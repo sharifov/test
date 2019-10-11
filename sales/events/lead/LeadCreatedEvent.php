@@ -6,6 +6,7 @@ use common\models\Lead;
 
 /**
  * Class LeadCreatedEvent
+ *
  * @property Lead $lead
  */
 class LeadCreatedEvent
@@ -13,11 +14,11 @@ class LeadCreatedEvent
     public $lead;
 
     /**
-     * LeadCreatedEvent constructor.
      * @param Lead $lead
      */
     public function __construct(Lead $lead)
     {
         $this->lead = $lead;
     }
+
 }

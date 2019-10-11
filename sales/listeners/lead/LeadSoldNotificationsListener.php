@@ -12,16 +12,16 @@ use sales\repositories\user\UserRepository;
 use Yii;
 
 /**
- * Class LeadSoldEventListener
+ * Class LeadSoldNotificationsListener
+ *
  * @property UserRepository $userRepository
  */
-class LeadSoldEventListener
+class LeadSoldNotificationsListener
 {
 
     private $userRepository;
 
     /**
-     * LeadSoldEventListener constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(UserRepository $userRepository)
@@ -34,26 +34,31 @@ class LeadSoldEventListener
      */
     public function handle(LeadSoldEvent $event): void
     {
-
-        $lead = $event->lead;
-
-        try {
-            $owner = $this->userRepository->find($lead->employee_id);
-        } catch (NotFoundException $e) {
+        if (!$event->newOwnerId) {
             Yii::warning(
-                'Not found owner for sold lead: ' . $lead->id,
-                self::class . ':ownerNotFound'
+                'Not found ownerId on LeadSoldEvent Lead: ' . $event->lead->id,
+                'LeadSoldNotificationsListener:ownerIdNotFound'
             );
             return;
         }
 
+        try {
+            $owner = $this->userRepository->find($event->newOwnerId);
+        } catch (NotFoundException $e) {
+            Yii::warning(
+                'Not found owner for sold lead: ' . $event->lead->id,
+                'LeadSoldNotificationsListener:ownerNotFound'
+            );
+            return;
+        }
+
+        $lead = $event->lead;
         $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
         $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $lead->id])->orderBy(['id' => SORT_ASC])->one();
         $airlineName = '-';
         $profit = 0;
         if (!empty($quote)) {
-            $airline = Airline::findOne(['iata' => $quote->main_airline_code]);
-            if (!empty($airline)) {
+            if ($airline = Airline::findOne(['iata' => $quote->main_airline_code])) {
                 $airlineName = $airline->name;
             }
             $profit = number_format(Quote::countProfit($quote->id), 2);
@@ -83,7 +88,7 @@ Lead ID: {lead_id} ({url})
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
-                self::class . ':sendNotification'
+                'LeadSoldNotificationsListener:sendNotification'
             );
         }
 

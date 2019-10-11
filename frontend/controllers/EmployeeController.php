@@ -7,7 +7,6 @@ use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\ProjectEmployeeAccess;
-use common\models\Reason;
 use common\models\search\EmployeeSearch;
 use common\models\search\UserProjectParamsSearch;
 use common\models\UserDepartment;

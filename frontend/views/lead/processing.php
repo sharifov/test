@@ -2,7 +2,7 @@
 
 use dosamigos\datepicker\DatePicker;
 use sales\access\EmployeeProjectAccess;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -141,12 +141,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-
                 $str = '<br><br>';
-                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
-
+                $str .= $model->getCommunicationInfo();
 
                 return $clientName . $str;
             },
@@ -179,9 +175,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'content' => function (\common\models\Lead $model) {
                 $content = '';
                 $content .= $model->getFlightDetails();
-                $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults .'/'. $model->children .'/'. $model->infants) . ')<br/>';
 
-                $content .= sprintf('<strong>Cabin:</strong> %s', $model->getCabinClassName());
+                if ($model->adults || $model->children || $model->infants) {
+                    $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults . '/' . $model->children . '/' . $model->infants) . ')<br/>';
+                }
+
+                if ($cabinClassName = $model->getCabinClassName()) {
+                    $content .= '<strong>Cabin:</strong> ' . $cabinClassName;
+                }
 
                 return $content;
             },
@@ -209,7 +210,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'status',
             'value' => function (\common\models\Lead $model) {
                 $statusValue = $model->getStatusName(true);
-                $reasonValue =  $model->getLastReason();
+                $reasonValue =  $model->getLastReasonFromLeadFlow();
 
                 if($reasonValue) {
                     $reasonValue = '<br><pre>'.$reasonValue.'</pre>';
@@ -271,18 +272,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ]),
         ],
 
-        /*[
-            'attribute' => 'reason',
-            'label' => 'Reason',
-            'contentOptions' => [
-                'style' => 'max-width: 250px;'
-            ],
-            'value' => function (\common\models\Lead $model) {
-                return $model->getLastReason();
-            },
-            'format' => 'raw'
-        ],*/
-
         [
             'header' => 'Answered',
             'attribute' => 'l_answered',
@@ -294,18 +283,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'filter' => [1 => 'Yes', 0 => 'No'],
             'format' => 'raw'
-        ],
-
-        [
-            'header' => 'Grade',
-            'attribute' => 'l_grade',
-            'value' => function (\common\models\Lead $model) {
-                return $model->l_grade;
-            },
-            'contentOptions' => [
-                'class' => 'text-center'
-            ],
-            'visible' => ! $isAgent
         ],
 
         [

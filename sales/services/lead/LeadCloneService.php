@@ -3,8 +3,11 @@
 namespace sales\services\lead;
 
 use common\models\Lead;
+use sales\dispatchers\EventDispatcher;
+use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
+use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
 
 /**
@@ -12,39 +15,52 @@ use sales\services\TransactionManager;
  * @property LeadRepository $leadRepository
  * @property LeadSegmentRepository $leadSegmentRepository
  * @property TransactionManager $transactionManager
+ * @property EventDispatcher $eventDispatcher
+ * @property ServiceFinder $serviceFinder
  */
 class LeadCloneService
 {
     private $leadRepository;
     private $leadSegmentRepository;
     private $transactionManager;
+    private $eventDispatcher;
+    private $serviceFinder;
 
     public function __construct(
         LeadRepository $leadRepository,
         LeadSegmentRepository $leadSegmentRepository,
-        TransactionManager $transactionManager)
+        TransactionManager $transactionManager,
+        EventDispatcher $eventDispatcher,
+        ServiceFinder $serviceFinder
+)
     {
         $this->leadRepository = $leadRepository;
         $this->leadSegmentRepository = $leadSegmentRepository;
         $this->transactionManager = $transactionManager;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->serviceFinder = $serviceFinder;
     }
 
     /**
-     * @param int $leadId
+     * @param int|Lead $lead
      * @param int $ownerId
-     * @param $description
+     * @param int|null $creatorId
+     * @param string|null $reason
      * @return Lead
      * @throws \Exception
      */
-    public function cloneLead(int $leadId, int $ownerId, $description): Lead
+    public function cloneLead($lead, int $ownerId, ?int $creatorId = null, ?string  $reason = ''): Lead
     {
-        $lead = $this->leadRepository->find($leadId);
+        $lead = $this->serviceFinder->leadFind($lead);
 
-        $clone = $this->transactionManager->wrap(function () use ($lead, $ownerId, $description) {
+        $clone = $this->transactionManager->wrap(function () use ($lead, $ownerId, $creatorId, $reason) {
 
-            $clone = $lead->createClone($ownerId, $description);
+            $clone = $lead->createClone($reason);
+            $clone->processing($ownerId, $creatorId, $reason);
 
             $this->leadRepository->save($clone);
+
+            $this->eventDispatcher->dispatchAll([new LeadCreatedCloneByUserEvent($clone, $ownerId)]);
 
             foreach ($lead->leadFlightSegments as $segment) {
                 $cloneSegment = $segment->createClone($clone->id);

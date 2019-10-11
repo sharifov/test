@@ -39,7 +39,6 @@ use yii\helpers\VarDumper;
  * @property int $bo_flight_id
  * @property string $additional_information
  * @property bool $l_answered
- * @property int $l_grade
  * @property int $clone_id
  * @property string $description
  * @property double $final_profit
@@ -107,7 +106,7 @@ class Lead2 extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['notes_for_experts', 'request_ip_detail', 'additional_information', 'l_client_ua'], 'string'],
             [['created', 'updated', 'snooze_for', 'l_pending_delay_dt', 'l_last_action_dt'], 'safe'],
@@ -163,7 +162,6 @@ class Lead2 extends \yii\db\ActiveRecord
             'bo_flight_id' => 'Bo Flight ID',
             'additional_information' => 'Additional Information',
             'l_answered' => 'Answered',
-            'l_grade' => 'Grade',
             'clone_id' => 'Clone ID',
             'description' => 'Description',
             'final_profit' => 'Final Profit',
@@ -478,7 +476,7 @@ class Lead2 extends \yii\db\ActiveRecord
 
         $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
 
-        Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig->attributes]), 'info\createOrUpdateQCall');
+        Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig ? $qcConfig->attributes : null]), 'info\createOrUpdateQCall');
 
         $lq = $this->leadQcall;
 
@@ -604,6 +602,7 @@ class Lead2 extends \yii\db\ActiveRecord
             //$lead->employee_id = $this->c_created_user_id;
             $lead->client_id = $client->id;
             $lead->project_id = $project_id;
+            $lead->source_id = $source_id;
             $lead->l_call_status_id = Lead::CALL_STATUS_QUEUE;
             $source = null;
 

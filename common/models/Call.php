@@ -7,6 +7,7 @@ use sales\entities\AggregateRoot;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
+use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
 use Yii;
 use DateTime;
@@ -574,7 +575,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
         if (!$insert) {
 
-            if ($isChangedStatus && $this->isIn() && ($this->isStatusCompleted() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusInProgress() || $this->isStatusCanceled())) {
+            if ($isChangedStatus && $this->isIn() && ($this->isStatusInProgress() || $this->isEnded())) {
 
                 $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {
@@ -625,22 +626,40 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 $host = \Yii::$app->params['url_address'] ?? '';
 
                 if($this->c_lead_id && (int) $this->c_dep_id === Department::DEPARTMENT_SALES) {
-                    $lead = $this->cLead2;
 
-                    if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
+                    $lead = $this->cLead;
+
+                    if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->isPending()) {
                         Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
-                        $lead->employee_id = $this->c_created_user_id;
-                        $lead->status = Lead::STATUS_PROCESSING;
-                        // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
-                        $lead->l_answered = true;
-                        if ($lead->save()) {
+                        try {
+                            $repo = Yii::createObject(LeadRepository::class);
+                            $lead->processing($this->c_created_user_id, null, 'Call AutoCreated Lead');
+                            // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
+                            $lead->l_answered = true;
+                            $repo->save($lead);
                             Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                             $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
                             Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
-                        } else {
-                            Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
+                        } catch (\Throwable $e) {
+                            Yii::error(VarDumper::dumpAsString($e->getMessage()), 'Call:afterSave:Lead:update');
                         }
                     }
+//                    $lead = $this->cLead2;
+//
+//                    if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
+//                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
+//                        $lead->employee_id = $this->c_created_user_id;
+//                        $lead->status = Lead::STATUS_PROCESSING;
+//                        // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
+//                        $lead->l_answered = true;
+//                        if ($lead->save()) {
+//                            Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
+//                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
+//                            Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
+//                        } else {
+//                            Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
+//                        }
+//                    }
                 }
 
 
@@ -648,7 +667,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     $case = $this->cCase;
 
                     if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
-                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Case' => $case->attributes]), 'info\Call:Case:afterSave');
+                        // Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Case' => $case->attributes]), 'info\Call:Case:afterSave');
                         $case->cs_user_id = $this->c_created_user_id;
                         //$case->processing($this->c_created_user_id);
                         $case->cs_status = CasesStatus::STATUS_PROCESSING;
@@ -826,7 +845,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     $call->c_created_user_id = $user_id;
                     $call->update();*/
 
-                    \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
+                    // \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
                     return true;
                 }
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');

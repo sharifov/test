@@ -10,16 +10,16 @@ use sales\repositories\user\UserRepository;
 use Yii;
 
 /**
- * Class LeadBookedEventListener
+ * Class LeadBookedNotificationsListener
+ *
  * @property UserRepository $userRepository
  */
-class LeadBookedEventListener
+class LeadBookedNotificationsListener
 {
 
     private $userRepository;
 
     /**
-     * LeadBookedEventListener constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(UserRepository $userRepository)
@@ -33,17 +33,25 @@ class LeadBookedEventListener
     public function handle(LeadBookedEvent $event): void
     {
 
-        $lead = $event->lead;
-
-        try {
-            $owner = $this->userRepository->find($lead->employee_id);
-        } catch (NotFoundException $e) {
+        if (!$event->newOwnerId) {
             Yii::warning(
-                'Not found owner for booked lead: ' . $lead->id,
-                self::class . ':ownerNotFound'
+                'Not found ownerId on LeadBookedEvent Lead: ' . $event->lead->id,
+                'LeadBookedNotificationsListener:ownerIdNotFound'
             );
             return;
         }
+
+        try {
+            $owner = $this->userRepository->find($event->newOwnerId);
+        } catch (NotFoundException $e) {
+            Yii::warning(
+                'Not found owner for book lead: ' . $event->lead->id,
+                'LeadBookedNotificationsListener:ownerNotFound'
+            );
+            return;
+        }
+
+        $lead = $event->lead;
 
         $host = Yii::$app->params['url_address'];
 
@@ -55,9 +63,9 @@ class LeadBookedEventListener
 Booked quote UID: {quote_uid}
 {url}",
             [
-                'url' => $host . '/lead/view/' . $lead->gid,
                 'lead_id' => $lead->id,
-                'quote_uid' => $quote ? $quote->uid : '-'
+                'quote_uid' => $quote ? $quote->uid : '-',
+                'url' => $host . '/lead/view/' . $lead->gid,
             ]);
 
         if (Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
@@ -66,7 +74,7 @@ Booked quote UID: {quote_uid}
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
-                self::class . ':createNotification'
+                'LeadBookedNotificationsListener:createNotification'
             );
         }
 

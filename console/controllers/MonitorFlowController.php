@@ -4,7 +4,7 @@ namespace console\controllers;
 
 use common\models\Lead;
 use common\models\Quote;
-use common\models\Reason;
+use sales\repositories\lead\LeadRepository;
 use yii\console\Controller;
 use Yii;
 use yii\db\Expression;
@@ -12,8 +12,21 @@ use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
+/**
+ * Class MonitorFlowController
+ *
+ * @property LeadRepository $leadRepository
+ */
 class MonitorFlowController extends Controller
 {
+
+    private $leadRepository;
+
+    public function __construct($id, $module, LeadRepository $leadRepository, $config = [])
+   {
+       parent::__construct($id, $module, $config);
+       $this->leadRepository = $leadRepository;
+   }
 
     /**
      * @param bool $test
@@ -97,16 +110,27 @@ class MonitorFlowController extends Controller
         if($leads) {
             foreach ($leads as $lead) {
 
-                $lead->status = Lead::STATUS_PROCESSING;
-                $lead->snooze_for = null;
-                if ($lead->save()) {
+//                $lead->status = Lead::STATUS_PROCESSING;
 
-                } else {
+                try {
+                    $lead->processing($lead->employee_id, null, 'From Snooze to Processing. Wake.');
+                    $lead->snooze_for = null;
+                    $this->leadRepository->save($lead);
+                } catch (\Throwable $e) {
                     Yii::error('Lead: ' . $lead->id . ', ' . VarDumper::dumpAsString($lead->errors), 'console:MonitorFlowController:actionOnWake:Lead:save');
                     if ($test) {
                         echo 'Lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors) . "\r\n";
                     }
+
                 }
+//                if ($lead->save()) {
+//
+//                } else {
+//                    Yii::error('Lead: ' . $lead->id . ', ' . VarDumper::dumpAsString($lead->errors), 'console:MonitorFlowController:actionOnWake:Lead:save');
+//                    if ($test) {
+//                        echo 'Lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors) . "\r\n";
+//                    }
+//                }
             }
         }
 
@@ -153,11 +177,6 @@ class MonitorFlowController extends Controller
                     echo $lead->id . ' - status: ' . $lead->status . PHP_EOL;
                 }
 
-                $reason = new Reason();
-                $reason->reason = 'No activity for more than 48 hours';
-                $reason->employee_id = null;
-                $reason->lead_id = $lead->id;
-                $reason->save();
             } else {
                 Yii::error('Lead: ' . $lead->id . ', ' . VarDumper::dumpAsString($lead->errors), 'console:MonitorFlowController:actionFollowUp:Lead:save');
                 if ($test) {

@@ -134,9 +134,6 @@ $lead = $leadForm->getLead();
                             <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>
                         <? endif; ?>
 
-                        <?php if($is_manager): ?>
-                            <span class="badge badge-info" title="Grade"><i class="fa fa-retweet"></i> GRADE: <?=$leadForm->getLead()->l_grade?></span>
-                        <? endif; ?>
                     </div>
 
                 </div>

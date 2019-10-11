@@ -3,23 +3,22 @@
 namespace sales\listeners\lead;
 
 use common\models\Notifications;
-use common\models\Reason;
 use sales\events\lead\LeadSnoozeEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\user\UserRepository;
 use Yii;
 
 /**
- * Class LeadSnoozeEventListener
+ * Class LeadSnoozeNotificationsListener
+ *
  * @property UserRepository $userRepository
  */
-class LeadSnoozeEventListener
+class LeadSnoozeNotificationsListener
 {
 
     private $userRepository;
 
     /**
-     * LeadSnoozeEventListener constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(UserRepository $userRepository)
@@ -33,26 +32,25 @@ class LeadSnoozeEventListener
      */
     public function handle(LeadSnoozeEvent $event): void
     {
-        $lead = $event->lead;
-
-        if ($lead->status_description) {
-            $reason = new Reason();
-            $reason->lead_id = $lead->id;
-            $reason->employee_id = $lead->employee_id;
-            $reason->created = date('Y-m-d H:i:s');
-            $reason->reason = $lead->status_description;
-            $reason->save();
-        }
-
-        try {
-            $owner = $this->userRepository->find($lead->employee_id);
-        } catch (NotFoundException $e) {
+        if (!$event->newOwnerId) {
             Yii::warning(
-                'Not found owner for snooze lead: ' . $lead->id,
-                self::class . ':ownerNotFound'
+                'Not found ownerId on LeadSnoozeEvent Lead: ' . $event->lead->id,
+                'LeadSnoozeNotificationsListener:ownerIdNotFound'
             );
             return;
         }
+
+        try {
+            $owner = $this->userRepository->find($event->newOwnerId);
+        } catch (NotFoundException $e) {
+            Yii::warning(
+                'Not found owner for snooze lead: ' . $event->lead->id,
+                'LeadSnoozeNotificationsListener:ownerNotFound'
+            );
+            return;
+        }
+
+        $lead = $event->lead;
 
         $host = Yii::$app->params['url_address'];
 
@@ -63,10 +61,10 @@ Snooze for: {datetime}.
 Reason: {reason}
 {url}",
             [
-                'url' => $host . '/lead/view/' . $lead->gid,
-                'datetime' => Yii::$app->formatter->asDatetime(strtotime($lead->snooze_for)),
-                'reason' => $lead->status_description ?: '-',
                 'lead_id' => $lead->id,
+                'datetime' => Yii::$app->formatter->asDatetime(strtotime($event->snoozeFor)),
+                'reason' => $event->reason ?: '-',
+                'url' => $host . '/lead/view/' . $lead->gid,
             ]);
 
         if (Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
@@ -75,7 +73,7 @@ Reason: {reason}
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
-                self::class . ':sendNotification'
+                'LeadSnoozeNotificationsListener:sendNotification'
             );
         }
     }

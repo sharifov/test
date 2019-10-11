@@ -1,11 +1,6 @@
 <?php
-/**
- * @var $lead \common\models\Lead
- * @var $reason \common\models\Reason
- * @var $activeLeadIdsStr array
- *
- */
 
+/*
 use yii\helpers\Html;
 
 $activeLeadIds = $activeLeadIds ?? [];
@@ -144,3 +139,5 @@ $reasonForm = \yii\widgets\ActiveForm::begin([
         <?= \yii\bootstrap\Html::submitButton('Add', ['class' => 'btn btn-success popover-close-btn']) ?>
     </div>
 <?php \yii\widgets\ActiveForm::end() ?>
+
+*/

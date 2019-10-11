@@ -47,6 +47,7 @@ use yii\widgets\Pjax;
                     <td style="width: 10%">Pax</td>
                     <td>Sale Created Date</td>
                     <td>Added Date</td>
+<!--                    <td>Sync with B/O</td>-->
                 </tr>
             </table>
 
@@ -65,13 +66,21 @@ use yii\widgets\Pjax;
                         <td style="width: 10%">'.Html::encode($item->css_sale_pax).'</td>
                         <td>'.Yii::$app->formatter->asDatetime($item->css_sale_created_dt).'</td>
                         <td>'.Yii::$app->formatter->asDatetime($item->css_created_dt).'</td>
+                        <!-- <td>'//. Html::button('<i class="fa fa-refresh"></i> Sync with B/O', [
+							//'class' => 'sync-with-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-warning'),
+							//'disabled' => !$item->css_need_sync_bo ? true : false,
+							//'id' => 'sync-with-bo-' . $item->css_sale_id,
+                            //'data-case-id' => $item->css_cs_id,
+                            //'data-case-sale-id' => $item->css_sale_id
+                            //])
+					.'</td> -->
                     </tr></table>';
 
                     $content = '';
 
-                    $dataSale = @json_decode($item->css_sale_data, true);
+                    $dataSale = @json_decode($item->css_sale_data_updated, true);
                     if(is_array($dataSale)) {
-                        $content = $this->render('/sale/view', ['data' => $dataSale]);
+                        $content = $this->render('/sale/view', ['data' => $dataSale, 'csId' => $caseModel->cs_id, 'caseSaleModel' => $item]);
                         //echo '******';
                         //\yii\helpers\VarDumper::dump($content); exit;
                     }

@@ -1,7 +1,7 @@
 <?php
 
 use kartik\select2\Select2;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\Lead;
@@ -11,7 +11,7 @@ use frontend\extensions\DatePicker;
 /* @var $model common\models\search\LeadSearch */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $action string */
-/** @var ListsAccess $lists */
+/** @var \sales\access\ListsAccess $lists */
 
 ?>
 
@@ -66,7 +66,6 @@ use frontend\extensions\DatePicker;
 
             <div class="row">
                 <div class="col-md-4">
-                    <?= $form->field($model, 'l_grade')->dropDownList(array_combine(range(0, 10), range(0, 10)), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-4">
                     <?= $form->field($model, 'l_answered')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
@@ -136,7 +135,7 @@ use frontend\extensions\DatePicker;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6"><?php echo $form->field($model, 'project_id')->dropDownList($lists->getProjects(), ['prompt' => '-']) ?></div>
-                <div class="col-md-6"><?php echo $form->field($model, 'source_id')->dropDownList($lists->getSources(), ['prompt' => '-']) ?></div>
+                <div class="col-md-6"><?php echo $form->field($model, 'source_id')->dropDownList($lists->getSources(true), ['prompt' => '-']) ?></div>
             </div>
             <div class="row">
                 <div class="col-md-12">
@@ -245,7 +244,7 @@ use frontend\extensions\DatePicker;
 
                 <? //php  echo $form->field($model, 'called_expert') ?>
                 <div class="col-md-6">
-                    <?php echo $form->field($model, 'employee_id')->dropDownList($lists->getEmployees(), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'employee_id')->dropDownList($lists->getEmployees(true), ['prompt' => '-']) ?>
                 </div>
             </div>
 

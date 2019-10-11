@@ -78,6 +78,4 @@ $js = <<<JS
 JS;
 $this->registerJs($js);
 ?>
-<?php Pjax::end(); ?>
-
-
+<?php Pjax::end();

@@ -8,6 +8,7 @@ use common\models\Employee;
 use common\models\Language;
 use common\models\Lead;
 use common\models\SmsTemplateType;
+use sales\entities\cases\Cases;
 use yii\base\Model;
 
 /**
@@ -15,7 +16,7 @@ use yii\base\Model;
  * @package frontend\models
  *
  * @property integer $c_type_id
- * @property integer $c_lead_id
+ * @property integer $c_case_id
  * @property string $c_phone_number
  * @property integer $c_sms_tpl_id
  * @property string $c_sms_tpl_key
@@ -47,8 +48,6 @@ class CaseCommunicationForm extends Model
     public const TYPE_VOICE = 3;
 
 
-
-
     public const TYPE_LIST = [
         self::TYPE_EMAIL    => 'Email',
         self::TYPE_SMS      => 'SMS',
@@ -69,7 +68,7 @@ class CaseCommunicationForm extends Model
 
 
     public $c_type_id;
-    public $c_lead_id;
+    public $c_case_id;
 
     public $c_phone_number;
 
@@ -104,23 +103,23 @@ class CaseCommunicationForm extends Model
     public function rules() : array
     {
         return [
-            [['c_type_id', 'c_lead_id'], 'required'],
+            [['c_type_id', 'c_case_id'], 'required'],
 
-            [['c_email_to', 'c_language_id', 'c_email_tpl_key'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_email_to', 'c_language_id', 'c_email_tpl_key'], 'required', 'when' => function (self $model) {
                 return (int) $model->c_type_id === self::TYPE_EMAIL;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_EMAIL . '; }'
             ],
 
 
-            [['c_email_message', 'c_email_subject'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_email_message', 'c_email_subject'], 'required', 'when' => function (self $model) {
                 return $model->c_email_tpl_key === self::TPL_TYPE_EMAIL_BLANK_KEY && (int) $model->c_type_id === self::TYPE_EMAIL;
             },
                 'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && $('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_BLANK_KEY . "'); }"
             ],
 
 
-            [['c_phone_number', 'c_sms_tpl_key'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_phone_number', 'c_sms_tpl_key'], 'required', 'when' => function (self $model) {
                 return (int) $model->c_type_id === self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
@@ -134,7 +133,7 @@ class CaseCommunicationForm extends Model
             ],*/
 
 
-            [['c_phone_number'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_phone_number'], 'required', 'when' => function (self $model) {
                 return (int) $model->c_type_id === self::TYPE_VOICE;
             },
                 'whenClient' => "function (attribute, value) {
@@ -143,13 +142,13 @@ class CaseCommunicationForm extends Model
 
 
 
-            [['c_quotes'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_quotes'], 'required', 'when' => function (self $model) {
                 return ($model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_KEY || $model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_EMAIL;
             },
                 'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && ($('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY . "' || $('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_KEY . "')); }"
             ],
 
-            [['c_quotes'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_quotes'], 'required', 'when' => function (self $model) {
                 return ($model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_KEY || $model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && ($('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_OFFER_KEY . "' || $('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_OFFER_VIEW_KEY . "'); }"
@@ -167,7 +166,7 @@ class CaseCommunicationForm extends Model
             //[['c_type_id'], 'validateType'],
 
             [['c_email_to'], 'email'],
-            [['c_sms_tpl_id', 'c_email_tpl_id', 'c_user_id', 'c_type_id', 'c_lead_id', 'c_voice_status', 'c_call_id'], 'integer'],
+            [['c_sms_tpl_id', 'c_email_tpl_id', 'c_user_id', 'c_type_id', 'c_case_id', 'c_voice_status', 'c_call_id'], 'integer'],
 
             [['c_email_message', 'c_sms_message'], 'string'],
             [['c_sms_tpl_key', 'c_email_tpl_key'], 'string', 'max' => 50],
@@ -184,7 +183,7 @@ class CaseCommunicationForm extends Model
 
             [['c_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_user_id' => 'id']],
             [['c_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['c_language_id' => 'language_id']],
-            [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
+            [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
 
             [['c_email_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['c_email_tpl_id' => 'etp_id']],
             [['c_sms_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => SmsTemplateType::class, 'targetAttribute' => ['c_sms_tpl_id' => 'stp_id']],

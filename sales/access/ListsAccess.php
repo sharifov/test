@@ -1,11 +1,9 @@
 <?php
 
-namespace sales\ui\user;
+namespace sales\access;
 
 use common\models\Employee;
 use common\models\Project;
-use sales\access\EmployeeDepartmentAccess;
-use sales\access\EmployeeProjectAccess;
 use sales\helpers\user\UserFinder;
 
 /**
@@ -60,9 +58,10 @@ class ListsAccess
     }
 
     /**
+     * @param bool $showHidden
      * @return array
      */
-    public function getSources(): array
+    public function getSources($showHidden = false): array
     {
         if ($this->sources !== null) {
             return $this->sources;
@@ -74,7 +73,7 @@ class ListsAccess
             foreach (Project::find()->andWhere(['id' => $projectsIds])->orderBy('name')->with('sources')->all() as $project) {
                 $map = [];
                 foreach ($project->sources as $source) {
-                    if ($source->hidden) {
+                    if ($showHidden === false && $source->hidden) {
                         continue;
                     }
                     $map[$source->id] = $source->name;
@@ -89,15 +88,20 @@ class ListsAccess
     }
 
     /**
+     * @param bool $withRoles
      * @return array
      */
-    public function getEmployees(): array
+    public function getEmployees($withRoles = false): array
     {
         if ($this->employees !== null) {
             return $this->employees;
         }
         if ($this->user->isAdmin()) {
-            $this->employees = Employee::getActiveUsersList();
+            if ($withRoles) {
+                $this->employees = Employee::getActiveUsersListWithRoles();
+            } else {
+                $this->employees = Employee::getActiveUsersList();
+            }
         } elseif ($this->user->isAnySupervision()) {
             $this->employees = Employee::getActiveUsersListFromCommonGroups($this->user->id);
         } elseif ($this->user->isQa()) {

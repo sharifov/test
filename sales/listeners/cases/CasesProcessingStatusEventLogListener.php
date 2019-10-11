@@ -9,13 +9,14 @@ use Yii;
 
 /**
  * Class CasesProcessingStatusEventLogListener
+ *
+ * @property CasesStatusLogService $casesStatusLogService
  */
 class CasesProcessingStatusEventLogListener
 {
     private $casesStatusLogService;
 
     /**
-     * CasesProcessingStatusEventLogListener constructor.
      * @param CasesStatusLogService $casesStatusLogService
      */
     public function __construct(CasesStatusLogService $casesStatusLogService)

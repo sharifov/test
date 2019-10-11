@@ -4,7 +4,7 @@ use yii\helpers\Url;
 use common\models\Email;
 use common\models\Sms;
 use common\models\Employee;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
@@ -14,7 +14,6 @@ use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Modal;
 use yii\web\View;
 use yii\helpers\ArrayHelper;
-use common\models\Reason;
 use common\models\LeadFlow;
 use common\models\Call;
 
@@ -263,16 +262,9 @@ $lists = new ListsAccess($user->id);
             'value' => function (Lead $lead) {
                 $statusValue = $lead->getStatusName(true);
 
-                if ($lead->isTrash()) {
-                    $reason = Reason::find()->where([
-                        'lead_id' => $lead->id
-                    ])
-                        ->orderBy([
-                            'id' => SORT_DESC
-                        ])
-                        ->one();
-                    if ($reason) {
-                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
+                if ($lead->isTrash() && ($lastLeadFlow = $lead->lastLeadFlow)) {
+                    if ($lastLeadFlow->status === $lead->status && $lastLeadFlow->lf_description) {
+                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($lastLeadFlow->lf_description) . '"><i class="fa fa-warning"></i></span>';
                     }
                 }
 
@@ -368,9 +360,7 @@ $lists = new ListsAccess($user->id);
             'value' => function (Lead $model) {
                 //$str = '';
                 $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span><br>';
-                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $model->getCountCalls(Call::CALL_TYPE_OUT) . '/' . $model->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' . $model->getCountSms(Sms::TYPE_OUTBOX) . '/' . $model->getCountCalls(Sms::TYPE_INBOX) . '</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' . $model->getCountEmails(Email::TYPE_OUTBOX) . '/' . $model->getCountEmails(Email::TYPE_INBOX) . '</span>';
+                $str .= $model->getCommunicationInfo();
                 return $str;
             },
             'format' => 'raw',
@@ -409,20 +399,6 @@ $lists = new ListsAccess($user->id);
             'filter' => array_combine(range(0, 9), range(0, 9)),
             'contentOptions' => ['class' => 'text-center'],
         ],*/
-
-        [
-            // 'header' => 'Grade',
-            'attribute' => 'l_grade',
-            'value' => function (Lead $model) {
-                return $model->l_grade;
-            },
-            'filter' => array_combine(range(0, 9), range(0, 9)),
-            'contentOptions' => [
-                'class' => 'text-center'
-            ],
-            'visible' => !$isAgent
-        ],
-
         [
             // 'header' => 'Grade',
             'attribute' => 'l_answered',
@@ -566,7 +542,7 @@ $lists = new ListsAccess($user->id);
             'value' => function (Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
-            'filter' => $lists->getEmployees() ?: false
+            'filter' => $lists->getEmployees(true) ?: false
         ],
 
         // 'rating',
@@ -753,7 +729,7 @@ $lists = new ListsAccess($user->id);
                         <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
 
                         <div id="reason_id_div" style="display: none">
-                            <?= $form->field($multipleForm, 'reason_id')->dropDownList(Reason::getReasonListByStatus(Lead::STATUS_PROCESSING), ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
+                            <?= $form->field($multipleForm, 'reason_id')->dropDownList([], ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
 
                             <div id="reason_description_div"
                                  style="display: none">
@@ -762,7 +738,7 @@ $lists = new ListsAccess($user->id);
                         </div>
 
                         <?php
-                            if ($employees = $lists->getEmployees()) {
+                            if ($employees = $lists->getEmployees(true)) {
                                 $employees[-1] = '--- REMOVE EMPLOYEE ---';
                                 echo $form->field($multipleForm, 'employee_id')->dropDownList($employees, ['prompt' => '-']);
                             }

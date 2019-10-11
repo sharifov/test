@@ -118,7 +118,13 @@ use yii\helpers\Html;
                         ],
                         'c_from',
                         'c_to',
-                        'c_call_status',
+                        //'c_call_status',
+                        [
+                            'attribute' => 'c_status_id',
+                            'value' => function (\common\models\Call $model) {
+                                return $model->getStatusName();
+                            },
+                        ],
                         'c_lead_id',
                         'c_case_id',
                         //'c_dep_id',

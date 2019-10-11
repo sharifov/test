@@ -476,7 +476,7 @@ class CommunicationController extends ApiBaseController
     {
         $response = [];
 
-        Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceClient');
+        // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceClient');
 
         $callSid = $post['callData']['sid'] ?? $post['callData']['CallSid'] ?? null;
 
@@ -1335,6 +1335,7 @@ class CommunicationController extends ApiBaseController
 
                     $job = new CallQueueJob();
                     $job->call_id = $callModel->c_id;
+                    $job->source_id = $department->dpp_source_id;
                     $job->delay = 0;
                     $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
                 }
@@ -1789,7 +1790,7 @@ class CommunicationController extends ApiBaseController
                         if($lead) {
                             $sms->s_project_id = $lead->project_id;
                         }
-                        Yii::info('SMS Detected LeadId '.$lead_id.' from '.$sms->s_phone_from, 'info\API:Communication:newSmsMessagesReceived:Sms');
+                        // Yii::info('SMS Detected LeadId '.$lead_id.' from '.$sms->s_phone_from, 'info\API:Communication:newSmsMessagesReceived:Sms');
                     }
 
 

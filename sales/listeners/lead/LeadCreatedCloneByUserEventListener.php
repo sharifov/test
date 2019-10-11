@@ -3,22 +3,23 @@
 namespace sales\listeners\lead;
 
 use common\models\Notifications;
-use sales\events\lead\LeadCreatedCloneEvent;
+use sales\events\lead\LeadCreatedCloneByUserEvent;
+use sales\helpers\user\UserFinder;
 use sales\repositories\NotFoundException;
 use sales\repositories\user\UserRepository;
 use Yii;
 
 /**
- * Class LeadCreatedCloneEventListener
+ * Class LeadCreatedCloneByUserEventListener
+ *
  * @property UserRepository $userRepository
  */
-class LeadCreatedCloneEventListener
+class LeadCreatedCloneByUserEventListener
 {
 
     private $userRepository;
 
     /**
-     * LeadCreatedCloneEventListener constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(UserRepository $userRepository)
@@ -27,9 +28,9 @@ class LeadCreatedCloneEventListener
     }
 
     /**
-     * @param LeadCreatedCloneEvent $event
+     * @param LeadCreatedCloneByUserEvent $event
      */
-    public function handle(LeadCreatedCloneEvent $event): void
+    public function handle(LeadCreatedCloneByUserEvent $event): void
     {
 
         $lead = $event->lead;
@@ -37,15 +38,21 @@ class LeadCreatedCloneEventListener
         $host = \Yii::$app->params['url_address'];
 
         try {
-            $owner = $this->userRepository->find($lead->employee_id);
+            $owner = $this->userRepository->find($event->ownerId);
         } catch (NotFoundException $e) {
             Yii::$app->errorHandler->logException($e);
-            Yii::warning('Not found employee (' . $lead->employee_id . ')', 'LeadCreatedCloneEventListener:notFoundOwner');
+            Yii::warning('Not found employee (' . $event->ownerId . ')', 'LeadCreatedCloneByUserEventListener:notFoundOwner');
             return;
         }
 
-        $agent = $owner->username;
-        $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
+        $subject = Yii::t('email', "Cloned Lead-{id} by {owner}", ['id' => $lead->clone_id, 'owner' => $owner->username]);
+
+        try {
+            $agent = UserFinder::find()->username;
+        } catch (\Throwable $e) {
+            $agent = 'System';
+        }
+
         $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
 New lead {lead_id}
 {url}",

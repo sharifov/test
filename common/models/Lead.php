@@ -17,15 +17,21 @@ use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
 use sales\events\lead\LeadCountPassengersChangedEvent;
+use sales\events\lead\LeadOwnerFreedEvent;
+use sales\events\lead\LeadPendingEvent;
+use sales\events\lead\LeadProcessingEvent;
+use sales\events\lead\LeadRejectEvent;
 use sales\events\lead\LeadSnoozeEvent;
 use sales\events\lead\LeadSoldEvent;
 use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
+use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\services\lead\calculator\LeadTripTypeCalculator;
+use sales\services\lead\calculator\SegmentDTO;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
-use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -33,9 +39,6 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\helpers\VarDumper;
-use common\models\local\FlightSegment;
 use common\components\SearchService;
 
 /**
@@ -67,7 +70,6 @@ use common\components\SearchService;
  * @property int $bo_flight_id
  * @property string $additional_information
  * @property int $l_answered
- * @property int $l_grade
  * @property int $clone_id
  * @property string $description
  * @property double $final_profit
@@ -167,14 +169,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         self::STATUS_SNOOZE         => 'Snooze',
     ];
 
-    public const CLONE_REASONS = [
-        1 => 'Group travel',
-        2 => 'Alternative credit card',
-        3 => 'Different flight',
-        4 => 'Flight adjustments',
-        0 => 'Other',
-    ];
-
     public const STATUS_MULTIPLE_UPDATE_LIST = [
         self::STATUS_FOLLOW_UP      => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
         self::STATUS_ON_HOLD        => self::STATUS_LIST[self::STATUS_ON_HOLD],
@@ -272,7 +266,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
             [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
@@ -357,16 +351,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
+        $lead->status = null;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
     }
 
     /**
-     * @param int $ownerId
      * @param string|null $description
      * @return Lead
      */
-    public function createClone(int $ownerId, ?string $description): self
+    public function createClone(?string $description): self
     {
         $clone = new static();
         $clone->attributes = $this->attributes;
@@ -375,7 +369,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clone->rating = 0;
         $clone->additional_information = null;
         $clone->l_answered = 0;
-        $clone->l_grade = 0;
         $clone->snooze_for = null;
         $clone->called_expert = false;
         $clone->created = null;
@@ -383,10 +376,9 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clone->tips = 0;
         $clone->uid = self::generateUid();
         $clone->gid = self::generateGid();
-        $clone->status = self::STATUS_PENDING;
+        $clone->status = null;
         $clone->clone_id = $this->id;
         $clone->employee_id = null;
-        $clone->take($ownerId);
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
     }
@@ -486,69 +478,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         $this->called_expert = $value;
     }
 
-    /**
-     * @param int $userId
-     * @return bool
-     */
-    private function isAlreadyTakenUser(int $userId): bool
-    {
-        return $this->isOwner($userId) && $this->isProcessing();
-    }
-
-    /**
-     * @param int $userId
-     */
-    public function take(int $userId): void
-    {
-        if ($this->isCompleted()) {
-            throw new \DomainException('Lead is completed!');
-        }
-
-        if ($this->isAlreadyTakenUser($userId)) {
-            throw new \DomainException('Lead is already taken to this user!');
-        }
-
-        if (!$this->isAvailableToTake()) {
-            throw new \DomainException('Lead is unavailable to "Take" now!');
-        }
-
-        $this->assign($userId, self::STATUS_PROCESSING);
-    }
-
-    /**
-     * @param int $userId
-     */
-    public function takeOver(int $userId): void
-    {
-        if ($this->isCompleted()) {
-            throw new \DomainException('Lead is completed!');
-        }
-
-        if ($this->isAlreadyTakenUser($userId)) {
-            throw new \DomainException('Lead is already taken to this user!');
-        }
-
-        if (!$this->isAvailableToTakeOver()) {
-            throw new \DomainException('Lead is unavailable to "Take Over" now!');
-        }
-
-        $this->assign($userId, self::STATUS_PROCESSING);
-    }
-
-    /**
-     * @param int|null $userId
-     * @param int $status
-     */
-    private function assign(?int $userId, int $status): void
-    {
-        if ($this->status === $status && $this->isOwner($userId)) {
-            throw new \DomainException('Lead is already assigned to this user!');
-        }
-//        $this->recordEvent(new LeadAssignedEvent($this, $this->employee_id, $userId, $this->status, $status));
-        $this->setStatus($status);
-        $this->setOwner($userId);
-    }
-
     public function isGetOwner(): bool
     {
         return $this->employee_id ? true : false;
@@ -571,17 +500,36 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
-     * @param int|null $userId
+     * @param int $ownerId
      */
-    private function setOwner(?int $userId): void
+    private function setOwner(int $ownerId): void
     {
-        if (!$this->isOwner($userId)) {
-            $this->recordEvent(new LeadOwnerChangedEvent($this, $this->employee_id, $userId));
-            if ($this->isProcessing()) {
-                $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
-            }
+        if ($this->isOwner($ownerId)) {
+            throw new \DomainException('This user already is owner.');
         }
-        $this->employee_id = $userId;
+
+        $this->recordEvent(new LeadOwnerChangedEvent($this, $this->employee_id, $ownerId));
+
+        $this->employee_id = $ownerId;
+    }
+
+    private function freedOwner(): void
+    {
+        if ($this->isFreedOwner()) {
+            throw new \DomainException('This Lead is already freed owner.');
+        }
+
+        $this->recordEvent(new LeadOwnerFreedEvent($this, $this->employee_id));
+
+        $this->employee_id = null;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isFreedOwner(): bool
+    {
+        return $this->employee_id === null;
     }
 
     /**
@@ -592,18 +540,17 @@ class Lead extends ActiveRecord implements AggregateRoot
         if (!array_key_exists($status, self::STATUS_LIST)) {
             throw new InvalidArgumentException('Invalid Status');
         }
-        if ($this->status !== $status) {
 
-            $this->recordEvent(new LeadStatusChangedEvent($this, $this->status, $status, $this->employee_id));
-
-            if ($status === self::STATUS_PROCESSING) {
-                $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
-            }
-
-            if ($this->isCalledExpert() && in_array($status, [self::STATUS_TRASH, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_PROCESSING], true)) {
-                $this->recordEvent(new LeadCallExpertRequestEvent($this));
-            }
+        if ($this->status === $status) {
+            throw new \DomainException('Lead is already ' . self::STATUS_LIST[$status]);
         }
+
+        $this->recordEvent(new LeadStatusChangedEvent($this, $this->status, $status, $this->employee_id));
+
+        if ($this->isCalledExpert() && in_array($status, [self::STATUS_TRASH, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_PROCESSING], true)) {
+            $this->recordEvent(new LeadCallExpertRequestEvent($this));
+        }
+
         $this->status = $status;
     }
 
@@ -663,13 +610,50 @@ class Lead extends ActiveRecord implements AggregateRoot
         $this->trip_type = '';
     }
 
-    public function sold(): void
+    public function recalculateTripType()
     {
-        if ($this->isSold()) {
-            throw new \DomainException('Lead is already sold!');
+        $segmentsDTO = [];
+
+        foreach ($this->leadFlightSegments as $segment) {
+            $segmentsDTO[] = new SegmentDTO($segment->origin, $segment->destination);
         }
-        $this->setStatus(self::STATUS_SOLD);
-        $this->recordEvent(new LeadSoldEvent($this));
+
+        $type = LeadTripTypeCalculator::calculate(...$segmentsDTO);
+
+        $this->setTripType($type);
+    }
+
+    /**
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function sold(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        self::guardStatus($this->status, self::STATUS_SOLD);
+
+        if ($newOwnerId === null && !$this->isGetOwner() && $this->isSold()) {
+            throw new \DomainException('Lead is already Sold without owner.');
+        }
+
+        if ($this->isOwner($newOwnerId) && $this->isSold()) {
+            throw new \DomainException('Lead is already Sold with this owner.');
+        }
+
+        $this->recordEvent(new LeadSoldEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason)
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isSold()) {
+            $this->setStatus(self::STATUS_SOLD);
+        }
     }
 
     /**
@@ -680,13 +664,37 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_SOLD;
     }
 
-    public function booked(): void
+    /**
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function booked(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
-        if ($this->isBooked()) {
-            throw new \DomainException('Lead is already booked!');
+        self::guardStatus($this->status, self::STATUS_BOOKED);
+
+        if ($newOwnerId === null && !$this->isGetOwner() && $this->isBooked()) {
+            throw new \DomainException('Lead is already Booked without owner.');
         }
-        $this->setStatus(self::STATUS_BOOKED);
-        $this->recordEvent(new LeadBookedEvent($this));
+
+        if ($this->isOwner($newOwnerId) && $this->isBooked()) {
+            throw new \DomainException('Lead is already Booked with this owner.');
+        }
+
+        $this->recordEvent(new LeadBookedEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason)
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isBooked()) {
+            $this->setStatus(self::STATUS_BOOKED);
+        }
     }
 
     /**
@@ -698,17 +706,46 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
-     * @param $snoozeFor
+     * @param string|null $snoozeFor
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
      */
-    public function snooze($snoozeFor): void
+    public function snooze(?string $snoozeFor, ?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
-        if ($this->isSnooze()) {
-            throw new \DomainException('Lead is already snooze!');
+        self::guardStatus($this->status, self::STATUS_SNOOZE);
+
+        if ($newOwnerId === null && !$this->isGetOwner() && $this->isSnooze()) {
+            throw new \DomainException('Lead is already Snooze without owner.');
         }
-        $this->setStatus(self::STATUS_SNOOZE);
-        $snoozeFor = $snoozeFor ? date('Y-m-d H:i:s', strtotime($snoozeFor)) : null;
+
+        if ($this->isOwner($newOwnerId) && $this->isSnooze()) {
+            throw new \DomainException('Lead is already Snooze with this owner.');
+        }
+
+        if ($snoozeFor) {
+            $snoozeFor = date('Y-m-d H:i:s', strtotime($snoozeFor));
+        } else {
+            $snoozeFor = null;
+        }
         $this->snooze_for = $snoozeFor;
-        $this->recordEvent(new LeadSnoozeEvent($this));
+
+        $this->recordEvent(new LeadSnoozeEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason,
+                $snoozeFor
+            )
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isSnooze()) {
+            $this->setStatus(self::STATUS_SNOOZE);
+        }
     }
 
     /**
@@ -719,13 +756,37 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_SNOOZE;
     }
 
-    public function followUp(): void
+    /**
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function followUp(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
-        if ($this->isFollowUp()) {
-            throw new \DomainException('Lead is already follow up!');
+        self::guardStatus($this->status, self::STATUS_FOLLOW_UP);
+
+        if ($newOwnerId === null && !$this->isGetOwner() && $this->isFollowUp()) {
+            throw new \DomainException('Lead is already Follow Up without owner.');
         }
-        $this->recordEvent(new LeadFollowUpEvent($this, $this->employee_id));
-        $this->assign(null, self::STATUS_FOLLOW_UP);
+
+        if ($this->isOwner($newOwnerId) && $this->isFollowUp()) {
+            throw new \DomainException('Lead is already Follow Up with this owner.');
+        }
+
+        $this->recordEvent(new LeadFollowUpEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason)
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isFollowUp()) {
+            $this->setStatus(self::STATUS_FOLLOW_UP);
+        }
     }
 
     /**
@@ -745,6 +806,102 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function processing(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        self::guardStatus($this->status, self::STATUS_PROCESSING);
+
+        if ($newOwnerId === null && !$this->isGetOwner() && $this->isProcessing()) {
+            throw new \DomainException('Lead is already Processing without owner.');
+        }
+
+        if ($this->isOwner($newOwnerId) && $this->isProcessing()) {
+            throw new \DomainException('Lead is already Processing with this owner.');
+        }
+
+        $this->recordEvent(new LeadProcessingEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason)
+        );
+
+        $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isProcessing()) {
+            $this->setStatus(self::STATUS_PROCESSING);
+        }
+    }
+
+    /**
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function pending(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        self::guardStatus($this->status, self::STATUS_PENDING);
+
+        if ($newOwnerId === null && !$this->isGetOwner() && $this->isPending()) {
+            throw new \DomainException('Lead is already Pending without owner.');
+        }
+
+        if ($this->isOwner($newOwnerId) && $this->isPending()) {
+            throw new \DomainException('Lead is already Pending with this owner.');
+        }
+
+        $this->recordEvent(new LeadPendingEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason)
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isPending()) {
+            $this->setStatus(self::STATUS_PENDING);
+        }
+    }
+
+    /**
+     * @param int|null $newOwnerId
+     */
+    private function changeOwner(?int $newOwnerId = null): void
+    {
+        if ($newOwnerId === null && $this->isFreedOwner()) {
+            return;
+        }
+
+        if ($newOwnerId === null) {
+            $this->freedOwner();
+            return;
+        }
+
+        if (!$this->isOwner($newOwnerId, false)) {
+            $this->setOwner($newOwnerId);
+        }
+    }
+
+    /**
+     * @param int|null $fromStatus
+     * @param int $toStatus
+     */
+    private static function guardStatus(?int $fromStatus, int $toStatus): void
+    {
+        // todo
+    }
+
+    /**
      * @return bool
      */
     public function isPending(): bool
@@ -752,12 +909,37 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_PENDING;
     }
 
-    public function trash(): void
+    /**
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function trash(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
-        if ($this->isTrash()) {
-            throw new \DomainException('Lead is already trash!');
+        self::guardStatus($this->status, self::STATUS_TRASH);
+
+        if ($newOwnerId === null && !$this->isGetOwner() && $this->isTrash()) {
+            throw new \DomainException('Lead is already Trash without owner.');
         }
-        $this->setStatus(self::STATUS_TRASH);
+
+        if ($this->isOwner($newOwnerId) && $this->isTrash()) {
+            throw new \DomainException('Lead is already Trash with this owner.');
+        }
+
+        $this->recordEvent(new LeadTrashEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason)
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isTrash()) {
+            $this->setStatus(self::STATUS_TRASH);
+        }
     }
 
     /**
@@ -776,9 +958,42 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_ON_HOLD;
     }
 
-    public function reject(): void
+    public function isReject()
     {
-        $this->setStatus(self::STATUS_REJECT);
+        return $this->status === self::STATUS_REJECT;
+    }
+
+    /**
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function reject(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        self::guardStatus($this->status, self::STATUS_REJECT);
+
+        if ($newOwnerId === null && !$this->isGetOwner() && $this->isReject()) {
+            throw new \DomainException('Lead is already Reject without owner.');
+        }
+
+        if ($this->isOwner($newOwnerId) && $this->isReject()) {
+            throw new \DomainException('Lead is already Reject with this owner.');
+        }
+
+        $this->recordEvent(new LeadRejectEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason)
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isReject()) {
+            $this->setStatus(self::STATUS_REJECT);
+        }
     }
 
     public function callProcessing(): void
@@ -833,10 +1048,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         $this->l_request_hash = $hash;
     }
 
-    public function setDuplicate(int $originId): void
+    /**
+     * @param int $originId
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function duplicate(int $originId, ?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
         $this->l_duplicate_lead_id = $originId;
-        $this->trash();
+        $this->trash($newOwnerId, $creatorId, $reason ?: 'Duplicate. OriginId: ' . $originId);
         $this->recordEvent(new LeadDuplicateDetectedEvent($this));
     }
 
@@ -862,6 +1083,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function isAvailableToTake(): bool
     {
         return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAvailableToProcessing(): bool
+    {
+        return $this->isAvailableToTake() || $this->isAvailableToTakeOver();
     }
 
     /**
@@ -922,7 +1151,6 @@ class Lead extends ActiveRecord implements AggregateRoot
             'created' => 'Created',
             'updated' => 'Updated',
             'l_answered' => 'Answered',
-            'l_grade' => 'Grade',
             'bo_flight_id' => '(BO) Flight ID',
             'agents_processing_fee' => 'Agents Processing Fee',
             'origin_country' => 'Origin Country code',
@@ -1002,7 +1230,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->hasMany(self::class, ['l_duplicate_lead_id' => 'id']);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -1019,12 +1246,13 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->onCondition([LeadFlow::tableName() . '.status' => static::STATUS_SOLD]);
     }
 
+    // TODO: update LeadFlow SORT created -> id
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getLastLeadFlow(): ActiveQuery
     {
-        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])->limit(1);
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.created' => SORT_DESC, LeadFlow::tableName() . '.id' => SORT_DESC])->limit(1);
     }
 
     /**
@@ -1523,7 +1751,7 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     public function getFlowTransition()
     {
-        return LeadFlow::findAll(['lead_id' => $this->id]);
+        return LeadFlow::find()->andWhere(['lead_id' => $this->id])->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->all();
     }
 
     public function getPendingAfterCreate($created = null)
@@ -1547,6 +1775,33 @@ class Lead extends ActiveRecord implements AggregateRoot
     {
         $label = '';
         $status = empty($status) ? $this->status : $status;
+        switch ($status) {
+            case self::STATUS_PENDING:
+                $label = '<span class="label status-label bg-light-brown">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_SNOOZE:
+            case self::STATUS_PROCESSING:
+                $label = '<span class="label status-label bg-turquoise">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_ON_HOLD:
+            case self::STATUS_FOLLOW_UP:
+                $label = '<span class="label status-label bg-blue">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_SOLD:
+            case self::STATUS_BOOKED:
+                $label = '<span class="label status-label bg-green">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_TRASH:
+            case self::STATUS_REJECT:
+                $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
+                break;
+        }
+        return $label;
+    }
+
+    public static function getStatusLabelForLeadFlow($status)
+    {
+        $label = '';
         switch ($status) {
             case self::STATUS_PENDING:
                 $label = '<span class="label status-label bg-light-brown">' . self::getStatus($status) . '</span>';
@@ -1867,67 +2122,6 @@ Reason: {reason}
         return $isSend;
     }
 
-    /**
-     * @param Lead $lead
-     * @return bool
-     */
-    public function sendClonedEmail(Lead $lead): bool
-    {
-        $isSend = false;
-
-        $host = \Yii::$app->params['url_address'];
-
-        //$swiftMailer = Yii::$app->mailer2;
-        $user = Employee::findOne($lead->employee_id);
-
-        if (!empty($user)) {
-            $agent = $user->username;
-            $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
-            $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
-New lead {lead_id}
-{url}",
-                [
-                    'agent' => $agent,
-                    'url' => $host . '/lead/view/' . $lead->gid,
-                    'cloned_url' => $host . '/lead/view/' . ($lead->clone ? $lead->clone->gid : $lead->gid),
-                    'reason' => $lead->description,
-                    'lead_id' => $lead->id,
-                    'clone_id' => $lead->clone_id,
-                    'br' => "\r\n"
-                ]);
-
-            //$emailTo = Yii::$app->params['email_to']['bcc_sales'];
-
-            try {
-
-                $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
-                // Notifications::socket($user->id, null, 'getNewNotification', [], true);
-
-                Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
-
-                /*$isSend = $swiftMailer
-                    ->compose()
-                    ->setTo($emailTo)
-                    ->setFrom(Yii::$app->params['email_from']['sales'])
-                    ->setSubject($subject)
-                    ->setTextBody($body)
-                    ->send();*/
-
-                if (!$isSend) {
-                    Yii::warning('Not send Notification to UserID:' . $user->id . ' - Lead Id: ' . $this->id, 'Lead:sendClonedEmail:Notifications::create');
-                }
-
-            } catch (\Throwable $e) {
-                Yii::error($user->id . ' ' . $e->getMessage(), 'Lead:sendClonedEmail:Notifications::create');
-            }
-        } else {
-            Yii::warning('Not found employee (' . $lead->employee_id . ')', 'Lead:sendClonedEmail');
-        }
-        //}
-
-        return $isSend;
-    }
-
     public function disableAREvents(): void
     {
         $this->enableActiveRecordEvents = false;
@@ -2062,12 +2256,6 @@ New lead {lead_id}
                             Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                         }
                     } elseif ($this->status == self::STATUS_FOLLOW_UP) {
-
-                        $this->l_grade = (int)$this->l_grade + 1;
-                        Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
-                            ':grade' => $this->l_grade,
-                            ':id' => $this->id
-                        ])->execute();
 
                         if ($this->status_description) {
                             $reason = new Reason();
@@ -2363,16 +2551,6 @@ New lead {lead_id}
     }
 
     /**
-     * @return Reason
-     */
-    public function lastReason()
-    {
-        return Reason::find()
-            ->where(['lead_id' => $this->id])
-            ->orderBy('id desc')->one();
-    }
-
-    /**
      * @return Quote|null
      */
     public function getAppliedAlternativeQuotes()
@@ -2571,98 +2749,98 @@ New lead {lead_id}
         return $types;
     }
 
-    public function sendSoldEmail($data)
-    {
-        $result = [
-            'status' => false,
-            'errors' => []
-        ];
-
-        $key = sprintf('%s_lead_UID_%s', uniqid(), $this->uid);
-        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->project->name)), $key);
-        $path = sprintf('%s/frontend/views/tmpEmail/quote/%s', dirname(Yii::getAlias('@app')), $fileName);
-
-        $template = ProjectEmailTemplate::findOne([
-            'type' => ProjectEmailTemplate::TYPE_EMAIL_TICKET,
-            'project_id' => $this->project_id
-        ]);
-
-        if ($template === null) {
-            $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
-                ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_TICKET),
-                $this->project->name
-            );
-            return $result;
-        }
-
-        $view = $template->template;
-        $fp = fopen($path, "w");
-        chmod($path, 0777);
-        fwrite($fp, $view);
-        fclose($fp);
-
-        $body = \Yii::$app->getView()->renderFile($path, [
-            'model' => $this,
-            'uid' => $this->getAppliedAlternativeQuotes()->uid,
-            'flightRequest' => $data,
-        ]);
-
-        $userProjectParams = UserProjectParams::findOne([
-            'upp_user_id' => $this->employee->id,
-            'upp_project_id' => $this->project_id
-        ]);
-        $credential = [
-            'email' => $userProjectParams->upp_email,
-        ];
-
-        if (!empty($template->layout_path)) {
-            $body = \Yii::$app->getView()->renderFile($template->layout_path, [
-                'project' => $this->project,
-                'agentName' => ucfirst($this->employee->username),
-                'employee' => $this->employee,
-                'userProjectParams' => $userProjectParams,
-                'body' => $body,
-                'templateType' => $template->type,
-            ]);
-        }
-
-        $subject = ProjectEmailTemplate::getMessageBody($template->subject, [
-            'pnr' => $data['pnr'],
-        ]);
-
-        $errors = [];
-        $bcc = [
-            trim($userProjectParams->upp_email),
-            'damian.t@wowfare.com',
-            'andrew.t@wowfare.com'
-        ];
-        $isSend = EmailService::sendByAWS($data['emails'], $this->project, $credential, $subject, $body, $errors, $bcc);
-        $message = ($isSend)
-            ? sprintf('Sending email - \'Tickets\' succeeded! <br/>Emails: %s',
-                implode(', ', $data['emails'])
-            )
-            : sprintf('Sending email - \'Tickets\' failed! <br/>Emails: %s',
-                implode(', ', $data['emails'])
-            );
-
-        //Add logs after changed model attributes
-        $leadLog = new LeadLog((new LeadLogMessage()));
-        $leadLog->logMessage->message = empty($errors)
-            ? $message
-            : sprintf('%s <br/>Errors: %s', $message, print_r($errors, true));
-        $leadLog->logMessage->title = 'Send Tickets by Email';
-        $leadLog->logMessage->model = $this->formName();
-        $leadLog->addLog([
-            'lead_id' => $this->id,
-        ]);
-
-        $result['status'] = $isSend;
-        $result['errors'] = $errors;
-
-        unlink($path);
-
-        return $result;
-    }
+//    public function sendSoldEmail($data)
+//    {
+//        $result = [
+//            'status' => false,
+//            'errors' => []
+//        ];
+//
+//        $key = sprintf('%s_lead_UID_%s', uniqid(), $this->uid);
+//        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->project->name)), $key);
+//        $path = sprintf('%s/frontend/views/tmpEmail/quote/%s', dirname(Yii::getAlias('@app')), $fileName);
+//
+//        $template = ProjectEmailTemplate::findOne([
+//            'type' => ProjectEmailTemplate::TYPE_EMAIL_TICKET,
+//            'project_id' => $this->project_id
+//        ]);
+//
+//        if ($template === null) {
+//            $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
+//                ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_TICKET),
+//                $this->project->name
+//            );
+//            return $result;
+//        }
+//
+//        $view = $template->template;
+//        $fp = fopen($path, "w");
+//        chmod($path, 0777);
+//        fwrite($fp, $view);
+//        fclose($fp);
+//
+//        $body = \Yii::$app->getView()->renderFile($path, [
+//            'model' => $this,
+//            'uid' => $this->getAppliedAlternativeQuotes()->uid,
+//            'flightRequest' => $data,
+//        ]);
+//
+//        $userProjectParams = UserProjectParams::findOne([
+//            'upp_user_id' => $this->employee->id,
+//            'upp_project_id' => $this->project_id
+//        ]);
+//        $credential = [
+//            'email' => $userProjectParams->upp_email,
+//        ];
+//
+//        if (!empty($template->layout_path)) {
+//            $body = \Yii::$app->getView()->renderFile($template->layout_path, [
+//                'project' => $this->project,
+//                'agentName' => ucfirst($this->employee->username),
+//                'employee' => $this->employee,
+//                'userProjectParams' => $userProjectParams,
+//                'body' => $body,
+//                'templateType' => $template->type,
+//            ]);
+//        }
+//
+//        $subject = ProjectEmailTemplate::getMessageBody($template->subject, [
+//            'pnr' => $data['pnr'],
+//        ]);
+//
+//        $errors = [];
+//        $bcc = [
+//            trim($userProjectParams->upp_email),
+//            'damian.t@wowfare.com',
+//            'andrew.t@wowfare.com'
+//        ];
+//        $isSend = EmailService::sendByAWS($data['emails'], $this->project, $credential, $subject, $body, $errors, $bcc);
+//        $message = ($isSend)
+//            ? sprintf('Sending email - \'Tickets\' succeeded! <br/>Emails: %s',
+//                implode(', ', $data['emails'])
+//            )
+//            : sprintf('Sending email - \'Tickets\' failed! <br/>Emails: %s',
+//                implode(', ', $data['emails'])
+//            );
+//
+//        //Add logs after changed model attributes
+//        $leadLog = new LeadLog((new LeadLogMessage()));
+//        $leadLog->logMessage->message = empty($errors)
+//            ? $message
+//            : sprintf('%s <br/>Errors: %s', $message, print_r($errors, true));
+//        $leadLog->logMessage->title = 'Send Tickets by Email';
+//        $leadLog->logMessage->model = $this->formName();
+//        $leadLog->addLog([
+//            'lead_id' => $this->id,
+//        ]);
+//
+//        $result['status'] = $isSend;
+//        $result['errors'] = $errors;
+//
+//        unlink($path);
+//
+//        return $result;
+//    }
 
     public function previewEmail($quotes, $email)
     {
@@ -3286,6 +3464,10 @@ New lead {lead_id}
                 $list = self::STATUS_LIST;
         }
 
+        if (isset($list[self::STATUS_ON_HOLD])) {
+            unset($list[self::STATUS_ON_HOLD]);
+        }
+
         return $list;
     }
 
@@ -3515,15 +3697,15 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $this->updated;
     }
 
-    public function getLastReason()
+    /**
+     * @return string
+     */
+    public function getLastReasonFromLeadFlow(): ?string
     {
-        $lastReason = Reason::find()->where(['lead_id' => $this->id])->orderBy(['created' => SORT_DESC])->one();
-
-        if (!empty($lastReason)) {
-            return $lastReason['reason'];
+        if (!$this->lastLeadFlow) {
+            return '';
         }
-
-        return '-';
+        return $this->lastLeadFlow->lf_description; //$this->status === $this->lastLeadFlow->status ? $this->lastLeadFlow->lf_description : '';
     }
 
     /**
@@ -3568,48 +3750,63 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $key;
     }
 
+
     /**
      * @param int $type_id
-     * @return int|string
+     * @param bool|null $onlyParent
+     * @return int
      */
-    public function getCountCalls(int $type_id = 0)
+    public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
-        if($type_id === 0) {
-            $count = Call::find()->where(['c_lead_id' => $this->id, 'c_is_deleted' => false])->count();
-        } else {
-            $count = Call::find()->where(['c_lead_id' => $this->id, 'c_is_deleted' => false, 'c_call_type_id' => $type_id])->count();
+        $query = Call::find();
+        $query->where(['c_lead_id' => $this->id, 'c_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['c_call_type_id' => $type_id]);
         }
-        return $count;
+
+        if ($onlyParent) {
+            $query->andWhere(['c_parent_id' => null]);
+        }
+        $count = $query->count();
+
+        return (int) $count;
     }
 
 
     /**
      * @param int $type_id
-     * @return int|string
+     * @return int
      */
-    public function getCountSms(int $type_id = 0)
+    public function getCountSms(int $type_id = 0): int
     {
-        if($type_id === 0) {
-            $count = Sms::find()->where(['s_lead_id' => $this->id, 's_is_deleted' => false])->count();
-        } else {
-            $count = Sms::find()->where(['s_lead_id' => $this->id, 's_type_id' => $type_id, 's_is_deleted' => false])->count();
+        $query = Sms::find();
+        $query->where(['s_lead_id' => $this->id, 's_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['s_type_id' => $type_id]);
         }
-        return $count;
+
+        $count = $query->count();
+        return (int) $count;
     }
 
 
     /**
      * @param int $type_id
-     * @return int|string
+     * @return int
      */
-    public function getCountEmails(int $type_id = 0)
+    public function getCountEmails(int $type_id = 0): int
     {
-        if($type_id === 0) {
-            $count = Email::find()->where(['e_lead_id' => $this->id, 'e_is_deleted' => false])->count();
-        } else {
-            $count = Email::find()->where(['e_lead_id' => $this->id, 'e_type_id' => $type_id, 'e_is_deleted' => false])->count();
+        $query = Email::find();
+        $query->where(['e_lead_id' => $this->id, 'e_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['e_type_id' => $type_id]);
         }
-        return $count;
+        $count = $query->count();
+
+        return (int) $count;
     }
 
 
@@ -3672,7 +3869,24 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $min;
     }
 
-
-
+    /**
+     * @return LeadQuery
+     */
+    public static function find(): LeadQuery
+    {
+        return new LeadQuery(get_called_class());
+    }
+    
+    /**
+     * @return string
+     */
+    public function getCommunicationInfo(): string
+    {
+        $str = '';
+        $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
+        $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+        $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+        return $str;
+    }
 
 }

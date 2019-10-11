@@ -123,7 +123,6 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklist')],
                 ['label' => 'LF Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
-                ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
             ]
         ];
 

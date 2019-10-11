@@ -367,9 +367,9 @@ class CallSearch extends Call
                     return $entry['ugs_user_id'];
                 }, $userIdsByGroup)) . "'";
         } else if (!empty($this->c_created_user_id) && !empty($this->userGroupId)) {
-            foreach ($userIdsByGroup as $userIdInGroup){
-                if($userIdInGroup['ugs_user_id'] == $this->c_created_user_id){
-                    $employees =  $userIdInGroup['ugs_user_id'];
+            foreach ($userIdsByGroup as $userIdInGroup) {
+                if ($userIdInGroup['ugs_user_id'] == $this->c_created_user_id) {
+                    $employees = $userIdInGroup['ugs_user_id'];
                 }
             }
         } else {
@@ -378,31 +378,31 @@ class CallSearch extends Call
 
         //var_dump($params['CallSearch']['callDepId']); die();
 
-        if (isset($params['CallSearch']['callDepId']) && $params['CallSearch']['callDepId'] != ""){
+        if (isset($params['CallSearch']['callDepId']) && $params['CallSearch']['callDepId'] != "") {
             $queryByDepartament = 'AND c_dep_id=' . $params['CallSearch']['callDepId'];
         } else {
             $queryByDepartament = '';
         }
-        if(!isset($employees)){
+        if (!isset($employees)) {
             $employees = 0;
         }
         $query = new Query();
 
         $query->select(['
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' THEN 1 ELSE 0 END) AS outgoingCalls, 
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_COMPLETED.'" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_NO_ANSWER.'" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_CANCELED.'" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' THEN 1 ELSE 0 END) AS incomingCalls,
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_DIRECT_CALL.' THEN 1 ELSE 0 END) AS incomingDirectLine,
-            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_GENERAL_LINE.' THEN 1 ELSE 0 END) AS incomingGeneralLine,
-            c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "'.$userTZ.'")) AS createdDate 
-            FROM `call` WHERE (c_created_dt '.$between_condition.') '.$queryByDepartament.' AND c_created_user_id in (' .$employees. ')
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' THEN 1 ELSE 0 END) AS outgoingCalls, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_call_status="' . self::TW_STATUS_COMPLETED . '" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_call_status="' . self::TW_STATUS_NO_ANSWER . '" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_call_status="' . self::TW_STATUS_CANCELED . '" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN 1 ELSE 0 END) AS incomingCalls,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_GENERAL_LINE . ' THEN 1 ELSE 0 END) AS incomingGeneralLine,
+            c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "' . $userTZ . '")) AS createdDate 
+            FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . ' AND c_created_user_id in (' . $employees . ')
         ']);
 
-        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "'.$userTZ.'"))']);
+        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "' . $userTZ . '"))']);
         //$query->orderBy(['c_created_user_id' => SORT_ASC]);
 
         $command = $query->createCommand();
@@ -466,6 +466,61 @@ class CallSearch extends Call
 
         $dataProvider = new SqlDataProvider($paramsData);
         return $dataProvider;
+    }
 
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchUserCallMapHistory($params): ActiveDataProvider
+    {
+        $query = Call::find();
+
+        $this->load($params);
+
+        //$query->limit(5);
+
+        if($this->limit > 0) {
+            $query->limit($this->limit);
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'pagination' => $this->limit > 0 ? false : [
+                'pageSize' => 100,
+            ]
+        ]);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        /*$query->andWhere(['c_call_status' => [Call::CALL_STATUS_RINGING]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_QUEUE]]);*/
+
+        $query->andWhere(['c_parent_id' => null]);
+
+        if ($this->status_ids) {
+            $query->andWhere(['c_status_id' => $this->status_ids]);
+        }
+
+        if ($this->dep_ids) {
+            $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
+                //->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => 'ud_dep_id'])
+                ->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
+
+        $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
+
+        return $dataProvider;
     }
 }

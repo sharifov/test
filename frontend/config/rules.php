@@ -26,6 +26,14 @@ return [
         'pattern' => 'cases/take/<gid>',
         'route' => 'cases/take',
     ],
+	[
+        'pattern' => 'cases/ajax-sale-list-edit-info/<caseId>/<caseSaleId>',
+        'route' => 'cases/ajax-sale-list-edit-info',
+    ],
+	[
+        'pattern' => 'cases/ajax-sync-with-back-office/<caseId>/<caseSaleId>',
+        'route' => 'cases/ajax-sync-with-back-office'
+    ],
 
     [
         'pattern' => 'take/<gid>',

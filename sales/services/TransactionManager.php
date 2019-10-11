@@ -22,7 +22,7 @@ class TransactionManager
             $result = $function();
             $transaction->commit();
             $this->dispatcher->release();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $transaction->rollBack();
             $this->dispatcher->clean();
             throw $e;
