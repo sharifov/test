@@ -12,6 +12,7 @@ use common\models\Client;
 use common\models\search\ClientSearch;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -131,18 +132,21 @@ class ClientController extends FController
      */
     public function actionAjaxGetInfo(): string
     {
-        $client = $this->findModel((int) Yii::$app->request->post('client_id'));
+        if (!$clientId = Yii::$app->request->post('client_id')) {
+            $clientId = Yii::$app->request->get('client_id');
+        }
+        $client = $this->findModel((int)$clientId);
 
         $providers = [];
 
-        if (Yii::$app->user->can('leadSection')) {
+//        if (Yii::$app->user->can('leadSection')) {
             $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id);
-        }
-        if (Yii::$app->user->can('caseSection')) {
+//        }
+//        if (Yii::$app->user->can('caseSection')) {
             $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id);
-        }
+//        }
 
-        return $this->renderPartial('ajax_info', ArrayHelper::merge(
+        return $this->renderAjax('ajax_info', ArrayHelper::merge(
             ['model' => $client],
             $providers)
         );
@@ -160,7 +164,16 @@ class ClientController extends FController
 
         $dataProvider = $searchModel->searchClient($params);
 
+        $dataProvider->query->orderBy(['cs_updated_dt' => SORT_DESC]);
+
         $dataProvider->sort = false;
+
+        $pagination = $dataProvider->pagination;
+        $pagination->pageSize = 10;
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->pageParam = 'case-page';
+        $pagination->pageSizeParam = 'case-per-page';
+        $dataProvider->pagination = $pagination;
 
         return $dataProvider;
     }
@@ -183,7 +196,16 @@ class ClientController extends FController
             $dataProvider = $searchModel->search($params);
         }
 
+        $dataProvider->query->orderBy(['l_last_action_dt' => SORT_DESC]);
+
         $dataProvider->sort = false;
+
+        $pagination = $dataProvider->pagination;
+        $pagination->pageSize = 10;
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->pageParam = 'lead-page';
+        $pagination->pageSizeParam = 'lead-per-page';
+        $dataProvider->pagination = $pagination;
 
         return $dataProvider;
     }
