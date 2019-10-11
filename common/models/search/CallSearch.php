@@ -80,7 +80,7 @@ class CallSearch extends Call
                 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id', 'callDepId', 'userGroupId'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
-            [['createTimeRange', 'createTimeStart', 'createTimeEnd'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
         ];
     }
