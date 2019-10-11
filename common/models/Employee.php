@@ -1444,7 +1444,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @param $formatShort
+     * @param $formatLong
      * @return array
      * @throws \Exception
      */
@@ -1476,7 +1476,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $offset = gmdate('H:i', abs($tz['offset']));
             $timezoneList[$tz['identifier']] = ($formatLong)
                 ? '(UTC ' . $sign . $offset . ') ' . $tz['identifier']
-            : $sign . $offset;
+                : $sign . $offset;
         }
 
         return $timezoneList;

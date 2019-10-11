@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use sales\access\EmployeeDepartmentAccess;
 ?>
 
 <div class="calls-search">
@@ -39,7 +40,17 @@ use yii\widgets\ActiveForm;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
-                    <?php echo $form->field($model, 'c_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => '-'])->label('Username') ?>
+                    <?= $form->field($model, 'c_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => '-'])->label('Username') ?>
+                </div>
+                <div class="col-md-6">
+                <?= $form->field($model, 'callDepId')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-'])->label('Department') ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $form->field($model, 'userGroupId')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '-'])->label('User Group') ?>
                 </div>
             </div>
         </div>

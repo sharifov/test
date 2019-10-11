@@ -44,6 +44,8 @@ class CallSearch extends Call
 
     public $call_duration_from;
     public $call_duration_to;
+    public $callDepId;
+    public $userGroupId;
 
     public $dep_ids = [];
 
@@ -75,7 +77,7 @@ class CallSearch extends Call
     {
         return [
             [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration',
-                'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id'], 'integer'],
+                'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id', 'callDepId', 'userGroupId'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
             [['createTimeRange', 'createTimeStart', 'createTimeEnd'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
@@ -347,7 +349,7 @@ class CallSearch extends Call
         $timezone = $user->timezone;
         $userTZ = Employee::timezoneList(false)[$timezone];
 
-        if ($this->createTimeRange != null){
+        if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]));
             $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]));
@@ -357,13 +359,39 @@ class CallSearch extends Call
             $date_to = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 23:59')));
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
         }
-
-        if (isset($params['CallSearch']['c_created_user_id']) && $params['CallSearch']['c_created_user_id'] != ""){
+        $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->userGroupId])->asArray()->all();
+        if (isset($params['CallSearch']['c_created_user_id']) && $params['CallSearch']['c_created_user_id'] != "" && empty($this->userGroupId)) {
             $employees = $params['CallSearch']['c_created_user_id'];
+        } else if (isset($params['CallSearch']['userGroupId']) && $params['CallSearch']['userGroupId'] != "" && empty($this->c_created_user_id)) {
+            $employees = "'" . implode("', '", array_map(function ($entry) {
+                    return $entry['ugs_user_id'];
+                }, $userIdsByGroup)) . "'";
+            //var_dump($employees); die();
+        } else if (!empty($this->c_created_user_id) && !empty($this->userGroupId)) {
+            /*$employees = "'" . implode("', '",array_map(function ($entry) {
+                    if($entry['ugs_user_id'] == $this->c_created_user_id){
+                        return $entry['ugs_user_id'];
+                    }
+                }, $userIdsByGroup)) . "'";*/
+            foreach ($userIdsByGroup as $userIdInGroup){
+                if($userIdInGroup['ugs_user_id'] == $this->c_created_user_id){
+                    $employees =  $userIdInGroup['ugs_user_id'];
+                }
+            }
         } else {
             $employees = "'" . implode("', '", array_keys(Employee::getList())) . "'";
         }
 
+        //var_dump($params['CallSearch']['callDepId']); die();
+
+        if (isset($params['CallSearch']['callDepId']) && $params['CallSearch']['callDepId'] != ""){
+            $queryByDepartament = 'AND c_dep_id=' . $params['CallSearch']['callDepId'];
+        } else {
+            $queryByDepartament = '';
+        }
+        if(!isset($employees)){
+            $employees = 0;
+        }
         $query = new Query();
 
         $query->select(['
@@ -376,7 +404,8 @@ class CallSearch extends Call
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' THEN 1 ELSE 0 END) AS incomingCalls,
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_DIRECT_CALL.' THEN 1 ELSE 0 END) AS incomingDirectLine,
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_GENERAL_LINE.' THEN 1 ELSE 0 END) AS incomingGeneralLine,
-            c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "'.$userTZ.'")) AS createdDate FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id in (' .$employees. ')
+            c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "'.$userTZ.'")) AS createdDate 
+            FROM `call` WHERE (c_created_dt '.$between_condition.') '.$queryByDepartament.' AND c_created_user_id in (' .$employees. ')
         ']);
 
         $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "'.$userTZ.'"))']);
