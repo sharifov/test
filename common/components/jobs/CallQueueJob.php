@@ -213,6 +213,9 @@ class CallQueueJob extends BaseObject implements JobInterface
                     }
 
                     Notifications::pingUserMap();
+                } else {
+                    Yii::info('Call not in status Queue or IVR, CallId: ' . $this->call_id . ' (' . $call->c_call_sid . '), Status: ' . $call->getStatusName(),
+                        'info\CallQueueJob:notRun');
                 }
             }
 
