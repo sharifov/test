@@ -1189,7 +1189,7 @@ class CasesController extends FController
 					throw new \Exception('Case is not in status: Processing');
 				}
 
-				$form = new CasesSaleForm();
+				$form = new CasesSaleForm($caseSale, $this->casesSaleService);
 
 				if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
 
@@ -1262,31 +1262,54 @@ class CasesController extends FController
 				!$user->isExSuper() &&
 				!$user->isSupSuper()
 			) {
-				throw new \Exception('Access Denied.');
+				throw new \Exception('Access Denied.', -1);
 			} else if (!$caseSale->css_need_sync_bo) {
-				throw new \Exception('Data is already synchronized.');
+				throw new \Exception('Data is already synchronized.', -2);
 			} else if (!$caseSale->cssCs->isProcessing()) {
-				throw new \Exception('Case is not in status: Processing');
+				throw new \Exception('Case is not in status: Processing', -3);
 			}
 
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
+			$updatedData['sale_id'] = $caseSaleId;
 
-			$response = BackOffice::sendRequest2('', $updatedData);
-
+			$response = BackOffice::sendRequest2('cs/update-passengers', $updatedData);
 			if ($response->isOk) {
-				$this->casesSaleRepository->updateSyncWithBOField($caseSale, false);
-				$this->casesSaleRepository->updateOriginalSaleData($caseSale);
-				$this->casesSaleRepository->save($caseSale);
 
-				$out['message'] = 'Sale: '. $caseSaleId .' data was successfully synchronized with b/o.';
+				$responseResult = json_decode($response->content, true)['results'];
+
+				$error = [];
+				foreach ($responseResult as $key => $result) {
+					if ($result['success'] === false) {
+						$error[$key] = $result;
+					}
+				}
+
+				if (!empty($error)) {
+					$out['errorHtml'] =  \yii\bootstrap\Alert::widget([
+						'options' => [
+							'class' => 'alert-danger'
+						],
+						'body' => $this->renderAjax('/sale/partial/_sale_info_errors', [
+							'errors' => $error
+						])
+					]);
+					$out['message'] = 'Errors occurred while syncing sales data with B/O; See error dump;';
+					$out['error']  = 1;
+				} else {
+					$this->casesSaleRepository->updateSyncWithBOField($caseSale, false);
+					$this->casesSaleRepository->updateOriginalSaleData($caseSale);
+					$this->casesSaleRepository->save($caseSale);
+
+					$out['message'] = 'Sale: '. $caseSaleId .' data was successfully synchronized with b/o.';
+				}
 			} else {
 				$out['error'] = 1;
-				$out['message'] = 'BO request Error: ' . VarDumper::dumpAsString($response->content);
+				$out['message'] = 'BO request Error: ' . json_decode($response->content, true)['message'] ?? '';
 			}
 
 		} catch (\Exception $exception) {
 			$out['error'] = 1;
-			$out['message'] = $exception->getMessage();
+			$out['message'] = 'An internal Sales error has occurred; Check system logs;';
 			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Exception');
 		}
 

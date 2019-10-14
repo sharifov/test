@@ -12,7 +12,7 @@ class CasesSaleService
 		'meal' => 'formatByCountSegments',
 		'wheelchair' => 'formatByCountSegments',
 		'ff_numbers' => 'formatByAirline',
-		'ktn_numbers' => 'formatByAirline',
+		'kt_numbers' => 'formatByAirline',
 	];
 
 	/**
@@ -48,9 +48,9 @@ class CasesSaleService
 		$originalData = json_decode( (string)$caseSale->css_sale_data, true );
 		$updatedData = json_decode( (string)$caseSale->css_sale_data_updated, true );
 
-		$difference = $this->compareSaleData($originalData, $updatedData);
+		$this->setSegments($caseSale);
 
-		$this->segments = $this->getSegments($caseSale);
+		$difference = $this->compareSaleData($originalData, $updatedData);
 
 		$this->preparePassengersData($difference);
 
@@ -78,6 +78,16 @@ class CasesSaleService
 
 	/**
 	 * @param CaseSale $caseSale
+	 * @return CasesSaleService
+	 */
+	public function setSegments(CaseSale $caseSale) {
+		$this->segments = $this->getSegments($caseSale);
+
+		return $this;
+	}
+
+	/**
+	 * @param CaseSale $caseSale
 	 * @return bool
 	 */
 	public function isDataBackedUpToOriginal(CaseSale $caseSale): bool
@@ -96,7 +106,7 @@ class CasesSaleService
 	{
 		if (isset($saleDataDiff['passengers'])) {
 			foreach ($saleDataDiff['passengers'] as $key => $passenger) {
-				$this->formatPassengersData($passenger);
+//				$this->formatPassengersData($passenger);
 
 				unset($saleDataDiff['passengers'][$key]);
 				$saleDataDiff['passengers'][++$key . '.1'] = $passenger;
@@ -107,7 +117,7 @@ class CasesSaleService
 	/**
 	 * @param array $passenger
 	 */
-	private function formatPassengersData(array &$passenger): void
+	public function formatPassengersData(array &$passenger): void
 	{
 		foreach ($passenger as $key => $value) {
 			if (key_exists($key, self::FORMAT_PASSENGERS_DATA) && method_exists($this, self::FORMAT_PASSENGERS_DATA[$key])) {

@@ -33,43 +33,58 @@ class CaseSale extends \yii\db\ActiveRecord
 {
 
 	public const PASSENGER_MEAL = [
-		"AVML - Vegetarian/Hindu" => "AVML - Vegetarian/Hindu",
-		"BBML - Baby" => "BBML - Baby",
-		"BLML - Bland" => "BLML - Bland",
-		"CHML - Child" => "CHML - Child",
-		"CNML - Chicken (LY only)" => "CNML - Chicken (LY only)",
-		"CHCK - Chicken (AA only)" => "CHCK - Chicken (AA only)",
-		"DBML - Diabetic" => "DBML - Diabetic",
-		"FPML - Fruit Platter" => "FPML - Fruit Platter",
-		"GFML - Gluten intolerant," => "GFML - Gluten intolerant,",
-		"HNML - Hindu (non-vegerarian)" => "HNML - Hindu (non-vegerarian)",
-		"IVML - Indian Vegetarian (UA only)" => "IVML - Indian Vegetarian (UA only)",
-		"JPML - Japanese (LH only)" => "JPML - Japanese (LH only)",
-		"KSML - Kosher" => "KSML - Kosher",
-		"LCML - Low Calorie" => "LCML - Low Calorie",
-		"LFML - Low Fat" => "LFML - Low Fat",
-		"LSML - Low Salt" => "LSML - Low Salt",
-		"MOML - Moslem" => "MOML - Moslem",
-		"NFML - No Fish (LH only)" => "NFML - No Fish (LH only)",
-		"NLML - Low Lactose" => "NLML - Low Lactose",
-		"OBML - Japanese Obento (UA only)" => "OBML - Japanese Obento (UA only)",
-		"RVML - Vegeratian Raw" => "RVML - Vegeratian Raw",
-		"SFML - Sea Food" => "SFML - Sea Food",
-		"SPML - Special meal, specify ~" => "SPML - Special meal, specify ~",
-		"VGML - Vegetarian Vegan" => "VGML - Vegetarian Vegan",
-		"VJML - Vegetarian Jain" => "VJML - Vegetarian Jain",
-		"VOML - Vagetarian Oriental" => "VOML - Vagetarian Oriental",
-		"VLML - Vegetarian Lacto-Ovo" => "VLML - Vegetarian Lacto-Ovo",
-		"NOML - No Meal" => "NOML - No Meal",
-		"NSML - No Salt/Sodium" => "NSML - No Salt/Sodium",
-		"PFML - Peanut Free" => "PFML - Peanut Free"
+		"AVML" => "AVML - Vegetarian/Hindu",
+		"BBML" => "BBML - Baby",
+		"BLML" => "BLML - Bland",
+		"CHML" => "CHML - Child",
+		"CNML" => "CNML - Chicken (LY only)",
+		"CHCK" => "CHCK - Chicken (AA only)",
+		"DBML" => "DBML - Diabetic",
+		"FPML" => "FPML - Fruit Platter",
+		"GFML" => "GFML - Gluten intolerant,",
+		"HNML" => "HNML - Hindu (non-vegerarian)",
+		"IVML" => "IVML - Indian Vegetarian (UA only)",
+		"JPML" => "JPML - Japanese (LH only)",
+		"KSML" => "KSML - Kosher",
+		"LCML" => "LCML - Low Calorie",
+		"LFML" => "LFML - Low Fat",
+		"LSML" => "LSML - Low Salt",
+		"MOML" => "MOML - Moslem",
+		"NFML" => "NFML - No Fish (LH only)",
+		"NLML" => "NLML - Low Lactose",
+		"OBML" => "OBML - Japanese Obento (UA only)",
+		"RVML" => "RVML - Vegeratian Raw",
+		"SFML" => "SFML - Sea Food",
+		"SPML" => "SPML - Special meal, specify ~",
+		"VGML" => "VGML - Vegetarian Vegan",
+		"VJML" => "VJML - Vegetarian Jain",
+		"VOML" => "VOML - Vagetarian Oriental",
+		"VLML" => "VLML - Vegetarian Lacto-Ovo",
+		"NOML" => "NOML - No Meal",
+		"NSML" => "NSML - No Salt/Sodium",
+		"PFML" => "PFML - Peanut Free"
 	];
 
 	public const PASSENGER_WHEELCHAIR = [
-		"WCOB - Wheelchair on board" => "WCOB - Wheelchair on board",
-		"WCHR - Wheelchair airport departure hall" => "WCHR - Wheelchair airport departure hall",
-		"WCHS - Wheelchair Up/Down stairs" => "WCHS - Wheelchair Up/Down stairs",
-		"WCHC - Passenger must be carried" => "WCHC - Passenger must be carried"
+		"WCOB" => "WCOB - Wheelchair on board",
+		"WCHR" => "WCHR - Wheelchair airport departure hall",
+		"WCHS" => "WCHS - Wheelchair Up/Down stairs",
+		"WCHC" => "WCHC - Passenger must be carried"
+	];
+
+	public const PASSENGER_TYPE_BIRTH_DATE_RANGE = [
+		'INF' => [
+			'min' => 0,
+			'max' => 2
+		],
+		'CHD' => [
+			'min' => 3,
+			'max' => 12
+		],
+		'ADT' => [
+			'min' => 13,
+			'max' => 130
+		]
 	];
 
     /**
