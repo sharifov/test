@@ -11,7 +11,7 @@ use yii\base\Model;
  * Class PhoneCreateForm
  * @property string $phone
  * @property string $help - only for View for multiInput Widget
- * @property boolean $phoneIsRequired
+ * @property boolean $required
  * @property string $message
  */
 class PhoneCreateForm extends Model
@@ -20,7 +20,7 @@ class PhoneCreateForm extends Model
     public $phone;
     public $help;
 
-    public $phoneIsRequired = true;
+    public $required = false;
     public $message = 'Phone cannot be blank.';
 
     /**
@@ -29,19 +29,19 @@ class PhoneCreateForm extends Model
     public function rules(): array
     {
         return [
-            ['phone', 'validatePhoneRequired', 'skipOnEmpty' => false],
+            ['phone', 'validateRequired', 'skipOnEmpty' => false],
             ['phone', 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],
-            ['phone', 'filter', 'filter' => function($value) {
+            ['phone', 'filter', 'filter' => static function($value) {
                 return str_replace(['-', ' '], '', trim($value));
             }],
 			['phone', 'checkForExistence']
         ];
     }
 
-    public function validatePhoneRequired($attribute, $params): void
+    public function validateRequired($attribute, $params): void
     {
-        if ($this->phoneIsRequired && !$this->phone) {
+        if ($this->required && !$this->phone) {
             $this->addError($attribute, $this->message);
         }
     }
