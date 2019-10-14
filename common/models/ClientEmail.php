@@ -23,6 +23,12 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 
     use EventTrait;
 
+	public const EMAIL_STATUS = [
+		1 => 'Valid',
+		2 => 'Favorite',
+		9 => 'Invalid'
+	];
+
     /**
      * {@inheritdoc}
      */

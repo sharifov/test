@@ -33,6 +33,12 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 
     use EventTrait;
 
+    public const PHONE_STATUS = [
+    	1 => 'Valid',
+		2 => 'Favorite',
+		9 => 'Invalid'
+	];
+
     // old phone value. need for afterSave() method
     private $old_phone = '';
 
