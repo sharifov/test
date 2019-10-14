@@ -1390,7 +1390,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         }
 
-        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['lf_owner_id' => $this->id, 'status' => $statusList]);
         $query->andFilterWhere(['>=', 'created', $startDate]);
         $query->andFilterWhere(['<=', 'created', $endDate]);
         $count = $query->asArray()->scalar();
@@ -1451,7 +1451,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         }
 
-        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['lf_owner_id' => $this->id, 'status' => $statusList]);
 
         if($from_status_id > 0) {
             $query->andWhere(['lf_from_status_id' => $from_status_id]);
