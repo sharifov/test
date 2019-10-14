@@ -49,7 +49,7 @@ class ApiLogSearch extends ApiLog
             'query' => $query,
             'sort'=> ['defaultOrder' => ['al_id' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 40,
+                'pageSize' => 30,
             ],
         ]);
 
