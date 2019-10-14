@@ -216,7 +216,10 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
             </div>
         <?php endif; ?>
 
-        <?= ClientCounterWidget::widget(['clientId' => $leadForm->getClient()->id]) ?>
+        <?= ClientCounterWidget::widget([
+            'clientId' => $leadForm->getClient()->id,
+            'userId' => Yii::$app->user->id
+        ]) ?>
 
     </div>
 

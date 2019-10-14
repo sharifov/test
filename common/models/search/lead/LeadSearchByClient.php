@@ -6,16 +6,16 @@ use common\models\Lead;
 use sales\access\EmployeeProjectAccess;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use yii\db\Query;
 
 /**
- * Class LeadSearchByIp
+ * Class LeadSearchByClient
  *
- * @property $requestIp
+ * @property $clientId
  */
-class LeadSearchByIp extends Model
+class LeadSearchByClient extends Model
 {
-    public $requestIp;
+
+    public $clientId;
 
     /**
      * @return array
@@ -23,8 +23,8 @@ class LeadSearchByIp extends Model
     public function rules(): array
     {
         return [
-            ['requestIp', 'required'],
-            ['requestIp', 'string']
+            ['clientId', 'required'],
+            ['clientId', 'integer']
         ];
     }
 
@@ -33,7 +33,7 @@ class LeadSearchByIp extends Model
      * @param int $userId
      * @return ActiveDataProvider
      */
-    public function search($params, int $userId): ActiveDataProvider
+    public function search($params, $userId): ActiveDataProvider
     {
         $query = Lead::find()->with('client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments');
 
@@ -54,31 +54,11 @@ class LeadSearchByIp extends Model
             return $dataProvider;
         }
 
-        $query->andWhere(['request_ip' => $this->requestIp]);
+        $query->andWhere(['client_id' => $this->clientId]);
 
         $query->andWhere(['project_id' => array_keys(EmployeeProjectAccess::getProjects($userId))]);
 
         return $dataProvider;
-    }
-
-    /**
-     * @param string|null $requestIp
-     * @param int $userId
-     * @return int
-     */
-    public static function count(?string $requestIp, int $userId): int
-    {
-        if (!$requestIp) {
-            return 0;
-        }
-
-        $query = (new Query())->from(Lead::tableName());
-
-        $query->andWhere(['request_ip' => $requestIp]);
-
-        $query->andWhere(['project_id' => array_keys(EmployeeProjectAccess::getProjects($userId))]);
-
-        return $query->count();
     }
 
     /**

@@ -24,7 +24,7 @@ class LeadViewController extends FController
 
         $params[LeadSearchByIp::getShortName()]['requestIp'] = $lead->request_ip;
 
-        $dataProvider = (new LeadSearchByIp())->search($params);
+        $dataProvider = (new LeadSearchByIp())->search($params, Yii::$app->user->id);
 
         return $this->renderAjax('search_leads_by_ip', [
             'dataProvider' => $dataProvider,

@@ -19,7 +19,7 @@ use common\models\LeadFlow;
             'columns' => [
                 [
                     'attribute' => 'id',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         return Html::a('<i class="fa fa-file-o"></i> ' . $model->id, [
                             'lead/view', 'gid' => $model->gid
                         ], [
@@ -37,7 +37,7 @@ use common\models\LeadFlow;
                 ],
                 [
                     'attribute' => 'status',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         $statusValue = $model->getStatusName(true);
                         if ($model->isTrash() && ($lastLeadFlow = $model->lastLeadFlow)) {
                             if ($lastLeadFlow->status === $model->status && $lastLeadFlow->lf_description) {
@@ -71,7 +71,7 @@ use common\models\LeadFlow;
                 [
                     'attribute' => 'created',
                     'label' => 'Pending Time',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         return Yii::$app->formatter->asRelativeTime(strtotime($model->created));
                     },
                     'format' => 'raw'
@@ -79,19 +79,19 @@ use common\models\LeadFlow;
                 [
                     'label' => 'Project',
                     'attribute' => 'project_id',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         return $model->project ? $model->project->name : '-';
                     },
                 ],
                 [
                     'attribute' => 'cabin',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         return Lead::getCabin($model->cabin) ?: '-';
                     },
                 ],
                 [
                     'label' => 'Pax',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         return '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span>
         / <span title="infant">' . $model->infants . '</span>';
                     },
@@ -102,7 +102,7 @@ use common\models\LeadFlow;
                 ],
                 [
                     'header' => 'Quotes',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         if ($model->quotesCount) {
                             /** @var Employee $user */
                             $user = Yii::$app->user->identity;
@@ -120,7 +120,7 @@ use common\models\LeadFlow;
                 ],
                 [
                     'header' => 'Segments',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         $segmentData = [];
                         foreach ($model->leadFlightSegments as $sk => $segment) {
                             $segmentData[] = ($sk + 1) . '. <code>' . Html::a($segment->origin . ' <i class="fa fa-long-arrow-right"></i> '
@@ -144,7 +144,7 @@ use common\models\LeadFlow;
                 ],
                 [
                     'header' => 'Depart',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         foreach ($model->leadFlightSegments as $sk => $segment) {
                             return date('d-M-Y', strtotime($segment->departure));
                         }
@@ -162,20 +162,20 @@ use common\models\LeadFlow;
                     'label' => 'Owner',
                     'attribute' => 'employee_id',
                     'format' => 'raw',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
                     },
                 ],
                 [
                     'attribute' => 'created',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                     },
                     'format' => 'raw'
                 ],
                 [
                     'attribute' => 'l_last_action_dt',
-                    'value' => function (Lead $model) {
+                    'value' => static function (Lead $model) {
                         return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt));
                     },
                     'format' => 'raw'

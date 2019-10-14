@@ -10,7 +10,7 @@ use yii\web\View;
 /** @var Lead $lead */
 /** @var View $this */
 
-if (($count = LeadSearchByIp::count($lead->request_ip)) > 1) {
+if (($count = LeadSearchByIp::count($lead->request_ip, Yii::$app->user->id)) > 1) {
 
     Modal::begin([
         'id' => 'modal-ip-cnt-ip',
@@ -20,7 +20,7 @@ if (($count = LeadSearchByIp::count($lead->request_ip)) > 1) {
     ]);
     Modal::end();
 
-    echo Html::button('<i class="fa fa-globe"></i> IP: ' . $lead->request_ip . ($count ? ' - ' . $count . ' <i class="fa fa-clone"></i>' : ''), [
+    echo Html::button('<i class="fa fa-globe"></i> IP: ' . $lead->request_ip . ' - ' . $count . ' <i class="fa fa-clone"></i>', [
         'id' => 'button-cnt-ip',
         'data-lead_id' => 'ip-cnt-ip',
         'title' => $lead->request_ip,
