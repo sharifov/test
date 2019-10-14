@@ -4,12 +4,10 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use sales\access\EmployeeProjectAccess;
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "sources".
@@ -21,14 +19,27 @@ use yii\helpers\VarDumper;
  * @property string $last_update
  * @property boolean $default
  * @property boolean $hidden
+ * @property int $rule
  *
  *
  * @property Project $project
  */
-class Sources extends \yii\db\ActiveRecord implements AggregateRoot
+class Sources extends \yii\db\ActiveRecord
 {
 
     use EventTrait;
+
+    public const RULE_PHONE_REQUIRED = 1;
+    public const RULE_EMAIL_REQUIRED = 2;
+    public const RULE_EMAIL_OR_PHONE_REQUIRED = 3;
+    public const RULE_EMAIL_AND_PHONE_REQUIRED = 4;
+
+    public const LIST_RULES = [
+        self::RULE_PHONE_REQUIRED => 'Phone required',
+        self::RULE_EMAIL_REQUIRED => 'Email required',
+        self::RULE_EMAIL_OR_PHONE_REQUIRED => 'Email or Phone required',
+        self::RULE_EMAIL_AND_PHONE_REQUIRED => 'Email and Phone required',
+    ];
 
     /**
      * {@inheritdoc}
@@ -55,6 +66,11 @@ class Sources extends \yii\db\ActiveRecord implements AggregateRoot
 //            [['phone_number'], PhoneInputValidator::class],
 
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
+
+            ['rule', 'required'],
+            ['rule', 'integer'],
+            ['rule', 'filter', 'filter' => 'intval'],
+            ['rule', 'in', 'range' => array_keys(self::LIST_RULES)],
         ];
     }
 
@@ -72,6 +88,7 @@ class Sources extends \yii\db\ActiveRecord implements AggregateRoot
             'phone_number' => 'Phone Number',
             'default' => 'Default',
             'hidden' => 'Hidden',
+            'rule' => 'Rule',
         ];
     }
 

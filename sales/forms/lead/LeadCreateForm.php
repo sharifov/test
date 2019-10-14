@@ -4,16 +4,13 @@ namespace sales\forms\lead;
 
 use common\models\Department;
 use common\models\Lead;
-use common\models\Project;
 use common\models\Sources;
-use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\forms\CompositeForm;
 use sales\helpers\lead\LeadHelper;
 use sales\access\ListsAccess;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
-use yii\helpers\VarDumper;
 
 /**
  * @property string $cabin
@@ -30,7 +27,6 @@ use yii\helpers\VarDumper;
  * @property string $caseGid
  * @property int $depId
  * @property boolean $delayedCharge
- * @property int $jivoChatId
  * @property int|null $userId
  * @property ClientCreateForm $client
  * @property EmailCreateForm[] $emails
@@ -55,9 +51,9 @@ class LeadCreateForm extends CompositeForm
     public $depId;
     public $delayedCharge = 0;
 
-    public $jivoChatId;
-
     private $userId;
+
+
 
     /**
      * LeadCreateForm constructor.
@@ -89,12 +85,6 @@ class LeadCreateForm extends CompositeForm
         }, self::createCountMultiField($countSegments));
 
         $this->preferences = new PreferencesCreateForm();
-
-        $this->jivoChatId = \Yii::$app->params['settings']['jivo_chat_id'] ?? null;
-
-        if (!$this->jivoChatId) {
-            \Yii::error('Jivo chat Id not found');
-        }
 
         $this->userId = $userId;
 
@@ -142,7 +132,11 @@ class LeadCreateForm extends CompositeForm
                 } else {
                     $this->addError('sourceId', 'Project not found');
                 }
-                $this->validateJivoChat();
+                if ($source = Sources::findOne($this->sourceId)) {
+                    $this->validateRequiredRules($source->rule);
+                } else {
+                    $this->addError('sourceId', 'Not found Source rules');
+                }
             }],
 
             ['notesForExperts', 'string'],
@@ -193,9 +187,68 @@ class LeadCreateForm extends CompositeForm
         ];
     }
 
-    public function validateJivoChat(): void
+    public function validateRequiredRules($ruleId): void
     {
-        if ((int)$this->sourceId !== $this->jivoChatId) {
+        switch ($ruleId) {
+            case Sources::RULE_EMAIL_REQUIRED:
+                $this->sourceRulesEmailRequired();
+                break;
+            case Sources::RULE_EMAIL_OR_PHONE_REQUIRED:
+                $this->sourceRulesEmailOrPhoneRequired();
+                break;
+            case Sources::RULE_EMAIL_AND_PHONE_REQUIRED:
+                $this->sourceRulesEmailAndPhoneRequired();
+                break;
+            case Sources::RULE_PHONE_REQUIRED:
+            default:
+                $this->sourceRulesPhoneRequired();
+        }
+    }
+
+    private function sourceRulesPhoneRequired(): void
+    {
+        if (count($this->phones) < 1) {
+            $this->addError('sourceId', 'Phone cannot be blank.');
+            return;
+        }
+        foreach ($this->phones as $phone) {
+            $phone->required = true;
+        }
+    }
+
+    private function sourceRulesEmailRequired(): void
+    {
+        if (count($this->emails) < 1) {
+            $this->addError('sourceId', 'Email cannot be blank.');
+            return;
+        }
+        foreach ($this->emails as $email) {
+            $email->required = true;
+        }
+    }
+
+    private function sourceRulesEmailAndPhoneRequired(): void
+    {
+        if (count($this->emails) < 1) {
+            $this->addError('sourceId', 'Email cannot be blank.');
+            return;
+        }
+        if (count($this->phones) < 1) {
+            $this->addError('sourceId', 'Phone cannot be blank.');
+            return;
+        }
+        foreach ($this->emails as $email) {
+            $email->required = true;
+        }
+        foreach ($this->phones as $phone) {
+            $phone->required = true;
+        }
+    }
+
+    private function sourceRulesEmailOrPhoneRequired(): void
+    {
+        if (count($this->emails) < 1 && count($this->phones) < 1) {
+            $this->addError('sourceId', 'Email or Phone cannot be blank.');
             return;
         }
 
@@ -215,22 +268,21 @@ class LeadCreateForm extends CompositeForm
 
         if (!$oneEmailIsNotEmpty && !$onePhoneIsNotEmpty) {
             foreach ($this->emails as $email) {
-                $email->emailIsRequired = true;
+                $email->required = true;
                 $email->message = 'Email or Phone cannot be blank.';
             }
             foreach ($this->phones as $phone) {
-                $phone->phoneIsRequired = true;
+                $phone->required = true;
                 $phone->message = 'Phone or Email cannot be blank.';
             }
         } else {
             foreach ($this->emails as $email) {
-                $email->emailIsRequired = false;
+                $email->required = false;
             }
             foreach ($this->phones as $phone) {
-                $phone->phoneIsRequired = false;
+                $phone->required = false;
             }
         }
-
     }
 
     /**
@@ -290,7 +342,7 @@ class LeadCreateForm extends CompositeForm
                 }
             }
         }
-        if (!$errors && count($this->phones) > 1  &&  isset($this->phones[0]->phone) && !$this->phones[0]->phone) {
+        if (!$errors && count($this->phones) > 1 && isset($this->phones[0]->phone) && !$this->phones[0]->phone) {
             if (!$this->getErrors('phones.0.phone')) {
                 $this->addError('phones.0.phone', 'Phone cannot be blank.');
             }
@@ -308,7 +360,7 @@ class LeadCreateForm extends CompositeForm
                 }
             }
         }
-        if (!$errors && count($this->emails) > 1  &&  isset($this->emails[0]->email) && !$this->emails[0]->email) {
+        if (!$errors && count($this->emails) > 1 && isset($this->emails[0]->email) && !$this->emails[0]->email) {
             if (!$this->getErrors('emails.0.email')) {
                 $this->addError('emails.0.email', 'Email cannot be blank.');
             }
@@ -320,7 +372,7 @@ class LeadCreateForm extends CompositeForm
      */
     public function listSources(): array
     {
-        return  (new ListsAccess($this->userId))->getSources();
+        return (new ListsAccess($this->userId))->getSources();
     }
 
     /**

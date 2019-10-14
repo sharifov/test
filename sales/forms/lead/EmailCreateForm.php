@@ -8,7 +8,7 @@ use yii\base\Model;
  * Class EmailCreateForm
  * @property string $email
  * @property string $help - only for View for multiInput Widget
- * @property boolean $emailIsRequired
+ * @property boolean $required
  * @property string $message
  */
 class EmailCreateForm extends Model
@@ -17,7 +17,7 @@ class EmailCreateForm extends Model
     public $email;
     public $help;
 
-    public $emailIsRequired = false;
+    public $required = false;
     public $message = 'Email cannot be blank.';
 
     /**
@@ -26,18 +26,18 @@ class EmailCreateForm extends Model
     public function rules(): array
     {
         return [
-            ['email', 'validateEmailRequired', 'skipOnEmpty' => false],
+            ['email', 'validateRequired', 'skipOnEmpty' => false],
             ['email', 'string', 'max' => 100],
             ['email', 'email'],
-            ['email', 'filter', 'filter' => function($value) {
+            ['email', 'filter', 'filter' => static function($value) {
                 return mb_strtolower(trim($value));
             }]
         ];
     }
 
-    public function validateEmailRequired($attribute, $params): void
+    public function validateRequired($attribute, $params): void
     {
-        if ($this->emailIsRequired && !$this->email) {
+        if ($this->required && !$this->email) {
             $this->addError($attribute, $this->message);
         }
     }

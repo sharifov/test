@@ -54,6 +54,7 @@ use Yii;
 use yii\base\Event;
 use yii\caching\DbDependency;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -119,6 +120,11 @@ class TestController extends FController
 
     public function actionTest()
     {
+
+        $q =  (new Query)->select(['client_id', 'status'])->from(Lead::tableName())
+            ->andWhere(['NOT IN', 'status', [Lead::STATUS_TRASH, Lead::STATUS_SOLD, Lead::STATUS_REJECT]])
+            ->createCommand()->getRawSql();
+        VarDumper::dump($q);
 
         return $this->render('blank');
 
