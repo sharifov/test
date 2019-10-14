@@ -12,7 +12,7 @@ class m191014_121803_add_column_status_tbl_client_phone extends Migration
      */
     public function safeUp()
     {
-		$this->addColumn('{{%client_phone}}', 'status', $this->tinyInteger(2)->defaultValue(null));
+		$this->addColumn('{{%client_phone}}', 'type', $this->tinyInteger(2)->defaultValue(null));
 
 		Yii::$app->db->getSchema()->refreshTableSchema('{{%client_phone}}');
 
@@ -26,7 +26,7 @@ class m191014_121803_add_column_status_tbl_client_phone extends Migration
      */
     public function safeDown()
     {
-		$this->dropColumn('{{%client_phone}}', 'status');
+		$this->dropColumn('{{%client_phone}}', 'type');
 
 		Yii::$app->db->getSchema()->refreshTableSchema('{{%case_sale}}');
 

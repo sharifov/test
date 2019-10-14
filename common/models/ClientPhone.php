@@ -9,6 +9,7 @@ use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 use yii\queue\Queue;
 use common\components\CheckPhoneNumberJob;
@@ -25,6 +26,7 @@ use common\components\CheckPhoneNumberJob;
  * @property string $created
  * @property string $updated
  * @property string $comments
+ * @property string $type
  *
  * @property Client $client
  */
@@ -33,10 +35,16 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 
     use EventTrait;
 
-    public const PHONE_STATUS = [
+    public const PHONE_TYPE = [
     	1 => 'Valid',
 		2 => 'Favorite',
 		9 => 'Invalid'
+	];
+
+    public const PHONE_TYPE_ICONS = [
+    	1 => '<i class="fa fa-check green"></i> ',
+		2 => '<i class="fa fa-star yellow"></i> ',
+		9 => '<i class="fa fa-close red"></i> '
 	];
 
     // old phone value. need for afterSave() method
@@ -50,18 +58,31 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
         return 'client_phone';
     }
 
-    /**
-     * @param string $phone
-     * @param int $clientId
-     * @return ClientPhone
-     */
-    public static function create(string $phone, int $clientId): self
+	/**
+	 * @param string $phone
+	 * @param int $clientId
+	 * @param int|null $phoneType
+	 * @return ClientPhone
+	 */
+    public static function create(string $phone, int $clientId, int $phoneType = null): self
     {
         $clientPhone = new static();
         $clientPhone->phone = $phone;
         $clientPhone->client_id = $clientId;
+        $clientPhone->type = $phoneType;
         return $clientPhone;
     }
+
+	/**
+	 * @param string $phone
+	 * @param int $clientId
+	 * @param int|null $phoneType
+	 */
+    public function edit(string $phone, int $phoneType = null): void
+	{
+		$this->phone = $phone;
+		$this->type = $phoneType;
+	}
 
     /**
      * {@inheritdoc}
@@ -70,7 +91,7 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['phone'], 'required'],
-            [['client_id', 'is_sms'], 'integer'],
+            [['client_id', 'is_sms', 'type'], 'integer'],
             [['created', 'updated', 'comments', 'validate_dt'], 'safe'],
 
             [['phone'], 'string', 'max' => 20],
@@ -94,6 +115,7 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
             'validate_dt' => 'Validated at',
             'created' => 'Created',
             'updated' => 'Updated',
+			'type' => 'Phone Type'
         ];
     }
 
@@ -170,4 +192,21 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
         }
         parent::afterSave($insert, $changedAttributes);
     }
+
+	/**
+	 * @return int
+	 */
+	public function countUsersSamePhone(): int
+	{
+		$subQuery = (new Query())->select(['client_id'])->distinct()
+			->from(ClientPhone::tableName())
+			->where(['phone' => $this->phone]);
+
+		$query = (new Query())->select(['id'])->distinct()
+			->from(Client::tableName())
+			->where(['NOT IN', 'id', $this->client_id])
+			->andWhere(['IN', 'id', $subQuery]);
+
+		return (int)$query->count();
+	}
 }

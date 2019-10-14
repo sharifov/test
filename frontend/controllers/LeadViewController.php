@@ -2,14 +2,22 @@
 
 namespace frontend\controllers;
 
+use common\models\ClientEmail;
+use common\models\ClientPhone;
+use common\models\search\ClientSearch;
+use sales\forms\lead\ClientCreateForm;
+use sales\forms\lead\EmailCreateForm;
+use sales\forms\lead\PhoneCreateForm;
+use sales\services\client\ClientManageService;
 use common\models\Quote;
 use sales\forms\lead\CloneQuoteByUidForm;
 use sales\services\lead\LeadCloneQuoteService;
 use Yii;
 use common\models\Lead;
 use common\models\search\lead\LeadSearchByIp;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -18,23 +26,40 @@ use yii\widgets\ActiveForm;
  * Class LeadViewController
  *
  * @property  LeadCloneQuoteService $leadCloneQuoteService
+ * @property  ClientManageService $clientManageService
  */
 class LeadViewController extends FController
 {
 
-    private $leadCloneQuoteService;
+	/**
+	 * @var ClientManageService
+	 */
+	private $clientManageService;
 
-    /**
-     * @param $id
-     * @param $module
-     * @param LeadCloneQuoteService $leadCloneQuoteService
-     * @param array $config
-     */
-    public function __construct($id, $module, LeadCloneQuoteService $leadCloneQuoteService, $config = [])
-    {
-        parent::__construct($id, $module, $config);
-        $this->leadCloneQuoteService = $leadCloneQuoteService;
-    }
+	/**
+	 * @var LeadCloneQuoteService
+	 */
+	private $leadCloneQuoteService;
+
+	/**
+	 * LeadViewController constructor.
+	 * @param $id
+	 * @param $module
+	 * @param ClientManageService $clientManageService
+	 * @param LeadCloneQuoteService $leadCloneQuoteService
+	 * @param array $config
+	 */
+	public function __construct(
+		$id,
+		$module,
+		ClientManageService $clientManageService,
+		LeadCloneQuoteService $leadCloneQuoteService,
+		$config = [])
+	{
+		$this->clientManageService = $clientManageService;
+		$this->leadCloneQuoteService = $leadCloneQuoteService;
+		parent::__construct($id, $module, $config);
+	}
 
     /**
      * @return string
@@ -57,6 +82,529 @@ class LeadViewController extends FController
             'lead' => $lead
         ]);
     }
+
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 */
+    public function actionAjaxGetUsersSamePhoneInfo(): string
+	{
+		if (Yii::$app->request->isAjax && Yii::$app->request->isPost)
+		{
+			try {
+				$searchModel = new ClientSearch();
+
+				$phone = Yii::$app->request->post('phone');
+				$clientId = Yii::$app->request->post('clientId');
+
+				$params['ClientSearch']['client_phone'] = $phone;
+				$params['ClientSearch']['not_in_client_id'] = $clientId;
+
+				$dataProvider = $searchModel->searchFromLead($params);
+
+				return $this->renderAjax('_client_same_users_by_phone', [
+					'dataProvider' => $dataProvider,
+					'phone' => $phone,
+					'clientId' => $clientId
+				]);
+
+			}catch (\Exception $e) {
+				Yii::error($e->getMessage() . '; On Line: ' . $e->getLine() . '; In File: ' . $e->getFile());
+				throw new BadRequestHttpException();
+			}
+		}
+
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 */
+	public function actionAjaxAddClientPhoneModalContent():string
+	{
+		try {
+			$gid = (string)Yii::$app->request->get('gid');
+
+			$lead = $this->findLeadByGid($gid);
+
+			$form = new PhoneCreateForm();
+
+			return $this->renderAjax('partial/_client_add_phone_modal_content', [
+				'addPhone' => $form,
+				'lead' => $lead
+			]);
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientPhoneModalContent:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return array
+	 * @throws BadRequestHttpException
+	 * @throws NotFoundHttpException
+	 */
+	public function actionAjaxAddClientPhoneValidation(): array
+	{
+		$gid = (string)Yii::$app->request->get('gid');
+		$lead = $this->findLeadByGid($gid);
+
+		try {
+			$form = new PhoneCreateForm();
+
+			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+
+				$form->client_id = $lead->client_id;
+
+				Yii::$app->response->format = Response::FORMAT_JSON;
+
+				return ActiveForm::validate($form);
+			}
+
+		}catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientPhoneValidation:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @throws HttpException
+	 */
+	public function actionAjaxAddClientPhone()
+	{
+		$user = Yii::$app->user->identity;
+		if (!$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+			throw new HttpException(403, 'Access Denied');
+		}
+
+		try {
+			$gid = (string)Yii::$app->request->get('gid');
+			$lead = $this->findLeadByGid($gid);
+
+			$form = new PhoneCreateForm();
+			$form->client_id = $lead->client_id;
+
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+				$this->clientManageService->addPhone($lead->client, $form);
+
+				$response['error'] = false;
+				$response['message'] = 'New phone was successfully added: ' . $form->phone;
+				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_phone', [
+					'clientPhones' => $lead->client->clientPhones,
+					'lead' => $lead
+				]);
+			} else {
+				$response['error'] = true;
+				$response['message'] = $form->getErrors();
+			}
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return $response;
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientPhone:Throwable');
+		}
+
+		throw new NotFoundHttpException();
+	}
+
+	/**
+	 * @throws BadRequestHttpException
+	 */
+	public function actionAjaxEditClientPhoneModalContent()
+	{
+		if (Yii::$app->request->isAjax) {
+			try {
+				$id = (int)Yii::$app->request->get('pid');
+				$gid = (string)Yii::$app->request->get('gid');
+				$lead = $this->findLeadByGid($gid);
+				if ($phone = ClientPhone::findOne($id)) {
+
+					$phoneForm = new PhoneCreateForm();
+					$phoneForm->id = $phone->id;
+					$phoneForm->phone = $phone->phone;
+					$phoneForm->type = $phone->type;
+					$phoneForm->client_id = $phone->client_id;
+
+					return $this->renderAjax('partial/_client_edit_phone_modal_content', [
+						'editPhone' => $phoneForm,
+						'lead' => $lead
+					]);
+				}
+
+				throw new BadRequestHttpException();
+			}catch (\Throwable $e) {
+				Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientPhone:Throwable');
+			}
+		}
+
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return array
+	 * @throws BadRequestHttpException
+	 * @throws NotFoundHttpException
+	 */
+	public function actionAjaxEditClientPhoneValidation(): array
+	{
+		$gid = (string)Yii::$app->request->get('gid');
+		$lead = $this->findLeadByGid($gid);
+
+		try {
+			$form = new PhoneCreateForm();
+			$form->scenario = 'update';
+
+			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+
+				$form->client_id = $lead->client_id;
+
+				Yii::$app->response->format = Response::FORMAT_JSON;
+
+				return ActiveForm::validate($form);
+			}
+
+		}catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientPhoneValidation:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return string|Response
+	 * @throws NotFoundHttpException
+	 * @throws HttpException
+	 */
+	public function actionAjaxEditClientPhone()
+	{
+		$user = Yii::$app->user->identity;
+		try {
+			$gid = (string)Yii::$app->request->get('gid');
+			$lead = $this->findLeadByGid($gid);
+
+			if (!$lead->isOwner(Yii::$app->user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+				throw new HttpException(403, 'Access Denied');
+			}
+
+
+			$form = new PhoneCreateForm();
+			$form->scenario = 'update';
+
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+				if ($lead->isOwner(Yii::$app->user->id) && $user->isSimpleAgent() && $phone = ClientPhone::findOne($form->id)) {
+					$form->phone = $phone->phone;
+				}
+
+				$this->clientManageService->updatePhone($form);
+
+				$response['error'] = false;
+				$response['message'] = 'Phone was successfully updated: ' . $form->phone;
+				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_phone', [
+					'clientPhones' => $lead->client->clientPhones,
+					'lead' => $lead
+				]);
+			} else {
+				$response['error'] = true;
+				$response['message'] = $form->getErrors();
+			}
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return $response;
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientPhone:Throwable');
+		}
+
+		throw new NotFoundHttpException();
+	}
+
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 */
+	public function actionAjaxAddClientEmailModalContent():string
+	{
+		try {
+			$gid = (string)Yii::$app->request->get('gid');
+
+			$lead = $this->findLeadByGid($gid);
+
+			$form = new EmailCreateForm();
+
+			return $this->renderAjax('partial/_client_add_email_modal_content', [
+				'addEmail' => $form,
+				'lead' => $lead
+			]);
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientEmailModalContent:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return array
+	 * @throws BadRequestHttpException
+	 * @throws NotFoundHttpException
+	 */
+	public function actionAjaxAddClientEmailValidation(): array
+	{
+		$gid = (string)Yii::$app->request->get('gid');
+		$lead = $this->findLeadByGid($gid);
+
+		try {
+			$form = new EmailCreateForm();
+			$form->required = true;
+
+			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+
+				$form->client_id = $lead->client_id;
+
+				Yii::$app->response->format = Response::FORMAT_JSON;
+
+				return ActiveForm::validate($form);
+			}
+
+		}catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientEmailValidation:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @throws HttpException
+	 */
+	public function actionAjaxAddClientEmail()
+	{
+		$user = Yii::$app->user->identity;
+		if (!$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+			throw new HttpException(403, 'Access Denied');
+		}
+
+		try {
+			$gid = (string)Yii::$app->request->get('gid');
+			$lead = $this->findLeadByGid($gid);
+
+			$form = new EmailCreateForm();
+			$form->client_id = $lead->client_id;
+
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+				$this->clientManageService->addEmails($lead->client, [$form]);
+
+				$response['error'] = false;
+				$response['message'] = 'New email was successfully added: ' . $form->email;
+				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_email', [
+					'clientEmails' => $lead->client->clientEmails,
+					'lead' => $lead
+				]);
+			} else {
+				$response['error'] = true;
+				$response['message'] = $form->getErrors();
+			}
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return $response;
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientEmail:Throwable');
+		}
+
+		throw new NotFoundHttpException();
+	}
+
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 */
+	public function actionAjaxEditClientEmailModalContent()
+	{
+		if (Yii::$app->request->isAjax) {
+			try {
+				$id = (int)Yii::$app->request->get('pid');
+				$gid = (string)Yii::$app->request->get('gid');
+				$lead = $this->findLeadByGid($gid);
+				if ($email = ClientEmail::findOne($id)) {
+
+					$emailForm = new EmailCreateForm();
+					$emailForm->id = $email->id;
+					$emailForm->email = $email->email;
+					$emailForm->type = $email->type;
+					$emailForm->client_id = $email->client_id;
+
+					return $this->renderAjax('partial/_client_edit_email_modal_content', [
+						'editEmail' => $emailForm,
+						'lead' => $lead
+					]);
+				}
+
+				throw new BadRequestHttpException();
+			}catch (\Throwable $e) {
+				Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientEmailModalContent:Throwable');
+			}
+		}
+
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return array
+	 * @throws BadRequestHttpException
+	 * @throws NotFoundHttpException
+	 */
+	public function actionAjaxEditClientEmailValidation(): array
+	{
+		$gid = (string)Yii::$app->request->get('gid');
+		$lead = $this->findLeadByGid($gid);
+
+		try {
+			$form = new EmailCreateForm();
+			$form->scenario = 'update';
+
+			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+
+				$form->client_id = $lead->client_id;
+
+				Yii::$app->response->format = Response::FORMAT_JSON;
+
+				return ActiveForm::validate($form);
+			}
+
+		}catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientEmailValidation:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return string|Response
+	 * @throws NotFoundHttpException
+	 * @throws HttpException
+	 */
+	public function actionAjaxEditClientEmail()
+	{
+		$user = Yii::$app->user->identity;
+		try {
+			$gid = (string)Yii::$app->request->get('gid');
+			$lead = $this->findLeadByGid($gid);
+
+			if (!$lead->isOwner(Yii::$app->user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+				throw new HttpException(403, 'Access Denied');
+			}
+
+			$form = new EmailCreateForm();
+			$form->scenario = 'update';
+
+
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+				if ($lead->isOwner(Yii::$app->user->id) && $user->isSimpleAgent() && $email = ClientEmail::findOne($form->id)) {
+					$form->email = $email->email;
+				}
+
+				$this->clientManageService->updateEmail($form);
+
+				$response['error'] = false;
+				$response['message'] = 'Email was successfully updated: ' . $form->email;
+				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_email', [
+					'clientEmails' => $lead->client->clientEmails,
+					'lead' => $lead
+				]);
+			} else {
+				$response['error'] = true;
+				$response['message'] = $form->getErrors();
+			}
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return $response;
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientEmail:Throwable');
+		}
+
+		throw new NotFoundHttpException();
+	}
+
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 */
+	public function actionAjaxEditClientNameModalContent()
+	{
+		if (Yii::$app->request->isAjax) {
+			try {
+				$gid = (string)Yii::$app->request->get('gid');
+				$lead = $this->findLeadByGid($gid);
+
+				$form = new ClientCreateForm();
+				$form->id = $lead->client->id;
+				$form->firstName = $lead->client->first_name;
+				$form->lastName = $lead->client->last_name;
+				$form->middleName = $lead->client->middle_name;
+
+				return $this->renderAjax('partial/_client_edit_name_modal_content', [
+					'editName' => $form,
+					'lead' => $lead
+				]);
+			}catch (\Throwable $e) {
+				Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientNameModalContent:Throwable');
+			}
+		}
+
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return array
+	 * @throws BadRequestHttpException
+	 * @throws NotFoundHttpException
+	 */
+	public function actionAjaxEditClientNameValidation(): array
+	{
+
+		try {
+			$form = new ClientCreateForm();
+
+			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+
+				Yii::$app->response->format = Response::FORMAT_JSON;
+
+				return ActiveForm::validate($form);
+			}
+		}catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; in File: ' . $e->getFile() . '; on Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientNameValidation:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return string|Response
+	 * @throws NotFoundHttpException
+	 * @throws HttpException
+	 */
+	public function actionAjaxEditClientName()
+	{
+		try {
+			$form = new ClientCreateForm();
+
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+				$client = $this->clientManageService->updateClient($form);
+
+				$response['error'] = false;
+				$response['message'] = 'User name was successfully updated';
+				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_name', [
+					'client' => $client
+				]);
+			} else {
+				$response['error'] = true;
+				$response['message'] = $form->getErrors();
+			}
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return $response;
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientName:Throwable');
+		}
+
+		throw new NotFoundHttpException();
+	}
 
     /**
      * @return array

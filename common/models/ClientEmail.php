@@ -15,6 +15,7 @@ use Yii;
  * @property string $created
  * @property string $updated
  * @property string $comments
+ * @property int $type
  *
  * @property Client $client
  */
@@ -23,10 +24,16 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 
     use EventTrait;
 
-	public const EMAIL_STATUS = [
+	public const EMAIL_TYPE = [
 		1 => 'Valid',
 		2 => 'Favorite',
 		9 => 'Invalid'
+	];
+
+	public const EMAIL_TYPE_ICONS = [
+		1 => '<i class="fa fa-check green"></i> ',
+		2 => '<i class="fa fa-star yellow"></i> ',
+		9 => '<i class="fa fa-close red"></i> '
 	];
 
     /**
@@ -37,18 +44,30 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
         return 'client_email';
     }
 
-    /**
-     * @param string $email
-     * @param int $clientId
-     * @return ClientEmail
-     */
-    public static function create(string $email, int $clientId): self
+	/**
+	 * @param string $email
+	 * @param int $clientId
+	 * @param int $emailType
+	 * @return static
+	 */
+    public static function create(string $email, int $clientId, int $emailType = null): self
     {
         $clientEmail = new static();
         $clientEmail->email = $email;
         $clientEmail->client_id = $clientId;
+        $clientEmail->type = $emailType;
         return $clientEmail;
     }
+
+	/**
+	 * @param string $email
+	 * @param int|null $emailType
+	 */
+	public function edit(string $email, int $emailType = null): void
+	{
+		$this->email = $email;
+		$this->type = $emailType;
+	}
 
     /**
      * {@inheritdoc}
@@ -58,7 +77,7 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
         return [
             [['email'], 'required'],
             [['email'], 'email'],
-            [['client_id'], 'integer'],
+            [['client_id', 'type'], 'integer'],
             [['created', 'updated', 'comments'], 'safe'],
             [['email'], 'string', 'max' => 100],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
@@ -77,6 +96,7 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
             'email' => 'Email',
             'created' => 'Created',
             'updated' => 'Updated',
+			'type' => 'Email Type'
         ];
     }
 
