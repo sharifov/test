@@ -235,7 +235,7 @@ $userId = Yii::$app->user->id;
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_PROCESSING], null, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[lf_owner_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_PROCESSING,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
@@ -248,7 +248,7 @@ $userId = Yii::$app->user->id;
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_ON_HOLD], \common\models\Lead::STATUS_PROCESSING, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[lf_owner_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_ON_HOLD,
                                 'LeadFlowSearch[lf_from_status_id]' => \common\models\Lead::STATUS_PROCESSING,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
@@ -262,7 +262,7 @@ $userId = Yii::$app->user->id;
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_BOOKED], null, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[lf_owner_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_BOOKED,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
@@ -275,7 +275,7 @@ $userId = Yii::$app->user->id;
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_SOLD], null, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[lf_owner_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_SOLD,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
@@ -288,7 +288,7 @@ $userId = Yii::$app->user->id;
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_FOLLOW_UP], \common\models\Lead::STATUS_PROCESSING, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[lf_owner_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_FOLLOW_UP,
                                 'LeadFlowSearch[lf_from_status_id]' => \common\models\Lead::STATUS_PROCESSING,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
@@ -302,7 +302,7 @@ $userId = Yii::$app->user->id;
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_TRASH], \common\models\Lead::STATUS_PROCESSING, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[lf_owner_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_TRASH,
                                 'LeadFlowSearch[lf_from_status_id]' => \common\models\Lead::STATUS_PROCESSING,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
