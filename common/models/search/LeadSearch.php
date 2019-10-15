@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Airport;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -14,11 +15,11 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Lead;
 use yii\data\SqlDataProvider;
+use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
 use common\models\Quote;
 use common\models\LeadFlightSegment;
-use common\models\ProjectEmployeeAccess;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
@@ -26,7 +27,8 @@ use yii\helpers\VarDumper;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
- * @param LeadBadgesRepository $leadBadgesRepository
+ *
+ * @property $remainingDays
  */
 class LeadSearch extends Lead
 {
@@ -71,6 +73,8 @@ class LeadSearch extends Lead
 
     public $last_ticket_date;
 
+    public $remainingDays;
+
     private $leadBadgesRepository;
 
     public function __construct($config = [])
@@ -103,6 +107,8 @@ class LeadSearch extends Lead
 
             ['last_ticket_date', 'safe'],
             [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+
+            ['remainingDays', 'safe']
 
         ];
     }
@@ -1022,11 +1028,46 @@ class LeadSearch extends Lead
 
         $leadTable = Lead::tableName();
 
+            $departureQuery =  (new Query())
+                ->select(['lfs.departure'])
+                ->from(['lfs' => LeadFlightSegment::tableName()])
+                ->where('lfs.lead_id  = ' . $leadTable . '.id')
+                ->orderBy(['lfs.departure' => SORT_ASC])
+                ->limit(1)
+                ->createCommand()->getSql();
+            $nowQuery = (new Query())
+                ->select(new Expression("if (a.dst is not null, if (cast(a.dst as signed) >= 0, concat('+', if (length(a.dst) < 2, concat(0, a.dst), a.dst),':00'), concat(a.dst, ':00')), '+00:00')"))
+                ->from(['a' => Airport::tableName()])
+                ->andWhere('a.iata = (' .
+                    (new Query())
+                    ->select(['lfs.origin'])
+                    ->from(['lfs' => LeadFlightSegment::tableName()])
+                    ->andWhere('lfs.lead_id = ' . $leadTable . '.id')
+                    ->orderBy(['lfs.departure' => SORT_ASC])
+                    ->limit(1)
+                    ->createCommand()->getSql()
+                    . ')'
+                )
+                ->createCommand()->getSql();
+
+        $query->addSelect([
+            'remainingDays' =>
+                new Expression("datediff((" . $departureQuery . "), (date(convert_tz(NOW(), '+00:00', (" . $nowQuery . ")))))")
+        ]);
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['l_last_action_dt' => SORT_DESC],'attributes' => ['id','updated','created','status','l_last_action_dt']],
+            'sort'=> [
+                'defaultOrder' => ['l_last_action_dt' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'created',
+                    'l_last_action_dt',
+                    'remainingDays'
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -1095,10 +1136,23 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+        if ($this->remainingDays) {
+            $query->andHaving(['remainingDays' => $this->remainingDays]);
+        }
 
-        /*  $sqlRaw = $query->createCommand()->getRawSql();
-         VarDumper::dump($sqlRaw, 10, true); exit; */
+        $query->with([
+            'client',
+            'client.clientEmails',
+            'client.clientPhones',
+            'employee',
+            'leadFlightSegments' => static function(ActiveQuery $query) {
+                return $query->orderBy(['id' => SORT_ASC]);
+            },
+//            'leadFlightSegments.airportByOrigin'
+        ]);
+
+//          $sqlRaw = $query->createCommand()->getRawSql();
+//         VarDumper::dump($sqlRaw, 10, true); exit;
 
         return $dataProvider;
     }

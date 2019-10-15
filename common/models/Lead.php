@@ -241,6 +241,8 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     public $enableActiveRecordEvents = true;
 
+    public $remainingDays;
+
     /**
      * {@inheritdoc}
      */

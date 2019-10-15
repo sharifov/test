@@ -121,11 +121,11 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $q =  (new Query)->select(['client_id', 'status'])->from(Lead::tableName())
-            ->andWhere(['NOT IN', 'status', [Lead::STATUS_TRASH, Lead::STATUS_SOLD, Lead::STATUS_REJECT]])
-            ->createCommand()->getRawSql();
-        VarDumper::dump($q);
+       $lead = Lead::find()->andWhere(['id' => 271706])->joinWith('leadFlightSegments')->createCommand()->getRawSql();
 
+       VarDumper::dump($lead);
+
+        die;
         return $this->render('blank');
 
     }

@@ -1,13 +1,13 @@
 <?php
 
+use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
-use sales\access\EmployeeProjectAccess;
 use sales\access\ListsAccess;
+use sales\helpers\lead\RemainingDayCalculator;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use common\models\Lead;
-use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
@@ -20,6 +20,7 @@ $this->title = 'Follow Up Queue';
 $lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 
 <style>
@@ -44,8 +45,8 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => function (\common\models\Lead $model) {
-                return $model->id;
+            'value' => static function (Lead $lead) {
+                return $lead->id;
             },
             'options' => [
                 'style' => 'width:80px'
@@ -54,17 +55,27 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'created',
             'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
-                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
+            'value' => static function (Lead $lead) {
+                return Yii::$app->formatter->asRelativeTime(strtotime($lead->created)); //Lead::getPendingAfterCreate($model->created);
             },
             'format' => 'raw',
             'filter' => false
         ],
-
+        [
+            'attribute' => 'remainingDays',
+            'label' => 'Remaining Days',
+//            'value' => static function (Lead $lead) {
+//                foreach ($lead->leadFlightSegments as $segment) {
+//                    return RemainingDayCalculator::calculate($segment->airportByOrigin, $segment->departure);
+//                }
+//            },
+            'format' => 'raw',
+//            'filter' => false
+        ],
         [
             'attribute' => 'created',
-            'value' => function (\common\models\Lead $model) {
-                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+            'value' => static function (Lead $lead) {
+                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($lead->created));
             },
             'format' => 'raw',
             'filter' => DatePicker::widget([
@@ -85,10 +96,10 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Client',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (Lead $lead) {
 
-                if ($model->client) {
-                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+                if ($lead->client) {
+                    $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
                     if ($clientName === 'Client Name') {
                         $clientName = '- - - ';
                     } else {
@@ -96,8 +107,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
 
 
-                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                    $str = $lead->client && $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str .= $lead->client && $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
 
 
                     $clientName.= '<br>'. $str;
@@ -106,7 +117,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                return $clientName.'<br/>'.$model->getClientTime2();
+                return $clientName.'<br/>'.$lead->getClientTime2();
             },
             'options' => [
                 'style' => 'width:160px'
@@ -115,8 +126,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Communication',
-            'value' => function (\common\models\Lead $model) {
-                return $model->getCommunicationInfo();
+            'value' => static function (Lead $lead) {
+                return $lead->getCommunicationInfo();
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -146,14 +157,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'Request Details',
-            'content' => function (\common\models\Lead $model) {
+            'content' => static function (Lead $lead) {
                 $content = '';
-                $content .= $model->getFlightDetails();
-                $pax = '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
+                $content .= $lead->getFlightDetails();
+                $pax = '<span title="adult"><i class="fa fa-male"></i> '. $lead->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $lead->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $lead->infants.'</span>';
 
                 $content .= '<br/>'.$pax.'<br/>';
 
-                $content .= sprintf('<strong>Cabin:</strong> %s', $model->getCabinClassName());
+                $content .= sprintf('<strong>Cabin:</strong> %s', $lead->getCabinClassName());
 
                 return $content;
             },
@@ -161,8 +172,8 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'attribute' => 'Quotes ',
-            'value' => function (\common\models\Lead $model) {
-                $quotes = $model->getQuoteSendInfo();
+            'value' => static function (Lead $lead) {
+                $quotes = $lead->getQuoteSendInfo();
                 return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>', ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
             },
             'format' => 'raw'
@@ -188,9 +199,9 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'l_last_action_dt',
             //'label' => 'Last Update',
-            'value' => function (\common\models\Lead $model) {
-                return $model->l_last_action_dt ? '<b>'.Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)).'</b><br>' .
-                    Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
+            'value' => static function (Lead $lead) {
+                return $lead->l_last_action_dt ? '<b>'.Yii::$app->formatter->asRelativeTime(strtotime($lead->l_last_action_dt)).'</b><br>' .
+                    Yii::$app->formatter->asDatetime(strtotime($lead->l_last_action_dt)) : $lead->l_last_action_dt;
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -216,8 +227,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'style' => 'text-align:center;'
             ],
-            'value' => function (\common\models\Lead $model) {
-                return '<span style="cursor:help;" class="label label-warning" title="'.Html::encode($model->getLastReasonFromLeadFlow()).'">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
+            'value' => static function (Lead $lead) {
+                return '<span style="cursor:help;" class="label label-warning" title="'.Html::encode($lead->getLastReasonFromLeadFlow()).'">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
             },
             'format' => 'raw'
         ],
@@ -225,8 +236,8 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Answ.',
             'attribute' => 'l_answered',
-            'value' => function (\common\models\Lead $model) {
-                return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+            'value' => static function (Lead $lead) {
+                return $lead->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
             },
             'contentOptions' => [
                 'class' => 'text-center'
@@ -237,8 +248,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'header' => 'Task Info',
-            'value' => function (\common\models\Lead $model) {
-                return '<small style="font-size: 10px">' . Lead::getTaskInfo2($model->id) . '</small>';
+            'value' => static function (Lead $lead) {
+                return '<small style="font-size: 10px">' . Lead::getTaskInfo2($lead->id) . '</small>';
             },
             'format' => 'html',
             'contentOptions' => [
@@ -258,15 +269,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'class' => 'text-right'
             ],
-            'value' => function (\common\models\Lead $model) {
-                return Lead::getRating2($model->rating);
+            'value' => static function (Lead $lead) {
+                return Lead::getRating2($lead->rating);
             },
             'format' => 'raw'
         ],
         [
             'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
-                return $model->project ? $model->project->name : '-';
+            'value' => static function (Lead $lead) {
+                return $lead->project ? $lead->project->name : '-';
             },
             'filter' => $lists->getProjects(),
         ],
@@ -274,19 +285,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
-                'action' => function ($url, \common\models\Lead $model, $key) {
+                'action' => static function ($url, Lead $lead, $key) {
 
                     $buttons = '';
 
                     $buttons .= Html::a('Take', [
                         'lead/take',
-                        'gid' => $model->gid
+                        'gid' => $lead->gid
                     ], [
                         'class' => 'btn btn-primary btn-xs take-btn',
                         'data-pjax' => 0
                     ]);
 
-                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $model->gid], [
+                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $lead->gid], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
@@ -320,8 +331,8 @@ echo GridView::widget([
         'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Processing</h3>'
     ],*/
 
-    'rowOptions' => function (Lead $model) {
-        if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
+    'rowOptions' => static function (Lead $lead) {
+        if ($lead->isProcessing() && $lead->isOwner(Yii::$app->user->id, false)) {
             return [
                 'class' => 'highlighted'
             ];
