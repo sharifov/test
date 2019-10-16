@@ -46,8 +46,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'al_action',
                 'value' => function(\common\models\ApiLog $model) {
-                    return $model->al_action;
+                    return '<b>'.Html::encode($model->al_action).'</b>';
                 },
+                'format' => 'raw',
                 'filter' => \common\models\ApiLog::getActionFilter()
             ],
 
@@ -63,11 +64,20 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'al_request_data',
-                'format' => 'html',
+                'format' => 'raw',
                 'value' => function(\common\models\ApiLog $model) {
                     $data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_request_data, true));
                     //if($data) $data = end($data);
-                    return $data ? '<pre style="font-size: 10px">'.(\yii\helpers\StringHelper::truncate($data, 200, '...', null, true)).'</pre>' : '-';
+                    $str = \yii\helpers\StringHelper::truncate(Html::encode($data), 1600, '...', null, false);
+                    $str = preg_replace("~CA(\w+)~", '<b style="color: darkred">${0}</b>', $str);
+
+                    $str = str_replace('CallSid', '<b style="color: green">CallSid</b>', $str);
+
+                    $str = str_replace('CallStatus', '<b style="color: #2b3f63">CallStatus</b>', $str);
+
+
+
+                    return $data ? '<small>'.$str.'</small>' : '-';
                 },
             ],
 
@@ -82,23 +92,35 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             //'al_response_data:ntext',
+//            [
+//                'attribute' => 'al_response_data',
+//                'format' => 'html',
+//                'value' => function(\common\models\ApiLog $model) {
+//                    $data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true));
+//                    //if($data) $data = end($data);
+//                    return $data ? '<pre style="font-size: 10px">'.(\yii\helpers\StringHelper::truncate($data, 500, '...', null, true)).'</pre>' : '-';
+//                },
+//            ],
+
             [
                 'attribute' => 'al_response_data',
-                'format' => 'html',
+                'format' => 'raw',
                 'value' => function(\common\models\ApiLog $model) {
-                    $data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true));
+                    return Yii::$app->formatter->asShortSize(mb_strlen($model->al_response_data), 1);
+                    //$data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true));
                     //if($data) $data = end($data);
-                    return $data ? '<pre style="font-size: 10px">'.(\yii\helpers\StringHelper::truncate($data, 500, '...', null, true)).'</pre>' : '-';
+                    //return $data ? '<small>'.\yii\helpers\StringHelper::truncate(Html::encode($data), 500, '...', null, false).'</small>' : '-';
                 },
             ],
+
             //'al_response_dt',
-            [
-                'attribute' => 'al_response_dt',
-                'value' => function (\common\models\ApiLog $model) {
-                    return $model->al_response_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_response_dt), 'php:Y-m-d [H:i:s]') : '-';
-                },
-                'format' => 'raw'
-            ],
+//            [
+//                'attribute' => 'al_response_dt',
+//                'value' => function (\common\models\ApiLog $model) {
+//                    return $model->al_response_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_response_dt), 'php:Y-m-d [H:i:s]') : '-';
+//                },
+//                'format' => 'raw'
+//            ],
 
             [
                 'attribute' => 'al_execution_time',

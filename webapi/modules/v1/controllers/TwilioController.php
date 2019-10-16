@@ -154,7 +154,7 @@ class TwilioController extends ApiBaseNoAuthController
             'post'      => Yii::$app->request->post(),
         ];
 
-        Yii::info(VarDumper::dumpAsString($out), 'info\API:Twilio:RedirectCal');
+        // Yii::info(VarDumper::dumpAsString($out), 'info\API:Twilio:RedirectCal');
 
 
 
@@ -215,7 +215,7 @@ class TwilioController extends ApiBaseNoAuthController
                 //$parentCallSid = $callData['ParentCallSid'] ?? '';
 
             $call = Call::find()->where(['c_call_sid' => $sid])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-            Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:RedirectCall:callData');
+            // Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:RedirectCall:callData');
 
             $responseTwml = new VoiceResponse();
 

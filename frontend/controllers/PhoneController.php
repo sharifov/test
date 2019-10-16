@@ -542,15 +542,22 @@ class PhoneController extends FController
 
 
 
+            $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
+            $data['type'] = $type;
+
             if ($originCall->cParent) {
-
                 $callSid = $originCall->cParent->c_call_sid;
-                $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
-                $data['type'] = $type;
-
                 $result = $communication->redirectCall($callSid, $data, $callbackUrl);
             } else {
-                $result['error'] = 'Not found originCall->cParent';
+
+                $childCall = Call::find()->where(['c_parent_id' => $originCall->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+                if ($childCall) {
+                    $callSid = $childCall->c_call_sid;
+                    $result = $communication->redirectCall($callSid, $data, $callbackUrl);
+                } else {
+                    $result['error'] = 'Not found originCall->cParent, Origin CallSid: ' . $originCall->c_call_sid;
+                }
             }
 
 

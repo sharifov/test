@@ -478,6 +478,8 @@ class CommunicationController extends ApiBaseController
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceClient');
 
+        // $post['callData']['CallSid']
+
         $callSid = $post['callData']['sid'] ?? $post['callData']['CallSid'] ?? null;
 
         if ($callSid) {

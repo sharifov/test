@@ -26,10 +26,10 @@ use yii\helpers\Html;
         $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
         $this->registerMetaTag(['name' => 'msapplication-TileColor', 'content' => '#a9e04b']);
         //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
-        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.ico']);
+        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.phone.ico']);
         $this->head();
-        $host = 'Sales';
-        echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
+        // $host = 'Sales';
+        echo Html::tag('title', Html::encode($this->title));
     ?>
 </head>
 <body>
