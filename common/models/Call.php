@@ -575,27 +575,33 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
         if (!$insert) {
 
-            if ($isChangedStatus && $this->isIn() && ($this->isStatusInProgress() || $this->isEnded())) {
+            if ($isChangedStatus && ($this->isStatusInProgress() || $this->isEnded())) {
 
-                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $this->c_id])->all();
+                $callUserAccessAny = CallUserAccess::find()->where([
+                    'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING,
+                    'cua_call_id' => $this->c_id
+                ])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
                         if (!$callAccess->update()) {
-                            Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:afterSave:CallUserAccess:update');
+                            Yii::error(VarDumper::dumpAsString($callAccess->errors),
+                                'Call:afterSave:CallUserAccess:update');
                         }
                     }
                 }
 
-                if (!$this->c_parent_id) {
-                    $isCallUserAccepted = CallUserAccess::find()->where([
-                        'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
-                        'cua_call_id' => $this->c_id
-                    ])->exists();
+                if ($this->isIn()) {
+                    if (!$this->c_parent_id) {
+                        $isCallUserAccepted = CallUserAccess::find()->where([
+                            'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
+                            'cua_call_id' => $this->c_id
+                        ])->exists();
 
-                    if (!$isCallUserAccepted) {
-                        $this->c_status_id = self::STATUS_NO_ANSWER;
-                        self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+                        if (!$isCallUserAccepted) {
+                            $this->c_status_id = self::STATUS_NO_ANSWER;
+                            self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+                        }
                     }
                 }
 
@@ -781,17 +787,26 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         try {
             if ($call) {
 
+                // \Yii::info('INFO: Call ('.$call->getStatusName().', '.$call->c_call_status.') CallId: ' . $call->c_id. ',  User: ' . $user_id, 'info\Call:applyCallToAgent:callRedirect');
+
                 /*if ($call->c_created_user_id) {
                     return false;
                 }*/
 
-                if (!$call->isStatusQueue()) {
-                    \Yii::warning('Error: Call ('.$call->c_call_status.') not in status QUEUE: ' . $call->c_id. ',  User: ' . $user_id, 'Call:applyCallToAgent:callRedirect');
+                if ($call->isStatusQueue()) {
+
+                } else {
+                    \Yii::warning('Error: Call ('.$call->getStatusName().', '.$call->c_call_status.') not in status QUEUE: ' . $call->c_id. ',  User: ' . $user_id, 'Call:applyCallToAgent:callRedirect');
                     return false;
                 }
 
                 //$call->c_call_status = self::CALL_STATUS_IN_PROGRESS;
-                $call->setStatusDelay();
+//                if ($parentCall = $call->cParent) {
+//                    //$parentCall->setStatusDelay();
+//                    //$parentCall->update();
+//                } else {
+                    $call->setStatusDelay();
+                //}
 
                 if($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
                     $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
@@ -849,6 +864,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     return true;
                 }
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
+            } else {
+                \Yii::warning('Error: Not found Call' . VarDumper::dumpAsString($call), 'Call:applyCallToAgent:callRedirect');
             }
 
         } catch (\Throwable $e) {
