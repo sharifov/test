@@ -52,30 +52,43 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'createdDate',
         ],
         [
+            'label' =>'Duration',
             'attribute' => 'outgoingCallsDuration',
         ],
         [
+            'label' =>'Total',
             'attribute' => 'outgoingCalls',
         ],
         [
+            'label' =>'Completed',
             'attribute' => 'outgoingCallsCompleted',
         ],
         [
+            'label' =>'NoAnswer',
             'attribute' => 'outgoingCallsNoAnswer',
         ],
         [
+            'label' =>'Canceled',
             'attribute' => 'outgoingCallsCanceled',
         ],
         [
+            'label' =>'Duration',
             'attribute' => 'incomingCallsDuration',
         ],
         [
+            'label' =>'Total',
             'attribute' => 'incomingCalls',
         ],
         [
+            'label' =>'Completed',
+            'attribute' => 'incomingCompletedCalls',
+        ],
+        [
+            'label' =>'Direct Line',
             'attribute' => 'incomingDirectLine',
         ],
         [
+            'label' =>'General Line',
             'attribute' => 'incomingGeneralLine',
         ],
     ];
@@ -115,7 +128,16 @@ $list = new ListsAccess(Yii::$app->user->id);
             'content' => Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], ['class' => 'btn btn-default', 'title'=>'Reset Grid']),
             '{export}',
             $fullExportMenu,
-        ]
+        ],
+        'beforeHeader' => [
+            [
+                'columns' => [
+                    ['content' => '', 'options' => ['colspan' => 2]],
+                    ['content' => 'Outgoing Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning']],
+                    ['content' => 'Incoming Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning']],
+                ],
+            ]
+        ],
     ]);
     ?>
 </div>
