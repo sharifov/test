@@ -411,11 +411,11 @@ class CallSearch extends Call
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_COMPLETED . '" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_NO_ANSWER . '" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_CANCELED . '" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN 1 ELSE 0 END) AS incomingCalls,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS incomingCompletedCalls,
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_GENERAL_LINE . ' THEN 1 ELSE 0 END) AS incomingGeneralLine,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND c_source_type_id <> ' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingGeneralLine,
             c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '")) AS createdDate 
             FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByDuration . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
         ']);
@@ -463,10 +463,10 @@ class CallSearch extends Call
                         'asc' => ['incomingCallsDuration' => SORT_ASC],
                         'desc' => ['incomingCallsDuration' => SORT_DESC],
                     ],
-                    'incomingCalls' => [
+                    /*'incomingCalls' => [
                         'asc' => ['incomingCalls' => SORT_ASC],
                         'desc' => ['incomingCalls' => SORT_DESC],
-                    ],
+                    ],*/
                     'incomingCompletedCalls' => [
                         'asc' => ['incomingCompletedCalls' => SORT_ASC],
                         'desc' => ['incomingCompletedCalls' => SORT_DESC],

@@ -54,42 +54,122 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' =>'Duration',
             'attribute' => 'outgoingCallsDuration',
+            'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'format' => 'raw',
+            'value' => function($data) {
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outgoingCallsDuration']).'">' . gmdate('H:i:s', $data['outgoingCallsDuration']) . '</span>';
+            }
         ],
         [
             'label' =>'Total',
             'attribute' => 'outgoingCalls',
+            'value' => function($data) {
+                return $data['outgoingCalls'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
             'label' =>'Completed',
             'attribute' => 'outgoingCallsCompleted',
+            'value' => function($data) {
+                return $data['outgoingCallsCompleted'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
             'label' =>'NoAnswer',
             'attribute' => 'outgoingCallsNoAnswer',
+            'value' => function($data) {
+                return $data['outgoingCallsNoAnswer'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
             'label' =>'Canceled',
             'attribute' => 'outgoingCallsCanceled',
+            'value' => function($data) {
+                return $data['outgoingCallsCanceled'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
             'label' =>'Duration',
             'attribute' => 'incomingCallsDuration',
+            'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'format' => 'raw',
+            'value' => function($data) {
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['incomingCallsDuration']).'">' . gmdate('H:i:s', $data['incomingCallsDuration']) . '</span>';
+            }
         ],
-        [
+        /*[
             'label' =>'Total',
             'attribute' => 'incomingCalls',
-        ],
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => ['style' => 'background-color:#fcf8e3'],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
+        ],*/
         [
             'label' =>'Completed',
             'attribute' => 'incomingCompletedCalls',
+            'value' => function($data) {
+                return $data['incomingCompletedCalls'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
             'label' =>'Direct Line',
             'attribute' => 'incomingDirectLine',
+            'value' => function($data) {
+                return $data['incomingDirectLine'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
             'label' =>'General Line',
             'attribute' => 'incomingGeneralLine',
+            'value' => function($data) {
+                return $data['incomingGeneralLine'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
     ];
 
@@ -133,8 +213,8 @@ $list = new ListsAccess(Yii::$app->user->id);
             [
                 'columns' => [
                     ['content' => '', 'options' => ['colspan' => 2]],
-                    ['content' => 'Outgoing Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning']],
-                    ['content' => 'Incoming Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning']],
+                    ['content' => 'Outgoing Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
+                    ['content' => 'Incoming Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                 ],
             ]
         ],
