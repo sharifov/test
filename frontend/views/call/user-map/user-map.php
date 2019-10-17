@@ -42,8 +42,7 @@ $dtNow = date('Y-m-d H:i:s');
  */
 function renderChildCallsRecursive($calls): void {
     ?>
-    <tr>
-        <td colspan="8">
+
             <table class="table table-condensed">
                 <?php foreach ($calls as $callItem):?>
                     <tr>
@@ -132,13 +131,16 @@ function renderChildCallsRecursive($calls): void {
                     </tr>
 
                     <?php if ($callItem->calls):?>
-                            <?php renderChildCallsRecursive($callItem->calls)?>
+                            <tr>
+                                <td colspan="8">
+                                <?php renderChildCallsRecursive($callItem->calls)?>
+                                </td>
+                            </tr>
                     <?php endif;?>
 
                 <?php endforeach;?>
             </table>
-        </td>
-    </tr>
+
 
     <?php
 }?>
