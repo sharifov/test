@@ -42,12 +42,12 @@ class LeadCloneService
     }
 
     /**
-     * @param int|Lead $lead
+     * @param $lead
      * @param int $ownerId
      * @param int|null $creatorId
      * @param string|null $reason
      * @return Lead
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function cloneLead($lead, int $ownerId, ?int $creatorId = null, ?string  $reason = ''): Lead
     {

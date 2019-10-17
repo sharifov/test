@@ -28,6 +28,9 @@ use yii\widgets\Pjax;
         <ul class="nav navbar-right panel_toolbox">
             <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) : ?>
             <li>
+                <?= $this->render('_quote_clone_by_id', ['lead' => $leadForm->getLead()])?>
+            </li>
+            <li>
                 <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
             </li>
             <li>

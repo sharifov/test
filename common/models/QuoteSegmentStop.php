@@ -21,6 +21,20 @@ use Yii;
  */
 class QuoteSegmentStop extends \yii\db\ActiveRecord
 {
+
+    /**
+     * @param array $attributes
+     * @param int $qsId
+     * @return static
+     */
+    public static function clone(array $attributes, int $qsId): self
+    {
+        $stop = new self();
+        $stop->attributes = $attributes;
+        $stop->qss_segment_id = $qsId;
+        return $stop;
+    }
+
     /**
      * {@inheritdoc}
      */

@@ -37,6 +37,18 @@ class QuoteRepository extends Repository
     }
 
     /**
+     * @param $uid
+     * @return Quote
+     */
+    public function findByUid($uid): Quote
+    {
+        if ($quote = Quote::findOne(['uid' => $uid])) {
+            return $quote;
+        }
+        throw new NotFoundException('Quote is not found');
+    }
+
+    /**
      * @param Quote $quote
      * @return int
      */

@@ -146,9 +146,9 @@ use yii\helpers\Url;
                         <?php if ($appliedQuote === null): ?>
                             <li>
                                 <?php  echo Html::a('<i class="fa fa-copy"></i> Clone', null, [
-                                    'class' => 'add-clone-alt-quote',
+                                    'class' => 'clone-quote-by-uid-self',
                                     'data-uid' => $model->uid,
-                                    'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
+                                   // 'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
                                     'title' => 'Clone'
                                 ]);
                                 ?>

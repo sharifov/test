@@ -16,11 +16,11 @@ use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
-use sales\events\lead\LeadOnHoldEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
 use sales\events\lead\LeadCountPassengersChangedEvent;
 use sales\events\lead\LeadPendingEvent;
 use sales\events\lead\LeadProcessingEvent;
+use sales\events\lead\LeadQuoteCloneEvent;
 use sales\events\lead\LeadRejectEvent;
 use sales\events\lead\LeadSnoozeEvent;
 use sales\events\lead\LeadSoldEvent;
@@ -37,14 +37,13 @@ use sales\listeners\lead\LeadCallExpertRequestEventListener;
 use sales\listeners\lead\LeadCreatedCloneByUserEventListener;
 use sales\listeners\lead\LeadCreatedEventListener;
 use sales\listeners\lead\LeadDuplicateDetectedEventListener;
-use sales\listeners\lead\LeadFollowUpCounterListener;
 use sales\listeners\lead\LeadFollowUpEventLogListener;
 use sales\listeners\lead\LeadFollowUpNotificationsListener;
-use sales\listeners\lead\LeadOnHoldEventLogListener;
 use sales\listeners\lead\LeadOwnerChangedNotificationsListener;
 use sales\listeners\lead\LeadCountPassengersChangedEventListener;
 use sales\listeners\lead\LeadPendingEventLogListener;
 use sales\listeners\lead\LeadProcessingEventLogListener;
+use sales\listeners\lead\LeadQuoteCloneEventListener;
 use sales\listeners\lead\LeadRejectEventLogListener;
 use sales\listeners\lead\LeadSnoozeEventLogListener;
 use sales\listeners\lead\LeadSnoozeNotificationsListener;
@@ -95,6 +94,8 @@ class SetUp implements BootstrapInterface
                     LeadSnoozeEventLogListener::class,
                     LeadSnoozeNotificationsListener::class,
                 ],
+
+                LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
 
                 CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],
                 CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class],

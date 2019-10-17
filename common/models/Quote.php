@@ -198,6 +198,20 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
         ];
     }
 
+    /**
+     * @param array $attributes
+     * @param int $leadId
+     * @return static
+     */
+    public static function cloneByUid(array $attributes, int $leadId): self
+    {
+        $quote = new self();
+        $quote->attributes = $attributes;
+        $quote->lead_id = $leadId;
+        $quote->uid = uniqid();
+        $quote->status = self::STATUS_CREATED;
+        return $quote;
+    }
 
     public function apply(): void
     {
