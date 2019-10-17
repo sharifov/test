@@ -42,6 +42,9 @@ class CallSearch extends Call
     public $createTimeStart;
     public $createTimeEnd;
 
+    public $projectId;
+    public $statusId;
+    public $callTypeId;
     public $call_duration_from;
     public $call_duration_to;
     public $callDepId;
@@ -79,7 +82,7 @@ class CallSearch extends Call
             [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration',
                 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id', 'callDepId', 'userGroupId'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
-                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
+                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
         ];
@@ -152,6 +155,18 @@ class CallSearch extends Call
         if ($this->c_created_dt) {
             $query->andFilterWhere(['>=', 'c_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->c_created_dt))])
                 ->andFilterWhere(['<=', 'c_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->c_created_dt) + 3600 * 24)]);
+        }
+
+        if($this->projectId){
+            $query->andFilterWhere(['=', 'c_project_id', $this->projectId]);
+        }
+
+        if($this->statusId){
+            $query->andFilterWhere(['=', 'c_status_id', $this->statusId]);
+        }
+
+        if($this->callTypeId){
+            $query->andFilterWhere(['=', 'c_call_type_id', $this->callTypeId]);
         }
 
         $query->andFilterWhere(['>=','c_call_duration', $this->call_duration_from]);
