@@ -40,7 +40,7 @@ $dtNow = date('Y-m-d H:i:s');
  * @param \common\models\Call[] $calls
  * @throws \yii\base\InvalidConfigException
  */
-function renderChildCallsRecursive($calls): void {
+function renderChildCallsRecursive2($calls): void {
     ?>
     <tr>
         <td colspan="8">
@@ -132,7 +132,7 @@ function renderChildCallsRecursive($calls): void {
                     </tr>
 
                     <?php if ($callItem->calls):?>
-                            <?php renderChildCallsRecursive($callItem->calls)?>
+                            <?php renderChildCallsRecursive2($callItem->calls)?>
                     <?php endif;?>
 
                 <?php endforeach;?>
