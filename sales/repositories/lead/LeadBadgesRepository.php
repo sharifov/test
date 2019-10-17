@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
+use common\models\UserGroupAssign;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use yii\db\ActiveQuery;
@@ -155,6 +156,20 @@ class LeadBadgesRepository
 
         if ($user->isAdmin()) {
             return $query;
+        }
+
+        if ($myGroups = $user->getUserGroupList()) {
+            $ruleGroups = [20 => 'Avengers', 21 => 'Revelation', 22 => 'Gunners'];
+            foreach ($ruleGroups as $ruleGroup) {
+                if (in_array($ruleGroup, $myGroups, true)) {
+                    $usersIds = UserGroupAssign::find()->select('ugs_user_id')->andWhere(['ugs_group_id' => array_keys($ruleGroups)])->indexBy('ugs_user_id')->column();
+                    $usersIds = Employee::find()->select('id')->andWhere(['id' => array_keys($usersIds)])->active()->indexBy('id')->column();
+                    if ($usersIds) {
+                        $query->andWhere([Lead::tableName() . '.employee_id' => array_keys($usersIds)]);
+                    }
+                    break;
+                }
+            }
         }
 
         $conditions = [];
