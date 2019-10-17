@@ -510,10 +510,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         } elseif ($this->isStatusQueue()) {
             $icon = 'fa fa-pause';
         } elseif ($this->isStatusCompleted()) {
-            $icon = 'fa fa-trophy text-success';
+            $icon = 'fa fa-flag text-success';
         } elseif ($this->isStatusDelay()) {
             $icon = 'fa fa-pause text-success';
-        } elseif ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy()) {
+        } elseif ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusFailed()) {
             $icon = 'fa fa-times-circle text-danger';
         } else {
             $icon = '';
