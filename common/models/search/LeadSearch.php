@@ -919,20 +919,6 @@ class LeadSearch extends Lead
                 ->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
-        if ($myGroups = $user->getUserGroupList()) {
-            $ruleGroups = [20 => 'Avengers', 21 => 'Revelation', 22 => 'Gunners'];
-            foreach ($ruleGroups as $ruleGroup) {
-                if (in_array($ruleGroup, $myGroups, true)) {
-                    $usersIds = UserGroupAssign::find()->select('ugs_user_id')->andWhere(['ugs_group_id' => array_keys($ruleGroups)])->indexBy('ugs_user_id')->column();
-                    $usersIds = Employee::find()->select('id')->andWhere(['id' => array_keys($usersIds)])->active()->indexBy('id')->column();
-                    if ($usersIds) {
-                        $query->andWhere([$leadTable . '.employee_id' => array_keys($usersIds)]);
-                    }
-                    break;
-                }
-            }
-        }
-
         return $dataProvider;
     }
 
