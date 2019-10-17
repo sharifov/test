@@ -25,6 +25,20 @@ use Yii;
  */
 class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
 {
+
+    /**
+     * @param array $attributes
+     * @param int $qsId
+     * @return QuoteSegmentBaggageCharge
+     */
+    public static function clone(array $attributes, int $qsId): self
+    {
+        $baggageCharge = new self();
+        $baggageCharge->attributes = $attributes;
+        $baggageCharge->qsbc_segment_id = $qsId;
+        return $baggageCharge;
+    }
+
     /**
      * {@inheritdoc}
      */

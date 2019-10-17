@@ -50,7 +50,19 @@ class QuoteSegment extends \yii\db\ActiveRecord
 
     public $isOvernight = false;
 
-    
+    /**
+     * @param array $attributes
+     * @param int $qtId
+     * @return QuoteSegment
+     */
+    public static function clone(array $attributes, int $qtId): self
+    {
+        $segment = new self();
+        $segment->attributes = $attributes;
+        $segment->qs_trip_id = $qtId;
+        return $segment;
+    }
+
     /**
      * {@inheritdoc}
      */

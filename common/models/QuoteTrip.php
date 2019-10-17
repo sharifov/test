@@ -19,6 +19,18 @@ class QuoteTrip extends \yii\db\ActiveRecord
 {
     public $stops = 0;
 
+    /**
+     * @param array $attributes
+     * @param int $quoteId
+     * @return static
+     */
+    public static function clone(array $attributes, int $quoteId): self
+    {
+        $trip = new self();
+        $trip->attributes = $attributes;
+        $trip->qt_quote_id = $quoteId;
+        return $trip;
+    }
 
     public function getStops()
     {
