@@ -9,7 +9,7 @@ use \common\models\Call;
 
 ?>
 
-<div class="col-md-12" style="margin-top: 5px">
+<div class="col-md-12" style="margin-bottom: 2px">
     <?php
         if ($model->isIn()) {
             $trClass = 'warning';
@@ -18,7 +18,7 @@ use \common\models\Call;
         }
     ?>
 
-    <table class="table table-condensed table-bordered">
+    <table class="table table-condensed">
         <tr class="<?=$trClass?>">
             <td class="text-center" style="width:50px">
                 <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
