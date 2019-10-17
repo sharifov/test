@@ -22,6 +22,8 @@ use yii\db\ActiveRecord;
  * @property int $css_updated_user_id
  * @property string $css_created_dt
  * @property string $css_updated_dt
+ * @property int $css_need_sync_bo
+ * @property array $css_sale_data_updated
  *
  * @property Employee $cssCreatedUser
  * @property Cases $cssCs
@@ -29,6 +31,47 @@ use yii\db\ActiveRecord;
  */
 class CaseSale extends \yii\db\ActiveRecord
 {
+
+	public const PASSENGER_MEAL = [
+		"AVML - Vegetarian/Hindu" => "AVML - Vegetarian/Hindu",
+		"BBML - Baby" => "BBML - Baby",
+		"BLML - Bland" => "BLML - Bland",
+		"CHML - Child" => "CHML - Child",
+		"CNML - Chicken (LY only)" => "CNML - Chicken (LY only)",
+		"CHCK - Chicken (AA only)" => "CHCK - Chicken (AA only)",
+		"DBML - Diabetic" => "DBML - Diabetic",
+		"FPML - Fruit Platter" => "FPML - Fruit Platter",
+		"GFML - Gluten intolerant," => "GFML - Gluten intolerant,",
+		"HNML - Hindu (non-vegerarian)" => "HNML - Hindu (non-vegerarian)",
+		"IVML - Indian Vegetarian (UA only)" => "IVML - Indian Vegetarian (UA only)",
+		"JPML - Japanese (LH only)" => "JPML - Japanese (LH only)",
+		"KSML - Kosher" => "KSML - Kosher",
+		"LCML - Low Calorie" => "LCML - Low Calorie",
+		"LFML - Low Fat" => "LFML - Low Fat",
+		"LSML - Low Salt" => "LSML - Low Salt",
+		"MOML - Moslem" => "MOML - Moslem",
+		"NFML - No Fish (LH only)" => "NFML - No Fish (LH only)",
+		"NLML - Low Lactose" => "NLML - Low Lactose",
+		"OBML - Japanese Obento (UA only)" => "OBML - Japanese Obento (UA only)",
+		"RVML - Vegeratian Raw" => "RVML - Vegeratian Raw",
+		"SFML - Sea Food" => "SFML - Sea Food",
+		"SPML - Special meal, specify ~" => "SPML - Special meal, specify ~",
+		"VGML - Vegetarian Vegan" => "VGML - Vegetarian Vegan",
+		"VJML - Vegetarian Jain" => "VJML - Vegetarian Jain",
+		"VOML - Vagetarian Oriental" => "VOML - Vagetarian Oriental",
+		"VLML - Vegetarian Lacto-Ovo" => "VLML - Vegetarian Lacto-Ovo",
+		"NOML - No Meal" => "NOML - No Meal",
+		"NSML - No Salt/Sodium" => "NSML - No Salt/Sodium",
+		"PFML - Peanut Free" => "PFML - Peanut Free"
+	];
+
+	public const PASSENGER_WHEELCHAIR = [
+		"WCOB - Wheelchair on board" => "WCOB - Wheelchair on board",
+		"WCHR - Wheelchair airport departure hall" => "WCHR - Wheelchair airport departure hall",
+		"WCHS - Wheelchair Up/Down stairs" => "WCHS - Wheelchair Up/Down stairs",
+		"WCHC - Passenger must be carried" => "WCHC - Passenger must be carried"
+	];
+
     /**
      * {@inheritdoc}
      */

@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
+use \common\models\CallUserAccess;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
@@ -32,6 +33,117 @@ $dtNow = date('Y-m-d H:i:s');
 <style>
     #call-map-page table {margin-bottom: 5px}
 </style>
+
+
+<?php
+/**
+ * @param \common\models\Call[] $calls
+ * @throws \yii\base\InvalidConfigException
+ */
+function renderChildCallsRecursive($calls): void {
+    ?>
+
+            <table class="table table-condensed">
+                <?php foreach ($calls as $callItem):?>
+                    <tr>
+                        <td style="width:70px; border: none">
+                            <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
+                        </td>
+                        <td style="width: 50px">
+                            <?php if ($callItem->c_source_type_id):?>
+                                <span class="label label-info"><?=$callItem->getShortSourceName()?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="width: 120px">
+                            <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName()?>
+                        </td>
+                        <td style="width: 80px" class="text-left">
+                            <?php if($callItem->c_updated_dt): ?>
+                                <?php if ($callItem->isEnded()):?>
+                                    <?php $sec = $callItem->c_call_duration ?: strtotime($callItem->c_updated_dt) - strtotime($callItem->c_created_dt); ?>
+                                    <span class="badge badge-primary timer" data-sec="<?=$sec?>" data-control="pause" data-format="%M:%S" style="font-size: 10px"><?=gmdate('i:s', $sec)?></span>
+                                <?php else: ?>
+                                    <?php $sec = time() - strtotime($callItem->c_updated_dt); ?>
+                                    <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
+                                <?php endif;?>
+                            <?php endif;?>
+                            <?php if ($callItem->c_recording_url):?>
+                                <small><i class="fa fa-play-circle-o"></i></small>
+                            <?php endif;?>
+                        </td>
+
+                        <td class="text-left">
+                            <?php if($callItem->cuaUsers):?>
+                                <?php foreach ($callItem->callUserAccesses as $cua):
+
+                                    switch ((int) $cua->cua_status_id) {
+                                        case CallUserAccess::STATUS_TYPE_PENDING:
+                                            $label = 'warning';
+                                            break;
+                                        case CallUserAccess::STATUS_TYPE_ACCEPT:
+                                            $label = 'success';
+                                            break;
+                                        case CallUserAccess::STATUS_TYPE_BUSY:
+                                            $label = 'danger';
+                                            break;
+                                        default:
+                                            $label = 'default';
+                                    }
+
+                                    ?>
+                                    <span class="label label-<?=$label?>"><i class="fa fa-user"></i> <?=Html::encode($cua->cuaUser->username)?></span>&nbsp;
+                                <?php endforeach;?>
+                            <?php endif; ?>
+                        </td>
+                        <td class="text-center" style="width:90px">
+                            <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i')?>
+                        </td>
+                        <td class="text-center" style="width:180px">
+                            <?php if($callItem->c_updated_dt): ?>
+                                <small>
+                                    <?php if ($callItem->isEnded()):?>
+                                        <?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
+                                    <?php endif;?>
+                                </small>
+                            <?php endif;?>
+                        </td>
+                        <td class="text-left" style="width:130px">
+                            <?php if($callItem->isIn()):?>
+                                <div>
+                                    <?php if($callItem->c_created_user_id):?>
+                                        <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
+                                    <?php else: ?>
+                                        <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
+                                    <?php endif; ?>
+                                </div>
+                            <?php else: ?>
+                                <div>
+
+                                    <?php if($callItem->c_created_user_id):?>
+                                        <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
+                                    <?php else: ?>
+                                        <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
+                                    <?php endif; ?>
+
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+
+                    <?php if ($callItem->calls):?>
+                            <tr>
+                                <td colspan="8">
+                                <?php renderChildCallsRecursive($callItem->calls)?>
+                                </td>
+                            </tr>
+                    <?php endif;?>
+
+                <?php endforeach;?>
+            </table>
+
+
+    <?php
+}?>
 
 <div id="call-map-page" class="col-md-12">
 

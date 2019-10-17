@@ -244,7 +244,7 @@ use frontend\extensions\DatePicker;
 
                 <? //php  echo $form->field($model, 'called_expert') ?>
                 <div class="col-md-6">
-                    <?php echo $form->field($model, 'employee_id')->dropDownList($lists->getEmployees(), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'employee_id')->dropDownList($lists->getEmployees(true), ['prompt' => '-']) ?>
                 </div>
             </div>
 

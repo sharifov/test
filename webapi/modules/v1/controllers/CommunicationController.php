@@ -478,6 +478,8 @@ class CommunicationController extends ApiBaseController
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceClient');
 
+        // $post['callData']['CallSid']
+
         $callSid = $post['callData']['sid'] ?? $post['callData']['CallSid'] ?? null;
 
         if ($callSid) {
@@ -1335,6 +1337,7 @@ class CommunicationController extends ApiBaseController
 
                     $job = new CallQueueJob();
                     $job->call_id = $callModel->c_id;
+                    $job->source_id = $department->dpp_source_id;
                     $job->delay = 0;
                     $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
                 }

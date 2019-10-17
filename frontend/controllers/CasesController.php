@@ -19,6 +19,7 @@ use common\models\search\SaleSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\UserProjectParams;
+use common\widgets\Alert;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
@@ -29,9 +30,12 @@ use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
+use sales\forms\cases\CasesSaleForm;
 use sales\forms\cases\CasesUpdateForm;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
+use sales\repositories\cases\CasesSaleRepository;
+use sales\services\cases\CasesSaleService;
 use sales\services\cases\CasesCommunicationService;
 use sales\repositories\user\UserRepository;
 use sales\services\cases\CasesCreateService;
@@ -45,6 +49,7 @@ use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -60,6 +65,8 @@ use yii\widgets\ActiveForm;
  * @property CasesRepository $casesRepository
  * @property CasesCommunicationService $casesCommunicationService
  * @property UserRepository $userRepository,
+ * @property CasesSaleRepository $casesSaleRepository
+ * @property CasesSaleService $casesSaleService
  */
 class CasesController extends FController
 {
@@ -70,29 +77,35 @@ class CasesController extends FController
     private $casesCategoryRepository;
     private $casesRepository;
     private $userRepository;
+    private $casesSaleRepository;
+    private $casesSaleService;
 
-    /**
-     * CasesController constructor.
-     * @param $id
-     * @param $module
-     * @param CasesCreateService $casesCreateService
-     * @param CasesManageService $casesManageService
-     * @param CasesCategoryRepository $casesCategoryRepository
-     * @param CasesRepository $casesRepository
-     * @param CasesCommunicationService $casesCommunicationService
-     * @param UserRepository $userRepository,
-     * @param array $config
-     */
+	/**
+	 * CasesController constructor.
+	 * @param $id
+	 * @param $module
+	 * @param CasesCreateService $casesCreateService
+	 * @param CasesManageService $casesManageService
+	 * @param CasesCategoryRepository $casesCategoryRepository
+	 * @param CasesRepository $casesRepository
+	 * @param CasesCommunicationService $casesCommunicationService
+	 * @param UserRepository $userRepository ,
+	 * @param CasesSaleRepository $casesSaleRepository
+	 * @param CasesSaleService $casesSaleService
+	 * @param array $config
+	 */
     public function __construct(
-        $id,
-        $module,
-        CasesCreateService $casesCreateService,
-        CasesManageService $casesManageService,
-        CasesCategoryRepository $casesCategoryRepository,
-        CasesRepository $casesRepository,
-        CasesCommunicationService $casesCommunicationService,
-        UserRepository $userRepository,
-        $config = []
+		$id,
+		$module,
+		CasesCreateService $casesCreateService,
+		CasesManageService $casesManageService,
+		CasesCategoryRepository $casesCategoryRepository,
+		CasesRepository $casesRepository,
+		CasesCommunicationService $casesCommunicationService,
+		UserRepository $userRepository,
+		CasesSaleRepository $casesSaleRepository,
+		CasesSaleService $casesSaleService,
+		$config = []
     )
     {
         parent::__construct($id, $module, $config);
@@ -102,6 +115,8 @@ class CasesController extends FController
         $this->casesRepository = $casesRepository;
         $this->casesCommunicationService = $casesCommunicationService;
         $this->userRepository = $userRepository;
+        $this->casesSaleRepository = $casesSaleRepository;
+        $this->casesSaleService = $casesSaleService;
     }
 
     /**
@@ -1137,4 +1152,144 @@ class CasesController extends FController
         ]);
     }
 
+	/**
+	 * @param $caseId
+	 * @param $caseSaleId
+	 * @return array|string
+	 */
+	public function actionAjaxSaleListEditInfo($caseId, $caseSaleId)
+	{
+		Yii::$app->response->format = Response::FORMAT_JSON;
+
+		$out = [
+			'output' => '',
+			'message' => '',
+			'caseId' => $caseId,
+			'caseSaleId' => $caseSaleId
+		];
+		try {
+
+			$user = Yii::$app->user->identity;
+
+			if (Yii::$app->request->isAjax &&
+				Yii::$app->request->isPost &&
+				Yii::$app->request->post('cssSaleData')) {
+
+				$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
+
+				if (
+					!$caseSale->cssCs->isOwner($user->getId()) &&
+					!$user->isAdmin() &&
+					!$user->isSuperAdmin() &&
+					!$user->isExSuper() &&
+					!$user->isSupSuper()
+				) {
+					throw new \Exception('Access Denied');
+				} elseif (!$caseSale->cssCs->isProcessing()) {
+					throw new \Exception('Case is not in status: Processing');
+				}
+
+				$form = new CasesSaleForm();
+
+				if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
+
+					$decodedSaleData = json_decode( (string)$caseSale->css_sale_data_updated, true );
+
+					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
+					if (!$difference) {
+						throw new \Exception('Cannot save because value has not been changed');
+					}
+
+					$this->casesSaleRepository->updateSaleData($caseSale, $decodedSaleData, $form->validatedData);
+
+					$sync = !$this->casesSaleService->isDataBackedUpToOriginal($caseSale);
+					$this->casesSaleRepository->updateSyncWithBOField($caseSale, $sync);
+
+					if (!$caseSale->save()) {
+						Yii::error(VarDumper::dumpAsString($caseSale->errors), 'CasesController:actionAjaxSaleListEditInfo:CaseSale:save');
+						throw new \Exception('Unsuccessful update');
+					}
+
+					if ($sync) {
+						$out['success_message'] = 'Sale: '. $caseSaleId .'; Now, you can sync data with b/o';
+					}else {
+						$out['success_message'] = 'Sale: '. $caseSaleId .'; The data has been returned to its original form.';
+					}
+
+					$out['sync'] = $sync;
+				} else {
+					$out['message'] = implode("; ", $form->getErrorSummary(false));
+				}
+			}
+
+		} catch (\Throwable $exception) {
+			$out['message'] = $exception->getMessage();
+			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CasesController:actionAjaxSaleListEditInfo:catch:Throwable');
+		}
+
+		return $out;
+	}
+
+	/**
+	 * @param $caseId
+	 * @param $caseSaleId
+	 * @return array|mixed
+	 * @throws BadRequestHttpException
+	 */
+	public function actionAjaxSyncWithBackOffice($caseId, $caseSaleId)
+	{
+		if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
+			throw new BadRequestHttpException();
+		}
+
+		try {
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+
+			$user = Yii::$app->user->identity;
+
+			$out = [
+				'error' => 0,
+				'message' => ''
+			];
+
+			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
+
+			if (
+				!$caseSale->cssCs->isOwner($user->getId()) &&
+				!$user->isAdmin() &&
+				!$user->isSuperAdmin() &&
+				!$user->isExSuper() &&
+				!$user->isSupSuper()
+			) {
+				throw new \Exception('Access Denied.');
+			} else if (!$caseSale->css_need_sync_bo) {
+				throw new \Exception('Data is already synchronized.');
+			} else if (!$caseSale->cssCs->isProcessing()) {
+				throw new \Exception('Case is not in status: Processing');
+			}
+
+			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
+
+			$response = BackOffice::sendRequest2('', $updatedData);
+
+			if ($response->isOk) {
+				$this->casesSaleRepository->updateSyncWithBOField($caseSale, false);
+				$this->casesSaleRepository->updateOriginalSaleData($caseSale);
+				$this->casesSaleRepository->save($caseSale);
+
+				$out['message'] = 'Sale: '. $caseSaleId .' data was successfully synchronized with b/o.';
+			} else {
+				$out['error'] = 1;
+				$out['message'] = 'BO request Error: ' . VarDumper::dumpAsString($response->content);
+			}
+
+		} catch (\Exception $exception) {
+			$out['error'] = 1;
+			$out['message'] = $exception->getMessage();
+			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Exception');
+		}
+
+		return $out;
+	}
 }

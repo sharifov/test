@@ -116,9 +116,10 @@ class LeadController extends FController
         return parent::beforeAction($action);
     }
 
+
     /**
      * @param string $gid
-     * @return string
+     * @return array|string|Response
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      * @throws UnauthorizedHttpException
@@ -131,25 +132,16 @@ class LeadController extends FController
     {
 
         $gid = mb_substr($gid, 0, 32);
-
-        //$id = (int) $id;
-        //$lead = Lead::findOne($id);
-
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
 
         if (!$lead) {
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if ($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->canRole('agent')) {
+        if ($lead->isTrash() && Yii::$app->user->identity->isAgent()) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
-
-
         $itineraryForm = new ItineraryEditForm($lead);
-
-
-        $user_id = Yii::$app->user->id;
         $user = Yii::$app->user->identity;
 
         $is_admin = $user->canRole('admin');

@@ -7,7 +7,6 @@ use common\models\Lead;
 use sales\access\EmployeeAccess;
 use sales\repositories\lead\LeadRepository;
 use sales\services\ServiceFinder;
-use yii\helpers\VarDumper;
 
 /**
  * Class LeadStateService

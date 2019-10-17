@@ -88,15 +88,20 @@ class ListsAccess
     }
 
     /**
+     * @param bool $withRoles
      * @return array
      */
-    public function getEmployees(): array
+    public function getEmployees($withRoles = false): array
     {
         if ($this->employees !== null) {
             return $this->employees;
         }
         if ($this->user->isAdmin()) {
-            $this->employees = Employee::getActiveUsersList();
+            if ($withRoles) {
+                $this->employees = Employee::getActiveUsersListWithRoles();
+            } else {
+                $this->employees = Employee::getActiveUsersList();
+            }
         } elseif ($this->user->isAnySupervision()) {
             $this->employees = Employee::getActiveUsersListFromCommonGroups($this->user->id);
         } elseif ($this->user->isQa()) {

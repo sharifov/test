@@ -53,7 +53,10 @@ use \common\models\Call;
                     to <b><?=($call->cCreatedUser ? '<i class="fa fa-user"></i> '.Html::encode($call->cCreatedUser->username) : '-') ?></b>
                 </div>
             <?php else: ?>
-                <div class="chat__sender">from "<b title="<?=Html::encode($call->c_from)?>"><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>" to <i class="fa fa-phone" title="<?=Html::encode($call->c_to)?>"></i></div>
+                <div class="chat__sender">
+                    from "<b title="<?=Html::encode($call->c_from)?>"><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>" to <i class="fa fa-phone" title="<?=Html::encode($call->c_to)?>"></i>
+                    <?=Html::encode($call->c_to)?>
+                </div>
             <?php endif;?>
 
             <div class="chat__date">
@@ -66,7 +69,7 @@ use \common\models\Call;
             <?php if($call->c_recording_url):?>
 
 
-                <?=Html::button(gmdate('i:s', $call->c_recording_duration) . ' <i class="fa fa-volume-up"></i>',
+                <?=Html::button(gmdate('i:s', $call->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
                     ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $call->c_recording_url]) ?>
 
                 <?/*<audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
@@ -78,85 +81,7 @@ use \common\models\Call;
             <div><?=$call->c_call_duration > 0 ? 'Duration: ' . Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
 
             <?php if ($call->calls):?>
-
-               <table class="table table-condensed" style="background-color: rgba(255, 255,255, .7)">
-                            <?php foreach ($call->calls as $callItem):?>
-                                <tr>
-                                    <?php if (Yii::$app->user->identity->isAdmin()):?>
-                                        <td style="width:50px">
-                                            <u title="SID: <?=Html::encode($callItem->c_call_sid)?>"><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
-                                        </td>
-                                    <?php endif; ?>
-                                    <td class="text-left">
-                                        <?=$callItem->getStatusIcon()?>  <?=$callItem->getStatusName()?>
-                                    </td>
-                                    <td class="text-center" style="width: 70px">
-                                        <?php if ($callItem->c_call_duration):?>
-                                        <span class="badge badge-warning" title="Duration: <?=Yii::$app->formatter->asDuration($callItem->c_call_duration)?>"><?=gmdate('i:s', $callItem->c_call_duration)?></span>
-                                        <?php endif;?>
-                                    </td>
-                                    <td>
-                                        <?php if ($callItem->c_recording_url):?>
-                                            <?=Html::button(gmdate('i:s', $callItem->c_recording_duration) . ' <i class="fa fa-volume-up"></i>',
-                                                ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->c_recording_url]) ?>
-                                        <?php endif;?>
-                                    </td>
-
-<!--                                    <td class="text-center">-->
-<!---->
-<!--                                        --><?php
-//                                        $sec = 0;
-//                                        if($callItem->c_updated_dt) {
-//
-//                                            if($callItem->isIvr() || $callItem->isRinging() || $callItem->isInProgress() || $callItem->isQueue()) {
-//                                                $sec = time() - strtotime($callItem->c_updated_dt);
-//                                            } else {
-//                                                $sec = $callItem->c_call_duration ?: strtotime($callItem->c_updated_dt) - strtotime($callItem->c_created_dt);
-//                                            }
-//                                        }
-//                                        ?>
-<!---->
-<!--                                        --><?php //if ($callItem->isIvr() || $callItem->isRinging() || $callItem->isInProgress() || $callItem->isQueue()):?>
-<!--                                            <span class="badge badge-warning timer" data-sec="--><?//=$sec?><!--" data-control="start" data-format="%M:%S" title="--><?//=Yii::$app->formatter->asDuration($sec)?><!--">-->
-<!--                        00:00-->
-<!--                    </span>-->
-<!--                                        --><?php //else: ?>
-<!--                                            <span class="badge badge-primary timer" data-sec="--><?//=$sec?><!--" data-control="pause" data-format="%M:%S" title="--><?//=Yii::$app->formatter->asDuration($sec)?><!--">-->
-<!--                        00:00-->
-<!--                    </span>-->
-<!---->
-<!--                                        --><?php //endif;?>
-<!---->
-<!--                                    </td>-->
-
-                                    <td class="text-center">
-                                        <?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
-                                    </td>
-
-                                    <td class="text-center" style="width: 90px">
-                                        <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?>
-                                    </td>
-
-                                    <td class="text-left" style="width:150px">
-                                        <?php if($callItem->isIn()):?>
-                                            <div>
-                                                <?php if($callItem->c_created_user_id):?>
-                                                    <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
-                                                <?php else: ?>
-                                                    <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php else: ?>
-                                            <div>
-                                                <i class="fa fa-male text-info fa-border"></i>
-                                            </div>
-                                            <?=$callItem->c_to?>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach;?>
-                        </table>
-
+                <?php \sales\helpers\communication\CommunicationHelper::renderChildCallsRecursive($call->calls)?>
             <?php endif;?>
 
 

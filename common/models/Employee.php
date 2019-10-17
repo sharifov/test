@@ -936,6 +936,37 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @return array
+     *
+     *  [
+     *      '1' => 'UserName (Role1, Role2)'
+     *      '34' => 'UserName2 (Role2)'
+     *  ]
+     */
+    public static function getActiveUsersListWithRoles(): array
+    {
+        $q = (new Query())->select(['u.username', 'u.id', 'u.status', 'a.item_name', 'i.name', 'i.description'])
+            ->andWhere(['u.status' => self::STATUS_ACTIVE])
+            ->from('{{%auth_assignment}} a')
+            ->leftJoin('{{%employees}} u', 'a.user_id = u.id')
+            ->leftJoin('{{%auth_item}} i', 'a.item_name = i.name')
+            ->orderBy(['u.username' => SORT_ASC])
+            ->all();
+        $list = [];
+        foreach ($q as $item) {
+            if (isset($list[$item['id']])) {
+                $list[$item['id']] .=  ', ' . $item['description'];
+            } else {
+                $list[$item['id']] = $item['username'] . ' (' . $item['description'];
+            }
+        }
+        foreach ($list as $k =>  $item) {
+            $list[$k] .= ')';
+        }
+        return $list;
+    }
+
+    /**
      * @param int $userId
      * @return array
      */

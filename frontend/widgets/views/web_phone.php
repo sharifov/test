@@ -529,11 +529,11 @@ use yii\helpers\Html;
         $.getJSON('/phone/get-token')
             .then(function (response) {
                 let data = response.data;
-                log('Got a token.');
+                log('Got a token');
                 // console.log('app_sid: ' + data.app_sid + 'account_sid: ' + data.account_sid);
                 call_acc_sid = data.account_sid;
                 //console.log('Token: ' + data.token);
-                device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], debug: true});
+                device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false});
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
@@ -558,7 +558,7 @@ use yii\helpers\Html;
                     $('#btn-group-id-hangup').show();
 
                     if (conn.parameters.From === undefined) {
-                        $('#btn-group-id-redirect').hide();
+                        $('#btn-group-id-redirect').show();
                     } else {
                         $('#btn-group-id-redirect').show();
                     }
@@ -581,6 +581,11 @@ use yii\helpers\Html;
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
                 });
+
+                // device.on('ringing', function (conn) {
+                //     // console.log(conn.parameters);
+                //     alert('Ringing 123');
+                // });
 
                 device.on('incoming', function (conn) {
                     connection = conn;
@@ -643,6 +648,12 @@ use yii\helpers\Html;
                     $('#call-controls2').hide();
                     $('#btn-group-id-redirect').hide();
                 });
+
+                device.on('offline', function (device) {
+                    console.log('Phone device: status Offline');
+                    // createNotify('Status Offline', 'Phone device: status Offline', 'error');
+                });
+
                 //setClientNameUI(data.client);
                 device.audio.on('deviceChange', updateAllDevices.bind(device));
 

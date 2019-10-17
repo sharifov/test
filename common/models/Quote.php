@@ -689,65 +689,64 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
                 $rowExpl = explode($depAirport . $arrAirport, $row);
                 $rowTime = $rowExpl[1];
                 preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9])?)?/', $rowTime, $matches);
-                if (!empty($matches)) {
-                    $now = new \DateTime();
-                    $matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
-                    $matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
-
-                    $date = $depDate . ' ' . $matches[1][0];
-                    if ($matches[2][0] != '') {
-                        $fAP = ($matches[2][0] == 'A') ? 'a' : 'A';
-                        $date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
-                        $depDateTime = \DateTime::createFromFormat('jM g:i' . $fAP, $date);
-                    } else {
-                        $depDateTime = \DateTime::createFromFormat('jM H:i', $date);
-                    }
-                    if ($depDateTime == false) {
-                        continue;
-                    }
-                    if ($now->getTimestamp() > $depDateTime->getTimestamp()) {
-                        $depDateTime->add(\DateInterval::createFromDateString('+1 year'));
-                    }
-
-                    $date = $arrDate . ' ' . $matches[1][1];
-                    if ($matches[2][1] != '') {
-                        $fAP = ($matches[2][1] == 'A') ? 'a' : 'A';
-                        $date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
-                        $arrDateTime = \DateTime::createFromFormat('jM g:i' . $fAP, $date);
-                    } else {
-                        $arrDateTime = \DateTime::createFromFormat('jM H:i', $date);
-                    }
-
-                    $arrDepDiff = $depDateTime->diff($arrDateTime);
-                    if ($arrDepDiff->d == 0 && !$arrDateInRow) {
-                        if ($matches[3][1] == "+") {
-                            $arrDateTime->add(\DateInterval::createFromDateString('+1 day'));
-                        } elseif (strpos($matches[3][1], "+")) {
-                            $arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
-                        }
-                    }
-
-                    if ($matches[4][1] != '') {
-                        $arrDateTime->add(new \DateInterval('P' . $matches[4][1] . 'D'));
-                    }
-
-                    if ($now->getTimestamp() > $arrDateTime->getTimestamp()) {
-                        $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
-                    }
-
-                    if ($depDateTime > $arrDateTime) {
-                        $arrDepDiff = $depDateTime->diff($arrDateTime);
-                        if($arrDepDiff->invert == 1 && $arrDepDiff->d > 0){
-                            $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
-                        }
-                    }
-
-                    $depCity = $arrCity = null;
-                    if (!$onView) {
-                        $depCity = Airport::findIdentity($depAirport);
-                        $arrCity = Airport::findIdentity($arrAirport);
-                    }
-                }
+				if (!empty($matches)) {
+					$now = new \DateTime();
+					$matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
+					$matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
+					$date = $depDate . ' ' . $matches[1][0];
+					if ($matches[2][0] != '') {
+						$date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
+						$dateFormat = 'jM g:ia';
+					}
+					else {
+						$dateFormat = 'jM H:i';
+					}
+					$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
+					if ($depDateTime == false) {
+						continue;
+					}
+					if (/*$now->format('m') > $depDateTime->format('m')*/
+						$now->getTimestamp() > $depDateTime->getTimestamp()
+					) {
+						$date = date('Y') + 1 . $date;
+						$dateFormat = 'Y' . $dateFormat;
+						$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
+					}
+					$date = $arrDate . ' ' . $matches[1][1];
+					if ($matches[2][1] != '') {
+						$date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
+						$dateFormat = 'jM g:ia';
+					}
+					else {
+						$dateFormat = 'jM H:i';
+					}
+					$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+					if (/*$now->format('m') > $arrDateTime->format('m')*/
+						$now->getTimestamp() > $arrDateTime->getTimestamp()
+					) {
+						$date = date('Y') + 1 . $date;
+						$dateFormat = 'Y' . $dateFormat;
+						$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+					}
+					$arrDepDiff = $depDateTime->diff($arrDateTime);
+					if ($arrDepDiff->d == 0 && !$arrDateInRow && !empty($matches[3][1])) {
+						if ($matches[3][1] == "+") {
+							$matches[3][1] .= 1;
+						}
+						$arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
+					}
+					/*if ($depDateTime > $arrDateTime) {
+						$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
+					}*/
+					$depCity = Airport::findIdentity($depAirport);
+					/*$timezone = ($depCity !== null && !empty($depCity->timezone))
+					? new \DateTimeZone($depCity->timezone)
+					: new \DateTimeZone("UTC");*/
+					$arrCity = Airport::findIdentity($arrAirport);
+					/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
+						? new \DateTimeZone($arrCity->timezone)
+						: new \DateTimeZone("UTC");*/
+				}
 
                 $rowExpl = explode($depDate, $rowFl);
                 $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
@@ -922,62 +921,64 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
             $rowExpl = explode($depAirport . $arrAirport, $row);
             $rowTime = $rowExpl[1];
             preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9])?)?/', $rowTime, $matches);
-            if (!empty($matches)) {
-                $now = new \DateTime();
-                $matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
-                $matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
-
-                $date = $depDate . ' ' . $matches[1][0];
-                if ($matches[2][0] != '') {
-                    $fAP = ($matches[2][0] == 'A') ? 'a' : 'A';
-                    $date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
-                    $depDateTime = \DateTime::createFromFormat('jM g:i' . $fAP, $date);
-                } else {
-                    $depDateTime = \DateTime::createFromFormat('jM H:i', $date);
-                }
-                if ($depDateTime == false) {
-                    continue;
-                }
-                if ($now->getTimestamp() > $depDateTime->getTimestamp()) {
-                    $depDateTime->add(\DateInterval::createFromDateString('+1 year'));
-                }
-
-                $date = $arrDate . ' ' . $matches[1][1];
-                if ($matches[2][1] != '') {
-                    $fAP = ($matches[2][1] == 'A') ? 'a' : 'A';
-                    $date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
-                    $arrDateTime = \DateTime::createFromFormat('jM g:i' . $fAP, $date);
-                } else {
-                    $arrDateTime = \DateTime::createFromFormat('jM H:i', $date);
-                }
-
-                $arrDepDiff = $depDateTime->diff($arrDateTime);
-                if ($arrDepDiff->d == 0 && !$arrDateInRow) {
-                    if ($matches[3][1] == "+") {
-                        $arrDateTime->add(\DateInterval::createFromDateString('+1 day'));
-                    } elseif (strpos($matches[3][1], "+")) {
-                        $arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
-                    }
-                }
-
-                if ($matches[4][1] != '') {
-                    $arrDateTime->add(new \DateInterval('P' . $matches[4][1] . 'D'));
-                }
-
-                if ($now->getTimestamp() > $arrDateTime->getTimestamp()) {
-                    $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
-                }
-
-                if ($depDateTime > $arrDateTime) {
-                    $arrDepDiff = $depDateTime->diff($arrDateTime);
-                    if($arrDepDiff->invert == 1 && $arrDepDiff->d > 0){
-                        $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
-                    }
-                }
-
-                $depCity = Airport::findIdentity($depAirport);
-                $arrCity = Airport::findIdentity($arrAirport);
-            }
+			if (!empty($matches)) {
+				$now = new \DateTime();
+				$matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
+				$matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
+				$date = $depDate . ' ' . $matches[1][0];
+				if ($matches[2][0] != '') {
+					$date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
+					$dateFormat = 'jM g:ia';
+				}
+				else {
+					$dateFormat = 'jM H:i';
+				}
+				$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
+				if ($depDateTime == false) {
+					continue;
+				}
+				if (/*$now->format('m') > $depDateTime->format('m')*/
+					$now->getTimestamp() > $depDateTime->getTimestamp()
+				) {
+					$date = date('Y') + 1 . $date;
+					$dateFormat = 'Y' . $dateFormat;
+					$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
+				}
+				$date = $arrDate . ' ' . $matches[1][1];
+				if ($matches[2][1] != '') {
+					$date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
+					$dateFormat = 'jM g:ia';
+				}
+				else {
+					$dateFormat = 'jM H:i';
+				}
+				$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+				if (/*$now->format('m') > $arrDateTime->format('m')*/
+					$now->getTimestamp() > $arrDateTime->getTimestamp()
+				) {
+					$date = date('Y') + 1 . $date;
+					$dateFormat = 'Y' . $dateFormat;
+					$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+				}
+				$arrDepDiff = $depDateTime->diff($arrDateTime);
+				if ($arrDepDiff->d == 0 && !$arrDateInRow && !empty($matches[3][1])) {
+					if ($matches[3][1] == "+") {
+						$matches[3][1] .= 1;
+					}
+					$arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
+				}
+				/*if ($depDateTime > $arrDateTime) {
+					$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
+				}*/
+				$depCity = Airport::findIdentity($depAirport);
+				/*$timezone = ($depCity !== null && !empty($depCity->timezone))
+				? new \DateTimeZone($depCity->timezone)
+				: new \DateTimeZone("UTC");*/
+				$arrCity = Airport::findIdentity($arrAirport);
+				/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
+					? new \DateTimeZone($arrCity->timezone)
+					: new \DateTimeZone("UTC");*/
+			}
 
             $rowExpl = explode($depDate, $rowFl);
             $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
