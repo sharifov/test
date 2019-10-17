@@ -9,25 +9,16 @@ use \common\models\Call;
 
 ?>
 
-<div class="col-md-12" style="margin-top: 5px">
+<div class="col-md-12" style="margin-bottom: 2px">
     <?php
-        $trClass = '';
-        if ($model->isIn() && ($model->isStatusNoAnswer() || $model->isStatusCanceled() || $model->isStatusBusy())) {
-            $trClass = 'danger';
-        }
-
         if ($model->isIn()) {
             $trClass = 'warning';
         } else {
             $trClass = 'info';
         }
-
-        /*if ($model->c_parent_id) {
-            $trClass = 'warning';
-        }*/
     ?>
 
-    <table class="table table-condensed <?=($model->isIn() && ($model->isStatusNoAnswer() || $model->isStatusCanceled() || $model->isStatusBusy())) ? '' : ''?>">
+    <table class="table table-condensed">
         <tr class="<?=$trClass?>">
             <td class="text-center" style="width:50px">
                 <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
@@ -196,7 +187,7 @@ use \common\models\Call;
 
         <?php if($model->cuaUsers):?>
             <tr class="<?=$trClass?>">
-                <td></td>
+                <td class="text-center"><i class="fa fa-users"></i> </td>
                 <td colspan="6">
                     <?php foreach ($model->callUserAccesses as $cua):
 
@@ -221,7 +212,11 @@ use \common\models\Call;
         <?php endif; ?>
 
         <?php if ($model->calls):?>
-            <?php renderChildCallsRecursive($model->calls)?>
+            <tr class="<?=$trClass?>">
+                <td colspan="7">
+                <?php renderChildCallsRecursive($model->calls)?>
+                </td>
+            </tr>
         <?php endif;?>
     </table>
 </div>
