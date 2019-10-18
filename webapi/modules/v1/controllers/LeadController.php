@@ -903,13 +903,6 @@ class LeadController extends ApiBaseController
 
         //$transaction->commit();
 
-            if ($lead->employee_id) {
-                // FOR B/O
-                $lead->agent_team = $lead->employee->getUserGroupList();
-            } else {
-                $lead->agent_team = [];
-            }
-
             $response['lead'] = $lead;
             $response['flights'] = $lead->leadFlightSegments;
             $response['emails'] = $lead->client->clientEmails;

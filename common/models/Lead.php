@@ -243,7 +243,6 @@ class Lead extends ActiveRecord implements AggregateRoot
     public $enableActiveRecordEvents = true;
 
     public $remainingDays;
-    public $agent_team = []; // for API for B/O
 
     /**
      * {@inheritdoc}
@@ -301,15 +300,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         ];
     }
 
-    /**
-     * @return array|false
-     */
-    public function fields()
-    {
-        $fields = parent::fields();
-        $fields[] = 'agent_team';
-        return $fields;
-    }
 
     /**
      * @param $clientId
@@ -3402,6 +3392,7 @@ Reason: {reason}
             'market_price' => $this->leadPreferences ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
             'agent_name' => $this->employee ? $this->employee->username : 'N/A',
+            'agent_team' => $this->employee ? $this->employee->getUserGroupList() : [],
             'agent_id' => $this->employee_id,
             'delayed_charge' => $this->l_delayed_charge
         ];
