@@ -123,6 +123,7 @@ class QuoteController extends FController
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', SearchService::getItineraryDump($entry));
                             $quote->employee_id = Yii::$app->user->id;
                             $quote->employee_name = Yii::$app->user->identity->username;
+                            $quote->origin_search_data = json_encode($entry);
 
                             if(isset($entry['tickets'])) {
                                 $quote->tickets = json_encode($entry['tickets']);
@@ -201,7 +202,7 @@ class QuoteController extends FController
                                                 $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
                                                 $segment->qs_cabin = $segmentEntry['cabin'];
 
-                                                if($quote->tickets && isset($ticketSegments[$tripNr][$segmentNr])) {
+                                                if ($ticketSegments && isset($ticketSegments[$tripNr][$segmentNr])) {
                                                     $segment->qs_ticket_id = $ticketSegments[$tripNr][$segmentNr];
                                                 }
 

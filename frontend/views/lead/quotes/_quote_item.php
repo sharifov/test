@@ -60,9 +60,11 @@ use yii\helpers\Url;
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
                 <strong><?= $model->employee_name?></strong>
             </span>
-            <?php if($model->tickets):?>
+            <?php
+                $ticketSegments = $model->getTicketSegments();
+                if($ticketSegments):?>
                 <span title="Separate Ticket">
-                    <i class="fa fa-ticket warning"></i> (<?=count($model->getTicketSegments())?>)
+                    <i class="fa fa-ticket warning"></i> (<?=count($ticketSegments)?>)
                 </span>
             <?php endif; ?>
 
