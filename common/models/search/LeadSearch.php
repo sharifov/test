@@ -108,7 +108,10 @@ class LeadSearch extends Lead
             ['last_ticket_date', 'safe'],
             [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
-            ['remainingDays', 'safe']
+            ['remainingDays', 'integer'],
+            ['remainingDays', 'filter', 'filter' => static function($value) {
+                return (int)$value;
+            }, 'skipOnEmpty' => true],
 
         ];
     }
@@ -1136,7 +1139,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        if ($this->remainingDays || $this->remainingDays == 0) {
+        if ($this->remainingDays || $this->remainingDays === 0) {
             $query->andHaving(['remainingDays' => $this->remainingDays]);
         }
 
