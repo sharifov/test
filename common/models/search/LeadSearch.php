@@ -1136,7 +1136,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        if ($this->remainingDays) {
+        if ($this->remainingDays || $this->remainingDays == 0) {
             $query->andHaving(['remainingDays' => $this->remainingDays]);
         }
 
