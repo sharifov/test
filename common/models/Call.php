@@ -7,6 +7,7 @@ use sales\entities\AggregateRoot;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
+use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
 use Yii;
@@ -674,16 +675,29 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
                     if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
                         // Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Case' => $case->attributes]), 'info\Call:Case:afterSave');
-                        $case->cs_user_id = $this->c_created_user_id;
-                        //$case->processing($this->c_created_user_id);
-                        $case->cs_status = CasesStatus::STATUS_PROCESSING;
-                        if ($case->save()) {
+//                        $case->cs_user_id = $this->c_created_user_id;
+//                        $case->cs_status = CasesStatus::STATUS_PROCESSING;
+
+//                        if ($case->save()) {
+//                            Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
+//                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
+//                            Notifications::sendSocket('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+//                        } else {
+//                            Yii::error(VarDumper::dumpAsString($case->errors), 'Call:afterSave:Case:update');
+//                        }
+
+                        try {
+                            $caseRepo = Yii::createObject(CasesRepository::class);
+                            $case->processing((int)$this->c_created_user_id);
+                            $caseRepo->save($case);
+
                             Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                             $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
                             Notifications::sendSocket('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
-                        } else {
-                            Yii::error(VarDumper::dumpAsString($case->errors), 'Call:afterSave:Case:update');
+                        } catch (\Throwable $e) {
+                            Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
                         }
+
                     }
                 }
             }
