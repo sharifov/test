@@ -262,6 +262,9 @@ class CommunicationController extends ApiBaseController
             }
 
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+            if ($incoming_phone_number === '+15206006011') {
+                return $this->startConference($postCall);
+            }
 
             $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             if ($departmentPhone) {
@@ -1885,4 +1888,84 @@ class CommunicationController extends ApiBaseController
         }
         return $responseData;
     }
+
+
+    private function startConference(array $postCall)
+    {
+        $response = [];
+
+
+        /*Yii::info(VarDumper::dumpAsString([
+            'callModel' => $callModel->attributes,
+            'department' => $department->attributes,
+            'ivrSelectedDigit' => $ivrSelectedDigit,
+            'ivrStep' => $ivrStep,
+
+        ], 10, false), 'info\API:Communication:ivrService');*/
+
+        $vr = new VoiceResponse();
+
+        try {
+
+            $vr->pause(['length' => 2]);
+            $vr->say('Hi! Conference "Room 1".', [
+                'language' => 'en-US',
+                'voice' => 'alice'
+            ]);
+            //$vr->reject(['reason' => 'busy']);
+            // $vr->say($ivrParams['error_phrase'], ['language' => $ivrParams['entry_language'], 'voice' => $ivrParams['entry_voice']]);
+            // $vr->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
+
+            $dial = $vr->dial('');
+
+            $params['muted']                        = false;
+            $params['beep']                         = true;     // true, false, onEnter, onExit
+            $params['startConferenceOnEnter']       = true;
+            $params['endConferenceOnExit']          = false;
+            $params['waitUrl']                      = 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical';
+            $params['maxParticipants']              = 250;
+
+            $params['record']                       = 'record-from-start';  // do-not-record or record-from-start
+            //$params['region']                     = 250;  // us1, ie1, de1, sg1, br1, au1, jp1
+            $params['trim']                         = 'trim-silence';    // trim-silence or do-not-trim
+            $params['statusCallbackEvent']          = 'start end join leave mute hold speaker';
+            $params['statusCallback']               = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-status-callback';
+            $params['statusCallbackMethod']             = 'POST';
+            $params['recordingStatusCallback']          = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-recording-status-callback';
+            $params['recordingStatusCallbackMethod']    = 'POST';
+            $params['recordingStatusCallbackEvent']     = 'completed'; // in-progress, completed, absent
+            //$params['eventCallbackUrl']               = 'relative or absolute URL';
+
+
+
+            $dial->conference('Room1', $params);
+            //$vr->reject(['reason' => 'busy']);
+
+            $response['twml'] = (string) $vr;
+            $responseData = [
+                'status' => 200,
+                'name' => 'Success',
+                'code' => 0,
+                'message' => '',
+                'data' => ['response' => $response]
+            ];
+
+
+        } catch (\Throwable $e) {
+
+            $vr->say('Conference Error!');
+            $vr->reject(['reason' => 'busy']);
+            $response['twml'] = (string) $vr;
+            $responseData = [
+                'status' => 404,
+                'name' => 'Error',
+                'code' => 404,
+                'message' => 'Sales Communication error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine(),
+                'data' => ['response' => $response]
+            ];
+        }
+
+        return $responseData;
+    }
+
 }

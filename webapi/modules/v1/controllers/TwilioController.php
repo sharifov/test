@@ -353,4 +353,26 @@ class TwilioController extends ApiBaseNoAuthController
         return $responseData;
     }
 
+
+    public function actionConferenceStatusCallback()
+    {
+
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+        $responseData = [
+            'date'      => date('Y-m-d'),
+            'ip'        => Yii::$app->request->getUserIP(),
+            'get'       => Yii::$app->request->get(),
+            'post'      => Yii::$app->request->post(),
+        ];
+
+        Yii::warning(VarDumper::dumpAsString($responseData), 'Twilio ConferenceStatusCallback');
+        $apiLog->endApiLog($responseData);
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        return $responseData;
+
+    }
+
+
 }
