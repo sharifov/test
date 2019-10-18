@@ -243,6 +243,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     public $enableActiveRecordEvents = true;
 
     public $remainingDays;
+    public $agent_team = []; // for API for B/O
 
     /**
      * {@inheritdoc}
@@ -298,6 +299,16 @@ class Lead extends ActiveRecord implements AggregateRoot
             ['l_delayed_charge', 'boolean'],
             ['l_delayed_charge', 'default', 'value' => false],
         ];
+    }
+
+    /**
+     * @return array|false
+     */
+    public function fields()
+    {
+        $fields = parent::fields();
+        $fields[] = 'agent_team';
+        return $fields;
     }
 
     /**

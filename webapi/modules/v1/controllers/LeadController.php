@@ -776,7 +776,9 @@ class LeadController extends ApiBaseController
 
         //print_r($this->apiProject); exit;
 
-        if ($this->apiProject) $modelLead->project_id = $this->apiProject->id;
+        if ($this->apiProject) {
+            $modelLead->project_id = $this->apiProject->id;
+        }
 
         if ($modelLead->load(Yii::$app->request->post())) {
             if (!$modelLead->validate()) {
@@ -789,26 +791,44 @@ class LeadController extends ApiBaseController
         }
 
         $lead = Lead::findOne($modelLead->lead_id);
+        //$lead->scenario = Lead::SCENARIO_UPDATE_API;
+
         if (!$lead) {
             throw new NotFoundHttpException('Not found lead ID: ' . $modelLead->lead_id, 9);
         }
 
+        //return $lead->attributes;
+
         $response = [];
+
         $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+
 
 
         foreach ($modelLead->attributes as $attrKey => $attrValue) {
-            if ($attrValue === null) continue;
-            if (isset($lead->$attrKey)) $lead->$attrKey = $attrValue;
+            if ($attrValue === null) {
+                continue;
+            }
+            if (isset($lead->$attrKey)) {
+                $lead->$attrKey = $attrValue;
+            }
         }
 
         $client = $lead->client;
 
         if ($modelLead->client_first_name || $modelLead->client_last_name || $modelLead->client_middle_name) {
             if ($client) {
-                if ($modelLead->client_first_name) $client->first_name = $modelLead->client_first_name;
-                if ($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
-                if ($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
+                if ($modelLead->client_first_name) {
+                    $client->first_name = $modelLead->client_first_name;
+                }
+                if ($modelLead->client_last_name) {
+                    $client->last_name = $modelLead->client_last_name;
+                }
+                if ($modelLead->client_middle_name) {
+                    $client->middle_name = $modelLead->client_middle_name;
+                }
 
                 $client->save();
             }
@@ -881,10 +901,15 @@ class LeadController extends ApiBaseController
             }
         }
 
-        $transaction->commit();
+        //$transaction->commit();
 
+            if ($lead->employee_id) {
+                // FOR B/O
+                $lead->agent_team = $lead->employee->getUserGroupList();
+            } else {
+                $lead->agent_team = [];
+            }
 
-        try {
             $response['lead'] = $lead;
             $response['flights'] = $lead->leadFlightSegments;
             $response['emails'] = $lead->client->clientEmails;
