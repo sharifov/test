@@ -78,6 +78,13 @@ class CloneQuoteByUidForm extends Model
         }
 
         try {
+            LeadCloneQuoteService::guardTypeCabin($leadQuote, $this->lead);
+        } catch (\DomainException $e) {
+            $this->addError('uid', $e->getMessage());
+            return;
+        }
+
+        try {
             LeadCloneQuoteService::guardTypePassengers($quote, $this->lead);
         } catch (\DomainException $e) {
             $this->addError('uid', $e->getMessage());

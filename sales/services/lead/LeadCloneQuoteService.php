@@ -94,6 +94,7 @@ class LeadCloneQuoteService
         }
 
         self::guardSegments($leadQuote, $lead);
+        self::guardTypeCabin($leadQuote, $lead);
         self::guardTypePassengers($currentQuote, $lead);
         self::guardCountPassengers($currentQuote, $lead);
 
@@ -238,6 +239,17 @@ class LeadCloneQuoteService
         if (!$lead->equalsSegments($leadQuoteSegments)) {
             throw new \DomainException('Different segments');
 
+        }
+    }
+
+    /**
+     * @param Lead $leadQuote
+     * @param Lead $lead
+     */
+    public static function guardTypeCabin(Lead $leadQuote, Lead $lead): void
+    {
+        if ($lead->cabin != $leadQuote->cabin) {
+            throw new \DomainException('Only same cabin type can be cloned.');
         }
     }
 
