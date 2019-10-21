@@ -406,11 +406,11 @@ class CallSearch extends Call
         $query = new Query();
 
         $query->select(['
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' THEN 1 ELSE 0 END) AS outgoingCalls, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_COMPLETED . '" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_NO_ANSWER . '" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_CANCELED . '" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS outgoingCalls, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_NO_ANSWER . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_BUSY . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS outgoingCallsBusy, 
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN 1 ELSE 0 END) AS incomingCalls,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS incomingCompletedCalls,
@@ -455,9 +455,9 @@ class CallSearch extends Call
                         'asc' => ['outgoingCallsNoAnswer' => SORT_ASC],
                         'desc' => ['outgoingCallsNoAnswer' => SORT_DESC],
                     ],
-                    'outgoingCallsCanceled' => [
-                        'asc' => ['outgoingCallsCanceled' => SORT_ASC],
-                        'desc' => ['outgoingCallsCanceled' => SORT_DESC],
+                    'outgoingCallsBusy' => [
+                        'asc' => ['outgoingCallsBusy' => SORT_ASC],
+                        'desc' => ['outgoingCallsBusy' => SORT_DESC],
                     ],
                     'incomingCallsDuration' => [
                         'asc' => ['incomingCallsDuration' => SORT_ASC],
