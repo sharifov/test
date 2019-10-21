@@ -68,7 +68,7 @@ $('#client-add-email-form').on('beforeSubmit', function (e) {
        dataType: 'json',
        success: function(data) {
             if (!data.error) {
-                $('#pjax-client-manage-email').html(data.html);
+                $('#client-manage-email').html(data.html);
                 $('#modal-client-manage-info').modal('hide');
                 
                 new PNotify({

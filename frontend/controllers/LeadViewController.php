@@ -89,13 +89,13 @@ class LeadViewController extends FController
 	 */
     public function actionAjaxGetUsersSamePhoneInfo(): string
 	{
-		if (Yii::$app->request->isAjax && Yii::$app->request->isPost)
+		if (Yii::$app->request->isAjax)
 		{
 			try {
 				$searchModel = new ClientSearch();
 
-				$phone = Yii::$app->request->post('phone');
-				$clientId = Yii::$app->request->post('clientId');
+				$phone = Yii::$app->request->get('phone');
+				$clientId = Yii::$app->request->get('clientId');
 
 				$params['ClientSearch']['client_phone'] = $phone;
 				$params['ClientSearch']['not_in_client_id'] = $clientId;
@@ -108,6 +108,39 @@ class LeadViewController extends FController
 					'clientId' => $clientId
 				]);
 
+			}catch (\Exception $e) {
+				Yii::error($e->getMessage() . '; On Line: ' . $e->getLine() . '; In File: ' . $e->getFile());
+				throw new BadRequestHttpException();
+			}
+		}
+
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 */
+    public function actionAjaxGetUsersSameEmailInfo(): string
+	{
+		if (Yii::$app->request->isAjax)
+		{
+			try {
+				$searchModel = new ClientSearch();
+
+				$email = Yii::$app->request->get('email');
+				$clientId = Yii::$app->request->get('clientId');
+
+				$params['ClientSearch']['client_email'] = $email;
+				$params['ClientSearch']['not_in_client_id'] = $clientId;
+
+				$dataProvider = $searchModel->searchFromLead($params);
+
+				return $this->renderAjax('_client_same_users_by_email', [
+					'dataProvider' => $dataProvider,
+					'email' => $email,
+					'clientId' => $clientId
+				]);
 			}catch (\Exception $e) {
 				Yii::error($e->getMessage() . '; On Line: ' . $e->getLine() . '; In File: ' . $e->getFile());
 				throw new BadRequestHttpException();
@@ -174,7 +207,7 @@ class LeadViewController extends FController
 	public function actionAjaxAddClientPhone()
 	{
 		$user = Yii::$app->user->identity;
-		if (!$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+		if (!Yii::$app->request->isAjax && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
 			throw new HttpException(403, 'Access Denied');
 		}
 
@@ -491,7 +524,6 @@ class LeadViewController extends FController
 
 			$form = new EmailCreateForm();
 			$form->scenario = 'update';
-
 
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 

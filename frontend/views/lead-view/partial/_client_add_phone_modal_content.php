@@ -14,7 +14,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
-use yii\widgets\Pjax;
 
 $user = Yii::$app->user->identity;
 $addPhone->client_id = $lead->client_id;
@@ -71,7 +70,7 @@ $('#client-add-phone-form').on('beforeSubmit', function (e) {
        dataType: 'json',
        success: function(data) {
             if (!data.error) {
-                $('#pjax-client-manage-phone').html(data.html);
+                $('#client-manage-phone').html(data.html);
                 $('#modal-client-manage-info').modal('hide');
                 
                 new PNotify({

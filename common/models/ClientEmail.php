@@ -5,6 +5,7 @@ namespace common\models;
 use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
+use yii\db\Query;
 
 /**
  * This is the model class for table "client_email".
@@ -34,6 +35,10 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 		1 => '<i class="fa fa-check green"></i> ',
 		2 => '<i class="fa fa-star yellow"></i> ',
 		9 => '<i class="fa fa-close red"></i> '
+	];
+
+	public const EMAIL_TYPE_TEXT_DECORATION = [
+		9 => 'text-line-through'
 	];
 
     /**
@@ -118,4 +123,21 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 
         return parent::beforeValidate();
     }
+
+	/**
+	 * @return int
+	 */
+	public function countUsersSameEmail(): int
+	{
+		$subQuery = (new Query())->select(['client_id'])->distinct()
+			->from(ClientEmail::tableName())
+			->where(['email' => $this->email]);
+
+		$query = (new Query())->select(['id'])->distinct()
+			->from(Client::tableName())
+			->where(['NOT IN', 'id', $this->client_id])
+			->andWhere(['IN', 'id', $subQuery]);
+
+		return (int)$query->count();
+	}
 }

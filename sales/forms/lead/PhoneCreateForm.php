@@ -6,7 +6,6 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\ClientPhone;
 use common\models\DepartmentPhoneProject;
 use common\models\UserProjectParams;
-use Twilio\Http\Client;
 use yii\base\Model;
 
 /**
@@ -73,8 +72,6 @@ class PhoneCreateForm extends Model
             $this->addError($attribute, $this->message);
         }
     }
-
-
 
 	/**
 	 * @param $attribute

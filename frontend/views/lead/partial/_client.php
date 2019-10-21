@@ -1,24 +1,16 @@
 <?php
 
 use frontend\widgets\client\ClientCounterWidget;
-use frontend\widgets\client\ClientManagePhoneEmailWidget;
-use sales\forms\lead\PhoneCreateForm;
 use yii\bootstrap\ActiveForm;
 use frontend\models\LeadForm;
-use common\models\ClientEmail;
-use common\models\ClientPhone;
 use yii\bootstrap\Modal;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\helpers\VarDumper;
-use yii\widgets\Pjax;
 
 /**
  * @var $this \yii\web\View
  * @var $formClient ActiveForm
  * @var $leadForm LeadForm
- * @var $nr integer
- * @var $newPhone ClientPhone
  */
 
 $formId = sprintf('%s-form', $leadForm->getClient()->formName());
@@ -63,7 +55,6 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 						'class' => 'btn btn-primary showModalButton'
 					]) ?>
 
-
                      <?= Html::button('<i class="fa fa-plus"></i> <i class="fa fa-envelope"></i>', [
 						'id' => 'client-new-email-button',
 						'data-modal_id' => 'client-manage-info',
@@ -99,18 +90,6 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 					]);
 				}
                 ?>
-                    <!-- new email fields -->
-<!--                    <div id="client-new-email-block" style="display: none;">-->
-<!--                        --><?php //$newEmail = new ClientEmail(); ?>
-<!--                        --><?//= $this->render('_formClientEmail', [
-//                            'key' => '__id__',
-//                            'form' => $formClient,
-//                            'email' => $newEmail,
-//                            'leadForm' => $leadForm,
-//                            'nr' => $nr
-//                        ]) ?>
-<!--                    </div>-->
-<!--                --><?php //endif; ?>
             </div>
         </div>
         <div class="sidebar__subsection">
@@ -174,15 +153,20 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 
 <?= Modal::widget([
     'id' => 'modal-client-manage-info',
-    'headerOptions' => [
-        'id' => 'modal-header'
-    ],
     'bodyOptions' => [
-        'id' => 'modal-content',
         'class' => 'modal-body'
     ],
     'size' => 'modal-sm',
 ]) ?>
+
+<?= Modal::widget([
+	'id' => 'modal-client-large',
+	'bodyOptions' => [
+		'class' => 'modal-body'
+	],
+	'size' => 'modal-lg',
+]);
+?>
 
     <style type="text/css">
         @media screen and (min-width: 768px) {
@@ -208,12 +192,12 @@ $jsCode = <<<JS
         var id = $(this).data('modal_id');
         var url = $(this).data('content-url');
 
-        $('#modal-header').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modal-' + id).find('.modal-header').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
         
-        $('#modal-' + id).modal('show').find('#modal-content').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
 
         $.post(url, function(data) {
-            $('#modal-' + id).find('#modal-content').html(data);
+            $('#modal-' + id).find('.modal-body').html(data);
         });
        return false;
     });

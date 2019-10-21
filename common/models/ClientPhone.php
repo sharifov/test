@@ -47,6 +47,10 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 		9 => '<i class="fa fa-close red"></i> '
 	];
 
+	public const PHONE_TYPE_TEXT_DECORATION = [
+		9 => 'text-line-through'
+	];
+
     // old phone value. need for afterSave() method
     private $old_phone = '';
 
@@ -75,7 +79,6 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 
 	/**
 	 * @param string $phone
-	 * @param int $clientId
 	 * @param int|null $phoneType
 	 */
     public function edit(string $phone, int $phoneType = null): void

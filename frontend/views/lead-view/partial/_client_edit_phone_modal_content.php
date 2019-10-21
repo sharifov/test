@@ -79,7 +79,7 @@ $('#client-edit-phone-form').on('beforeSubmit', function (e) {
        dataType: 'json',
        success: function(data) {
             if (!data.error) {
-                $('#pjax-client-manage-phone').html(data.html);
+                $('#client-manage-phone').html(data.html);
                 $('#modal-client-manage-info').modal('hide');
                 
                 new PNotify({

@@ -144,33 +144,9 @@ div#call-controls input {
   padding: 5px;
 }
 
-.phone_number_readonly .intl-tel-input.allow-dropdown .flag-container:hover {
-    cursor: default;
-}
-.phone_number_readonly .intl-tel-input.allow-dropdown .flag-container:hover .selected-flag {
-    background-color: transparent;
-}
-.phone_number_readonly .intl-tel-input .selected-flag .iti-arrow {
-    display: none;
-}
-.phone_number_readonly .intl-tel-input.allow-dropdown input {
-    background-color: transparent;
-    padding-left: 30px;
-}
-.phone_number_readonly .intl-tel-input.allow-dropdown input:hover {
-    cursor: default;
-}
-.phone_number_readonly .intl-tel-input.allow-dropdown input:focus {
-    border-color: transparent;
-}
-
-.phone_number_readonly .intl-tel-input.allow-dropdown .selected-flag,
-.phone_number_readonly .intl-tel-input.separate-dial-code .selected-flag
-{
-    width: 25px;
-    padding: 0;
-}
-
 .yellow {
     color: #e3c300;
+}
+.text-line-through {
+    text-decoration: line-through;
 }
