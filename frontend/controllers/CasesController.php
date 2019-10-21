@@ -1310,6 +1310,9 @@ class CasesController extends FController
 		} catch (\Exception $exception) {
 			$out['error'] = 1;
 			$out['message'] = 'An internal Sales error has occurred; Check system logs;';
+			if ($exception->getCode() < 0 && $exception->getCode() > -4) {
+				$out['message'] = $exception->getMessage();
+			}
 			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Exception');
 		}
 
