@@ -128,6 +128,16 @@ use yii\helpers\VarDumper;
  *
  * @property LeadFlow $lastLeadFlow
  *
+ * @property $remainingDays
+ * @property $grade
+ * @property $inCalls
+ * @property $inCallsDuration
+ * @property $outCalls
+ * @property $outCallsDuration
+ * @property $smsOffers
+ * @property $emailOffers
+ * @property $quoteType
+ *
  */
 class Lead extends ActiveRecord implements AggregateRoot
 {
@@ -243,6 +253,16 @@ class Lead extends ActiveRecord implements AggregateRoot
     public $enableActiveRecordEvents = true;
 
     public $remainingDays;
+
+    public $grade;
+    public $inCalls;
+    public $inCallsDuration;
+    public $outCalls;
+    public $outCallsDuration;
+    public $smsOffers;
+    public $emailOffers;
+    public $quoteType;
+
 
     /**
      * {@inheritdoc}

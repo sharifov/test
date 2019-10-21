@@ -168,7 +168,7 @@ class LeadsController extends FController
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
-        $dataProvider = $searchModel->search($params);
+        $dataProvider = $searchModel->searchExport($params);
 
         return $this->render('export', [
             'searchModel' => $searchModel,
