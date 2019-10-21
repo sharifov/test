@@ -247,7 +247,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
                             <td><?=Html::encode($passenger['type'])?></td>
                             <td>
 								<?php
-                                if ($caseSaleModel->cssCs->isProcessing()) :
+                                if (isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) :
                                 $editable = Editable::begin([
 									'name' => 'cssSaleData[passengers]['.$key.'][birth_date]',
 									'header' => 'Date of Birth',
@@ -280,7 +280,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
                                 <? endif; ?>
                             </td>
                             <td>
-								<? if($caseSaleModel->cssCs->isProcessing()):
+								<? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()):
                                         echo Editable::widget([
                                             'name' => 'cssSaleData[passengers]['.$key.'][gender]',
                                             'header' => 'Gender',
@@ -302,7 +302,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                             </td>
                             <td>
-								<? if($caseSaleModel->cssCs->isProcessing()) {
+								<? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) {
                                     echo Editable::widget([
                                         'name' => 'cssSaleData[passengers]['.$key.'][meal]',
                                         'header' => 'Meal',
@@ -330,7 +330,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                             </td>
                             <td>
-								<? if($caseSaleModel->cssCs->isProcessing()) {
+								<? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) {
 									echo Editable::widget([
 										'name' => 'cssSaleData[passengers][' . $key . '][wheelchair]',
 										'header' => 'Wheelchair',
@@ -358,7 +358,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                             </td>
                             <td>
-                                <? if($caseSaleModel->cssCs->isProcessing()) {
+                                <? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) {
 									echo Editable::widget([
 										'name' => 'cssSaleData[passengers][' . $key . '][ff_numbers]',
 										'header' => 'Frequent Fayer',
@@ -384,7 +384,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                             </td>
                             <td>
-								<? if($caseSaleModel->cssCs->isProcessing()) {
+								<? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) {
                                     echo Editable::widget([
                                         'name' => 'cssSaleData[passengers]['.$key.'][kt_numbers]',
                                         'header' => 'KTN',
