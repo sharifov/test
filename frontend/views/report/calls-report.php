@@ -102,10 +102,10 @@ $list = new ListsAccess(Yii::$app->user->id);
             'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
-            'label' =>'Canceled',
-            'attribute' => 'outgoingCallsCanceled',
+            'label' =>'Busy',
+            'attribute' => 'outgoingCallsBusy',
             'value' => function($data) {
-                return $data['outgoingCallsCanceled'] ?: '-';
+                return $data['outgoingCallsBusy'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
