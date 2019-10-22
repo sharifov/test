@@ -33,7 +33,7 @@ class CasesSaleForm extends Model
 	/**
 	 * @var string
 	 */
-	private $dateFormat = 'php:Y-m-d';
+	private $dateFormat = 'Y-m-d';
 
 	/**
 	 * @var array
@@ -144,7 +144,7 @@ class CasesSaleForm extends Model
 	 */
 	private function birthDateFilter(&$value, $key)
 	{
-		$value[$key] = Yii::$app->formatter->asDate(Html::encode($value[$key]), $this->dateFormat);
+		$value[$key] = date($this->dateFormat, strtotime(Html::encode($value[$key])));
 	}
 
 	/**
