@@ -26,6 +26,7 @@ use yii\widgets\ActiveForm;
     <?//= $form->field($model, 'created')->textInput() ?>
 
     <?//= $form->field($model, 'updated')->textInput() ?>
+    <?= $form->field($model, 'type')->dropDownList($model::PHONE_TYPE); ?>
 
     <?= $form->field($model, 'comments')->textarea(['rows' => 6]) ?>
 

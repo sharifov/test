@@ -1,5 +1,7 @@
 <?php
 
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use sales\entities\cases\Cases;
 use yii\helpers\Html;
 
@@ -71,11 +73,13 @@ use yii\helpers\Html;
 
                                         $phones = $model->clientPhones;
                                         $data = [];
-                                        if($phones) {
-                                            foreach ($phones as $k => $phone) {
-                                                $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
-                                            }
-                                        }
+										if ($phones) {
+											foreach ($phones as $k => $phone) {
+												$data[] = '<i class="fa fa-phone"></i> 
+                                                           <code class="' . (ClientPhone::PHONE_TYPE_TEXT_DECORATION[$phone->type] ?? '') . '" 
+                                                                 title="' . (ClientPhone::PHONE_TYPE[$phone->type] ?? '') . '">' . Html::encode($phone->phone) . ' ' . (ClientPhone::PHONE_TYPE_ICONS[$phone->type] ?? '') . '</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+											}
+										}
 
                                         $str = implode('<br>', $data);
                                         return ''.$str.'';
@@ -92,7 +96,9 @@ use yii\helpers\Html;
                                         $data = [];
                                         if($emails) {
                                             foreach ($emails as $k => $email) {
-                                                $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                                                $data[] = '<i class="fa fa-envelope"></i> 
+                                                           <code class="' . (ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '') . '"
+                                                                 title="' . (ClientEmail::EMAIL_TYPE[$email->type] ?? '') . '">'.Html::encode($email->email). ' ' . (ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '') .'</code>';
                                             }
                                         }
 

@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -43,6 +44,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'client_id',
             'phone',
+            [
+                'attribute' => 'type',
+                'value' => function (\common\models\ClientPhone $model) {
+                    return $model::PHONE_TYPE[$model->type] ?? '(not set)';
+                },
+                'format' => 'raw',
+                'filter' =>  \common\models\ClientPhone::PHONE_TYPE
+            ],
             [
                 'attribute' => 'created',
                 'value' => function (\common\models\ClientPhone $model) {

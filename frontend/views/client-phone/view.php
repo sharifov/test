@@ -47,6 +47,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             [
+                'attribute' => 'type',
+                'value' => function (\common\models\ClientPhone $model) {
+                    return $model::PHONE_TYPE[$model->type] ?? '(not set)';
+                }
+            ],
+            [
                 'attribute' => 'updated',
                 'value' => function (\common\models\ClientPhone $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
