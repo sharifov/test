@@ -431,7 +431,8 @@ class LeadViewController extends FController
 				$response['message'] = 'New email was successfully added: ' . $form->email;
 				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_email', [
 					'clientEmails' => $lead->client->clientEmails,
-					'lead' => $lead
+					'lead' => $lead,
+					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
 				]);
 			} else {
 				$response['error'] = true;
