@@ -47,6 +47,12 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 		9 => '<i class="fa fa-close red"></i> '
 	];
 
+    public const PHONE_TYPE_LABELS = [
+    	1 => '<span class="label label-success">{type}</span>',
+		2 => '<span class="label label-warning">{type}</span>',
+		9 => '<span class="label label-danger">{type}</span>'
+	];
+
 	public const PHONE_TYPE_TEXT_DECORATION = [
 		9 => 'text-line-through'
 	];
@@ -211,5 +217,44 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 			->andWhere(['IN', 'id', $subQuery]);
 
 		return (int)$query->count();
+	}
+
+	/**
+	 * @param int|null $type
+	 * @return mixed|string
+	 */
+	public static function getPhoneType(?int $type): string
+	{
+		return self::PHONE_TYPE[$type] ?? '';
+	}
+
+	/**
+	 * @param int $type
+	 * @return mixed|string
+	 */
+	public static function getPhoneTypeTextDecoration(?int $type): string
+	{
+		return self::PHONE_TYPE_TEXT_DECORATION[$type] ?? '';
+	}
+
+	/**
+	 * @param int $type
+	 * @return mixed|string
+	 */
+	public static function getPhoneTypeIcon(?int $type): string
+	{
+		return self::PHONE_TYPE_ICONS[$type] ?? '';
+	}
+
+	/**
+	 * @param int|null $type
+	 * @return string
+	 */
+	public static function getPhoneTypeLabel(?int $type): string
+	{
+		if (isset(self::PHONE_TYPE_LABELS[$type], self::PHONE_TYPE[$type])) {
+			return str_replace('{type}', self::PHONE_TYPE[$type], self::PHONE_TYPE_LABELS[$type]);
+		}
+		return '';
 	}
 }

@@ -25,10 +25,10 @@ use yii\widgets\DetailView;
             'attributes' => [
                 [
                     'label' => 'Phones',
-                    'value' => function (Client $model) {
+                    'value' => static function (Client $model) {
                         $data = [];
                         foreach ($model->clientPhones as $k => $phone) {
-                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
+                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code> ' . $phone::getPhoneTypeLabel($phone->type);
                         }
                         return implode('<br>', $data);
                     },
@@ -37,10 +37,10 @@ use yii\widgets\DetailView;
                 ],
                 [
                     'label' => 'Emails',
-                    'value' => function (Client $model) {
+                    'value' => static function (Client $model) {
                         $data = [];
                         foreach ($model->clientEmails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
+                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code> ' . $email::getPhoneTypeLabel($email->type);
                         }
                         return implode('<br>', $data);
                     },
@@ -49,14 +49,14 @@ use yii\widgets\DetailView;
                 ],
                 [
                     'attribute' => 'created',
-                    'value' => function (Client $model) {
+                    'value' => static function (Client $model) {
                         return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                     },
                     'format' => 'html',
                 ],
                 [
                     'attribute' => 'updated',
-                    'value' => function (Client $model) {
+                    'value' => static function (Client $model) {
                         return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                     },
                     'format' => 'html',

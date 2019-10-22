@@ -51,7 +51,7 @@ class PhoneCreateForm extends Model
     public function rules(): array
     {
         return [
-            ['phone', 'required'],
+//            ['phone', 'required'],
             ['phone', 'validateRequired', 'skipOnEmpty' => false],
             ['phone', 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],

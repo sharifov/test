@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 
 <? Pjax::begin(['id' => 'pjax-client-manage-name', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed" style="margin-bottom: 0;">
 	<tr>
 		<td><?= $client->getAttributeLabel('firstName') ?>:</td>
 		<td><?= $client->first_name ?></td>

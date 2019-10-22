@@ -1,6 +1,8 @@
 <?php
 
 use frontend\widgets\client\ClientCounterWidget;
+use sales\access\ClientInfoAccess;
+use sales\access\EmployeeGroupAccess;
 use yii\bootstrap\ActiveForm;
 use frontend\models\LeadForm;
 use yii\bootstrap\Modal;
@@ -14,6 +16,9 @@ use yii\helpers\Url;
  */
 
 $formId = sprintf('%s-form', $leadForm->getClient()->formName());
+$lead = $leadForm->lead;
+
+$manageClientInfoAccess = ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id);
 ?>
 
     <script>
@@ -44,14 +49,14 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
             <i class="fa fa-user"></i>
         </h3>
         <div class="sidebar__subsection">
-			<? if ($leadForm->mode != $leadForm::VIEW_MODE): ?>
+			<?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess): ?>
 
 				 <div class="">
                      <?= Html::button('<i class="fa fa-plus"></i> <i class="fa fa-phone"></i>', [
 						'id' => 'client-new-phone-button',
 						'data-modal_id' => 'client-manage-info',
 						'title' => 'Add Phone',
-						'data-content-url' => Url::to(['lead-view/ajax-add-client-phone-modal-content', 'gid' => $leadForm->getLead()->gid]),
+						'data-content-url' => Url::to(['lead-view/ajax-add-client-phone-modal-content', 'gid' => $lead->gid]),
 						'class' => 'btn btn-primary showModalButton'
 					]) ?>
 
@@ -59,7 +64,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 						'id' => 'client-new-email-button',
 						'data-modal_id' => 'client-manage-info',
 						'title' => 'Add Email',
-						'data-content-url' => Url::to(['lead-view/ajax-add-client-email-modal-content', 'gid' => $leadForm->getLead()->gid]),
+						'data-content-url' => Url::to(['lead-view/ajax-add-client-email-modal-content', 'gid' => $lead->gid]),
 						'class' => 'btn btn-primary showModalButton'
 					]) ?>
 
@@ -67,42 +72,45 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 						'id' => 'client-edit-user-name-button',
 						'data-modal_id' => 'client-manage-info',
 						'title' => 'Update user name',
-						'data-content-url' => Url::to(['lead-view/ajax-edit-client-name-modal-content', 'gid' => $leadForm->getLead()->gid]),
+						'data-content-url' => Url::to(['lead-view/ajax-edit-client-name-modal-content', 'gid' => $lead->gid]),
 						'class' => 'btn btn-primary showModalButton'
 					]) ?>
-
                  </div>
 
-			<? endif; ?>
+			<?php endif; ?>
         </div>
         <div class="sidebar__subsection">
             <?= $this->render('_client_manage_name', [
-                    'client' => $leadForm->getClient()
+                    'client' => $lead->client
             ]) ?>
         </div>
-        <div class="sidebar__subsection">
-            <div id="client-emails">
-                <?
-				if ($leadForm->viewPermission) {
-					echo $this->render('_client_manage_email', [
-						'clientEmails' => $leadForm->getClientEmail(),
-						'lead' => $leadForm->getLead()
-					]);
-				}
-                ?>
-            </div>
-        </div>
-        <div class="sidebar__subsection">
-            <div id="client-phones">
+
+        <div id="client-manage-email">
+            <?php if ($emails = $lead->client->clientEmails): ?>
                 <?php
                     if ($leadForm->viewPermission) {
-                        echo $this->render('_client_manage_phone', [
-                            'clientPhones' => $leadForm->getClientPhone(),
-                            'lead' => $leadForm->getLead()
+                        echo $this->render('_client_manage_email', [
+                            'clientEmails' => $emails,
+                            'lead' => $lead,
+                            'manageClientInfoAccess' => $manageClientInfoAccess
                         ]);
                     }
                 ?>
-            </div>
+            <?php endif; ?>
+        </div>
+
+        <div id="client-manage-phone">
+            <?php if ($phones = $lead->client->clientPhones): ?>
+                <?php
+                    if ($leadForm->viewPermission) {
+                        echo $this->render('_client_manage_phone', [
+                            'clientPhones' => $phones,
+                            'lead' => $lead,
+							'manageClientInfoAccess' => $manageClientInfoAccess
+						]);
+                    }
+                ?>
+            <?php endif; ?>
         </div>
         <?php if(!$leadForm->getLead()->isNewRecord) :?>
         <div class="sidebar__subsection">

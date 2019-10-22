@@ -31,7 +31,7 @@ $user = Yii::$app->user->identity;
 
 	<?= $form->errorSummary($editPhone); ?>
 
-	<? if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
+	<?php if ($user->isAdmin() || $user->isSuperAdmin()): ?>
 		<?= $form->field($editPhone, 'phone', [
 			'options' => [
 				'class' => 'form-group',
@@ -45,19 +45,19 @@ $user = Yii::$app->user->identity;
 				'nationalMode' => false,
 				'preferredCountries' => ['us'],
 			]
-		]); ?>
-	<? endif; ?>
+		]) ?>
+	<?php endif; ?>
 
 	<?=
-	$form->field($editPhone, 'type')->dropDownList(ClientPhone::PHONE_TYPE);
+	$form->field($editPhone, 'type')->dropDownList(ClientPhone::PHONE_TYPE)
 	?>
 
 	<?=
-	$form->field($editPhone, 'id')->hiddenInput()->label(false)->error(false);
+	$form->field($editPhone, 'id')->hiddenInput()->label(false)->error(false)
 	?>
 
 	<?=
-	$form->field($editPhone, 'client_id')->hiddenInput()->label(false)->error(false);
+	$form->field($editPhone, 'client_id')->hiddenInput()->label(false)->error(false)
 	?>
 
 	<?= Html::submitButton('Submit', [

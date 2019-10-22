@@ -29,10 +29,9 @@ $addEmail->client_id = $lead->client_id;
 		'validationUrl' => Url::to(['lead-view/ajax-add-client-email-validation', 'gid' => $lead->gid])
 	]); ?>
 
-	<?= $form->errorSummary($addEmail); ?>
+	<?= $form->errorSummary($addEmail) ?>
 
-	<? if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
-
+	<?php if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
         <?=
         $form->field($addEmail, 'email', [
         'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
@@ -42,16 +41,16 @@ $addEmail->client_id = $lead->client_id;
         ])->textInput([
         'class' => 'form-control email lead-form-input-element',
         'type' => 'email'
-        ]);
+        ])
         ?>
-	<? endif; ?>
+	<?php endif; ?>
 
 	<?=
 	$form->field($addEmail, 'type')->dropDownList(ClientEmail::EMAIL_TYPE);
 	?>
 	<?= Html::submitButton('Submit', [
 		'class' => 'btn btn-warning'
-	]);
+	])
 	?>
 	<?php ActiveForm::end(); ?>
 </div>

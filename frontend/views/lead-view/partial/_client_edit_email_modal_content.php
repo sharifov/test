@@ -28,9 +28,9 @@ $user = Yii::$app->user->identity;
 		'validationUrl' => Url::to(['lead-view/ajax-edit-client-email-validation', 'gid' => $lead->gid])
 	]); ?>
 
-	<?= $form->errorSummary($editEmail); ?>
+	<?= $form->errorSummary($editEmail) ?>
 
-	<? if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
+	<?php if ($user->isAdmin() || $user->isSuperAdmin()): ?>
 		<?=
 		$form->field($editEmail, 'email', [
 			'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
@@ -40,23 +40,23 @@ $user = Yii::$app->user->identity;
 		])->textInput([
 			'class' => 'form-control email lead-form-input-element',
 			'type' => 'email'
-		]);
+		])
 		?>
-	<? endif; ?>
+	<?php endif; ?>
 
 	<?=
-	$form->field($editEmail, 'type')->dropDownList(ClientEmail::EMAIL_TYPE);
+	$form->field($editEmail, 'type')->dropDownList(ClientEmail::EMAIL_TYPE)
 	?>
 
 	<?=
-	$form->field($editEmail, 'id')->hiddenInput()->label(false)->error(false);
+	$form->field($editEmail, 'id')->hiddenInput()->label(false)->error(false)
 	?>
 
 	<?=
-	$form->field($editEmail, 'client_id')->hiddenInput()->label(false)->error(false);
+	$form->field($editEmail, 'client_id')->hiddenInput()->label(false)->error(false)
 	?>
 
-	<?= Html::submitButton('Submit', [
+	<?= Html::submitButton('Save', [
 		'class' => 'btn btn-warning'
 	]);
 	?>

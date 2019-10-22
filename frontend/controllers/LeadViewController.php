@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\search\ClientSearch;
+use sales\access\ClientInfoAccess;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
@@ -185,6 +186,7 @@ class LeadViewController extends FController
 
 		try {
 			$form = new PhoneCreateForm();
+			$form->required = true;
 
 			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
 
@@ -225,7 +227,8 @@ class LeadViewController extends FController
 				$response['message'] = 'New phone was successfully added: ' . $form->phone;
 				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_phone', [
 					'clientPhones' => $lead->client->clientPhones,
-					'lead' => $lead
+					'lead' => $lead,
+					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
 				]);
 			} else {
 				$response['error'] = true;
@@ -287,6 +290,7 @@ class LeadViewController extends FController
 		try {
 			$form = new PhoneCreateForm();
 			$form->scenario = 'update';
+			$form->required = true;
 
 			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
 
@@ -319,12 +323,11 @@ class LeadViewController extends FController
 				throw new HttpException(403, 'Access Denied');
 			}
 
-
 			$form = new PhoneCreateForm();
 			$form->scenario = 'update';
 
-			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 				if ($lead->isOwner(Yii::$app->user->id) && $user->isSimpleAgent() && $phone = ClientPhone::findOne($form->id)) {
 					$form->phone = $phone->phone;
 				}
@@ -335,7 +338,8 @@ class LeadViewController extends FController
 				$response['message'] = 'Phone was successfully updated: ' . $form->phone;
 				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_phone', [
 					'clientPhones' => $lead->client->clientPhones,
-					'lead' => $lead
+					'lead' => $lead,
+					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
 				]);
 			} else {
 				$response['error'] = true;
@@ -537,7 +541,8 @@ class LeadViewController extends FController
 				$response['message'] = 'Email was successfully updated: ' . $form->email;
 				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_email', [
 					'clientEmails' => $lead->client->clientEmails,
-					'lead' => $lead
+					'lead' => $lead,
+					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
 				]);
 			} else {
 				$response['error'] = true;
@@ -557,7 +562,7 @@ class LeadViewController extends FController
 	 * @return string
 	 * @throws BadRequestHttpException
 	 */
-	public function actionAjaxEditClientNameModalContent()
+	public function actionAjaxEditClientNameModalContent(): string
 	{
 		if (Yii::$app->request->isAjax) {
 			try {

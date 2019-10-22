@@ -37,6 +37,12 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 		9 => '<i class="fa fa-close red"></i> '
 	];
 
+	public const EMAIL_TYPE_LABELS = [
+		1 => '<span class="label label-success">{type}</span>',
+		2 => '<span class="label label-warning">{type}</span>',
+		9 => '<span class="label label-danger">{type}</span>'
+	];
+
 	public const EMAIL_TYPE_TEXT_DECORATION = [
 		9 => 'text-line-through'
 	];
@@ -139,5 +145,44 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 			->andWhere(['IN', 'id', $subQuery]);
 
 		return (int)$query->count();
+	}
+
+	/**
+	 * @param int|null $type
+	 * @return mixed|string
+	 */
+	public static function getEmailType(?int $type)
+	{
+		return self::EMAIL_TYPE[$type] ?? '';
+	}
+
+	/**
+	 * @param int|null $type
+	 * @return mixed|string
+	 */
+	public static function getEmailTypeTextDecoration(?int $type)
+	{
+		return self::EMAIL_TYPE_TEXT_DECORATION[$type] ?? '';
+	}
+
+	/**
+	 * @param int|null $type
+	 * @return mixed|string
+	 */
+	public static function getEmailTypeIcon(?int $type)
+	{
+		return self::EMAIL_TYPE_ICONS[$type] ?? '';
+	}
+
+	/**
+	 * @param int|null $type
+	 * @return string
+	 */
+	public static function getPhoneTypeLabel(?int $type): string
+	{
+		if (isset(self::EMAIL_TYPE_LABELS[$type], self::EMAIL_TYPE[$type])) {
+			return str_replace('{type}', self::EMAIL_TYPE[$type], self::EMAIL_TYPE_LABELS[$type]);
+		}
+		return '';
 	}
 }

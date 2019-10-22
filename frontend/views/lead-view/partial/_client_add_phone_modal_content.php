@@ -20,42 +20,42 @@ $addPhone->client_id = $lead->client_id;
 ?>
 
 <div class="edit-phone-modal-content-ghj">
-        <?php $form = ActiveForm::begin([
-            'id' => 'client-add-phone-form',
-            'action' => Url::to(['lead-view/ajax-add-client-phone', 'gid' => $lead->gid]),
-            'enableClientValidation' => false,
-            'enableAjaxValidation' => true,
-            'validateOnChange' => false,
-            'validateOnBlur' => false,
-            'validationUrl' => Url::to(['lead-view/ajax-add-client-phone-validation', 'gid' => $lead->gid])
-        ]); ?>
+    <?php $form = ActiveForm::begin([
+        'id' => 'client-add-phone-form',
+        'action' => Url::to(['lead-view/ajax-add-client-phone', 'gid' => $lead->gid]),
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+        'validateOnChange' => false,
+        'validateOnBlur' => false,
+        'validationUrl' => Url::to(['lead-view/ajax-add-client-phone-validation', 'gid' => $lead->gid])
+    ]); ?>
 
-    	<?= $form->errorSummary($addPhone); ?>
+    <?= $form->errorSummary($addPhone); ?>
 
-	    <? if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
-                <?= $form->field($addPhone, 'phone', [
-                    'options' => [
-                        'class' => 'form-group',
-                    ],
-                ])->widget(PhoneInput::class, [
-                    'options' => [
-                        'class' => 'form-control lead-form-input-element',
-                    ],
-                    'jsOptions' => [
-                        'nationalMode' => false,
-                        'preferredCountries' => ['us'],
-                    ]
-                ]); ?>
-            <? endif; ?>
+    <?php if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
+            <?= $form->field($addPhone, 'phone', [
+                'options' => [
+                    'class' => 'form-group',
+                ],
+            ])->widget(PhoneInput::class, [
+                'options' => [
+                    'class' => 'form-control lead-form-input-element',
+                ],
+                'jsOptions' => [
+                    'nationalMode' => false,
+                    'preferredCountries' => ['us'],
+                ]
+            ]) ?>
+        <?php endif; ?>
 
-            <?=
-            $form->field($addPhone, 'type')->dropDownList(ClientPhone::PHONE_TYPE);
-            ?>
-            <?= Html::submitButton('Submit', [
-                'class' => 'btn btn-warning'
-            ]);
-            ?>
-        <?php ActiveForm::end(); ?>
+        <?=
+        $form->field($addPhone, 'type')->dropDownList(ClientPhone::PHONE_TYPE);
+        ?>
+        <?= Html::submitButton('Submit', [
+            'class' => 'btn btn-warning'
+        ])
+        ?>
+    <?php ActiveForm::end(); ?>
 </div>
 
 <?php
