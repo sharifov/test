@@ -35,10 +35,14 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 
     use EventTrait;
 
+    public const PHONE_VALID = 1;
+    public const PHONE_FAVORITE = 2;
+    public const PHONE_INVALID = 9;
+
     public const PHONE_TYPE = [
-    	1 => 'Valid',
-		2 => 'Favorite',
-		9 => 'Invalid'
+    	self::PHONE_VALID => 'Valid',
+		self::PHONE_FAVORITE => 'Favorite',
+		self::PHONE_INVALID => 'Invalid'
 	];
 
     public const PHONE_TYPE_ICONS = [
@@ -226,6 +230,14 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 	public static function getPhoneType(?int $type): string
 	{
 		return self::PHONE_TYPE[$type] ?? '';
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getPhoneTypeList(): array
+	{
+		return self::PHONE_TYPE;
 	}
 
 	/**

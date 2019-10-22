@@ -76,8 +76,8 @@ use yii\helpers\Html;
 										if ($phones) {
 											foreach ($phones as $k => $phone) {
 												$data[] = '<i class="fa fa-phone"></i> 
-                                                           <code class="' . (ClientPhone::PHONE_TYPE_TEXT_DECORATION[$phone->type] ?? '') . '" 
-                                                                 title="' . (ClientPhone::PHONE_TYPE[$phone->type] ?? '') . '">' . Html::encode($phone->phone) . ' ' . (ClientPhone::PHONE_TYPE_ICONS[$phone->type] ?? '') . '</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                                                           <code class="' . $phone::getPhoneTypeTextDecoration($phone->type) . '" 
+                                                                 title="' . $phone::getPhoneType($phone->type) . '">' . Html::encode($phone->phone) . ' ' . $phone::getPhoneTypeLabel($phone->type) . '</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
 											}
 										}
 
@@ -97,8 +97,8 @@ use yii\helpers\Html;
                                         if($emails) {
                                             foreach ($emails as $k => $email) {
                                                 $data[] = '<i class="fa fa-envelope"></i> 
-                                                           <code class="' . (ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '') . '"
-                                                                 title="' . (ClientEmail::EMAIL_TYPE[$email->type] ?? '') . '">'.Html::encode($email->email). ' ' . (ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '') .'</code>';
+                                                           <code class="' . $email::getEmailTypeTextDecoration($email->type) . '"
+                                                                 title="' . $email::getEmailType($email->type) . '">'.Html::encode($email->email). ' ' . $email::getPhoneTypeLabel($email->type) .'</code>';
                                             }
                                         }
 

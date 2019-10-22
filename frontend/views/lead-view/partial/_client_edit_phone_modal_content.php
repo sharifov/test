@@ -49,7 +49,7 @@ $user = Yii::$app->user->identity;
 	<?php endif; ?>
 
 	<?=
-	$form->field($editPhone, 'type')->dropDownList(ClientPhone::PHONE_TYPE)
+	$form->field($editPhone, 'type')->dropDownList(ClientPhone::getPhoneTypeList())
 	?>
 
 	<?=

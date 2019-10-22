@@ -92,7 +92,7 @@ class PhoneCreateForm extends Model
 	 */
 	public function checkTypeForExistence($attribute, $params): void
 	{
-		if (!isset(ClientPhone::PHONE_TYPE[$this->type])) {
+		if (!ClientPhone::getPhoneType($this->type)) {
 			$this->addError($attribute, 'Type of the phone is not found');
 		}
 	}

@@ -17,8 +17,8 @@ use yii\web\View;
     <table class="table table-condensed" style="margin-bottom: 0;">
         <?php foreach ($clientPhones as $key => $phone): ?>
             <tr>
-                <td title="<?= ClientPhone::PHONE_TYPE[$phone->type] ?? '' ?>">
-                    <?= ClientPhone::PHONE_TYPE_ICONS[$phone->type] ?? '' ?>
+                <td title="<?= $phone::getPhoneType($phone->type) ?>">
+                    <?= $phone::getPhoneTypeIcon($phone->type) ?>
                 </td>
                 <td><i class="fa fa-phone"></i> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= $phone->phone ?></span></td>
 

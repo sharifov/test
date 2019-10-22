@@ -49,7 +49,7 @@ $addPhone->client_id = $lead->client_id;
         <?php endif; ?>
 
         <?=
-        $form->field($addPhone, 'type')->dropDownList(ClientPhone::PHONE_TYPE);
+        $form->field($addPhone, 'type')->dropDownList(ClientPhone::getPhoneTypeList())
         ?>
         <?= Html::submitButton('Submit', [
             'class' => 'btn btn-warning'

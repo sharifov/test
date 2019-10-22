@@ -46,7 +46,7 @@ $addEmail->client_id = $lead->client_id;
 	<?php endif; ?>
 
 	<?=
-	$form->field($addEmail, 'type')->dropDownList(ClientEmail::EMAIL_TYPE);
+	$form->field($addEmail, 'type')->dropDownList(ClientEmail::getEmailTypeList())
 	?>
 	<?= Html::submitButton('Submit', [
 		'class' => 'btn btn-warning'

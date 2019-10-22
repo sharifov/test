@@ -1,9 +1,8 @@
 <?php
 
-use yii\helpers\ArrayHelper;
+use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClentPhoneSearch */
@@ -32,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Client',
                 'attribute' => 'client_id',
-                'value' => function (\common\models\ClientPhone $model) {
+                'value' => static function (\common\models\ClientPhone $model) {
                     $client = $model->client;
                     if($client->id) {
                         return '<span class="label label-info"> <i class="fa fa-link"></i> ' .  Html::encode($client->full_name). '</span>';
@@ -46,15 +45,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'phone',
             [
                 'attribute' => 'type',
-                'value' => function (\common\models\ClientPhone $model) {
-                    return $model::PHONE_TYPE[$model->type] ?? '(not set)';
+                'value' => static function (\common\models\ClientPhone $model) {
+                    return $model::getPhoneTypeLabel($model->type);
                 },
                 'format' => 'raw',
-                'filter' =>  \common\models\ClientPhone::PHONE_TYPE
+                'filter' =>  \common\models\ClientPhone::getPhoneTypeList()
             ],
             [
                 'attribute' => 'created',
-                'value' => function (\common\models\ClientPhone $model) {
+                'value' => static function (\common\models\ClientPhone $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
                 'format' => 'raw',
@@ -77,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'validate_dt',
             [
                 'attribute' => 'validate_dt',
-                'value' => function (\common\models\ClientPhone $model) {
+                'value' => static function (\common\models\ClientPhone $model) {
                     return $model->validate_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->validate_dt)) : null;
                 },
                 'format' => 'raw',
@@ -95,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]),
             ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
 

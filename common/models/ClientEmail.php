@@ -25,10 +25,14 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 
     use EventTrait;
 
+    public const EMAIL_VALID = 1;
+    public const EMAIL_FAVORITE = 2;
+    public const EMAIL_INVALID = 9;
+
 	public const EMAIL_TYPE = [
-		1 => 'Valid',
-		2 => 'Favorite',
-		9 => 'Invalid'
+		self::EMAIL_VALID => 'Valid',
+		self::EMAIL_FAVORITE => 'Favorite',
+		self::EMAIL_INVALID => 'Invalid'
 	];
 
 	public const EMAIL_TYPE_ICONS = [
@@ -154,6 +158,14 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 	public static function getEmailType(?int $type)
 	{
 		return self::EMAIL_TYPE[$type] ?? '';
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getEmailTypeList(): array
+	{
+		return self::EMAIL_TYPE;
 	}
 
 	/**
