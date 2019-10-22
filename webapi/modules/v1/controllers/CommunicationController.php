@@ -1907,23 +1907,36 @@ class CommunicationController extends ApiBaseController
 
         try {
 
-            $vr->pause(['length' => 2]);
-            $vr->say('Hi! Conference "Room 1".', [
+            $vr->pause(['length' => 5]);
+            $vr->say('Hi, conference Room 7'/*, [
                 'language' => 'en-US',
                 'voice' => 'alice'
-            ]);
+            ]*/);
+
+            $vr->say('Time: ' . date('H:i')/*, [
+                'language' => 'en-US',
+                'voice' => 'alice'
+            ]*/);
+
+//            $vr->say('Your phone number ' . $postCall['From']/*, [
+//                'language' => 'en-US',
+//                'voice' => 'alice'
+//            ]*/);
+
             //$vr->reject(['reason' => 'busy']);
             // $vr->say($ivrParams['error_phrase'], ['language' => $ivrParams['entry_language'], 'voice' => $ivrParams['entry_voice']]);
             // $vr->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
 
             $dial = $vr->dial('');
 
+            $params = [];
+
             $params['muted']                        = false;
             $params['beep']                         = true;     // true, false, onEnter, onExit
             $params['startConferenceOnEnter']       = true;
             $params['endConferenceOnExit']          = false;
             $params['waitUrl']                      = 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical';
-            $params['maxParticipants']              = 250;
+            $params['maxParticipants']              = 100;
 
             $params['record']                       = 'record-from-start';  // do-not-record or record-from-start
             //$params['region']                     = 250;  // us1, ie1, de1, sg1, br1, au1, jp1
@@ -1933,12 +1946,12 @@ class CommunicationController extends ApiBaseController
             $params['statusCallbackMethod']             = 'POST';
             $params['recordingStatusCallback']          = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-recording-status-callback';
             $params['recordingStatusCallbackMethod']    = 'POST';
-            $params['recordingStatusCallbackEvent']     = 'completed'; // in-progress, completed, absent
-            //$params['eventCallbackUrl']               = 'relative or absolute URL';
+            $params['recordingStatusCallbackEvent']     = 'in-progress, completed, absent'; // in-progress, completed, absent
+            $params['eventCallbackUrl']               = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-event-callback';
 
 
-
-            $dial->conference('Room1', $params);
+            //$vr->pause(['length' => 3]);
+            $dial->conference('Room7', $params);
             //$vr->reject(['reason' => 'busy']);
 
             $response['twml'] = (string) $vr;
