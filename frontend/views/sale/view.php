@@ -276,7 +276,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                                 <?php  $editable->beforeInput = Html::hiddenInput("cssSaleData[passengers][".$key."][type]", Html::encode($passenger['type'])); ?>
                                 <?php  Editable::end(); else: ?>
-                                    <?= Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y') ?>
+                                    <?= date('d M Y', strtotime($passenger['birth_date'])) ?>
                                 <? endif; ?>
                             </td>
                             <td>
