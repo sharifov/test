@@ -253,8 +253,8 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 									'header' => 'Date of Birth',
 									'asPopover' => true,
 									'inputType' => Editable::INPUT_DATE,
-									'displayValue' => Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y'),
-									'value' => Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y'),
+									'displayValue' => date('d M Y', strtotime($passenger['birth_date'])),
+									'value' => date('d M Y', strtotime($passenger['birth_date'])),
 									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
 									'options' => [
 										'convertFormat'=>true,
