@@ -3,12 +3,11 @@
 namespace sales\forms\cases;
 
 use common\models\CaseSale;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use sales\services\cases\CasesSaleService;
+use yii\base\InvalidConfigException;
 use yii\base\Model;
 use yii\helpers\Html;
 use Yii;
-use yii\validators\Validator;
 
 /**
  * Class CasesSaleForm
@@ -141,7 +140,7 @@ class CasesSaleForm extends Model
 	/**
 	 * @param $value
 	 * @param $key
-	 * @throws \yii\base\InvalidConfigException
+	 * @throws InvalidConfigException
 	 */
 	private function birthDateFilter(&$value, $key)
 	{
@@ -204,11 +203,9 @@ class CasesSaleForm extends Model
 			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': Departure Time of last segment is missing;');
 		}
 
-		$diff = $birthDate->diff(new \DateTime($lastDepartureTime));
+		$age = $birthDate->diff(new \DateTime($lastDepartureTime))->y;
 
-		$age = $diff->y;
-
-		if ($age < $passengerBirthDateRange['min'] || $age > $passengerBirthDateRange['max']) {
+		if ($age > $passengerBirthDateRange['max']) {
 			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': you cant set birth date that is not in range;');
 		}
 	}

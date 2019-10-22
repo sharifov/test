@@ -75,14 +75,14 @@ class CaseSale extends \yii\db\ActiveRecord
 	public const PASSENGER_TYPE_BIRTH_DATE_RANGE = [
 		'INF' => [
 			'min' => 0,
-			'max' => 2
+			'max' => 1
 		],
 		'CHD' => [
-			'min' => 3,
-			'max' => 12
+			'min' => 2,
+			'max' => 11
 		],
 		'ADT' => [
-			'min' => 13,
+			'min' => 12,
 			'max' => 130
 		]
 	];
