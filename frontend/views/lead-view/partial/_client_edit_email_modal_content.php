@@ -56,10 +56,12 @@ $user = Yii::$app->user->identity;
 	$form->field($editEmail, 'client_id')->hiddenInput()->label(false)->error(false)
 	?>
 
-	<?= Html::submitButton('Save', [
-		'class' => 'btn btn-warning'
-	]);
-	?>
+    <div class="text-center">
+        <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Save email', [
+            'class' => 'btn btn-warning'
+        ])
+        ?>
+    </div>
 	<?php ActiveForm::end(); ?>
 </div>
 

@@ -48,10 +48,12 @@ $addEmail->client_id = $lead->client_id;
 	<?=
 	$form->field($addEmail, 'type')->dropDownList(ClientEmail::getEmailTypeList())
 	?>
-	<?= Html::submitButton('Submit', [
-		'class' => 'btn btn-warning'
-	])
-	?>
+    <div class="text-center">
+        <?= Html::submitButton('<i class="fa fa-plus"></i> Add Email', [
+            'class' => 'btn btn-success'
+        ])
+        ?>
+    </div>
 	<?php ActiveForm::end(); ?>
 </div>
 

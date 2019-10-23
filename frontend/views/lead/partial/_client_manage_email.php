@@ -17,7 +17,7 @@ use yii\web\View;
     <table class="table table-condensed" style="margin-bottom: 0;">
         <?php foreach ($clientEmails as $key => $email): ?>
             <tr>
-                <td title="<?= ClientEmail::EMAIL_TYPE[$email->type] ?? '' ?>">
+                <td title="<?= ClientEmail::EMAIL_TYPE[$email->type] ?? '' ?>"  class="text-center" style="width:35px; background-color: #eef3f9">
                     <?= ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '' ?>
                 </td>
                 <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"><i class="fa fa-envelope"></i> <?= $email->email ?? 'email is not set'?></td>
@@ -34,10 +34,14 @@ use yii\web\View;
     <!--            --><?// endif; ?>
 
                 <?php if($manageClientInfoAccess): ?>
-                    <td class="text-right showModalButton" title="Edit Email" data-content-url="<?= Url::to([
-                        'lead-view/ajax-edit-client-email-modal-content',
-                        'gid' => $lead->gid,
-                        'pid' => $email->id]) ?>" data-modal_id="client-manage-info"><i class="fa fa-edit" style="cursor:pointer;"></i></td>
+                    <td class="text-right">
+                        <a class="showModalButton text-warning" title="Edit Email" data-content-url="<?= Url::to([
+                            'lead-view/ajax-edit-client-email-modal-content',
+                            'gid' => $lead->gid,
+                            'pid' => $email->id]) ?>" data-modal_id="client-manage-info">
+                            <i class="fa fa-edit fa-border"></i>
+                        </a>
+                    </td>
                 <?php endif; ?>
             </tr>
         <?php endforeach; ?>

@@ -40,10 +40,12 @@ $user = Yii::$app->user->identity;
 	$form->field($editName, 'id')->hiddenInput()->label(false)->error(false);
 	?>
 
-	<?= Html::submitButton('Submit', [
-		'class' => 'btn btn-warning'
-	]);
-	?>
+    <div class="text-center">
+        <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Update client', [
+            'class' => 'btn btn-warning'
+        ])
+        ?>
+    </div>
 	<?php ActiveForm::end(); ?>
 </div>
 

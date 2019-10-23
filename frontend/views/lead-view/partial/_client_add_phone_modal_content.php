@@ -51,10 +51,12 @@ $addPhone->client_id = $lead->client_id;
         <?=
         $form->field($addPhone, 'type')->dropDownList(ClientPhone::getPhoneTypeList())
         ?>
-        <?= Html::submitButton('Submit', [
-            'class' => 'btn btn-warning'
-        ])
-        ?>
+        <div class="text-center">
+            <?= Html::submitButton('<i class="fa fa-plus"></i> Add Phone', [
+                'class' => 'btn btn-success'
+            ])
+            ?>
+        </div>
     <?php ActiveForm::end(); ?>
 </div>
 

@@ -17,10 +17,10 @@ use yii\web\View;
     <table class="table table-condensed" style="margin-bottom: 0;">
         <?php foreach ($clientPhones as $key => $phone): ?>
             <tr>
-                <td title="<?= $phone::getPhoneType($phone->type) ?>">
+                <td title="<?= $phone::getPhoneType($phone->type) ?>" class="text-center" style="width:35px; background-color: #eef3f9">
                     <?= $phone::getPhoneTypeIcon($phone->type) ?>
                 </td>
-                <td><i class="fa fa-phone"></i> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= $phone->phone ?></span></td>
+                <td><i class="fa fa-phone"></i> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode($phone->phone) ?></span></td>
 
 <!--				--><?// $count = $phone->countUsersSamePhone(); ?>
 <!--                --><?// if($count): ?>
@@ -34,9 +34,13 @@ use yii\web\View;
 <!--                --><?// endif; ?>
 
                 <?php if($manageClientInfoAccess): ?>
-                    <td class="text-right showModalButton" title="Edit Phone" data-content-url="<?= Url::to([
-                        'lead-view/ajax-edit-client-phone-modal-content',
-                        'gid' => $lead->gid, 'pid' => $phone->id]) ?>" data-modal_id="client-manage-info" style="cursor:pointer;"><i class="fa fa-edit"></i></td>
+                    <td class="text-right">
+                        <a class="showModalButton text-warning" title="Edit Phone" data-content-url="<?= Url::to([
+                            'lead-view/ajax-edit-client-phone-modal-content',
+                            'gid' => $lead->gid, 'pid' => $phone->id]) ?>" data-modal_id="client-manage-info">
+                            <i class="fa fa-edit fa-border"></i>
+                        </a>
+                    </td>
                 <?php endif; ?>
             </tr>
         <?php endforeach; ?>

@@ -46,9 +46,9 @@ $manageClientInfoAccess = ClientInfoAccess::isUserCanManageLeadClientInfo($lead,
 
     <div class="sidebar__section">
         <h3 class="sidebar__subtitle">
-            <i class="fa fa-user"></i>
+            <i class="fa fa-user"></i> Client Info
         </h3>
-        <div class="sidebar__subsection">
+        <div class="sidebar__subsection text-center">
 			<?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess): ?>
 
 				 <div class="">

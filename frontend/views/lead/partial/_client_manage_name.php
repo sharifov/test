@@ -9,23 +9,23 @@ use yii\widgets\Pjax;
 
 ?>
 
-<? Pjax::begin(['id' => 'pjax-client-manage-name', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+<?php Pjax::begin(['id' => 'pjax-client-manage-name', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
 <table class="table table-bordered table-condensed" style="margin-bottom: 0;">
 	<tr>
-		<td><?= $client->getAttributeLabel('firstName') ?>:</td>
-		<td><?= $client->first_name ?></td>
+		<td style="width: 40%; background-color: #eef3f9"><?= $client->getAttributeLabel('firstName') ?></td>
+		<td><?= \yii\helpers\Html::encode($client->first_name) ?></td>
 	</tr>
 	<tr>
-		<td><?= $client->getAttributeLabel('last_name') ?>:</td>
-		<td><?= $client->last_name ?></td>
+		<td style="background-color: #eef3f9"><?= $client->getAttributeLabel('last_name') ?></td>
+		<td><?= \yii\helpers\Html::encode($client->last_name) ?></td>
 	</tr>
-	<? if(!empty($client->middle_name)): ?>
+	<?php if(!empty($client->middle_name)): ?>
 		<tr>
-			<td><?= $client->getAttributeLabel('middle_name') ?></td>
-			<td><?= $client->middle_name ?></td>
+			<td style="background-color: #eef3f9"><?= $client->getAttributeLabel('middle_name') ?></td>
+			<td><?= \yii\helpers\Html::encode($client->middle_name) ?></td>
 		</tr>
-	<? endif; ?>
+	<?php endif; ?>
 </table>
 
-<? Pjax::end() ?>
+<?php Pjax::end() ?>
