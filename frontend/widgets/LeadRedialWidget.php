@@ -53,7 +53,7 @@ class LeadRedialWidget extends Widget
      */
     private function findRedialAutoTakeSeconds(): int
     {
-        return Yii::$app->params['redial_auto_take_seconds'] ?? 5;
+        return Yii::$app->params['redial_auto_take_seconds'] ?? 10;
     }
 
     /**
@@ -84,10 +84,10 @@ class LeadRedialWidget extends Widget
             /** @var ClientPhone $phone */
             $phone = $this->lead->client->getClientPhones()->
                 andWhere(['or',
-                    ['status' => [1,2]],//todo change to const type and remove field status
-                    ['IS', 'status', NULL]
+                    ['type' => [ClientPhone::PHONE_FAVORITE, ClientPhone::PHONE_VALID, ClientPhone::PHONE_NOT_SET]],
+                    ['IS', 'type', NULL]
                 ])
-                ->orderBy(['status' => SORT_DESC])->asArray()->limit(1)->one();
+                ->orderBy(['type' => SORT_DESC])->asArray()->limit(1)->one();
             if ($phone) {
                 return $phone['phone'];
             }
