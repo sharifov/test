@@ -102,9 +102,9 @@ class LeadRedialService
      */
     private function guardLeadForTake(Lead $lead): void
     {
-        if (!$lead->isPending()) {
-            throw new \DomainException('Lead is not in status Pending');
-        }
+//        if (!$lead->isPending()) {
+//            throw new \DomainException('Lead is not in status Pending');
+//        }
     }
 
     /**
@@ -112,9 +112,9 @@ class LeadRedialService
      */
     private function guardLeadForRedial(Lead $lead): void
     {
-        if (!$lead->isPending()) {
-            throw new \DomainException('Lead is not in status Pending');
-        }
+//        if (!$lead->isPending()) {
+//            throw new \DomainException('Lead is not in status Pending');
+//        }
 
         if (!$lead->isCallReady()) {
             throw new \DomainException('Lead is not ready for call');

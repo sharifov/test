@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Lead;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
@@ -47,7 +48,20 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     'format' => 'raw'
                 ],
-
+                [
+                        'label' => 'Status',
+                        'value' => static function (LeadQcall $model) {
+                            return $model->lqcLead->getStatusName(true);
+                        },
+                        'format' => 'raw',
+                ],
+                [
+                        'label' => 'Call status',
+                        'value' => static function (LeadQcall $model) {
+                            return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
+                        },
+                        'format' => 'raw',
+                ],
                 [
                     'attribute' => 'lqcLead.project_id',
                     'value' => static function (LeadQcall $model) {
