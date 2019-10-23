@@ -123,25 +123,22 @@ class TestController extends FController
     {
 
 
-        $quote = Quote::findOne(570780);
+        $lead = Lead::findOne(271702);
+        $lead->callReady();
+        $lead->save();
 
-//        VarDumper::dump($quote->quotePrices);
 
-        $adt = 0;
-        $chd = 0;
-        $inf = 0;
 
-        foreach ($quote->quotePrices as $item) {
-            if ($item->passenger_type === 'ADT') {
-                $adt++;
-            } elseif ($item->passenger_type === 'CHD') {
-                $chd++;
-            } elseif ($item->passenger_type === 'INF') {
-                $inf++;
-            }
-        }
-        echo $adt . '  ' . $chd . ' ' . $inf;
+        $call = Call::findOne(1035611);
+        $call->c_status_id = Call::STATUS_RINGING;
+//        $call->c_status_id = Call::STATUS_IN_PROGRESS;
+//        $call->c_status_id = Call::STATUS_COMPLETED;
+//        $call->c_status_id = Call::STATUS_BUSY;
+//        $call->c_status_id = Call::STATUS_NO_ANSWER;
+//        $call->c_status_id = Call::STATUS_FAILED;
+//        $call->c_status_id = Call::STATUS_CANCELED;
 
+        $call->save();
         die;
         return $this->render('blank');
 
