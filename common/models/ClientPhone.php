@@ -48,10 +48,10 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 	];
 
     public const PHONE_TYPE_ICONS = [
-		self::PHONE_VALID => '<i class="fa fa-check green"></i> ',
-		self::PHONE_FAVORITE => '<i class="fa fa-star yellow"></i> ',
-		self::PHONE_INVALID => '<i class="fa fa-close red"></i> ',
-		self::PHONE_NOT_SET => ''
+		self::PHONE_VALID => '<i class="fa fa-phone success"></i> ',
+		self::PHONE_FAVORITE => '<i class="fa fa-phone warning"></i> ',
+		self::PHONE_INVALID => '<i class="fa fa-phone danger"></i> ',
+		self::PHONE_NOT_SET => '<i class="fa fa-phone"></i> '
 	];
 
     public const PHONE_TYPE_LABELS = [

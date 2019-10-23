@@ -17,32 +17,28 @@ use yii\web\View;
     <table class="table table-condensed" style="margin-bottom: 0;">
         <?php foreach ($clientEmails as $key => $email): ?>
             <tr>
-                <td title="<?= ClientEmail::EMAIL_TYPE[$email->type] ?? '' ?>"  class="text-center" style="width:35px; background-color: #eef3f9">
+                <td title="<?= ClientEmail::EMAIL_TYPE[$email->type] ?? '' ?>"  class="text-center" style="width:33px; background-color: #eef3f9">
                     <?= ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '' ?>
                 </td>
-                <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"><i class="fa fa-envelope"></i> <?= $email->email ?? 'email is not set'?></td>
+                <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"> <?= \yii\helpers\Html::encode($email->email)?></td>
 
-    <!--            --><?// $count = $email->countUsersSameEmail(); ?>
-    <!--            --><?// if($count): ?>
-    <!--                <td class="text-right showModalButton" data-modal_id="client-large" title="The Same users by email" data-content-url="--><?//= Url::to([
-    //                    'lead-view/ajax-get-users-same-email-info',
-    //                    'email' => $email->email,
-    //                    'clientId' => $email->client_id
-    //                ]) ?><!--" style="cursor:pointer;"><i class="fa fa-user"></i> --><?//= $count ?><!--</td>-->
-    <!--            --><?// else: ?>
-    <!--            <td></td>-->
-    <!--            --><?// endif; ?>
-
-                <?php if($manageClientInfoAccess): ?>
-                    <td class="text-right">
+                <td class="text-right" style="width: 70px">
+                    <?php if($count = $email->countUsersSameEmail()): ?>
+                        <a class="showModalButton" data-modal_id="client-large" title="The Same users by email" data-content-url="<?= Url::to([
+                            'lead-view/ajax-get-users-same-email-info',
+                            'email' => $email->email,
+                            'clientId' => $email->client_id
+                        ]) ?>" style="cursor:pointer;"><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
+                    <?php endif; ?>
+                    <?php if($manageClientInfoAccess): ?>
                         <a class="showModalButton text-warning" title="Edit Email" data-content-url="<?= Url::to([
                             'lead-view/ajax-edit-client-email-modal-content',
                             'gid' => $lead->gid,
                             'pid' => $email->id]) ?>" data-modal_id="client-manage-info">
                             <i class="fa fa-edit fa-border"></i>
                         </a>
-                    </td>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </td>
             </tr>
         <?php endforeach; ?>
     </table>
