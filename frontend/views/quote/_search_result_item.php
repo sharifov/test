@@ -105,10 +105,16 @@ if (!empty($baggagePerSegment)) {
                 $previousSegment = null;
                 $marketingAirlines = [];
                 $airlineNames = [];
+                $needRecheck = false;
                 foreach ($trip['segments'] as $segment){
                     if(!in_array(SearchService::getCabin($segment['cabin']), $cabins)){
                         $cabins[] = SearchService::getCabin($segment['cabin']);
                     }
+
+                    if (isset($segment['recheckBaggage']) && $segment['recheckBaggage'] == true){
+                        $needRecheck = true;
+                    }
+
                     if(isset($segment['stop']) && $segment['stop'] > 0){
                         $stopCnt += $segment['stop'];
                     }
@@ -188,6 +194,13 @@ if (!empty($baggagePerSegment)) {
                   title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>" data-original-title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>">
 				<i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
 			</span>
+
+            <span class="quote__badge quote__badge--warning <?php if(!$needRecheck):?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
+                  title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>"
+                  data-original-title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>">
+				<i class="fa fa-warning"></i>
+			</span>
+
             <span class="quote__badge <?php if($hasAirportChange):?>quote__badge--warning<?php else:?>quote__badge--disabled<?php endif;?>"
                   data-toggle="tooltip" title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>" data-original-title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>">
 				<i class="fa fa-exchange"></i>
@@ -301,6 +314,7 @@ if (!empty($baggagePerSegment)) {
                                                     <?php break; endforeach;?>
                                             <?php endif;?>
                                             <?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
+                                            <?php if ($segment['recheckBaggage'] == true):?> <h5 class="danger"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
                                             <?php if(isset($segment['stop']) && $segment['stop'] > 0):?>
 
                                                 <h5 class="danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment['stop']])?></h5>
