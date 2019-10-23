@@ -18,7 +18,7 @@ class ClientInfoAccess
 		return (
 			$lead->isOwner(Yii::$app->user->id) ||
 			!Yii::$app->user->identity->isSimpleAgent() ||
-			(Yii::$app->user->identity->isSupervision() &&
+			(Yii::$app->user->identity->isSupervision() && $lead->isGetOwner() &&
 			EmployeeGroupAccess::isUserInCommonGroup(Yii::$app->user->id, $lead->employee_id))
 		);
 	}
