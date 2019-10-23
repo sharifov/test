@@ -28,17 +28,20 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
     public const EMAIL_VALID = 1;
     public const EMAIL_FAVORITE = 2;
     public const EMAIL_INVALID = 9;
+    public const EMAIL_NOT_SET = 0;
 
 	public const EMAIL_TYPE = [
+		self::EMAIL_NOT_SET => 'Not set',
 		self::EMAIL_VALID => 'Valid',
 		self::EMAIL_FAVORITE => 'Favorite',
-		self::EMAIL_INVALID => 'Invalid'
+		self::EMAIL_INVALID => 'Invalid',
 	];
 
 	public const EMAIL_TYPE_ICONS = [
-		1 => '<i class="fa fa-check green"></i> ',
-		2 => '<i class="fa fa-star yellow"></i> ',
-		9 => '<i class="fa fa-close red"></i> '
+		self::EMAIL_VALID => '<i class="fa fa-check green"></i> ',
+		self::EMAIL_FAVORITE => '<i class="fa fa-star yellow"></i> ',
+		self::EMAIL_INVALID => '<i class="fa fa-close red"></i> ',
+//		self::EMAIL_NOT_SET => '<i>'
 	];
 
 	public const EMAIL_TYPE_LABELS = [

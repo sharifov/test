@@ -73,7 +73,7 @@ class ClentPhoneSearch extends ClientPhone
                 ->andFilterWhere(['<=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt) + 3600 * 24)]);
         }
 
-        if ($this->type) {
+        if ($this->type >= 0) {
         	$query->andFilterWhere(['=', 'type', $this->type]);
 		}
 

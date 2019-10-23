@@ -4,10 +4,9 @@ namespace sales\forms\cases;
 
 use common\models\CaseSale;
 use sales\services\cases\CasesSaleService;
-use yii\base\InvalidConfigException;
 use yii\base\Model;
 use yii\helpers\Html;
-use Yii;
+use Exception;
 
 /**
  * Class CasesSaleForm
@@ -71,13 +70,15 @@ class CasesSaleForm extends Model
 	 * @param CaseSale $caseSale
 	 * @param CasesSaleService $casesSaleService
 	 * @param array $config
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function __construct(CaseSale $caseSale, CasesSaleService $casesSaleService, $config = [])
 	{
 		parent::__construct($config);
 
-		if (!$caseSale) throw new \Exception('Error occurred when validate case sale: Data of the Case Sale is not found;');
+		if (!$caseSale) {
+			throw new \RuntimeException('Error occurred when validate case sale: Data of the Case Sale is not found;');
+		}
 
 		$this->caseSale = $caseSale;
 		$this->caseSaleService = $casesSaleService;
@@ -140,7 +141,6 @@ class CasesSaleForm extends Model
 	/**
 	 * @param $value
 	 * @param $key
-	 * @throws InvalidConfigException
 	 */
 	private function birthDateFilter(&$value, $key)
 	{
@@ -172,7 +172,7 @@ class CasesSaleForm extends Model
 	/**
 	 * @param $attribute
 	 * @param $value
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function birthDateRangeValidator($attribute, $value)
 	{

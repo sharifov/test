@@ -38,27 +38,31 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
     public const PHONE_VALID = 1;
     public const PHONE_FAVORITE = 2;
     public const PHONE_INVALID = 9;
+    public const PHONE_NOT_SET = 0;
 
     public const PHONE_TYPE = [
+		self::PHONE_NOT_SET => 'Not set',
     	self::PHONE_VALID => 'Valid',
 		self::PHONE_FAVORITE => 'Favorite',
-		self::PHONE_INVALID => 'Invalid'
+		self::PHONE_INVALID => 'Invalid',
 	];
 
     public const PHONE_TYPE_ICONS = [
-    	1 => '<i class="fa fa-check green"></i> ',
-		2 => '<i class="fa fa-star yellow"></i> ',
-		9 => '<i class="fa fa-close red"></i> '
+		self::PHONE_VALID => '<i class="fa fa-check green"></i> ',
+		self::PHONE_FAVORITE => '<i class="fa fa-star yellow"></i> ',
+		self::PHONE_INVALID => '<i class="fa fa-close red"></i> ',
+		self::PHONE_NOT_SET => '<i class="fa fa-ban"></i>'
 	];
 
     public const PHONE_TYPE_LABELS = [
-    	1 => '<span class="label label-success">{type}</span>',
-		2 => '<span class="label label-warning">{type}</span>',
-		9 => '<span class="label label-danger">{type}</span>'
+    	self::PHONE_VALID => '<span class="label label-success">{type}</span>',
+		self::PHONE_FAVORITE => '<span class="label label-warning">{type}</span>',
+		self::PHONE_INVALID => '<span class="label label-danger">{type}</span>',
+		self::PHONE_NOT_SET => '<span class="label label-primary">{type}</span>'
 	];
 
 	public const PHONE_TYPE_TEXT_DECORATION = [
-		9 => 'text-line-through'
+		self::PHONE_INVALID => 'text-line-through'
 	];
 
     // old phone value. need for afterSave() method

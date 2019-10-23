@@ -1272,6 +1272,8 @@ class CasesController extends FController
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
 			$updatedData['sale_id'] = $caseSaleId;
 
+//			print_r($updatedData);die;
+
 			$response = BackOffice::sendRequest2('cs/update-passengers', $updatedData);
 			if ($response->isOk) {
 
@@ -1307,13 +1309,13 @@ class CasesController extends FController
 				$out['message'] = 'BO request Error: ' . json_decode($response->content, true)['message'] ?? '';
 			}
 
-		} catch (\Exception $exception) {
+		} catch (\Throwable $throwable) {
 			$out['error'] = 1;
 			$out['message'] = 'An internal Sales error has occurred; Check system logs;';
-			if ($exception->getCode() < 0 && $exception->getCode() > -4) {
-				$out['message'] = $exception->getMessage();
+			if ($throwable->getCode() < 0 && $throwable->getCode() > -4) {
+				$out['message'] = $throwable->getMessage();
 			}
-			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Exception');
+			Yii::error('Code: ' . $throwable->getCode() . '; ' . $throwable->getMessage() . '; File: ' . $throwable->getFile() . ': ' . $throwable->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
 		}
 
 		return $out;

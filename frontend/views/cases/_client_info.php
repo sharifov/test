@@ -77,7 +77,7 @@ use yii\helpers\Html;
 											foreach ($phones as $k => $phone) {
 												$data[] = '<i class="fa fa-phone"></i> 
                                                            <code class="' . $phone::getPhoneTypeTextDecoration($phone->type) . '" 
-                                                                 title="' . $phone::getPhoneType($phone->type) . '">' . Html::encode($phone->phone) . ' ' . $phone::getPhoneTypeLabel($phone->type) . '</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                                                                 title="' . $phone::getPhoneType($phone->type) . '">' . Html::encode($phone->phone) . '</code> ' . $phone::getPhoneTypeLabel($phone->type); //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
 											}
 										}
 
@@ -98,7 +98,7 @@ use yii\helpers\Html;
                                             foreach ($emails as $k => $email) {
                                                 $data[] = '<i class="fa fa-envelope"></i> 
                                                            <code class="' . $email::getEmailTypeTextDecoration($email->type) . '"
-                                                                 title="' . $email::getEmailType($email->type) . '">'.Html::encode($email->email). ' ' . $email::getPhoneTypeLabel($email->type) .'</code>';
+                                                                 title="' . $email::getEmailType($email->type) . '">'.Html::encode($email->email) . '</code> ' . $email::getPhoneTypeLabel($email->type);
                                             }
                                         }
 

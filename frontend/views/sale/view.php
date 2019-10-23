@@ -201,7 +201,6 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
         </div>
 
     </div>
-
     <div class="row">
         <div class="col-md-12">
             <h2>Passengers</h2>
