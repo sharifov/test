@@ -41,17 +41,18 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 		self::EMAIL_VALID => '<i class="fa fa-check green"></i> ',
 		self::EMAIL_FAVORITE => '<i class="fa fa-star yellow"></i> ',
 		self::EMAIL_INVALID => '<i class="fa fa-close red"></i> ',
-//		self::EMAIL_NOT_SET => '<i>'
+		self::EMAIL_NOT_SET => '<i class="fa fa-ban"></i>'
 	];
 
 	public const EMAIL_TYPE_LABELS = [
-		1 => '<span class="label label-success">{type}</span>',
-		2 => '<span class="label label-warning">{type}</span>',
-		9 => '<span class="label label-danger">{type}</span>'
+		self::EMAIL_VALID => '<span class="label label-success">{type}</span>',
+		self::EMAIL_FAVORITE => '<span class="label label-warning">{type}</span>',
+		self::EMAIL_INVALID => '<span class="label label-danger">{type}</span>',
+		self::EMAIL_NOT_SET => '<span class="label label-primary">{type}</span>'
 	];
 
 	public const EMAIL_TYPE_TEXT_DECORATION = [
-		9 => 'text-line-through'
+		self::EMAIL_INVALID => 'text-line-through'
 	];
 
     /**

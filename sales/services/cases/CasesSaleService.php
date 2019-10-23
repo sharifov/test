@@ -52,7 +52,7 @@ class CasesSaleService
 
 		$difference = $this->compareSaleData($originalData, $updatedData);
 
-		if (!empty($originalData['passengers'])) {
+		if (empty($originalData['passengers'])) {
 			throw new \RuntimeException('Sale Info: not found passengers data while preparing data for sync with B/0', 10);
 		}
 

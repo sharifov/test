@@ -1272,8 +1272,6 @@ class CasesController extends FController
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
 			$updatedData['sale_id'] = $caseSaleId;
 
-//			print_r($updatedData);die;
-
 			$response = BackOffice::sendRequest2('cs/update-passengers', $updatedData);
 			if ($response->isOk) {
 
