@@ -1398,6 +1398,29 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $statusList
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return int
+     */
+    public function getLeadCountByStatusAndEmployee(array $statusList = [], string $startDate = null, string $endDate = null): int
+    {
+        if ($startDate) {
+            $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
+        }
+
+        if ($endDate) {
+            $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+        }
+
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+        $query->andFilterWhere(['>=', 'created', $startDate]);
+        $query->andFilterWhere(['<=', 'created', $endDate]);
+        $count = $query->asArray()->scalar();
+        return $count;
+    }
+
+    /**
      * @param $employeeId
      * @param $callType
      * @param $status

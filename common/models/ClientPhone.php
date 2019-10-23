@@ -51,7 +51,7 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 		self::PHONE_VALID => '<i class="fa fa-check green"></i> ',
 		self::PHONE_FAVORITE => '<i class="fa fa-star yellow"></i> ',
 		self::PHONE_INVALID => '<i class="fa fa-close red"></i> ',
-		self::PHONE_NOT_SET => '<i class="fa fa-ban"></i>'
+		self::PHONE_NOT_SET => ''
 	];
 
     public const PHONE_TYPE_LABELS = [

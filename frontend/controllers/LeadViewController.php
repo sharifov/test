@@ -209,13 +209,14 @@ class LeadViewController extends FController
 	public function actionAjaxAddClientPhone()
 	{
 		$user = Yii::$app->user->identity;
-		if (!Yii::$app->request->isAjax && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+		$gid = (string)Yii::$app->request->get('gid');
+		$lead = $this->findLeadByGid($gid);
+
+		if (!$lead->isOwner(Yii::$app->user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
 			throw new HttpException(403, 'Access Denied');
 		}
 
 		try {
-			$gid = (string)Yii::$app->request->get('gid');
-			$lead = $this->findLeadByGid($gid);
 
 			$form = new PhoneCreateForm();
 			$form->client_id = $lead->client_id;
@@ -413,14 +414,14 @@ class LeadViewController extends FController
 	public function actionAjaxAddClientEmail()
 	{
 		$user = Yii::$app->user->identity;
-		if (!$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+		$gid = (string)Yii::$app->request->get('gid');
+		$lead = $this->findLeadByGid($gid);
+
+		if (!$lead->isOwner(Yii::$app->user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
 			throw new HttpException(403, 'Access Denied');
 		}
 
 		try {
-			$gid = (string)Yii::$app->request->get('gid');
-			$lead = $this->findLeadByGid($gid);
-
 			$form = new EmailCreateForm();
 			$form->client_id = $lead->client_id;
 
