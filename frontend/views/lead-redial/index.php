@@ -44,7 +44,7 @@ $userIsFreeForCall = $user->isCallFree();
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
             'rowOptions' => static function (LeadQcall $model, $index, $widget, $grid) {
-                if (!$model->lqcLead->isCallReady()) {
+                if (!$model->lqcLead->isCallProcessing()) {
                     return ['class' => 'danger'];
                 }
             },
@@ -196,7 +196,7 @@ $userIsFreeForCall = $user->isCallFree();
                         'call' => static function ($url, LeadQcall $model) use ($userIsFreeForCall) {
                             return Html::button('<i class="fa fa-phone"></i> Call', [
                                 'class' => 'btn btn-primary btn-xs lead-redial-btn',
-                                'disabled' => (!$model->lqcLead->isCallReady() || !$userIsFreeForCall) ? 'disabled' : false,
+                                'disabled' => ($model->lqcLead->isCallProcessing() || !$userIsFreeForCall) ? 'disabled' : false,
                                 'data-url' => Url::to(['lead-redial/redial']),
                                 'data-gid' => $model->lqcLead->gid,
                             ]);
