@@ -111,7 +111,8 @@ class LeadRedialService
 //            throw new \DomainException('Lead is not in status Pending');
 //        }
 
-        if (!$lead->isCallReady()) {
+//        if (!$lead->isCallReady()) {
+        if ($lead->isCallProcessing()) {
             throw new \DomainException('Lead is not ready for call');
         }
 
