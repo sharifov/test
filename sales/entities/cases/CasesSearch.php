@@ -306,40 +306,6 @@ class CasesSearch extends Cases
     }
 
     /**
-     * @param $params
-     * @return ActiveDataProvider
-     */
-    public function searchClient($params): ActiveDataProvider
-    {
-        $query = Cases::find();
-
-        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
-        $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-        ]);
-
-        $this->load($params);
-
-        if (!$this->validate()) {
-            $query->where('0=1');
-            return $dataProvider;
-        }
-
-        if (!$this->cs_client_id) {
-            throw new \InvalidArgumentException('cs_client_id must be set');
-        }
-
-        $query->andWhere(['cs_client_id' => $this->cs_client_id]);
-
-        return $dataProvider;
-    }
-
-    /**
      * @return array
      */
     public function attributeLabels(): array

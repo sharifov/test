@@ -85,6 +85,11 @@ class LeadFlowSearch extends LeadFlow
             }
         }
 
+        if (isset($params['LeadFlowSearch']['created_date_from']) && isset($params['LeadFlowSearch']['created_date_to'])) {
+            $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($params['LeadFlowSearch']['created_date_from']))])
+                 ->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($params['LeadFlowSearch']['created_date_to']))]);
+        }
+
         if($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
@@ -97,7 +102,7 @@ class LeadFlowSearch extends LeadFlow
         if($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'lead_flow.employee_id', $subQuery]);
+            $query->andWhere(['IN', 'lead_flow.lf_owner_id', $subQuery]);
         }
 
         // grid filtering conditions

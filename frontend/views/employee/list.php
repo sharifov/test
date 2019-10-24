@@ -559,7 +559,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                             <?= $form->field($multipleForm, 'workMinutes')->input('number', ['step' => 10, 'min' => 0])?>
                             <?=
                             $form->field($multipleForm, 'timeZone')->widget(\kartik\select2\Select2::class, [
-                                'data' => \common\models\Employee::timezoneList(),
+                                'data' => \common\models\Employee::timezoneList(true),
                                 'size' => \kartik\select2\Select2::SMALL,
                                 'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
                                 'pluginOptions' => ['allowClear' => true],

@@ -46,6 +46,20 @@ class QuotePrice extends \yii\db\ActiveRecord
     public $oldParams;
     public $selling, $net, $service_fee;
 
+    /**
+     * @param array $attributes
+     * @param int $quoteId
+     * @return static
+     */
+    public static function clone(array $attributes, int $quoteId): self
+    {
+        $price = new self();
+        $price->attributes = $attributes;
+        $price->quote_id = $quoteId;
+        $price->uid = uniqid(explode('.', $price->uid)[0] . '.');
+        $price->toFloat();
+        return $price;
+    }
 
     /**
      * {@inheritdoc}
@@ -53,6 +67,30 @@ class QuotePrice extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'quote_price';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAdult(): bool
+    {
+        return $this->passenger_type === self::PASSENGER_ADULT;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChild(): bool
+    {
+        return $this->passenger_type === self::PASSENGER_CHILD;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInfant(): bool
+    {
+        return $this->passenger_type === self::PASSENGER_INFANT;
     }
 
 

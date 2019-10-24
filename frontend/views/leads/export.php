@@ -1,7 +1,9 @@
 <?php
 
+use common\models\Lead;
 use sales\access\ListsAccess;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
 
@@ -73,6 +75,49 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 }
                 return implode(', ', $emails);
             },
+        ],
+        [
+                'attribute' => 'called_expert',
+        ],
+        [
+                'attribute' => 'grade',
+        ],
+        [
+                'attribute' => 'inCalls',
+                'label' => 'In Calls',
+        ],
+        [
+                'attribute' => 'inCallsDuration',
+                'label' => 'In Calls Duration',
+                'value' => static function (Lead $lead) {
+                    return $lead->inCallsDuration ?: '';
+                },
+        ],
+        [
+                'attribute' => 'outCalls',
+                'label' => 'Out Calls',
+        ],
+        [
+                'attribute' => 'outCallsDuration',
+                'label' => 'Out Calls Duration',
+                'value' => static function (Lead $lead) {
+                    return $lead->outCallsDuration ?: '';
+                },
+        ],
+        [
+                'attribute' => 'smsOffers',
+                'label' => 'Sms Offers',
+        ],
+        [
+                'attribute' => 'emailOffers',
+                'label' => 'Email Offers',
+        ],
+        [
+                'attribute' => 'quoteType',
+                'label' => 'Quote Type',
+                'value' => static function (Lead $lead) {
+                    return isset($lead->quoteType) ? ($lead->quoteType ? 'Agent' : 'Expert' ) : '';
+                }
         ],
         [
             'header' => 'Segments',

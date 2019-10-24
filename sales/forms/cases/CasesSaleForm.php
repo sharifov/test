@@ -2,10 +2,11 @@
 
 namespace sales\forms\cases;
 
+use common\models\CaseSale;
+use sales\services\cases\CasesSaleService;
 use yii\base\Model;
 use yii\helpers\Html;
-use Yii;
-use yii\validators\Validator;
+use Exception;
 
 /**
  * Class CasesSaleForm
@@ -31,7 +32,7 @@ class CasesSaleForm extends Model
 	/**
 	 * @var string
 	 */
-	private $dateFormat = 'php:Y-m-d';
+	private $dateFormat = 'Y-m-d';
 
 	/**
 	 * @var array
@@ -44,9 +45,20 @@ class CasesSaleForm extends Model
 	 * @var array
 	 */
 	private $validators = [
+		'birth_date' => 'birthDateRangeValidator',
 		'ff_numbers' => 'onlyNumbers',
-		'ktn_numbers' => 'onlyNumbersAndLetters',
+		'kt_numbers' => 'onlyNumbersAndLetters',
 	];
+
+	/**
+	 * @var CasesSaleService
+	 */
+	private $caseSaleService;
+
+	/**
+	 * @var CaseSale
+	 */
+	private $caseSale;
 
 	/**
 	 * @var array
@@ -55,11 +67,21 @@ class CasesSaleForm extends Model
 
 	/**
 	 * CasesSaleForm constructor.
+	 * @param CaseSale $caseSale
+	 * @param CasesSaleService $casesSaleService
 	 * @param array $config
+	 * @throws Exception
 	 */
-	public function __construct($config = [])
+	public function __construct(CaseSale $caseSale, CasesSaleService $casesSaleService, $config = [])
 	{
 		parent::__construct($config);
+
+		if (!$caseSale) {
+			throw new \RuntimeException('Error occurred when validate case sale: Data of the Case Sale is not found;');
+		}
+
+		$this->caseSale = $caseSale;
+		$this->caseSaleService = $casesSaleService;
 	}
 
 	/**
@@ -94,6 +116,13 @@ class CasesSaleForm extends Model
 	public function afterValidate()
 	{
 		parent::afterValidate();
+
+		$this->caseSaleService->setSegments($this->caseSale);
+
+		foreach ($this->passengers as $key => $passenger) {
+			$this->caseSaleService->formatPassengersData($this->passengers[$key]);
+		}
+
 		$this->validatedData['passengers'] = $this->passengers;
 	}
 
@@ -105,18 +134,17 @@ class CasesSaleForm extends Model
 		return [
 			'passengers' => 'Passengers',
 			'ff_numbers' => 'Frequent Fayer',
-			'ktn_numbers' => 'KTN'
+			'kt_numbers' => 'KTN'
 		];
 	}
 
 	/**
 	 * @param $value
 	 * @param $key
-	 * @throws \yii\base\InvalidConfigException
 	 */
 	private function birthDateFilter(&$value, $key)
 	{
-		$value[$key] = Yii::$app->formatter->asDate(Html::encode($value[$key]), $this->dateFormat);
+		$value[$key] = date($this->dateFormat, strtotime(Html::encode($value[$key])));
 	}
 
 	/**
@@ -138,6 +166,47 @@ class CasesSaleForm extends Model
 	{
 		if (!preg_match('/^[0-9A-Za-z]+$/', Html::encode($value))) {
 			$this->addError($attribute, $this->getAttributeLabel($attribute) . ' should contain only numbers and letters.');
+		}
+	}
+
+	/**
+	 * @param $attribute
+	 * @param $value
+	 * @throws Exception
+	 */
+	private function birthDateRangeValidator($attribute, $value)
+	{
+		$currentDate = date('Y-m-d');
+
+		$birthDate = new \DateTime($value);
+		$type = $this->passengers['type'] ?? null;
+
+		if (!$type) {
+			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': cant validate, passenger type is not provided.');
+		}
+
+		$passengerBirthDateRange = CaseSale::PASSENGER_TYPE_BIRTH_DATE_RANGE[$type] ?? null;
+
+		if (!$passengerBirthDateRange) {
+			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': cant validate, passenger birth date range is not found.');
+		}
+
+		$segments = $this->caseSaleService->getSegments($this->caseSale);
+
+		if (empty($segments)) {
+			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': segments missing from case sales information;');
+		}
+
+		$lastDepartureTime = end($segments)['departureTime'] ?? null;
+
+		if (!$lastDepartureTime) {
+			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': Departure Time of last segment is missing;');
+		}
+
+		$age = $birthDate->diff(new \DateTime($lastDepartureTime))->y;
+
+		if ($age > $passengerBirthDateRange['max']) {
+			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': you cant set birth date that is not in range;');
 		}
 	}
 }

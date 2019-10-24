@@ -217,7 +217,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                             <?//= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
                             <?php
                             echo $form->field($modelUserParams, 'up_timezone')->widget(\kartik\select2\Select2::class, [
-                                'data' => Employee::timezoneList(),
+                                'data' => Employee::timezoneList(true),
                                 'size' => \kartik\select2\Select2::SMALL,
                                 'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
                                 'pluginOptions' => ['allowClear' => true],

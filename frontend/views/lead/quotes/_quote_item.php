@@ -60,9 +60,11 @@ use yii\helpers\Url;
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
                 <strong><?= $model->employee_name?></strong>
             </span>
-            <?php if($model->tickets):?>
+            <?php
+                $ticketSegments = $model->getTicketSegments();
+                if($ticketSegments):?>
                 <span title="Separate Ticket">
-                    <i class="fa fa-ticket warning"></i> (<?=count($model->getTicketSegments())?>)
+                    <i class="fa fa-ticket warning"></i> (<?=count($ticketSegments)?>)
                 </span>
             <?php endif; ?>
 
@@ -146,9 +148,9 @@ use yii\helpers\Url;
                         <?php if ($appliedQuote === null): ?>
                             <li>
                                 <?php  echo Html::a('<i class="fa fa-copy"></i> Clone', null, [
-                                    'class' => 'add-clone-alt-quote',
+                                    'class' => 'clone-quote-by-uid-self',
                                     'data-uid' => $model->uid,
-                                    'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
+                                   // 'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
                                     'title' => 'Clone'
                                 ]);
                                 ?>

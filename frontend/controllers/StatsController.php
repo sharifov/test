@@ -149,14 +149,14 @@ class StatsController extends FController
             $date = explode("/", $chartOptions['dateRange']);
             $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy, (int)$chartOptions['callType']);
 
-            return $this->renderAjax('calls-report', [
+            return $this->renderAjax('calls-stats', [
                 'callsGraphData' => $callsGraphData
             ]);
         } else {
             $currentDate =  date('Y-m-d', strtotime('-0 day'));
             $callsGraphData = Call::getCallStats($currentDate, $currentDate, null, 0);
 
-            return $this->render('calls-report', [
+            return $this->render('calls-stats', [
                 'callsGraphData' => $callsGraphData
             ]);
         }

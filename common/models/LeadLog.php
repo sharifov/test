@@ -97,7 +97,11 @@ class LeadLog extends \yii\db\ActiveRecord
         parent::afterFind();
     }
 
-    public function addLog($params)
+    /**
+     * @param $params
+     * @return bool
+     */
+    public function addLog($params): bool
     {
         $this->attributes = $params;
         $this->message = $this->logMessage->getMessage();

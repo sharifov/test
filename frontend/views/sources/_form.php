@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Sources;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -27,6 +28,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'hidden')->checkbox() ?>
 
+        <?= $form->field($model, 'rule')->dropDownList(Sources::LIST_RULES) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

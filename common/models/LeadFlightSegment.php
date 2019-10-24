@@ -7,6 +7,7 @@ use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -23,6 +24,8 @@ use yii\db\ActiveRecord;
  * @property string $updated
  * @property string $origin_label
  * @property string $destination_label
+ *
+ * @property  Airport $airportByOrigin
  *
  * @property Lead $lead
  */
@@ -139,7 +142,13 @@ class LeadFlightSegment extends \yii\db\ActiveRecord implements AggregateRoot
         return $scenarios;
     }
 
-
+    /**
+     * @return ActiveQuery
+     */
+    public function getAirportByOrigin(): ActiveQuery
+    {
+        return $this->hasOne(Airport::class, ['iata' => 'origin']);
+    }
 
     public function checkOriginIata() : void
     {

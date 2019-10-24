@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Sources;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -30,11 +31,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
+            [
+                'attribute' => 'rule',
+                'value' => static function (Sources $source) {
+                    return Sources::LIST_RULES[$source->rule] ?? 'Undefined';
+                },
+            ],
             'default:boolean',
             'hidden:boolean',
             [
                 'attribute' => 'project_id',
-                'value' => function (\common\models\Sources $model) {
+                'value' => static function (\common\models\Sources $model) {
                     return $model->project ? $model->project->name : '-';
                 },
             ],
@@ -43,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'last_update',
             [
                 'attribute' => 'last_update',
-                'value' => function (\common\models\Sources $model) {
+                'value' => static function (\common\models\Sources $model) {
                     return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
                 },
                 'format' => 'raw'

@@ -123,7 +123,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
             ],
             [
-                    'label' => 'Created',
+                    'label' => 'Created by',
                 'attribute' => 'employee_id',
                 'value' => function(\common\models\LeadFlow $model) {
                     return $model->employee ? '<i class="fa fa-user"></i> '. Html::encode($model->employee->username) : '-';

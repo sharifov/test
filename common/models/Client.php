@@ -54,6 +54,18 @@ class Client extends ActiveRecord implements AggregateRoot
         return $client;
     }
 
+	/**
+	 * @param string $firstName
+	 * @param string $lastName
+	 * @param string $middleName
+	 */
+	public function edit(string $firstName, string $lastName, string $middleName): void
+	{
+		$this->first_name = $firstName;
+		$this->last_name = $lastName;
+		$this->middle_name = $middleName;
+	}
+
     /**
      * @return array
      */

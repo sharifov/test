@@ -3,15 +3,18 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\search\lead\LeadSearchByClient;
 use common\models\search\LeadSearch;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesSearch;
+use sales\entities\cases\CasesSearchByClient;
 use Yii;
 use common\models\Client;
 use common\models\search\ClientSearch;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -128,21 +131,25 @@ class ClientController extends FController
     /**
      * @return string
      * @throws NotFoundHttpException
+     * @throws \ReflectionException
      */
     public function actionAjaxGetInfo(): string
     {
-        $client = $this->findModel((int) Yii::$app->request->post('client_id'));
+        if (!$clientId = Yii::$app->request->post('client_id')) {
+            $clientId = Yii::$app->request->get('client_id');
+        }
+        $client = $this->findModel((int)$clientId);
 
         $providers = [];
 
-        if (Yii::$app->user->can('leadSection')) {
-            $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id);
-        }
-        if (Yii::$app->user->can('caseSection')) {
-            $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id);
-        }
+//        if (Yii::$app->user->can('leadSection')) {
+            $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id, Yii::$app->user->id);
+//        }
+//        if (Yii::$app->user->can('caseSection')) {
+            $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id, Yii::$app->user->id);
+//        }
 
-        return $this->renderPartial('ajax_info', ArrayHelper::merge(
+        return $this->renderAjax('ajax_info', ArrayHelper::merge(
             ['model' => $client],
             $providers)
         );
@@ -150,40 +157,52 @@ class ClientController extends FController
 
     /**
      * @param int $clientId
+     * @param int $userId
      * @return ActiveDataProvider
+     * @throws \ReflectionException
      */
-    private function getCasesDataProvider(int $clientId): ActiveDataProvider
+    private function getCasesDataProvider(int $clientId, int $userId): ActiveDataProvider
     {
-        $searchModel = new CasesSearch();
+        $params[CasesSearchByClient::getShortName()]['clientId'] = $clientId;
 
-        $params['CasesSearch']['cs_client_id'] = $clientId;
+        $dataProvider = (new CasesSearchByClient())->search($params, $userId);
 
-        $dataProvider = $searchModel->searchClient($params);
+        $dataProvider->query->orderBy(['cs_updated_dt' => SORT_DESC]);
 
         $dataProvider->sort = false;
+
+        $pagination = $dataProvider->pagination;
+        $pagination->pageSize = 10;
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->pageParam = 'case-page';
+        $pagination->pageSizeParam = 'case-per-page';
+        $dataProvider->pagination = $pagination;
 
         return $dataProvider;
     }
 
     /**
      * @param int $clientId
+     * @param int $userId
      * @return ActiveDataProvider
+     * @throws \ReflectionException
      */
-    private function getLeadsDataProvider(int $clientId): ActiveDataProvider
+    private function getLeadsDataProvider(int $clientId, int $userId): ActiveDataProvider
     {
-        $searchModel = new LeadSearch();
+        $params[LeadSearchByClient::getShortName()]['clientId'] = $clientId;
 
-        $params['LeadSearch']['client_id'] = $clientId;
+        $dataProvider = (new LeadSearchByClient())->search($params, $userId);
 
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-        if ($user->isAgent()) {
-            $dataProvider = $searchModel->searchAgent($params);
-        } else {
-            $dataProvider = $searchModel->search($params);
-        }
+        $dataProvider->query->orderBy(['l_last_action_dt' => SORT_DESC]);
 
         $dataProvider->sort = false;
+
+        $pagination = $dataProvider->getPagination();
+        $pagination->pageSize = 10;
+        $pagination->params = array_merge(Yii::$app->request->get(), ['client_id' => $clientId]);
+        $pagination->pageParam = 'lead-page';
+        $pagination->pageSizeParam = 'lead-per-page';
+        $dataProvider->setPagination($pagination);
 
         return $dataProvider;
     }

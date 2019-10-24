@@ -40,6 +40,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use common\components\SearchService;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "leads".
@@ -126,6 +127,16 @@ use common\components\SearchService;
  * @property UserConnection[] $userConnections
  *
  * @property LeadFlow $lastLeadFlow
+ *
+ * @property $remainingDays
+ * @property $grade
+ * @property $inCalls
+ * @property $inCallsDuration
+ * @property $outCalls
+ * @property $outCallsDuration
+ * @property $smsOffers
+ * @property $emailOffers
+ * @property $quoteType
  *
  */
 class Lead extends ActiveRecord implements AggregateRoot
@@ -241,6 +252,18 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     public $enableActiveRecordEvents = true;
 
+    public $remainingDays;
+
+    public $grade;
+    public $inCalls;
+    public $inCallsDuration;
+    public $outCalls;
+    public $outCallsDuration;
+    public $smsOffers;
+    public $emailOffers;
+    public $quoteType;
+
+
     /**
      * {@inheritdoc}
      */
@@ -296,6 +319,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             ['l_delayed_charge', 'default', 'value' => false],
         ];
     }
+
 
     /**
      * @param $clientId
@@ -381,6 +405,23 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clone->employee_id = null;
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
+    }
+
+    /**
+     * @param array $segments
+     * @return bool
+     */
+    public function equalsSegments(array $segments): bool
+    {
+        $originSegments = [];
+        foreach ($this->leadFlightSegments as $segment) {
+            $originSegments[] = [
+                'origin' => $segment->origin,
+                'destination' => $segment->destination,
+                'departure' => $segment->departure
+            ];
+        }
+        return $segments === $originSegments;
     }
 
     /**
@@ -3371,6 +3412,7 @@ Reason: {reason}
             'market_price' => $this->leadPreferences ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
             'agent_name' => $this->employee ? $this->employee->username : 'N/A',
+            'agent_team' => $this->employee ? $this->employee->getUserGroupList() : [],
             'agent_id' => $this->employee_id,
             'delayed_charge' => $this->l_delayed_charge
         ];

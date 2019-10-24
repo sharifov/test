@@ -4,6 +4,7 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
+use common\models\search\EmployeeSearch;
 use sales\access\EmployeeGroupAccess;
 use Yii;
 use yii\base\NotSupportedException;
@@ -210,14 +211,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     public function isSimpleAgent(): bool
-	{
-		return !$this->canRoles([
-			self::ROLE_SUPER_ADMIN,
-			self::ROLE_ADMIN,
-			self::ROLE_SUP_SUPER,
-			self::ROLE_EX_SUPER
-		]);
-	}
+    {
+        return !$this->canRoles([
+            self::ROLE_SUPER_ADMIN,
+            self::ROLE_ADMIN,
+            self::ROLE_SUP_SUPER,
+            self::ROLE_EX_SUPER
+        ]);
+    }
 
     /**
      * @return bool
@@ -1389,6 +1390,29 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         }
 
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['lf_owner_id' => $this->id, 'status' => $statusList]);
+        $query->andFilterWhere(['>=', 'created', $startDate]);
+        $query->andFilterWhere(['<=', 'created', $endDate]);
+        $count = $query->asArray()->scalar();
+        return $count;
+    }
+
+    /**
+     * @param array $statusList
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return int
+     */
+    public function getLeadCountByStatusAndEmployee(array $statusList = [], string $startDate = null, string $endDate = null): int
+    {
+        if ($startDate) {
+            $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
+        }
+
+        if ($endDate) {
+            $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+        }
+
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
         $query->andFilterWhere(['>=', 'created', $startDate]);
         $query->andFilterWhere(['<=', 'created', $endDate]);
@@ -1396,6 +1420,42 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $count;
     }
 
+    /**
+     * @param $employeeId
+     * @param $callType
+     * @param $status
+     * @param $source
+     * @param $searchModel EmployeeSearch;
+     * @return array|Call[]
+     */
+    public function getCallsCount($employeeId, $callType, $status, $source, $searchModel)
+    {
+        $query = Call::find();
+        $query->select("COUNT(*) AS cnt, SUM(c_call_duration) AS duration")
+            ->where([
+                'c_created_user_id' => $employeeId,
+                'c_call_type_id' => $callType,
+            ]);
+        if ($status != null){
+            $query->andWhere([
+                'c_call_status' => $status
+            ]);
+        }
+
+        /*if ($callType == Call::CALL_TYPE_IN){
+            $query->andWhere(['NOT',['c_parent_id' => null]]);
+        }*/
+
+        if ($source != null){
+            $query->andWhere([
+                'c_source_type_id' => $source
+            ]);
+        }
+
+        $count = $query->asArray()->all();
+
+        return $count;
+    }
 
     /**
      * @param array $statusList
@@ -1414,7 +1474,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         }
 
-        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['lf_owner_id' => $this->id, 'status' => $statusList]);
 
         if($from_status_id > 0) {
             $query->andWhere(['lf_from_status_id' => $from_status_id]);
@@ -1437,9 +1497,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param $formatLong
      * @return array
+     * @throws \Exception
      */
-    public static function timezoneList(): array
+    public static function timezoneList($formatLong): array
     {
         $timezoneIdentifiers = \DateTimeZone::listIdentifiers(\DateTimeZone:: ALL);
         $utcTime = new \DateTime('now', new \DateTimeZone('UTC'));
@@ -1465,8 +1527,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         foreach ($tempTimezones as $tz) {
             $sign = ($tz['offset'] > 0) ? '+' : '-';
             $offset = gmdate('H:i', abs($tz['offset']));
-            $timezoneList[$tz['identifier']] = '(UTC ' . $sign . $offset . ') ' .
-                $tz['identifier'];
+            $timezoneList[$tz['identifier']] = ($formatLong)
+                ? '(UTC ' . $sign . $offset . ') ' . $tz['identifier']
+                : $sign . $offset;
         }
 
         return $timezoneList;

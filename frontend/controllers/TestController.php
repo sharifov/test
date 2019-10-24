@@ -12,6 +12,7 @@ use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\Quote;
 use common\models\Sources;
 use common\models\Test1;
 use common\models\UserConnection;
@@ -54,6 +55,7 @@ use Yii;
 use yii\base\Event;
 use yii\caching\DbDependency;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -120,6 +122,27 @@ class TestController extends FController
     public function actionTest()
     {
 
+
+        $quote = Quote::findOne(570780);
+
+//        VarDumper::dump($quote->quotePrices);
+
+        $adt = 0;
+        $chd = 0;
+        $inf = 0;
+
+        foreach ($quote->quotePrices as $item) {
+            if ($item->passenger_type === 'ADT') {
+                $adt++;
+            } elseif ($item->passenger_type === 'CHD') {
+                $chd++;
+            } elseif ($item->passenger_type === 'INF') {
+                $inf++;
+            }
+        }
+        echo $adt . '  ' . $chd . ' ' . $inf;
+
+        die;
         return $this->render('blank');
 
     }

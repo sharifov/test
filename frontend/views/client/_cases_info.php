@@ -1,12 +1,12 @@
 <?php
 
 use sales\entities\cases\Cases;
+use sales\entities\cases\CasesStatus;
 use yii\grid\GridView;
 use yii\helpers\Html;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$isAgent = true;
 ?>
 
 <div class="row">
@@ -17,16 +17,25 @@ $isAgent = true;
             'dataProvider' => $dataProvider,
             'columns' => [
                 [
-                    'attribute' => 'cs_gid',
+                    'label' => 'ID',
                     'value' => function (Cases $model) {
-                        return Html::a($model->cs_id, ['cases/view', 'gid' => $model->cs_gid], [
-                            'data-pjax' => 0,
-                            'target' => '_blank'
-                        ]);
+                        if (Yii::$app->user->can('caseSection')) {
+                            return Html::a($model->cs_id, ['cases/view', 'gid' => $model->cs_gid], [
+                                'data-pjax' => 0,
+                                'target' => '_blank'
+                            ]);
+                        }
+                        return $model->cs_id;
                     },
                     'format' => 'raw'
                 ],
-
+                [
+                    'attribute' => 'cs_status',
+                    'value' => function (Cases $model) {
+                        return CasesStatus::getLabel($model->cs_status);
+                    },
+                    'format' => 'raw'
+                ],
                 [
                     'attribute' => 'cs_project_id',
                     'value' => function (Cases $model) {
@@ -41,6 +50,7 @@ $isAgent = true;
                     },
                 ],
                 [
+                    'label' => 'Owner',
                     'attribute' => 'cs_user_id',
                     'value' => function (Cases $model) {
                         return $model->owner ? $model->owner->username : '';
@@ -67,8 +77,15 @@ $isAgent = true;
                     },
                     'format' => 'raw'
                 ],
+                [
+                    'attribute' => 'cs_updated_dt',
+                    'value' => function (Cases $model) {
+                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_updated_dt));
+                    },
+                    'format' => 'raw'
+                ],
             ],
-        ]); ?>
+        ]) ?>
 
     </div>
 </div>

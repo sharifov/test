@@ -2,10 +2,14 @@
 
 namespace common\models\search;
 
+use common\models\Airport;
+use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Email;
 use common\models\Employee;
+use common\models\Sms;
 use common\models\UserGroupAssign;
 use sales\access\EmployeeProjectAccess;
 use sales\repositories\lead\LeadBadgesRepository;
@@ -14,11 +18,11 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Lead;
 use yii\data\SqlDataProvider;
+use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
 use common\models\Quote;
 use common\models\LeadFlightSegment;
-use common\models\ProjectEmployeeAccess;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
@@ -26,7 +30,16 @@ use yii\helpers\VarDumper;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
- * @param LeadBadgesRepository $leadBadgesRepository
+ *
+ * @property $remainingDays
+ * @property $grade
+ * @property $inCalls
+ * @property $inCallsDuration
+ * @property $outCalls
+ * @property $outCallsDuration
+ * @property $smsOffers
+ * @property $emailOffers
+ * @property $quoteType
  */
 class LeadSearch extends Lead
 {
@@ -71,6 +84,18 @@ class LeadSearch extends Lead
 
     public $last_ticket_date;
 
+    public $remainingDays;
+
+    public $grade;
+    public $inCalls;
+    public $inCallsDuration;
+    public $outCalls;
+    public $outCallsDuration;
+    public $smsOffers;
+    public $emailOffers;
+    public $quoteType;
+
+
     private $leadBadgesRepository;
 
     public function __construct($config = [])
@@ -103,6 +128,11 @@ class LeadSearch extends Lead
 
             ['last_ticket_date', 'safe'],
             [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+
+            ['remainingDays', 'integer'],
+            ['remainingDays', 'filter', 'filter' => static function($value) {
+                return (int)$value;
+            }, 'skipOnEmpty' => true],
 
         ];
     }
@@ -382,6 +412,324 @@ class LeadSearch extends Lead
         /*  $sqlRaw = $query->createCommand()->getRawSql();
 
         VarDumper::dump($sqlRaw, 10, true); exit; */
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchExport($params): ActiveDataProvider
+    {
+        $query = Lead::find()->with('project', 'source', 'employee', 'client');
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> [
+                'defaultOrder' => ['leads.id' => SORT_DESC]
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'leads.id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ],
+            'id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ]
+        ]);
+        $dataProvider->setSort($sort);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'gid'   => $this->gid,
+            'client_id' => $this->client_id,
+            'employee_id' => $this->employee_id,
+            'status' => $this->status,
+            'project_id' => $this->project_id,
+            'source_id' => $this->source_id,
+            'adults' => $this->adults,
+            'children' => $this->children,
+            'infants' => $this->infants,
+            //'created' => $this->created,
+            //'updated' => $this->updated,
+            'snooze_for' => $this->snooze_for,
+            'bo_flight_id' => $this->bo_flight_id,
+            'rating' => $this->rating,
+            'called_expert' => $this->called_expert,
+            'l_answered'    => $this->l_answered,
+            'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
+            'l_init_price'  => $this->l_init_price,
+            'request_ip'    => $this->request_ip
+        ]);
+
+        if($this->statuses) {
+            $query->andWhere(['status' => $this->statuses]);
+        }
+
+        if ($this->createdRangeTime) {
+            $createdRange = explode(" - ", $this->createdRangeTime);
+            if ($createdRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
+            }
+            if ($createdRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]))]);
+            }
+        }
+
+        if ($this->updatedRangeTime) {
+            $updatedRange = explode(" - ", $this->updatedRangeTime);
+            if ($updatedRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.updated', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[0]))]);
+            }
+            if ($updatedRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.updated', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]))]);
+            }
+        }
+
+        if ($this->lastActionRangeTime) {
+            $lastActionRange = explode(" - ", $this->lastActionRangeTime);
+            if ($lastActionRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastActionRange[0]))]);
+            }
+            if ($lastActionRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastActionRange[1]))]);
+            }
+        }
+
+        if($this->departRangeTime) {
+            $departRange = explode(" - ", $this->departRangeTime);
+            $having = [];
+            if ($departRange[0]) {
+                $having[] = "MIN(departure) >= '".date('Y-m-d', strtotime($departRange[0]))."'";
+            }
+            if ($departRange[1]) {
+                $having[] = "MIN(departure) <= '".date('Y-m-d', strtotime($departRange[1]))."'";
+            }
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        if($this->soldRangeTime) {
+            $soldRange = explode(" - ", $this->soldRangeTime);
+            $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
+
+            if ($soldRange[0]) {
+                $subQuery->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($soldRange[0]))]);
+            }
+            if ($soldRange[1]) {
+                $subQuery->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($soldRange[1]))]);
+            }
+
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        if($this->client_name) {
+            $query->joinWith(['client' => function ($q) {
+                if($this->client_name) {
+                    $q->where(['like', 'clients.last_name', $this->client_name])
+                        ->orWhere(['like', 'clients.first_name', $this->client_name]);
+                }
+            }]);
+        }
+
+        if($this->client_email) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->client_phone) {
+
+            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
+            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
+
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        //echo $this->created_date_from;
+        if($this->quote_pnr) {
+            //$subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            //$query->andWhere(['IN', 'leads.id', $subQuery]);
+
+            $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"'.$this->quote_pnr.'"%\'')]);
+        }
+
+        if($this->supervision_id > 0) {
+
+            if(
+                $this->id
+                || $this->uid
+                || $this->client_id
+                || $this->client_email
+                || $this->client_phone
+                || $this->status == Lead::STATUS_FOLLOW_UP
+                || $this->request_ip
+                || $this->discount_id
+                || $this->gid
+                || $this->bo_flight_id
+            ) {
+
+            } else {
+
+                if($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
+
+                } elseif($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1){
+
+                } else {
+                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                    $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                }
+            }
+        }
+
+        $query->andFilterWhere(['like', 'uid', $this->uid])
+            ->andFilterWhere(['like', 'trip_type', $this->trip_type])
+            ->andFilterWhere(['like', 'cabin', $this->cabin])
+            ->andFilterWhere(['like', 'notes_for_experts', $this->notes_for_experts])
+            //->andFilterWhere(['like', 'request_ip', $this->request_ip])
+            ->andFilterWhere(['like', 'request_ip_detail', $this->request_ip_detail])
+            ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
+            ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
+
+        if(!empty($this->origin_airport)){
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','origin',$this->origin_airport]);
+
+            $subQuery1 = LeadFlightSegment::find()->select(['MIN(id)'])->where(['IN','lead_id', $subQuery])->groupBy('lead_id');
+
+            $subQuery2 = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','origin',$this->origin_airport])
+                ->andWhere(['IN','id', $subQuery1]);
+
+            $query->andWhere(['IN', 'leads.id', $subQuery2]);
+        }
+
+        if(!empty($this->destination_airport)){
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','destination',$this->destination_airport]);
+
+            $subQuery1 = LeadFlightSegment::find()->select(['MIN(id)'])->where(['IN','lead_id', $subQuery])->groupBy('lead_id');
+
+            $subQuery2 = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','destination',$this->destination_airport])
+                ->andWhere(['IN','id', $subQuery1]);
+
+            $query->andWhere(['IN', 'leads.id', $subQuery2]);
+        }
+
+        if(!empty($this->origin_country)){
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->leftJoin('airports','airports.iata = lead_flight_segments.origin')
+                ->andFilterWhere(['like','airports.countryId',$this->origin_country]);
+
+            $subQuery1 = LeadFlightSegment::find()->select(['MIN(id)'])->where(['IN','lead_id', $subQuery])->groupBy('lead_id');
+
+            $subQuery2 = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->leftJoin('airports','airports.iata = lead_flight_segments.origin')
+                ->andFilterWhere(['like','airports.countryId',$this->origin_country])
+                ->andWhere(['IN','id', $subQuery1]);
+
+            $query->andWhere(['IN', 'leads.id', $subQuery2]);
+        }
+        if(!empty($this->destination_country)){
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->leftJoin('airports','airports.iata = lead_flight_segments.destination')
+                ->andFilterWhere(['like','airports.countryId',$this->destination_country]);
+
+            $subQuery1 = LeadFlightSegment::find()->select(['MIN(id)'])->where(['IN','lead_id', $subQuery])->groupBy('lead_id');
+
+            $subQuery2 = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->leftJoin('airports','airports.iata = lead_flight_segments.destination')
+                ->andFilterWhere(['like','airports.countryId',$this->destination_country])
+                ->andWhere(['IN','id', $subQuery1]);
+
+            $query->andWhere(['IN', 'leads.id', $subQuery2]);
+        }
+
+        $query->addSelect([
+            'grade' => (new Query())
+                ->select(['count(*)'])
+                ->from(LeadFlow::tableName())
+                ->andWhere(LeadFlow::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
+                ->andWhere(LeadFlow::tableName() . '.status = ' . Lead::STATUS_FOLLOW_UP)
+        ]);
+
+        $query->addSelect([
+            'inCalls' => (new Query())
+                ->select(['count(*)'])
+                ->from(Call::tableName())
+                ->andWhere([Call::tableName() . '.c_call_type_id' => Call::CALL_TYPE_IN])
+                ->andWhere(Call::tableName() . '.c_lead_id = ' . Lead::tableName() . '.id')
+                ->andWhere(['>=', Call::tableName() . '.c_recording_duration', 15])
+        ]);
+
+        $query->addSelect([
+            'inCallsDuration' => (new Query())
+                ->select(['sum('.Call::tableName() . '.c_recording_duration)'])
+                ->from(Call::tableName())
+                ->andWhere([Call::tableName() . '.c_call_type_id' => Call::CALL_TYPE_IN])
+                ->andWhere(Call::tableName() . '.c_lead_id = ' . Lead::tableName() . '.id')
+                ->andWhere(['>=', Call::tableName() . '.c_recording_duration', 15])
+        ]);
+
+        $query->addSelect([
+            'outCalls' => (new Query())
+                ->select(['count(*)'])
+                ->from(Call::tableName())
+                ->andWhere([Call::tableName() . '.c_call_type_id' => Call::CALL_TYPE_OUT])
+                ->andWhere(Call::tableName() . '.c_lead_id = ' . Lead::tableName() . '.id')
+                ->andWhere(['>=', Call::tableName() . '.c_recording_duration', 15])
+        ]);
+
+        $query->addSelect([
+            'outCallsDuration' => (new Query())
+                ->select(['sum('.Call::tableName() . '.c_recording_duration)'])
+                ->from(Call::tableName())
+                ->andWhere([Call::tableName() . '.c_call_type_id' => Call::CALL_TYPE_OUT])
+                ->andWhere(Call::tableName() . '.c_lead_id = ' . Lead::tableName() . '.id')
+                ->andWhere(['>=', Call::tableName() . '.c_recording_duration', 15])
+        ]);
+
+        $query->addSelect([
+            'smsOffers' => (new Query())
+                ->select(['count(*)'])
+                ->from(Sms::tableName())
+                ->andWhere([Sms::tableName() . '.s_template_type_id' => 2])
+                ->andWhere(Sms::tableName() . '.s_lead_id = ' . Lead::tableName() . '.id')
+        ]);
+
+        $query->addSelect([
+            'emailOffers' => (new Query())
+                ->select(['count(*)'])
+                ->from(Email::tableName())
+                ->andWhere([Email::tableName() . '.e_template_type_id' => 1])
+                ->andWhere(Email::tableName() . '.e_lead_id = ' . Lead::tableName() . '.id')
+        ]);
+
+        $query->addSelect([
+            'quoteType' => (new Query())
+                ->select([Quote::tableName() . '.created_by_seller'])
+                ->from(Quote::tableName())
+                ->andWhere([Quote::tableName() . '.status' => Quote::STATUS_APPLIED])
+                ->andWhere(Quote::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
+                ->limit(1)
+        ]);
+
+//        $sqlRaw = $query->createCommand()->getRawSql();
+//        VarDumper::dump($sqlRaw, 10, true); die;
 
         return $dataProvider;
     }
@@ -1022,11 +1370,46 @@ class LeadSearch extends Lead
 
         $leadTable = Lead::tableName();
 
+            $departureQuery =  (new Query())
+                ->select(['lfs.departure'])
+                ->from(['lfs' => LeadFlightSegment::tableName()])
+                ->where('lfs.lead_id  = ' . $leadTable . '.id')
+                ->orderBy(['lfs.departure' => SORT_ASC])
+                ->limit(1)
+                ->createCommand()->getSql();
+            $nowQuery = (new Query())
+                ->select(new Expression("if (a.dst is not null, if (cast(a.dst as signed) >= 0, concat('+', if (length(a.dst) < 2, concat(0, a.dst), a.dst),':00'), concat(a.dst, ':00')), '+00:00')"))
+                ->from(['a' => Airport::tableName()])
+                ->andWhere('a.iata = (' .
+                    (new Query())
+                    ->select(['lfs.origin'])
+                    ->from(['lfs' => LeadFlightSegment::tableName()])
+                    ->andWhere('lfs.lead_id = ' . $leadTable . '.id')
+                    ->orderBy(['lfs.departure' => SORT_ASC])
+                    ->limit(1)
+                    ->createCommand()->getSql()
+                    . ')'
+                )
+                ->createCommand()->getSql();
+
+        $query->addSelect([
+            'remainingDays' =>
+                new Expression("datediff((" . $departureQuery . "), (date(convert_tz(NOW(), '+00:00', (" . $nowQuery . ")))))")
+        ]);
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['l_last_action_dt' => SORT_DESC],'attributes' => ['id','updated','created','status','l_last_action_dt']],
+            'sort'=> [
+                'defaultOrder' => ['l_last_action_dt' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'created',
+                    'l_last_action_dt',
+                    'remainingDays'
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -1095,10 +1478,23 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+        if ($this->remainingDays || $this->remainingDays === 0) {
+            $query->andHaving(['remainingDays' => $this->remainingDays]);
+        }
 
-        /*  $sqlRaw = $query->createCommand()->getRawSql();
-         VarDumper::dump($sqlRaw, 10, true); exit; */
+        $query->with([
+            'client',
+            'client.clientEmails',
+            'client.clientPhones',
+            'employee',
+            'leadFlightSegments' => static function(ActiveQuery $query) {
+                return $query->orderBy(['id' => SORT_ASC]);
+            },
+//            'leadFlightSegments.airportByOrigin'
+        ]);
+
+//          $sqlRaw = $query->createCommand()->getRawSql();
+//         VarDumper::dump($sqlRaw, 10, true); exit;
 
         return $dataProvider;
     }
