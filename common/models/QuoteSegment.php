@@ -32,6 +32,7 @@ use Yii;
  * @property string $qs_updated_dt
  * @property int $qs_updated_user_id
  * @property int $qs_ticket_id
+ * @property boolean $qs_recheck_baggage
  *
  * @property QuoteTrip $trip
  * @property Employee $updatedUser
@@ -90,6 +91,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
             [['qs_departure_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['qs_departure_airport_code' => 'iata']],
             [['qs_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteTrip::class, 'targetAttribute' => ['qs_trip_id' => 'qt_id']],
             [['qs_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qs_updated_user_id' => 'id']],
+            [['qs_recheck_baggage'], 'boolean']
         ];
     }
 

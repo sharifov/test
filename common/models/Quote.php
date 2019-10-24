@@ -44,6 +44,7 @@ use common\components\SearchService;
  * @property double $service_fee_percent
  * @property boolean $alternative
  * @property string $tickets
+ * @property string $origin_search_data
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -145,7 +146,7 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
             [['reservation_dump'], 'checkReservationDump'],
-            [['pricing_info', 'tickets'], 'string'],
+            [['pricing_info', 'tickets', 'origin_search_data'], 'string'],
             [['status'], 'checkStatus'],
 
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
@@ -180,7 +181,8 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
             'reservation_dump' => 'Reservation Dump',
             'pricing_info' => 'Pricing info',
             'alternative' => 'Alternative',
-            'tickets'   => 'Tickets JSON'
+            'tickets'   => 'Tickets JSON',
+            'origin_search_data' => 'Original Search JSON'
         ];
     }
 
@@ -2348,9 +2350,11 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
     {
         $segments = [];
 
-        if($this->tickets) {
-            $ticketsArr = @json_decode($this->tickets, true);
-            if(is_array($ticketsArr)) {
+        if($this->origin_search_data) {
+            $dataArr = @json_decode($this->origin_search_data, true);
+
+            if($dataArr && isset($dataArr['tickets'])) {
+                $ticketsArr = $dataArr['tickets'];
                 $ticketNr = 1;
                 foreach ($ticketsArr as $ticket) {
 

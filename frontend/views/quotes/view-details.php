@@ -90,7 +90,7 @@ use yii\helpers\Html;
                                             <?php endforeach;?>
                                         <?php endif;?>
                                         <?php if(isset($segment->qs_meal)):?><span class="badge badge-light" title="<?= $segment->qs_meal?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
-
+                                        <?php if ($segment->qs_recheck_baggage == true && $segment->qs_recheck_baggage !== null):?> <h5 class="danger"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
                                         <?php if(isset($segment->qs_stop) && $segment->qs_stop > 0):?>
 
                                             <h5 class="danger">

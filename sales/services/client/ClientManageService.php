@@ -77,11 +77,22 @@ class ClientManageService
         if (!$this->clientPhoneRepository->exists($client->id, $phoneForm->phone)) {
             $phone = ClientPhone::create(
                 $phoneForm->phone,
-                $client->id
+                $client->id,
+				$phoneForm->type ?? null
             );
             $this->clientPhoneRepository->save($phone);
         }
     }
+
+	/**
+	 * @param PhoneCreateForm $form
+	 */
+    public function updatePhone(PhoneCreateForm $form): void
+	{
+		$phone = $this->clientPhoneRepository->find($form->id);
+		$phone->edit($form->phone, $form->type);
+		$this->clientPhoneRepository->save($phone);
+	}
 
     /**
      * @param Client $client
@@ -106,11 +117,34 @@ class ClientManageService
         if (!$this->clientEmailRepository->exists($client->id, $emailForm->email)) {
             $email = ClientEmail::create(
                 $emailForm->email,
-                $client->id
+                $client->id,
+				$emailForm->type
             );
             $this->clientEmailRepository->save($email);
         }
     }
+
+	/**
+	 * @param EmailCreateForm $form
+	 */
+	public function updateEmail(EmailCreateForm $form): void
+	{
+		$email = $this->clientEmailRepository->find($form->id);
+		$email->edit($form->email, $form->type);
+		$this->clientEmailRepository->save($email);
+	}
+
+	/**
+	 * @param ClientCreateForm $form
+	 * @return Client
+	 */
+	public function updateClient(ClientCreateForm $form): Client
+	{
+		$client = $this->clientRepository->find($form->id);
+		$client->edit($form->firstName, $form->lastName, $form->middleName);
+		$this->clientRepository->save($client);
+		return $client;
+	}
 
     /**
      * Find or create Client

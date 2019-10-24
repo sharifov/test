@@ -476,7 +476,7 @@ class Lead2 extends \yii\db\ActiveRecord
 
         $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
 
-        Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig ? $qcConfig->attributes : null]), 'info\createOrUpdateQCall');
+        // Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig ? $qcConfig->attributes : null]), 'info\createOrUpdateQCall');
 
         $lq = $this->leadQcall;
 

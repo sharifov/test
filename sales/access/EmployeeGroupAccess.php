@@ -37,4 +37,14 @@ class EmployeeGroupAccess
     {
         return ArrayHelper::getColumn(self::usersIdsInCommonGroupsSubQuery($userId)->asArray()->indexBy('ugs_user_id')->asArray()->all(), 'ugs_user_id');
     }
+
+	/**
+	 * @param int $searchUserId
+	 * @param int $userIdExist
+	 * @return bool
+	 */
+    public static function isUserInCommonGroup(int $searchUserId, int $userIdExist): bool
+	{
+		return array_key_exists($userIdExist, self::getUsersIdsInCommonGroups($searchUserId));
+	}
 }

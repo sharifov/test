@@ -699,6 +699,24 @@ use yii\helpers\Html;
         }
     }
 
+    function webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type) {
+
+        let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'c_type': type, 'c_user_id': userId};
+        webPhoneParams = params;
+
+        if (device) {
+            $('#web-call-from-number').text(params.FromAgentPhone);
+            $('#web-call-to-number').text(params.To);
+
+            console.log('Calling ' + params.To + '...');
+            createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+            updateAgentStatus(connection, false, 0);
+            //connection = device.connect(params);
+           // $('#btn-group-id-redirect').hide();
+        }
+
+    }
+
     function cleanPhones() {
         $('#web-call-from-number').text('');
         $('#web-call-to-number').text('');

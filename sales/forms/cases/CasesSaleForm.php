@@ -3,12 +3,10 @@
 namespace sales\forms\cases;
 
 use common\models\CaseSale;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use sales\services\cases\CasesSaleService;
 use yii\base\Model;
 use yii\helpers\Html;
-use Yii;
-use yii\validators\Validator;
+use Exception;
 
 /**
  * Class CasesSaleForm
@@ -34,7 +32,7 @@ class CasesSaleForm extends Model
 	/**
 	 * @var string
 	 */
-	private $dateFormat = 'php:Y-m-d';
+	private $dateFormat = 'Y-m-d';
 
 	/**
 	 * @var array
@@ -72,13 +70,15 @@ class CasesSaleForm extends Model
 	 * @param CaseSale $caseSale
 	 * @param CasesSaleService $casesSaleService
 	 * @param array $config
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function __construct(CaseSale $caseSale, CasesSaleService $casesSaleService, $config = [])
 	{
 		parent::__construct($config);
 
-		if (!$caseSale) throw new \Exception('Error occurred when validate case sale: Data of the Case Sale is not found;');
+		if (!$caseSale) {
+			throw new \RuntimeException('Error occurred when validate case sale: Data of the Case Sale is not found;');
+		}
 
 		$this->caseSale = $caseSale;
 		$this->caseSaleService = $casesSaleService;
@@ -141,11 +141,10 @@ class CasesSaleForm extends Model
 	/**
 	 * @param $value
 	 * @param $key
-	 * @throws \yii\base\InvalidConfigException
 	 */
 	private function birthDateFilter(&$value, $key)
 	{
-		$value[$key] = Yii::$app->formatter->asDate(Html::encode($value[$key]), $this->dateFormat);
+		$value[$key] = date($this->dateFormat, strtotime(Html::encode($value[$key])));
 	}
 
 	/**
@@ -173,7 +172,7 @@ class CasesSaleForm extends Model
 	/**
 	 * @param $attribute
 	 * @param $value
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function birthDateRangeValidator($attribute, $value)
 	{
@@ -204,11 +203,9 @@ class CasesSaleForm extends Model
 			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': Departure Time of last segment is missing;');
 		}
 
-		$diff = $birthDate->diff(new \DateTime($lastDepartureTime));
+		$age = $birthDate->diff(new \DateTime($lastDepartureTime))->y;
 
-		$age = $diff->y;
-
-		if ($age < $passengerBirthDateRange['min'] || $age > $passengerBirthDateRange['max']) {
+		if ($age > $passengerBirthDateRange['max']) {
 			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': you cant set birth date that is not in range;');
 		}
 	}

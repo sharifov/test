@@ -144,6 +144,10 @@ $js = <<<JS
                         if (typeof refreshCallBox === "function") {
                             refreshCallBox(obj);
                         }
+                        
+                         if (typeof webCallLeadRedialUpdate === "function") {
+                            webCallLeadRedialUpdate(obj);
+                        }
                     }
                     
                     if(obj.command === 'webCallUpdate') {

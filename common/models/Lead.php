@@ -128,6 +128,16 @@ use yii\helpers\VarDumper;
  *
  * @property LeadFlow $lastLeadFlow
  *
+ * @property $remainingDays
+ * @property $grade
+ * @property $inCalls
+ * @property $inCallsDuration
+ * @property $outCalls
+ * @property $outCallsDuration
+ * @property $smsOffers
+ * @property $emailOffers
+ * @property $quoteType
+ *
  */
 class Lead extends ActiveRecord implements AggregateRoot
 {
@@ -244,6 +254,16 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     public $remainingDays;
 
+    public $grade;
+    public $inCalls;
+    public $inCallsDuration;
+    public $outCalls;
+    public $outCallsDuration;
+    public $smsOffers;
+    public $emailOffers;
+    public $quoteType;
+
+
     /**
      * {@inheritdoc}
      */
@@ -299,6 +319,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             ['l_delayed_charge', 'default', 'value' => false],
         ];
     }
+
 
     /**
      * @param $clientId
@@ -3391,6 +3412,7 @@ Reason: {reason}
             'market_price' => $this->leadPreferences ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
             'agent_name' => $this->employee ? $this->employee->username : 'N/A',
+            'agent_team' => $this->employee ? $this->employee->getUserGroupList() : [],
             'agent_id' => $this->employee_id,
             'delayed_charge' => $this->l_delayed_charge
         ];

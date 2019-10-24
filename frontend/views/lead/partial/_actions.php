@@ -4,14 +4,19 @@
  * @var $leadForm LeadForm
  */
 
+use common\models\Employee;
 use frontend\models\LeadForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
 use yii\bootstrap\Modal;
+use function Matrix\identity;
 
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadForm->getLead()->id]);
 $userId = Yii::$app->user->id;
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && Yii::$app->user->identity->canRoles(['admin', 'supervision']))) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
@@ -464,7 +469,13 @@ if (!$leadForm->getLead()->isNewRecord) {
         $buttonsSubAction[] = $buttonTrash;
         $buttonsSubAction[] = $buttonSnooze;
         //$buttonsSubAction[] = $buttonSendEmail;
-        $buttonsSubAction[] = $buttonClone;
+        if ($leadForm->getLead()->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
+            $buttonsSubAction[] = $buttonClone;
+        }
     }
     if ($unSnoozeConditions) {
         $buttonsSubAction[] = $buttonOnWake;
@@ -474,11 +485,23 @@ if (!$leadForm->getLead()->isNewRecord) {
         $buttonsSubAction[] = $buttonReject;
     }
     if ($viwModeSuperAdminCondition){
-        $buttonsSubAction[] = $buttonClone;
+        if ($leadForm->getLead()->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
+            $buttonsSubAction[] = $buttonClone;
+        }
     }
 
     if (Yii::$app->user->identity->isAgent() && ($leadForm->getLead()->isBooked() || $leadForm->getLead()->isSold())) {
-        $buttonsSubAction[] = $buttonClone;
+        if ($leadForm->getLead()->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
+            $buttonsSubAction[] = $buttonClone;
+        }
     }
 
 

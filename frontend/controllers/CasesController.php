@@ -1307,10 +1307,13 @@ class CasesController extends FController
 				$out['message'] = 'BO request Error: ' . json_decode($response->content, true)['message'] ?? '';
 			}
 
-		} catch (\Exception $exception) {
+		} catch (\Throwable $throwable) {
 			$out['error'] = 1;
 			$out['message'] = 'An internal Sales error has occurred; Check system logs;';
-			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Exception');
+			if ($throwable->getCode() < 0 && $throwable->getCode() > -4) {
+				$out['message'] = $throwable->getMessage();
+			}
+			Yii::error('Code: ' . $throwable->getCode() . '; ' . $throwable->getMessage() . '; File: ' . $throwable->getFile() . ': ' . $throwable->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
 		}
 
 		return $out;

@@ -2282,6 +2282,14 @@ class LeadController extends FController
     {
         $id = (int)$id;
         $lead = $this->findLeadById($id);
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($lead->isSold() && !$user->isAdmin()) {
+            throw new ForbiddenHttpException('Access denied! Lead is sold.');
+        }
+
         $form = new CloneReasonForm($lead);
 
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {

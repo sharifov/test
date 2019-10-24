@@ -19,7 +19,7 @@ class ClentPhoneSearch extends ClientPhone
     public function rules()
     {
         return [
-            [['id', 'client_id', 'is_sms'], 'integer'],
+            [['id', 'client_id', 'is_sms', 'type'], 'integer'],
             [['phone', 'created', 'updated', 'comments', 'validate_dt'], 'safe'],
         ];
     }
@@ -72,6 +72,10 @@ class ClentPhoneSearch extends ClientPhone
             $query->andFilterWhere(['>=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt))])
                 ->andFilterWhere(['<=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt) + 3600 * 24)]);
         }
+
+        if ($this->type >= 0) {
+        	$query->andFilterWhere(['=', 'type', $this->type]);
+		}
 
         // grid filtering conditions
         $query->andFilterWhere([

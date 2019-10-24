@@ -9,6 +9,7 @@ use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 use yii\queue\Queue;
 use common\components\CheckPhoneNumberJob;
@@ -25,6 +26,7 @@ use common\components\CheckPhoneNumberJob;
  * @property string $created
  * @property string $updated
  * @property string $comments
+ * @property string $type
  *
  * @property Client $client
  */
@@ -32,6 +34,36 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 {
 
     use EventTrait;
+
+    public const PHONE_VALID = 1;
+    public const PHONE_FAVORITE = 2;
+    public const PHONE_INVALID = 9;
+    public const PHONE_NOT_SET = 0;
+
+    public const PHONE_TYPE = [
+		self::PHONE_NOT_SET => 'Not set',
+    	self::PHONE_VALID => 'Valid',
+		self::PHONE_FAVORITE => 'Favorite',
+		self::PHONE_INVALID => 'Invalid',
+	];
+
+    public const PHONE_TYPE_ICONS = [
+		self::PHONE_VALID => '<i class="fa fa-phone success"></i> ',
+		self::PHONE_FAVORITE => '<i class="fa fa-phone warning"></i> ',
+		self::PHONE_INVALID => '<i class="fa fa-phone danger"></i> ',
+		self::PHONE_NOT_SET => '<i class="fa fa-phone"></i> '
+	];
+
+    public const PHONE_TYPE_LABELS = [
+    	self::PHONE_VALID => '<span class="label label-success">{type}</span>',
+		self::PHONE_FAVORITE => '<span class="label label-warning">{type}</span>',
+		self::PHONE_INVALID => '<span class="label label-danger">{type}</span>',
+		self::PHONE_NOT_SET => '<span class="label label-primary">{type}</span>'
+	];
+
+	public const PHONE_TYPE_TEXT_DECORATION = [
+		self::PHONE_INVALID => 'text-line-through'
+	];
 
     // old phone value. need for afterSave() method
     private $old_phone = '';
@@ -44,18 +76,30 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
         return 'client_phone';
     }
 
-    /**
-     * @param string $phone
-     * @param int $clientId
-     * @return ClientPhone
-     */
-    public static function create(string $phone, int $clientId): self
+	/**
+	 * @param string $phone
+	 * @param int $clientId
+	 * @param int|null $phoneType
+	 * @return ClientPhone
+	 */
+    public static function create(string $phone, int $clientId, int $phoneType = null): self
     {
         $clientPhone = new static();
         $clientPhone->phone = $phone;
         $clientPhone->client_id = $clientId;
+        $clientPhone->type = $phoneType;
         return $clientPhone;
     }
+
+	/**
+	 * @param string $phone
+	 * @param int|null $phoneType
+	 */
+    public function edit(string $phone, int $phoneType = null): void
+	{
+		$this->phone = $phone;
+		$this->type = $phoneType;
+	}
 
     /**
      * {@inheritdoc}
@@ -64,14 +108,16 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['phone'], 'required'],
-            [['client_id', 'is_sms'], 'integer'],
+            [['client_id', 'is_sms', 'type'], 'integer'],
             [['created', 'updated', 'comments', 'validate_dt'], 'safe'],
 
             [['phone'], 'string', 'max' => 20],
             [['phone'], PhoneInputValidator::class],
 
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
-            [['phone', 'client_id'], 'unique', 'targetAttribute' => ['phone', 'client_id']]
+            [['phone', 'client_id'], 'unique', 'targetAttribute' => ['phone', 'client_id']],
+
+            ['type', 'in', 'range' => array_keys(self::PHONE_TYPE)]
         ];
     }
 
@@ -88,6 +134,7 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
             'validate_dt' => 'Validated at',
             'created' => 'Created',
             'updated' => 'Updated',
+			'type' => 'Phone Type'
         ];
     }
 
@@ -164,4 +211,68 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
         }
         parent::afterSave($insert, $changedAttributes);
     }
+
+	/**
+	 * @return int
+	 */
+	public function countUsersSamePhone(): int
+	{
+		$subQuery = (new Query())->select(['client_id'])->distinct()
+			->from(ClientPhone::tableName())
+			->where(['phone' => $this->phone]);
+
+		$query = (new Query())->select(['id'])->distinct()
+			->from(Client::tableName())
+			->where(['NOT IN', 'id', $this->client_id])
+			->andWhere(['IN', 'id', $subQuery]);
+
+		return (int)$query->count();
+	}
+
+	/**
+	 * @param int|null $type
+	 * @return mixed|string
+	 */
+	public static function getPhoneType(?int $type): string
+	{
+		return self::PHONE_TYPE[$type] ?? '';
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getPhoneTypeList(): array
+	{
+		return self::PHONE_TYPE;
+	}
+
+	/**
+	 * @param int $type
+	 * @return mixed|string
+	 */
+	public static function getPhoneTypeTextDecoration(?int $type): string
+	{
+		return self::PHONE_TYPE_TEXT_DECORATION[$type] ?? '';
+	}
+
+	/**
+	 * @param int $type
+	 * @return mixed|string
+	 */
+	public static function getPhoneTypeIcon(?int $type): string
+	{
+		return self::PHONE_TYPE_ICONS[$type] ?? '';
+	}
+
+	/**
+	 * @param int|null $type
+	 * @return string
+	 */
+	public static function getPhoneTypeLabel(?int $type): string
+	{
+		if (isset(self::PHONE_TYPE_LABELS[$type], self::PHONE_TYPE[$type])) {
+			return str_replace('{type}', self::PHONE_TYPE[$type], self::PHONE_TYPE_LABELS[$type]);
+		}
+		return '';
+	}
 }

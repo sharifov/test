@@ -14,6 +14,8 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Lead form
+ *
+ * @property Lead $lead
  */
 class LeadForm extends Model
 {

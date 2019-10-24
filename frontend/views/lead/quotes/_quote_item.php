@@ -60,9 +60,11 @@ use yii\helpers\Url;
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
                 <strong><?= $model->employee_name?></strong>
             </span>
-            <?php if($model->tickets):?>
+            <?php
+                $ticketSegments = $model->getTicketSegments();
+                if($ticketSegments):?>
                 <span title="Separate Ticket">
-                    <i class="fa fa-ticket warning"></i> (<?=count($model->getTicketSegments())?>)
+                    <i class="fa fa-ticket warning"></i> (<?=count($ticketSegments)?>)
                 </span>
             <?php endif; ?>
 
@@ -217,6 +219,7 @@ use yii\helpers\Url;
 			<?php
 			$firstSegment = null;
 			$lastSegment = null;
+            $needRecheck = false;
 
 			$segments = $trip->quoteSegments;
 			if( $segments ) {
@@ -231,6 +234,9 @@ use yii\helpers\Url;
     			    if(!in_array(SearchService::getCabin($segment->qs_cabin), $cabins)){
     			        $cabins[] = SearchService::getCabin($segment->qs_cabin);
     			    }
+    			    if (isset($segment->qs_recheck_baggage) && $segment->qs_recheck_baggage == true){
+    			        $needRecheck = true;
+                    }
     			    if(isset($segment->qs_stop) && $segment->qs_stop > 0){
     			        $stopCnt += $segment->qs_stop;
     			    }
@@ -306,6 +312,13 @@ use yii\helpers\Url;
 			data-original-title="<?= ($model->freeBaggageInfo)?'Free baggage - '.$model->freeBaggageInfo:'No free baggage'?>">
 				<i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
 			</span>
+
+            <span class="quote__badge quote__badge--warning <?php if(!$needRecheck):?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
+                  title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>"
+                  data-original-title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>">
+				<i class="fa fa-warning"></i>
+			</span>
+
 			<span class="quote__badge <?php if($model->hasAirportChange):?>quote__badge--warning<?php else:?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
 			 title="<?= ($model->hasAirportChange)?'Airports Change':'No Airports Change'?>"
 			  data-original-title="<?= ($model->hasAirportChange)?'Airports Change':'No Airports Change'?>">

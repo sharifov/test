@@ -605,9 +605,9 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'Follow Up',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->timeStart, $searchModel->timeEnd);
+                            $cnt = $model->getLeadCountByStatusAndEmployee([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[lf_owner_id]' => $model->id,
+                                'LeadFlowSearch[employee_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_FOLLOW_UP,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd

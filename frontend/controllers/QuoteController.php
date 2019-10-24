@@ -123,6 +123,7 @@ class QuoteController extends FController
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', SearchService::getItineraryDump($entry));
                             $quote->employee_id = Yii::$app->user->id;
                             $quote->employee_name = Yii::$app->user->identity->username;
+                            $quote->origin_search_data = json_encode($entry);
 
                             if(isset($entry['tickets'])) {
                                 $quote->tickets = json_encode($entry['tickets']);
@@ -180,7 +181,6 @@ class QuoteController extends FController
 
                                         if(isset($tripEntry['segments']) && is_array($tripEntry['segments'])) {
                                             foreach ($tripEntry['segments'] as $segmentEntry){
-
                                                 $segment = new QuoteSegment();
                                                 $segment->qs_departure_airport_code = $segmentEntry['departureAirportCode'];
                                                 if(isset($segmentEntry['departureAirportTerminal']) && !empty($segmentEntry['departureAirportTerminal'])){
@@ -201,7 +201,7 @@ class QuoteController extends FController
                                                 $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
                                                 $segment->qs_cabin = $segmentEntry['cabin'];
 
-                                                if($quote->tickets && isset($ticketSegments[$tripNr][$segmentNr])) {
+                                                if ($ticketSegments && isset($ticketSegments[$tripNr][$segmentNr])) {
                                                     $segment->qs_ticket_id = $ticketSegments[$tripNr][$segmentNr];
                                                 }
 
@@ -214,6 +214,10 @@ class QuoteController extends FController
                                                 if(isset($segmentEntry['meal'])){
                                                     $segment->qs_meal = $segmentEntry['meal'];
                                                 }
+                                                if (isset($segmentEntry['recheckBaggage'])){
+                                                    $segment->qs_recheck_baggage = $segmentEntry['recheckBaggage'];
+                                                }
+
                                                 $segment->qs_stop = $segmentEntry['stop'];
                                                 $segment->qs_air_equip_type = $segmentEntry['airEquipType'];
                                                 $segment->qs_key = '#'.$segmentEntry['flightNumber'].

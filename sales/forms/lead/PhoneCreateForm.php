@@ -3,6 +3,7 @@
 namespace sales\forms\lead;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\ClientPhone;
 use common\models\DepartmentPhoneProject;
 use common\models\UserProjectParams;
 use yii\base\Model;
@@ -17,26 +18,52 @@ use yii\base\Model;
 class PhoneCreateForm extends Model
 {
 
+	/**
+	 * @var string
+	 */
     public $phone;
+
+	/**
+	 * @var integer
+	 */
+	public $id;
+
+	/**
+	 * @var integer
+	 */
+	public $client_id;
+
+	/**
+	 * @var integer
+	 */
+    public $type;
+
     public $help;
 
     public $required = false;
+
     public $message = 'Phone cannot be blank.';
 
-    /**
+
+	/**
      * @return array
      */
     public function rules(): array
     {
         return [
+//            ['phone', 'required'],
             ['phone', 'validateRequired', 'skipOnEmpty' => false],
             ['phone', 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],
             ['phone', 'filter', 'filter' => static function($value) {
                 return str_replace(['-', ' '], '', trim($value));
             }],
-			['phone', 'checkForExistence']
-        ];
+			['phone', 'checkForExistence'],
+			[['type', 'client_id', 'id'], 'integer'],
+			['type', 'checkTypeForExistence'],
+			[['phone', 'client_id'], 'unique', 'targetClass' => ClientPhone::class,  'targetAttribute' => ['phone', 'client_id'], 'message' => 'Client already has this phone number', 'except' => 'update'],
+			['phone', 'checkUniqueClientPhone', 'on' => 'update']
+		];
     }
 
     public function validateRequired($attribute, $params): void
@@ -59,4 +86,26 @@ class PhoneCreateForm extends Model
 		}
 	}
 
+	/**
+	 * @param $attribute
+	 * @param $params
+	 */
+	public function checkTypeForExistence($attribute, $params): void
+	{
+		if (!ClientPhone::getPhoneType($this->type)) {
+			$this->addError($attribute, 'Type of the phone is not found');
+		}
+	}
+
+	/**
+	 * @param $attribute
+	 * @param $params
+	 */
+	public function checkUniqueClientPhone($attribute, $params): void
+	{
+		$phone = ClientPhone::find()->where('id<>:id', [':id' => $this->id])->andWhere(['phone' => $this->phone, 'client_id' => $this->client_id])->exists();
+		if ($phone) {
+			$this->addError($attribute, 'Client already has this phone number');
+		}
+	}
 }

@@ -2,6 +2,8 @@
 
 namespace sales\forms\lead;
 
+use common\models\Client;
+use common\models\ClientEmail;
 use yii\base\Model;
 
 /**
@@ -13,8 +15,26 @@ use yii\base\Model;
  */
 class EmailCreateForm extends Model
 {
+	/**
+	 * @var string
+	 */
+	public $email;
 
-    public $email;
+	/**
+	 * @var integer
+	 */
+	public $id;
+
+	/**
+	 * @var integer
+	 */
+	public $client_id;
+
+	/**
+	 * @var integer
+	 */
+	public $type;
+
     public $help;
 
     public $required = false;
@@ -29,10 +49,15 @@ class EmailCreateForm extends Model
             ['email', 'validateRequired', 'skipOnEmpty' => false],
             ['email', 'string', 'max' => 100],
             ['email', 'email'],
-            ['email', 'filter', 'filter' => static function($value) {
+			[['type', 'client_id', 'id'], 'integer'],
+			['email', 'filter', 'filter' => static function($value) {
                 return mb_strtolower(trim($value));
-            }]
-        ];
+            }],
+			[['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
+			[['email', 'client_id'], 'unique', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['email', 'client_id'], 'except' => 'update', 'message' => 'Client already has this email',],
+			['email', 'checkUniqueClientEmail', 'on' => 'update'],
+			['type', 'checkTypeForExistence'],
+		];
     }
 
     public function validateRequired($attribute, $params): void
@@ -41,5 +66,28 @@ class EmailCreateForm extends Model
             $this->addError($attribute, $this->message);
         }
     }
+
+	/**
+	 * @param $attribute
+	 * @param $params
+	 */
+	public function checkTypeForExistence($attribute, $params): void
+	{
+		if (!isset(ClientEmail::EMAIL_TYPE[$this->type])) {
+			$this->addError($attribute, 'Type of the email is not found');
+		}
+	}
+
+	/**
+	 * @param $attribute
+	 * @param $params
+	 */
+	public function checkUniqueClientEmail($attribute, $params): void
+	{
+		$email = ClientEmail::find()->where('id<>:id', [':id' => $this->id])->andWhere(['email' => $this->email, 'client_id' => $this->client_id])->exists();
+		if ($email) {
+			$this->addError($attribute, 'Client already has this email');
+		}
+	}
 
 }
