@@ -20,28 +20,26 @@ use yii\web\View;
                 <td title="<?= $phone::getPhoneType($phone->type) ?>" class="text-center" style="width:35px; background-color: #eef3f9">
                     <?= $phone::getPhoneTypeIcon($phone->type) ?>
                 </td>
-                <td><i class="fa fa-phone"></i> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode($phone->phone) ?></span></td>
+                <td> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode($phone->phone) ?></span></td>
 
-<!--				--><?// $count = $phone->countUsersSamePhone(); ?>
-<!--                --><?// if($count): ?>
-<!--                    <td class="text-right showModalButton" data-modal_id="client-large" title="The Same users by phone" data-content-url="--><?//= Url::to([
-//                        'lead-view/ajax-get-users-same-phone-info',
-//                        'phone' => $phone->phone,
-//                        'clientId' => $phone->client_id
-//                    ]) ?><!--" style="cursor:pointer;"><i class="fa fa-user"></i> --><?//= $count; ?><!--</td>-->
-<!--				--><?// else: ?>
-<!--                    <td></td>-->
-<!--                --><?// endif; ?>
-
-                <?php if($manageClientInfoAccess): ?>
-                    <td class="text-right">
+                <td class="text-right" style="width: 70px">
+                    <?php if($count = $phone->countUsersSamePhone()): ?>
+                        <a class="showModalButton" data-modal_id="client-large" title="The Same users by phone" data-content-url="<?= Url::to([
+                            'lead-view/ajax-get-users-same-phone-info',
+                            'phone' => $phone->phone,
+                            'clientId' => $phone->client_id
+                        ]) ?>" ><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
+                    <?php endif; ?>
+                    <?php if($manageClientInfoAccess): ?>
                         <a class="showModalButton text-warning" title="Edit Phone" data-content-url="<?= Url::to([
                             'lead-view/ajax-edit-client-phone-modal-content',
                             'gid' => $lead->gid, 'pid' => $phone->id]) ?>" data-modal_id="client-manage-info">
                             <i class="fa fa-edit fa-border"></i>
                         </a>
-                    </td>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </td>
+
+
             </tr>
         <?php endforeach; ?>
     </table>

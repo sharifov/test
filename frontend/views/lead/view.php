@@ -247,12 +247,12 @@ $lead = $leadForm->getLead();
         <?php else: ?>
             <?= $this->render('partial/_client', [
                 'leadForm' => $leadForm
-            ]);
+            ])
             ?>
         <?php endif; ?>
         <?= $this->render('partial/_preferences', [
             'leadForm' => $leadForm
-        ]);
+        ])
         ?>
         <?php
         if (Yii::$app->user->can('updateLead', ['leadId' => $itineraryForm->leadId])) : ?>
