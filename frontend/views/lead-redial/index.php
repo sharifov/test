@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use common\models\Lead;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -14,29 +15,39 @@ use common\models\LeadQcall;
 $this->title = 'Lead Redial';
 $this->params['breadcrumbs'][] = $this->title;
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+$userIsFreeForCall = $user->isCallFree();
+
 ?>
     <div class="lead-qcall-list">
 
         <h1><?= Html::encode($this->title) ?></h1>
 
-        <?php //Pjax::begin(); ?>
-
         <div class="row">
-            <div class="col-md-6">
-                <div id="phone-redial">
-                    <div class="text-center badge badge-warning call-status" style="font-size: 35px">
-                         <span id="text-status-call">Ready</span>
+            <div class="col-md-12">
+                <?php Pjax::begin(['id' => 'redial-call-box-pjax', 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+                    <div id="redial-call-box">
+                        <div class="text-center badge badge-warning call-status" style="font-size: 35px">
+                            <span id="text-status-call">Ready</span>
+                        </div>
                     </div>
-                </div>
+                <?php Pjax::end(); ?>
             </div>
-            <div class="col-md-6"></div>
         </div>
 
         <p></p>
 
+        <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>
+
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
+            'rowOptions' => static function (LeadQcall $model, $index, $widget, $grid) {
+                if (!$model->lqcLead->isCallReady()) {
+                    return ['class' => 'danger'];
+                }
+            },
             'columns' => [
                 ['class' => 'yii\grid\SerialColumn'],
 
@@ -49,18 +60,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     'format' => 'raw'
                 ],
                 [
-                        'label' => 'Status',
-                        'value' => static function (LeadQcall $model) {
-                            return $model->lqcLead->getStatusName(true);
-                        },
-                        'format' => 'raw',
+                    'label' => 'Status',
+                    'value' => static function (LeadQcall $model) {
+                        return $model->lqcLead->getStatusName(true);
+                    },
+                    'format' => 'raw',
                 ],
                 [
-                        'label' => 'Call status',
-                        'value' => static function (LeadQcall $model) {
-                            return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
-                        },
-                        'format' => 'raw',
+                    'label' => 'Call status',
+                    'value' => static function (LeadQcall $model) {
+                        return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
+                    },
+                    'format' => 'raw',
                 ],
                 [
                     'attribute' => 'lqcLead.project_id',
@@ -71,7 +82,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'options' => [
                         'style' => 'width:120px'
                     ],
-                    'filter' => \common\models\Project::getList(),
                 ],
 
                 [
@@ -79,7 +89,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => static function (LeadQcall $model) {
                         return $model->lqcLead->source ? $model->lqcLead->source->name : '-';
                     },
-                    'filter' => \common\models\Sources::getList(true)
                 ],
 
                 [
@@ -97,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => static function (LeadQcall $model) {
                         return $model->lqcLead->employee ? '<i class="fa fa-user"></i> ' . $model->lqcLead->employee->username : '-';
                     },
-                    'filter' => false //\common\models\Employee::getList()
+                    'filter' => false
                 ],
 
                 [
@@ -173,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'yii\grid\ActionColumn',
                     'template' => '{view} {call}',
                     'buttons' => [
-                        'view' => function ($url, LeadQcall $model) {
+                        'view' => static function ($url, LeadQcall $model) {
                             return Html::a('<i class="glyphicon glyphicon-search"></i> View', [
                                 'lead-qcall/view',
                                 'id' => $model->lqc_lead_id
@@ -184,12 +193,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'title' => 'View',
                             ]);
                         },
-                        'call' => function ($url, LeadQcall $model) {
+                        'call' => static function ($url, LeadQcall $model) use ($userIsFreeForCall) {
                             return Html::button('<i class="fa fa-phone"></i> Call', [
                                 'class' => 'btn btn-primary btn-xs lead-redial-btn',
-                                'data-url' => Url::to(['lead-redial/redial', 'gid' => $model->lqcLead->gid]),
-//                                'data-pjax' => 0,
-                                'data-id' => $model->lqc_lead_id
+                                'disabled' => (!$model->lqcLead->isCallReady() || !$userIsFreeForCall) ? 'disabled' : false,
+                                'data-url' => Url::to(['lead-redial/redial']),
+                                'data-gid' => $model->lqcLead->gid,
                             ]);
                         }
                     ]
@@ -197,39 +206,24 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]); ?>
 
-        <?php //Pjax::end(); ?>
+        <?php Pjax::end(); ?>
 
     </div>
 
 <?php
 
 $js = <<<JS
-    $(".lead-redial-btn").on("click", function(e) {
-        e.preventDefault();
-        $("#phone-redial").html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-        $.ajax({
-                type: 'post',
-                url: $(this).data('url'),
-                data: {id: $(this).data('id')}
-            }
-        )
-        .done(function(data) {
-            if (data.success) {
-               $("#phone-redial").html(data.data);    
-            } else {
-                $("#phone-redial").html('');
-               let text = 'Error. Try again later';
-               if (data.message) {
-                   text = data.message;
-               }
-               new PNotify({title: "Lead redial", type: "error", text: text, hide: true});
-            }
-        })
-        .fail(function () {
-            $("#phone-redial").html('');
-            new PNotify({title: "Lead redial", type: "error", text: 'Error. Try again later', hide: true});
-        })
-        return false;
+    $("body").on("click", ".lead-redial-btn", function(e) {
+        $("body").find("#redial-call-box").html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $.pjax.reload({
+            container: '#redial-call-box-pjax', 
+            async: false, 
+            push: false, 
+            replace: false, 
+            url: $(this).data('url'), 
+            type: 'post',
+            data: {gid: $(this).data('gid')}
+        });
     });
 JS;
 

@@ -39,7 +39,7 @@ class LeadRedialService
 
         EmployeeAccess::leadAccess($lead, $user);
 
-        $this->guardUserFree($user->id);
+        $this->guardUserFree($user);
         $this->guardLeadForRedial($lead);
 
         $lead->callProcessing();
@@ -83,17 +83,12 @@ class LeadRedialService
     }
 
     /**
-     * @param int $userId
+     * @param Employee $user
      */
-    private function guardUserFree(int $userId): void
+    private function guardUserFree($user): void
     {
-        $call = Call::find()
-            ->andWhere(['c_created_user_id' => $userId])
-            ->andWhere(['c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])
-            ->exists();
-
-        if ($call) {
-            throw new \DomainException('Current user cant call now!');
+        if (!$user->isCallFree()) {
+            throw new \DomainException('Current user cant call now! He is busy');
         }
     }
 

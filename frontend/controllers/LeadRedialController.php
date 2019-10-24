@@ -31,15 +31,21 @@ class LeadRedialController extends FController
         $searchModel = new LeadQcallSearch();
         $dataProvider = $searchModel->searchList(Yii::$app->request->queryParams);
 
+        $dataProvider->pagination->pageSize = 1;
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
-    public function actionRedial(): Response
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionRedial(): string
     {
-        $gid = Yii::$app->request->get('gid');
+        $gid = Yii::$app->request->post('gid');
         $lead = $this->findLeadById($gid);
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
@@ -47,18 +53,30 @@ class LeadRedialController extends FController
         try {
             $this->leadRedialService->redial($lead, $user);
         } catch (\DomainException $e) {
-            return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+            return $this->renderAjax('error', ['message' => $e->getMessage()]);
         }
 
-        return $this->asJson([
-            'success' => true,
-            'data' => $this->renderAjax('redial', ['lead' => $lead])
-        ]);
+        return $this->renderAjax('redial', ['lead' => $lead]);
     }
 
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionShow(): string
+    {
+        $gid = Yii::$app->request->post('gid');
+        $lead = $this->findLeadById($gid);
+        return $this->renderAjax('show', ['lead' => $lead]);
+    }
+
+    /**
+     * @return Response
+     * @throws NotFoundHttpException
+     */
     public function actionTake(): Response
     {
-        $gid = Yii::$app->request->get('gid');
+        $gid = Yii::$app->request->post('gid');
         $lead = $this->findLeadById($gid);
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
@@ -71,6 +89,11 @@ class LeadRedialController extends FController
         }
     }
 
+    /**
+     * @param $gid
+     * @return Lead
+     * @throws NotFoundHttpException
+     */
     protected function findLeadById($gid): Lead
     {
         if ($model = Lead::findOne(['gid' => $gid])) {

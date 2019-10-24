@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\widgets;
+namespace frontend\widgets\redial;
 
 use Yii;
 use common\models\ClientPhone;
@@ -12,6 +12,9 @@ use yii\base\Widget;
  * Class LeadRedialWidget
  *
  * @property Lead $lead
+ * @property RedialUrl $viewUrl
+ * @property RedialUrl $takeUrl
+ * @property string $pjaxListContainerId
  * @property string $phoneFrom
  * @property string $phoneTo
  */
@@ -19,6 +22,12 @@ class LeadRedialWidget extends Widget
 {
 
     public $lead;
+
+    public $viewUrl;
+
+    public $takeUrl;
+
+    public $pjaxListContainerId;
 
     public $phoneFrom;
 
@@ -32,6 +41,15 @@ class LeadRedialWidget extends Widget
         if (!$this->lead instanceof Lead) {
             throw new \InvalidArgumentException('lead property must be Lead');
         }
+        if (!$this->viewUrl instanceof RedialUrl) {
+            throw new \InvalidArgumentException('viewUrl property must be ViewUrl');
+        }
+        if (!$this->takeUrl instanceof RedialUrl) {
+            throw new \InvalidArgumentException('viewUrl property must be ViewUrl');
+        }
+        if (!$this->pjaxListContainerId) {
+            throw new \InvalidArgumentException('pjaxListContainer must be set');
+        }
     }
 
     /**
@@ -41,6 +59,9 @@ class LeadRedialWidget extends Widget
     {
         return $this->render('lead_redial', [
             'lead' => $this->lead,
+            'viewUrl' => $this->viewUrl,
+            'takeUrl' => $this->takeUrl,
+            'pjaxListContainerId' => $this->pjaxListContainerId,
             'phoneFrom' => $this->findPhoneFrom(),
             'phoneTo' => $this->findPhoneTo(),
             'projectId' => $this->findProjectId(),
