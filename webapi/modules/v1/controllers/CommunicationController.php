@@ -6,6 +6,8 @@ use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallUserGroup;
 use common\models\ClientPhone;
+use common\models\Conference;
+use common\models\ConferenceRoom;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
@@ -262,8 +264,11 @@ class CommunicationController extends ApiBaseController
             }
 
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            if ($incoming_phone_number === '+15206006011') {
-                return $this->startConference($postCall);
+
+            $conferenceRoom = ConferenceRoom::find()->where(['cr_phone_number' => $incoming_phone_number, 'cr_enabled' => true])->orderBy(['cr_id' => SORT_DESC])->limit(1)->one();
+
+            if ($conferenceRoom) {
+                return $this->startConference($conferenceRoom, $postCall);
             }
 
             $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
@@ -1890,93 +1895,85 @@ class CommunicationController extends ApiBaseController
     }
 
 
-    private function startConference(array $postCall)
+    /**
+     * @param ConferenceRoom $conferenceRoom
+     * @param array $postCall
+     * @return array
+     */
+    private function startConference(ConferenceRoom $conferenceRoom, array $postCall): array
     {
-        $response = [];
 
-
-        /*Yii::info(VarDumper::dumpAsString([
-            'callModel' => $callModel->attributes,
-            'department' => $department->attributes,
-            'ivrSelectedDigit' => $ivrSelectedDigit,
-            'ivrStep' => $ivrStep,
-
-        ], 10, false), 'info\API:Communication:ivrService');*/
+        Yii::info(VarDumper::dumpAsString($postCall), 'info/API:startConference');
 
         $vr = new VoiceResponse();
 
         try {
 
+            $sayParam = [];   // ['language' => 'en-US', 'voice' => 'alice']
+
+            if ($conferenceRoom->cr_start_dt && strtotime($conferenceRoom->cr_start_dt) > time() ) {
+                $vr->say('This conference room has not started yet', $sayParam);
+                $vr->reject(['reason' => 'busy']);
+                Yii::warning('Conference (id: ' . $conferenceRoom->cr_id . ') has not started yet', 'API:CommunicationController:startConference:start');
+                return $this->getResponseChownData($vr);
+            }
+
+            if ($conferenceRoom->cr_end_dt && strtotime($conferenceRoom->cr_end_dt) < time() ) {
+                $vr->say('This conference room has already ended', $sayParam);
+                $vr->reject(['reason' => 'busy']);
+                Yii::warning('Conference (id: ' . $conferenceRoom->cr_id . ') has already ended', 'API:CommunicationController:startConference:end');
+                return $this->getResponseChownData($vr);
+            }
+
             $vr->pause(['length' => 5]);
-            $vr->say('Hi, conference Room 7'/*, [
-                'language' => 'en-US',
-                'voice' => 'alice'
-            ]*/);
+            if ($conferenceRoom->cr_welcome_message) {
+                $vr->say($conferenceRoom->cr_welcome_message, $sayParam);
+            }
 
-            $vr->say('Time: ' . date('H:i')/*, [
-                'language' => 'en-US',
-                'voice' => 'alice'
-            ]*/);
-
-//            $vr->say('Your phone number ' . $postCall['From']/*, [
-//                'language' => 'en-US',
-//                'voice' => 'alice'
-//            ]*/);
-
-            //$vr->reject(['reason' => 'busy']);
-            // $vr->say($ivrParams['error_phrase'], ['language' => $ivrParams['entry_language'], 'voice' => $ivrParams['entry_voice']]);
             // $vr->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
 
             $dial = $vr->dial('');
-
-            $params = [];
-
-            $params['muted']                        = false;
-            $params['beep']                         = true;     // true, false, onEnter, onExit
-            $params['startConferenceOnEnter']       = true;
-            $params['endConferenceOnExit']          = false;
-            $params['waitUrl']                      = 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical';
-            $params['maxParticipants']              = 100;
-
-            $params['record']                       = 'record-from-start';  // do-not-record or record-from-start
-            //$params['region']                     = 250;  // us1, ie1, de1, sg1, br1, au1, jp1
-            $params['trim']                         = 'trim-silence';    // trim-silence or do-not-trim
-            $params['statusCallbackEvent']          = 'start end join leave mute hold speaker';
-            $params['statusCallback']               = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-status-callback';
-            $params['statusCallbackMethod']             = 'POST';
-            $params['recordingStatusCallback']          = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-recording-status-callback';
-            $params['recordingStatusCallbackMethod']    = 'POST';
-            $params['recordingStatusCallbackEvent']     = 'in-progress, completed, absent'; // in-progress, completed, absent
-            $params['eventCallbackUrl']               = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-event-callback';
-
+            $params = $conferenceRoom->getCreatedTwParams();
 
             //$vr->pause(['length' => 3]);
-            $dial->conference('Room7', $params);
-            //$vr->reject(['reason' => 'busy']);
+            $dial->conference($conferenceRoom->cr_key, $params);
 
-            $response['twml'] = (string) $vr;
-            $responseData = [
-                'status' => 200,
-                'name' => 'Success',
-                'code' => 0,
-                'message' => '',
-                'data' => ['response' => $response]
-            ];
+            $conference = new Conference();
+            $conference->cf_cr_id = $conferenceRoom->cr_id;
+            $conference->cf_options = @json_encode($conferenceRoom->attributes);
+            $conference->cf_status_id = Conference::STATUS_START;
+            if (!$conference->save()) {
+                Yii::error(VarDumper::dumpAsString($conference->errors), 'API:CommunicationController:startConference:Conference:save');
+            }
 
 
         } catch (\Throwable $e) {
 
             $vr->say('Conference Error!');
             $vr->reject(['reason' => 'busy']);
-            $response['twml'] = (string) $vr;
-            $responseData = [
-                'status' => 404,
-                'name' => 'Error',
-                'code' => 404,
-                'message' => 'Sales Communication error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine(),
-                'data' => ['response' => $response]
-            ];
+            return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine());
         }
+
+        return $this->getResponseChownData($vr);
+    }
+
+    /**
+     * @param VoiceResponse $vr
+     * @param int $status
+     * @param int $code
+     * @param string $message
+     * @return array
+     */
+    private function getResponseChownData(VoiceResponse $vr, int $status = 200, int $code = 0, string $message = ''): array
+    {
+        $response['twml'] = (string) $vr;
+        $responseData = [
+            'status' => $status,
+            'name' => ($status === 200 ? 'Success' : 'Error'),
+            'code' => $code,
+            'message' => $message,
+            'data' => ['response' => $response]
+        ];
 
         return $responseData;
     }

@@ -74,6 +74,8 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                 ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
+                ['label' => 'Conference Room', 'url' => ['/conference-room/index'], 'icon' => 'comment'],
+                ['label' => 'Conferences', 'url' => ['/conference/index'], 'icon' => 'comment'],
             ]
         ];
 

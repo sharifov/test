@@ -33,7 +33,7 @@ class m191021_090906_create_tbl_conference extends Migration
             'cr_key'                    => $this->string(30)->notNull()->unique(),
             'cr_name'                   => $this->string(50)->notNull(),
             'cr_phone_number'           => $this->string(18)->notNull(),
-            'cr_enable'                 => $this->boolean()->defaultValue(true),
+            'cr_enabled'                => $this->boolean()->defaultValue(true),
             'cr_start_dt'               => $this->dateTime(),
             'cr_end_dt'                 => $this->dateTime(),
 
@@ -48,6 +48,8 @@ class m191021_090906_create_tbl_conference extends Migration
             'cr_param_wait_url'                     => $this->string(255),
             'cr_moderator_phone_number'             => $this->string(18),
 
+            'cr_welcome_message'                    => $this->text(),
+
             'cr_created_dt'             => $this->dateTime(),
             'cr_updated_dt'             => $this->dateTime(),
             'cr_created_user_id'        => $this->integer(),
@@ -55,8 +57,7 @@ class m191021_090906_create_tbl_conference extends Migration
 
         ], $tableOptions);
 
-
-        $this->addPrimaryKey('PK-qcall_config', '{{%qcall_config}}', ['qc_status_id', 'qc_call_att']);
+        $this->createIndex('IND-conference_room_cr_phone_number_cr_enabled', '{{%conference_room}}', ['cr_phone_number', 'cr_enabled']);
 
         $this->addForeignKey(
             'FK-conference_room_cr_created_user_id',
@@ -91,6 +92,8 @@ class m191021_090906_create_tbl_conference extends Migration
 
         $this->addForeignKey('FK-conference_cf_cr_id', '{{%conference}}', ['cf_cr_id'], '{{%conference_room}}', ['cr_id'], 'CASCADE', 'CASCADE');
 
+        $this->createIndex('IND-conference_cf_sid', '{{%conference}}', ['cf_sid']);
+
 
         $auth = Yii::$app->authManager;
 
@@ -122,8 +125,8 @@ class m191021_090906_create_tbl_conference extends Migration
     public function safeDown()
     {
 
-        $this->dropTable('{{%lead_qcall}}');
-        $this->dropTable('{{%qcall_config}}');
+        $this->dropTable('{{%conference}}');
+        $this->dropTable('{{%conference_room}}');
 
 
         $auth = Yii::$app->authManager;
