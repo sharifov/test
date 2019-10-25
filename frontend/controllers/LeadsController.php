@@ -247,7 +247,7 @@ class LeadsController extends FController
             //return $this->renderAjax('view', $viewParams);
         }
 
-        return $this->render('view', $viewParams);
+        return $this->renderAjax('view', $viewParams);
 
     }
 
