@@ -84,7 +84,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = [];
                     if($leads) {
                         foreach ($leads as $lead) {
-                            $data[] = '<i class="fa fa-link"></i> '. Html::a('lead: '.$lead->id, ['/leads/view', 'id' => $lead->id], ['title' => 'Lead: '. $lead->id, 'class'=>"show-modal", "data-id"=>$lead->id, 'target' => '_blank', 'data-pjax' => 0]).' (IP: '.$lead->request_ip.')';
+                            $data[] = '<i class="fa fa-link"></i> '. Html::a('lead: '.$lead->id, ['/leads/view', 'id' => $lead->id, 'showInPopUp' => 'modal'], ['title' => 'Lead: '. $lead->id, 'class'=>"show-modal", "data-id"=>$lead->id, 'target' => '_blank', 'data-pjax' => 0]).' (IP: '.$lead->request_ip.')';
                         }
                     }
 
