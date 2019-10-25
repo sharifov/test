@@ -20,6 +20,7 @@ use yii\db\ActiveRecord;
  * @property bool $dpp_enable
  * @property int $dpp_updated_user_id
  * @property string $dpp_updated_dt
+ * @property bool $dpp_default
  *
  * @property array $user_group_list
  *
@@ -60,6 +61,8 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             [['dpp_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['dpp_project_id' => 'id']],
             [['dpp_source_id'], 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['dpp_source_id' => 'id']],
             [['dpp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['dpp_updated_user_id' => 'id']],
+
+            ['dpp_default', 'boolean']
         ];
     }
 
@@ -79,6 +82,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             'dpp_enable' => 'Enable',
             'dpp_updated_user_id' => 'Updated User',
             'dpp_updated_dt' => 'Updated Date',
+            'dpp_default' => 'Default phone',
         ];
     }
 

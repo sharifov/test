@@ -711,7 +711,7 @@ use yii\helpers\Html;
             console.log('Calling ' + params.To + '...');
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             updateAgentStatus(connection, false, 0);
-            // connection = device.connect(params);
+            connection = device.connect(params);
            // $('#btn-group-id-redirect').hide();
         }
 

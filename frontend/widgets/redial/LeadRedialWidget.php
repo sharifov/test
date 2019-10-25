@@ -2,6 +2,8 @@
 
 namespace frontend\widgets\redial;
 
+use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use Yii;
 use common\models\ClientPhone;
 use common\models\Lead;
@@ -92,6 +94,24 @@ class LeadRedialWidget extends Widget
         if ($this->phoneFrom) {
             return $this->phoneFrom;
         }
+
+        $query = DepartmentPhoneProject::find()
+            ->andWhere(['dpp_project_id' => $this->lead->project_id])
+            ->andWhere(['dpp_default' => true]);
+
+        if ($this->lead->l_dep_id === null) {
+            $query->andWhere(['or',
+                ['dpp_dep_id' => Department::DEPARTMENT_SALES],
+                ['IS', 'dpp_dep_id', NULL]
+            ]);
+         } else {
+            $query->andWhere(['dpp_dep_id' => $this->lead->l_dep_id]);
+        }
+
+        if ($phone = $query->one()) {
+            return $phone->dpp_phone_number;
+        }
+
         if ($phone = Project::findOne($this->lead->project_id)) {
             if ($phone->contactInfo->phone) {
                 return $phone->contactInfo->phone;
@@ -111,10 +131,10 @@ class LeadRedialWidget extends Widget
         if ($this->lead->client) {
             /** @var ClientPhone $phone */
             $phone = $this->lead->client->getClientPhones()->
-                andWhere(['or',
-                    ['type' => [ClientPhone::PHONE_FAVORITE, ClientPhone::PHONE_VALID, ClientPhone::PHONE_NOT_SET]],
-                    ['IS', 'type', NULL]
-                ])
+            andWhere(['or',
+                ['type' => [ClientPhone::PHONE_FAVORITE, ClientPhone::PHONE_VALID, ClientPhone::PHONE_NOT_SET]],
+                ['IS', 'type', NULL]
+            ])
                 ->orderBy(['type' => SORT_DESC])->asArray()->limit(1)->one();
             if ($phone) {
                 return $phone['phone'];

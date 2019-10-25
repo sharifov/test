@@ -4,6 +4,7 @@ use common\models\Lead;
 use frontend\widgets\redial\LeadRedialViewWidget;
 use frontend\widgets\redial\RedialUrl;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\View;
 use yii\web\JqueryAsset;
 
@@ -129,7 +130,7 @@ function leadRedialTake() {
     .done(function(data) {
         hideActionBlock();
         if (data.success) {
-             // openInNewTab();
+             openInNewTab();
              let text = 'Lead taken!';
              if (data.message) {
                 text = data.message;
@@ -182,7 +183,7 @@ function webCallLeadRedialUpdate(obj) {
             if (obj.leadId != '{$lead->id}') {
                 return;
             }
-            reloadListContainer();
+            reloadContainers();
             if (obj.status === 'Ringing') {
                 $("#redial-lead-call-status-block-text").html('Ringing ...');
             } else if (obj.status === 'In progress') {
