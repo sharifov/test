@@ -20,5 +20,10 @@ echo LeadRedialWidget::widget([
         'post',
         ['gid' => $lead->gid]
     ),
+    'reservationUrl' => new RedialUrl(
+        Url::to(['lead-redial/reservation']),
+        'post',
+        ['gid' => $lead->gid]
+    ),
     'pjaxListContainerId' => 'lead-redial-pjax',
 ]);

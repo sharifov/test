@@ -26,13 +26,19 @@ $userIsFreeForCall = $user->isCallFree();
 
         <div class="row">
             <div class="col-md-12">
-                <?php Pjax::begin(['id' => 'redial-call-box-pjax', 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+
+                <div id="loading" style="text-align:center; display: none">
+                    <img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"/>
+                </div>
+
+                <?php Pjax::begin(['id' => 'redial-call-box-pjax']); ?>
                     <div id="redial-call-box">
                         <div class="text-center badge badge-warning call-status" style="font-size: 35px">
                             <span id="text-status-call">Ready</span>
                         </div>
                     </div>
                 <?php Pjax::end(); ?>
+
             </div>
         </div>
 
@@ -213,18 +219,31 @@ $userIsFreeForCall = $user->isCallFree();
 <?php
 
 $js = <<<JS
-    $("body").on("click", ".lead-redial-btn", function(e) {
-        $("body").find("#redial-call-box").html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-        $.pjax.reload({
-            container: '#redial-call-box-pjax', 
-            async: false, 
-            push: false, 
-            replace: false, 
-            url: $(this).data('url'), 
-            type: 'post',
-            data: {gid: $(this).data('gid')}
-        });
+
+$("body").on("click", ".lead-redial-btn", function(e) {
+    $.pjax.reload({  
+        container: '#redial-call-box-pjax',  
+        push: false,
+        replace: false,
+        timeout: false,
+        type: 'post',
+        url: $(this).data('url'), 
+        data: {gid: $(this).data('gid')} 
     });
+});
+$('#redial-call-box-pjax').on("pjax:start", function () {
+    $("#redial-call-box").html('');
+    $("#loading").show();
+});
+
+$('#redial-call-box-pjax').on("pjax:complete", function () {
+    $("#loading").hide();
+});
+
+$('#redial-call-box-pjax').on("pjax:error", function () {
+    console.log('Failed to load the page');
+});
+
 JS;
 
 $this->registerJs($js);

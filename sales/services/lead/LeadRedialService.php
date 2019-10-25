@@ -32,6 +32,24 @@ class LeadRedialService
      * @param int|Lead $lead
      * @param int|Employee $user
      */
+    public function reservation($lead, $user): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $user = $this->serviceFinder->userFind($user);
+
+        EmployeeAccess::leadAccess($lead, $user);
+
+        $this->guardUserFree($user);
+        $this->guardLeadForCall($lead);
+
+        $lead->callProcessing();
+        $this->leadRepository->save($lead);
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee $user
+     */
     public function redial($lead, $user): void
     {
         $lead = $this->serviceFinder->leadFind($lead);
@@ -40,10 +58,7 @@ class LeadRedialService
         EmployeeAccess::leadAccess($lead, $user);
 
         $this->guardUserFree($user);
-        $this->guardLeadForRedial($lead);
-
-        $lead->callProcessing();
-        $this->leadRepository->save($lead);
+        $this->guardLeadForCall($lead);
     }
 
     /**
@@ -105,7 +120,7 @@ class LeadRedialService
     /**
      * @param Lead $lead
      */
-    private function guardLeadForRedial(Lead $lead): void
+    private function guardLeadForCall(Lead $lead): void
     {
 //        if (!$lead->isPending()) {
 //            throw new \DomainException('Lead is not in status Pending');

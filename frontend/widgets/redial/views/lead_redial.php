@@ -3,16 +3,15 @@
 use common\models\Lead;
 use frontend\widgets\redial\LeadRedialViewWidget;
 use frontend\widgets\redial\RedialUrl;
-use frontend\widgets\redial\ViewUrl;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\web\JqueryAsset;
-use yii\widgets\Pjax;
 
 /** @var View $this */
 /** @var Lead $lead */
 /** @var RedialUrl $viewUrl */
 /** @var RedialUrl $takeUrl */
+/** @var RedialUrl $reservationUrl */
 /** @var string $pjaxListContainerId */
 
 /** @var string $phoneFrom */
@@ -43,9 +42,9 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
             </div>
 
             <div class="col-md-6">
-                <?php Pjax::begin(['id' => 'redial-lead-view-block-pjax', 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+                <div id="redial-lead-view-block">
                       <?= LeadRedialViewWidget::widget(['lead' => $lead]) ?>
-                <?php Pjax::end(); ?>
+                </div>
             </div>
             <div class="col-md-6"></div>
 
@@ -84,7 +83,7 @@ $js = <<<JS
 
 $("#redial-lead-actions-block-call").on('click', function (e) {
     $(this).hide();
-    leadRedialCall();
+    leadRedialReservationAndCall();
 });
 
 $("#redial-lead-actions-take").on('click', function (e) {
@@ -130,14 +129,13 @@ function leadRedialTake() {
     .done(function(data) {
         hideActionBlock();
         if (data.success) {
-             openInNewTab();
+             // openInNewTab();
              let text = 'Lead taken!';
              if (data.message) {
                 text = data.message;
              }
              new PNotify({title: "Take Lead", type: "success", text: text, hide: true});
-             reloadLeadViewContainer();
-             reloadListContainer();
+             reloadContainers();
         } else {
            let text = 'Error. Try again later';
            if (data.message) {
@@ -148,6 +146,30 @@ function leadRedialTake() {
     })
     .fail(function() {
         hideActionBlock();
+        new PNotify({title: "Take lead", type: "error", text: 'Try again later.', hide: true});
+    })
+}
+
+function leadRedialReservationAndCall() {
+    new PNotify({title: "Take Lead", type: "info", text: 'Reservation for call', hide: true});
+    $.ajax({
+        type: '{$reservationUrl->method}',
+        url: '{$reservationUrl->url}',
+        data: {$reservationUrl->getData()}
+    })
+    .done(function(data) {
+        if (data.success) {
+            new PNotify({title: "Take Lead: Reservation", type: "success", text: 'Lead reserved', hide: true});
+            leadRedialCall();
+        } else {
+           let text = 'Error. Try again later';
+           if (data.message) {
+               text = data.message;
+           }
+           new PNotify({title: "Take Lead", type: "error", text: text, hide: true});
+        }
+    })
+    .fail(function() {
         new PNotify({title: "Take lead", type: "error", text: 'Try again later.', hide: true});
     })
 }
@@ -181,20 +203,32 @@ function webCallLeadRedialUpdate(obj) {
         }
 }
 
+function reloadContainers()
+{
+    reloadListContainer();
+    reloadLeadViewContainer();
+}
+
 function reloadListContainer() {
   $.pjax.reload({container: '#{$pjaxListContainerId}', async: false});
 }
 
 function reloadLeadViewContainer() {
-  $.pjax.reload({
-        container: '#redial-lead-view-block-pjax', 
-        async: false, 
-        push: false, 
-        replace: false, 
-        url: '{$viewUrl->url}', 
+    $.ajax({
         type: '{$viewUrl->method}',
+        url: '{$viewUrl->url}',
         data: {$viewUrl->getData()}
-    });
+    })
+    .done(function(data) {
+        if (data.success) {
+            $("#redial-lead-view-block").html(data.data);
+        } else {
+           new PNotify({title: "Update Lead details", type: "error", text: 'Error', hide: true});
+        }
+    })
+    .fail(function() {
+        new PNotify({title: "Update Lead details", type: "error", text: 'Error', hide: true});
+    })
 }
 
 function startTimer(sec) {

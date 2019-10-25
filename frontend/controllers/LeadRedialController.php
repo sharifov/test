@@ -31,11 +31,23 @@ class LeadRedialController extends FController
         $searchModel = new LeadQcallSearch();
         $dataProvider = $searchModel->searchList(Yii::$app->request->queryParams);
 
-        $dataProvider->pagination->pageSize = 1;
-
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionShow(): Response
+    {
+        $gid = Yii::$app->request->post('gid');
+        $lead = $this->findLeadById($gid);
+        return $this->asJson([
+            'success' => true,
+            'data' => $this->renderAjax('show', ['lead' => $lead])
         ]);
     }
 
@@ -60,14 +72,22 @@ class LeadRedialController extends FController
     }
 
     /**
-     * @return string
+     * @return Response
      * @throws NotFoundHttpException
      */
-    public function actionShow(): string
+    public function actionReservation(): Response
     {
         $gid = Yii::$app->request->post('gid');
         $lead = $this->findLeadById($gid);
-        return $this->renderAjax('show', ['lead' => $lead]);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        try {
+            $this->leadRedialService->reservation($lead, $user);
+            return $this->asJson(['success' => true]);
+        } catch (\DomainException $e) {
+            return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 
     /**
