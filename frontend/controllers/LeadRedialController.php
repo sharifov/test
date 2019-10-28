@@ -28,8 +28,11 @@ class LeadRedialController extends FController
 
     public function actionIndex(): string
     {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
         $searchModel = new LeadQcallSearch();
-        $dataProvider = $searchModel->searchList(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->searchByRedial(Yii::$app->request->queryParams, $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

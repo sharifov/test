@@ -3,7 +3,6 @@
 use common\models\Lead;
 use frontend\widgets\redial\LeadRedialWidget;
 use frontend\widgets\redial\RedialUrl;
-use frontend\widgets\redial\ViewUrl;
 use yii\helpers\Url;
 
 /** @var Lead $lead */
@@ -25,5 +24,5 @@ echo LeadRedialWidget::widget([
         'post',
         ['gid' => $lead->gid]
     ),
-    'pjaxListContainerId' => 'lead-redial-pjax',
+    'script' => 'reloadCallFunction();',
 ]);

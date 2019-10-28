@@ -1,32 +1,79 @@
 <?php
 
+use common\models\Employee;
 use common\models\Lead;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var Lead $lead */
+/** @var Employee $user */
+
+$user = Yii::$app->user->identity;
 
 ?>
 
 <div class="x_panel">
-    <div class="x_title">
-        <h2><i class="fa fa-list"></i> Lead <?= $lead->id ?></h2>
-        <div class="clearfix"></div>
-    </div>
     <div class="x_content">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <?= DetailView::widget([
                 'model' => $lead,
                 'attributes' => [
-                    'uid',
+                    [
+                        'attribute' => 'id',
+                        'visible' => !$user->isAgent()
+                    ],
+                    [
+                        'attribute' => 'status',
+                        'value' => static function (Lead $lead) {
+                            return $lead->getStatusName(true);
+                        },
+                        'format' => 'html',
+                    ],
+                    [
+                        'label' => 'Project',
+                        'attribute' => 'project_id',
+                        'value' => static function (Lead $lead) {
+                            return $lead->project ? $lead->project->name : '-';
+                        },
+                    ],
+                    [
+                        'attribute' => 'created',
+                        'value' => static function (Lead $lead) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($lead->created));
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'label' => 'Pending Time',
+                        'value' => static function (Lead $lead) {
+                            $createdTS = strtotime($lead->created);
+
+                            $diffTime = time() - $createdTS;
+                            $diffHours = (int)($diffTime / (60 * 60));
+
+                            return ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                        },
+                        'options' => [
+                            'style' => 'width:180px'
+                        ],
+                        'format' => 'raw',
+                    ],
+
+                ],
+            ]) ?>
+        </div>
+        <div class="col-md-4">
+            <?= DetailView::widget([
+                'model' => $lead,
+                'attributes' => [
                     [
                         'attribute' => 'client.name',
                         'header' => 'Client name',
                         'format' => 'raw',
-                        'value' => static function (Lead $model) {
-                            if ($model->client) {
-                                $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+                        'value' => static function (Lead $lead) {
+                            if ($lead->client) {
+                                $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
                                 if ($clientName === 'Client Name') {
                                     $clientName = '- - - ';
                                 } else {
@@ -40,87 +87,81 @@ use yii\widgets\DetailView;
                         },
                         'options' => ['style' => 'width:160px'],
                     ],
-
                     [
                         'attribute' => 'client.phone',
                         'header' => 'Client Phones',
                         'format' => 'raw',
-                        'value' => static function (Lead $model)  {
-                            if ($model->client && $model->client->clientPhones) {
-                                $str = '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($model->client->clientPhones, 'phone', 'phone'));
+                        'value' => static function (Lead $lead) {
+                            if ($lead->client && $lead->client->clientPhones) {
+                                $str = '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone'));
                             }
                             return $str ?? '-';
                         },
                         'options' => ['style' => 'width:180px'],
                     ],
                     [
-                        'attribute' => 'status',
-                        'value' => static function (Lead $model) {
-                            return $model->getStatusName(true);
-                        },
-                        'format' => 'html',
-                    ],
-                    [
-                        'attribute' => 'project_id',
-                        'value' => static function (Lead $model) {
-                            return $model->project ? $model->project->name : '-';
-                        },
-                    ],
-                    [
-                        'attribute' => 'source_id',
-                        'value' => static function (Lead $model) {
-                            return $model->source ? $model->source->name : '-';
+                        'label' => 'Client time',
+                        'format' => 'raw',
+                        'value' => static function (Lead $lead) {
+                            return $lead->getClientTime2();
                         },
                     ],
                 ],
             ]) ?>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <?= DetailView::widget([
                 'model' => $lead,
                 'attributes' => [
                     [
-                        'attribute' => 'trip_type',
-                        'value' => static function (Lead $model) {
-                            return $model->getFlightTypeName();
-                        },
-                    ],
-                    [
                         'attribute' => 'cabin',
-                        'value' => static function (Lead $model) {
-                            return $model->getCabinClassName();
+                        'value' => static function (Lead $lead) {
+                            return $lead->getCabinClassName();
                         },
                     ],
-                    'offset_gmt',
                     [
-                        'label' => 'Client time',
+                        'attribute' => 'trip_type',
+                        'value' => static function (Lead $lead) {
+                            return $lead->getFlightTypeName();
+                        },
+                    ],
+                    [
+                        'label' => 'Depart',
+                        'value' => static function (Lead $lead) {
+                            foreach ($lead->leadFlightSegments as $sk => $segment) {
+                                return date('d-M-Y', strtotime($segment->departure));
+                            }
+                            return '-';
+                        },
+                    ],
+                    [
+                        'label' => 'Pax',
+                        'value' => static function (Lead $lead) {
+                            return '<i class="fa fa-male"></i> <span title="adult">' . $lead->adults . '</span> / <span title="child">' . $lead->children . '</span> / <span title="infant">' . $lead->infants . '</span><br>';
+                        },
                         'format' => 'raw',
-                        'value' => static function (Lead $model) {
-                            return $model->getClientTime2();
-                        },
+                        'visible' => !$user->isAgent(),
                     ],
                     [
-                        'attribute' => 'created',
+                        'label' => 'Segments',
                         'value' => static function (Lead $model) {
-                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+                            $segmentData = [];
+                            foreach ($model->leadFlightSegments as $sk => $segment) {
+                                $segmentData[] = ($sk + 1) . '. <code>' . Html::a($segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination, [
+                                        'lead-flight-segment/view',
+                                        'id' => $segment->id
+                                    ], [
+                                        'target' => '_blank',
+                                        'data-pjax' => 0
+                                    ]) . '</code>';
+                            }
+                            $segmentStr = implode('<br>', $segmentData);
+                            return '' . $segmentStr . '';
                         },
                         'format' => 'raw',
+                        'visible' => !$user->isAgent(),
                     ],
-                    [
-                        'label' => 'Pending Time',
-                        'value' => static function (Lead $model) {
-                            $createdTS = strtotime($model->created);
 
-                            $diffTime = time() - $createdTS;
-                            $diffHours = (int)($diffTime / (60 * 60));
-
-                            return ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
-                        },
-                        'options' => [
-                            'style' => 'width:180px'
-                        ],
-                        'format' => 'raw',
-                    ],
                 ],
             ]) ?>
         </div>

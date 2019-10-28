@@ -128,7 +128,7 @@ class TestController extends FController
 //        $lead->save();
 
         $call = Call::findOne(1035611);
-        $call->c_status_id = Call::STATUS_RINGING;
+//        $call->c_status_id = Call::STATUS_RINGING;
         $call->c_status_id = Call::STATUS_IN_PROGRESS;
 //        $call->c_status_id = Call::STATUS_COMPLETED;
 //        $call->c_status_id = Call::STATUS_BUSY;

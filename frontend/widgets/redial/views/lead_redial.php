@@ -13,7 +13,7 @@ use yii\web\JqueryAsset;
 /** @var RedialUrl $viewUrl */
 /** @var RedialUrl $takeUrl */
 /** @var RedialUrl $reservationUrl */
-/** @var string $pjaxListContainerId */
+/** @var string $script */
 
 /** @var string $phoneFrom */
 /** @var string $phoneTo */
@@ -42,12 +42,12 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
                 <hr>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-9">
                 <div id="redial-lead-view-block">
                       <?= LeadRedialViewWidget::widget(['lead' => $lead]) ?>
                 </div>
             </div>
-            <div class="col-md-6"></div>
+            <div class="col-md-3"></div>
 
             <div class="col-md-12">
                 <button id="redial-lead-actions-block-call" class="btn btn-success" style="font-size: 25px; margin-top: 5px">
@@ -206,12 +206,8 @@ function webCallLeadRedialUpdate(obj) {
 
 function reloadContainers()
 {
-    reloadListContainer();
+    {$script}
     reloadLeadViewContainer();
-}
-
-function reloadListContainer() {
-  $.pjax.reload({container: '#{$pjaxListContainerId}', async: false});
 }
 
 function reloadLeadViewContainer() {

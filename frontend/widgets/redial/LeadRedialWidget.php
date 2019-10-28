@@ -17,7 +17,7 @@ use yii\base\Widget;
  * @property RedialUrl $viewUrl
  * @property RedialUrl $takeUrl
  * @property RedialUrl $reservationUrl
- * @property string $pjaxListContainerId
+ * @property string $script
  * @property string $phoneFrom
  * @property string $phoneTo
  */
@@ -32,7 +32,7 @@ class LeadRedialWidget extends Widget
 
     public $reservationUrl;
 
-    public $pjaxListContainerId;
+    public $script;
 
     public $phoneFrom;
 
@@ -55,9 +55,6 @@ class LeadRedialWidget extends Widget
         if (!$this->reservationUrl instanceof RedialUrl) {
             throw new \InvalidArgumentException('reservationUrl property must be RedialUrl');
         }
-        if (!$this->pjaxListContainerId) {
-            throw new \InvalidArgumentException('pjaxListContainer must be set');
-        }
     }
 
     /**
@@ -70,7 +67,7 @@ class LeadRedialWidget extends Widget
             'viewUrl' => $this->viewUrl,
             'takeUrl' => $this->takeUrl,
             'reservationUrl' => $this->reservationUrl,
-            'pjaxListContainerId' => $this->pjaxListContainerId,
+            'script' => $this->script,
             'phoneFrom' => $this->findPhoneFrom(),
             'phoneTo' => $this->findPhoneTo(),
             'projectId' => $this->findProjectId(),

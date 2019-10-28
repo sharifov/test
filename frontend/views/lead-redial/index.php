@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use common\models\Lead;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
@@ -31,13 +32,13 @@ $userIsFreeForCall = $user->isCallFree();
                     <img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"/>
                 </div>
 
-                <?php Pjax::begin(['id' => 'redial-call-box-pjax']); ?>
+                <div id="redial-call-box-wrapper">
                     <div id="redial-call-box">
                         <div class="text-center badge badge-warning call-status" style="font-size: 35px">
                             <span id="text-status-call">Ready</span>
                         </div>
                     </div>
-                <?php Pjax::end(); ?>
+                </div>
 
             </div>
         </div>
@@ -56,15 +57,6 @@ $userIsFreeForCall = $user->isCallFree();
             },
             'columns' => [
                 ['class' => 'yii\grid\SerialColumn'],
-
-                //'lqc_lead_id',
-                [
-                    'attribute' => 'lqc_lead_id',
-                    'value' => static function (LeadQcall $model) {
-                        return Html::a($model->lqc_lead_id, ['lead/view', 'gid' => $model->lqcLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
-                    },
-                    'format' => 'raw'
-                ],
                 [
                     'label' => 'Status',
                     'value' => static function (LeadQcall $model) {
@@ -72,13 +64,13 @@ $userIsFreeForCall = $user->isCallFree();
                     },
                     'format' => 'raw',
                 ],
-                [
-                    'label' => 'Call status',
-                    'value' => static function (LeadQcall $model) {
-                        return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
-                    },
-                    'format' => 'raw',
-                ],
+//                [
+//                    'label' => 'Call status',
+//                    'value' => static function (LeadQcall $model) {
+//                        return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
+//                    },
+//                    'format' => 'raw',
+//                ],
                 [
                     'attribute' => 'lqcLead.project_id',
                     'value' => static function (LeadQcall $model) {
@@ -89,32 +81,15 @@ $userIsFreeForCall = $user->isCallFree();
                         'style' => 'width:120px'
                     ],
                 ],
-
                 [
-                    'attribute' => 'lqcLead.source_id',
+                    'attribute' => 'lqc_lead_id',
                     'value' => static function (LeadQcall $model) {
-                        return $model->lqcLead->source ? $model->lqcLead->source->name : '-';
+                        return Html::a($model->lqc_lead_id, ['lead/view', 'gid' => $model->lqcLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                     },
-                ],
-
-                [
-                    'header' => 'Client time',
                     'format' => 'raw',
-                    'value' => static function (LeadQcall $model) {
-                        return $model->lqcLead->getClientTime2();
-                    },
-                    'options' => ['style' => 'width:90px'],
+                    'filter' => false,
+                    'visible' => !$user->isAgent(),
                 ],
-
-                [
-                    'attribute' => 'employee_id',
-                    'format' => 'raw',
-                    'value' => static function (LeadQcall $model) {
-                        return $model->lqcLead->employee ? '<i class="fa fa-user"></i> ' . $model->lqcLead->employee->username : '-';
-                    },
-                    'filter' => false
-                ],
-
                 [
                     'attribute' => 'lqcLead.pending',
                     'label' => 'Pending Time',
@@ -136,69 +111,151 @@ $userIsFreeForCall = $user->isCallFree();
                     ],
                     'format' => 'raw'
                 ],
-
                 [
-                    'label' => 'Out Calls',
+                    'header' => 'Client time',
+                    'format' => 'raw',
                     'value' => static function (LeadQcall $model) {
-                        $cnt = $model->lqcLead->getCountCalls(\common\models\Call::CALL_TYPE_OUT);
-                        return $cnt ?: '-';
+                        return $model->lqcLead->getClientTime2();
                     },
-                    'options' => [
-                        'style' => 'width:60px'
-                    ],
-                    'contentOptions' => [
-                        'class' => 'text-center'
-                    ],
-                    //'format' => 'raw'
+                    'options' => ['style' => 'width:90px'],
                 ],
-
-
-                'lqc_weight',
                 [
-                    'attribute' => 'lqc_dt_from',
+                    'label' => 'Client / Phones',
+                    'format' => 'raw',
                     'value' => static function (LeadQcall $model) {
-                        return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
-                    },
-                    'format' => 'raw'
-                ],
+                        $lead = $model->lqcLead;
 
-                [
-                    'attribute' => 'lqc_dt_to',
-                    'value' => static function (LeadQcall $model) {
-                        return $model->lqc_dt_to ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_to)) : '-';
-                    },
-                    'format' => 'raw'
-                ],
+                        if (!$lead->client) {
+                            return '-';
+                        }
+                        $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
+                        if ($clientName === 'Client Name') {
+                            $clientName = '- - - ';
+                        } else {
+                            $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                        }
 
-                [
-                    'label' => 'Duration',
-                    'value' => static function (LeadQcall $model) {
-                        return Yii::$app->formatter->asDuration(strtotime($model->lqc_dt_to) - strtotime($model->lqc_dt_from));
+                        $str = $clientName . '<br>';
+                        $str .= $lead->client->clientPhones ? '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
+
+                        return $str;
                     },
                 ],
-
                 [
-                    'label' => 'Deadline',
+                    'label' => 'Depart',
                     'value' => static function (LeadQcall $model) {
-                        $timeTo = strtotime($model->lqc_dt_to);
-                        return time() <= $timeTo ? Yii::$app->formatter->asDuration($timeTo - time()) : 'deadline';
+                        $lead = $model->lqcLead;
+                        if (!$lead) {
+                            return '-';
+                        }
+                        foreach ($model->lqcLead->leadFlightSegments as $sk => $segment) {
+                            return date('d-M-Y', strtotime($segment->departure));
+                        }
+                        return '-';
                     },
                 ],
+                [
+                    'header' => 'Segments',
+                    'value' => static function (LeadQcall $model) {
+                        $lead = $model->lqcLead;
+                        if (!$lead) {
+                            return '-';
+                        }
+                        $segmentData = [];
+                        foreach ($lead->leadFlightSegments as $sk => $segment) {
+                            $segmentData[] = ($sk + 1) . '. <code>' . Html::a($segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination, [
+                                    'lead-flight-segment/view',
+                                    'id' => $segment->id
+                                ], [
+                                    'target' => '_blank',
+                                    'data-pjax' => 0
+                                ]) . '</code>';
+                        }
+                        $segmentStr = implode('<br>', $segmentData);
+                        return '' . $segmentStr . '';
+                    },
+                    'format' => 'raw',
+                    'visible' => !$user->isAgent(),
+                ],
+                [
+                    'label' => 'Pax',
+                    'value' => static function (LeadQcall $model) {
+                        $lead = $model->lqcLead;
+                        if (!$lead) {
+                            return '-';
+                        }
+                        $str = '<i class="fa fa-male"></i> <span title="adult">' . $lead->adults . '</span> / <span title="child">' . $lead->children . '</span> / <span title="infant">' . $lead->infants . '</span><br>';
+                        //$str .= $model->getCommunicationInfo();
+                        return $str;
+                    },
+                    'format' => 'raw',
+                    'visible' => !$user->isAgent(),
+                ],
+                [
+                    'attribute' => 'cabin',
+                    'value' => static function (LeadQcall $model) {
+                        $lead = $model->lqcLead;
+                        if (!$lead) {
+                            return '-';
+                        }
+                        return $lead->getCabinClassName();
+                    },
+                    'filter' => Lead::CABIN_LIST
+                ],
+//                [
+//                    'label' => 'Out Calls',
+//                    'value' => static function (LeadQcall $model) {
+//                        $cnt = $model->lqcLead->getCountCalls(\common\models\Call::CALL_TYPE_OUT);
+//                        return $cnt ?: '-';
+//                    },
+//                    'options' => [
+//                        'style' => 'width:60px'
+//                    ],
+//                    'contentOptions' => [
+//                        'class' => 'text-center'
+//                    ],
+//                    //'format' => 'raw'
+//                ],
+                [
+                    'attribute' => 'attempts',
+                    'filter' => false,
+                ],
+//                'lqc_weight',
+//                [
+//                    'attribute' => 'lqc_dt_from',
+//                    'value' => static function (LeadQcall $model) {
+//                        return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
+//                    },
+//                    'format' => 'raw'
+//                ],
+//
+//                [
+//                    'attribute' => 'lqc_dt_to',
+//                    'value' => static function (LeadQcall $model) {
+//                        return $model->lqc_dt_to ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_to)) : '-';
+//                    },
+//                    'format' => 'raw'
+//                ],
+
+//                [
+//                    'label' => 'Duration',
+//                    'value' => static function (LeadQcall $model) {
+//                        return Yii::$app->formatter->asDuration(strtotime($model->lqc_dt_to) - strtotime($model->lqc_dt_from));
+//                    },
+//                ],
+//
+//                [
+//                    'label' => 'Deadline',
+//                    'value' => static function (LeadQcall $model) {
+//                        $timeTo = strtotime($model->lqc_dt_to);
+//                        return time() <= $timeTo ? Yii::$app->formatter->asDuration($timeTo - time()) : 'deadline';
+//                    },
+//                ],
+//
                 [
                     'class' => 'yii\grid\ActionColumn',
-                    'template' => '{view} {call}',
+                    'template' => '{call}',
                     'buttons' => [
-                        'view' => static function ($url, LeadQcall $model) {
-                            return Html::a('<i class="glyphicon glyphicon-search"></i> View', [
-                                'lead-qcall/view',
-                                'id' => $model->lqc_lead_id
-                            ], [
-                                'class' => 'btn btn-info btn-xs',
-                                'target' => '_blank',
-                                'data-pjax' => 0,
-                                'title' => 'View',
-                            ]);
-                        },
                         'call' => static function ($url, LeadQcall $model) use ($userIsFreeForCall) {
                             return Html::button('<i class="fa fa-phone"></i> Call', [
                                 'class' => 'btn btn-primary btn-xs lead-redial-btn',
@@ -220,30 +277,38 @@ $userIsFreeForCall = $user->isCallFree();
 
 $js = <<<JS
 
-$("body").on("click", ".lead-redial-btn", function(e) {
-    $.pjax.reload({  
-        container: '#redial-call-box-pjax',  
-        push: false,
-        replace: false,
-        timeout: false,
-        type: 'post',
-        url: $(this).data('url'), 
-        data: {gid: $(this).data('gid')} 
-    });
-});
-$('#redial-call-box-pjax').on("pjax:start", function () {
+function loadRedialCallBoxBlock(type, url, data) {
     $("#redial-call-box").html('');
     $("#loading").show();
-});
+    $.ajax({
+        type: type,
+        url: url,
+        data: data
+    })
+    .done(function(data) {
+        $("#loading").hide();
+        $("#redial-call-box-wrapper").html(data);
+    })
+    .fail(function() {
+        $("#loading").hide();
+        new PNotify({title: "Lead redial", type: "error", text: 'Error', hide: true});
+    })
+}
 
-$('#redial-call-box-pjax').on("pjax:complete", function () {
-    $("#loading").hide();
-});
-
-$('#redial-call-box-pjax').on("pjax:error", function () {
-    console.log('Failed to load the page');
+$("body").on("click", ".lead-redial-btn", function(e) {
+    loadRedialCallBoxBlock('post', $(this).data('url'), {gid: $(this).data('gid')});
 });
 
 JS;
 
 $this->registerJs($js);
+
+$js = <<<JS
+
+function reloadCallFunction() {
+    $.pjax.reload({container: '#lead-redial-pjax', async: false});
+}
+
+JS;
+
+$this->registerJs($js, $this::POS_END);
