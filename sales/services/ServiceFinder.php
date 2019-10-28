@@ -4,8 +4,10 @@ namespace sales\services;
 
 use common\models\Employee;
 use common\models\Lead;
+use common\models\LeadPreferences;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
+use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
 
@@ -22,18 +24,28 @@ class ServiceFinder
     private $leadRepository;
     private $userRepository;
     private $casesRepository;
+	/**
+	 * @var LeadPreferencesRepository
+	 */
+	private $leadPreferencesRepository;
 
-    /**
-     * @param LeadRepository $leadRepository
-     * @param UserRepository $userRepository
-     * @param CasesRepository $casesRepository
-     */
-    public function __construct(LeadRepository $leadRepository, UserRepository $userRepository, CasesRepository $casesRepository)
+	/**
+	 * @param LeadRepository $leadRepository
+	 * @param UserRepository $userRepository
+	 * @param CasesRepository $casesRepository
+	 * @param LeadPreferencesRepository $leadPreferencesRepository
+	 */
+    public function __construct(
+    	LeadRepository $leadRepository,
+		UserRepository $userRepository,
+		CasesRepository $casesRepository,
+		LeadPreferencesRepository $leadPreferencesRepository)
     {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
         $this->casesRepository = $casesRepository;
-    }
+		$this->leadPreferencesRepository = $leadPreferencesRepository;
+	}
 
     /**
      * @param int|Lead $lead
@@ -48,6 +60,21 @@ class ServiceFinder
             return $lead;
         }
         throw new \InvalidArgumentException('$lead must be integer or Lead');
+    }
+
+    /**
+     * @param int|LeadPreferences $leadPreferences
+     * @return LeadPreferences
+     */
+    public function leadPreferences($leadPreferences): LeadPreferences
+    {
+        if (is_int($leadPreferences)) {
+            return $this->leadPreferencesRepository->find($leadPreferences);
+        }
+        if ($leadPreferences instanceof LeadPreferences) {
+            return $leadPreferences;
+        }
+        throw new \InvalidArgumentException('$leadPreferences must be integer or LeadPreferences');
     }
 
     /**

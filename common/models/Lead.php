@@ -3911,6 +3911,16 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $min;
     }
 
+	/**
+	 * @param int $delayedCharged
+	 * @param string $notesForExperts
+	 */
+    public function editDelayedChargeAndNote(int $delayedCharged, string $notesForExperts): void
+	{
+		$this->l_delayed_charge = $delayedCharged;
+		$this->notes_for_experts = strip_tags($notesForExperts);
+	}
+
     /**
      * @return LeadQuery
      */

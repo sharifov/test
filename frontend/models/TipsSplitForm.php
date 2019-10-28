@@ -57,10 +57,11 @@ class TipsSplitForm extends Model
         if($sum > 100){
             $this->addError('sumPercent', \Yii::t('user', 'Sum of percent more than 100'));
             return false;
-        }elseif($sum == 100){
-            $this->addError('sumPercent', \Yii::t('user', 'Sum of percent is 100. The main agent was left without profit.'));
-            return false;
         }
+//        elseif($sum == 100){
+//            $this->addError('sumPercent', \Yii::t('user', 'Sum of percent is 100. The main agent was left without profit.'));
+//            return false;
+//        }
         return true;
     }
 

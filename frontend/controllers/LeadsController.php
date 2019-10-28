@@ -199,17 +199,15 @@ class LeadsController extends FController
     }
 
 
-
-
     /**
      * Displays a single Lead model.
      * @param integer $id
+     * @param null|string $showInPopUp
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id, $showInPopUp = null)
     {
-
         $model = $this->findModel($id);
 
         $searchModel = new QuoteSearch();
@@ -247,8 +245,11 @@ class LeadsController extends FController
             //return $this->renderAjax('view', $viewParams);
         }
 
-        return $this->render('view', $viewParams);
-
+        if ($showInPopUp === 'modal'){
+            return $this->renderAjax('view', $viewParams);
+        } else {
+            return $this->render('view', $viewParams);
+        }
     }
 
     /**
