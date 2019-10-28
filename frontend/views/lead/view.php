@@ -153,6 +153,26 @@ $lead = $leadForm->getLead();
 
             <?php endif;?>
 
+        	<?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()):?>
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Warning!</h4>
+                    <p>Lead Preferences is not available in VIEW MODE, please take lead!</p>
+                </div>
+			<?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP || ($leadForm->getLead()->status == \common\models\Lead::STATUS_PENDING && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id != Yii::$app->user->id):?>
+
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Warning!</h4>
+                    <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
+                </div>
+            <?php else: ?>
+                <div id="lead-preferences">
+                    <?= $this->render('partial/_lead_preferences', [
+                        'lead' => $lead,
+                        'leadForm' => $leadForm
+                    ]) ?>
+                </div>
+            <?php endif; ?>
+
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
                 <?/*= $this->render('partial/_task_list', [
@@ -167,7 +187,7 @@ $lead = $leadForm->getLead();
                     'lead' => $leadForm->getLead(),
                     'dataProviderNotes'  => $dataProviderNotes,
                     'modelNote'  => $modelNote,
-                ]); ?>
+                ]) ?>
 
                 <?/*= $this->render('partial/_leadLog', [
                     'logs' => $leadForm->getLead()->leadLogs
@@ -250,20 +270,6 @@ $lead = $leadForm->getLead();
             ])
             ?>
         <?php endif; ?>
-        <?= $this->render('partial/_preferences', [
-            'leadForm' => $leadForm
-        ])
-        ?>
-        <?php
-        if (Yii::$app->user->can('updateLead', ['leadId' => $itineraryForm->leadId])) : ?>
-            <div class="text-center">
-                <?= Html::submitButton('<span class="fa fa-check"></span> Save', [
-                    'id' => 'submit-lead-form-btn',
-                    'class' => 'btn btn-success'
-                ]) ?>
-            </div>
-        <?php endif; ?>
-
     </aside>
 
 </div>
