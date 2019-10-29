@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use common\models\Lead;
+use sales\access\ListsAccess;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -19,6 +20,8 @@ $this->params['breadcrumbs'][] = $this->title;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 $userIsFreeForCall = $user->isCallFree();
+
+$list = new ListsAccess($user->id);
 
 ?>
     <div class="lead-qcall-list">
@@ -59,20 +62,24 @@ $userIsFreeForCall = $user->isCallFree();
                 ['class' => 'yii\grid\SerialColumn'],
                 [
                     'label' => 'Status',
+                    'attribute' => 'leadStatus',
                     'value' => static function (LeadQcall $model) {
                         return $model->lqcLead->getStatusName(true);
                     },
                     'format' => 'raw',
+                    'filter' => Lead::getStatusList()
                 ],
-//                [
-//                    'label' => 'Call status',
-//                    'value' => static function (LeadQcall $model) {
-//                        return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
-//                    },
-//                    'format' => 'raw',
-//                ],
                 [
-                    'attribute' => 'lqcLead.project_id',
+                    'label' => 'Call status',
+                    'value' => static function (LeadQcall $model) {
+                        return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
+                    },
+                    'format' => 'raw',
+                    'visible' => $user->isAdmin()
+                ],
+                [
+                    'label' => 'Project',
+                    'attribute' => 'projectId',
                     'value' => static function (LeadQcall $model) {
                         return $model->lqcLead->project ? '<span class="badge badge-info">' . Html::encode($model->lqcLead->project->name) . '</span>' : '-';
                     },
@@ -80,6 +87,7 @@ $userIsFreeForCall = $user->isCallFree();
                     'options' => [
                         'style' => 'width:120px'
                     ],
+                    'filter' => $list->getProjects()
                 ],
                 [
                     'attribute' => 'lqc_lead_id',
@@ -87,7 +95,6 @@ $userIsFreeForCall = $user->isCallFree();
                         return Html::a($model->lqc_lead_id, ['lead/view', 'gid' => $model->lqcLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                     },
                     'format' => 'raw',
-                    'filter' => false,
                     'visible' => !$user->isAgent(),
                 ],
                 [
@@ -219,39 +226,41 @@ $userIsFreeForCall = $user->isCallFree();
                 [
                     'attribute' => 'attempts',
                     'filter' => false,
+                    'visible' => !$user->isAgent(),
                 ],
-//                'lqc_weight',
-//                [
-//                    'attribute' => 'lqc_dt_from',
-//                    'value' => static function (LeadQcall $model) {
-//                        return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
-//                    },
-//                    'format' => 'raw'
-//                ],
-//
-//                [
-//                    'attribute' => 'lqc_dt_to',
-//                    'value' => static function (LeadQcall $model) {
-//                        return $model->lqc_dt_to ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_to)) : '-';
-//                    },
-//                    'format' => 'raw'
-//                ],
-
+                [
+                    'attribute' => 'lqc_weight',
+                    'visible' => $user->isAdmin()
+                ],
+                [
+                    'attribute' => 'lqc_dt_from',
+                    'value' => static function (LeadQcall $model) {
+                        return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
+                    },
+                    'format' => 'raw',
+                    'visible' => $user->isAdmin()
+                ],
+                [
+                    'attribute' => 'lqc_dt_to',
+                    'value' => static function (LeadQcall $model) {
+                        return $model->lqc_dt_to ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_to)) : '-';
+                    },
+                    'format' => 'raw',
+                    'visible' => $user->isAdmin()
+                ],
 //                [
 //                    'label' => 'Duration',
 //                    'value' => static function (LeadQcall $model) {
 //                        return Yii::$app->formatter->asDuration(strtotime($model->lqc_dt_to) - strtotime($model->lqc_dt_from));
 //                    },
 //                ],
-//
-//                [
-//                    'label' => 'Deadline',
-//                    'value' => static function (LeadQcall $model) {
-//                        $timeTo = strtotime($model->lqc_dt_to);
-//                        return time() <= $timeTo ? Yii::$app->formatter->asDuration($timeTo - time()) : 'deadline';
-//                    },
-//                ],
-//
+                [
+                    'label' => 'Deadline',
+                    'value' => static function (LeadQcall $model) {
+                        return floor((strtotime($model->lqc_dt_to) - time()) / 60);
+                    },
+                    'visible' => $user->isAdmin()
+                ],
                 [
                     'class' => 'yii\grid\ActionColumn',
                     'template' => '{call}',

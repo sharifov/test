@@ -38,8 +38,6 @@ class LeadRedialWidget extends Widget
 
     public $phoneTo;
 
-    public $redialAutoTakeSeconds;
-
     public function init(): void
     {
         parent::init();
@@ -80,7 +78,7 @@ class LeadRedialWidget extends Widget
      */
     private function findRedialAutoTakeSeconds(): int
     {
-        return Yii::$app->params['redial_auto_take_seconds'] ?? 10;
+        return Yii::$app->params['settings']['redial_auto_take_seconds'] ?? 10;
     }
 
     /**

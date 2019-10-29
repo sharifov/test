@@ -62,9 +62,11 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
                             <button id="redial-lead-actions-take" class="btn btn-success" style="font-size: 25px; ">
                                 Take
                             </button>
+<?php /*
                             <button id="redial-lead-actions-take-cancel" class="btn btn-primary" style="font-size: 25px; ">
                                 Cancel
                             </button>
+*/ ?>
                         </div>
 
                     </div>
@@ -91,10 +93,10 @@ $("#redial-lead-actions-take").on('click', function (e) {
     leadRedialTake();
 });
 
-$("#redial-lead-actions-take-cancel").on('click', function (e) {
-    $('#clock').countdown('remove');
-    hideActionBlock();
-});
+// $("#redial-lead-actions-take-cancel").on('click', function (e) {
+//     $('#clock').countdown('remove');
+//     hideActionBlock();
+// });
 
 function showActionBlock() {
     $('#redial-lead-actions-block *').show();
@@ -120,7 +122,7 @@ function callInProgress() {
 function leadRedialTake() {
     $('#clock').countdown('stop');
     $('#redial-lead-actions-take').hide();
-    $('#redial-lead-actions-take-cancel').hide();        
+    //$('#redial-lead-actions-take-cancel').hide();        
     new PNotify({title: "Take Lead", type: "info", text: 'Wait', hide: true});
     $.ajax({
         type: '{$takeUrl->method}',

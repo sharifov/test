@@ -5,6 +5,7 @@ namespace common\models\search;
 use common\models\Call;
 use common\models\Employee;
 use common\models\Lead;
+use sales\access\EmployeeProjectAccess;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\LeadQcall;
@@ -16,13 +17,20 @@ use yii\helpers\VarDumper;
  * LeadQcallSearch represents the model behind the search form of `common\models\LeadQcall`.
  *
  * @property string $current_dt
+ * @property $projectId
+ * @property $leadStatus
+ * @property $cabin
  * @property $attempts
+ * @property $deadline;
  */
 class LeadQcallSearch extends LeadQcall
 {
     public $current_dt;
-
+    public $projectId;
+    public $leadStatus;
+    public $cabin;
     public $attempts;
+    public $deadline;
 
     /**
      * {@inheritdoc}
@@ -34,7 +42,11 @@ class LeadQcallSearch extends LeadQcall
 
             [['lqc_dt_from', 'lqc_dt_to', 'current_dt'], 'safe'],
 
-            ['attempts', 'safe'],
+            ['attempts', 'integer'],
+            ['projectId', 'integer'],
+            ['leadStatus', 'integer'],
+            ['cabin', 'in', 'range' => array_keys(Lead::CABIN_LIST)],
+            ['deadline', 'safe'],
         ];
     }
 
@@ -143,6 +155,12 @@ class LeadQcallSearch extends LeadQcall
     {
         $query = LeadQcall::find()->select('*');
 
+        $query->with(['lqcLead.project', 'lqcLead.source', 'lqcLead.employee']);
+
+        $query->joinWith('lqcLead');
+
+        $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+
         $query->addSelect([
             'attempts' => (new Query())
                 ->select('count(*)')
@@ -153,8 +171,13 @@ class LeadQcallSearch extends LeadQcall
                 ->andWhere(['IS NOT', 'c_parent_id', null])
         ]);
 
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date("Y-m-d H:i:s") . "', lqc_dt_to )/60))";
+        $query->addSelect(['deadline' =>
+            new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
+        ]);
+
         $query->addOrderBy([
-            'lqc_dt_to' => SORT_ASC,
+            'deadline' => SORT_ASC,
             'attempts' => SORT_ASC,
             'lqc_dt_from' => SORT_ASC
         ]);
@@ -190,15 +213,15 @@ class LeadQcallSearch extends LeadQcall
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
-//        $query->andFilterWhere([
-//            'lqc_lead_id' => $this->lqc_lead_id,
-//            'lqc_dt_from' => $this->lqc_dt_from,
-//            'lqc_dt_to' => $this->lqc_dt_to,
-//        ]);
+        if (!$user->isAgent()) {
+            $query->andFilterWhere(['lqc_lead_id' => $this->lqc_lead_id]);
+        }
 
-        $query->with(['lqcLead.project', 'lqcLead.source', 'lqcLead.employee']);
-
-        $query->joinWith('lqcLead');
+        $query->andFilterWhere([
+            Lead::tableName() . '.project_id' => $this->projectId,
+            Lead::tableName() . '.status' => $this->leadStatus,
+            Lead::tableName() . '.cabin' => $this->cabin,
+        ]);
 
 //        VarDumper::dump($query->createCommand()->getRawSql());die;
 
