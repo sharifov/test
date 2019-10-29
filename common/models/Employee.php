@@ -85,7 +85,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         5000 => 150
     ];
 
-    private const CALL_EXPERT_SHIFT_MINUTES = 12*60;
+	private const CALL_EXPERT_SHIFT_MINUTES = 12*60;
 
     public $password;
     public $deleted;
@@ -109,7 +109,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $_timezone;
     private $_isAllowCallExpert;
     private $_callExpertCountByShiftTime;
-    private $_callExpertCount;
+	private $_callExpertCount;
 
     private $departmentAccess = [];
     private $projectAccess = [];
