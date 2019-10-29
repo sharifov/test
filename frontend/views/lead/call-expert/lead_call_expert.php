@@ -74,7 +74,7 @@ $user = Yii::$app->user->identity;
             ?>
 
             <?php if($user->userParams && $user->userParams->up_call_expert_limit > 0):?>
-                [limit: <?=$user->callExpertCountByShiftTime?> /  <?= $user->userParams->up_call_expert_limit?>]
+                [limit: <?=$user->callExpertCount?> /  <?= $user->userParams->up_call_expert_limit?>]
             <?php endif;?>
 
         </h2>
