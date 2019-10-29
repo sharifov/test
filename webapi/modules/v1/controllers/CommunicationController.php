@@ -609,6 +609,7 @@ class CommunicationController extends ApiBaseController
                     $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+' . $delayTimeMin . ' minutes'));
                     $lead->employee_id = null;
                     $lead->callReady();
+                    Yii::error('Lead id: ' . $lead->id .  ' call out: ' . ($call->isOut() ? 'yes' : 'no'));
 
                     if (!$lead->save()) {
                         Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save');
