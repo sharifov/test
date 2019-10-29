@@ -143,7 +143,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuLItems[] = ['label' => 'Lead Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
         $menuLItems[] = ['label' => 'Lead Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
         $menuLItems[] = ['label' => 'Lead Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
-        $menuLItems[] = ['label' => 'Lead Redial <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'text-info'];
+        $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-success label pull-right bginfo"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
 
 
         if($isAdmin) {

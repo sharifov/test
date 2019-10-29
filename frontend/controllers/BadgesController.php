@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\search\LeadQcallSearch;
 use sales\repositories\lead\LeadBadgesRepository;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
@@ -100,6 +101,11 @@ class BadgesController extends FController
                 case 'duplicate':
                     if ($count = $this->getDuplicate()) {
                         $result['duplicate'] = $count;
+                    }
+                    break;
+                case 'redial':
+                    if ($count = $this->getRedial()) {
+                        $result['redial'] = $count;
                     }
                     break;
                 case 'trash':
@@ -214,6 +220,19 @@ class BadgesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->leadBadgesRepository->getDuplicateCount($user);
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getRedial(): ?int
+    {
+        if (!Yii::$app->user->can('/lead-redial/*')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return (new LeadQcallSearch())->searchByRedial([], $user)->query->count();
     }
 
 }

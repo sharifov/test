@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\Call;
+use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
@@ -156,11 +157,26 @@ class LeadQcallSearch extends LeadQcall
     {
         $query = LeadQcall::find()->select('*');
 
-        $query->with(['lqcLead.project', 'lqcLead.source', 'lqcLead.employee']);
+        $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
 
         $query->joinWith('lqcLead');
 
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+
+        $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+
+        if ($user->isAgent() || $user->isSupervision()) {
+            $query->andWhere(['l_call_status_id' => Lead::CALL_STATUS_READY]);
+            $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
+        }
+
+        $query->addSelect([
+            'countClientPhones' => (new Query())
+                ->select('count(*)')
+                ->from(ClientPhone::tableName())
+                ->andWhere(ClientPhone::tableName() . '.client_id = ' . Lead::tableName() . '.client_id')
+        ]);
+        $query->andHaving(['>', 'countClientPhones', 0]);
 
         $query->addSelect([
             'attempts' => (new Query())
@@ -204,13 +220,6 @@ class LeadQcallSearch extends LeadQcall
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
-        }
-
-        $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
-
-        if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['l_call_status_id' => Lead::CALL_STATUS_READY]);
-            $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
         if (!$user->isAgent()) {

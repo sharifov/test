@@ -96,6 +96,7 @@ class LeadRedialController extends FController
     /**
      * @return Response
      * @throws NotFoundHttpException
+     * @throws \Throwable
      */
     public function actionTake(): Response
     {
