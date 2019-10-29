@@ -10,7 +10,7 @@ $class = 'text-success';
 ?>
 
 <div class="col-md-12" style="margin-bottom: 5px">
-    <div class="row">
+    <div class="list-striped">
         <div class="col-md-1">
             <?=($index + 1)?>.
         </div>
@@ -20,13 +20,13 @@ $class = 'text-success';
         </div>
         <div class="col-md-4">
             <?php if (isset($model['finalProfit'])) : ?>
-                <?= Yii::$app->formatter->asCurrency((float)$model['finalProfit'], 'USD') ?>
+                <?= '$ ' . number_format($model['finalProfit']) ?>
             <?php elseif (isset($model['soldLeads'])) :?>
                 <?= $model['soldLeads'] ?>
             <?php elseif (isset($model['profitPerPax'])) :?>
-                <?= Yii::$app->formatter->asCurrency((float)$model['profitPerPax'], 'USD') ?>
+                <?= '$ ' . number_format($model['profitPerPax']) ?>
             <?php elseif (isset($model['tips'])) :?>
-                <?= Yii::$app->formatter->asCurrency($model['tips'], 'USD') ?>
+                <?= '$ ' . number_format($model['tips'])?>
             <?php endif;?>
         </div>
     </div>

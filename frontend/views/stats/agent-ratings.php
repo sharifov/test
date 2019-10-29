@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  @var $profitDataProvider yii\data\SqlDataProvider
  *  @var $soldDataProvider yii\data\SqlDataProvider
