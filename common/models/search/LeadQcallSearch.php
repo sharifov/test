@@ -166,7 +166,7 @@ class LeadQcallSearch extends LeadQcall
         $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['l_call_status_id' => Lead::CALL_STATUS_READY]);
+            $query->andWhere(['IS NOT', 'l_call_status_id', Lead::CALL_STATUS_PROCESS]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 

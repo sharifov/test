@@ -602,27 +602,26 @@ class CommunicationController extends ApiBaseController
 //                }
 //            }
 
-            if($call->c_lead_id && $lead = $call->cLead) {
-                if ($lead->isPending() && $lead->isCallProcessing()) {
-
-                    $delayTimeMin = $lead->getDelayPendingTime();
-                    $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+' . $delayTimeMin . ' minutes'));
-                    $lead->employee_id = null;
-                    $lead->callReady();
-                    Yii::error('Lead id: ' . $lead->id .  ' call out: ' . ($call->isOut() ? 'yes' : 'no'));
-
-                    if (!$lead->save()) {
-                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save');
-                    }
-                }
-
-                if ($lead->isProcessing() && !$lead->isCallDone()) {
-                    $lead->callDone();
-                    if (!$lead->save()) {
-                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save2');
-                    }
-                }
-            }
+//            if($call->c_lead_id && $lead = $call->cLead) {
+//                if ($lead->isPending() && $lead->isCallProcessing()) {
+//
+//                    $delayTimeMin = $lead->getDelayPendingTime();
+//                    $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+' . $delayTimeMin . ' minutes'));
+//                    $lead->employee_id = null;
+//                    $lead->callReady();
+//
+//                    if (!$lead->save()) {
+//                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save');
+//                    }
+//                }
+//
+//                if ($lead->isProcessing() && !$lead->isCallDone()) {
+//                    $lead->callDone();
+//                    if (!$lead->save()) {
+//                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save2');
+//                    }
+//                }
+//            }
             if(!$call->save()) {
                 Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceClient:Call:save');
             }
