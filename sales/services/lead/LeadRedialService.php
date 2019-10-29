@@ -9,23 +9,31 @@ use common\models\LeadQcall;
 use sales\access\EmployeeAccess;
 use sales\repositories\lead\LeadRepository;
 use sales\services\ServiceFinder;
+use sales\services\TransactionManager;
 
 /**
  * Class LeadRedialService
  *
  * @property LeadRepository $leadRepository
  * @property ServiceFinder $serviceFinder
+ * @property TransactionManager $transactionManager
  */
 class LeadRedialService
 {
 
     private $leadRepository;
     private $serviceFinder;
+    private $transactionManager;
 
-    public function __construct(LeadRepository $leadRepository,  ServiceFinder $serviceFinder)
+    public function __construct(
+        LeadRepository $leadRepository,
+        ServiceFinder $serviceFinder,
+        TransactionManager $transactionManager
+    )
     {
         $this->leadRepository = $leadRepository;
         $this->serviceFinder = $serviceFinder;
+        $this->transactionManager = $transactionManager;
     }
 
     /**
@@ -62,9 +70,10 @@ class LeadRedialService
     }
 
     /**
-     * @param int|Lead $lead
-     * @param int|Employee $user
-     * @param int|null $creatorId
+     * @param $lead
+     * @param $user
+     * @param $creatorId
+     * @throws \Throwable
      */
     public function take($lead, $user, $creatorId): void
     {
@@ -77,7 +86,13 @@ class LeadRedialService
         $this->guardLeadForTake($lead);
 
         $lead->processing($user->id, $creatorId, 'Lead redial');
-        $this->leadRepository->save($lead);
+
+        $this->transactionManager->wrap(function () use ($lead) {
+            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                $qCall->delete();
+            }
+            $this->leadRepository->save($lead);
+        });
     }
 
     /**
