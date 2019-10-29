@@ -21,6 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property string $description
  * @property string $category
  * @property string $clientPhone
+ * @property string $clientEmail
  * @property int $depId
  *
  * @property Employee $user
@@ -33,6 +34,7 @@ class CasesCreateByWebForm extends Model
     public $description;
     public $category;
     public $clientPhone;
+    public $clientEmail;
     public $depId;
 
     private $user;
@@ -72,14 +74,30 @@ class CasesCreateByWebForm extends Model
                 return $this->getAvailableCategories($this->depId);
             }],
 
-            ['clientPhone', 'required'],
+            ['clientPhone', 'phoneOrEmailRequired', 'skipOnEmpty' => false],
             ['clientPhone', 'string', 'max' => 100],
             ['clientPhone', PhoneInputValidator::class],
             ['clientPhone', 'filter', 'filter' => function($value) {
                 return str_replace('-', '', trim($value));
             }],
 //			['clientPhone', 'checkPhoneForExistence']
+
+            ['clientEmail', 'phoneOrEmailRequired', 'skipOnEmpty' => false],
+            ['clientEmail', 'string', 'max' => 100],
+            ['clientEmail', 'email'],
+            ['clientEmail', 'filter', 'filter' => static function($value) {
+                return mb_strtolower(trim($value));
+            }],
         ];
+    }
+
+    public function phoneOrEmailRequired(): void
+    {
+        if (!$this->clientPhone && !$this->clientEmail) {
+            $this->addError('clientPhone', 'Phone or Email cannot be blank.');
+            $this->addError('clientEmail', 'Email or Phone cannot be blank.');
+            return;
+        }
     }
 
     /**
@@ -163,6 +181,7 @@ class CasesCreateByWebForm extends Model
             'depId' => 'Department',
             'category' => 'Category',
             'clientPhone' => 'Phone',
+            'clientEmail' => 'Email',
         ];
     }
 

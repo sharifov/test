@@ -745,7 +745,9 @@ class CasesController extends FController
      */
     public function actionCreate()
     {
-        $form = new CasesCreateByWebForm(Yii::$app->user->identity);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $form = new CasesCreateByWebForm($user);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $case = $this->casesCreateService->createByWeb($form);
@@ -768,7 +770,9 @@ class CasesController extends FController
      */
     public function actionCreateValidation(): array
     {
-        $form = new CasesCreateByWebForm(Yii::$app->user->identity);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $form = new CasesCreateByWebForm($user);
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($form);
