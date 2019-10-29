@@ -5,6 +5,7 @@ namespace common\models\search;
 use common\models\Call;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\LeadFlow;
 use sales\access\EmployeeProjectAccess;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -163,12 +164,11 @@ class LeadQcallSearch extends LeadQcall
 
         $query->addSelect([
             'attempts' => (new Query())
-                ->select('count(*)')
-                ->from(Call::tableName())
-                ->andWhere('c_lead_id = lqc_lead_id')
-                ->andWhere(['c_is_deleted' => false])
-                ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
-                ->andWhere(['IS NOT', 'c_parent_id', null])
+                ->select('lf_out_calls')
+                ->from(LeadFlow::tableName())
+                ->andWhere(LeadFlow::tableName() . '.lead_id = lqc_lead_id')
+                ->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])
+                ->limit(1)
         ]);
 
         $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date("Y-m-d H:i:s") . "', lqc_dt_to )/60))";

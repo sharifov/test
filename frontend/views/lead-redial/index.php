@@ -226,6 +226,7 @@ $list = new ListsAccess($user->id);
                 [
                     'attribute' => 'attempts',
                     'filter' => false,
+
                     'visible' => !$user->isAgent(),
                 ],
                 [
