@@ -2178,4 +2178,57 @@ class LeadSearch extends Lead
         $dataProvider = new SqlDataProvider($paramsData);
         return $dataProvider;
     }
+
+    /**
+     * @param string $category
+     * @return SqlDataProvider
+     */
+    public function searchTopAgents(string $category):SqlDataProvider
+    {
+        $query = new Query();
+        $query->select(['e.id', 'e.username']);
+        if ($category == 'finalProfit'){
+            $query->addSelect(['(SELECT SUM(final_profit) FROM leads WHERE employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+        }
+
+        if ($category == 'soldLeads'){
+            $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+        }
+
+        if ($category == 'profitPerPax'){
+            $query->addSelect(['(SELECT AVG(final_profit / adults + children) FROM leads WHERE employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+        }
+
+        if ($category == 'tips'){
+            $query->addSelect(['(SELECT SUM(tips) FROM leads WHERE employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+        }
+
+        $query->from('employees AS e')->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id')
+            ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
+        //$query->orderBy($category, SORT_DESC);
+
+        $command = $query->createCommand();
+        $sql = $command->rawSql;
+
+        $paramsData = [
+            'sql' => $sql,
+            'sort' =>[
+                'defaultOrder' => [$category => SORT_DESC],
+                'attributes' => [
+                    $category
+                    /*'finalProfit' => [
+                        'asc' => ['finalProfit' => SORT_ASC],
+                        'desc' => ['finalProfit' => SORT_DESC],
+                    ],*/
+                ]
+            ],
+            /*'pagination' => [
+                'pageSize' => 50,
+            ],*/
+            'pagination' => false
+            ];
+
+        //var_dump($sql); die();
+        return $dataProvider = new SqlDataProvider($paramsData);
+    }
 }

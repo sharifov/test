@@ -8,6 +8,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
+use common\models\search\LeadSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\Sms;
 use common\models\Email;
@@ -270,6 +271,24 @@ class StatsController extends FController
                 'actions' => $actionList
             ]);
         }
+    }
 
+    public function actionAgentRatings()
+    {
+        $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
+        $searchLeader = new LeadSearch();
+
+        $profitDataProvider = $searchLeader->searchTopAgents('finalProfit');
+        $soldDataProvider = $searchLeader->searchTopAgents('soldLeads');
+        $profitPerPaxDataProvider = $searchLeader->searchTopAgents('profitPerPax');
+        $tipsDataProvider = $searchLeader->searchTopAgents('tips');
+
+        return $this->render('agent-ratings', [
+            'profitDataProvider' => $profitDataProvider,
+            'soldDataProvider' => $soldDataProvider,
+            'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
+            'tipsDataProvider' => $tipsDataProvider
+
+        ]);
     }
 }
