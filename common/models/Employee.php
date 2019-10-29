@@ -59,6 +59,7 @@ use yii\web\NotFoundHttpException;
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
  * @property int $callExpertCountByShiftTime
+ * @property int $callExpertCount
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -84,6 +85,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         5000 => 150
     ];
 
+	private const CALL_EXPERT_SHIFT_MINUTES = 12*60;
+
     public $password;
     public $deleted;
 
@@ -106,6 +109,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $_timezone;
     private $_isAllowCallExpert;
     private $_callExpertCountByShiftTime;
+	private $_callExpertCount;
 
     private $departmentAccess = [];
     private $projectAccess = [];
@@ -440,6 +444,20 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->_callExpertCountByShiftTime;
     }
 
+	/**
+	 * @param int $minutes
+	 * @return int
+	 */
+	public function getCallExpertCount(int $minutes = self::CALL_EXPERT_SHIFT_MINUTES): int
+	{
+		if($this->_callExpertCount === null) {
+
+			$startShiftDateTime = date('Y-m-d H:i:s', strtotime('-' . $minutes .' minutes'));
+
+			$this->_callExpertCount = LeadCallExpert::find()->where(['lce_agent_user_id' => $this->id])->andWhere(['>=', 'lce_request_dt', $startShiftDateTime])->count();
+		}
+		return $this->_callExpertCount;
+	}
 
     /**
      * @return bool
