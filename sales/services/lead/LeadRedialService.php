@@ -6,10 +6,12 @@ use common\models\Call;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
+use common\models\search\LeadQcallSearch;
 use sales\access\EmployeeAccess;
 use sales\repositories\lead\LeadRepository;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
+use yii\helpers\VarDumper;
 
 /**
  * Class LeadRedialService
@@ -67,6 +69,39 @@ class LeadRedialService
 
         $this->guardUserFree($user);
         $this->guardLeadForCall($lead);
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee $user
+     */
+    public function reservationFromLastCalls($lead, $user): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $user = $this->serviceFinder->userFind($user);
+
+        EmployeeAccess::leadAccess($lead, $user);
+
+        $this->guardUserFree($user);
+        $this->guardLeadForCallFromLastCalls($lead, $user);
+
+        $lead->callProcessing();
+        $this->leadRepository->save($lead);
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee $user
+     */
+    public function redialFromLastCalls($lead, $user): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $user = $this->serviceFinder->userFind($user);
+
+        EmployeeAccess::leadAccess($lead, $user);
+
+        $this->guardUserFree($user);
+        $this->guardLeadForCallFromLastCalls($lead, $user);
     }
 
     /**
@@ -154,6 +189,33 @@ class LeadRedialService
 
         if (strtotime(date('Y-m-d H:i:s')) < strtotime($leadQCall->lqc_dt_from)) {
             throw new \DomainException('Cant call before Date Time From');
+        }
+    }
+
+    /**
+     * @param Lead $lead
+     * @param Employee $user
+     */
+    private function guardLeadForCallFromLastCalls(Lead $lead, Employee $user): void
+    {
+//        if (!$lead->isPending()) {
+//            throw new \DomainException('Lead is not in status Pending');
+//        }
+
+//        if (!$lead->isCallReady()) {
+        if ($lead->isCallProcessing()) {
+            throw new \DomainException('Lead is not ready for call');
+        }
+
+        $leadQCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one();
+
+        if (!$leadQCall) {
+            throw new \DomainException('Lead is not exist in Lead Redial Queue');
+        }
+
+        $leadIds = array_keys((new LeadQcallSearch())->searchLastCalls([], $user)->query->indexBy('lqc_lead_id')->asArray()->all());
+        if (!in_array($lead->id, $leadIds, true)) {
+            throw new \DomainException('Lead is not exist on last dialed leads');
         }
     }
 

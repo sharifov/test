@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\search\LeadQcallSearch;
+use sales\access\ListsAccess;
 use sales\services\lead\LeadRedialService;
 use Yii;
 use yii\web\NotFoundHttpException;
@@ -33,10 +34,12 @@ class LeadRedialController extends FController
 
         $searchModel = new LeadQcallSearch();
         $dataProvider = $searchModel->searchByRedial(Yii::$app->request->queryParams, $user);
+        $dataProviderLastCalls = $searchModel->searchLastCalls([], $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'dataProviderLastCalls' => $dataProviderLastCalls,
         ]);
     }
 
@@ -51,6 +54,22 @@ class LeadRedialController extends FController
         return $this->asJson([
             'success' => true,
             'data' => $this->renderAjax('show', ['lead' => $lead])
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionShowLastCalls(): string
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        return $this->renderPartial('_last_calls', [
+            'dataProvider' => (new LeadQcallSearch())->searchLastCalls([], $user),
+            'list' => new ListsAccess($user->id),
+            'userIsFreeForCall' => $user->isCallFree(),
+            'user' => $user
         ]);
     }
 
@@ -71,7 +90,7 @@ class LeadRedialController extends FController
             return $this->renderAjax('error', ['message' => $e->getMessage()]);
         }
 
-        return $this->renderAjax('redial', ['lead' => $lead]);
+        return $this->renderAjax('redial_from_queue', ['lead' => $lead]);
     }
 
     /**
@@ -87,6 +106,45 @@ class LeadRedialController extends FController
 
         try {
             $this->leadRedialService->reservation($lead, $user);
+            return $this->asJson(['success' => true]);
+        } catch (\DomainException $e) {
+            return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionRedialFromLastCalls(): string
+    {
+        $gid = Yii::$app->request->post('gid');
+        $lead = $this->findLeadById($gid);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        try {
+            $this->leadRedialService->redialFromLastCalls($lead, $user);
+        } catch (\DomainException $e) {
+            return $this->renderAjax('error', ['message' => $e->getMessage()]);
+        }
+
+        return $this->renderAjax('redial_from_last_calls', ['lead' => $lead]);
+    }
+
+    /**
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionReservationFromLastCall(): Response
+    {
+        $gid = Yii::$app->request->post('gid');
+        $lead = $this->findLeadById($gid);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        try {
+            $this->leadRedialService->reservationFromLastCalls($lead, $user);
             return $this->asJson(['success' => true]);
         } catch (\DomainException $e) {
             return $this->asJson(['success' => false, 'message' => $e->getMessage()]);

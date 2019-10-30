@@ -559,11 +559,22 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $isChangedStatus = isset($changedAttributes['c_status_id']);
 
         if ($this->c_parent_id && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
-            $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            if ($lf) {
-                $lf->lf_out_calls = (int) $lf->lf_out_calls + 1;
-                if (!$lf->update()) {
-                    Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
+
+            if (($lead = $this->cLead2) && $lead->l_call_status_id !== Lead::CALL_STATUS_READY) {
+                $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+                if ($lead->save(false)) {
+                    Yii::error('Call:afterSave:Lead:callStatus:ready');
+                }
+            }
+
+            if (($lqc = LeadQcall::findOne($this->c_lead_id)) && time() > strtotime($lqc->lqc_dt_from)) {
+
+                $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                if ($lf) {
+                    $lf->lf_out_calls = (int) $lf->lf_out_calls + 1;
+                    if (!$lf->update()) {
+                        Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
+                    }
                 }
             }
 
@@ -571,8 +582,6 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 $this->cLead2->createOrUpdateQCall();
             }
         }
-
-
 
         if (!$insert) {
 

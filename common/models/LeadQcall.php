@@ -16,8 +16,6 @@ use Yii;
  */
 class LeadQcall extends \yii\db\ActiveRecord
 {
-    public $attempts;
-    public $deadline;
 
     /**
      * {@inheritdoc}

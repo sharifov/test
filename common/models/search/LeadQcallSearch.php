@@ -23,7 +23,6 @@ use yii\helpers\VarDumper;
  * @property $leadStatus
  * @property $cabin
  * @property $attempts
- * @property $deadline;
  */
 class LeadQcallSearch extends LeadQcall
 {
@@ -32,7 +31,6 @@ class LeadQcallSearch extends LeadQcall
     public $leadStatus;
     public $cabin;
     public $attempts;
-    public $deadline;
 
     /**
      * {@inheritdoc}
@@ -44,11 +42,10 @@ class LeadQcallSearch extends LeadQcall
 
             [['lqc_dt_from', 'lqc_dt_to', 'current_dt'], 'safe'],
 
-            ['attempts', 'integer'],
             ['projectId', 'integer'],
             ['leadStatus', 'integer'],
             ['cabin', 'in', 'range' => array_keys(Lead::CABIN_LIST)],
-            ['deadline', 'safe'],
+            ['attempts', 'integer'],
         ];
     }
 
@@ -155,7 +152,7 @@ class LeadQcallSearch extends LeadQcall
      */
     public function searchByRedial($params, Employee $user): ActiveDataProvider
     {
-        $query = LeadQcall::find()->select('*');
+        $query = self::find()->select('*');
 
         $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
 
@@ -209,9 +206,9 @@ class LeadQcallSearch extends LeadQcall
 //                    'lqc_dt_from' => SORT_ASC,
 //                ]
 //            ],
-            'pagination' => [
+            /*'pagination' => [
                 'pageSize' => 40,
-            ],
+            ],*/
         ]);
 
         $this->load($params);
@@ -233,6 +230,81 @@ class LeadQcallSearch extends LeadQcall
         ]);
 
 //        VarDumper::dump($query->createCommand()->getRawSql());die;
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchLastCalls($params, Employee $user): ActiveDataProvider
+    {
+        $query = self::find()->select('*');
+
+        $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
+
+        $query->joinWith('lqcLead');
+
+        $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+
+        if ($user->isAgent() || $user->isSupervision()) {
+            $query->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_PROCESS]);
+            $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
+        }
+
+        $query->addSelect([
+            'countClientPhones' => (new Query())
+                ->select('count(*)')
+                ->from(ClientPhone::tableName())
+                ->andWhere(ClientPhone::tableName() . '.client_id = ' . Lead::tableName() . '.client_id')
+        ]);
+        $query->andHaving(['>', 'countClientPhones', 0]);
+
+        $query->addSelect([
+            'attempts' => (new Query())
+                ->select('lf_out_calls')
+                ->from(LeadFlow::tableName())
+                ->andWhere(LeadFlow::tableName() . '.lead_id = lqc_lead_id')
+                ->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])
+                ->limit(1)
+        ]);
+
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date("Y-m-d H:i:s") . "', lqc_dt_to )/60))";
+        $query->addSelect(['deadline' =>
+            new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
+        ]);
+
+        $query->andWhere([
+            'lqc_lead_id' => Call::find()
+                ->select('c_lead_id')
+                ->andWhere([
+                    'c_lead_id' => self::find()->select('lqc_lead_id'),
+                    'c_call_type_id' => Call::CALL_TYPE_OUT,
+                    'c_created_user_id' => $user->id
+                ])
+//                    ->andWhere(['IS NOT', 'c_parent_id', null])
+                ->groupBy(['c_lead_id'])
+                ->orderBy('MAX(c_id)')
+        ]);
+
+        $query->addOrderBy(['l_last_action_dt' => SORT_DESC]);
+
+        $query->limit(5);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => false,
+            'sort' => false
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
 
         return $dataProvider;
     }
