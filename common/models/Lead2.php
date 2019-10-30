@@ -571,9 +571,10 @@ class Lead2 extends \yii\db\ActiveRecord
 	 * @param string $phoneNumber
 	 * @param int $project_id
 	 * @param int $source_id
+	 * @param $gmt
 	 * @return Lead2
 	 */
-    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0): Lead2
+    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0, $gmt): Lead2
     {
         $lead = new self();
         $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
@@ -604,6 +605,7 @@ class Lead2 extends \yii\db\ActiveRecord
             $lead->project_id = $project_id;
             $lead->source_id = $source_id;
             $lead->l_call_status_id = Lead::CALL_STATUS_QUEUE;
+            $lead->offset_gmt = $gmt;
             $source = null;
 
 			if ($source_id) {
