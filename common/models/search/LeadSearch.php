@@ -26,6 +26,7 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
+use common\components\ChartTools;
 use yii\helpers\VarDumper;
 
 /**
@@ -2181,26 +2182,46 @@ class LeadSearch extends Lead
 
     /**
      * @param string $category
+     * @param string $period
      * @return SqlDataProvider
      */
-    public function searchTopAgents(string $category):SqlDataProvider
+    public function searchTopAgents(string $category, string $period):SqlDataProvider
     {
+        switch ($period) {
+            case 'currentWeek':
+                $interval = ChartTools::getWeek('0 week');
+                break;
+            case 'lastWeek':
+                $interval = ChartTools::getWeek('-1 week');
+                break;
+            case 'currentMonth':
+                $interval = ChartTools::getCurrentMonth();
+                break;
+        }
+
+        /**
+         * @var $interval array
+         */
+        $start = date("Y-m-d H:i", $interval['start']);
+        $end = date("Y-m-d 23:59", $interval['end']);
+        $between_condition = " BETWEEN '{$start}' AND '{$end}'";
+
         $query = new Query();
         $query->select(['e.id', 'e.username']);
         if ($category == 'finalProfit'){
-            $query->addSelect(['(SELECT SUM(final_profit) FROM leads WHERE employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT SUM(final_profit) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
         }
 
         if ($category == 'soldLeads'){
-            $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
         }
 
         if ($category == 'profitPerPax'){
-            $query->addSelect(['(SELECT AVG(final_profit / adults + children) FROM leads WHERE employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT AVG(final_profit / adults + children) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
         }
 
         if ($category == 'tips'){
-            $query->addSelect(['(SELECT SUM(tips) FROM leads WHERE employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT SUM(tips) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
         }
 
         $query->from('employees AS e')->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id')

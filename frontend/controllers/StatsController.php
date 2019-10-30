@@ -10,6 +10,7 @@ use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadSearch;
 use common\models\search\LeadTaskSearch;
+use common\models\Setting;
 use common\models\Sms;
 use common\models\Email;
 use common\models\UserParams;
@@ -278,17 +279,38 @@ class StatsController extends FController
         $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
         $searchLeader = new LeadSearch();
 
-        $profitDataProvider = $searchLeader->searchTopAgents('finalProfit');
-        $soldDataProvider = $searchLeader->searchTopAgents('soldLeads');
-        $profitPerPaxDataProvider = $searchLeader->searchTopAgents('profitPerPax');
-        $tipsDataProvider = $searchLeader->searchTopAgents('tips');
+        $settings = Setting::find()->where(['s_key' => 'agents_ratings'])->asArray()->one();
+        $boardsSettings = json_decode($settings['s_value'], true);
 
-        return $this->render('agent-ratings', [
-            'profitDataProvider' => $profitDataProvider,
-            'soldDataProvider' => $soldDataProvider,
-            'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
-            'tipsDataProvider' => $tipsDataProvider
+       if(Yii::$app->request->isPost){
+           $period = Yii::$app->request->post('period');
+       } else {
+           $period = 'currentWeek';
+       }
 
-        ]);
+
+        $profitDataProvider = $searchLeader->searchTopAgents('finalProfit', $period);
+        $soldDataProvider = $searchLeader->searchTopAgents('soldLeads', $period);
+        $profitPerPaxDataProvider = $searchLeader->searchTopAgents('profitPerPax', $period);
+        $tipsDataProvider = $searchLeader->searchTopAgents('tips', $period);
+
+        if (Yii::$app->request->isAjax) {
+            return $this->renderPartial('agent-ratings', [
+                'profitDataProvider' => $profitDataProvider,
+                'soldDataProvider' => $soldDataProvider,
+                'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
+                'tipsDataProvider' => $tipsDataProvider,
+                'boardsSettings' => $boardsSettings,
+            ]);
+        } else {
+            return $this->render('agent-ratings', [
+                'profitDataProvider' => $profitDataProvider,
+                'soldDataProvider' => $soldDataProvider,
+                'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
+                'tipsDataProvider' => $tipsDataProvider,
+                'boardsSettings' => $boardsSettings,
+            ]);
+        }
+
     }
 }

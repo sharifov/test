@@ -1,17 +1,23 @@
 <?php
-
+use yii\widgets\Pjax;
 /**
  *  @var $profitDataProvider yii\data\SqlDataProvider
  *  @var $soldDataProvider yii\data\SqlDataProvider
  *  @var $profitPerPaxDataProvider yii\data\SqlDataProvider
  *  @var $tipsDataProvider yii\data\SqlDataProvider
+ *  @var $boardsSettings array
+ *  @var $showRatingSettings boolean
  */
 $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.ico']);
+
 ?>
+
+<?= $this->render('ratings/_agent_ratings_settings')?>
+
 <div id="agent-leader-board" class="col-md-12">
     <div class="row">
-
-        <div class="col-md-3">
+        <?php if ($boardsSettings['finalProfit']) : ?>
+        <div id="finalProfit" class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading"><i class="fa fa-users"></i> Top - AGENT By FINAL PROFIT</div>
                 <div class="panel-body">
@@ -33,7 +39,10 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
             </div>
         </div>
 
-        <div class="col-md-3">
+        <?php endif;?>
+
+        <?php if ($boardsSettings['soldLeads']) : ?>
+        <div id="soldLeads" class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading"><i class="fa fa-users"></i> Top - AGENT by SOLD LEADS </div>
                 <div class="panel-body">
@@ -54,8 +63,10 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                 </div>
             </div>
         </div>
+        <?php endif;?>
 
-        <div class="col-md-3">
+        <?php if ($boardsSettings['profitPerPax']) : ?>
+        <div id="profitPerPax" class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading"><i class="fa fa-users"></i> Top - AGENT by PROFIT PER PAX </div>
                 <div class="panel-body">
@@ -76,8 +87,10 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                 </div>
             </div>
         </div>
+        <?php endif;?>
 
-        <div class="col-md-3">
+        <?php if ($boardsSettings['tips']) : ?>
+        <div id="tips" class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading"><i class="fa fa-users"></i> Top - AGENT By TIPS</div>
                 <div class="panel-body">
@@ -98,6 +111,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                 </div>
             </div>
         </div>
+        <?php endif;?>
 
     </div>
 </div>
