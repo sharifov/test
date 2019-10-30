@@ -42,6 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ])*/ ?>
     </p>
 
+    <?/*
     <div class="row top_tiles">
 
         <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
@@ -62,16 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             </table>
 
-            <?/*<div class="tile-stats">
-                <div class="icon"><i class="fa fa-comments"></i></div>
-                <div class="count">
 
-                    <?=\common\models\Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
-                        ->andWhere(['s_type_id' => \common\models\Sms::FILTER_TYPE_DRAFT, 's_is_deleted' => false])->count()?>
-                </div>
-                <h3>Draft</h3>
-                <p>Draft count of SMS messages</p>
-            </div>*/ ?>
         </div>
 
         <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
@@ -110,17 +102,8 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
 
-        <?php /*
-            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
-                <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-list"></i></div>
-                    <div class="count"><?=\frontend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()?></div>
-                    <h3>System Logs</h3>
-                    <p>Today count of System Logs</p>
-                </div>
-            </div>
-            */ ?>
     </div>
+*/?>
 
     <?php Pjax::begin(['timeout' => 10000]); ?>
 

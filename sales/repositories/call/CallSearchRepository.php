@@ -28,8 +28,9 @@ class CallSearchRepository
 
         if ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper()) {
             $conditions = [
-                'c_created_user_id' => $this->usersIdsInCommonGroups($user->id)
+                'c_created_user_id' => $this->usersIdsInCommonGroups($user->id),
             ];
+            $query->andWhere(['IS NOT', 'c_parent_id', null]);
         }
 
         if ($user->isQa()) {

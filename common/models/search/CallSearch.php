@@ -259,6 +259,8 @@ class CallSearch extends Call
 
         $query->andFilterWhere(['=','DATE(c_created_dt)', $this->c_created_dt]);
 
+        $query->andWhere(['IS NOT', 'c_parent_id', null]);
+
 
         // grid filtering conditions
         $query->andFilterWhere([
