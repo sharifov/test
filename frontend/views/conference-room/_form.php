@@ -104,7 +104,7 @@ use common\models\ConferenceRoom;
 
         <?= $form->field($model, 'cr_param_start_conference_on_enter')->checkbox() ?>
 
-        <?= $form->field($model, 'cr_param_end_conference_on_enter')->checkbox() ?>
+        <?= $form->field($model, 'cr_param_end_conference_on_exit')->checkbox() ?>
 
         <?= $form->field($model, 'cr_param_beep')->dropDownList(ConferenceRoom::getParamBeepList(), ['prompt' => '---']) ?>
 

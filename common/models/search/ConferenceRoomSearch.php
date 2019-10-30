@@ -17,7 +17,7 @@ class ConferenceRoomSearch extends ConferenceRoom
     public function rules()
     {
         return [
-            [['cr_id', 'cr_enabled', 'cr_param_muted', 'cr_param_start_conference_on_enter', 'cr_param_end_conference_on_enter', 'cr_param_max_participants', 'cr_created_user_id', 'cr_updated_user_id'], 'integer'],
+            [['cr_id', 'cr_enabled', 'cr_param_muted', 'cr_param_start_conference_on_enter', 'cr_param_end_conference_on_exit', 'cr_param_max_participants', 'cr_created_user_id', 'cr_updated_user_id'], 'integer'],
             [['cr_key', 'cr_name', 'cr_phone_number', 'cr_start_dt', 'cr_end_dt', 'cr_param_beep', 'cr_param_record', 'cr_param_region', 'cr_param_trim', 'cr_param_wait_url', 'cr_moderator_phone_number', 'cr_welcome_message', 'cr_created_dt', 'cr_updated_dt'], 'safe'],
         ];
     }
@@ -46,6 +46,10 @@ class ConferenceRoomSearch extends ConferenceRoom
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['cr_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -64,7 +68,7 @@ class ConferenceRoomSearch extends ConferenceRoom
             'cr_end_dt' => $this->cr_end_dt,
             'cr_param_muted' => $this->cr_param_muted,
             'cr_param_start_conference_on_enter' => $this->cr_param_start_conference_on_enter,
-            'cr_param_end_conference_on_enter' => $this->cr_param_end_conference_on_enter,
+            'cr_param_end_conference_on_exit' => $this->cr_param_end_conference_on_exit,
             'cr_param_max_participants' => $this->cr_param_max_participants,
             'cr_created_dt' => $this->cr_created_dt,
             'cr_updated_dt' => $this->cr_updated_dt,

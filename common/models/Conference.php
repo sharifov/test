@@ -15,10 +15,14 @@ use yii\db\ActiveRecord;
  * @property string $cf_sid
  * @property int $cf_status_id
  * @property string $cf_options
+ * @property string $cf_recording_url
+ * @property int $cf_recording_duration
+ * @property string $cf_recording_sid
  * @property string $cf_created_dt
  * @property string $cf_updated_dt
  *
  * @property ConferenceRoom $cfCr
+ * @property ConferenceParticipant[] $conferenceParticipants
  */
 class Conference extends \yii\db\ActiveRecord
 {
@@ -48,11 +52,12 @@ class Conference extends \yii\db\ActiveRecord
     {
         return [
             [['cf_cr_id'], 'required'],
-            [['cf_cr_id', 'cf_status_id'], 'integer'],
+            [['cf_cr_id', 'cf_status_id', 'cf_recording_duration'], 'integer'],
             [['cf_options'], 'string'],
             [['cf_created_dt', 'cf_updated_dt'], 'safe'],
-            [['cf_sid'], 'string', 'max' => 34],
-            [['cf_sid'], 'unique'],
+            [['cf_sid', 'cf_recording_sid'], 'string', 'max' => 34],
+            [['cf_sid', 'cf_recording_sid'], 'unique'],
+            [['cf_recording_url'], 'string', 'max' => 200],
             [['cf_cr_id'], 'exist', 'skipOnError' => true, 'targetClass' => ConferenceRoom::class, 'targetAttribute' => ['cf_cr_id' => 'cr_id']],
         ];
     }
@@ -64,9 +69,9 @@ class Conference extends \yii\db\ActiveRecord
     {
         return [
             'cf_id' => 'ID',
-            'cf_cr_id' => 'Cr ID',
-            'cf_sid' => 'Sid',
-            'cf_status_id' => 'Status ID',
+            'cf_cr_id' => 'Conference Room',
+            'cf_sid' => 'Conference SID',
+            'cf_status_id' => 'Status',
             'cf_options' => 'Options',
             'cf_created_dt' => 'Created Dt',
             'cf_updated_dt' => 'Updated Dt',
@@ -99,11 +104,35 @@ class Conference extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getConferenceParticipants()
+    {
+        return $this->hasMany(ConferenceParticipant::class, ['cp_cf_id' => 'cf_id']);
+    }
+
+    /**
      * {@inheritdoc}
      * @return ConferenceQuery the active query used by this AR class.
      */
     public static function find()
     {
         return new ConferenceQuery(get_called_class());
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return self::STATUS_LIST[$this->cf_status_id] ?? '';
+    }
+
+    /**
+     * @return array
+     */
+    public static function getList(): array
+    {
+        return self::STATUS_LIST;
     }
 }

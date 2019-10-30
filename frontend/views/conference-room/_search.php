@@ -38,7 +38,7 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'cr_param_start_conference_on_enter') ?>
 
-    <?php // echo $form->field($model, 'cr_param_end_conference_on_enter') ?>
+    <?php // echo $form->field($model, 'cr_param_end_conference_on_exit') ?>
 
     <?php // echo $form->field($model, 'cr_param_max_participants') ?>
 

@@ -4,12 +4,12 @@ namespace common\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Conference;
+use common\models\ConferenceParticipant;
 
 /**
- * ConferenceSearch represents the model behind the search form of `common\models\Conference`.
+ * ConferenceParticipantSearch represents the model behind the search form of `common\models\ConferenceParticipant`.
  */
-class ConferenceSearch extends Conference
+class ConferenceParticipantSearch extends ConferenceParticipant
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,8 @@ class ConferenceSearch extends Conference
     public function rules()
     {
         return [
-            [['cf_id', 'cf_cr_id', 'cf_status_id'], 'integer'],
-            [['cf_sid', 'cf_options', 'cf_created_dt', 'cf_updated_dt'], 'safe'],
+            [['cp_id', 'cp_cf_id', 'cp_call_id', 'cp_status_id'], 'integer'],
+            [['cp_call_sid', 'cp_join_dt', 'cp_leave_dt'], 'safe'],
         ];
     }
 
@@ -40,13 +40,13 @@ class ConferenceSearch extends Conference
      */
     public function search($params)
     {
-        $query = Conference::find();
+        $query = ConferenceParticipant::find();
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cf_id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['cp_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -62,15 +62,15 @@ class ConferenceSearch extends Conference
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cf_id' => $this->cf_id,
-            'cf_cr_id' => $this->cf_cr_id,
-            'cf_status_id' => $this->cf_status_id,
-            'cf_created_dt' => $this->cf_created_dt,
-            'cf_updated_dt' => $this->cf_updated_dt,
+            'cp_id' => $this->cp_id,
+            'cp_cf_id' => $this->cp_cf_id,
+            'cp_call_id' => $this->cp_call_id,
+            'cp_status_id' => $this->cp_status_id,
+            'cp_join_dt' => $this->cp_join_dt,
+            'cp_leave_dt' => $this->cp_leave_dt,
         ]);
 
-        $query->andFilterWhere(['like', 'cf_sid', $this->cf_sid])
-            ->andFilterWhere(['like', 'cf_options', $this->cf_options]);
+        $query->andFilterWhere(['like', 'cp_call_sid', $this->cp_call_sid]);
 
         return $dataProvider;
     }

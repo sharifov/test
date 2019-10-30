@@ -52,12 +52,27 @@ $this->params['breadcrumbs'][] = $this->title;
             'cr_name',
             'cr_phone_number',
             'cr_enabled:boolean',
-            'cr_start_dt',
-            'cr_end_dt',
+            //'cr_start_dt',
+            [
+                'attribute' => 'cr_start_dt',
+                'value' => function(\common\models\ConferenceRoom $model) {
+                    return $model->cr_start_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cr_start_dt)) : '-';
+                },
+                'format' => 'raw',
+            ],
+
+            [
+                'attribute' => 'cr_end_dt',
+                'value' => function(\common\models\ConferenceRoom $model) {
+                    return $model->cr_end_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cr_end_dt)) : '-';
+                },
+                'format' => 'raw',
+            ],
+            //'cr_end_dt',
             'cr_param_muted:boolean',
             'cr_param_beep',
             //'cr_param_start_conference_on_enter',
-            //'cr_param_end_conference_on_enter',
+            //'cr_param_end_conference_on_exit',
             'cr_param_max_participants',
             'cr_param_record',
             'cr_param_region',
@@ -66,7 +81,27 @@ $this->params['breadcrumbs'][] = $this->title;
             'cr_moderator_phone_number',
             //'cr_welcome_message:ntext',
             //'cr_created_dt',
-            'cr_updated_dt',
+            //'cr_updated_dt',
+            [
+                'attribute' => 'cr_updated_dt',
+                'value' => function(\common\models\ConferenceRoom $model) {
+                    return $model->cr_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cr_updated_dt)) : '-';
+                },
+                'format' => 'raw',
+                'filter' => \dosamigos\datepicker\DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'cr_updated_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
+            ],
+
             //'cr_created_user_id',
             //'cr_updated_user_id',
 

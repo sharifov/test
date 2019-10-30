@@ -40,7 +40,7 @@ class m191021_090906_create_tbl_conference extends Migration
             'cr_param_muted'                        => $this->boolean()->defaultValue(false),
             'cr_param_beep'                         => $this->string(10)->defaultValue('true'),
             'cr_param_start_conference_on_enter'    => $this->boolean()->defaultValue(true),
-            'cr_param_end_conference_on_enter'      => $this->boolean()->defaultValue(false),
+            'cr_param_end_conference_on_exit'      => $this->boolean()->defaultValue(false),
             'cr_param_max_participants'             => $this->smallInteger()->defaultValue(250),
             'cr_param_record'                       => $this->string(20)->defaultValue('record-from-start'),
             'cr_param_region'                       => $this->string(3),

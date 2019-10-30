@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cr_param_muted:boolean',
             'cr_param_beep',
             'cr_param_start_conference_on_enter:boolean',
-            'cr_param_end_conference_on_enter:boolean',
+            'cr_param_end_conference_on_exit:boolean',
             'cr_param_max_participants',
             'cr_param_record',
             'cr_param_region',

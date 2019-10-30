@@ -22,7 +22,7 @@ use yii\helpers\ArrayHelper;
  * @property bool $cr_param_muted
  * @property string $cr_param_beep
  * @property bool $cr_param_start_conference_on_enter
- * @property bool $cr_param_end_conference_on_enter
+ * @property bool $cr_param_end_conference_on_exit
  * @property int $cr_param_max_participants
  * @property string $cr_param_record
  * @property string $cr_param_region
@@ -112,7 +112,7 @@ class ConferenceRoom extends \yii\db\ActiveRecord
             [['cr_start_dt', 'cr_end_dt', 'cr_created_dt', 'cr_updated_dt'], 'safe'],
             [['cr_welcome_message'], 'string'],
 
-            [['cr_enabled', 'cr_param_muted', 'cr_param_start_conference_on_enter', 'cr_param_end_conference_on_enter'], 'boolean'],
+            [['cr_enabled', 'cr_param_muted', 'cr_param_start_conference_on_enter', 'cr_param_end_conference_on_exit'], 'boolean'],
 
             [['cr_key'], 'string', 'max' => 30],
             [['cr_name'], 'string', 'max' => 50],
@@ -167,7 +167,7 @@ class ConferenceRoom extends \yii\db\ActiveRecord
             'cr_param_muted' => 'Muted',
             'cr_param_beep' => 'Beep',
             'cr_param_start_conference_on_enter' => 'Start Conference On Enter',
-            'cr_param_end_conference_on_enter' => 'End Conference On Enter',
+            'cr_param_end_conference_on_exit' => 'End Conference On Exit',
             'cr_param_max_participants' => 'Max Participants',
             'cr_param_record' => 'Record',
             'cr_param_region' => 'Region',
@@ -278,8 +278,8 @@ class ConferenceRoom extends \yii\db\ActiveRecord
             $params['startConferenceOnEnter']       = $this->cr_param_start_conference_on_enter;
         }
 
-        if ($this->cr_param_end_conference_on_enter) {
-            $params['endConferenceOnExit'] = $this->cr_param_end_conference_on_enter;
+        if ($this->cr_param_end_conference_on_exit) {
+            $params['endConferenceOnExit'] = $this->cr_param_end_conference_on_exit;
         }
 
         if ($this->cr_param_wait_url) {
@@ -299,13 +299,13 @@ class ConferenceRoom extends \yii\db\ActiveRecord
         }
 
         $params['maxParticipants']                  = $this->cr_param_max_participants ?: 250;
-        $params['statusCallbackEvent']              = 'start end join leave mute hold speaker';
+        $params['statusCallbackEvent']              = 'start end join leave mute hold'; //speaker
         $params['statusCallback']                   = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-status-callback';
         $params['statusCallbackMethod']             = 'POST';
         $params['recordingStatusCallback']          = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-recording-status-callback';
         $params['recordingStatusCallbackMethod']    = 'POST';
-        $params['recordingStatusCallbackEvent']     = 'in-progress, completed, absent'; // in-progress, completed, absent
-        $params['eventCallbackUrl']                 = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-event-callback';
+        $params['recordingStatusCallbackEvent']     = 'completed'; // in-progress, completed, absent
+        //$params['eventCallbackUrl']                 = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-event-callback';
 
         return $params;
     }
