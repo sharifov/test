@@ -472,7 +472,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 return true;
             }
 
-            if ((int)$params->up_call_expert_limit > 0 && $this->callExpertCountByShiftTime >= $params->up_call_expert_limit) {
+            if ((int)$params->up_call_expert_limit > 0 && $this->callExpertCount >= $params->up_call_expert_limit) {
                 return false;
             }
         }
