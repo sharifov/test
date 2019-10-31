@@ -14,7 +14,7 @@ $class = 'text-success';
         <div class="col-md-1">
             <?=($index + 1)?>.
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <?/*=Html::tag('i', '', ['class' => 'fa ' . $iconClass . ' fa-lg ' . $class, 'title' => $model['username']])*/?>
             <?=Html::encode($model['username'])?>
         </div>
@@ -22,11 +22,13 @@ $class = 'text-success';
             <?php if (isset($model['finalProfit'])) : ?>
                 <?= '$ ' . number_format($model['finalProfit']) ?>
             <?php elseif (isset($model['soldLeads'])) :?>
-                <?= $model['soldLeads'] ?>
+                <?= $model['soldLeads'] != 0 ? $model['soldLeads'] : null ?>
             <?php elseif (isset($model['profitPerPax'])) :?>
                 <?= '$ ' . number_format($model['profitPerPax']) ?>
             <?php elseif (isset($model['tips'])) :?>
                 <?= '$ ' . number_format($model['tips'])?>
+            <?php elseif (isset($model['leadConversion'])) :?>
+                <?= Yii::$app->formatter->asPercent($model['leadConversion']) ?>
             <?php endif;?>
         </div>
     </div>

@@ -282,17 +282,17 @@ class StatsController extends FController
         $settings = Setting::find()->where(['s_key' => 'agents_ratings'])->asArray()->one();
         $boardsSettings = json_decode($settings['s_value'], true);
 
-       if(Yii::$app->request->isPost){
+        if(Yii::$app->request->isPost){
            $period = Yii::$app->request->post('period');
-       } else {
+        } else {
            $period = 'currentWeek';
-       }
-
+        }
 
         $profitDataProvider = $searchLeader->searchTopAgents('finalProfit', $period);
         $soldDataProvider = $searchLeader->searchTopAgents('soldLeads', $period);
         $profitPerPaxDataProvider = $searchLeader->searchTopAgents('profitPerPax', $period);
         $tipsDataProvider = $searchLeader->searchTopAgents('tips', $period);
+        $conversionDataProvider = $searchLeader->searchTopAgents('leadConversion', $period);
 
         if (Yii::$app->request->isAjax) {
             return $this->renderPartial('agent-ratings', [
@@ -301,6 +301,7 @@ class StatsController extends FController
                 'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
                 'tipsDataProvider' => $tipsDataProvider,
                 'boardsSettings' => $boardsSettings,
+                'conversionDataProvider' => $conversionDataProvider
             ]);
         } else {
             return $this->render('agent-ratings', [
@@ -309,8 +310,8 @@ class StatsController extends FController
                 'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
                 'tipsDataProvider' => $tipsDataProvider,
                 'boardsSettings' => $boardsSettings,
+                'conversionDataProvider' => $conversionDataProvider
             ]);
         }
-
     }
 }
