@@ -4,9 +4,18 @@
 namespace console\controllers;
 
 use common\bootstrap\Logger;
+use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
+use common\models\Lead;
+use common\models\LeadPreferences;
 use sales\entities\log\GlobalLog;
+use sales\logger\formatter\Formatter;
+use yii\base\InvalidConfigException;
 use yii\console\Controller;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 
 /**
  * Class LoggerController
@@ -63,20 +72,13 @@ class LoggerController extends Controller
 		try {
 			$model = \Yii::createObject($modelPath);
 
-			if ($oldAttr) {
-				$oldAttr = json_decode($oldAttr, true);
-				foreach ($oldAttr as $attr => $value) {
-					$formattedAttr['old'][$model->getAttributeLabel($attr)] = $this->formatAttrValue($model, $attr, $value);
-//					$formattedAttr['old'][$model->getAttributeLabel($attr)] = $value;
-				}
-			}
+			$formatterName = 'sales\\logger\\formatter\\' . (new \ReflectionClass($modelPath))->getShortName() . 'Formatter';
 
-			if ($newAttr) {
-				$newAttr = json_decode($newAttr, true);
-				foreach ($newAttr as $attr => $value) {
-					$formattedAttr['new'][$model->getAttributeLabel($attr)] = $this->formatAttrValue($model, $attr, $value);
-//					$formattedAttr['new'][$model->getAttributeLabel($attr)] = $value;
-				}
+			if (class_exists($formatterName)) {
+				$formatter = \Yii::createObject($formatterName);
+				$this->formatByFormatter($formatter, $formattedAttr, $oldAttr, $newAttr);
+			} else {
+				$this->formatByModel($model, $formattedAttr, $oldAttr, $newAttr);
 			}
 
 			return json_encode($formattedAttr);
@@ -88,20 +90,49 @@ class LoggerController extends Controller
 	}
 
 	/**
-	 * @param ActiveRecord $model
-	 * @param $attr
-	 * @param $value
-	 * @return mixed
+	 * @param Formatter $formatter
+	 * @param array $formattedAttr
+	 * @param string|null $oldAttr
+	 * @param string|null $newAttr
 	 */
-	private function formatAttrValue(ActiveRecord $model, $attr, $value)
+	private function formatByFormatter(Formatter $formatter, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
 	{
-		$functions = $model->formatValue();
-
-		if (array_key_exists($attr, $functions)) {
-			return $functions[$attr]($value);
+		if ($oldAttr) {
+			$oldAttr = json_decode($oldAttr, true);
+			foreach ($oldAttr as $attr => $value) {
+				$formattedAttr['old'][$formatter->getFormattedAttributeLabel($attr)] = $formatter->getFormattedAttributeValue($attr, $value);
+			}
 		}
 
-		return $value;
+		if ($newAttr) {
+			$newAttr = json_decode($newAttr, true);
+			foreach ($newAttr as $attr => $value) {
+				$formattedAttr['new'][$formatter->getFormattedAttributeLabel($attr)] = $formatter->getFormattedAttributeValue($attr, $value);
+			}
+		}
+	}
+
+	/**
+	 * @param ActiveRecord $model
+	 * @param array $formattedAttr
+	 * @param string|null $oldAttr
+	 * @param string|null $newAttr
+	 */
+	private function formatByModel(ActiveRecord $model, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
+	{
+		if ($oldAttr) {
+			$oldAttr = json_decode($oldAttr, true);
+			foreach ($oldAttr as $attr => $value) {
+				$formattedAttr['old'][$model->getAttributeLabel($attr)] = $value;
+			}
+		}
+
+		if ($newAttr) {
+			$newAttr = json_decode($newAttr, true);
+			foreach ($newAttr as $attr => $value) {
+				$formattedAttr['new'][$model->getAttributeLabel($attr)] = $value;
+			}
+		}
 	}
 
 	/**
@@ -114,4 +145,34 @@ class LoggerController extends Controller
 			return implode('<br>', $errors);
 		}, $errors));
 	}
+
+	public function actionTest()
+	{
+		$query = GlobalLog::find()->andWhere(['IN','gl_obj_id',97694]);
+
+		$subQuery = (new Query())->select(['cp.id'])
+			->from(ClientPhone::tableName() . ' as cp')
+			->join('JOIN', Client::tableName() . ' as client', 'client.id = cp.client_id')
+			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => 97694] );
+		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
+
+		$subQuery = (new Query())->select(['ce.id'])
+			->from(ClientEmail::tableName() . ' as ce')
+			->join('JOIN', Client::tableName() . ' as client', 'client.id = ce.client_id')
+			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => 97694] );
+		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
+
+		$subQuery = (new Query())->select(['c.id'])
+			->from(Client::tableName() . ' as c')
+			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = c.id and lead.id = :leadId', [':leadId' => 97694] );
+		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
+
+		$subQuery = (new Query())->select(['lp.id'])
+			->from(LeadPreferences::tableName() . ' as lp')
+			->where(['lead_id' => 97694]);
+		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
+
+		$result = $query->all();
+	}
+
 }

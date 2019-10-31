@@ -2,9 +2,18 @@
 
 namespace sales\entities\log;
 
+use common\models\ApiUser;
+use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
+use common\models\Employee;
+use common\models\Lead;
+use common\models\LeadPreferences;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 
 /**
  * This is the model class for table "global_logs".
@@ -18,6 +27,8 @@ use yii\db\ActiveRecord;
  * @property array $gl_new_attr
  * @property array $gl_formatted_attr
  * @property string $gl_created_at
+ *
+ * @property Employee|ApiUser|null $user
  */
 class GlobalLog extends ActiveRecord
 {
@@ -90,21 +101,72 @@ class GlobalLog extends ActiveRecord
 		return $log;
 	}
 
+	public function getGlModel()
+	{
+		return (new \ReflectionClass($this->gl_model))->getShortName();
+	}
+
+	/**
+	 * @return ActiveQuery|null
+	 */
+	public function getUser(): ?ActiveQuery
+	{
+		if ($this->gl_app_id === 'app-frontend') {
+			return $this->hasOne(Employee::class, ['id' => 'gl_app_user_id']);
+		}
+
+		if ($this->gl_app_id === 'app-webapi') {
+			return $this->hasOne(ApiUser::class, ['au_id' => 'gl_app_user_id']);
+		}
+
+		return null;
+	}
+
+	public function getGeneralLeadLog(int $leadId)
+	{
+		$query = GlobalLog::find()->andWhere(['IN','gl_obj_id',$leadId]);
+
+		$subQuery = (new Query())->select(['cp.id'])
+			->from(ClientPhone::tableName() . ' as cp')
+			->join('JOIN', Client::tableName() . ' as client', 'client.id = cp.client_id')
+			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => $leadId] );
+		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
+
+		$subQuery = (new Query())->select(['ce.id'])
+			->from(ClientEmail::tableName() . ' as ce')
+			->join('JOIN', Client::tableName() . ' as client', 'client.id = ce.client_id')
+			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => $leadId] );
+		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
+
+		$subQuery = (new Query())->select(['c.id'])
+			->from(Client::tableName() . ' as c')
+			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = c.id and lead.id = :leadId', [':leadId' => $leadId] );
+		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
+
+		$subQuery = (new Query())->select(['lp.id'])
+			->from(LeadPreferences::tableName() . ' as lp')
+			->where(['lead_id' => $leadId]);
+		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
+
+		return $query->all();
+	}
+
     /**
      * {@inheritdoc}
      */
     public function attributeLabels(): array
     {
         return [
-            'gl_id' => 'Gl ID',
-            'gl_app_id' => 'Gl App ID',
-            'gl_app_user_id' => 'Gl App User ID',
-            'gl_model' => 'Gl Model',
-            'gl_obj_id' => 'Gl Obj ID',
-            'gl_old_attr' => 'Gl Old Attr',
-            'gl_new_attr' => 'Gl New Attr',
-            'gl_formatted_attr' => 'Gl Formatted Attr',
-            'gl_created_at' => 'Gl Created At',
+            'gl_id' => 'Id',
+            'gl_app_id' => 'Application',
+            'gl_app_user_id' => 'Who made the changes',
+            'gl_model' => 'Model',
+            'gl_obj_id' => 'Object id',
+            'gl_old_attr' => 'Old attributes',
+            'gl_new_attr' => 'New attributes',
+            'gl_formatted_attr' => 'Formatted Attributes',
+            'gl_created_at' => 'When changes were made',
+			'glModel' => 'Model'
         ];
     }
 }

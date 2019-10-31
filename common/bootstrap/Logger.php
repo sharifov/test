@@ -35,9 +35,13 @@ class Logger implements BootstrapInterface
 			foreach (self::CLASSES as $class) {
 				if (get_class($event->sender) === $class) {
 
+					$oldAttr = self::getOldAttrs($event);
+
 					$newAttr = self::getNewAttrs($event);
 
-					$oldAttr = self::getOldAttrs($event);
+					if (empty($oldAttr) && empty($newAttr)) {
+						continue;
+					}
 
 					$log = \Yii::createObject(GlobalLogInterface::class);
 
@@ -72,7 +76,7 @@ class Logger implements BootstrapInterface
 				$newAttr[$key] = $event->sender->attributes[$key];
 			}
 		}
-		return json_encode($newAttr);
+		return $newAttr ? json_encode($newAttr) : '';
 	}
 
 	/**
@@ -84,7 +88,7 @@ class Logger implements BootstrapInterface
 		if ($event->name === ActiveRecord::EVENT_AFTER_INSERT) {
 			$oldAttr = null;
 		} else {
-			$oldAttr = json_encode($event->changedAttributes);
+			$oldAttr = $event->changedAttributes ? json_encode($event->changedAttributes) : '';
 		}
 		return $oldAttr;
 	}

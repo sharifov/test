@@ -602,6 +602,16 @@ if($project){
 
         ?>
 
+        <?php if(!$leadForm->getLead()->isNewRecord && Yii::$app->user->identity->canRoles(['admin', 'supervision'])): ?>
+            <?= Html::a('General Log', null, [
+                'id' => 'btn-general-lead-log',
+                'class' => 'btn btn-default showModalButton',
+                'data-modal_id' => 'client-large',
+                'title' => 'General Lead Log',
+                'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
+            ]) ?>
+        <?php endif; ?>
+
 
         <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && Yii::$app->user->identity->canRoles(['admin', 'supervision'])):?>
         	<?= Html::button('<span class="btn-icon"><i class="fa fa-money"></i></span><span class="btn-text">Split profit</span>', [
