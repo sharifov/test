@@ -2230,8 +2230,8 @@ class LeadSearch extends Lead
 
         if ($category == 'leadConversion'){
             $query->select(['employee_id, 
-                             (SUM(CASE WHEN status IN(10,12) AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=2 AND employee_id=lf_owner_id AND lf_from_status_id=13 OR lf_from_status_id=1 AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
-                             SUM(CASE WHEN status NOT IN(4, 11, 12) AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=2 AND employee_id=lf_owner_id AND lf_from_status_id=13 OR lf_from_status_id=1 AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END)) AS leadConversion,
+                             (SUM(CASE WHEN status IN('.Lead::STATUS_SOLD.','.Lead::STATUS_BOOKED.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
+                             SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END)) AS leadConversion,
                              (SELECT username FROM `employees` WHERE id=employee_id) as username
                              FROM leads']);
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = employee_id')
@@ -2241,8 +2241,6 @@ class LeadSearch extends Lead
             $query->from('employees AS e')->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id')
                 ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
         }
-
-        //$query->orderBy($category, SORT_DESC);
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
@@ -2265,7 +2263,6 @@ class LeadSearch extends Lead
             'pagination' => false
         ];
 
-        //var_dump($sql); die();
         return $dataProvider = new SqlDataProvider($paramsData);
     }
 }
