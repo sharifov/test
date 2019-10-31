@@ -23,7 +23,7 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
             <?php if($manageLeadPreferencesAccess): ?>
             <li>
                 <?=
-                    Html::a('<i class="fa fa-edit fa-border yellow"></i> Edit Lead Preferences', '#', [
+                    Html::a('<i class="fa fa-edit yellow"></i> Edit Preferences', '#', [
                         'class' => 'showModalButton',
                         'title' => 'Edit Lead Preferences',
                         'data-modal_id' => 'client-manage-info',
@@ -42,42 +42,47 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block">
-        <table class="table table-bordered table-condensed">
-            <thead>
-                <tr>
-                    <td style="background-color: #eef3f9">Market Price</td>
-                    <td style="background-color: #eef3f9">Clients Budget</td>
-                    <td style="background-color: #eef3f9">Stops</td>
-                    <td style="background-color: #eef3f9">Delayed Charge</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><?= !empty($leadPreferences->market_price) ? Html::encode($leadPreferences->market_price) : '(not set)' ?></td>
-                    <td><?= !empty($leadPreferences->clients_budget) ? Html::encode($leadPreferences->clients_budget) : '(not set)' ?></td>
-                    <td><?= !empty($leadPreferences->number_stops) ? Html::encode($leadPreferences->number_stops) : '(not set)' ?></td>
-                    <td>
-                        <?php if($lead->l_delayed_charge): ?>
-                            <i class="fa fa-check green"></i>
-                        <?php else: ?>
-                            <i class="fa fa-remove red"></i>
-						<?php endif; ?>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <table class="table table-bordered table-condensed" style="margin-bottom: 0;">
-            <thead>
-                <tr>
-                    <td style="background-color: #eef3f9">Notes from client</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><?= $lead->notes_for_experts ? Html::encode($lead->notes_for_experts) : '(not set)' ?></td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th class="bg-info" style="width: 25%">Market Price</th>
+                        <th class="bg-info" style="width: 25%">Clients Budget</th>
+                        <th class="bg-info" style="width: 25%">Stops</th>
+                        <th class="bg-info">Delayed Charge</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?= !empty($leadPreferences->market_price) ? Html::encode($leadPreferences->market_price) : '-' ?></td>
+                        <td><?= is_numeric($leadPreferences->clients_budget) ? Html::encode($leadPreferences->clients_budget) : '-' ?></td>
+                        <td><?= is_numeric($leadPreferences->number_stops) ? Html::encode($leadPreferences->number_stops) : '-' ?></td>
+                        <td>
+                            <?php if($lead->l_delayed_charge): ?>
+                                <i class="fa fa-check-square-o green"></i> yes
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+            <div class="col-md-6">
+            <table class="table table-bordered table-condensed" style="margin-bottom: 0;">
+                <thead>
+                    <tr>
+                        <th class="bg-info">Notes from client</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?= $lead->notes_for_experts ? nl2br(Html::encode($lead->notes_for_experts)) : '-' ?></td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
     </div>
 </div>
