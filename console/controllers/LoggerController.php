@@ -83,7 +83,7 @@ class LoggerController extends Controller
 
 			return json_encode($formattedAttr);
 		} catch (\Throwable $e) {
-			\Yii::error($e->getMessage(), 'Console:LoggerController:formAttr:Throwable');
+			\Yii::error($e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine(), 'Console:LoggerController:formAttr:Throwable');
 
 			return null;
 		}
@@ -145,34 +145,4 @@ class LoggerController extends Controller
 			return implode('<br>', $errors);
 		}, $errors));
 	}
-
-	public function actionTest()
-	{
-		$query = GlobalLog::find()->andWhere(['IN','gl_obj_id',97694]);
-
-		$subQuery = (new Query())->select(['cp.id'])
-			->from(ClientPhone::tableName() . ' as cp')
-			->join('JOIN', Client::tableName() . ' as client', 'client.id = cp.client_id')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => 97694] );
-		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['ce.id'])
-			->from(ClientEmail::tableName() . ' as ce')
-			->join('JOIN', Client::tableName() . ' as client', 'client.id = ce.client_id')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => 97694] );
-		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['c.id'])
-			->from(Client::tableName() . ' as c')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = c.id and lead.id = :leadId', [':leadId' => 97694] );
-		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['lp.id'])
-			->from(LeadPreferences::tableName() . ' as lp')
-			->where(['lead_id' => 97694]);
-		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$result = $query->all();
-	}
-
 }

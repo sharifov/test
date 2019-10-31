@@ -194,7 +194,7 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 	 * @param int|null $type
 	 * @return string
 	 */
-	public static function getPhoneTypeLabel(?int $type): string
+	public static function getEmailTypeLabel(?int $type): string
 	{
 		if (isset(self::EMAIL_TYPE_LABELS[$type], self::EMAIL_TYPE[$type])) {
 			return str_replace('{type}', self::EMAIL_TYPE[$type], self::EMAIL_TYPE_LABELS[$type]);

@@ -590,15 +590,15 @@ if($project){
 
         <?php
 
-            if(!$leadForm->getLead()->isNewRecord && Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
-                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadForm->getLead()->id])->count();
-                echo Html::a('Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
-                    [
-                        'id' => 'btn-lead-logs',
-                        'class' => 'btn btn-default',
-                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadForm->getLead()->id])
-                ]);
-            }
+//            if(!$leadForm->getLead()->isNewRecord && Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
+//                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadForm->getLead()->id])->count();
+//                echo Html::a('Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
+//                    [
+//                        'id' => 'btn-lead-logs',
+//                        'class' => 'btn btn-default',
+//                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadForm->getLead()->id])
+//                ]);
+//            }
 
         ?>
 
@@ -607,7 +607,7 @@ if($project){
                 'id' => 'btn-general-lead-log',
                 'class' => 'btn btn-default showModalButton',
                 'data-modal_id' => 'client-large',
-                'title' => 'General Lead Log',
+                'title' => 'General Lead Log #' . $leadForm->lead->id,
                 'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
             ]) ?>
         <?php endif; ?>

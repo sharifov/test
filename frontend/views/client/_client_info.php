@@ -40,7 +40,7 @@ use yii\widgets\DetailView;
                     'value' => static function (Client $model) {
                         $data = [];
                         foreach ($model->clientEmails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code> ' . $email::getPhoneTypeLabel($email->type);
+                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type);
                         }
                         return implode('<br>', $data);
                     },

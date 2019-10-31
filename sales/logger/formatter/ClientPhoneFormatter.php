@@ -59,8 +59,11 @@ class ClientPhoneFormatter implements Formatter
 	{
 		$clientPhone = $this->clientPhone;
 		return [
+			'phone' => static function ($value) use ($clientPhone) {
+				return '<i class="fa fa-phone"></i> ' . $value;
+			},
 			'type' => static function ($value) use ($clientPhone) {
-				return $clientPhone::PHONE_TYPE[$value];
+				return $clientPhone::getPhoneTypeLabel($value) ?? $value;
 			}
 		];
 	}
