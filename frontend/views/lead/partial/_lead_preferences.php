@@ -56,8 +56,8 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
                 <tbody>
                     <tr>
                         <td><?= !empty($leadPreferences->market_price) ? Html::encode($leadPreferences->market_price) : '-' ?></td>
-                        <td><?= is_numeric($leadPreferences->clients_budget) ? Html::encode($leadPreferences->clients_budget) : '-' ?></td>
-                        <td><?= is_numeric($leadPreferences->number_stops) ? Html::encode($leadPreferences->number_stops) : '-' ?></td>
+                        <td><?= $leadPreferences && is_numeric($leadPreferences->clients_budget) ? Html::encode($leadPreferences->clients_budget) : '-' ?></td>
+                        <td><?= $leadPreferences && is_numeric($leadPreferences->number_stops) ? Html::encode($leadPreferences->number_stops) : '-' ?></td>
                         <td>
                             <?php if($lead->l_delayed_charge): ?>
                                 <i class="fa fa-check-square-o green"></i> yes

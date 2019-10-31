@@ -163,10 +163,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     ];
 
     public const SHORT_SOURCE_LIST = [
-        self::SOURCE_GENERAL_LINE => 'GL',
-        self::SOURCE_DIRECT_CALL  => 'DC',
-        self::SOURCE_REDIRECT_CALL  => 'RC',
-        self::SOURCE_TRANSFER_CALL  => 'TC',
+        self::SOURCE_GENERAL_LINE => 'General',
+        self::SOURCE_DIRECT_CALL  => 'Direct',
+        self::SOURCE_REDIRECT_CALL  => 'Redirect',
+        self::SOURCE_TRANSFER_CALL  => 'Transfer',
         self::SOURCE_CONFERENCE_CALL  => 'Conference',
     ];
 
