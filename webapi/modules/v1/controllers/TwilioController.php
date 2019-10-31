@@ -353,4 +353,50 @@ class TwilioController extends ApiBaseNoAuthController
         return $responseData;
     }
 
+
+    public function actionConferenceStatusCallback()
+    {
+
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+        $responseData = [
+            'date'      => date('Y-m-d'),
+            'ip'        => Yii::$app->request->getUserIP(),
+            'get'       => Yii::$app->request->get(),
+            'post'      => Yii::$app->request->post(),
+        ];
+
+        Yii::warning(VarDumper::dumpAsString($responseData), 'Twilio ConferenceStatusCallback');
+
+
+        $conferenceSid = Yii::$app->request->post('ConferenceSid');
+
+
+
+        $apiLog->endApiLog($responseData);
+
+
+//        [
+//            'Coaching' => 'false'
+//    'FriendlyName' => 'room1'
+//    'SequenceNumber' => '1'
+//    'ConferenceSid' => 'CF4a296dff23784c3e25e4f166529fa0ff'
+//    'EndConferenceOnExit' => 'true'
+//    'CallSid' => 'CA16e5e86828dbb27fef7bff9b1a40a645'
+//    'StatusCallbackEvent' => 'participant-join'
+//    'Timestamp' => 'Fri, 25 Oct 2019 06:37:44 +0000'
+//    'StartConferenceOnEnter' => 'true'
+//    'Hold' => 'false'
+//    'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c'
+//    'Muted' => 'true'
+//]
+
+
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        return $responseData;
+
+    }
+
+
 }

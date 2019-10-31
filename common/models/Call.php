@@ -56,6 +56,7 @@ use Locale;
  * @property string $c_recording_sid
  * @property int $c_source_id
  *
+ *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
  * @property Client $cClient
@@ -65,11 +66,12 @@ use Locale;
  * @property Call $cParent
  * @property Call[] $calls
  * @property Project $cProject
- * @property Cases[] $cases
  * @property CallUserAccess[] $callUserAccesses
  * @property Employee[] $cuaUsers
  * @property CallUserGroup[] $callUserGroups
  * @property UserGroup[] $cugUgs
+ * @property Cases[] $cases
+ * @property ConferenceParticipant[] $conferenceParticipants
  */
 class Call extends \yii\db\ActiveRecord implements AggregateRoot
 {
@@ -150,19 +152,22 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public const SOURCE_DIRECT_CALL     = 2;
     public const SOURCE_REDIRECT_CALL   = 3;
     public const SOURCE_TRANSFER_CALL   = 4;
+    public const SOURCE_CONFERENCE_CALL  = 5;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
         self::SOURCE_DIRECT_CALL  => 'Direct Call',
         self::SOURCE_REDIRECT_CALL  => 'Redirect Call',
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
+        self::SOURCE_CONFERENCE_CALL  => 'Conference Call',
     ];
 
     public const SHORT_SOURCE_LIST = [
-        self::SOURCE_GENERAL_LINE => 'GL',
-        self::SOURCE_DIRECT_CALL  => 'DC',
-        self::SOURCE_REDIRECT_CALL  => 'RC',
-        self::SOURCE_TRANSFER_CALL  => 'TC',
+        self::SOURCE_GENERAL_LINE => 'General',
+        self::SOURCE_DIRECT_CALL  => 'Direct',
+        self::SOURCE_REDIRECT_CALL  => 'Redirect',
+        self::SOURCE_TRANSFER_CALL  => 'Transfer',
+        self::SOURCE_CONFERENCE_CALL  => 'Conference',
     ];
 
 
@@ -355,6 +360,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $this->c_call_duration = $duration;
     }
 
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getConferenceParticipants()
+    {
+        return $this->hasMany(ConferenceParticipant::class, ['cp_call_id' => 'c_id']);
+    }
 
 
     /**
@@ -601,7 +614,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     }
                 }
 
-                if ($this->isIn()) {
+                if ((int) $this->c_source_type_id !== self::SOURCE_CONFERENCE_CALL && $this->isIn()) {
                     if (!$this->c_parent_id) {
                         $isCallUserAccepted = CallUserAccess::find()->where([
                             'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,

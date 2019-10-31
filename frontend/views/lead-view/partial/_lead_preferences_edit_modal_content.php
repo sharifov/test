@@ -28,18 +28,34 @@ use yii\web\View;
 
 	<?= $form->errorSummary($leadPreferencesForm) ?>
 
-	<?= $form->field($leadPreferencesForm, 'marketPrice')->input('number') ?>
+    <div class="row">
+    <div class="col-md-6">
+	    <?= $form->field($leadPreferencesForm, 'marketPrice')->input('number', ['min' => 0, 'max' => 99000]) ?>
+    </div>
+    <div class="col-md-6">
+	    <?= $form->field($leadPreferencesForm, 'clientsBudget')->input('number', ['min' => 0, 'max' => 99000]) ?>
+    </div>
+    </div>
+    <div class="row">
+    <div class="col-md-6">
+	<?= $form->field($leadPreferencesForm, 'numberStops')->dropDownList(\sales\helpers\lead\LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
+    </div>
+    </div>
 
-	<?= $form->field($leadPreferencesForm, 'clientsBudget')->input('number') ?>
-
-	<?= $form->field($leadPreferencesForm, 'numberStops')->input('number') ?>
-
+    <div class="row">
+    <div class="col-md-12">
 	<?= $form->field($leadPreferencesForm, 'delayedCharge')->checkbox() ?>
+    </div>
+    </div>
 
+    <div class="row">
+    <div class="col-md-12">
 	<?= $form->field($leadPreferencesForm, 'notesForExperts')->textarea([
         'style' => 'resize: vertical;',
-        'rows' => 10
+        'rows' => 8
     ]) ?>
+    </div>
+    </div>
 
 	<div class="text-center">
 		<?= Html::submitButton('<i class="fa fa-check-square-o"></i> Update Lead Preferences', [

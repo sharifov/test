@@ -86,6 +86,7 @@ return [
         'queue_phone_check',
         'queue_job',
         \common\components\SettingsBootstrap::class,
-        common\bootstrap\SetUp::class
+        common\bootstrap\SetUp::class,
+        common\bootstrap\Logger::class,
     ],
 ];

@@ -121,6 +121,18 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
         ];
     }
 
+	/**
+	 * @return array
+	 */
+    public function formatValue(): array
+	{
+		return [
+			'type' => static function ($value) {
+				return self::PHONE_TYPE[$value];
+			}
+		];
+	}
+
     /**
      * {@inheritdoc}
      */

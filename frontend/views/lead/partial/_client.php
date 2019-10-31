@@ -191,25 +191,3 @@ $manageClientInfoAccess = ClientInfoAccess::isUserCanManageLeadClientInfo($lead,
             }
         }
     </style>
-
-
-<?php
-$jsCode = <<<JS
-
-    $(document).on('click', '.showModalButton', function(){
-        var id = $(this).data('modal_id');
-        var url = $(this).data('content-url');
-
-        $('#modal-' + id).find('.modal-header').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
-        
-        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-
-        $.post(url, function(data) {
-            $('#modal-' + id).find('.modal-body').html(data);
-        });
-       return false;
-    });
-    
-JS;
-
-$this->registerJs($jsCode);

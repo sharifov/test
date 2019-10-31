@@ -116,7 +116,7 @@ $lead = $leadForm->getLead();
                     <div class="col-md-12">
                         <?php if(!$leadForm->getLead()->l_answered): ?>
 
-                            <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_PROCESSING):?>
+                            <?php if($leadForm->getLead()->isProcessing()):?>
                                 <?= Html::a(($leadForm->getLead()->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $leadForm->getLead()->id, 'act' => 'answer'], [
                                     'class' => 'btn '.($leadForm->getLead()->l_answered ? 'btn-success' : 'btn-info'),
                                     'data-pjax' => false,
@@ -142,23 +142,13 @@ $lead = $leadForm->getLead();
 
 
 
-			<?php if (!$leadForm->getLead()->isNewRecord):?>
 
-                <?= $this->render('quotes/quote_list', [
-                        'dataProvider' => $quotesProvider,
-                        'lead' => $lead,
-                        'leadForm' => $leadForm,
-                        'is_manager' => $is_manager,
-                ]); ?>
-
-            <?php endif;?>
-
-        	<?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()):?>
+        	<?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $leadForm->getLead()->employee_id !== Yii::$app->user->id):?>
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Lead Preferences is not available in VIEW MODE, please take lead!</p>
                 </div>
-			<?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP || ($leadForm->getLead()->status == \common\models\Lead::STATUS_PENDING && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id != Yii::$app->user->id):?>
+			<?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->isFollowUp() || ($leadForm->getLead()->isPending() && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id !== Yii::$app->user->id):?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
@@ -172,6 +162,18 @@ $lead = $leadForm->getLead();
                     ]) ?>
                 </div>
             <?php endif; ?>
+
+
+            <?php if (!$leadForm->getLead()->isNewRecord):?>
+
+                <?= $this->render('quotes/quote_list', [
+                    'dataProvider' => $quotesProvider,
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'is_manager' => $is_manager,
+                ]); ?>
+
+            <?php endif;?>
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
@@ -321,3 +323,23 @@ JS;
 
     $this->registerJs($js);
 }
+
+$jsCode = <<<JS
+
+    $(document).on('click', '.showModalButton', function(){
+        var id = $(this).data('modal_id');
+        var url = $(this).data('content-url');
+
+        $('#modal-' + id).find('.modal-header').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        
+        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+
+        $.post(url, function(data) {
+            $('#modal-' + id).find('.modal-body').html(data);
+        });
+       return false;
+    });
+    
+JS;
+
+$this->registerJs($jsCode);

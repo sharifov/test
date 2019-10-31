@@ -249,7 +249,7 @@ class LeadViewController extends FController
 				]);
 			} else {
 				$response['error'] = true;
-				$response['message'] = $form->getErrors();
+				$response['message'] = $this->getParsedErrors($form->getErrors());
 			}
 
 			Yii::$app->response->format = Response::FORMAT_JSON;
@@ -360,7 +360,7 @@ class LeadViewController extends FController
 				]);
 			} else {
 				$response['error'] = true;
-				$response['message'] = $form->getErrors();
+				$response['message'] = $this->getParsedErrors($form->getErrors());
 			}
 
 			Yii::$app->response->format = Response::FORMAT_JSON;
@@ -453,7 +453,7 @@ class LeadViewController extends FController
 				]);
 			} else {
 				$response['error'] = true;
-				$response['message'] = $form->getErrors();
+				$response['message'] = $this->getParsedErrors($form->getErrors());
 			}
 
 			return $this->asJson($response);
@@ -563,7 +563,7 @@ class LeadViewController extends FController
 				]);
 			} else {
 				$response['error'] = true;
-				$response['message'] = $form->getErrors();
+				$response['message'] = $this->getParsedErrors($form->getErrors());
 			}
 
 			Yii::$app->response->format = Response::FORMAT_JSON;
@@ -634,30 +634,23 @@ class LeadViewController extends FController
 	 */
 	public function actionAjaxEditClientName()
 	{
-		try {
-			$form = new ClientCreateForm();
+		$form = new ClientCreateForm();
 
-			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+		if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-				$client = $this->clientManageService->updateClient($form);
+			$client = $this->clientManageService->updateClient($form);
 
-				$response['error'] = false;
-				$response['message'] = 'User name was successfully updated';
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_name', [
-					'client' => $client
-				]);
-			} else {
-				$response['error'] = true;
-				$response['message'] = $form->getErrors();
-			}
-
-			Yii::$app->response->format = Response::FORMAT_JSON;
-			return $response;
-		} catch (\Throwable $e) {
-			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientName:Throwable');
+			$response['error'] = false;
+			$response['message'] = 'User name was successfully updated';
+			$response['html'] = $this->renderAjax('/lead/partial/_client_manage_name', [
+				'client' => $client
+			]);
+		} else {
+			$response['error'] = true;
+			$response['message'] = $this->getParsedErrors($form->getErrors());
 		}
 
-		throw new BadRequestHttpException();
+		return $this->asJson($response);
 	}
 
     /**
@@ -750,9 +743,7 @@ class LeadViewController extends FController
 					]);
 				}else {
 					$response['error'] = true;
-					$response['message'] = implode('<br>', array_map(static function ($errors) {
-						return implode('<br>', $errors);
-					}, $form->getErrors()));
+					$response['message'] = $this->getParsedErrors($form->getErrors());
 				}
 			} catch (\Throwable $e) {
 				Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditLeadPreferences:Throwable');
@@ -778,6 +769,17 @@ class LeadViewController extends FController
         }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+	/**
+	 * @param array $errors
+	 * @return string
+	 */
+    private function getParsedErrors(array $errors): string
+	{
+		return implode('<br>', array_map(static function ($errors) {
+			return implode('<br>', $errors);
+		}, $errors));
+	}
 
     /**
      * @param $uid
