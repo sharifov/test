@@ -35,10 +35,10 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                     </li>
                     <li>
                         <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Email', '#',  [
-                            'id' => 'client-new-phone-button',
+                            'id' => 'client-new-email-button',
                             'data-modal_id' => 'client-manage-info',
-                            'title' => 'Add Phone',
-                            'data-content-url' => Url::to(['lead-view/ajax-add-client-phone-modal-content', 'gid' => $lead->gid]),
+                            'title' => 'Add Email',
+                            'data-content-url' => Url::to(['lead-view/ajax-add-client-email-modal-content', 'gid' => $lead->gid]),
                             'class' => 'showModalButton'
                         ])?>
                     </li>
