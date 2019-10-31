@@ -242,7 +242,7 @@ class LeadViewController extends FController
 
 				$response['error'] = false;
 				$response['message'] = 'New phone was successfully added: ' . $form->phone;
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_phone', [
+				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
 					'clientPhones' => $lead->client->clientPhones,
 					'lead' => $lead,
 					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
@@ -353,7 +353,7 @@ class LeadViewController extends FController
 
 				$response['error'] = false;
 				$response['message'] = 'Phone was successfully updated: ' . $form->phone;
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_phone', [
+				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
 					'clientPhones' => $lead->client->clientPhones,
 					'lead' => $lead,
 					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
@@ -446,7 +446,7 @@ class LeadViewController extends FController
 
 				$response['error'] = false;
 				$response['message'] = 'New email was successfully added: ' . $form->email;
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_email', [
+				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
 					'clientEmails' => $lead->client->clientEmails,
 					'lead' => $lead,
 					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
@@ -556,7 +556,7 @@ class LeadViewController extends FController
 
 				$response['error'] = false;
 				$response['message'] = 'Email was successfully updated: ' . $form->email;
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_email', [
+				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
 					'clientEmails' => $lead->client->clientEmails,
 					'lead' => $lead,
 					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
@@ -642,7 +642,7 @@ class LeadViewController extends FController
 
 			$response['error'] = false;
 			$response['message'] = 'User name was successfully updated';
-			$response['html'] = $this->renderAjax('/lead/partial/_client_manage_name', [
+			$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_name', [
 				'client' => $client
 			]);
 		} else {

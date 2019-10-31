@@ -101,20 +101,20 @@ class LeadController extends FController
     /**
      * {@inheritdoc}
      */
-
-    public function beforeAction($action)
-    {
-        if (parent::beforeAction($action)) {
-            if (in_array($action->id, ['create', 'view'])) {
-                //Yii::$app->setLayoutPath('@frontend/views/layouts');
-                //$this->layout = 'sale';
-                $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
-            }
-            return true;
-        }
-
-        return parent::beforeAction($action);
-    }
+//
+//    public function beforeAction($action)
+//    {
+//        if (parent::beforeAction($action)) {
+//            if (in_array($action->id, ['create'])) {
+//                //Yii::$app->setLayoutPath('@frontend/views/layouts');
+//                //$this->layout = 'sale';
+//                $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
+//            }
+//            return true;
+//        }
+//
+//        return parent::beforeAction($action);
+//    }
 
 
     /**
