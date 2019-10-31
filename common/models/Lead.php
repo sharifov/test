@@ -29,6 +29,7 @@ use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
+use sales\services\lead\qcall\CalculateDateService;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
@@ -2213,8 +2214,15 @@ Reason: {reason}
                 $lq->lqc_weight = $this->project_id * 10;
             }
 
-            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
-            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+            $date = (new CalculateDateService())->calculate(
+                $qcConfig->qc_client_time_enable,
+                $this->offset_gmt,
+                $qcConfig->qc_time_from,
+                $qcConfig->qc_time_to
+            );
+
+            $lq->lqc_dt_from = $date->from;
+            $lq->lqc_dt_to = $date->to;
 
             if (!$lq->save()) {
                 Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');

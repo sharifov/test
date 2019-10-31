@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\jobs\QuickSearchInitPriceJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadLogMessage;
+use sales\services\lead\qcall\CalculateDateService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -487,8 +488,15 @@ class Lead2 extends \yii\db\ActiveRecord
                 $lq->lqc_weight = $this->project_id * 10;
             }
 
-            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
-            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+            $date = (new CalculateDateService())->calculate(
+                $qcConfig->qc_client_time_enable,
+                $this->offset_gmt,
+                $qcConfig->qc_time_from,
+                $qcConfig->qc_time_to
+            );
+
+            $lq->lqc_dt_from = $date->from;
+            $lq->lqc_dt_to = $date->to;
 
             if (!$lq->save()) {
                 Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead2:createOrUpdateQCall:LeadQcall:save');

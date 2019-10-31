@@ -290,7 +290,7 @@ class LeadQcallSearch extends LeadQcall
 
         $query->addOrderBy(['l_last_action_dt' => SORT_DESC]);
 
-        $query->limit(5);
+        $query->limit((int)\Yii::$app->params['settings']['qcall_count_last_dialed_leads']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
