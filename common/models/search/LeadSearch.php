@@ -26,6 +26,7 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
+use common\components\ChartTools;
 use yii\helpers\VarDumper;
 
 /**
@@ -1304,7 +1305,7 @@ class LeadSearch extends Lead
 
         if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
-            ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
         if ($this->l_last_action_dt) {
@@ -1370,27 +1371,27 @@ class LeadSearch extends Lead
 
         $leadTable = Lead::tableName();
 
-            $departureQuery =  (new Query())
-                ->select(['lfs.departure'])
-                ->from(['lfs' => LeadFlightSegment::tableName()])
-                ->where('lfs.lead_id  = ' . $leadTable . '.id')
-                ->orderBy(['lfs.departure' => SORT_ASC])
-                ->limit(1)
-                ->createCommand()->getSql();
-            $nowQuery = (new Query())
-                ->select(new Expression("if (a.dst is not null, if (cast(a.dst as signed) >= 0, concat('+', if (length(a.dst) < 2, concat(0, a.dst), a.dst),':00'), concat(a.dst, ':00')), '+00:00')"))
-                ->from(['a' => Airport::tableName()])
-                ->andWhere('a.iata = (' .
-                    (new Query())
+        $departureQuery =  (new Query())
+            ->select(['lfs.departure'])
+            ->from(['lfs' => LeadFlightSegment::tableName()])
+            ->where('lfs.lead_id  = ' . $leadTable . '.id')
+            ->orderBy(['lfs.departure' => SORT_ASC])
+            ->limit(1)
+            ->createCommand()->getSql();
+        $nowQuery = (new Query())
+            ->select(new Expression("if (a.dst is not null, if (cast(a.dst as signed) >= 0, concat('+', if (length(a.dst) < 2, concat(0, a.dst), a.dst),':00'), concat(a.dst, ':00')), '+00:00')"))
+            ->from(['a' => Airport::tableName()])
+            ->andWhere('a.iata = (' .
+                (new Query())
                     ->select(['lfs.origin'])
                     ->from(['lfs' => LeadFlightSegment::tableName()])
                     ->andWhere('lfs.lead_id = ' . $leadTable . '.id')
                     ->orderBy(['lfs.departure' => SORT_ASC])
                     ->limit(1)
                     ->createCommand()->getSql()
-                    . ')'
-                )
-                ->createCommand()->getSql();
+                . ')'
+            )
+            ->createCommand()->getSql();
 
         $query->addSelect([
             'remainingDays' =>
@@ -2177,5 +2178,91 @@ class LeadSearch extends Lead
 
         $dataProvider = new SqlDataProvider($paramsData);
         return $dataProvider;
+    }
+
+    /**
+     * @param string $category
+     * @param string $period
+     * @return SqlDataProvider
+     */
+    public function searchTopAgents(string $category, string $period):SqlDataProvider
+    {
+        switch ($period) {
+            case 'currentWeek':
+                $interval = ChartTools::getWeek('0 week');
+                break;
+            case 'lastWeek':
+                $interval = ChartTools::getWeek('-1 week');
+                break;
+            case 'currentMonth':
+                $interval = ChartTools::getCurrentMonth();
+                break;
+        }
+
+        /**
+         * @var $interval array
+         */
+        $start = date("Y-m-d H:i", $interval['start']);
+        $end = date("Y-m-d 23:59", $interval['end']);
+        $between_condition = " BETWEEN '{$start}' AND '{$end}'";
+
+        $query = new Query();
+
+        if ($category == 'finalProfit'){
+            $query->select(['e.id', 'e.username']);
+            $query->addSelect(['(SELECT SUM(final_profit) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+        }
+
+        if ($category == 'soldLeads'){
+            $query->select(['e.id', 'e.username']);
+            $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+        }
+
+        if ($category == 'profitPerPax'){
+            $query->select(['e.id', 'e.username']);
+            $query->addSelect(['(SELECT AVG(final_profit / adults + children) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+        }
+
+        if ($category == 'tips'){
+            $query->select(['e.id', 'e.username']);
+            $query->addSelect(['(SELECT SUM(tips) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+        }
+
+        if ($category == 'leadConversion'){
+            $query->select(['employee_id, 
+                             (SUM(CASE WHEN status IN('.Lead::STATUS_SOLD.','.Lead::STATUS_BOOKED.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
+                             SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END)) AS leadConversion,
+                             (SELECT username FROM `employees` WHERE id=employee_id) as username
+                             FROM leads']);
+            $query->leftJoin('auth_assignment', 'auth_assignment.user_id = employee_id')
+                ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
+            $query->groupBy(['employee_id']);
+        } else {
+            $query->from('employees AS e')->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id')
+                ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
+        }
+
+        $command = $query->createCommand();
+        $sql = $command->rawSql;
+
+        $paramsData = [
+            'sql' => $sql,
+            'sort' =>[
+                'defaultOrder' => [$category => SORT_DESC],
+                'attributes' => [
+                    $category
+                    /*'finalProfit' => [
+                        'asc' => ['finalProfit' => SORT_ASC],
+                        'desc' => ['finalProfit' => SORT_DESC],
+                    ],*/
+                ]
+            ],
+            /*'pagination' => [
+                'pageSize' => 50,
+            ],*/
+            'pagination' => false
+        ];
+
+        return $dataProvider = new SqlDataProvider($paramsData);
     }
 }

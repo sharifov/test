@@ -95,6 +95,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
+                ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
             ]
         ];
 
