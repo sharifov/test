@@ -64,6 +64,8 @@ class LeadPreferences extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['lead_id', 'number_stops'], 'integer'],
+			[['lead_id', 'numberStops'], 'filter', 'filter' => 'intval'],
+			[['marketPrice', 'clientsBudget'], 'filter', 'filter' => 'floatval'],
             [['notes'], 'string'],
             [['clients_budget', 'market_price'], 'number'],
             [['pref_language', 'pref_currency', 'pref_airline'], 'string', 'max' => 255],

@@ -64,10 +64,7 @@ class LoggerController extends Controller
 	 */
 	private function formatAttr(string $modelPath, ?string $oldAttr, ?string $newAttr): ?string
 	{
-		$formattedAttr = [
-			'old' => [],
-			'new' => []
-		];
+		$formattedAttr = [];
 
 		try {
 			$model = \Yii::createObject($modelPath);
@@ -97,17 +94,16 @@ class LoggerController extends Controller
 	 */
 	private function formatByFormatter(Formatter $formatter, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
 	{
-		if ($oldAttr) {
-			$oldAttr = json_decode($oldAttr, true);
-			foreach ($oldAttr as $attr => $value) {
-				$formattedAttr['old'][$formatter->getFormattedAttributeLabel($attr)] = $formatter->getFormattedAttributeValue($attr, $value);
-			}
-		}
-
 		if ($newAttr) {
+			$oldAttr = json_decode($oldAttr, true);
 			$newAttr = json_decode($newAttr, true);
 			foreach ($newAttr as $attr => $value) {
-				$formattedAttr['new'][$formatter->getFormattedAttributeLabel($attr)] = $formatter->getFormattedAttributeValue($attr, $value);
+				if (!in_array($attr, $formatter->getExceptedAttributes(), false)) {
+					$formattedAttr[$formatter->getFormattedAttributeLabel($attr)][1] = $formatter->getFormattedAttributeValue($attr, $value);
+					if (isset($oldAttr[$attr])) {
+						$formattedAttr[$formatter->getFormattedAttributeLabel($attr)][0] = $formatter->getFormattedAttributeValue($attr, $oldAttr[$attr]);
+					}
+				}
 			}
 		}
 	}
@@ -120,17 +116,14 @@ class LoggerController extends Controller
 	 */
 	private function formatByModel(ActiveRecord $model, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
 	{
-		if ($oldAttr) {
-			$oldAttr = json_decode($oldAttr, true);
-			foreach ($oldAttr as $attr => $value) {
-				$formattedAttr['old'][$model->getAttributeLabel($attr)] = $value;
-			}
-		}
-
 		if ($newAttr) {
+			$oldAttr = json_decode($oldAttr, true);
 			$newAttr = json_decode($newAttr, true);
 			foreach ($newAttr as $attr => $value) {
-				$formattedAttr['new'][$model->getAttributeLabel($attr)] = $value;
+				$formattedAttr[$model->getAttributeLabel($attr)][1] = $value;
+				if (isset($oldAttr[$attr])) {
+					$formattedAttr[$model->getAttributeLabel($attr)][0] = $oldAttr[$attr];
+				}
 			}
 		}
 	}

@@ -3,8 +3,8 @@
 use sales\entities\log\GlobalLogSearch;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
-use yii\helpers\Html;
 use yii\widgets\Pjax;
+use common\models\GlobalLog;
 
 /**
  * @var $dataProvider ActiveDataProvider
@@ -28,7 +28,7 @@ echo GridView::widget([
 		[
 			'header' => 'Who made the changes',
 			'attribute' => 'gl_app_user_id',
-			'value' => static function (\sales\entities\log\GlobalLog $model) {
+			'value' => static function (GlobalLog $model) {
 				$template = '<i class="fa fa-user"></i> ';
 
 				if ($model->user) {
@@ -53,7 +53,10 @@ echo GridView::widget([
 
 		],
 		[
-			'attribute' => 'glModel',
+			'attribute' => 'gl_model',
+			'value' => static function (GlobalLog $model) {
+				return $model->getModelName() . ' (#' . $model->gl_obj_id . ')';
+			},
 			'options' => [
 				'width' => '12%'
 			]
@@ -61,14 +64,14 @@ echo GridView::widget([
 		[
 			'header' => 'Changed Attributes',
 			'attribute' => 'gl_formatted_attr',
-			'value' => static function (\sales\entities\log\GlobalLog $model) use ($view) {
+			'value' => static function (GlobalLog $model) use ($view) {
 				if ($model->gl_formatted_attr) {
 					return $view->render('_formatted_attributes', [
-						'formattedAttributes' => json_decode((string)$model->gl_formatted_attr, true)
+						'model' => $model
 					]);
-				} else {
-					return 'Data log not formatted yet';
 				}
+
+				return 'Data log not formatted yet';
 			},
 			'filter' => false,
 			'enableSorting' => false,

@@ -267,6 +267,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
+				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
             ]
         ];
 

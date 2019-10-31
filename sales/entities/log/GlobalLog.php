@@ -26,6 +26,7 @@ use yii\db\Query;
  * @property array $gl_old_attr
  * @property array $gl_new_attr
  * @property array $gl_formatted_attr
+ * @property int $gl_action_type
  * @property string $gl_created_at
  *
  * @property Employee|ApiUser|null $user
@@ -63,7 +64,7 @@ class GlobalLog extends ActiveRecord
     {
         return [
             [['gl_app_id', 'gl_model', 'gl_obj_id'], 'required'],
-            [['gl_app_user_id', 'gl_obj_id'], 'integer'],
+            [['gl_app_user_id', 'gl_obj_id', 'gl_action_type'], 'integer'],
             [['gl_old_attr', 'gl_new_attr', 'gl_formatted_attr', 'gl_created_at'], 'safe'],
             [['gl_app_id'], 'string', 'max' => 20],
             [['gl_model'], 'string', 'max' => 50],
@@ -78,6 +79,7 @@ class GlobalLog extends ActiveRecord
 	 * @param string|null $glOldAttr
 	 * @param string|null $glNewAttr
 	 * @param string|null $glFormattedAttr
+	 * @param int|null $glActionType
 	 * @return static
 	 */
     public static function create(
@@ -87,7 +89,8 @@ class GlobalLog extends ActiveRecord
 		?int $glAppUserId,
 		?string $glOldAttr,
 		?string $glNewAttr,
-		?string $glFormattedAttr
+		?string $glFormattedAttr,
+		?int $glActionType
 	): self
 	{
 		$log = new static();
@@ -98,57 +101,8 @@ class GlobalLog extends ActiveRecord
 		$log->gl_old_attr = $glOldAttr;
 		$log->gl_new_attr = $glNewAttr;
 		$log->gl_formatted_attr = $glFormattedAttr;
+		$log->gl_action_type = $glActionType;
 		return $log;
-	}
-
-	public function getGlModel()
-	{
-		return (new \ReflectionClass($this->gl_model))->getShortName();
-	}
-
-	/**
-	 * @return ActiveQuery|null
-	 */
-	public function getUser(): ?ActiveQuery
-	{
-		if ($this->gl_app_id === 'app-frontend') {
-			return $this->hasOne(Employee::class, ['id' => 'gl_app_user_id']);
-		}
-
-		if ($this->gl_app_id === 'app-webapi') {
-			return $this->hasOne(ApiUser::class, ['au_id' => 'gl_app_user_id']);
-		}
-
-		return null;
-	}
-
-	public function getGeneralLeadLog(int $leadId)
-	{
-		$query = GlobalLog::find()->andWhere(['IN','gl_obj_id',$leadId]);
-
-		$subQuery = (new Query())->select(['cp.id'])
-			->from(ClientPhone::tableName() . ' as cp')
-			->join('JOIN', Client::tableName() . ' as client', 'client.id = cp.client_id')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => $leadId] );
-		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['ce.id'])
-			->from(ClientEmail::tableName() . ' as ce')
-			->join('JOIN', Client::tableName() . ' as client', 'client.id = ce.client_id')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => $leadId] );
-		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['c.id'])
-			->from(Client::tableName() . ' as c')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = c.id and lead.id = :leadId', [':leadId' => $leadId] );
-		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['lp.id'])
-			->from(LeadPreferences::tableName() . ' as lp')
-			->where(['lead_id' => $leadId]);
-		$query->orWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		return $query->all();
 	}
 
     /**
@@ -166,6 +120,7 @@ class GlobalLog extends ActiveRecord
             'gl_new_attr' => 'New attributes',
             'gl_formatted_attr' => 'Formatted Attributes',
             'gl_created_at' => 'When changes were made',
+			'gl_action_type' => 'Action',
 			'glModel' => 'Model'
         ];
     }

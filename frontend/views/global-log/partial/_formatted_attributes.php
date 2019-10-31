@@ -1,41 +1,40 @@
 <?php
-
+use common\models\GlobalLog;
 /**
- * @var array $formattedAttributes
+ * @var GlobalLog $model
  */
 ?>
 
-<?php if (empty($formattedAttributes['old'])): ?>
-    <p>Created</p>
-<?php else: ?>
-    <p>Updated</p>
-<?php endif; ?>
-<table class="table table-bordered table-hover">
+<p><?= $model->getActionTypeName() ?></p>
+<table class="table table-bordered table-hover table-condensed">
     <tbody>
     <tr>
-        <th>Attribute</th>
+        <th>Field</th>
         <th style="width: 40%;">Old Value</th>
         <th style="width: 40%;">New Value</th>
     </tr>
     </tbody>
     <tbody>
-	<?php foreach ($formattedAttributes['new'] as $key => $attribute) : ?>
+    <?php $formattedAttributes = @json_decode($model->gl_formatted_attr, true); ?>
+	<?php foreach ($formattedAttributes as $fieldName => $data) : ?>
         <tr>
             <th>
-				<?= $key ?>
+				<?= \yii\helpers\Html::encode($fieldName) ?>
             </th>
             <td style="width: 40%; word-break: break-word;">
-                                        <span class="item-new">
-                                            <?= $formattedAttributes['old'][$key] ?? '' ?>
-                                        </span>
+                <span class="item-new">
+                    <?= isset($data[0]) ? \yii\helpers\Html::encode($data[0]) : '-' ?>
+                </span>
             </td>
             <td style="width: 40%; word-break: break-word;">
-                                        <span class="item-old">
-                                            <?= $attribute ?>
-                                        </span>
+                <span class="item-old">
+                    <?= isset($data[1]) ? \yii\helpers\Html::encode($data[1]) : '-' ?>
+                </span>
             </td>
         </tr>
 	<?php endforeach; ?>
+
+
     </tbody>
 </table>
 
