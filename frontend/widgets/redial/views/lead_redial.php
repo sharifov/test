@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Call;
 use common\models\Lead;
 use frontend\widgets\redial\LeadRedialViewWidget;
 use frontend\widgets\redial\RedialUrl;
@@ -82,6 +83,8 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
 
 $leadViewUrl = Url::to(['lead/view', 'gid' => $lead->gid]);
 
+$callSourceType = Call::SOURCE_REDIAL_CALL;
+
 $js = <<<JS
 
 $("#redial-lead-actions-block-call").on('click', function (e) {
@@ -109,7 +112,7 @@ function hideActionBlock() {
 function leadRedialCall() {
     $("#redial-lead-call-status-block-text").html('Processing ...');
     $('#redial-lead-call-status-block').show();
-    webCallLeadRedial('{$phoneFrom}', '{$phoneTo}', {$projectId}, {$lead->id}, 'web-call');  
+    webCallLeadRedial('{$phoneFrom}', '{$phoneTo}', {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
 }
 
 function callInProgress() {

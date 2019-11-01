@@ -528,6 +528,15 @@ class CommunicationController extends ApiBaseController
                 $upp = null;
 
                 if ($call->isOut()) {
+
+                    if (
+                        isset($callOriginalData['c_source_type_id'])
+                        && $callOriginalData['c_source_type_id']
+                        && (int)$callOriginalData['c_source_type_id'] === Call::SOURCE_REDIAL_CALL
+                    ) {
+                            $call->c_source_type_id = Call::SOURCE_REDIAL_CALL;
+                    }
+
                     if (!$call->c_client_id && $call->c_to) {
                         $clientPhone = ClientPhone::find()->where(['phone' => $call->c_to])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                         if ($clientPhone && $clientPhone->client_id) {

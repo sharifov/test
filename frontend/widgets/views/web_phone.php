@@ -699,9 +699,17 @@ use yii\helpers\Html;
         }
     }
 
-    function webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type) {
+    function webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type, c_source_type_id) {
 
-        let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'c_type': type, 'c_user_id': userId};
+        let params = {
+            'To': phone_to,
+            'FromAgentPhone': phone_from,
+            'project_id': project_id,
+            'lead_id': lead_id,
+            'c_type': type,
+            'c_user_id': userId,
+            'c_source_type_id': c_source_type_id
+        };
         webPhoneParams = params;
 
         if (device) {

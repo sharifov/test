@@ -152,7 +152,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public const SOURCE_DIRECT_CALL     = 2;
     public const SOURCE_REDIRECT_CALL   = 3;
     public const SOURCE_TRANSFER_CALL   = 4;
-    public const SOURCE_CONFERENCE_CALL  = 5;
+    public const SOURCE_CONFERENCE_CALL = 5;
+    public const SOURCE_REDIAL_CALL     = 6;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -160,6 +161,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::SOURCE_REDIRECT_CALL  => 'Redirect Call',
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
         self::SOURCE_CONFERENCE_CALL  => 'Conference Call',
+        self::SOURCE_REDIAL_CALL  => 'Redial Call',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -168,6 +170,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::SOURCE_REDIRECT_CALL  => 'Redirect',
         self::SOURCE_TRANSFER_CALL  => 'Transfer',
         self::SOURCE_CONFERENCE_CALL  => 'Conference',
+        self::SOURCE_REDIAL_CALL  => 'Redial',
     ];
 
 
