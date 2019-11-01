@@ -25,6 +25,13 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
             <ul class="nav navbar-right panel_toolbox">
                 <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess): ?>
                     <li>
+                        <?=Html::a('<i class="fa fa-info-circle"></i> Details', '#',  [
+                            'id' => 'btn-client-details',
+                            'data-client-id' => $leadForm->getClient()->id,
+                            'title' => 'Client Info',
+                        ])?>
+                    </li>
+                    <li>
                         <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Phone', '#', [
                             'id' => 'client-new-phone-button',
                             'data-modal_id' => 'client-manage-info',
@@ -51,6 +58,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                             'class' => 'showModalButton'
                         ])?>
                     </li>
+
                 <?php endif; ?>
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
@@ -112,11 +120,11 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         'class' => 'btn btn-default'
                     ]) */ ?>
 
-                            <?= Html::button('<i class="fa fa-user"></i> Client Info', [
+                            <?/*= Html::button('<i class="fa fa-user"></i> Client Info', [
                                 'class' => 'btn btn-default',
                                 'id' => 'btn-client-details',
                                 'data-client-id' => $leadForm->getClient()->id
-                            ]) ?>
+                            ])*/ ?>
 
                             <?php if (!empty($leadForm->getLead()->request_ip)): ?>
                                 <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
