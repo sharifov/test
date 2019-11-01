@@ -571,7 +571,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
 
-        if ($this->isOut() && ($lead = $this->cLead) && $lead->isCallPrepare()) {
+        if ($this->c_parent_id && $this->isOut() && ($lead = $this->cLead) && $lead->isCallPrepare()) {
             $lead->callProcessing();
             $lead->save();
         }
