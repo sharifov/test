@@ -7,7 +7,7 @@ use Yii;
 class CalculateDateService
 {
 
-    public function calculate(bool $clientTimeEnable, string $clientGmt, int $from, int $to): Date
+    public function calculate(bool $clientTimeEnable, ?string $clientGmt, int $from, int $to): Date
     {
         $fromInterval = new \DateInterval('PT' . $from . 'M');
         $toInterval = new \DateInterval('PT' . $to . 'M');
