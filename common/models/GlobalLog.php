@@ -26,16 +26,22 @@ class GlobalLog extends ActiveRecord
 {
 	public const MODEL_CLIENT 			= 'common\models\Client';
 	public const MODEL_CLIENT_PHONE 	= 'common\models\ClientPhone';
+	public const MODEL_CLIENT_EMAIL 	= 'common\models\ClientEmail';
 	public const MODEL_CLIENT_LEAD2 	= 'common\models\Lead2';
 	public const MODEL_CLIENT_LEAD 		= 'common\models\Lead';
 	public const MODEL_CLIENT_LEAD_PREFERENCES 		= 'common\models\LeadPreferences';
+	public const MODEL_LEAD_FLIGHT_SEGMENTS	= 'common\models\LeadFlightSegment';
+	public const MODEL_QUOTE	= 'common\models\Quote';
 
 	public const MODEL_LIST 		= [
 		self::MODEL_CLIENT			=> 'Client',
 		self::MODEL_CLIENT_PHONE	=> 'Client Phone',
+		self::MODEL_CLIENT_EMAIL	=> 'Client Email',
 		self::MODEL_CLIENT_LEAD		=> 'Lead',
 		self::MODEL_CLIENT_LEAD_PREFERENCES	=> 'Lead Preferences',
 		self::MODEL_CLIENT_LEAD2		=> 'Lead2',
+		self::MODEL_LEAD_FLIGHT_SEGMENTS => 'LeadFlightSegment',
+		self::MODEL_QUOTE => 'Quote',
 	];
 
 	public const APP_CONSOLE 	= 'app-console';

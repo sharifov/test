@@ -2,18 +2,29 @@
 namespace console\controllers;
 
 use common\models\Airline;
+use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\LeadFlow;
+use common\models\LeadLog;
 use common\models\Quote;
 use frontend\models\UserSiteActivity;
+use sales\logger\db\GlobalLogInterface;
+use sales\logger\db\LogDTO;
+use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
 class DbController extends Controller
 {
+
+	private const MODELS_PATH = [
+		'\\common\\models\\',
+		'\\frontend\\models\\'
+	];
 
     /**
      * @throws \yii\db\Exception
@@ -227,4 +238,84 @@ ORDER BY lf.lead_id, id';
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
+	/**
+	 *
+	 * @throws InvalidConfigException
+	 */
+    public function actionMigrateOldLeadLogsInGlobalLog(): void
+	{
+		$leadLog = LeadLog::find()->where(['>=', 'created', date('Y-m-d', strtotime('-3 months'))])->asArray()->all();
+
+		$globalLog = Yii::createObject(GlobalLogInterface::class);
+
+		foreach ($leadLog as $log) {
+			$message = json_decode($log['message'], true);
+
+			$modelPath = $this->getModelPath($message['model']);
+
+			if (!$modelPath) {
+				echo 'Log will not be inserted, because the model ' . $message['model'] . ' was not found.' . PHP_EOL;
+				continue;
+			}
+
+			$action = array_search($message['title'], GlobalLog::getActionTypeList(), false);
+
+			$this->removeDuplicatesFromOldNewAttributes($message['oldParams'], $message['newParams']);
+
+			if (empty($message['oldParams']) && empty($message['newParams'])) {
+				continue;
+			}
+
+			$globalLog->log(new LogDTO(
+				$modelPath,
+				$log['lead_id'],
+				$log['employee_id'] ? 'app-frontend' : 'app-webapi',
+				$log['employee_id'] ?? null,
+				json_encode($message['oldParams']),
+				json_encode($message['newParams']),
+				null,
+				$action ?: null,
+				$log['created'] ?? null
+			));
+		}
+	}
+
+	public function actionTruncateGlobalLog(): void
+	{
+		try {
+			Yii::$app->db->createCommand()->truncateTable('global_log')->execute();
+		} catch (Exception $e) {
+			echo $e->getMessage() . PHP_EOL;
+		}
+	}
+
+	/**
+	 * @param string $modelName
+	 * @return string|null
+	 */
+	private function getModelPath(string $modelName): ?string
+	{
+		foreach (self::MODELS_PATH as $path) {
+			try {
+				return (new \ReflectionClass(explode(' ', $path . $modelName, 2)[0]))->getName();
+			} catch (\ReflectionException $e) {
+				echo 'ReflectionException: ' . $e->getMessage() . PHP_EOL;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param array $oldAttributes
+	 * @param array $newAttributes
+	 */
+	private function removeDuplicatesFromOldNewAttributes(array &$oldAttributes, array &$newAttributes): void
+	{
+		foreach ($newAttributes as $key => $value) {
+			if (array_key_exists($key, $newAttributes) && $newAttributes[$key] == $oldAttributes[$key]) {
+				unset($newAttributes[$key], $oldAttributes[$key]);
+			}
+		}
+	}
 }

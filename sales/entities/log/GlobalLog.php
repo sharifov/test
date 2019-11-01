@@ -52,7 +52,12 @@ class GlobalLog extends ActiveRecord
 				'attributes' => [
 					ActiveRecord::EVENT_BEFORE_INSERT => ['gl_created_at']
 				],
-				'value' => date('Y-m-d H:i:s')
+				'value' => static function ($model) {
+					if ($model->sender->gl_created_at) {
+						return $model->sender->gl_created_at;
+					}
+					return date('Y-m-d H:i:s');
+				}
 			],
 		];
 	}
@@ -80,6 +85,7 @@ class GlobalLog extends ActiveRecord
 	 * @param string|null $glNewAttr
 	 * @param string|null $glFormattedAttr
 	 * @param int|null $glActionType
+	 * @param string|null $glCreatedAt
 	 * @return static
 	 */
     public static function create(
@@ -90,7 +96,8 @@ class GlobalLog extends ActiveRecord
 		?string $glOldAttr,
 		?string $glNewAttr,
 		?string $glFormattedAttr,
-		?int $glActionType
+		?int $glActionType,
+		?string $glCreatedAt
 	): self
 	{
 		$log = new static();
@@ -102,6 +109,7 @@ class GlobalLog extends ActiveRecord
 		$log->gl_new_attr = $glNewAttr;
 		$log->gl_formatted_attr = $glFormattedAttr;
 		$log->gl_action_type = $glActionType;
+		$log->gl_created_at = $glCreatedAt;
 		return $log;
 	}
 
