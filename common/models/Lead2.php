@@ -585,6 +585,8 @@ class Lead2 extends \yii\db\ActiveRecord
     public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0, $gmt): Lead2
     {
         $lead = new self();
+        $lead->l_client_phone = $phoneNumber;
+
         $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
         if($clientPhone) {
