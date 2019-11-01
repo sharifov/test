@@ -222,9 +222,16 @@ use yii\helpers\Url;
         [
             'label' => 'Deadline',
             'value' => static function (LeadQcall $model) {
+                /** @var Employee $user */
+                $user = Yii::$app->user->identity;
+                if ($user->isAgent() || $user->isSupervision()) {
+                    if (time() > strtotime($model->lqc_dt_to)) {
+                        return 'deadline';
+                    }
+                    return Yii::$app->formatter->asDuration(strtotime($model->lqc_dt_to) - time());
+                }
                 return floor((strtotime($model->lqc_dt_to) - time()) / 60);
             },
-            'visible' => $user->isAdmin()
         ],
         [
             'class' => 'yii\grid\ActionColumn',
