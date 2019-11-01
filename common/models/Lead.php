@@ -227,6 +227,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     public const CALL_STATUS_CANCEL     = 3;
     public const CALL_STATUS_DONE       = 4;
     public const CALL_STATUS_QUEUE      = 5;
+    public const CALL_STATUS_PREPARE    = 6;
 
     public const CALL_STATUS_LIST = [
         self::CALL_STATUS_NONE      => 'None',
@@ -235,6 +236,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         self::CALL_STATUS_CANCEL    => 'Cancel',
         self::CALL_STATUS_DONE      => 'Done',
         self::CALL_STATUS_QUEUE     => 'Queue',
+        self::CALL_STATUS_PREPARE   => 'Prepare',
     ];
 
 
@@ -1042,6 +1044,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         if (!$this->isReject()) {
             $this->setStatus(self::STATUS_REJECT);
         }
+    }
+
+    public function callPrepare()
+    {
+        $this->setCallStatus(self::CALL_STATUS_PREPARE);
+    }
+
+    public function isCallPrepare()
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_PREPARE;
     }
 
     public function callProcessing(): void

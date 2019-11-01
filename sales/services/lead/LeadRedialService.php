@@ -52,7 +52,7 @@ class LeadRedialService
         $this->guardUserFree($user);
         $this->guardLeadForCall($lead);
 
-        $lead->callProcessing();
+        $lead->callPrepare();
         $this->leadRepository->save($lead);
     }
 
@@ -85,7 +85,7 @@ class LeadRedialService
         $this->guardUserFree($user);
         $this->guardLeadForCallFromLastCalls($lead, $user);
 
-        $lead->callProcessing();
+        $lead->callPrepare();
         $this->leadRepository->save($lead);
     }
 

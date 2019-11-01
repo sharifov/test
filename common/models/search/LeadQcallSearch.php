@@ -165,7 +165,7 @@ class LeadQcallSearch extends LeadQcall
         $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_PROCESS]);
+            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE]]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
@@ -251,7 +251,7 @@ class LeadQcallSearch extends LeadQcall
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_PROCESS]);
+            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE]]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
