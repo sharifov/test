@@ -55,7 +55,7 @@ echo GridView::widget([
 		[
 			'attribute' => 'gl_model',
 			'value' => static function (GlobalLog $model) {
-				return $model->getModelName() . ' (#' . $model->gl_obj_id . ')';
+				return ($model->getModelName() ?: $model->gl_model) . ' (#' . $model->gl_obj_id . ')';
 			},
 			'options' => [
 				'width' => '12%'

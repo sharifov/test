@@ -8,7 +8,9 @@ use common\models\ClientPhone;
 use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\Lead2;
+use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
+use common\models\Quote;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use yii\base\BootstrapInterface;
@@ -24,7 +26,9 @@ class Logger implements BootstrapInterface
 		ClientEmail::class,
 		Lead::class,
 		Lead2::class,
-		LeadPreferences::class
+		LeadPreferences::class,
+		LeadFlightSegment::class,
+		Quote::class,
 	];
 
 	/**

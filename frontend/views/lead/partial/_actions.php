@@ -10,17 +10,342 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
 use yii\bootstrap\Modal;
-use function Matrix\identity;
 
-$urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadForm->getLead()->id]);
+$leadModel = $leadForm->getLead();
+$urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadModel->id]);
 $userId = Yii::$app->user->id;
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && Yii::$app->user->identity->canRoles(['admin', 'supervision']))) {
+
+?>
+<?php
+
+$buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
+    'lead/take',
+    'gid' => $leadModel->gid,
+    'over' => true
+], [
+    'class' => 'take-processing-btn btn btn-sm btn-info',
+    'data-status' => $leadModel->status
+]);
+
+$buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
+    'lead/take',
+    'gid' => $leadModel->gid
+],[
+    'class' => 'btn btn-sm btn-info',
+]);
+
+$buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
+    'id' => 'clone-lead',
+    'class' => 'btn btn-primary',
+    'data-url' => Url::to(['lead/clone', 'id' => $leadModel->id])
+]);
+
+$buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
+    'class' => 'add-reason btn btn-primary',
+    'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadModel->gid]),
+]);
+
+$buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
+    'class' => 'add-reason btn btn-danger',
+    'data-url' => Url::to(['lead-change-state/trash', 'gid' => $leadModel->gid]),
+]);
+
+$buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
+    'class' => 'add-reason btn btn-primary',
+    'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadModel->gid]),
+]);
+
+
+$buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
+    'lead/take',
+    'class' => 'btn btn-primary',
+    'gid' => $leadModel->gid
+]));
+
+$buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
+    'class' => 'add-reason btn btn-primary',
+    'data-url' => \yii\helpers\Url::to(['lead-change-state/return', 'gid' => $leadModel->gid]),
+]);
+
+$buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
+    'class' => 'add-reason btn-primary',
+    'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadModel->gid]),
+]);
+
+$buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadModel->l_answered ? 'UnAnswered' : 'Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadModel->id], [
+    'class' => 'add-comment btn btn-default',
+    //'data-url' => Url::to(['lead/update2', 'act' => 'answer', 'id' => $leadModel->id]),
+    'data-pjax' => 0
+]);
+
+$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && $user->canRoles(['admin', 'supervision']));
+$buttonsSubAction = [];
+$takeConditions = false;
+if (!$leadModel->isNewRecord) {
+
+    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isPending() || $leadModel->isProcessing()) && $leadModel->getAppliedAlternativeQuotes() === null);
+    $processingConditions = $leadModel->isIOwner() && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
+
+    if($processingConditions){
+        if ($user->canRoles(['admin', 'supervision'])) {
+            $buttonsSubAction[] = $buttonAnswer;
+        }
+        //$buttonsSubAction[] = $buttonHoldOn;
+        $buttonsSubAction[] = $buttonFollowUp;
+        $buttonsSubAction[] = $buttonSnooze;
+        $buttonsSubAction[] = $buttonTrash;
+        if ($leadModel->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
+            $buttonsSubAction[] = $buttonClone;
+        }
+    }
+    if ($leadModel->isSnooze()) {
+        $buttonsSubAction[] = $buttonOnWake;
+    }
+    if ($leadModel->isTrash()) {
+        $buttonsSubAction[] = $buttonReturnLead;
+        $buttonsSubAction[] = $buttonReject;
+    }
+    if ($viwModeSuperAdminCondition){
+        if ($leadModel->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
+            $buttonsSubAction[] = $buttonClone;
+        }
+    }
+
+    if ($user->isAgent() && ($leadModel->isBooked() || $leadModel->isSold())) {
+        if ($leadModel->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
+            $buttonsSubAction[] = $buttonClone;
+        }
+    }
+
+
+}
+$project = $leadModel->project;
+$projectStyles = '';
+if($project){
+    $projectCustomData = $project->custom_data;
+    if(!empty($projectCustomData)){
+        $projectCustomDataArr = json_decode($projectCustomData, true);
+        if(!empty($projectCustomDataArr)){
+            $stylesArr = [];
+            foreach ($projectCustomDataArr as $styleKey => $styleEntry){
+                if(!empty($styleEntry)){
+                    $stylesArr[] = $styleKey.':'.$styleEntry;
+                }
+            }
+            $stylesArr[] = 'background-image:url(https://communication.travelinsides.com/imgs/'. strtolower($project->name).'/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
+            if(!empty($stylesArr)){
+                $projectStyles = ' style="'.implode(';',$stylesArr).'"';
+            }
+        }
+    }
+}
+
+?>
+<div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
+
+    <?php if (!$user->canRole('qa')) : ?>
+
+            <div class="panel-main__actions">
+    	<?php if ($takeConditions){
+            if (!$leadModel->isIOwner() && ($leadModel->isProcessing() || $leadModel->isOnHold())) {
+               echo $buttonTakeOver;
+            } elseif ($leadModel->isPending() || $leadModel->isFollowUp()) {
+                echo $buttonTake;
+            }
+        }?>
+
+                <?php if ($buttonsSubAction): ?>
+                    <?php foreach ($buttonsSubAction as $btn):?>
+                        <?= $btn ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+
+
+<!--    	--><?php //if(count($buttonsSubAction) > 1):?>
+<!--    	<div class="dropdown inline-block">-->
+<!--            --><?//= Html::a('<span class="btn-icon"><i class="fa fa-ellipsis-v"></i></span><span class="btn-text">Action</span>', null, [
+//                'class' => 'btn btn-default btn-with-icon',
+//                'data-toggle' => 'dropdown'
+//            ]) ?>
+<!--            <ul class="dropdown-menu" aria-labelledby="dLabel">-->
+<!--                --><?php //foreach ($buttonsSubAction as $button):?>
+<!--                <li>--><?//= $button?><!--</li>-->
+<!--                --><?php //endforeach;?>
+<!--            </ul>-->
+<!--        </div>-->
+<!--        --><?php //elseif (count($buttonsSubAction) == 1):?>
+<!--        	--><?//= $buttonsSubAction[0];?>
+<!--    	--><?php //endif;?>
+
+        <?php if (!empty($leadModel->bo_flight_id) && $leadModel->isIOwner() && $leadModel->isBooked()) {
+            $title = empty($leadModel->additionalInformationForm->pnr)
+                ? 'Create PNR' : 'PNR Created';
+            $options = empty($leadModel->additionalInformationForm->pnr) ? [
+                'class' => 'btn btn-success add-pnr',
+                'id' => 'create-pnr',
+                'data-url' => Url::to(['lead/add-pnr', 'leadId' => $leadModel->id])
+            ] : [
+                'class' => 'btn btn-default',
+            ];
+            echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
+        } ?>
+
+
+
+        <?php
+
+//            if(!$leadModel->isNewRecord && $user->canRoles(['admin', 'supervision'])) {
+//                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadModel->id])->count();
+//                echo Html::a('Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
+//                    [
+//                        'id' => 'btn-lead-logs',
+//                        'class' => 'btn btn-default',
+//                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadModel->id])
+//                ]);
+//            }
+
+        ?>
+
+        <?php if(!$leadModel->isNewRecord && $user->canRoles(['admin', 'supervision'])): ?>
+            <?= Html::a('<i class="fa fa-bars"></i> Status Logs', null, [
+                'id' => 'view-flow-transition',
+                'class' => 'btn btn-default',
+                'title' => 'Status Logs LeadID #' . $leadForm->lead->id
+            ]) ?>
+
+            <?= Html::a('<i class="fa fa-list"></i> Data Logs', null, [
+                'id' => 'btn-general-lead-log',
+                'class' => 'btn btn-default showModalButton',
+                'data-modal_id' => 'client-large',
+                'title' => 'General Lead Log #' . $leadForm->lead->id,
+                'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
+            ]) ?>
+        <?php endif; ?>
+
+
+        <?php if($leadModel->isSold() && $user->canRoles(['admin', 'supervision'])):?>
+        	<?= Html::button('<i class="fa fa-money"></i> Split profit', [
+                    'class' => 'btn btn-default',
+                    'id' => 'split-profit',
+                    'data-url' => Url::to(['lead/split-profit', 'id' => $leadModel->id]),
+                ])?>
+
+            <?php Modal::begin(['id' => 'split-profit-modal',
+                'header' => '<h2>Split profit</h2>',
+                'size' => Modal::SIZE_LARGE
+            ])?>
+            <?php Modal::end()?>
+
+            <?php if($leadModel->tips > 0):?>
+                <?= Html::button('<i class="fa fa-money"></i> Split tips', [
+                        'class' => 'btn btn-default',
+                        'id' => 'split-tips',
+                        'data-url' => Url::to(['lead/split-tips', 'id' => $leadModel->id]),
+                    ])?>
+
+                <?php Modal::begin(['id' => 'split-tips-modal',
+                    'header' => '<h2>Split tips</h2>',
+                    'size' => Modal::SIZE_LARGE
+                ])?>
+                <?php Modal::end()?>
+            <?php endif;?>
+        <?php endif;?>
+    </div>
+
+    <?php endif; ?>
+
+</div>
+
+
+<!----Popover for adding notes START---->
+<div id="popover-content-add-note" class="hidden popover-form">
+    <?php
+    $note = new \common\models\Note();
+    $addNoteUrl = Url::to([
+        '/lead/add-note',
+        'id' => $leadModel->id
+    ]);
+    $noteForm = \yii\widgets\ActiveForm::begin([
+        'action' => $addNoteUrl,
+        'id' => 'note-form'
+    ]) ?>
+    <?= $noteForm->field($note, 'message')->textarea(['rows' => 5]) ?>
+    <?= Html::submitButton('Add', [
+        'class' => 'btn btn-success popover-close-btn',
+        'onclick' => '$(\'#popover-link-add-note\').popover(\'hide\'); $(\'#preloader\').removeClass(\'hidden\');'
+    ]) ?>
+    <?php \yii\widgets\ActiveForm::end() ?>
+</div>
+<!--endregion-->
+<style>
+    #search-results__modal .modal-dialog {
+        width: 1150px;
+    }
+
+    #modal-info-d .modal-dialog {
+        width: 900px;
+    }
+
+</style>
+
+<?php Modal::begin(['id' => 'search-results__modal',
+    'header' => '<h2>Search results</h2>',
+    'size' => Modal::SIZE_LARGE
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'flight-details__modal',
+    'header' => '<h2></h2>',
+    'size' => Modal::SIZE_DEFAULT,
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'search-result-quote__modal',
+    'header' => '<h2>Add quote</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+<?php Modal::begin(['id' => 'preview-send-quotes',
+    'header' => '<h2>Preview email</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'modal-info',
+    'header' => '<h2>Info</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'modal-info-d',
+    'header' => '<h2>Info</h2>',
+    'size' => Modal::SIZE_DEFAULT,
+])?>
+<?php Modal::end()?>
+
+
+<?php
+
+if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && $user->canRoles(['admin', 'supervision']))) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
-    $formLeadId = sprintf('%s-form', $leadForm->getLead()->formName());
+    $formLeadId = sprintf('%s-form', $leadModel->formName());
     $formClientId = sprintf('%s-form', $leadForm->getClient()->formName());
 
 
@@ -200,7 +525,7 @@ JS;
 }
 
 
-$urlCreateQuoteFromSearch = Url::to(['quote/create-quote-from-search', 'leadId' => $leadForm->getLead()->id]);
+$urlCreateQuoteFromSearch = Url::to(['quote/create-quote-from-search', 'leadId' => $leadModel->id]);
 
 $js = <<<JS
     $(document).on('click','.create_quote__btn', function (e) {
@@ -359,340 +684,16 @@ JS;
 $this->registerJs($js);
 
 ?>
-<?php
 
-$buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
-    'lead/take',
-    'gid' => $leadForm->getLead()->gid,
-    'over' => true
-], [
-    'class' => 'take-processing-btn btn btn-sm btn-info',
-    'data-status' => $leadForm->getLead()->status
-]);
-
-$buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
-    'lead/take',
-    'gid' => $leadForm->getLead()->gid
-],[
-    'class' => 'btn btn-sm btn-info',
-]);
-
-$buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
-    'id' => 'clone-lead',
-    'class' => 'btn btn-primary',
-    'data-url' => Url::to(['lead/clone', 'id' => $leadForm->getLead()->id])
-]);
-
-$buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
-    'class' => 'add-reason btn btn-primary',
-    'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadForm->getLead()->gid]),
-]);
-
-$buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
-    'class' => 'add-reason btn btn-danger',
-    'data-url' => Url::to(['lead-change-state/trash', 'gid' => $leadForm->getLead()->gid]),
-]);
-
-$buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
-    'class' => 'add-reason btn btn-primary',
-    'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadForm->getLead()->gid]),
-]);
-
-
-$buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
-    'lead/take',
-    'class' => 'btn btn-primary',
-    'gid' => $leadForm->getLead()->gid
-]));
-
-$buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
-    'class' => 'add-reason btn btn-primary',
-    'data-url' => \yii\helpers\Url::to(['lead-change-state/return', 'gid' => $leadForm->getLead()->gid]),
-]);
-
-$buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
-    'class' => 'add-reason btn-primary',
-    'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadForm->getLead()->gid]),
-]);
-
-$buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm->getLead()->l_answered ? 'UnAnswered' : 'Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id], [
-    'class' => 'add-comment btn btn-default',
-    //'data-url' => Url::to(['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id]),
-    'data-pjax' => 0
-]);
-
-$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && Yii::$app->user->identity->canRoles(['admin', 'supervision']));
-$buttonsSubAction = [];
-$takeConditions = false;
-if (!$leadForm->getLead()->isNewRecord) {
-    $takeConditions = ($leadForm->viewPermission &&
-        in_array($leadForm->getLead()->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP, Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]) &&
-        $leadForm->getLead()->getAppliedAlternativeQuotes() === null
-        );
-
-    $processingConditions = ($leadForm->getLead()->employee_id == Yii::$app->user->identity->getId() &&
-        $leadForm->getLead()->status == Lead::STATUS_PROCESSING &&
-        $leadForm->getLead()->getAppliedAlternativeQuotes() === null
-        );
-
-
-    if($processingConditions){
-        if (Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
-            $buttonsSubAction[] = $buttonAnswer;
-        }
-        //$buttonsSubAction[] = $buttonHoldOn;
-        $buttonsSubAction[] = $buttonFollowUp;
-        $buttonsSubAction[] = $buttonSnooze;
-        $buttonsSubAction[] = $buttonTrash;
-        if ($leadForm->getLead()->isSold()) {
-            if ($user->isAdmin()) {
-                $buttonsSubAction[] = $buttonClone;
-            }
-        } else {
-            $buttonsSubAction[] = $buttonClone;
-        }
-    }
-    if ($leadForm->getLead()->isSnooze()) {
-        $buttonsSubAction[] = $buttonOnWake;
-    }
-    if ($leadForm->getLead()->isTrash()) {
-        $buttonsSubAction[] = $buttonReturnLead;
-        $buttonsSubAction[] = $buttonReject;
-    }
-    if ($viwModeSuperAdminCondition){
-        if ($leadForm->getLead()->isSold()) {
-            if ($user->isAdmin()) {
-                $buttonsSubAction[] = $buttonClone;
-            }
-        } else {
-            $buttonsSubAction[] = $buttonClone;
-        }
-    }
-
-    if (Yii::$app->user->identity->isAgent() && ($leadForm->getLead()->isBooked() || $leadForm->getLead()->isSold())) {
-        if ($leadForm->getLead()->isSold()) {
-            if ($user->isAdmin()) {
-                $buttonsSubAction[] = $buttonClone;
-            }
-        } else {
-            $buttonsSubAction[] = $buttonClone;
-        }
-    }
-
-
-}
-$project = $leadForm->getLead()->project;
-$projectStyles = '';
-if($project){
-    $projectCustomData = $project->custom_data;
-    if(!empty($projectCustomData)){
-        $projectCustomDataArr = json_decode($projectCustomData, true);
-        if(!empty($projectCustomDataArr)){
-            $stylesArr = [];
-            foreach ($projectCustomDataArr as $styleKey => $styleEntry){
-                if(!empty($styleEntry)){
-                    $stylesArr[] = $styleKey.':'.$styleEntry;
-                }
-            }
-            $stylesArr[] = 'background-image:url(https://communication.travelinsides.com/imgs/'. strtolower($project->name).'/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
-            if(!empty($stylesArr)){
-                $projectStyles = ' style="'.implode(';',$stylesArr).'"';
-            }
-        }
-    }
-}
-
-?>
-<div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
-
-    <?php if (!Yii::$app->user->identity->canRole('qa')) : ?>
-
-            <div class="panel-main__actions">
-    	<?php if ($takeConditions){
-            if (in_array($leadForm->getLead()->status, [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD]) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()) {
-               echo $buttonTakeOver;
-            } else if (($leadForm->getLead()->status == Lead::STATUS_ON_HOLD && $leadForm->getLead()->employee_id == Yii::$app->user->identity->getId()) ||
-            in_array($leadForm->getLead()->status, [Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP])
-            ) {
-                echo $buttonTake;
-            }
-        }?>
-
-                <?php if ($buttonsSubAction): ?>
-                    <?php foreach ($buttonsSubAction as $btn):?>
-                        <?= $btn ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-
-
-
-<!--    	--><?php //if(count($buttonsSubAction) > 1):?>
-<!--    	<div class="dropdown inline-block">-->
-<!--            --><?//= Html::a('<span class="btn-icon"><i class="fa fa-ellipsis-v"></i></span><span class="btn-text">Action</span>', null, [
-//                'class' => 'btn btn-default btn-with-icon',
-//                'data-toggle' => 'dropdown'
-//            ]) ?>
-<!--            <ul class="dropdown-menu" aria-labelledby="dLabel">-->
-<!--                --><?php //foreach ($buttonsSubAction as $button):?>
-<!--                <li>--><?//= $button?><!--</li>-->
-<!--                --><?php //endforeach;?>
-<!--            </ul>-->
-<!--        </div>-->
-<!--        --><?php //elseif (count($buttonsSubAction) == 1):?>
-<!--        	--><?//= $buttonsSubAction[0];?>
-<!--    	--><?php //endif;?>
-
-        <?php if ($leadForm->getLead()->employee_id == Yii::$app->user->getId() &&
-            $leadForm->getLead()->status == Lead::STATUS_BOOKED &&
-            !empty($leadForm->getLead()->bo_flight_id)
-        ) {
-            $title = empty($leadForm->getLead()->additionalInformationForm->pnr)
-                ? 'Create PNR' : 'PNR Created';
-            $options = empty($leadForm->getLead()->additionalInformationForm->pnr) ? [
-                'class' => 'btn btn-success btn-with-icon add-pnr',
-                'id' => 'create-pnr',
-                'data-url' => Url::to(['lead/add-pnr', 'leadId' => $leadForm->getLead()->id])
-            ] : [
-                'class' => 'btn btn-default btn-with-icon',
-            ];
-            echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span> <span class="btn-text">' . $title . '</span>', $options);
-        } ?>
-
-
-
-        <?php
-
-//            if(!$leadForm->getLead()->isNewRecord && Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
-//                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadForm->getLead()->id])->count();
-//                echo Html::a('Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
-//                    [
-//                        'id' => 'btn-lead-logs',
-//                        'class' => 'btn btn-default',
-//                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadForm->getLead()->id])
-//                ]);
-//            }
-
-        ?>
-
-        <?php if(!$leadForm->getLead()->isNewRecord && Yii::$app->user->identity->canRoles(['admin', 'supervision'])): ?>
-            <?= Html::a('<i class="fa fa-list"></i> Logs', null, [
-                'id' => 'btn-general-lead-log',
-                'class' => 'btn btn-default showModalButton',
-                'data-modal_id' => 'client-large',
-                'title' => 'General Lead Log #' . $leadForm->lead->id,
-                'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
-            ]) ?>
-        <?php endif; ?>
-
-
-        <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && Yii::$app->user->identity->canRoles(['admin', 'supervision'])):?>
-        	<?= Html::button('<i class="fa fa-money"></i> Split profit', [
-                    'class' => 'btn btn-warning',
-                    'id' => 'split-profit',
-                    'data-url' => Url::to(['lead/split-profit', 'id' => $leadForm->getLead()->id]),
-                ])?>
-
-            <?php Modal::begin(['id' => 'split-profit-modal',
-                'header' => '<h2>Split profit</h2>',
-                'size' => Modal::SIZE_LARGE
-            ])?>
-            <?php Modal::end()?>
-
-            <?php if($leadForm->getLead()->tips > 0):?>
-                <?= Html::button('<span class="btn-icon"><i class="fa fa-money"></i></span><span class="btn-text">Split tips</span>', [
-                        'class' => 'btn btn-info btn-with-icon',
-                        'id' => 'split-tips',
-                        'data-url' => Url::to(['lead/split-tips', 'id' => $leadForm->getLead()->id]),
-                    ])?>
-
-                <?php Modal::begin(['id' => 'split-tips-modal',
-                    'header' => '<h2>Split tips</h2>',
-                    'size' => Modal::SIZE_LARGE
-                ])?>
-                <?php Modal::end()?>
-            <?php endif;?>
-        <?php endif;?>
-    </div>
-
-    <?php endif; ?>
-
-</div>
-
-
-<!----Popover for adding notes START---->
-<div id="popover-content-add-note" class="hidden popover-form">
-    <?php
-    $note = new \common\models\Note();
-    $addNoteUrl = Url::to([
-        '/lead/add-note',
-        'id' => $leadForm->getLead()->id
-    ]);
-    $noteForm = \yii\widgets\ActiveForm::begin([
-        'action' => $addNoteUrl,
-        'id' => 'note-form'
-    ]) ?>
-    <?= $noteForm->field($note, 'message')->textarea(['rows' => 5]) ?>
-    <?= Html::submitButton('Add', [
-        'class' => 'btn btn-success popover-close-btn',
-        'onclick' => '$(\'#popover-link-add-note\').popover(\'hide\'); $(\'#preloader\').removeClass(\'hidden\');'
-    ]) ?>
-    <?php \yii\widgets\ActiveForm::end() ?>
-</div>
-<!--endregion-->
-<style>
-    #search-results__modal .modal-dialog {
-        width: 1150px;
-    }
-
-    #modal-info-d .modal-dialog {
-        width: 900px;
-    }
-
-</style>
-
-<?php Modal::begin(['id' => 'search-results__modal',
-    'header' => '<h2>Search results</h2>',
-    'size' => Modal::SIZE_LARGE
-])?>
-<?php Modal::end()?>
-
-<?php Modal::begin(['id' => 'flight-details__modal',
-    'header' => '<h2></h2>',
-    'size' => Modal::SIZE_DEFAULT,
-])?>
-<?php Modal::end()?>
-
-<?php Modal::begin(['id' => 'search-result-quote__modal',
-    'header' => '<h2>Add quote</h2>',
-    'size' => Modal::SIZE_LARGE,
-])?>
-<?php Modal::end()?>
-<?php Modal::begin(['id' => 'preview-send-quotes',
-    'header' => '<h2>Preview email</h2>',
-    'size' => Modal::SIZE_LARGE,
-])?>
-<?php Modal::end()?>
-
-<?php Modal::begin(['id' => 'modal-info',
-    'header' => '<h2>Info</h2>',
-    'size' => Modal::SIZE_LARGE,
-])?>
-<?php Modal::end()?>
-
-<?php Modal::begin(['id' => 'modal-info-d',
-    'header' => '<h2>Info</h2>',
-    'size' => Modal::SIZE_DEFAULT,
-])?>
-<?php Modal::end()?>
 
 <?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css',[
-    'depends' => [\yii\bootstrap\BootstrapAsset::className()],
+    'depends' => [\yii\bootstrap\BootstrapAsset::class],
 ]);?>
 <?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal.css',[
-    'depends' => [\yii\bootstrap\BootstrapAsset::className()],
+    'depends' => [\yii\bootstrap\BootstrapAsset::class],
 ]);?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
-<?php $this->registerJsFile('/js/search-result.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
+<?php $this->registerJsFile('/js/search-result.js', ['depends' => [yii\web\JqueryAsset::class]])?>

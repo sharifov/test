@@ -736,6 +736,8 @@ class LeadViewController extends FController
 
 					$this->leadPreferencesManageService->edit($form, $lead);
 
+					$lead->refresh();
+
 					$response['error'] = false;
 					$response['message'] = 'Lead preferences successfully updated';
 					$response['html'] = $this->renderAjax('/lead/partial/_lead_preferences', [

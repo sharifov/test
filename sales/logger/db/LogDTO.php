@@ -15,6 +15,7 @@ namespace sales\logger\db;
  * @property $glNewAttr
  * @property $glFormattedAttr
  * @property $glActionType
+ * @property $glCreatedAt
  */
 class LogDTO
 {
@@ -26,6 +27,7 @@ class LogDTO
 	public $glNewAttr;
 	public $glFormattedAttr;
 	public $glActionType;
+	public $glCreatedAt;
 
 	public function __construct(
 		string $glModel,
@@ -35,7 +37,8 @@ class LogDTO
 		?string $glOldAttr = null,
 		?string $glNewAttr = null,
 		?string $glFormattedAttr = null,
-		?int $glActionType = null
+		?int $glActionType = null,
+		?string $glCreatedAt = null
 	)
 	{
 
@@ -48,5 +51,6 @@ class LogDTO
 		$this->glNewAttr = $glNewAttr;
 		$this->glFormattedAttr = $glFormattedAttr;
 		$this->glActionType = $glActionType;
+		$this->glCreatedAt = $glCreatedAt;
 	}
 }

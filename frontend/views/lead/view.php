@@ -71,7 +71,8 @@ $lead = $leadForm->getLead();
                     </div>
                     <div class="page-header__general-item">
                         <strong>UID:</strong>
-                        <span><?= Html::a($leadForm->getLead()->uid, '#', ['id' => 'view-flow-transition']) ?></span>
+                        <span><?=Html::encode($leadForm->getLead()->uid)?></span>
+                            <?//= Html::a($leadForm->getLead()->uid, '#', ['id' => 'view-flow-transition']) ?>
                     </div>
 
                     <div class="page-header__general-item">
@@ -296,7 +297,7 @@ if (!$leadForm->getLead()->isNewRecord) {
 
     $js = <<<JS
 
-    $('#view-flow-transition').click(function() {
+    $('#view-flow-transition').on('click', function() {
         $('#preloader').removeClass('hidden');
         var editBlock = $('#get-request-flow-transition');
         editBlock.find('.modal-body').html('');
