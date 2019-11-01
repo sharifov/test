@@ -360,14 +360,6 @@ $this->registerJs($js);
 
 ?>
 <?php
-$buttonAddNote = Html::a('<span class="btn-icon"><i class="fa fa-file-text-o"></i></span> <span class="btn-text">Add Note</span>', null, [
-    'class' => 'btn btn-primary btn-with-icon hidden',
-    'data-toggle' => 'popover',
-    'title' => '',
-    'data-content' => '',
-    'id' => 'popover-link-add-note',
-    'data-placement' => 'bottom',
-    'data-original-title' => 'Add note']);
 
 $buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
     'lead/take',
@@ -387,58 +379,44 @@ $buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
 
 $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
     'id' => 'clone-lead',
+    'class' => 'btn btn-primary',
     'data-url' => Url::to(['lead/clone', 'id' => $leadForm->getLead()->id])
 ]);
 
 $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
-    'class' => 'add-reason',
+    'class' => 'add-reason btn btn-primary',
     'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
 $buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
-    'class' => 'add-reason',
+    'class' => 'add-reason btn btn-danger',
     'data-url' => Url::to(['lead-change-state/trash', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
 $buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
-    'class' => 'add-reason',
+    'class' => 'add-reason btn btn-primary',
     'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
-/*$buttonSendEmail = Html::a('<i class="fa fa-envelope"></i> Send email', '#', [
-    'id' => 'send-email-action',
-    'data-url' => Url::to(['lead/send-email', 'id' => $leadForm->getLead()->id])
-]);*/
 
 $buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
     'lead/take',
+    'class' => 'btn btn-primary',
     'gid' => $leadForm->getLead()->gid
 ]));
 
 $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
-    'class' => 'add-reason',
+    'class' => 'add-reason btn btn-primary',
     'data-url' => \yii\helpers\Url::to(['lead-change-state/return', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
 $buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
-    'class' => 'add-reason',
+    'class' => 'add-reason btn-primary',
     'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
-/*$buttonAddQuote = Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Add Quote</span>', [
-    'class' => 'btn btn-success btn-with-icon add-clone-alt-quote',
-    'data-uid' => 0,
-    'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0]),
-]);
-
-$buttonQuickSearchQuote = Html::button('<i class="fa fa-search"></i> Quick Search Quote', [
-    'class' => 'btn btn-warning',
-    'id' => 'quick-search-quotes-btn',
-    'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
-]);*/
-
-$buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm->getLead()->l_answered ? 'Make UnAnswered' : 'Make Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id], [
-    'class' => 'add-comment',
+$buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm->getLead()->l_answered ? 'UnAnswered' : 'Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id], [
+    'class' => 'add-comment btn btn-default',
     //'data-url' => Url::to(['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id]),
     'data-pjax' => 0
 ]);
@@ -451,14 +429,12 @@ if (!$leadForm->getLead()->isNewRecord) {
         in_array($leadForm->getLead()->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP, Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]) &&
         $leadForm->getLead()->getAppliedAlternativeQuotes() === null
         );
+
     $processingConditions = ($leadForm->getLead()->employee_id == Yii::$app->user->identity->getId() &&
         $leadForm->getLead()->status == Lead::STATUS_PROCESSING &&
         $leadForm->getLead()->getAppliedAlternativeQuotes() === null
         );
-    $unSnoozeConditions = (/*$leadForm->getLead()->employee_id == Yii::$app->user->identity->getId() &&*/
-        $leadForm->getLead()->status == Lead::STATUS_SNOOZE
-        );
-    $unTrashConditions = ($leadForm->getLead()->status == Lead::STATUS_TRASH);
+
 
     if($processingConditions){
         if (Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
@@ -466,9 +442,8 @@ if (!$leadForm->getLead()->isNewRecord) {
         }
         //$buttonsSubAction[] = $buttonHoldOn;
         $buttonsSubAction[] = $buttonFollowUp;
-        $buttonsSubAction[] = $buttonTrash;
         $buttonsSubAction[] = $buttonSnooze;
-        //$buttonsSubAction[] = $buttonSendEmail;
+        $buttonsSubAction[] = $buttonTrash;
         if ($leadForm->getLead()->isSold()) {
             if ($user->isAdmin()) {
                 $buttonsSubAction[] = $buttonClone;
@@ -477,10 +452,10 @@ if (!$leadForm->getLead()->isNewRecord) {
             $buttonsSubAction[] = $buttonClone;
         }
     }
-    if ($unSnoozeConditions) {
+    if ($leadForm->getLead()->isSnooze()) {
         $buttonsSubAction[] = $buttonOnWake;
     }
-    if ($unTrashConditions) {
+    if ($leadForm->getLead()->isTrash()) {
         $buttonsSubAction[] = $buttonReturnLead;
         $buttonsSubAction[] = $buttonReject;
     }
@@ -542,21 +517,30 @@ if($project){
                 echo $buttonTake;
             }
         }?>
-    	<?php if(count($buttonsSubAction) > 1):?>
-    	<div class="dropdown inline-block">
-            <?= Html::a('<span class="btn-icon"><i class="fa fa-ellipsis-v"></i></span><span class="btn-text">Action</span>', null, [
-                'class' => 'btn btn-default btn-with-icon',
-                'data-toggle' => 'dropdown'
-            ]) ?>
-            <ul class="dropdown-menu" aria-labelledby="dLabel">
-                <?php foreach ($buttonsSubAction as $button):?>
-                <li><?= $button?></li>
-                <?php endforeach;?>
-            </ul>
-        </div>
-        <?php elseif (count($buttonsSubAction) == 1):?>
-        	<span class="btn btn-info btn-sm btn-out-a"><?= $buttonsSubAction[0];?></span>
-    	<?php endif;?>
+
+                <?php if ($buttonsSubAction): ?>
+                    <?php foreach ($buttonsSubAction as $btn):?>
+                        <?= $btn ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+
+
+<!--    	--><?php //if(count($buttonsSubAction) > 1):?>
+<!--    	<div class="dropdown inline-block">-->
+<!--            --><?//= Html::a('<span class="btn-icon"><i class="fa fa-ellipsis-v"></i></span><span class="btn-text">Action</span>', null, [
+//                'class' => 'btn btn-default btn-with-icon',
+//                'data-toggle' => 'dropdown'
+//            ]) ?>
+<!--            <ul class="dropdown-menu" aria-labelledby="dLabel">-->
+<!--                --><?php //foreach ($buttonsSubAction as $button):?>
+<!--                <li>--><?//= $button?><!--</li>-->
+<!--                --><?php //endforeach;?>
+<!--            </ul>-->
+<!--        </div>-->
+<!--        --><?php //elseif (count($buttonsSubAction) == 1):?>
+<!--        	--><?//= $buttonsSubAction[0];?>
+<!--    	--><?php //endif;?>
 
         <?php if ($leadForm->getLead()->employee_id == Yii::$app->user->getId() &&
             $leadForm->getLead()->status == Lead::STATUS_BOOKED &&
@@ -574,18 +558,6 @@ if($project){
             echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span> <span class="btn-text">' . $title . '</span>', $options);
         } ?>
 
-		<?php if ($leadForm->mode !== $leadForm::VIEW_MODE) {
-//            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
-//            echo Html::submitButton($title, [
-//                'id' => 'submit-lead-form-btn',
-//                'class' => 'btn btn-success btn-with-icon'
-//            ]);
-
-            if(!$leadForm->getLead()->isNewRecord) {
-                echo $buttonAddNote;
-            }
-
-        }?>
 
 
         <?php
@@ -603,7 +575,7 @@ if($project){
         ?>
 
         <?php if(!$leadForm->getLead()->isNewRecord && Yii::$app->user->identity->canRoles(['admin', 'supervision'])): ?>
-            <?= Html::a('General Log', null, [
+            <?= Html::a('<i class="fa fa-list"></i> Logs', null, [
                 'id' => 'btn-general-lead-log',
                 'class' => 'btn btn-default showModalButton',
                 'data-modal_id' => 'client-large',
@@ -614,8 +586,8 @@ if($project){
 
 
         <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && Yii::$app->user->identity->canRoles(['admin', 'supervision'])):?>
-        	<?= Html::button('<span class="btn-icon"><i class="fa fa-money"></i></span><span class="btn-text">Split profit</span>', [
-                    'class' => 'btn btn-warning btn-with-icon',
+        	<?= Html::button('<i class="fa fa-money"></i> Split profit', [
+                    'class' => 'btn btn-warning',
                     'id' => 'split-profit',
                     'data-url' => Url::to(['lead/split-profit', 'id' => $leadForm->getLead()->id]),
                 ])?>

@@ -27,7 +27,7 @@ class GlobalLogSearch extends GlobalLog
     public function rules(): array
     {
         return [
-            [['gl_id', 'gl_app_user_id', 'gl_obj_id', 'leadId'], 'integer'],
+            [['gl_id', 'gl_app_user_id', 'gl_obj_id', 'leadId', 'gl_action_type'], 'integer'],
             [['gl_app_id', 'gl_model', 'gl_old_attr', 'gl_new_attr', 'gl_formatted_attr', 'gl_created_at'], 'safe'],
         ];
     }
@@ -63,6 +63,7 @@ class GlobalLogSearch extends GlobalLog
             'gl_app_user_id' => $this->gl_app_user_id,
             'gl_obj_id' => $this->gl_obj_id,
             'gl_created_at' => $this->gl_created_at,
+			'gl_action_type' => $this->gl_action_type
         ]);
 
         $query->andFilterWhere(['like', 'gl_app_id', $this->gl_app_id])
@@ -73,54 +74,4 @@ class GlobalLogSearch extends GlobalLog
 
         return $dataProvider;
     }
-
-	/**
-	 * @param $params
-	 * @return ActiveDataProvider
-	 */
-    public function searchByLead($params): ActiveDataProvider
-	{
-		$query = self::find();
-
-		$dataProvider = new ActiveDataProvider([
-			'query' => $query,
-			'pagination' => ['pageSize' => 10],
-		]);
-
-		$this->load($params);
-
-		if (!$this->validate()) {
-			return $dataProvider;
-		}
-
-		$query->andFilterWhere([
-			'gl_obj_id' => $this->leadId,
-		]);
-
-//		$query->andFilterWhere(['like', 'gl_model', $this->gl_model]);
-
-		$subQuery = (new Query())->select(['cp.id'])
-			->from(ClientPhone::tableName() . ' as cp')
-			->join('JOIN', Client::tableName() . ' as client', 'client.id = cp.client_id')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => $this->leadId] );
-		$query->orFilterWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['ce.id'])
-			->from(ClientEmail::tableName() . ' as ce')
-			->join('JOIN', Client::tableName() . ' as client', 'client.id = ce.client_id')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => $this->leadId] );
-		$query->orFilterWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['c.id'])
-			->from(Client::tableName() . ' as c')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = c.id and lead.id = :leadId', [':leadId' => $this->leadId] );
-		$query->orFilterWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		$subQuery = (new Query())->select(['lp.id'])
-			->from(LeadPreferences::tableName() . ' as lp')
-			->where(['lead_id' => $this->leadId]);
-		$query->orFilterWhere(['IN', 'gl_obj_id', $subQuery]);
-
-		return $dataProvider;
-	}
 }

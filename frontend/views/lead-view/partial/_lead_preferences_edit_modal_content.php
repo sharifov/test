@@ -30,10 +30,10 @@ use yii\web\View;
 
     <div class="row">
     <div class="col-md-6">
-	    <?= $form->field($leadPreferencesForm, 'marketPrice')->input('number', ['min' => 0, 'max' => 99000]) ?>
+	    <?= $form->field($leadPreferencesForm, 'marketPrice')->input('number', ['min' => 0, 'max' => 99000, 'step' => 'any']) ?>
     </div>
     <div class="col-md-6">
-	    <?= $form->field($leadPreferencesForm, 'clientsBudget')->input('number', ['min' => 0, 'max' => 99000]) ?>
+	    <?= $form->field($leadPreferencesForm, 'clientsBudget')->input('number', ['min' => 0, 'max' => 99000, 'step' => 'any']) ?>
     </div>
     </div>
     <div class="row">

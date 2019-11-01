@@ -55,15 +55,26 @@ class ClientPhoneFormatter implements Formatter
 	/**
 	 * @return array
 	 */
+	public function getExceptedAttributes(): array
+	{
+		return [
+			'updated',
+			'created'
+		];
+	}
+
+	/**
+	 * @return array
+	 */
 	private function getAttributeFormatters(): array
 	{
 		$clientPhone = $this->clientPhone;
 		return [
-			'phone' => static function ($value) use ($clientPhone) {
-				return '<i class="fa fa-phone"></i> ' . $value;
+			'phone' => static function ($value) {
+				return $value;
 			},
 			'type' => static function ($value) use ($clientPhone) {
-				return $clientPhone::getPhoneTypeLabel($value) ?? $value;
+				return $clientPhone::PHONE_TYPE[$value] ?? $value;
 			}
 		];
 	}

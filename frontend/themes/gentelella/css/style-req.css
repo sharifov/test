@@ -209,6 +209,11 @@ pre {
 .label.label-info {
   background: none repeat scroll 0 0 #65bbd6;
 }
+.label.label-info.label-large {
+  vertical-align: super;
+  font-size: large;
+  background: none repeat scroll 0 0 #65bbd6;
+}
 
 .label.label-default {
   background: none repeat scroll 0 0 #91a5ae;

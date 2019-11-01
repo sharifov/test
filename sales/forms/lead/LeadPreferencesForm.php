@@ -65,6 +65,8 @@ class LeadPreferencesForm extends Model
 			['notesForExperts', 'string'],
 			['delayedCharge', 'boolean'],
 			['delayedCharge', 'default', 'value' => false],
+			[['numberStops'], 'filter', 'filter' => 'intval'],
+			[['marketPrice', 'clientsBudget'], 'filter', 'filter' => 'floatval'],
 		];
 	}
 

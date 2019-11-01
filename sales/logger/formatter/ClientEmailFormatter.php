@@ -54,15 +54,26 @@ class ClientEmailFormatter implements Formatter
 	/**
 	 * @return array
 	 */
+	public function getExceptedAttributes(): array
+	{
+		return [
+			'updated',
+			'created'
+		];
+	}
+
+	/**
+	 * @return array
+	 */
 	private function getAttributeFormatters(): array
 	{
 		$clientEmail = $this->clientEmail;
 		return [
-			'email' => static function ($value) use ($clientEmail) {
-				return '<i class="fa fa-envelope"></i> ' . $value;
+			'email' => static function ($value) {
+				return $value;
 			},
 			'type' => static function ($value) use ($clientEmail) {
-				return $clientEmail::getEmailTypeLabel($value) ?? $value;
+				return $clientEmail::EMAIL_TYPE[$value] ?? $value;
 			}
 		];
 	}

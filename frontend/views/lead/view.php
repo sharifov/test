@@ -103,14 +103,44 @@ $lead = $leadForm->getLead();
             <br>
         </div>
 
-        <div class="col-md-7">
-
+        <div class="col-md-6">
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
-                <?= $this->render('partial/_flightDetails', [
-                    'itineraryForm' => $itineraryForm,
-                    'leadForm' => $leadForm
-                ]) ?>
+            <?= $this->render('partial/_flightDetails', [
+                'itineraryForm' => $itineraryForm,
+                'leadForm' => $leadForm
+            ]) ?>
             <?php \yii\widgets\Pjax::end()?>
+        </div>
+        <div class="col-md-6">
+            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$leadForm->getLead()->isOwner(Yii::$app->user->id, false)):?>
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Warning!</h4>
+                    <p>Client information is not available in VIEW MODE, please take lead!</p>
+                </div>
+
+            <?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->isFollowUp() || ($leadForm->getLead()->isPending() && !$leadForm->getLead()->isNewRecord) ) && !$leadForm->getLead()->isOwner(Yii::$app->user->id, false)):?>
+
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Warning!</h4>
+                    <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
+                </div>
+
+            <?php else: ?>
+
+                <?= $this->render('client-info/client_info', [
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'is_manager' => $is_manager,
+                ]) ?>
+
+            <?php endif;?>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <div class="col-md-6">
+
+
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
                 <div class="row">
@@ -201,7 +231,7 @@ $lead = $leadForm->getLead();
         </div>
 
 
-        <div class="col-md-5">
+        <div class="col-md-6">
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
                 <?= $this->render('checklist/lead_checklist', [
@@ -253,27 +283,6 @@ $lead = $leadForm->getLead();
         </div>
     </div>
 
-	<aside class="sidebar right-sidebar sl-right-sidebar">
-    	 <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()):?>
-			<div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">Warning!</h4>
-                <p>Client information is not available in VIEW MODE, please take lead!</p>
-            </div>
-
-    	 <?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP || ($leadForm->getLead()->status == \common\models\Lead::STATUS_PENDING && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id != Yii::$app->user->id):?>
-
-            <div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">Warning!</h4>
-                <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
-            </div>
-
-        <?php else: ?>
-            <?= $this->render('partial/_client', [
-                'leadForm' => $leadForm
-            ])
-            ?>
-        <?php endif; ?>
-    </aside>
 
 </div>
 

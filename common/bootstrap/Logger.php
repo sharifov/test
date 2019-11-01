@@ -5,6 +5,7 @@ namespace common\bootstrap;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\Lead2;
 use common\models\LeadPreferences;
@@ -53,7 +54,8 @@ class Logger implements BootstrapInterface
 							\Yii::$app->user->id ?? null,
 							$oldAttr,
 							$newAttr,
-							null
+							null,
+							GlobalLog::ACTION_TYPE_AR[$event->name] ?? null
 						)
 					);
 				}

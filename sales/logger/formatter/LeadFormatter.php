@@ -54,6 +54,17 @@ class LeadFormatter implements Formatter
 	/**
 	 * @return array
 	 */
+	public function getExceptedAttributes(): array
+	{
+		return [
+			'l_last_action_dt',
+			'updated',
+		];
+	}
+
+	/**
+	 * @return array
+	 */
 	private function getAttributeFormatters(): array
 	{
 		$lead = $this->lead;
@@ -66,9 +77,9 @@ class LeadFormatter implements Formatter
 			},
 			'l_delayed_charge' => static function ($value) use ($lead) {
 				if ($value) {
-					return '<span class="label label-success">Yes</span>';
+					return 'yes';
 				}
-				return '<span class="label label-danger">No</span>';
+				return 'no';
 			}
 		];
 	}

@@ -41,7 +41,8 @@ class GlobalLogDBService implements GlobalLogInterface
 			$data->glAppUserId,
 			$data->glOldAttr,
 			$data->glNewAttr,
-			$data->glFormattedAttr
+			$data->glFormattedAttr,
+			$data->glActionType
 		);
 		$this->globalLogRepository->save($log);
 	}
