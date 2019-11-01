@@ -21,6 +21,10 @@ class CalculateDateService
 
         $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
 
+        if ($dayTimeHours->isEmpty()) {
+            Yii::error('qcall_day_time_hours is empty');
+        }
+
         try {
             $clientTimeZone = new \DateTimeZone($clientGmt);
         } catch (\Throwable $e) {

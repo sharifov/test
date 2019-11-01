@@ -125,11 +125,8 @@ class TestController extends FController
     public function actionTest()
     {
 
-        die;
+      die;
 
-//        $lead = Lead::findOne(271702);
-//        $lead->callReady();
-//        $lead->save();
 
         $call = Call::findOne(1035611);
         $call->c_status_id = Call::STATUS_RINGING;

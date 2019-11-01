@@ -2,6 +2,8 @@
 
 use common\models\Lead;
 use common\models\LeadQcall;
+use common\models\search\LeadQcallSearch;
+use sales\formatters\client\ClientTimeFormatter;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -15,8 +17,8 @@ use yii\helpers\Url;
 <?= GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
-    'rowOptions' => static function (LeadQcall $model, $index, $widget, $grid) {
-        if (!$model->lqcLead->isCallProcessing()) {
+    'rowOptions' => static function (LeadQcallSearch $model, $index, $widget, $grid) {
+        if (!$model->deadline) {
             return ['class' => 'danger'];
         }
     },
@@ -84,7 +86,7 @@ use yii\helpers\Url;
             'header' => 'Client time',
             'format' => 'raw',
             'value' => static function (LeadQcall $model) {
-                return $model->lqcLead->getClientTime2();
+                return ClientTimeFormatter::dayHoursFormat($model->lqcLead->getClientTime2());
             },
             'options' => ['style' => 'width:90px'],
         ],
@@ -222,7 +224,7 @@ use yii\helpers\Url;
             'value' => static function (LeadQcall $model) {
                 return floor((strtotime($model->lqc_dt_to) - time()) / 60);
             },
-            'visible' => $user->isAdmin()
+            'visible' => $user->isAdmin(),
         ],
         [
             'class' => 'yii\grid\ActionColumn',

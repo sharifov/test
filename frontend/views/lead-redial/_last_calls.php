@@ -3,6 +3,8 @@
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
+use common\models\search\LeadQcallSearch;
+use sales\formatters\client\ClientTimeFormatter;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -15,6 +17,11 @@ use yii\helpers\Url;
 
 <?= GridView::widget([
     'dataProvider' => $dataProvider,
+    'rowOptions' => static function (LeadQcallSearch $model, $index, $widget, $grid) {
+        if (!$model->deadline) {
+            return ['class' => 'danger'];
+        }
+    },
     'columns' => [
         ['class' => 'yii\grid\SerialColumn'],
         [
@@ -79,7 +86,7 @@ use yii\helpers\Url;
             'header' => 'Client time',
             'format' => 'raw',
             'value' => static function (LeadQcall $model) {
-                return $model->lqcLead->getClientTime2();
+                return ClientTimeFormatter::dayHoursFormat($model->lqcLead->getClientTime2());
             },
             'options' => ['style' => 'width:90px'],
         ],

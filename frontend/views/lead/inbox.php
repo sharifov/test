@@ -1,6 +1,7 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
+use sales\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -391,7 +392,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
-                return $model->getClientTime2();
+                return ClientTimeFormatter::format($model->getClientTime2());
             },
             //'options' => ['style' => 'width:80px'],
             //'filter' => \common\models\Employee::getList()

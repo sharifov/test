@@ -27,6 +27,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\services\lead\calculator\ClientTimeCalculator;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -488,7 +489,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @param bool $value
      */
-    private function setAnswered(bool $value): void
+    public function setAnswered(bool $value): void
     {
         if ($this->l_answered !== $value) {
             $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
@@ -2461,13 +2462,46 @@ Reason: {reason}
         return '';
     }
 
-
     /**
-     * @return string
+     * @return \DateTime|null
      * @throws \Exception
      */
-    public function getClientTime2(): string
+    public function getClientTime2():? \DateTime
     {
+        $clientDt = null;
+        $offset = false;
+
+        if ($this->offset_gmt) {
+            $offset = str_replace('.', ':', $this->offset_gmt);
+        } elseif ($this->leadFlightSegments) {
+            $firstSegment = $this->leadFlightSegments[0] ?? null;
+            if ($firstSegment && ($airport = Airport::findIdentity($firstSegment->origin)) && $airport->dst) {
+                $offset = $airport->dst;
+            }
+        }
+
+        if ($offset) {
+            if (is_numeric($offset) && $offset > 0) {
+                $offset = '+' . $offset;
+            }
+            $clientDt = new \DateTime();
+            $timezoneName = timezone_name_from_abbr('', (int)$offset * 3600, date('I', time()));
+            if ($timezoneName) {
+                $timezone = new \DateTimeZone($timezoneName);
+                $clientDt->setTimezone($timezone);
+            }
+        }
+
+        return $clientDt;
+    }
+
+    /**
+     * @return \DateTime|null
+     * @throws \Exception
+     */
+    public function getClientTime2Old()
+    {
+
         $clientTime = '-';
         $offset = false;
 
@@ -2533,7 +2567,8 @@ Reason: {reason}
 
             //$offset = '-2';
 
-            $timezoneName = timezone_name_from_abbr('',intval($offset) * 3600, true);
+
+            $timezoneName = timezone_name_from_abbr('',(int)$offset * 3600, date('I', time()));
 
             /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
            // $clientTime = Yii::$app->formatter->asTime() $date->format('H:i');

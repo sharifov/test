@@ -23,6 +23,7 @@ use yii\helpers\VarDumper;
  * @property $leadStatus
  * @property $cabin
  * @property $attempts
+ * @property $deadline
  */
 class LeadQcallSearch extends LeadQcall
 {
@@ -31,6 +32,7 @@ class LeadQcallSearch extends LeadQcall
     public $leadStatus;
     public $cabin;
     public $attempts;
+    public $deadline;
 
     /**
      * {@inheritdoc}

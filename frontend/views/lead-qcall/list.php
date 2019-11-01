@@ -1,5 +1,6 @@
 <?php
 
+use sales\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -60,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Client time',
                 'format' => 'raw',
                 'value' => function(\common\models\LeadQcall $model) {
-                    return $model->lqcLead->getClientTime2();
+                    return ClientTimeFormatter::format($model->lqcLead->getClientTime2());
                 },
                 'options' => ['style' => 'width:90px'],
             ],

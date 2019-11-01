@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use common\models\Lead;
+use sales\formatters\client\ClientTimeFormatter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -103,7 +104,7 @@ $user = Yii::$app->user->identity;
                         'label' => 'Client time',
                         'format' => 'raw',
                         'value' => static function (Lead $lead) {
-                            return $lead->getClientTime2();
+                            return ClientTimeFormatter::dayHoursFormat($lead->getClientTime2());
                         },
                     ],
                 ],

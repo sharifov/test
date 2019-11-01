@@ -16,6 +16,7 @@
  * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  */
 
+use sales\formatters\client\ClientTimeFormatter;
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 
@@ -66,7 +67,7 @@ $lead = $leadForm->getLead();
                     <?php endif; ?>
                     <div class="page-header__general-item">
                         <strong>Client:</strong>
-                        <?= $leadForm->getLead()->getClientTime2(); ?>
+                        <?= ClientTimeFormatter::format($leadForm->getLead()->getClientTime2()); ?>
                     </div>
                     <div class="page-header__general-item">
                         <strong>UID:</strong>
