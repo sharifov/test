@@ -120,7 +120,7 @@ class LeadRedialService
         $this->guardUserIsCaller($user->id, $lead->id);
         $this->guardLeadForTake($lead);
 
-        $lead->setAnswered(true);
+        $lead->answered();
         $lead->processing($user->id, $creatorId, 'Lead redial');
 
         $this->transactionManager->wrap(function () use ($lead) {

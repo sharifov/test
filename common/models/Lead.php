@@ -486,10 +486,15 @@ class Lead extends ActiveRecord implements AggregateRoot
         }
     }
 
+    public function answered()
+    {
+        $this->setAnswered(true);
+    }
+
     /**
      * @param bool $value
      */
-    public function setAnswered(bool $value): void
+    private function setAnswered(bool $value): void
     {
         if ($this->l_answered !== $value) {
             $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
