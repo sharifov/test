@@ -579,7 +579,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             $lead->save();
         }
 
-        if ($this->c_parent_id && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
+        if ($this->c_parent_id === null && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
 
             if (($lead = $this->cLead2) && $lead->l_call_status_id !== Lead::CALL_STATUS_READY) {
                 $lead->l_call_status_id = Lead::CALL_STATUS_READY;
@@ -587,6 +587,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     Yii::error('Call:afterSave:Lead:callStatus:ready');
                 }
             }
+
+        }
+
+        if ($this->c_parent_id && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
 
             if (($lqc = LeadQcall::findOne($this->c_lead_id)) && time() > strtotime($lqc->lqc_dt_from)) {
 
