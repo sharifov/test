@@ -165,7 +165,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
-                return ClientTimeFormatter::format($model->getClientTime2());
+                return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             //'options' => ['style' => 'width:80px'],
             //'filter' => \common\models\Employee::getList()

@@ -200,7 +200,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
-                return ClientTimeFormatter::format($model->getClientTime2());
+                return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             'options' => [
                 'style' => 'width:90px'

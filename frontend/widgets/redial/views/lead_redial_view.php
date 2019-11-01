@@ -104,7 +104,7 @@ $user = Yii::$app->user->identity;
                         'label' => 'Client time',
                         'format' => 'raw',
                         'value' => static function (Lead $lead) {
-                            return ClientTimeFormatter::dayHoursFormat($lead->getClientTime2());
+                            return ClientTimeFormatter::dayHoursFormat($lead->getClientTime2(), $lead->offset_gmt);
                         },
                     ],
                 ],

@@ -539,7 +539,7 @@ $duration = 10;
                                                     'label' => 'Client time',
                                                     'format' => 'raw',
                                                     'value' => function(\common\models\Lead $model) {
-                                                        return ClientTimeFormatter::format($model->getClientTime2());
+                                                        return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
                                                     },
                                                     //'options' => ['style' => 'width:80px'],
                                                     //'filter' => \common\models\Employee::getList()
@@ -641,7 +641,7 @@ $duration = 10;
                                             [
                                                 'label' => 'Client Time',
                                                 'value' => function (\common\models\Call $model) {
-                                                    return $model->cLead ? ClientTimeFormatter::format($model->cLead->getClientTime2()) : '';
+                                                    return $model->cLead ? ClientTimeFormatter::format($model->cLead->getClientTime2(), $model->cLead->offset_gmt) : '';
                                                 },
                                                 'format' => 'raw'
                                             ],
@@ -1054,7 +1054,7 @@ $duration = 10;
                 'header' => 'Client time',
                 'format' => 'raw',
                 'value' => function(\common\models\Lead $model) {
-                    return ClientTimeFormatter::format($model->getClientTime2());
+                    return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
                 },
                 //'options' => ['style' => 'width:80px'],
                 //'filter' => \common\models\Employee::getList()

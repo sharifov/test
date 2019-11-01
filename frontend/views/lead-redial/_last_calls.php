@@ -86,7 +86,7 @@ use yii\helpers\Url;
             'header' => 'Client time',
             'format' => 'raw',
             'value' => static function (LeadQcall $model) {
-                return ClientTimeFormatter::dayHoursFormat($model->lqcLead->getClientTime2());
+                return ClientTimeFormatter::dayHoursFormat($model->lqcLead->getClientTime2(), $model->lqcLead->offset_gmt);
             },
             'options' => ['style' => 'width:90px'],
         ],

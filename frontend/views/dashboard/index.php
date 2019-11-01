@@ -342,7 +342,7 @@ JS;
                 'format' => 'raw',
                 'value' => function(\common\models\LeadTask $model) {
                     if($model->ltLead) {
-                        $clientTime = ClientTimeFormatter::format($model->ltLead->getClientTime2());
+                        $clientTime = ClientTimeFormatter::format($model->ltLead->getClientTime2(), $model->ltLead->offset_gmt);
                     } else {
                         $clientTime = '-';
                     }

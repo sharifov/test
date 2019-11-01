@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Client time',
                 'format' => 'raw',
                 'value' => function(\common\models\LeadQcall $model) {
-                    return ClientTimeFormatter::format($model->lqcLead->getClientTime2());
+                    return ClientTimeFormatter::format($model->lqcLead->getClientTime2(), $model->lqcLead->offset_gmt);
                 },
                 'options' => ['style' => 'width:90px'],
             ],

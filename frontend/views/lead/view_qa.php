@@ -74,7 +74,7 @@ if($is_admin || $is_supervision) {
                     <?php endif; ?>
                     <div class="page-header__general-item">
                         <strong>Client:</strong>
-                        <?= ClientTimeFormatter::format($leadForm->getLead()->getClientTime2()); ?>
+                        <?= ClientTimeFormatter::format($leadForm->getLead()->getClientTime2(), $leadForm->getLead()->offset_gmt); ?>
                     </div>
                     <div class="page-header__general-item">
                         <strong>UID:</strong>

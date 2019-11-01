@@ -118,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                return $clientName.'<br/>'. ClientTimeFormatter::format($lead->getClientTime2());
+                return $clientName.'<br/>'. ClientTimeFormatter::format($lead->getClientTime2(), $lead->offset_gmt);
             },
             'options' => [
                 'style' => 'width:160px'
