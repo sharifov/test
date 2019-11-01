@@ -76,71 +76,59 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                     ]) ?>
                 </div>
 
-
-                <div class="col-md-4">
-                    <div id="client-manage-email">
-                    <?php if ($emails = $lead->client->clientEmails): ?>
-                        <?php
-                        if ($leadForm->viewPermission) {
-                            echo $this->render('_client_manage_email', [
-                                'clientEmails' => $emails,
-                                'lead' => $lead,
-                                'manageClientInfoAccess' => $manageClientInfoAccess
-                            ]);
-                        }
-                        ?>
-                    <?php endif; ?>
-                    </div>
-                </div>
-
                 <div class="col-md-4">
                     <div id="client-manage-phone">
-                    <?php if ($phones = $lead->client->clientPhones): ?>
-                        <?php
-                        if ($leadForm->viewPermission) {
-                            echo $this->render('_client_manage_phone', [
-                                'clientPhones' => $phones,
-                                'lead' => $lead,
-                                'manageClientInfoAccess' => $manageClientInfoAccess
-                            ]);
-                        }
-                        ?>
-                    <?php endif; ?>
+                        <?php if ($phones = $lead->client->clientPhones): ?>
+                            <?php
+                            if ($leadForm->viewPermission) {
+                                echo $this->render('_client_manage_phone', [
+                                    'clientPhones' => $phones,
+                                    'lead' => $lead,
+                                    'manageClientInfoAccess' => $manageClientInfoAccess
+                                ]);
+                            }
+                            ?>
+                        <?php endif; ?>
+                    </div>
+                    <div id="client-manage-email">
+                        <?php if ($emails = $lead->client->clientEmails): ?>
+                            <?php
+                            if ($leadForm->viewPermission) {
+                                echo $this->render('_client_manage_email', [
+                                    'clientEmails' => $emails,
+                                    'lead' => $lead,
+                                    'manageClientInfoAccess' => $manageClientInfoAccess
+                                ]);
+                            }
+                            ?>
+                        <?php endif; ?>
                     </div>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-8">
-
-
-
-                            <?php /*  Html::button('<i class="fa fa-history"></i> Actions', [
-                        'id' => 'view-client-actions-btn',
-                        'class' => 'btn btn-default'
-                    ]) */ ?>
-
-                            <?/*= Html::button('<i class="fa fa-user"></i> Client Info', [
-                                'class' => 'btn btn-default',
-                                'id' => 'btn-client-details',
-                                'data-client-id' => $leadForm->getClient()->id
-                            ])*/ ?>
-
-                            <?php if (!empty($leadForm->getLead()->request_ip)): ?>
-                                <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
-                            <?php endif; ?>
-
-
-
-
-                </div>
                 <div class="col-md-4">
                     <?= \frontend\widgets\client\ClientCounterWidget::widget([
                         'clientId' => $leadForm->getClient()->id,
                         'userId' => Yii::$app->user->id
                     ]) ?>
+
+                    <?php if (!empty($leadForm->getLead()->request_ip)): ?>
+                        <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
+                    <?php endif; ?>
+
                 </div>
             </div>
+
+                    <?php /*  Html::button('<i class="fa fa-history"></i> Actions', [
+                'id' => 'view-client-actions-btn',
+                'class' => 'btn btn-default'
+            ]) */ ?>
+
+                    <?/*= Html::button('<i class="fa fa-user"></i> Client Info', [
+                        'class' => 'btn btn-default',
+                        'id' => 'btn-client-details',
+                        'data-client-id' => $leadForm->getClient()->id
+                    ])*/ ?>
+
         </div>
     </div>
 

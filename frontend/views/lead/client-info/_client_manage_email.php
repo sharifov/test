@@ -27,14 +27,14 @@ use yii\web\View;
                         'lead-view/ajax-get-users-same-email-info',
                         'email' => $email->email,
                         'clientId' => $email->client_id
-                    ]) ?>" style="cursor:pointer;"><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
+                    ]) ?>"><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
                 <?php endif; ?>
                 <?php if($manageClientInfoAccess): ?>
-                    <a class="showModalButton text-warning" title="Edit Email" data-content-url="<?= Url::to([
+                    <a class="showModalButton" title="Edit Email" data-content-url="<?= Url::to([
                         'lead-view/ajax-edit-client-email-modal-content',
                         'gid' => $lead->gid,
                         'pid' => $email->id]) ?>" data-modal_id="client-manage-info">
-                        <i class="fa fa-edit fa-border"></i>
+                        <i class="fa fa-edit warning"></i>
                     </a>
                 <?php endif; ?>
             </td>

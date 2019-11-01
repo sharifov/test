@@ -13,7 +13,7 @@ use yii\web\View;
  */
 ?>
 
-<table class="table table-condensed table-bordered">
+<table class="table table-condensed table-bordered" style="margin: 0">
     <?php foreach ($clientPhones as $key => $phone): ?>
         <tr>
             <td title="<?= $phone::getPhoneType($phone->type) ?>" class="text-center" style="width:35px; background-color: #eef3f9">
@@ -30,10 +30,10 @@ use yii\web\View;
                     ]) ?>" ><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
                 <?php endif; ?>
                 <?php if($manageClientInfoAccess): ?>
-                    <a class="showModalButton text-warning" title="Edit Phone" data-content-url="<?= Url::to([
+                    <a class="showModalButton" title="Edit Phone" data-content-url="<?= Url::to([
                         'lead-view/ajax-edit-client-phone-modal-content',
                         'gid' => $lead->gid, 'pid' => $phone->id]) ?>" data-modal_id="client-manage-info">
-                        <i class="fa fa-edit fa-border"></i>
+                        <i class="fa fa-edit text-warning"></i>
                     </a>
                 <?php endif; ?>
             </td>

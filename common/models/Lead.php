@@ -541,6 +541,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @return bool
+     */
+    public function isIOwner(): bool
+    {
+        return $this->isOwner(Yii::$app->user->id, false);
+    }
+
+    /**
      * @param int $ownerId
      */
     private function setOwner(int $ownerId): void
