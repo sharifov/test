@@ -592,6 +592,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
         if ($this->c_parent_id && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
 
+            $lead = $this->cLead;
+
             if (($lqc = LeadQcall::findOne($this->c_lead_id)) && time() > strtotime($lqc->lqc_dt_from)) {
 
                 $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
@@ -607,7 +609,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     } catch (\Throwable $e) {
                         Yii::error($e, 'Not found redial_pending_to_follow_up_attempts setting');
                     }
-                    $lead = $this->cLead;
+
                     if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
                         try {
                             $repo = Yii::createObject(LeadRepository::class);
@@ -621,9 +623,12 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
             }
 
-            if ($this->cLead2->leadQcall) {
-                $this->cLead2->createOrUpdateQCall();
+            if ($lead->leadQcall) {
+                $lead->createOrUpdateQCall();
             }
+//            if ($this->cLead2->leadQcall) {
+//                $this->cLead2->createOrUpdateQCall();
+//            }
         }
 
         if (!$insert) {
