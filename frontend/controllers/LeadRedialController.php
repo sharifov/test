@@ -18,6 +18,23 @@ use yii\web\Response;
  */
 class LeadRedialController extends FController
 {
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['guardAutoRedial'] = [
+            'class' => \yii\filters\AccessControl::class,
+            'rules' => [
+                [
+                    'allow' => true,
+                    'matchCallback' => static function ($rule, $action) {
+                        /** @var Employee $user */
+                        return ($user = Yii::$app->user->identity) && ($profile = $user->userProfile) && $profile->up_auto_redial;
+                    }
+                ]
+            ]
+        ];
+        return $behaviors;
+    }
 
     private $leadRedialService;
 
