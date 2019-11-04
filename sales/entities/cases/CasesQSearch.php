@@ -7,16 +7,21 @@ use common\models\Lead;
 use sales\repositories\cases\CasesQRepository;
 use yii\data\ActiveDataProvider;
 use Yii;
+use yii\db\Query;
 
 /**
  * Class CasesSearch
  *
  * @property CasesQRepository $casesQRepository
+ *
+ * @property string $solved_date
  */
 class CasesQSearch extends Cases
 {
 
     private $casesQRepository;
+
+    public $solved_date;
 
     /**
      * CasesSearch constructor.
@@ -35,25 +40,27 @@ class CasesQSearch extends Cases
     public function rules(): array
     {
         return [
+        	['cs_id', 'integer'],
 
             ['cs_gid', 'string'],
 
-//            ['cs_project_id', 'integer'],
+            ['cs_project_id', 'integer'],
 
             ['cs_subject', 'string'],
 
-//            ['cs_category', 'string'],
+            ['cs_category', 'string'],
 
             ['cs_status', 'integer'],
 
-            ['cs_user_id', 'string'],
+            ['cs_user_id', 'integer'],
 
             ['cs_lead_id', 'string'],
 
-//            ['cs_dep_id', 'integer'],
+            ['cs_dep_id', 'integer'],
 
             ['cs_created_dt', 'string'],
 
+            ['solved_date', 'string'],
         ];
     }
 
@@ -262,7 +269,15 @@ class CasesQSearch extends Cases
     {
         $query = $this->casesQRepository->getSolvedQuery($user);
 
+        $query->addSelect('*');
+
         // add conditions that should always apply here
+		$query->addSelect('b.csl_start_dt as `solved_date`');
+
+		$query->join('JOIN', '('.(new Query())->select(['csl_start_dt', 'csl_case_id'])
+			->from('cases_status_log')
+			->where(['csl_to_status' => CasesStatus::STATUS_SOLVED])
+			->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql().') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -282,15 +297,18 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
+        	'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
+			'cs_user_id' => $this->cs_user_id,
+//			'cs_updated_dt' => $this->cs_updated_dt,
         ]);
 
-        if ($this->cs_user_id) {
-            $query->andWhere(['cs_user_id' => Employee::find()->select('id')->andWhere(['like', 'username', $this->cs_user_id])]);
-        }
+//        if ($this->cs_user_id) {
+//            $query->andWhere(['cs_user_id' => Employee::find()->select('id')->andWhere(['like', 'username', $this->cs_user_id])]);
+//        }
 
         if ($this->cs_lead_id) {
             $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
@@ -300,7 +318,22 @@ class CasesQSearch extends Cases
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
         }
 
+        if ($this->solved_date) {
+            $query->andFilterHaving(['DATE(solved_date)' => date('Y-m-d', strtotime($this->solved_date))]);
+        }
+
+//        if ($this->cs_updated_dt) {
+//            $query->andFilterWhere(['DATE(cs_updated_dt)' => date('Y-m-d', strtotime($this->cs_updated_dt))]);
+//        }
+
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+
+        $dataProvider->sort->attributes['solved_date'] = [
+        	'asc' => ['solved_date' => SORT_ASC],
+        	'desc' => ['solved_date' => SORT_DESC],
+		];
+
+//        echo $query->createCommand()->getRawSql();die;
 
         return $dataProvider;
     }
@@ -372,6 +405,8 @@ class CasesQSearch extends Cases
             'cs_lead_id' => 'Lead',
             'cs_dep_id' => 'Department',
             'cs_created_dt' => 'Created',
+            'cs_updated_dt' => 'Last Action',
+            'lastSolvedDate' => 'Solved',
         ];
     }
 }
