@@ -44,7 +44,7 @@ class LeadController extends Controller
                 /** @var Lead $lead */
                 $lead->callReady();
                 $this->leadRepository->save($lead);
-                $report[] = 'Lead: ' . $lead->id . ' updated';
+                $report[$lead->id] = 'Lead: ' . $lead->id . ' updated';
             } catch (\Throwable $e) {
                 $report[] = 'Lead: ' . $lead->id . ' not updated';
                 Yii::error($e, 'Lead:ReturnToCallReadyStatus');
@@ -54,6 +54,11 @@ class LeadController extends Controller
             echo $item . PHP_EOL;
         }
 
+        $message = '0 leads returned';
+        if (count($report) > 0) {
+            $message = count($report) .' leads returned. [' . implode(', ', array_keys($report)) . ']';
+        }
+        Yii::info($message, 'info\CronReturnLeadToReady');
     }
 
     /**
