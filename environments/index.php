@@ -36,6 +36,8 @@ return [
             'backend/web/assets',
             'frontend/runtime',
             'frontend/web/assets',
+            'console/runtime',
+            'webapi/runtime',
         ],
         'setExecutable' => [
             'yii',
@@ -44,6 +46,8 @@ return [
         'setCookieValidationKey' => [
             'backend/config/main-local.php',
             'frontend/config/main-local.php',
+            'console/config/main-local.php',
+            'webapi/config/main-local.php',
         ],
     ],
     'Development' => [
@@ -53,6 +57,8 @@ return [
             'backend/web/assets',
             'frontend/runtime',
             'frontend/web/assets',
+            'console/runtime',
+            'webapi/runtime',
         ],
         'setExecutable' => [
             'yii',
@@ -61,6 +67,8 @@ return [
         'setCookieValidationKey' => [
             'backend/config/main-local.php',
             'frontend/config/main-local.php',
+            'console/config/main-local.php',
+            'webapi/config/main-local.php',
         ],
     ],
     'Production' => [
@@ -70,6 +78,8 @@ return [
             'backend/web/assets',
             'frontend/runtime',
             'frontend/web/assets',
+            'console/runtime',
+            'webapi/runtime',
         ],
         'setExecutable' => [
             'yii',
@@ -77,6 +87,8 @@ return [
         'setCookieValidationKey' => [
             'backend/config/main-local.php',
             'frontend/config/main-local.php',
+            'console/config/main-local.php',
+            'webapi/config/main-local.php',
         ],
     ],
 ];
