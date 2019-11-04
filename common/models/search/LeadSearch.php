@@ -2203,7 +2203,7 @@ class LeadSearch extends Lead
          * @var $interval array
          */
         $start = date("Y-m-d H:i", $interval['start']);
-        $end = date("Y-m-d 23:59", $interval['end']);
+        $end = date("Y-m-d H:i", $interval['end']);
         $between_condition = " BETWEEN '{$start}' AND '{$end}'";
 
         $query = new Query();
@@ -2241,6 +2241,96 @@ class LeadSearch extends Lead
             $query->from('employees AS e')->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id')
                 ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
         }
+
+        $command = $query->createCommand();
+        $sql = $command->rawSql;
+
+        $paramsData = [
+            'sql' => $sql,
+            'sort' =>[
+                'defaultOrder' => [$category => SORT_DESC],
+                'attributes' => [
+                    $category
+                    /*'finalProfit' => [
+                        'asc' => ['finalProfit' => SORT_ASC],
+                        'desc' => ['finalProfit' => SORT_DESC],
+                    ],*/
+                ]
+            ],
+            /*'pagination' => [
+                'pageSize' => 50,
+            ],*/
+            'pagination' => false
+        ];
+
+        return $dataProvider = new SqlDataProvider($paramsData);
+    }
+
+    /**
+     * @param string $category
+     * @param string $period
+     * @return SqlDataProvider
+     */
+    public function searchTopTeams(string $category, string $period):SqlDataProvider
+    {
+        switch ($period) {
+            case 'currentWeek':
+                $interval = ChartTools::getWeek('0 week');
+                break;
+            case 'lastWeek':
+                $interval = ChartTools::getWeek('-1 week');
+                break;
+            case 'currentMonth':
+                $interval = ChartTools::getCurrentMonth();
+                break;
+        }
+
+        /**
+         * @var $interval array
+         */
+        $start = date("Y-m-d H:i", $interval['start']);
+        $end = date("Y-m-d H:i", $interval['end']);
+        $between_condition = " BETWEEN '{$start}' AND '{$end}'";
+
+        $query = new Query();
+
+        if ($category == 'teamsProfit'){
+            $query->addSelect(['ug_name', 'sum(final_profit) as teamsProfit']);
+            $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
+            $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
+        }
+
+        if ($category == 'teamsSoldLeads'){
+            $query->addSelect(['ug_name', 'count(leads.status='.Lead::STATUS_SOLD.') / COUNT(DISTINCT(user_group_assign.ugs_user_id)) as teamsSoldLeads']);
+            $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
+            $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
+        }
+
+        if ($category == 'teamsProfitPerPax'){
+            $query->addSelect(['ug_name', 'AVG(final_profit / adults + children) as teamsProfitPerPax']);
+            $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
+            $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
+        }
+
+        if ($category == 'teamsProfitPerAgent'){
+            $query->addSelect(['ug_name', 'AVG(final_profit) / COUNT(DISTINCT(user_group_assign.ugs_user_id)) as teamsProfitPerAgent']);
+            $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
+            $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
+        }
+
+        if ($category == 'teamsConversion'){
+            $query->addSelect(['ug_name', ' 
+                             (SUM(CASE WHEN status IN('.Lead::STATUS_SOLD.','.Lead::STATUS_BOOKED.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
+                             SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END))  as teamsConversion']);
+            $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
+            $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND (updated '.$between_condition.')');
+        }
+
+        $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
+            ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
+        $query->from('user_group' );
+        $query->groupBy('ug_name');
+
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
