@@ -24,14 +24,18 @@ use yii\helpers\Html;
                         <div class="trip__details trip-detailed" id="flight-leg-1">
                             <!--Segment1-->
                             <?php foreach ($segments as $key => $segment):?>
-                                <?php if($key > 0):?>
+                                <?php if($key > 0):
+
+                                    //$ticketBgColor = $segment->qs_ticket_id;
+
+                                    ?>
                                     <?php $prevSegment = $segments[$key-1];?>
                                     <div class="trip-detailed__layover">
                                         <span class="trip-detailed__layover-location">Layover in <?= (!$segment->departureAirport)?:$segment->departureAirport->city;?> (<?= $segment->qs_departure_airport_code?>)</span>
                                         <span class="trip-detailed__layover-duration"><?= SearchService::getLayoverDuration($prevSegment->qs_arrival_time,$segment->qs_departure_time)?></span>
                                     </div>
                                 <?php endif;?>
-                                <div class="trip-detailed__segment segment">
+                                <div class="trip-detailed__segment segment" style="background-color: <?=$segment->getTicketColor()?>">
                                     <div class="segment__wrapper">
                                         <div class="segment__options">
                                             <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $segment->qs_marketing_airline?>.png" alt="<?= $segment->qs_marketing_airline?>" class="segment__airline-logo">
