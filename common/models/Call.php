@@ -600,6 +600,24 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     if (!$lf->update()) {
                         Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
                     }
+
+                    $attempts = 0;
+                    try {
+                        $attempts = (int)Yii::$app->params['settings']['redial_pending_to_follow_up_attempts'];
+                    } catch (\Throwable $e) {
+                        Yii::error($e, 'Not found redial_pending_to_follow_up_attempts setting');
+                    }
+                    $lead = $this->cLead;
+                    if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
+                        try {
+                            $repo = Yii::createObject(LeadRepository::class);
+                            $lead->followUp(null, null, 'Redial Pending max attempts reached');
+                            $repo->save($lead);
+                        } catch (\Throwable $e) {
+                            Yii::error($e, 'Call:AfterSave:Lead follow up');
+                        }
+                    }
+
                 }
             }
 
