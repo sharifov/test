@@ -279,8 +279,10 @@ class StatsController extends FController
         $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
         $searchLeader = new LeadSearch();
 
-        $settings = Setting::find()->where(['s_key' => 'agents_ratings'])->asArray()->one();
-        $boardsSettings = json_decode($settings['s_value'], true);
+        $agentsSettings = Setting::find()->where(['s_key' => 'agents_ratings'])->asArray()->one();
+        $teamsSettings = Setting::find()->where(['s_key' => 'teams_ratings'])->asArray()->one();
+        $agentsBoardsSettings = json_decode($agentsSettings['s_value'], true);
+        $teamsBoardsSettings = json_decode($teamsSettings['s_value'], true);
 
         if(Yii::$app->request->isPost){
            $period = Yii::$app->request->post('period');
@@ -294,14 +296,26 @@ class StatsController extends FController
         $tipsDataProvider = $searchLeader->searchTopAgents('tips', $period);
         $conversionDataProvider = $searchLeader->searchTopAgents('leadConversion', $period);
 
+        $teamsProfitDataProvider = $searchLeader->searchTopTeams('teamsProfit', $period);
+        $avgSoldLeadsDataProvider = $searchLeader->searchTopTeams('teamsSoldLeads', $period);
+        $avgProfitPerPax = $searchLeader->searchTopTeams('teamsProfitPerPax', $period);
+        $avgProfitPerAgent = $searchLeader->searchTopTeams('teamsProfitPerAgent', $period);
+        $teamConversion = $searchLeader->searchTopTeams('teamsConversion', $period);
+
         if (Yii::$app->request->isAjax) {
             return $this->renderPartial('agent-ratings', [
                 'profitDataProvider' => $profitDataProvider,
                 'soldDataProvider' => $soldDataProvider,
                 'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
                 'tipsDataProvider' => $tipsDataProvider,
-                'boardsSettings' => $boardsSettings,
-                'conversionDataProvider' => $conversionDataProvider
+                'agentsBoardsSettings' => $agentsBoardsSettings,
+                'teamsBoardsSettings' => $teamsBoardsSettings,
+                'conversionDataProvider' => $conversionDataProvider,
+                'teamsProfitDataProvider' => $teamsProfitDataProvider,
+                'avgSoldLeadsDataProvider' => $avgSoldLeadsDataProvider,
+                'avgProfitPerPax' => $avgProfitPerPax,
+                'avgProfitPerAgent' => $avgProfitPerAgent,
+                'teamConversion' => $teamConversion
             ]);
         } else {
             return $this->render('agent-ratings', [
@@ -309,8 +323,14 @@ class StatsController extends FController
                 'soldDataProvider' => $soldDataProvider,
                 'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
                 'tipsDataProvider' => $tipsDataProvider,
-                'boardsSettings' => $boardsSettings,
-                'conversionDataProvider' => $conversionDataProvider
+                'agentsBoardsSettings' => $agentsBoardsSettings,
+                'teamsBoardsSettings' => $teamsBoardsSettings,
+                'conversionDataProvider' => $conversionDataProvider,
+                'teamsProfitDataProvider' => $teamsProfitDataProvider,
+                'avgSoldLeadsDataProvider' => $avgSoldLeadsDataProvider,
+                'avgProfitPerPax' => $avgProfitPerPax,
+                'avgProfitPerAgent' => $avgProfitPerAgent,
+                'teamConversion' => $teamConversion
             ]);
         }
     }
