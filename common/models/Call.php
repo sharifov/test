@@ -583,7 +583,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             if (($lead = $this->cLead2) && $lead->l_call_status_id !== Lead::CALL_STATUS_READY) {
                 $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-                if ($lead->save(false)) {
+                if (!$lead->save(false)) {
                     Yii::error('Call:afterSave:Lead:callStatus:ready');
                 }
             }
