@@ -55,35 +55,35 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
             <div class="col-md-3"></div>
 
             <div class="col-md-12">
-              <div class="col-sm-2">
+                <div class="col-sm-2">
 
-                <?php
+                    <?php
                     $phones = [];
                     foreach ($phonesTo as $phone) {
-                        $phones[$phone->phone] = $phone->phone . ($phone->description ? ' (' . $phone->description . ')' : '');
+                        $phones[$phone->phone . ':' . $phone->description] = $phone->phone . ($phone->description ? ' (' . $phone->description . ')' : '');
                     }
-                ?>
+                    ?>
 
-                <?= Select2::widget([
-                    'id' => 'redial-lead-phone-to',
-                    'name' => 'redial-lead-phone-to',
-                    'theme' => Select2::THEME_KRAJEE,
-                    'data' => $phones,
-                    'options' => [
-                        'multiple' => false
-                    ],
-                    'addon' => [
-                        'append' => [
-                            'content' => Html::button('Call', [
-                                'class' => 'btn btn-success',
-                                'title' => 'Call',
-                                'data-toggle' => 'tooltip',
-                                'id' => 'redial-lead-actions-block-call',
-                            ]),
-                            'asButton' => true
+                    <?= Select2::widget([
+                        'id' => 'redial-lead-phone-to',
+                        'name' => 'redial-lead-phone-to',
+                        'theme' => Select2::THEME_KRAJEE,
+                        'data' => $phones,
+                        'options' => [
+                            'multiple' => false
+                        ],
+                        'addon' => [
+                            'append' => [
+                                'content' => Html::button('Call', [
+                                    'class' => 'btn btn-success',
+                                    'title' => 'Call',
+                                    'data-toggle' => 'tooltip',
+                                    'id' => 'redial-lead-actions-block-call',
+                                ]),
+                                'asButton' => true
+                            ]
                         ]
-                    ]
-                ]) ?>
+                    ]) ?>
 
                 </div>
 
@@ -120,7 +120,8 @@ $callSourceType = Call::SOURCE_REDIAL_CALL;
 $js = <<<JS
 
 $("#redial-lead-actions-block-call").on('click', function (e) {
-    let phoneTo = $('#redial-lead-phone-to').val();
+    let phoneToStr = $('#redial-lead-phone-to').val();
+    let phoneTo = phoneToStr.split(":")[0];
     if (!phoneTo) {
         new PNotify({title: "Lead Redial: Call", type: "error", text: 'Not selected phone', hide: true});
         return ;
