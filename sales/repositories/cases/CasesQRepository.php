@@ -8,6 +8,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\Cases;
+use sales\entities\cases\CasesQSearch;
 use sales\entities\cases\CasesStatus;
 use yii\db\ActiveQuery;
 
@@ -29,7 +30,7 @@ class CasesQRepository
      */
     public function getPendingQuery(Employee $user): ActiveQuery
     {
-        $query = Cases::find()->andWhere(['cs_status' => CasesStatus::STATUS_PENDING]);
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_PENDING]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -53,7 +54,7 @@ class CasesQRepository
      */
     public function getInboxQuery(Employee $user): ActiveQuery
     {
-        $query = Cases::find()->andWhere(['cs_status' => CasesStatus::STATUS_PENDING]);
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_PENDING]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -85,7 +86,7 @@ class CasesQRepository
      */
     public function getFollowUpQuery(Employee $user): ActiveQuery
     {
-        $query = Cases::find()->andWhere(['cs_status' => CasesStatus::STATUS_FOLLOW_UP]);
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_FOLLOW_UP]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -113,7 +114,7 @@ class CasesQRepository
      */
     public function getProcessingQuery(Employee $user): ActiveQuery
     {
-        $query = Cases::find()->andWhere(['cs_status' => CasesStatus::STATUS_PROCESSING]);
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_PROCESSING]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -151,7 +152,7 @@ class CasesQRepository
      */
     public function getSolvedQuery(Employee $user): ActiveQuery
     {
-        $query = Cases::find()->where(['cs_status' => CasesStatus::STATUS_SOLVED]);
+        $query = CasesQSearch::find()->where(['cs_status' => CasesStatus::STATUS_SOLVED]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -189,7 +190,7 @@ class CasesQRepository
      */
     public function getTrashQuery(Employee $user): ActiveQuery
     {
-        $query = Cases::find()->andWhere(['cs_status' => CasesStatus::STATUS_TRASH]);
+        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_TRASH]);
 
         if ($user->isAdmin()) {
             return $query;
