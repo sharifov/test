@@ -46,10 +46,20 @@ use Yii;
  */
 class QuoteSegment extends \yii\db\ActiveRecord
 {
+
+
+
     const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
     CABIN_PREMIUM_BUSINESS = 'J', CABIN_FIRST = 'F', CABIN_PREMIUM_FIRST = 'P';
 
     public $isOvernight = false;
+
+    public const TICKET_COLOR_LIST = [
+        0   => '#FFFFFF',
+        1   => '#fbe5e1',
+        2   => '#fafbe1',
+        3   => '#e1fbec',
+    ];
 
     /**
      * @param array $attributes
@@ -268,4 +278,13 @@ class QuoteSegment extends \yii\db\ActiveRecord
 
         return $mapping[$cabin] ?? $cabin;
     }
+
+    /**
+     * @return string
+     */
+    public function getTicketColor(): string
+    {
+        return self::TICKET_COLOR_LIST[$this->qs_ticket_id] ?? '#FFFFFF';
+    }
+
 }

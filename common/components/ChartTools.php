@@ -80,8 +80,8 @@ class ChartTools
 
     public static function getWeek($periodName){
         $week = [];
-        $startWeek = strtotime("last monday noon", strtotime($periodName));
-        $endWeek = strtotime("next sunday midnight", $startWeek);
+        $startWeek = strtotime("last monday -12", strtotime($periodName));
+        $endWeek = strtotime("next sunday midnight -36", $startWeek);
         $week['start'] = $startWeek;
         $week['end'] = $endWeek;
 
@@ -91,7 +91,7 @@ class ChartTools
     public static function getCurrentMonth(){
         $month = [];
         $month['start'] = strtotime('first day of this month noon');
-        $month['end'] = strtotime('last day of this month');
+        $month['end'] = strtotime('last day of this month noon -24');
         return $month;
     }
 
