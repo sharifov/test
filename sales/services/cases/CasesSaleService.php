@@ -105,6 +105,20 @@ class CasesSaleService
 	}
 
 	/**
+	 * @param array $passengers
+	 * @return bool
+	 */
+	public function checkIfPassengersHasNamerefAttribute(array  $passengers): bool
+	{
+		foreach ($passengers as $passenger) {
+			if (!empty($passenger['nameref'])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * @param array $saleDataDiff
 	 * @throws Exception
 	 */

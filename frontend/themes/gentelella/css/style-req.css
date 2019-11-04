@@ -5470,3 +5470,15 @@ input[disabled] + .radio-tab__text {
 .modal-body{
   overflow: visible !important;
 }
+
+/******* CASE SALE INFO ********/
+#passengers td {
+    vertical-align: initial;
+}
+.tooltip.top .tooltip-inner {
+    background-color: #F39C12;
+}
+.tooltip.top .tooltip-arrow {
+    border-top-color: #F39C12;
+}
+/******* END CASE SALE INFO ********/

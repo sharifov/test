@@ -32,6 +32,7 @@ use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\forms\cases\CasesUpdateForm;
+use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -1180,18 +1181,7 @@ class CasesController extends FController
 				Yii::$app->request->post('cssSaleData')) {
 
 				$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
-
-				if (
-					!$caseSale->cssCs->isOwner($user->getId()) &&
-					!$user->isAdmin() &&
-					!$user->isSuperAdmin() &&
-					!$user->isExSuper() &&
-					!$user->isSupSuper()
-				) {
-					throw new \Exception('Access Denied');
-				} elseif (!$caseSale->cssCs->isProcessing()) {
-					throw new \Exception('Case is not in status: Processing');
-				}
+				$this->checkAccessToManageCaseSaleInfo($caseSale);
 
 				$form = new CasesSaleForm($caseSale, $this->casesSaleService);
 
@@ -1250,28 +1240,13 @@ class CasesController extends FController
 
 			Yii::$app->response->format = Response::FORMAT_JSON;
 
-			$user = Yii::$app->user->identity;
-
 			$out = [
 				'error' => 0,
 				'message' => ''
 			];
 
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
-
-			if (
-				!$caseSale->cssCs->isOwner($user->getId()) &&
-				!$user->isAdmin() &&
-				!$user->isSuperAdmin() &&
-				!$user->isExSuper() &&
-				!$user->isSupSuper()
-			) {
-				throw new \Exception('Access Denied.', -1);
-			} else if (!$caseSale->css_need_sync_bo) {
-				throw new \Exception('Data is already synchronized.', -2);
-			} else if (!$caseSale->cssCs->isProcessing()) {
-				throw new \Exception('Case is not in status: Processing', -3);
-			}
+			$this->checkAccessToManageCaseSaleInfo($caseSale);
 
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
 			$updatedData['sale_id'] = $caseSaleId;
@@ -1308,7 +1283,7 @@ class CasesController extends FController
 				}
 			} else {
 				$out['error'] = 1;
-				$out['message'] = 'BO request Error: ' . json_decode($response->content, true)['message'] ?? '';
+				$out['message'] = 'BO request Error: ' . (json_decode($response->content, true)['message'] ?? '');
 			}
 
 		} catch (\Throwable $throwable) {
@@ -1321,5 +1296,25 @@ class CasesController extends FController
 		}
 
 		return $out;
+	}
+
+	/**
+	 * @param CaseSale $caseSale
+	 * @return bool
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	private function checkAccessToManageCaseSaleInfo(CaseSale $caseSale): bool
+	{
+		$caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
+		$canManageSaleInfo = $caseGuard->canManageSaleInfo(
+			$caseSale,
+			Yii::$app->user->identity,
+			json_decode((string)$caseSale->css_sale_data, true)['passengers'] ?? []);
+
+		if ($canManageSaleInfo) {
+			throw new \DomainException($canManageSaleInfo, -3);
+		}
+
+		return true;
 	}
 }
