@@ -2,8 +2,11 @@
 
 use common\models\Call;
 use common\models\Lead;
+use frontend\widgets\redial\ClientPhonesDTO;
 use frontend\widgets\redial\LeadRedialViewWidget;
 use frontend\widgets\redial\RedialUrl;
+use kartik\select2\Select2;
+use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\View;
@@ -17,7 +20,7 @@ use yii\web\JqueryAsset;
 /** @var string $script */
 
 /** @var string $phoneFrom */
-/** @var string $phoneTo */
+/** @var ClientPhonesDTO[] $phonesTo */
 /** @var int $projectId */
 /** @var int $redialAutoTakeSeconds */
 
@@ -25,6 +28,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
     'position' => $this::POS_HEAD,
     'depends' => [JqueryAsset::class]
 ]);
+
 
 ?>
     <div id="redial-call-box">
@@ -45,15 +49,43 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
 
             <div class="col-md-9">
                 <div id="redial-lead-view-block">
-                      <?= LeadRedialViewWidget::widget(['lead' => $lead]) ?>
+                    <?= LeadRedialViewWidget::widget(['lead' => $lead]) ?>
                 </div>
             </div>
             <div class="col-md-3"></div>
 
             <div class="col-md-12">
-                <button id="redial-lead-actions-block-call" class="btn btn-success" style="font-size: 25px; margin-top: 5px">
-                    Call
-                </button>
+              <div class="col-sm-2">
+
+                <?php
+                    $phones = [];
+                    foreach ($phonesTo as $phone) {
+                        $phones[$phone->phone] = $phone->phone . ($phone->description ? ' (' . $phone->description . ')' : '');
+                    }
+                ?>
+
+                <?= Select2::widget([
+                    'id' => 'redial-lead-phone-to',
+                    'name' => 'redial-lead-phone-to',
+                    'theme' => Select2::THEME_KRAJEE,
+                    'data' => $phones,
+                    'options' => [
+                        'multiple' => false
+                    ],
+                    'addon' => [
+                        'append' => [
+                            'content' => Html::button('Call', [
+                                'class' => 'btn btn-success',
+                                'title' => 'Call',
+                                'data-toggle' => 'tooltip',
+                                'id' => 'redial-lead-actions-block-call',
+                            ]),
+                            'asButton' => true
+                        ]
+                    ]
+                ]) ?>
+
+                </div>
 
                 <div id="redial-lead-actions-block">
 
@@ -63,7 +95,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
                             <button id="redial-lead-actions-take" class="btn btn-success" style="font-size: 25px; ">
                                 Take
                             </button>
-<?php /*
+                            <?php /*
                             <button id="redial-lead-actions-take-cancel" class="btn btn-primary" style="font-size: 25px; ">
                                 Cancel
                             </button>
@@ -88,8 +120,13 @@ $callSourceType = Call::SOURCE_REDIAL_CALL;
 $js = <<<JS
 
 $("#redial-lead-actions-block-call").on('click', function (e) {
-    $(this).hide();
-    leadRedialReservationAndCall();
+    let phoneTo = $('#redial-lead-phone-to').val();
+    if (!phoneTo) {
+        new PNotify({title: "Lead Redial: Call", type: "error", text: 'Not selected phone', hide: true});
+        return ;
+    }
+    $('.group-redial-lead-phone-to').hide();
+    leadRedialReservationAndCall(phoneTo);
 });
 
 $("#redial-lead-actions-take").on('click', function (e) {
@@ -109,10 +146,10 @@ function hideActionBlock() {
     $('#redial-lead-actions-block *').hide();
 }
 
-function leadRedialCall() {
+function leadRedialCall(phoneTo) {
     $("#redial-lead-call-status-block-text").html('Processing ...');
     $('#redial-lead-call-status-block').show();
-    webCallLeadRedial('{$phoneFrom}', '{$phoneTo}', {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
+    webCallLeadRedial('{$phoneFrom}', phoneTo, {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
 }
 
 function callInProgress() {
@@ -156,7 +193,7 @@ function leadRedialTake() {
     })
 }
 
-function leadRedialReservationAndCall() {
+function leadRedialReservationAndCall(phoneTo) {
     new PNotify({title: "Take Lead", type: "info", text: 'Reservation for call', hide: true});
     $.ajax({
         type: '{$reservationUrl->method}',
@@ -166,7 +203,7 @@ function leadRedialReservationAndCall() {
     .done(function(data) {
         if (data.success) {
             new PNotify({title: "Take Lead: Reservation", type: "success", text: 'Lead reserved', hide: true});
-            leadRedialCall();
+            leadRedialCall(phoneTo);
         } else {
            let text = 'Error. Try again later';
            if (data.message) {

@@ -2,6 +2,7 @@
 
 namespace frontend\widgets\redial;
 
+use common\models\Call;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use Yii;
@@ -19,7 +20,7 @@ use yii\base\Widget;
  * @property RedialUrl $reservationUrl
  * @property string $script
  * @property string $phoneFrom
- * @property string $phoneTo
+ * @property ClientPhonesDTO[] $phonesTo
  */
 class LeadRedialWidget extends Widget
 {
@@ -36,7 +37,7 @@ class LeadRedialWidget extends Widget
 
     public $phoneFrom;
 
-    public $phoneTo;
+    public $phonesTo;
 
     public function init(): void
     {
@@ -67,7 +68,7 @@ class LeadRedialWidget extends Widget
             'reservationUrl' => $this->reservationUrl,
             'script' => $this->script,
             'phoneFrom' => $this->findPhoneFrom(),
-            'phoneTo' => $this->findPhoneTo(),
+            'phonesTo' => $this->findPhonesTo(),
             'projectId' => $this->findProjectId(),
             'redialAutoTakeSeconds' => $this->findRedialAutoTakeSeconds(),
         ]);
@@ -116,26 +117,50 @@ class LeadRedialWidget extends Widget
     }
 
     /**
-     * @return string
+     * @return ClientPhonesDTO[]
      */
-    private function findPhoneTo(): string
+    private function findPhonesTo(): array
     {
-        if ($this->phoneTo) {
-            return $this->phoneTo;
+        if ($this->phonesTo) {
+            return $this->phonesTo;
         }
+
+        $phones = [];
+
+        $lastCall = Call::find()
+            ->andWhere(['c_lead_id' => $this->lead->id])
+            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
+            ->andWhere(['IS NOT', 'c_from', NULL])
+            ->orderBy(['c_updated_dt' => SORT_DESC])
+            ->asArray()
+            ->one();
+
+        if ($lastCall) {
+            $phones[] = new ClientPhonesDTO($lastCall['c_from'], 'Last Called');
+        }
+
+        if ($this->lead->l_client_phone) {
+            $phones[] = new ClientPhonesDTO($this->lead->l_client_phone, 'Lead Phone');
+        }
+
         if ($this->lead->client) {
             /** @var ClientPhone $phone */
-            $phone = $this->lead->client->getClientPhones()->
+            $clientPhones = $this->lead->client->getClientPhones()->
             andWhere(['or',
                 ['type' => [ClientPhone::PHONE_FAVORITE, ClientPhone::PHONE_VALID, ClientPhone::PHONE_NOT_SET]],
                 ['IS', 'type', NULL]
             ])
-                ->orderBy(['type' => SORT_DESC])->asArray()->limit(1)->one();
-            if ($phone) {
-                return $phone['phone'];
+                ->orderBy(['type' => SORT_DESC])->asArray()->all();
+            foreach ($clientPhones as $clientPhone) {
+                $phones[] = new ClientPhonesDTO($clientPhone['phone']);
             }
         }
-        throw new \DomainException('Not found phoneTo for LeadId: ' . $this->lead->id);
+
+        if ($phones) {
+            return $phones;
+        }
+
+        throw new \DomainException('Not found phonesTo for LeadId: ' . $this->lead->id);
     }
 
     /**
