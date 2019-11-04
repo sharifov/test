@@ -10,8 +10,52 @@ use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use Yii;
 
+/**
+ * Class LeadController
+ *
+ * @property LeadRepository $leadRepository
+ */
 class LeadController extends Controller
 {
+
+    private $leadRepository;
+
+    public function __construct($id, $module, LeadRepository $leadRepository, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->leadRepository = $leadRepository;
+    }
+
+    public function actionReturnLeadToReady(): void
+    {
+        $report = [];
+
+        $interval = new \DateInterval('PT1M');
+        $interval->invert = 1;
+        $from = (new \DateTimeImmutable())->add($interval);
+
+        $leads = Lead::find()
+            ->andWhere(['l_call_status_id' => Lead::CALL_STATUS_PREPARE])
+            ->andWhere(['<', 'l_last_action_dt', $from->format('Y-m-d H:i:s')])
+            ->all();
+
+        foreach ($leads as $lead) {
+            try {
+                /** @var Lead $lead */
+                $lead->callReady();
+                $this->leadRepository->save($lead);
+                $report[] = 'Lead: ' . $lead->id . ' updated';
+            } catch (\Throwable $e) {
+                $report[] = 'Lead: ' . $lead->id . ' not updated';
+                Yii::error($e, 'Lead:ReturnToCallReadyStatus');
+            }
+        }
+        foreach ($report as $item) {
+            echo $item . PHP_EOL;
+        }
+
+    }
+
     /**
      *
      */

@@ -283,7 +283,8 @@ class LeadQcallSearch extends LeadQcall
                 ->andWhere([
                     'c_lead_id' => self::find()->select('lqc_lead_id'),
                     'c_call_type_id' => Call::CALL_TYPE_OUT,
-                    'c_created_user_id' => $user->id
+                    'c_created_user_id' => $user->id,
+                    'c_source_type_id' => Call::SOURCE_REDIAL_CALL
                 ])
 //                    ->andWhere(['IS NOT', 'c_parent_id', null])
                 ->groupBy(['c_lead_id'])
