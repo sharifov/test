@@ -31,7 +31,8 @@ use yii\helpers\Url;
                 return $model->lqcLead->getStatusName(true);
             },
             'format' => 'raw',
-            'filter' => Lead::getStatusList()
+            'filter' => Lead::getStatusList(),
+            'visible' => $user->isAdmin(),
         ],
         [
             'label' => 'Call status',

@@ -30,6 +30,7 @@ $user = Yii::$app->user->identity;
                             return $lead->getStatusName(true);
                         },
                         'format' => 'html',
+                        'visible' => $user->isAdmin(),
                     ],
                     [
                         'label' => 'Project',
