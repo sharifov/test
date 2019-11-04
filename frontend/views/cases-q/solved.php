@@ -105,6 +105,9 @@ $lists = new ListsAccess(Yii::$app->user->id);
             ],
             [
                 'attribute' => 'solved_date',
+                'value' => static function (CasesQSearch $model) {
+					return $model->solved_date ? Yii::$app->formatter->asDatetime(strtotime($model->solved_date)) : '-';
+				},
 				'filter' => DatePicker::widget([
 					'model' => $searchModel,
 					'attribute' => 'solved_date',
