@@ -120,6 +120,11 @@ $callSourceType = Call::SOURCE_REDIAL_CALL;
 $js = <<<JS
 
 $("#redial-lead-actions-block-call").on('click', function (e) {
+    let cann = $("body").find("#online-connection-indicator").attr("title").indexOf(": true");
+    if (cann < 0) {
+        new PNotify({title: "Lead Redial: Call", type: "error", text: 'Online connection error. Please wait some seconds.', hide: true});
+        return ;
+    }
     let phoneToStr = $('#redial-lead-phone-to').val();
     let phoneTo = phoneToStr.split(":")[0];
     if (!phoneTo) {

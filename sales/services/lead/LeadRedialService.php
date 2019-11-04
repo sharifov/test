@@ -163,9 +163,9 @@ class LeadRedialService
      */
     private function guardLeadForTake(Lead $lead): void
     {
-//        if (!$lead->isPending()) {
-//            throw new \DomainException('Lead is not in status Pending');
-//        }
+        if (!$lead->isPending()) {
+            throw new \DomainException('Lead is not in status Pending');
+        }
     }
 
     /**
@@ -173,12 +173,11 @@ class LeadRedialService
      */
     private function guardLeadForCall(Lead $lead): void
     {
-//        if (!$lead->isPending()) {
-//            throw new \DomainException('Lead is not in status Pending');
-//        }
+        if (!$lead->isPending()) {
+            throw new \DomainException('Lead is not in status Pending');
+        }
 
-//        if (!$lead->isCallReady()) {
-        if ($lead->isCallProcessing()) {
+        if ($lead->isCallProcessing() || $lead->isCallPrepare()) {
             throw new \DomainException('Lead is not ready for call');
         }
 
@@ -199,12 +198,11 @@ class LeadRedialService
      */
     private function guardLeadForCallFromLastCalls(Lead $lead, Employee $user): void
     {
-//        if (!$lead->isPending()) {
-//            throw new \DomainException('Lead is not in status Pending');
-//        }
+        if (!$lead->isPending()) {
+            throw new \DomainException('Lead is not in status Pending');
+        }
 
-//        if (!$lead->isCallReady()) {
-        if ($lead->isCallProcessing()) {
+        if ($lead->isCallProcessing() || $lead->isCallPrepare()) {
             throw new \DomainException('Lead is not ready for call');
         }
 
