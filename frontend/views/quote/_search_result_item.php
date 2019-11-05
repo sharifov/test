@@ -347,7 +347,7 @@ if (!empty($baggagePerSegment)) {
                                                     <?php break; endforeach;?>
                                             <?php endif;?>
                                             <?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
-                                            <?php if ($segment['recheckBaggage']):?> <h5 class="danger" title="<?=\yii\helpers\Html::encode(SearchService::getRecheckBaggageText($departCountryName, $projectName))?>"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
+                                            <?php if ($segment['recheckBaggage']):?> <h5 class="danger" title="<?=\yii\helpers\Html::encode(SearchService::getRecheckBaggageText($departCountryName))?>"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
                                             <?php if(isset($segment['stop']) && $segment['stop'] > 0):?>
 
                                                 <h5 class="danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment['stop']])?></h5>
