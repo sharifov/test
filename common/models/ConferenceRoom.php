@@ -302,9 +302,9 @@ class ConferenceRoom extends \yii\db\ActiveRecord
 
         $params['maxParticipants']                  = $this->cr_param_max_participants ?: 250;
         $params['statusCallbackEvent']              = 'start end join leave mute hold'; //speaker
-        $params['statusCallback']                   = $communicationHost . 'v1/twilio/conference-status-callback';
+        $params['statusCallback']                   = $communicationHost . 'twilio/conference-status-callback';
         $params['statusCallbackMethod']             = 'POST';
-        $params['recordingStatusCallback']          = $communicationHost . 'v1/twilio/conference-recording-status-callback';
+        $params['recordingStatusCallback']          = $communicationHost . 'twilio/conference-recording-status-callback';
         $params['recordingStatusCallbackMethod']    = 'POST';
         $params['recordingStatusCallbackEvent']     = 'completed'; // in-progress, completed, absent
         //$params['eventCallbackUrl']                 = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-event-callback';
