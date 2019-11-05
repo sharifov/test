@@ -701,6 +701,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                             // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
                             $lead->l_answered = true;
                             $repo->save($lead);
+                            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                                $qCall->delete();
+                            }
                             Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                             $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
                             Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
