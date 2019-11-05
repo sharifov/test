@@ -2391,7 +2391,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalProfit = $lead->finalProfit ?: $lead->getBookedQuote()->getEstimationProfit();
+            $totalProfit = $lead->getFinalProfit() ?: $lead->getBookedQuote()->getEstimationProfit();
             $splitForm = new ProfitSplitForm($lead);
 
             $mainAgentProfit = $totalProfit;
@@ -2473,7 +2473,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalTips = $lead->totalTips;
+            $totalTips = $lead->getTotalTips();
             $splitForm = new TipsSplitForm($lead);
 
             $mainAgentTips = $totalTips;

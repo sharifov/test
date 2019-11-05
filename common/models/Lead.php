@@ -96,10 +96,12 @@ use yii\helpers\VarDumper;
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
  * @property int $quotesExpertCount
- * @property double $agentProcessingFee
+ * @property double $agentsProcessingFee
  * @property double $agents_processing_fee
  * @property string $l_client_time
  * @property boolean $enableActiveRecordEvents
+ * @property $totalTips
+ * @property $processingFeePerPax
  *
  * @property $status_description;
  *
@@ -243,15 +245,11 @@ class Lead extends ActiveRecord implements AggregateRoot
     public const SCENARIO_API = 'scenario_api';
     public const SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
 
-    public $additionalInformationForm;
     public $status_description;
     public $totalProfit;
     public $splitProfitPercentSum = 0;
-    public $totalTips;
     public $splitTipsPercentSum = 0;
 
-    public $finalProfit = 0;
-    public $agentProcessingFee = 0.00;
     public $l_client_time;
 
     public $enableActiveRecordEvents = true;
@@ -2791,9 +2789,7 @@ Reason: {reason}
             $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
         }
 
-        $this->totalTips = $this->tips ? $this->tips/2 : 0;
-
-
+//        $this->totalTips = $this->tips ? $this->tips/2 : 0;
 
 //        $processing_fee_per_pax = self::AGENT_PROCESSING_FEE_PER_PAX;
 //
@@ -2809,17 +2805,73 @@ Reason: {reason}
 //                unset($groups);
 //            }
 //        }
+//
+//        if($this->final_profit !== null) {
+//            $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
+//        } else {
+//            $this->finalProfit = $this->final_profit;
+//        }
 
-        $processing_fee_per_pax = $this->getProcessingFeePerPax();
+//        $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
+//        $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
+    }
 
-        if($this->final_profit !== null) {
-            $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
-        } else {
-            $this->finalProfit = $this->final_profit;
+    private $additionalInformationForm;
+
+    public function getAdditionalInformationForm()
+    {
+        if ($this->additionalInformationForm !== null) {
+            return $this->additionalInformationForm;
         }
 
-        $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
-        $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
+        if (!empty($this->additional_information)) {
+            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
+        }
+
+
+    }
+
+    private $totalTips;
+
+    public function getTotalTips()
+    {
+        if ($this->totalTips !== null) {
+            return $this->totalTips;
+        }
+
+        $this->totalTips = $this->tips ? $this->tips/2 : 0;
+
+        return $this->totalTips;
+    }
+
+    private $agentsProcessingFee;
+
+    public function getAgentsProcessingFee()
+    {
+        if ($this->agentsProcessingFee !== null) {
+            return $this->agentsProcessingFee;
+        }
+
+        $this->agentsProcessingFee = $this->agents_processing_fee ?: ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+
+        return $this->agentsProcessingFee;
+    }
+
+    private $finalProfit;
+
+    public function getFinalProfit()
+    {
+        if ($this->finalProfit !== null) {
+            return $this->finalProfit;
+        }
+
+        if ($this->final_profit !== null) {
+            $this->finalProfit = (float)$this->final_profit - ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+        } else {
+            $this->finalProfit = null;
+        }
+
+        return $this->finalProfit;
     }
 
     private $processingFeePerPax;
@@ -2844,6 +2896,7 @@ Reason: {reason}
                 unset($groups);
             }
         }
+
         return $this->processingFeePerPax;
     }
 

@@ -125,19 +125,10 @@ class TestController extends FController
     public function actionTest()
     {
 
-      die;
 
-
-        $call = Call::findOne(1035611);
-        $call->c_status_id = Call::STATUS_RINGING;
-//        $call->c_status_id = Call::STATUS_IN_PROGRESS;
-//        $call->c_status_id = Call::STATUS_COMPLETED;
-//        $call->c_status_id = Call::STATUS_BUSY;
-//        $call->c_status_id = Call::STATUS_NO_ANSWER;
-//        $call->c_status_id = Call::STATUS_FAILED;
-//        $call->c_status_id = Call::STATUS_CANCELED;
-
-        $call->save();
+        $quote = Quote::findOne(6390);
+//        echo $quote->lead_id;
+        echo $quote->lead->agents_processing_fee;
         die;
         return $this->render('blank');
 
