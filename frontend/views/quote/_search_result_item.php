@@ -95,7 +95,7 @@ if (!empty($baggagePerSegment)) {
 
             <?php if($technicalStopCnt):?>
                 <div class="quote__seats" title="Technical Stops">
-                    <span class="fa fa-warning danger"></span> Stops (<?= $technicalStopCnt?>)
+                    <span class="fa fa-warning danger"></span>Tech Stops (<?= $technicalStopCnt?>)
                 </div>
             <?php endif;?>
 
