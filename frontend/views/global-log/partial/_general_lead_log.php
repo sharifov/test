@@ -32,9 +32,9 @@ echo GridView::widget([
 				$template = '<i class="fa fa-user"></i> ';
 
 				if ($model->user) {
-					if ($model->user->username) {
+					if (property_exists($model->user, 'username')) {
 						$template .= $model->user->username . ' <br>(' . implode(', ', $model->user->getRoles()) .')';
-					} elseif ($model->user->au_name) {
+					} elseif (property_exists($model->user, 'au_name')) {
 						$template .= $model->user->au_name;
 					}
 				} else {
