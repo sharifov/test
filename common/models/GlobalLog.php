@@ -202,4 +202,20 @@ class GlobalLog extends ActiveRecord
 		return null;
 	}
 
+	/**
+	 * @return bool
+	 */
+	public function isAppFrontend(): bool
+	{
+		return $this->gl_app_id === 'app-frontend';
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isAppWebApi(): bool
+	{
+		return $this->gl_app_id === 'app-webapi';
+	}
+
 }

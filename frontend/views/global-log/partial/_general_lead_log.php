@@ -29,18 +29,21 @@ echo GridView::widget([
 			'header' => 'Who made the changes',
 			'attribute' => 'gl_app_user_id',
 			'value' => static function (GlobalLog $model) {
-				$template = '<i class="fa fa-user"></i> ';
+				$template = '';
 
-				if ($model->user) {
-					if (property_exists($model->user, 'username')) {
-						$template .= $model->user->username . ' <br>(' . implode(', ', $model->user->getRoles()) .')';
-					} elseif (property_exists($model->user, 'au_name')) {
-						$template .= $model->user->au_name;
-					}
+				if ($model->isAppFrontend()) {
+					$template .= '<i class="fa fa-user"></i> ';
+					$template .= \yii\helpers\Html::encode($model->user->username) . ' <br>(' . implode(', ', $model->user->getRoles()) .')';
+				} elseif ($model->isAppWebApi()) {
+					$template .= \yii\helpers\Html::encode($model->user->au_name);
 				} else {
-
-					$template .= 'Console';
+					if ($model->gl_app_user_id) {
+						$template .= 'Console UserId: ' . $model->gl_app_user_id;
+					} else {
+						$template .= 'Console';
+					}
 				}
+
 
 				$template .= '<br><br> <i class="fa fa-calendar"></i> ' . $model->gl_created_at;
 
