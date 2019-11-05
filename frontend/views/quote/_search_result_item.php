@@ -23,13 +23,18 @@ $preSegment = null;
 $airportChange = false;
 $freeBaggage = false;
 $baggagePerSegment = [];
+$technicalStopCnt = 0;
+
 foreach ($result['trips'] as $trip){
     if(isset($trip['duration'])){
         $totalDuration[] = $trip['duration'];
         $totalDurationSum += $trip['duration'];
     }
     $stopCnt = count($trip['segments']) - 1;
-    $technicalStopCnt = 0;
+
+    //\yii\helpers\VarDumper::dump($result['trips'], 10, true); exit;
+
+
     foreach ($trip['segments'] as $segment){
         if(isset($segment['stop']) && $segment['stop'] > 0){
             $stopCnt += $segment['stop'];
@@ -54,6 +59,9 @@ foreach ($result['trips'] as $trip){
     $time[] = ['departure' => $firstSegment['departureTime'],'arrival' => $lastSegment['arrivalTime']];
     $stops[] = $stopCnt;
 }
+
+
+
 if (!empty($baggagePerSegment)) {
     if (min($baggagePerSegment) == 1) {
         $bagFilter = 1;
@@ -213,7 +221,7 @@ if (!empty($baggagePerSegment)) {
             <?php
 
                 if ($needRecheck) {
-                    $bagText = 'Bag re-check not required'; //SearchService::getRecheckBaggageText();
+                    $bagText = 'Bag re-check is required'; //SearchService::getRecheckBaggageText();
                 } else {
                     $bagText = 'Bag re-check not required';
                 }
