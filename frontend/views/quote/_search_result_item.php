@@ -221,7 +221,7 @@ if (!empty($baggagePerSegment)) {
             <?php
 
                 if ($needRecheck) {
-                    $bagText = 'Bag re-check is required'; //SearchService::getRecheckBaggageText();
+                    $bagText = 'Bag re-check may be required'; //SearchService::getRecheckBaggageText();
                 } else {
                     $bagText = 'Bag re-check not required';
                 }
