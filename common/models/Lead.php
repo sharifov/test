@@ -249,7 +249,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     public $totalProfit;
     public $splitProfitPercentSum = 0;
     public $splitTipsPercentSum = 0;
-
+    public $additionalInformationForm;
     public $l_client_time;
 
     public $enableActiveRecordEvents = true;
@@ -2814,21 +2814,6 @@ Reason: {reason}
 
 //        $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
 //        $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
-    }
-
-    private $additionalInformationForm;
-
-    public function getAdditionalInformationForm()
-    {
-        if ($this->additionalInformationForm !== null) {
-            return $this->additionalInformationForm;
-        }
-
-        if (!empty($this->additional_information)) {
-            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
-        }
-
-
     }
 
     private $totalTips;

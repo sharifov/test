@@ -194,10 +194,10 @@ if($project){
 <!--        	--><?//= $buttonsSubAction[0];?>
 <!--    	--><?php //endif;?>
 
-        <?php /* if (!empty($leadModel->bo_flight_id) && $leadModel->isIOwner() && $leadModel->isBooked()) {
-            $title = empty($leadModel->additionalInformationForm->pnr)
+        <?php  if (!empty($leadModel->bo_flight_id) && $leadModel->isIOwner() && $leadModel->isBooked()) {
+            $title = empty($leadModel->additionalInformationForm[0]->pnr)
                 ? 'Create PNR' : 'PNR Created';
-            $options = empty($leadModel->additionalInformationForm->pnr) ? [
+            $options = empty($leadModel->additionalInformationForm[0]->pnr) ? [
                 'class' => 'btn btn-success add-pnr',
                 'id' => 'create-pnr',
                 'data-url' => Url::to(['lead/add-pnr', 'leadId' => $leadModel->id])
@@ -205,7 +205,7 @@ if($project){
                 'class' => 'btn btn-default',
             ];
             echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
-        } */ ?>
+        }  ?>
 
 
 

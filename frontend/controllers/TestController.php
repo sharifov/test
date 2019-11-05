@@ -126,9 +126,9 @@ class TestController extends FController
     {
 
 
-        $quote = Quote::findOne(6390);
-//        echo $quote->lead_id;
-        echo $quote->lead->agents_processing_fee;
+        $quote = Lead::findOne(271137);
+
+
         die;
         return $this->render('blank');
 
