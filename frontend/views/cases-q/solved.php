@@ -55,6 +55,7 @@ $lists = new ListsAccess(Yii::$app->user->id);
             ],
             [
                 'attribute' => 'cs_user_id',
+                'label' => 'Agent',
                 'value' => static function (CasesQSearch $model) {
                     return $model->owner ? $model->owner->username : '';
                 },

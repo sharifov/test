@@ -2,8 +2,11 @@
 
 use common\models\Department;
 use common\models\Project;
+use sales\access\ListsAccess;
 use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CasesQSearch;
 use yii\helpers\Html;
+use dosamigos\datepicker\DatePicker;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
 
@@ -13,6 +16,8 @@ use sales\entities\cases\Cases;
 
 $this->title = 'Follow Up Queue';
 $this->params['breadcrumbs'][] = $this->title;
+
+$lists = new ListsAccess(Yii::$app->user->id);
 ?>
 <style>
     .dropdown-menu {
@@ -34,43 +39,54 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'cs_id',
             'cs_gid',
-            [
-                'attribute' => 'cs_project_id',
-                'value' => function (Cases $model) {
-                    return $model->project ? $model->project->name : '';
-                },
-                //'filter' => Project::getList()
-            ],
+			[
+				'attribute' => 'cs_project_id',
+				'value' => static function (CasesQSearch $model) {
+					return $model->project ? $model->project->name : '';
+				},
+				'filter' => Project::getList()
+			],
             'cs_subject',
             [
                 'attribute' => 'cs_category',
-                'value' => function (Cases $model) {
+                'value' => function (CasesQSearch $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-                //'filter' => CasesCategory::getList()
+                'filter' => CasesCategory::getList()
             ],
             [
                 'attribute' => 'cs_lead_id',
-                'value' => function (Cases $model) {
+                'value' => function (CasesQSearch $model) {
                     return $model->lead ? $model->lead->uid : '';
                 },
             ],
-            [
-                'attribute' => 'cs_dep_id',
-                'value' => function (Cases $model) {
-                    return $model->department ? $model->department->dep_name : '';
-                },
-                //'filter' => Department::getList()
-            ],
-            [
-                'attribute' => 'cs_created_dt',
-                'value' => function (Cases $model) {
-                    return $model->cs_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
-                },
-            ],
+			[
+				'attribute' => 'cs_dep_id',
+				'value' => static function (CasesQSearch $model) {
+					return $model->department ? $model->department->dep_name : '';
+				},
+				'filter' => Department::getList()
+			],
+			[
+				'attribute' => 'cs_created_dt',
+				'value' => static function (CasesQSearch $model) {
+					return $model->cs_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
+				},
+				'filter' => DatePicker::widget([
+					'model' => $searchModel,
+					'attribute' => 'cs_created_dt',
+					'clientOptions' => [
+						'autoclose' => true,
+						'format' => 'yyyy-mm-dd'
+					],
+					'options' => [
+						'autocomplete' => 'off'
+					]
+				]),
+			],
             [
                 'label' => 'Pending Time',
-                'value' => function (Cases $model) {
+                'value' => function (CasesQSearch $model) {
                     $createdTS = strtotime($model->cs_created_dt);
     
                     $diffTime = time() - $createdTS;
@@ -87,29 +103,31 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Client time',
                 'format' => 'raw',
-                'value' => function(Cases $model) {
+                'value' => function(CasesQSearch $model) {
                     return $model->getClientTime();
                 },
             ],
-            [
-                'header' => 'Agent',
-                'format' => 'raw',
-                'value' => function (Cases $model) {
-                    return $model->owner ? '<i class="fa fa-user"></i> ' . $model->owner->username : '-';
-                },
-            ],
-            [
-                'header' => 'Last Action',
-                'format' => 'raw',
-                'value' => function (Cases $model) {
-                    $createdTS = strtotime($model->cs_updated_dt);
-    
-                    $diffTime = time() - $createdTS;
-                    $diffHours = (int) ($diffTime / (60 * 60));
-    
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
-                }
-            ],
+			[
+				'attribute' => 'cs_user_id',
+                'label' => 'Agent',
+				'value' => static function (CasesQSearch $model) {
+					return $model->owner ? $model->owner->username : '';
+				},
+				'filter' => $lists->getEmployees(),
+				'visible' => Yii::$app->user->identity->isSupSuper() || Yii::$app->user->identity->isExSuper() || Yii::$app->user->identity->isAdmin()
+			],
+			[
+				'attribute' => 'cs_updated_dt',
+				'label' => 'Last Action',
+				'value' => static function (CasesQSearch $model) {
+					$createdTS = strtotime($model->cs_updated_dt);
+
+					$diffTime = time() - $createdTS;
+					$diffHours = (int) ($diffTime / (60 * 60));
+
+					return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+				},
+			],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {take}',
