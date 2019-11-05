@@ -2793,20 +2793,24 @@ Reason: {reason}
 
         $this->totalTips = $this->tips ? $this->tips/2 : 0;
 
-        $processing_fee_per_pax = self::AGENT_PROCESSING_FEE_PER_PAX;
 
-        if($this->employee_id && $this->employee) {
-            $groups = $this->employee->ugsGroups;
-            if($groups) {
-                foreach ($groups as $group) {
-                    if($group->ug_processing_fee) {
-                        $processing_fee_per_pax = $group->ug_processing_fee;
-                        break;
-                    }
-                }
-                unset($groups);
-            }
-        }
+
+//        $processing_fee_per_pax = self::AGENT_PROCESSING_FEE_PER_PAX;
+//
+//        if($this->employee_id && $this->employee) {
+//            $groups = $this->employee->ugsGroups;
+//            if($groups) {
+//                foreach ($groups as $group) {
+//                    if($group->ug_processing_fee) {
+//                        $processing_fee_per_pax = $group->ug_processing_fee;
+//                        break;
+//                    }
+//                }
+//                unset($groups);
+//            }
+//        }
+
+        $processing_fee_per_pax = $this->getProcessingFeePerPax();
 
         if($this->final_profit !== null) {
             $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
@@ -2816,6 +2820,31 @@ Reason: {reason}
 
         $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
         $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
+    }
+
+    private $processingFeePerPax;
+
+    public function getProcessingFeePerPax()
+    {
+        if ($this->processingFeePerPax !== null) {
+            return $this->processingFeePerPax;
+        }
+
+        $this->processingFeePerPax = self::AGENT_PROCESSING_FEE_PER_PAX;
+
+        if ($this->employee_id && $this->employee) {
+            $groups = $this->employee->ugsGroups;
+            if ($groups) {
+                foreach ($groups as $group) {
+                    if ($group->ug_processing_fee) {
+                        $this->processingFeePerPax = $group->ug_processing_fee;
+                        break;
+                    }
+                }
+                unset($groups);
+            }
+        }
+        return $this->processingFeePerPax;
     }
 
     /**
