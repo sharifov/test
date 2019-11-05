@@ -528,6 +528,15 @@ class CommunicationController extends ApiBaseController
                 $upp = null;
 
                 if ($call->isOut()) {
+
+                    if (
+                        isset($callOriginalData['c_source_type_id'])
+                        && $callOriginalData['c_source_type_id']
+                        && (int)$callOriginalData['c_source_type_id'] === Call::SOURCE_REDIAL_CALL
+                    ) {
+                            $call->c_source_type_id = Call::SOURCE_REDIAL_CALL;
+                    }
+
                     if (!$call->c_client_id && $call->c_to) {
                         $clientPhone = ClientPhone::find()->where(['phone' => $call->c_to])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                         if ($clientPhone && $clientPhone->client_id) {
@@ -620,26 +629,26 @@ class CommunicationController extends ApiBaseController
 //                }
 //            }
 
-            if($call->c_lead_id && $lead = $call->cLead) {
-                if ($lead->isPending() && $lead->isCallProcessing()) {
-
-                    $delayTimeMin = $lead->getDelayPendingTime();
-                    $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+' . $delayTimeMin . ' minutes'));
-                    $lead->employee_id = null;
-                    $lead->callReady();
-
-                    if (!$lead->save()) {
-                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save');
-                    }
-                }
-
-                if ($lead->isProcessing() && !$lead->isCallDone()) {
-                    $lead->callDone();
-                    if (!$lead->save()) {
-                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save2');
-                    }
-                }
-            }
+//            if($call->c_lead_id && $lead = $call->cLead) {
+//                if ($lead->isPending() && $lead->isCallProcessing()) {
+//
+//                    $delayTimeMin = $lead->getDelayPendingTime();
+//                    $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+' . $delayTimeMin . ' minutes'));
+//                    $lead->employee_id = null;
+//                    $lead->callReady();
+//
+//                    if (!$lead->save()) {
+//                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save');
+//                    }
+//                }
+//
+//                if ($lead->isProcessing() && !$lead->isCallDone()) {
+//                    $lead->callDone();
+//                    if (!$lead->save()) {
+//                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save2');
+//                    }
+//                }
+//            }
             if(!$call->save()) {
                 Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceClient:Call:save');
             }

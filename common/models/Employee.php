@@ -1790,13 +1790,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isCallFree() : bool
     {
-        $isFree = true;
-        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->limit(1)->exists(); //Call::CALL_STATUS_QUEUE, andWhere(['<>', 'c_parent_id', null])
+        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->exists(); //Call::CALL_STATUS_QUEUE, andWhere(['<>', 'c_parent_id', null])
 
-        if($callExist) {
-            $isFree = false;
+        if ($callExist) {
+            return false;
         }
-        return $isFree;
+
+        return true;
     }
 
 

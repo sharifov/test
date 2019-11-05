@@ -19,6 +19,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'dpp_phone_number')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'dpp_default')->dropDownList([0 => 'No', 1 => 'Yes']) ?>
+
         <?//= $form->field($model, 'dpp_source_id')->dropDownList(Sour) ?>
 
         <?php

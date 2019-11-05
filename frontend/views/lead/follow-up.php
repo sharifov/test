@@ -3,6 +3,7 @@
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use sales\access\ListsAccess;
+use sales\formatters\client\ClientTimeFormatter;
 use sales\helpers\lead\RemainingDayCalculator;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -117,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                return $clientName.'<br/>'.$lead->getClientTime2();
+                return $clientName.'<br/>'. ClientTimeFormatter::format($lead->getClientTime2(), $lead->offset_gmt);
             },
             'options' => [
                 'style' => 'width:160px'

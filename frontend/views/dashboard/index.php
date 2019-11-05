@@ -1,5 +1,6 @@
 <?php
 
+use sales\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -341,7 +342,7 @@ JS;
                 'format' => 'raw',
                 'value' => function(\common\models\LeadTask $model) {
                     if($model->ltLead) {
-                        $clientTime = $model->ltLead->getClientTime2();
+                        $clientTime = ClientTimeFormatter::format($model->ltLead->getClientTime2(), $model->ltLead->offset_gmt);
                     } else {
                         $clientTime = '-';
                     }

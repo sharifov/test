@@ -27,8 +27,10 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\services\lead\calculator\ClientTimeCalculator;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
+use sales\services\lead\qcall\CalculateDateService;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
@@ -225,6 +227,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     public const CALL_STATUS_CANCEL     = 3;
     public const CALL_STATUS_DONE       = 4;
     public const CALL_STATUS_QUEUE      = 5;
+    public const CALL_STATUS_PREPARE    = 6;
 
     public const CALL_STATUS_LIST = [
         self::CALL_STATUS_NONE      => 'None',
@@ -233,6 +236,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         self::CALL_STATUS_CANCEL    => 'Cancel',
         self::CALL_STATUS_DONE      => 'Done',
         self::CALL_STATUS_QUEUE     => 'Queue',
+        self::CALL_STATUS_PREPARE   => 'Prepare',
     ];
 
 
@@ -482,6 +486,11 @@ class Lead extends ActiveRecord implements AggregateRoot
         } else {
             $this->setAnswered(true);
         }
+    }
+
+    public function answered()
+    {
+        $this->setAnswered(true);
     }
 
     /**
@@ -1043,6 +1052,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         if (!$this->isReject()) {
             $this->setStatus(self::STATUS_REJECT);
         }
+    }
+
+    public function callPrepare()
+    {
+        $this->setCallStatus(self::CALL_STATUS_PREPARE);
+    }
+
+    public function isCallPrepare()
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_PREPARE;
     }
 
     public function callProcessing(): void
@@ -2221,8 +2240,15 @@ Reason: {reason}
                 $lq->lqc_weight = $this->project_id * 10;
             }
 
-            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
-            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+            $date = (new CalculateDateService())->calculate(
+                $qcConfig->qc_client_time_enable,
+                $this->offset_gmt,
+                $qcConfig->qc_time_from,
+                $qcConfig->qc_time_to
+            );
+
+            $lq->lqc_dt_from = $date->from;
+            $lq->lqc_dt_to = $date->to;
 
             if (!$lq->save()) {
                 Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');
@@ -2461,13 +2487,46 @@ Reason: {reason}
         return '';
     }
 
-
     /**
-     * @return string
+     * @return \DateTime|null
      * @throws \Exception
      */
-    public function getClientTime2(): string
+    public function getClientTime2():? \DateTime
     {
+        $clientDt = null;
+        $offset = false;
+
+        if ($this->offset_gmt) {
+            $offset = str_replace('.', ':', $this->offset_gmt);
+        } elseif ($this->leadFlightSegments) {
+            $firstSegment = $this->leadFlightSegments[0] ?? null;
+            if ($firstSegment && ($airport = Airport::findIdentity($firstSegment->origin)) && $airport->dst) {
+                $offset = $airport->dst;
+            }
+        }
+
+        if ($offset) {
+            if (is_numeric($offset) && $offset > 0) {
+                $offset = '+' . $offset;
+            }
+            $clientDt = new \DateTime();
+            $timezoneName = timezone_name_from_abbr('', (int)$offset * 3600, date('I', time()));
+            if ($timezoneName) {
+                $timezone = new \DateTimeZone($timezoneName);
+                $clientDt->setTimezone($timezone);
+            }
+        }
+
+        return $clientDt;
+    }
+
+    /**
+     * @return \DateTime|null
+     * @throws \Exception
+     */
+    public function getClientTime2Old()
+    {
+
         $clientTime = '-';
         $offset = false;
 
@@ -2533,7 +2592,8 @@ Reason: {reason}
 
             //$offset = '-2';
 
-            $timezoneName = timezone_name_from_abbr('',intval($offset) * 3600, true);
+
+            $timezoneName = timezone_name_from_abbr('',(int)$offset * 3600, date('I', time()));
 
             /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
            // $clientTime = Yii::$app->formatter->asTime() $date->format('H:i');

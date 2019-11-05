@@ -1540,7 +1540,7 @@ class LeadController extends FController
             $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
             Yii::$app->getSession()->setFlash('success', 'Lead taken!');
         } catch (\DomainException $e) {
-            Yii::$app->errorHandler->logException($e);
+            Yii::info($e, 'info\Lead:Take');
             Yii::$app->getSession()->setFlash('warning', $e->getMessage());
         } catch (\Throwable $e) {
             Yii::$app->errorHandler->logException($e);
@@ -1739,7 +1739,7 @@ class LeadController extends FController
             try {
                 $this->leadAssignService->take($lead, $user, $user->id, 'Auto Dial');
             } catch (\DomainException $e) {
-                Yii::$app->errorHandler->logException($e);
+                Yii::info($e, 'info\Lead:AutoTake');
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);

@@ -19,6 +19,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use Mpdf\Tag\P;
 use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeAccessQuery;
@@ -46,6 +47,8 @@ use sales\repositories\TestRepository;
 use sales\services\api\communication\CommunicationService;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
+use sales\services\lead\qcall\CalculateDateService;
+use sales\services\lead\qcall\DayTimeHours;
 use sales\services\TransactionManager;
 use sales\StatusLog;
 use sales\temp\LeadFlowUpdate;
@@ -122,11 +125,7 @@ class TestController extends FController
     public function actionTest()
     {
 
-
-        $lead = Lead::findOne(271702);
-        $lead->callReady();
-        $lead->save();
-
+      die;
 
 
         $call = Call::findOne(1035611);

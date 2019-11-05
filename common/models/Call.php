@@ -152,7 +152,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public const SOURCE_DIRECT_CALL     = 2;
     public const SOURCE_REDIRECT_CALL   = 3;
     public const SOURCE_TRANSFER_CALL   = 4;
-    public const SOURCE_CONFERENCE_CALL  = 5;
+    public const SOURCE_CONFERENCE_CALL = 5;
+    public const SOURCE_REDIAL_CALL     = 6;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -160,6 +161,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::SOURCE_REDIRECT_CALL  => 'Redirect Call',
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
         self::SOURCE_CONFERENCE_CALL  => 'Conference Call',
+        self::SOURCE_REDIAL_CALL  => 'Redial Call',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -168,6 +170,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::SOURCE_REDIRECT_CALL  => 'Redirect',
         self::SOURCE_TRANSFER_CALL  => 'Transfer',
         self::SOURCE_CONFERENCE_CALL  => 'Conference',
+        self::SOURCE_REDIAL_CALL  => 'Redial',
     ];
 
 
@@ -571,21 +574,62 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
 
-        if (($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
-            $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            if ($lf) {
-                $lf->lf_out_calls = (int) $lf->lf_out_calls + 1;
-                if (!$lf->update()) {
-                    Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
+        if ($this->c_parent_id && $this->isOut() && ($lead = $this->cLead) && $lead->isCallPrepare()) {
+            $lead->callProcessing();
+            $lead->save();
+        }
+
+        if ($this->c_parent_id === null && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
+
+            if (($lead = $this->cLead2) && $lead->l_call_status_id !== Lead::CALL_STATUS_READY) {
+                $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+                if (!$lead->save(false)) {
+                    Yii::error('Call:afterSave:Lead:callStatus:ready');
                 }
             }
 
-            if ($this->cLead2->leadQcall) {
-                $this->cLead2->createOrUpdateQCall();
-            }
         }
 
+        if ($this->c_parent_id && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
 
+            $lead = $this->cLead;
+
+            if (($lqc = LeadQcall::findOne($this->c_lead_id)) && time() > strtotime($lqc->lqc_dt_from)) {
+
+                $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                if ($lf) {
+                    $lf->lf_out_calls = (int) $lf->lf_out_calls + 1;
+                    if (!$lf->update()) {
+                        Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
+                    }
+
+                    $attempts = 0;
+                    try {
+                        $attempts = (int)Yii::$app->params['settings']['redial_pending_to_follow_up_attempts'];
+                    } catch (\Throwable $e) {
+                        Yii::error($e, 'Not found redial_pending_to_follow_up_attempts setting');
+                    }
+
+                    if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
+                        try {
+                            $repo = Yii::createObject(LeadRepository::class);
+                            $lead->followUp(null, null, 'Redial Pending max attempts reached');
+                            $repo->save($lead);
+                        } catch (\Throwable $e) {
+                            Yii::error($e, 'Call:AfterSave:Lead follow up');
+                        }
+                    }
+
+                }
+            }
+
+            if ($lead->leadQcall) {
+                $lead->createOrUpdateQCall();
+            }
+//            if ($this->cLead2->leadQcall) {
+//                $this->cLead2->createOrUpdateQCall();
+//            }
+        }
 
         if (!$insert) {
 

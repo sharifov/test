@@ -16,6 +16,7 @@ use Yii;
  */
 class LeadQcall extends \yii\db\ActiveRecord
 {
+
     /**
      * {@inheritdoc}
      */

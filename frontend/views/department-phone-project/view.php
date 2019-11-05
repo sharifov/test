@@ -45,6 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'dpp_phone_number',
+            'dpp_default:boolean',
             //'dpp_source_id',
             [
                 'attribute' => 'dpp_source_id',
