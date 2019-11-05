@@ -72,7 +72,7 @@ $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Le
 ]);
 
 $buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
-    'class' => 'add-reason btn-primary',
+    'class' => 'add-reason btn btn-primary',
     'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadModel->gid]),
 ]);
 

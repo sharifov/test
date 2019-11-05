@@ -298,11 +298,13 @@ class ConferenceRoom extends \yii\db\ActiveRecord
             $params['trim'] = $this->cr_param_trim;    // trim-silence or do-not-trim
         }
 
+        $communicationHost = Yii::$app->communication->url;
+
         $params['maxParticipants']                  = $this->cr_param_max_participants ?: 250;
         $params['statusCallbackEvent']              = 'start end join leave mute hold'; //speaker
-        $params['statusCallback']                   = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-status-callback';
+        $params['statusCallback']                   = $communicationHost . 'v1/twilio/conference-status-callback';
         $params['statusCallbackMethod']             = 'POST';
-        $params['recordingStatusCallback']          = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-recording-status-callback';
+        $params['recordingStatusCallback']          = $communicationHost . 'v1/twilio/conference-recording-status-callback';
         $params['recordingStatusCallbackMethod']    = 'POST';
         $params['recordingStatusCallbackEvent']     = 'completed'; // in-progress, completed, absent
         //$params['eventCallbackUrl']                 = 'http://'.Yii::$app->params['host'].'/v1/twilio/conference-event-callback';
