@@ -11,7 +11,6 @@ use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
-use common\models\Lead2;
 use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;

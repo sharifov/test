@@ -822,7 +822,7 @@ class CommunicationController extends ApiBaseController
             }
 
 //            if ($call->c_dep_id === Department::DEPARTMENT_SALES) {
-//                /*$lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
+//                /*$lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
 //                if ($lead) {
 //                    $call->c_lead_id = $lead->id;
 //                }*////
@@ -929,7 +929,7 @@ class CommunicationController extends ApiBaseController
             }*/
 
 //            if ($call->c_dep_id === Department::DEPARTMENT_SALES) {
-//                /*$lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
+//                /*$lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
 //                if ($lead) {
 //                    $call->c_lead_id = $lead->id;
 //                }*////

@@ -2,7 +2,7 @@
 
 namespace sales\temp;
 
-use common\models\Lead2;
+use common\models\Lead;
 use common\models\LeadFlow;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -10,7 +10,7 @@ use yii\helpers\VarDumper;
 class LeadFlowUpdate
 {
 
-    public static function update(Lead2 $lead, $debug = false): array
+    public static function update(Lead $lead, $debug = false): array
     {
 
 //        $logs = $lead->getLeadLogs()->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->asArray()->all();

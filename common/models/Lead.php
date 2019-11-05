@@ -27,7 +27,6 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
-use sales\services\lead\calculator\ClientTimeCalculator;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -1267,6 +1266,22 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getCalls()
+    {
+        return $this->hasMany(Call::class, ['c_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmails()
+    {
+        return $this->hasMany(Email::class, ['e_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getLeadCallExperts()
     {
         return $this->hasMany(LeadCallExpert::class, ['lce_lead_id' => 'id']);
@@ -1364,6 +1379,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getReasons()
+    {
+        return $this->hasMany(Reason::class, ['lead_id' => 'id']);
+    }
+
+    /**
      * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
@@ -1394,6 +1417,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function getLeadPreferences(): ActiveQuery
     {
         return $this->hasOne(LeadPreferences::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadTasks()
+    {
+        return $this->hasMany(LeadTask::class, ['lt_lead_id' => 'id']);
     }
 
     /**
@@ -1436,6 +1467,13 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->hasMany(ProfitSplit::class, ['ps_lead_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPsUsers()
+    {
+        return $this->hasMany(Employee::class, ['id' => 'ps_user_id'])->viaTable('profit_split', ['ps_lead_id' => 'id']);
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -2229,6 +2267,9 @@ Reason: {reason}
         }
 
         $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
+
+        // Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig ? $qcConfig->attributes : null]), 'info\createOrUpdateQCall');
+
         $lq = $this->leadQcall;
 
         if ($qcConfig) {
@@ -2264,6 +2305,107 @@ Reason: {reason}
         return false;
     }
 
+    /**
+     * @param string $phoneNumber
+     * @param int|null $project_id
+     * @param bool $sql
+     * @return array|string|ActiveRecord|null
+     */
+    public static function findLastLeadByClientPhone(string $phoneNumber = '', ?int $project_id = null, bool $sql = false)
+    {
+        $query = self::find()->innerJoinWith(['client.clientPhones'])
+            ->where(['client_phone.phone' => $phoneNumber])
+            ->andWhere(['<>', 'leads.status', self::STATUS_TRASH])
+            ->orderBy(['leads.id' => SORT_DESC])
+            ->limit(1);
+
+        if ($project_id) {
+            $query->andWhere(['leads.project_id' => $project_id]);
+        }
+
+        return $sql ? $query->createCommand()->getRawSql() : $query->one();
+    }
+
+    /**
+     * @param string $phoneNumber
+     * @param int $project_id
+     * @param int $source_id
+     * @param $gmt
+     * @return static
+     */
+    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0, $gmt): self
+    {
+        $lead = new self();
+        $lead->l_client_phone = $phoneNumber;
+
+        $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+        if($clientPhone) {
+            $client = $clientPhone->client;
+        } else {
+            $client = new Client();
+            $client->first_name = 'ClientName';
+            $client->created = date('Y-m-d H:i:s');
+
+            if($client->save()) {
+                $clientPhone = new ClientPhone();
+                $clientPhone->phone = $phoneNumber;
+                $clientPhone->client_id = $client->id;
+                $clientPhone->comments = 'incoming';
+                if (!$clientPhone->save()) {
+                    Yii::error(VarDumper::dumpAsString($clientPhone->errors), 'Model:Lead:createNewLeadByPhone:ClientPhone:save');
+                }
+            }
+        }
+
+        if($client) {
+
+            $lead->status = self::STATUS_PENDING;
+            //$lead->employee_id = $this->c_created_user_id;
+            $lead->client_id = $client->id;
+            $lead->project_id = $project_id;
+            $lead->source_id = $source_id;
+            $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
+            $lead->offset_gmt = $gmt;
+            $source = null;
+
+            if ($source_id) {
+                $source = Sources::findOne(['id' => $lead->source_id]);
+            }
+
+            if (!$source) {
+                $source = Sources::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+            }
+
+            if($source) {
+                $lead->source_id = $source->id;
+            }
+
+            if ($lead->save()) {
+                /*self::updateAll(['c_lead_id' => $lead->id], ['c_id' => $this->c_id]);
+
+                if($lead->employee_id) {
+                    $task = Task::find()->where(['t_key' => Task::TYPE_MISSED_CALL])->limit(1)->one();
+
+                    if ($task) {
+                        $lt = new LeadTask();
+                        $lt->lt_lead_id = $lead->id;
+                        $lt->lt_task_id = $task->t_id;
+                        $lt->lt_user_id = $lead->employee_id;
+                        $lt->lt_date = date('Y-m-d');
+                        if (!$lt->save()) {
+                            Yii::error(VarDumper::dumpAsString($lt->errors), 'Model:Lead:createNewLeadByPhone:LeadTask:save');
+                        }
+                    }
+                }*/
+
+            } else {
+                Yii::error(VarDumper::dumpAsString($lead->errors), 'Model:Lead:createNewLeadByPhone:Lead:save');
+            }
+        }
+
+        return $lead;
+    }
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -2718,6 +2860,10 @@ Reason: {reason}
 
                 } else {
                     //$this->updated = date('Y-m-d H:i:s');
+                }
+
+                if (!$this->uid) {
+                    $this->uid = uniqid();
                 }
 
                 if(!$this->gid) {

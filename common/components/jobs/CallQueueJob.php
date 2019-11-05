@@ -12,7 +12,6 @@ use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
-use common\models\Lead2;
 use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
@@ -96,9 +95,9 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                 if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
                     if ($call->c_from) {
-                        $lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
+                        $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
                         if (!$lead) {
-                            $lead = Lead2::createNewLeadByPhone($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
+                            $lead = Lead::createNewLeadByPhone($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
                         }
                         if ($lead) {
                             $call->c_lead_id = $lead->id;
