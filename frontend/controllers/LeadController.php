@@ -138,8 +138,8 @@ class LeadController extends FController
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if ($lead->isTrash() && Yii::$app->user->identity->isAgent()) {
-            throw new ForbiddenHttpException('Access Denied for Agent');
+        if (($lead->isTrash() || $lead->isPending()) && Yii::$app->user->identity->isAgent()) {
+            throw new ForbiddenHttpException('Access Denied for Agent (Status Lead)');
         }
         $itineraryForm = new ItineraryEditForm($lead);
         $user = Yii::$app->user->identity;
