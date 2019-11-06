@@ -244,7 +244,8 @@ ORDER BY lf.lead_id, id';
 	 */
     public function actionMigrateOldLeadLogsInGlobalLog(): void
 	{
-		$leadLog = LeadLog::find()->where(['>=', 'created', date('Y-m-d', strtotime('-6 months'))])->asArray()->all();
+		$leadLog = LeadLog::find()->where(['>=', 'created', date('Y-m-d', strtotime('-6 months'))])
+            ->andWhere(['<=', 'created', date('Y-m-d', strtotime('-3 months'))])->asArray()->orderBy(['id' => SORT_DESC])->all();
 
 		$globalLog = Yii::createObject(GlobalLogInterface::class);
 
