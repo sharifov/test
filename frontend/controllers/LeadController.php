@@ -1540,7 +1540,7 @@ class LeadController extends FController
             $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
             Yii::$app->getSession()->setFlash('success', 'Lead taken!');
         } catch (\DomainException $e) {
-            Yii::info($e, 'info\Lead:Take');
+            // Yii::info($e, 'info\Lead:Take');
             Yii::$app->getSession()->setFlash('warning', $e->getMessage());
         } catch (\Throwable $e) {
             Yii::$app->errorHandler->logException($e);
