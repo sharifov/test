@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use frontend\widgets\UserInfoProgress;
 use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -10,6 +11,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel common\models\search\LeadQcallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $dataProviderLastCalls yii\data\ActiveDataProvider */
+/* @var array $guard */
 
 $this->title = 'Lead Redial';
 $this->params['breadcrumbs'][] = $this->title;
@@ -24,6 +26,10 @@ $list = new ListsAccess($user->id);
     <div class="lead-qcall-list">
 
         <h1><?= Html::encode($this->title) ?></h1>
+
+        <div class="row">
+            <?= UserInfoProgress::widget(['user' => $user])?>
+        </div>
 
         <div class="row">
             <div class="col-md-12">
@@ -73,7 +79,8 @@ $list = new ListsAccess($user->id);
                 'searchModel' => $searchModel,
                 'list' => $list,
                 'userIsFreeForCall' => $userIsFreeForCall,
-                'user' => $user
+                'user' => $user,
+                'guard' => $guard
             ]) ?>
 
         <?php Pjax::end(); ?>
