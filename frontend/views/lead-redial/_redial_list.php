@@ -12,6 +12,7 @@ use yii\helpers\Url;
 
 /* @var $searchModel common\models\search\LeadQcallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $guard array */
 
 ?>
 
@@ -239,7 +240,16 @@ use yii\helpers\Url;
             'class' => 'yii\grid\ActionColumn',
             'template' => '{call}',
             'buttons' => [
-                'call' => static function ($url, LeadQcall $model) use ($userIsFreeForCall) {
+                'call' => static function ($url, LeadQcall $model) use ($userIsFreeForCall, $guard) {
+
+                    if ($guard) {
+                        $str = '';
+                        foreach ($guard as $item) {
+                            $str .= '<i class="fa fa-warning warning"></i> ' . $item . '<br />';
+                        }
+                        return $str;
+                    }
+
                     return Html::button('<i class="fa fa-phone"></i> Call', [
                         'class' => 'btn btn-primary btn-xs lead-redial-btn',
                         'disabled' => ($model->lqcLead->isCallProcessing() || !$userIsFreeForCall) ? 'disabled' : false,
