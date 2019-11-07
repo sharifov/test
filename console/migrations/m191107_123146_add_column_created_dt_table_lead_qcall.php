@@ -16,10 +16,10 @@ class m191107_123146_add_column_created_dt_table_lead_qcall extends Migration
     {
         $this->addColumn('{{%lead_qcall}}', 'lqc_created_dt', $this->dateTime());
 
-        foreach (LeadQcall::find()->all() as $item) {
-            $item->lqc_created_dt = $item->lqc_dt_from;
-            $item->save();
-        }
+//        foreach (LeadQcall::find()->all() as $item) {
+//            $item->lqc_created_dt = $item->lqc_dt_from;
+//            $item->save();
+//        }
 
         $this->insert('{{%setting}}', [
             's_key' => 'redial_fresh_time',
