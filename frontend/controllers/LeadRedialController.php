@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\search\LeadQcallSearch;
 use sales\access\ListsAccess;
+use sales\guards\lead\TakeGuard;
 use sales\services\lead\LeadRedialService;
 use Yii;
 use yii\web\NotFoundHttpException;
@@ -15,6 +16,7 @@ use yii\web\Response;
  * Class LeadRedialController
  *
  * @property LeadRedialService $leadRedialService
+ * @property TakeGuard $takeGuard
  */
 class LeadRedialController extends FController
 {
@@ -37,11 +39,19 @@ class LeadRedialController extends FController
     }
 
     private $leadRedialService;
+    private $takeGuard;
 
-    public function __construct($id, $module, LeadRedialService $leadRedialService, $config = [])
+    public function __construct(
+        $id,
+        $module,
+        LeadRedialService $leadRedialService,
+        TakeGuard $takeGuard,
+        $config = []
+    )
     {
         parent::__construct($id, $module, $config);
         $this->leadRedialService = $leadRedialService;
+        $this->takeGuard = $takeGuard;
     }
 
     public function actionIndex(): string
@@ -53,10 +63,25 @@ class LeadRedialController extends FController
         $dataProvider = $searchModel->searchByRedial(Yii::$app->request->queryParams, $user);
         $dataProviderLastCalls = $searchModel->searchLastCalls([], $user);
 
+        $guard = [];
+
+        try {
+            $this->takeGuard->frequencyMinutesGuard($user);
+        } catch (\DomainException $e) {
+            $guard[] = $e->getMessage();
+        }
+
+        try {
+            $this->takeGuard->minPercentGuard($user);
+        } catch (\DomainException $e) {
+            $guard[] = $e->getMessage();
+        }
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'dataProviderLastCalls' => $dataProviderLastCalls,
+            'guard' => $guard,
         ]);
     }
 
