@@ -10,27 +10,46 @@ $js = <<<JS
 
 $('#period').on('change', function() {  
     var period = this.value;
-     $.ajax({
+    refreshStats(period)     
+});
+
+function refreshStatsInterval() {
+    let period = $('#period').val();
+    refreshStats(period)   
+}
+
+setInterval(refreshStatsInterval, 60 * 5000);
+
+function generatePreloader() {
+              return "<div class='chartPreloader' style='width:100%; height:50%'>" + 
+              "<i class='fa fa-spinner fa-pulse fa-4x' style='color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%);'></i>" +
+              "</div>"
+     }
+
+function refreshStats(period){
+    $('#agent-leader-board').html(generatePreloader());
+    
+    $.ajax({
             url: 'agent-ratings',
             type: 'POST',
-            data: {'period' : this.value},
+            data: {'period' : period},
             success: function(data) { 
                  let result = $("#agent-leader-board").append(data).find("#agent-leader-board").html();
                  $("#agent-leader-board").html(result); 
                  
                  $("#showPeriod").html()
                  if (period === 'currentWeek'){
-                     $("#showPeriod").html('<span> $currentWeek </span>');
+                     $("#showPeriod").html('<span> $currentWeek (UTC)</span>');
                  }
                  if (period === 'lastWeek'){
-                     $("#showPeriod").html('<span> $lastWeek </span>');
+                     $("#showPeriod").html('<span> $lastWeek (UTC)</span>');
                  }
                  if (period === 'currentMonth'){
-                     $("#showPeriod").html('<span> $currentMonth </span>');
+                     $("#showPeriod").html('<span> $currentMonth (UTC)</span>');
                  }                 
             }
      });
-});
+}
 
 JS;
 $this->registerJs($js);
@@ -46,7 +65,7 @@ $this->registerJs($js);
                 </select>
             </div>
             <div id="showPeriod" class="col-md-5 label label-info label-large">
-                <span> <?= $currentWeek ?> </span>
+                <span> <?= $currentWeek . ' (UTC)'?> </span>
             </div>
         </div>
     </div>
