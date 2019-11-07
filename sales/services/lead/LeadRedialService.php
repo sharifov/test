@@ -204,7 +204,7 @@ class LeadRedialService
             $this->takeGuard->frequencyMinutesGuard($user);
         }
 
-        if ((bool)\Yii::$app->params['settings']['enable_min_percent_for_take_leads']) {
+        if ((bool)\Yii::$app->params['settings']['enable_min_percent_take_leads']) {
             $this->takeGuard->minPercentGuard($user);
         }
     }

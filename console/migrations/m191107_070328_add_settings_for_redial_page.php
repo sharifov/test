@@ -22,7 +22,7 @@ class m191107_070328_add_settings_for_redial_page extends Migration
         ]);
 
         $this->insert('{{%setting}}', [
-            's_key' => 'count_as_taken_leads_created_manually',
+            's_key' => 'count_taken_leads_created_manually',
             's_name' => 'Count as Taken leads created manually',
             's_type' => Setting::TYPE_BOOL,
             's_value' => false,
@@ -30,7 +30,7 @@ class m191107_070328_add_settings_for_redial_page extends Migration
         ]);
 
         $this->insert('{{%setting}}', [
-            's_key' => 'count_as_taken_leads_from_incoming_call',
+            's_key' => 'count_taken_leads_incoming_call',
             's_name' => 'Count as Taken leads from incoming call',
             's_type' => Setting::TYPE_BOOL,
             's_value' => false,
@@ -46,7 +46,7 @@ class m191107_070328_add_settings_for_redial_page extends Migration
         ]);
 
         $this->insert('{{%setting}}', [
-            's_key' => 'enable_min_percent_for_take_leads',
+            's_key' => 'enable_min_percent_take_leads',
             's_name' => 'Enable Min percent for take leads',
             's_type' => Setting::TYPE_BOOL,
             's_value' => false,
@@ -73,8 +73,8 @@ class m191107_070328_add_settings_for_redial_page extends Migration
     public function safeDown()
     {
         $this->delete('{{%setting}}', ['IN', 's_key', [
-            'enable_redial_show_lead_limit', 'count_as_taken_leads_created_manually', 'count_as_taken_leads_from_incoming_call',
-            'enable_redial_default_take_limit', 'enable_min_percent_for_take_leads', 'enable_take_frequency_minutes',
+            'enable_redial_show_lead_limit', 'count_taken_leads_created_manually', 'count_taken_leads_incoming_call',
+            'enable_redial_default_take_limit', 'enable_min_percent_take_leads', 'enable_take_frequency_minutes',
         ]]);
 
         if (Yii::$app->cache) {
