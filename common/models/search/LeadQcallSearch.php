@@ -192,9 +192,9 @@ class LeadQcallSearch extends LeadQcall
             new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
         ]);
 
-        $query->addSelect(['expired' =>
-            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
-        ]);
+//        $query->addSelect(['expired' =>
+//            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
+//        ]);
 
         if (($freshTime = (int)Yii::$app->params['settings']['redial_fresh_time']) > 0) {
             $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date("Y-m-d H:i:s") . "')";
@@ -207,7 +207,7 @@ class LeadQcallSearch extends LeadQcall
         }
 
         $query->addOrderBy([
-            'expired' => SORT_DESC,
+//            'expired' => SORT_DESC,
             'deadline' => SORT_ASC,
             'attempts' => SORT_ASC,
             'lqc_dt_from' => SORT_ASC
