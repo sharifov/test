@@ -282,6 +282,11 @@ $lead = $leadForm->getLead();
 
             <?php endif;?>
         </div>
+
+        <div class="clearfix"></div>
+        <br/>
+        <br/>
+
     </div>
 
 

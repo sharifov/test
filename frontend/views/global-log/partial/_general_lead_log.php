@@ -29,24 +29,27 @@ echo GridView::widget([
 			'header' => 'Who made the changes',
 			'attribute' => 'gl_app_user_id',
 			'value' => static function (GlobalLog $model) {
-				$template = '<i class="fa fa-user"></i> ';
-
-				if ($model->user) {
-					if ($model->user->username) {
-						$template .= $model->user->username . ' <br>(' . implode(', ', $model->user->getRoles()) .')';
-					} elseif ($model->user->au_name) {
-						$template .= $model->user->au_name;
+				$template = '';
+				if ($model->gl_app_user_id) {
+					if ($model->isAppFrontend() && $model->userFrontend) {
+						$template .= '<i class="fa fa-user"></i> ';
+						$template .= \yii\helpers\Html::encode($model->userFrontend->username) . ' (' . $model->gl_app_user_id . ')<br>(' . implode(', ', $model->userFrontend->getRoles()) . ')';
+					} elseif ($model->isAppWebApi() && $model->userApi) {
+						$template .= 'WebAPI: ' . \yii\helpers\Html::encode($model->userApi->au_name) . '(' . $model->gl_app_user_id . ')';
+					} else {
+						$template .= 'UserId: ' . $model->gl_app_user_id;
 					}
-				} else {
-
+				} elseif ($model->isAppConsole()) {
 					$template .= 'Console';
+				} else {
+					$template .= 'Unknown App';
 				}
 
-				$template .= '<br><br> <i class="fa fa-calendar"></i> ' . $model->gl_created_at;
+				$template .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->gl_created_at));
 
 				return $template;
 			},
-			'format' => 'html',
+			'format' => 'raw',
 			'options' => [
 				'width' => '15%'
 			]
@@ -75,7 +78,7 @@ echo GridView::widget([
 			},
 			'filter' => false,
 			'enableSorting' => false,
-			'format' => 'html'
+			'format' => 'raw'
 		]
 	],
 ]);

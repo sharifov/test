@@ -53,6 +53,7 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -781,31 +782,30 @@ class CasesController extends FController
         throw new BadRequestHttpException();
     }
 
+
     /**
      * @return array
-     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
      */
     public function actionCheckPhoneForExistence(): array
     {
-    	try {
-			$response = [];
-			$clientPhone = Yii::$app->request->post('clientPhone') ?? null;
-			Yii::$app->response->format = Response::FORMAT_JSON;
-			if (Yii::$app->request->isAjax && $clientPhone) {
+        if (!Yii::$app->request->isAjax) {
+            throw new ForbiddenHttpException('Access denied', 10);
+        }
 
-				if ($cases = $this->casesRepository->findOpenCasesByPhone($clientPhone)) {
-					$casesLink = '';
-					foreach ($cases as $case) {
-						$casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
-					}
-					$response['clientPhoneResponse'] = 'This number is already used in ' . $casesLink;
-				}
-				return $response;
-			}
-		} catch (\Throwable $exception) {
-    		return $response;
-		}
-		throw new BadRequestHttpException();
+        $response = [];
+        $clientPhone = Yii::$app->request->post('clientPhone');
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if ($clientPhone && $cases = $this->casesRepository->getOpenCasesByPhone($clientPhone)) {
+            $casesLink = '';
+            foreach ($cases as $case) {
+                $casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
+            }
+            $response['clientPhoneResponse'] = 'This number is already used in ' . $casesLink;
+        }
+
+        return $response;
     }
 
     /**
@@ -819,7 +819,7 @@ class CasesController extends FController
         if ($categories = $this->casesCategoryRepository->getAllByDep($id)) {
             $str .= '<option>Choose a category</option>';
             foreach ($categories as $category) {
-                $str .= '<option value="' . $category->cc_key . '">' . $category->cc_name . '</option>';
+                $str .= '<option value="' . Html::encode($category->cc_key) . '">' . Html::encode($category->cc_name) . '</option>';
             }
         } else {
             $str = '<option>-</option>';

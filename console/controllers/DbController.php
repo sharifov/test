@@ -240,15 +240,36 @@ ORDER BY lf.lead_id, id';
 
 	/**
 	 *
+	 * @param int $limit
 	 * @throws InvalidConfigException
 	 */
-    public function actionMigrateOldLeadLogsInGlobalLog(): void
+    public function actionMigrateOldLeadLogsInGlobalLog($limit = 1000): void
 	{
-		$leadLog = LeadLog::find()->where(['>=', 'created', date('Y-m-d', strtotime('-3 months'))])->asArray()->all();
+		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+		$time_start = microtime(true);
+
+		$leadLog = LeadLog::find()->where(['>=', 'created', '2019-06-01 00:00:00'])->asArray();
+		$leadLogCount = $leadLog->count();
+
+		printf("\n --- Message: %s ---\n", $this->ansiFormat('Total rows: ' . $leadLogCount, Console::FG_GREEN));
 
 		$globalLog = Yii::createObject(GlobalLogInterface::class);
 
-		foreach ($leadLog as $log) {
+		$c = 0;
+
+		foreach ($leadLog->each($limit) as $log) {
+			if (($c % $limit) === 0) {
+				if ($leadLogCount > 0) {
+					$percent = round($c * 100 / $leadLogCount, 1);
+				} else {
+					$percent = 0;
+				}
+
+				$memory = Yii::$app->formatter->asShortSize(memory_get_usage(), 1);
+
+				printf(" --- [%s] (%s) %s ---\n", $percent . '%', $memory, $this->ansiFormat( 'Current processed rows: ' . $c . ' of ' . $leadLogCount, Console::FG_PURPLE));
+			}
+
 			$message = json_decode($log['message'], true);
 
 			$modelPath = $this->getModelPath($message['model']);
@@ -277,7 +298,13 @@ ORDER BY lf.lead_id, id';
 				$action ?: null,
 				$log['created'] ?? null
 			));
+			$c++;
 		}
+
+		$time_end = microtime(true);
+		$time = number_format(round($time_end - $time_start, 2), 2);
+		printf("\nExecute Time: %s, count Old Logs: " . $leadLogCount, $this->ansiFormat($time . ' s', Console::FG_RED));
+		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 
 	public function actionTruncateGlobalLog(): void

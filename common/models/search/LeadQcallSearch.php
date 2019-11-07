@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use Yii;
 use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Employee;
@@ -165,7 +166,7 @@ class LeadQcallSearch extends LeadQcall
         $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE]]);
+            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
@@ -191,11 +192,30 @@ class LeadQcallSearch extends LeadQcall
             new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
         ]);
 
+//        $query->addSelect(['expired' =>
+//            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
+//        ]);
+
+        if (($freshTime = (int)Yii::$app->params['settings']['redial_fresh_time']) > 0) {
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date("Y-m-d H:i:s") . "')";
+            $query->addSelect(['isFresh' =>
+                new Expression("if (" . $expression . " <= " . $freshTime . ", 1, 0) ")
+            ]);
+            $query->addOrderBy([
+               'isFresh' => SORT_DESC
+            ]);
+        }
+
         $query->addOrderBy([
+//            'expired' => SORT_DESC,
             'deadline' => SORT_ASC,
             'attempts' => SORT_ASC,
             'lqc_dt_from' => SORT_ASC
         ]);
+
+        if ((bool)Yii::$app->params['settings']['enable_redial_show_lead_limit']) {
+            $query->limit((int)$user->userParams->up_inbox_show_limit_leads);
+        }
 
         // add conditions that should always apply here
 
@@ -251,7 +271,7 @@ class LeadQcallSearch extends LeadQcall
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE]]);
+            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 

@@ -4,11 +4,13 @@ namespace sales\services\lead;
 
 use common\models\Employee;
 use common\models\Lead;
+use common\models\LeadQcall;
 use sales\access\EmployeeAccess;
+use sales\guards\lead\TakeGuard;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
 use sales\services\ServiceFinder;
-use yii\web\ForbiddenHttpException;
+use sales\services\TransactionManager;
 
 /**
  * Class LeadAssignService
@@ -16,6 +18,8 @@ use yii\web\ForbiddenHttpException;
  * @property LeadRepository $leadRepository
  * @property UserRepository $userRepository
  * @property ServiceFinder $serviceFinder
+ * @property TransactionManager $transactionManager
+ * @property TakeGuard $takeGuard
  */
 class LeadAssignService
 {
@@ -23,20 +27,30 @@ class LeadAssignService
     private $leadRepository;
     private $userRepository;
     private $serviceFinder;
+    private $transactionManager;
+    private $takeGuard;
 
-    public function __construct(LeadRepository $leadRepository, UserRepository $userRepository, ServiceFinder $serviceFinder)
+    public function __construct(
+        LeadRepository $leadRepository,
+        UserRepository $userRepository,
+        ServiceFinder $serviceFinder,
+        TransactionManager $transactionManager,
+        TakeGuard $takeGuard
+    )
     {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
         $this->serviceFinder = $serviceFinder;
+        $this->transactionManager = $transactionManager;
+        $this->takeGuard = $takeGuard;
     }
 
     /**
-     * @param int|Lead $lead
-     * @param int|Employee $user
+     * @param $lead
+     * @param $user
      * @param int|null $creatorId
      * @param string|null $reason
-     * @throws ForbiddenHttpException
+     * @throws \Throwable
      */
     public function take($lead, $user, ?int $creatorId = null, ?string $reason = ''): void
     {
@@ -44,7 +58,7 @@ class LeadAssignService
         $user = $this->serviceFinder->userFind($user);
 
         EmployeeAccess::leadAccess($lead, $user);
-        self::checkAccess($lead, $user);
+        $this->checkAccess($lead, $user);
 
         if ($lead->isCompleted()) {
             throw new \DomainException('Lead is completed!');
@@ -56,15 +70,20 @@ class LeadAssignService
 
         $lead->processing($user->id, $creatorId, $reason);
 
-        $this->leadRepository->save($lead);
+        $this->transactionManager->wrap(function () use ($lead) {
+            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                $qCall->delete();
+            }
+            $this->leadRepository->save($lead);
+        });
     }
 
     /**
-     * @param int|Lead $lead
-     * @param int|Employee $user
+     * @param $lead
+     * @param $user
      * @param int|null $creatorId
      * @param string|null $reason
-     * @throws ForbiddenHttpException
+     * @throws \Throwable
      */
     public function takeOver($lead, $user, ?int $creatorId = null, ?string $reason = ''): void
     {
@@ -72,7 +91,7 @@ class LeadAssignService
         $user = $this->serviceFinder->userFind($user);
 
         EmployeeAccess::leadAccess($lead, $user);
-        self::checkAccess($lead, $user);
+        $this->checkAccess($lead, $user);
 
         if ($lead->isCompleted()) {
             throw new \DomainException('Lead is completed!');
@@ -84,25 +103,23 @@ class LeadAssignService
 
         $lead->processing($user->id, $creatorId, $reason);
 
-        $this->leadRepository->save($lead);
+        $this->transactionManager->wrap(function () use ($lead) {
+            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                $qCall->delete();
+            }
+            $this->leadRepository->save($lead);
+        });
     }
 
     /**
      * @param Lead $lead
      * @param Employee $user
-     * @throws ForbiddenHttpException
      */
-    private static function checkAccess(Lead $lead, Employee $user): void
+    private function checkAccess(Lead $lead, Employee $user): void
     {
         if ($lead->isPending() && $user->isAgent()) {
-            $isAccessNewLead = $user->accessTakeNewLead();
-            if (!$isAccessNewLead) {
-                throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
-            }
-            $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
-            if (!$isAccessNewLeadByFrequency['access']) {
-                throw new ForbiddenHttpException('Access is denied (frequency) - "Take lead"');
-            }
+            $this->takeGuard->minPercentGuard($user);
+            $this->takeGuard->frequencyMinutesGuard($user);
         }
     }
 

@@ -20,6 +20,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'lqc_weight')->input('number', ['min' => 0]) ?>
 
+    <?= $form->field($model, 'lqc_created_dt')->textInput() ?>
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

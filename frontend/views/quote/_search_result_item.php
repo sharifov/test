@@ -23,13 +23,18 @@ $preSegment = null;
 $airportChange = false;
 $freeBaggage = false;
 $baggagePerSegment = [];
+$technicalStopCnt = 0;
+
 foreach ($result['trips'] as $trip){
     if(isset($trip['duration'])){
         $totalDuration[] = $trip['duration'];
         $totalDurationSum += $trip['duration'];
     }
     $stopCnt = count($trip['segments']) - 1;
-    $technicalStopCnt = 0;
+
+    //\yii\helpers\VarDumper::dump($result['trips'], 10, true); exit;
+
+
     foreach ($trip['segments'] as $segment){
         if(isset($segment['stop']) && $segment['stop'] > 0){
             $stopCnt += $segment['stop'];
@@ -54,6 +59,9 @@ foreach ($result['trips'] as $trip){
     $time[] = ['departure' => $firstSegment['departureTime'],'arrival' => $lastSegment['arrivalTime']];
     $stops[] = $stopCnt;
 }
+
+
+
 if (!empty($baggagePerSegment)) {
     if (min($baggagePerSegment) == 1) {
         $bagFilter = 1;
@@ -95,7 +103,7 @@ if (!empty($baggagePerSegment)) {
 
             <?php if($technicalStopCnt):?>
                 <div class="quote__seats" title="Technical Stops">
-                    <span class="fa fa-warning danger"></span> Stops (<?= $technicalStopCnt?>)
+                    <span class="fa fa-warning danger"></span>Tech Stops (<?= $technicalStopCnt?>)
                 </div>
             <?php endif;?>
 
@@ -213,7 +221,7 @@ if (!empty($baggagePerSegment)) {
             <?php
 
                 if ($needRecheck) {
-                    $bagText = 'Bag re-check not required'; //SearchService::getRecheckBaggageText();
+                    $bagText = 'Bag re-check may be required'; //SearchService::getRecheckBaggageText();
                 } else {
                     $bagText = 'Bag re-check not required';
                 }
@@ -347,7 +355,7 @@ if (!empty($baggagePerSegment)) {
                                                     <?php break; endforeach;?>
                                             <?php endif;?>
                                             <?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
-                                            <?php if ($segment['recheckBaggage']):?> <h5 class="danger" title="<?=\yii\helpers\Html::encode(SearchService::getRecheckBaggageText($departCountryName, $projectName))?>"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
+                                            <?php if ($segment['recheckBaggage']):?> <h5 class="danger" title="<?=\yii\helpers\Html::encode(SearchService::getRecheckBaggageText($departCountryName))?>"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
                                             <?php if(isset($segment['stop']) && $segment['stop'] > 0):?>
 
                                                 <h5 class="danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment['stop']])?></h5>

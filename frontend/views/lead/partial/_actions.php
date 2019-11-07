@@ -72,7 +72,7 @@ $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Le
 ]);
 
 $buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
-    'class' => 'add-reason btn-primary',
+    'class' => 'add-reason btn btn-primary',
     'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadModel->gid]),
 ]);
 
@@ -211,15 +211,9 @@ if($project){
 
         <?php
 
-//            if(!$leadModel->isNewRecord && $user->canRoles(['admin', 'supervision'])) {
-//                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadModel->id])->count();
-//                echo Html::a('Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
-//                    [
-//                        'id' => 'btn-lead-logs',
-//                        'class' => 'btn btn-default',
-//                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadModel->id])
-//                ]);
-//            }
+            if(!$leadModel->isNewRecord && $user->canRoles(['admin', 'supervision'])) {
+
+            }
 
         ?>
 
@@ -229,6 +223,16 @@ if($project){
                 'class' => 'btn btn-default',
                 'title' => 'Status Logs LeadID #' . $leadForm->lead->id
             ]) ?>
+
+            <?php
+                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadModel->id])->count();
+                echo Html::a('Old Data Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
+                    [
+                        'id' => 'btn-lead-logs',
+                        'class' => 'btn btn-default',
+                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadModel->id])
+                    ]);
+            ?>
 
             <?= Html::a('<i class="fa fa-list"></i> Data Logs', null, [
                 'id' => 'btn-general-lead-log',

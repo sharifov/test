@@ -26,7 +26,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'gl_old_attr',
             'gl_new_attr',
             'gl_formatted_attr',
-            'gl_created_at',
+			[
+				'attribute' => 'gl_created_at',
+				'value' => static function(\common\models\GlobalLog $model) {
+					return $model->gl_created_at ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->gl_created_at), 'php: Y-M-d [H:i:s]') : '-';
+				},
+				'format' => 'raw',
+			],
         ],
     ]) ?>
 

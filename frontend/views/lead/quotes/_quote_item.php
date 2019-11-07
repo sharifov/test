@@ -215,11 +215,13 @@ use yii\helpers\Url;
 	</div>
 	<div class="quote__wrapper">
 		<div class="quote__trip">
+            <?php
+                $needRecheck = false;
+                $firstSegment = null;
+                $lastSegment = null;
+            ?>
 			<?php foreach ($model->quoteTrips as $trip):?>
 			<?php
-			$firstSegment = null;
-			$lastSegment = null;
-            $needRecheck = false;
 
 			$segments = $trip->quoteSegments;
 			if( $segments ) {
@@ -234,7 +236,7 @@ use yii\helpers\Url;
     			    if(!in_array(SearchService::getCabin($segment->qs_cabin), $cabins)){
     			        $cabins[] = SearchService::getCabin($segment->qs_cabin);
     			    }
-    			    if (isset($segment->qs_recheck_baggage) && $segment->qs_recheck_baggage == true){
+    			    if (isset($segment->qs_recheck_baggage) && $segment->qs_recheck_baggage){
     			        $needRecheck = true;
                     }
     			    if(isset($segment->qs_stop) && $segment->qs_stop > 0){

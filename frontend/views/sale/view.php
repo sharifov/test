@@ -21,9 +21,12 @@ if(Yii::$app->request->isPjax) {
 $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 
 //$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
-
 $caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
-$canManageSaleInfo = $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->user->identity, $data['passengers'] ?? []);
+if (!empty($caseSaleModel)) {
+    $canManageSaleInfo =  $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->user->identity, $data['passengers'] ?? []);
+} else {
+    $canManageSaleInfo = true;
+}
 ?>
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
@@ -211,7 +214,7 @@ $canManageSaleInfo = $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->us
                 <table class="table table-bordered table-hover" id="passengers">
                     <thead>
                     <tr>
-                        <?php if($canManageSaleInfo): ?>
+                        <?php if(!empty($csId) && $canManageSaleInfo): ?>
                             <th></th>
                         <?php endif; ?>
                         <th>First name</th>
@@ -228,7 +231,7 @@ $canManageSaleInfo = $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->us
                     <tbody>
 					<?php foreach($data['passengers'] as $key => $passenger): ?>
                         <tr>
-							<?php if($canManageSaleInfo): ?>
+							<?php if(!empty($csId) &&  $canManageSaleInfo): ?>
                                 <td style="width: 30px;" class="text-center"><span data-toggle="tooltip" title="<?= $canManageSaleInfo ?>" class="label label-default bg-orange"><i class="fa fa-info"></i></span></td>
 							<?php endif; ?>
                             <td>
