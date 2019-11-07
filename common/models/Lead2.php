@@ -488,6 +488,7 @@ class Lead2 extends \yii\db\ActiveRecord
                 $lq = new LeadQcall();
                 $lq->lqc_lead_id = $this->id;
                 $lq->lqc_weight = $this->project_id * 10;
+                $lq->lqc_created_dt = date('Y-m-d H:i:s');
             }
 
             $date = (new CalculateDateService())->calculate(
