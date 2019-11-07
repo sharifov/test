@@ -191,7 +191,12 @@ class LeadQcallSearch extends LeadQcall
             new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
         ]);
 
+        $query->addSelect(['expired' =>
+            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
+        ]);
+
         $query->addOrderBy([
+            'expired' => SORT_DESC,
             'deadline' => SORT_ASC,
             'attempts' => SORT_ASC,
             'lqc_dt_from' => SORT_ASC
