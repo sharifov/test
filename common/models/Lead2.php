@@ -59,6 +59,7 @@ use yii\helpers\VarDumper;
  * @property double $l_init_price
  * @property string $l_last_action_dt
  * @property int $l_dep_id
+ * @property int $l_type_create
  *
  * @property Call[] $calls
  * @property Email[] $emails
@@ -129,6 +130,7 @@ class Lead2 extends \yii\db\ActiveRecord
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
             [['source_id'], 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['source_id' => 'id']],
             [['l_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['l_dep_id' => 'dep_id']],
+            ['l_type_create', 'integer']
         ];
     }
 
@@ -586,6 +588,7 @@ class Lead2 extends \yii\db\ActiveRecord
     {
         $lead = new self();
         $lead->l_client_phone = $phoneNumber;
+        $lead->l_type_create = Lead::TYPE_CREATE_INCOMING_CALL;
 
         $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
