@@ -8,6 +8,9 @@ use common\models\LeadFlow;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 
 <div class="row">
@@ -98,7 +101,8 @@ use common\models\LeadFlow;
                     'format' => 'raw',
                     'contentOptions' => [
                         'class' => 'text-center'
-                    ]
+                    ],
+                    'visible' => !($user->isAgent() || $user->isExAgent()),
                 ],
                 [
                     'header' => 'Quotes',
@@ -116,7 +120,8 @@ use common\models\LeadFlow;
                     'format' => 'raw',
                     'contentOptions' => [
                         'class' => 'text-center'
-                    ]
+                    ],
+                    'visible' => !($user->isAgent() || $user->isExAgent()),
                 ],
                 [
                     'header' => 'Segments',
@@ -140,7 +145,8 @@ use common\models\LeadFlow;
                     ],
                     'options' => [
                         'style' => 'width:140px'
-                    ]
+                    ],
+                    'visible' => !($user->isAgent() || $user->isExAgent()),
                 ],
                 [
                     'header' => 'Depart',
@@ -156,7 +162,8 @@ use common\models\LeadFlow;
                     ],
                     'options' => [
                         'style' => 'width:100px'
-                    ]
+                    ],
+                    'visible' => !($user->isAgent() || $user->isExAgent()),
                 ],
                 [
                     'label' => 'Owner',
