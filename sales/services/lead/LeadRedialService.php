@@ -8,10 +8,12 @@ use common\models\Lead;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
 use sales\access\EmployeeAccess;
+use sales\guards\lead\TakeGuard;
 use sales\repositories\lead\LeadRepository;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
 use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Class LeadRedialService
@@ -19,6 +21,7 @@ use yii\helpers\VarDumper;
  * @property LeadRepository $leadRepository
  * @property ServiceFinder $serviceFinder
  * @property TransactionManager $transactionManager
+ * @property TakeGuard $takeGuard
  */
 class LeadRedialService
 {
@@ -26,21 +29,25 @@ class LeadRedialService
     private $leadRepository;
     private $serviceFinder;
     private $transactionManager;
+    private $takeGuard;
 
     public function __construct(
         LeadRepository $leadRepository,
         ServiceFinder $serviceFinder,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        TakeGuard $takeGuard
     )
     {
         $this->leadRepository = $leadRepository;
         $this->serviceFinder = $serviceFinder;
         $this->transactionManager = $transactionManager;
+        $this->takeGuard = $takeGuard;
     }
 
     /**
-     * @param int|Lead $lead
-     * @param int|Employee $user
+     * @param $lead
+     * @param $user
+     * @throws \yii\web\ForbiddenHttpException
      */
     public function reservation($lead, $user): void
     {
@@ -50,15 +57,16 @@ class LeadRedialService
         EmployeeAccess::leadAccess($lead, $user);
 
         $this->guardUserFree($user);
-        $this->guardLeadForCall($lead);
+        $this->guardLeadForCall($lead, $user);
 
         $lead->callPrepare();
         $this->leadRepository->save($lead);
     }
 
     /**
-     * @param int|Lead $lead
-     * @param int|Employee $user
+     * @param $lead
+     * @param $user
+     * @throws \yii\web\ForbiddenHttpException
      */
     public function redial($lead, $user): void
     {
@@ -68,7 +76,7 @@ class LeadRedialService
         EmployeeAccess::leadAccess($lead, $user);
 
         $this->guardUserFree($user);
-        $this->guardLeadForCall($lead);
+        $this->guardLeadForCall($lead, $user);
     }
 
     /**
@@ -170,8 +178,9 @@ class LeadRedialService
 
     /**
      * @param Lead $lead
+     * @param Employee $user
      */
-    private function guardLeadForCall(Lead $lead): void
+    private function guardLeadForCall(Lead $lead, Employee $user): void
     {
         if (!$lead->isPending()) {
             throw new \DomainException('Lead is not in status Pending');
@@ -189,6 +198,14 @@ class LeadRedialService
 
         if (strtotime(date('Y-m-d H:i:s')) < strtotime($leadQCall->lqc_dt_from)) {
             throw new \DomainException('Cant call before Date Time From');
+        }
+
+        if ((bool)\Yii::$app->params['settings']['enable_take_frequency_minutes']) {
+            $this->takeGuard->frequencyMinutesGuard($user);
+        }
+
+        if ((bool)\Yii::$app->params['settings']['enable_min_percent_take_leads']) {
+            $this->takeGuard->minPercentGuard($user);
         }
     }
 
@@ -217,5 +234,4 @@ class LeadRedialService
             throw new \DomainException('Lead is not exist on last dialed leads');
         }
     }
-
 }

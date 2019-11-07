@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Lead;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -194,8 +195,16 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                         'visible' => !$isAgent
                     ],
 
-
-
+                    [
+                            'label' => 'Type create',
+                            'attribute' => 'l_type_create',
+                            'value' => static function (Lead $lead) {
+                                if ($lead->l_type_create === null) {
+                                    return '';
+                                }
+                                return Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? 'Undefined';
+                            },
+                    ],
 
                 ],
             ]) ?>

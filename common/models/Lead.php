@@ -27,7 +27,6 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
-use sales\services\lead\calculator\ClientTimeCalculator;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -91,6 +90,7 @@ use yii\helpers\VarDumper;
  * @property string $l_last_action_dt
  * @property int $l_dep_id
  * @property boolean $l_delayed_charge
+ * @property int $l_type_create
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -239,6 +239,15 @@ class Lead extends ActiveRecord implements AggregateRoot
         self::CALL_STATUS_PREPARE   => 'Prepare',
     ];
 
+    public const TYPE_CREATE_MANUALLY = 1;
+    public const TYPE_CREATE_INCOMING_CALL = 2;
+    public const TYPE_CREATE_API = 3;
+
+    public const TYPE_CREATE_LIST = [
+        self::TYPE_CREATE_MANUALLY => 'Manually',
+        self::TYPE_CREATE_INCOMING_CALL => 'Incoming call',
+        self::TYPE_CREATE_API => 'Api',
+    ];
 
     public const SCENARIO_API = 'scenario_api';
     public const SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
@@ -321,6 +330,8 @@ class Lead extends ActiveRecord implements AggregateRoot
 
             ['l_delayed_charge', 'boolean'],
             ['l_delayed_charge', 'default', 'value' => false],
+
+            ['l_type_create', 'in', 'range' => array_keys(self::TYPE_CREATE_LIST)],
         ];
     }
 
@@ -341,6 +352,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      * @param $clientEmail
      * @param $depId
      * @param $delayedCharge
+     * @param $typeCreate
      * @return Lead
      */
     public static function create(
@@ -358,7 +370,8 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clientPhone,
         $clientEmail,
         $depId,
-        $delayedCharge
+        $delayedCharge,
+        $typeCreate
     ): self
     {
         $lead = new static();
@@ -379,6 +392,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
+        $lead->l_type_create = $typeCreate;
         $lead->status = null;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
@@ -2238,6 +2252,7 @@ Reason: {reason}
                 $lq = new LeadQcall();
                 $lq->lqc_lead_id = $this->id;
                 $lq->lqc_weight = $this->project_id * 10;
+                $lq->lqc_created_dt = date('Y-m-d H:i:s');
             }
 
             $date = (new CalculateDateService())->calculate(

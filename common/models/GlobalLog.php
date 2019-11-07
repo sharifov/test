@@ -20,7 +20,12 @@ use yii\db\ActiveRecord;
  * @property int $gl_action_type
  * @property string $gl_created_at
  *
- * @property Employee|ApiUser|null $user
+ * @property Employee|null $userFrontend
+ * @property string $glModel
+ * @property string $appName
+ * @property string $actionTypeName
+ * @property string $modelName
+ * @property ApiUser|null $userApi
  */
 class GlobalLog extends ActiveRecord
 {
@@ -67,10 +72,11 @@ class GlobalLog extends ActiveRecord
 		ActiveRecord::EVENT_AFTER_UPDATE => self::ACTION_TYPE_UPDATE
 	];
 
+
 	/**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+	 * @return string
+	 */
+	public static function tableName()
     {
         return 'global_log';
     }
@@ -189,17 +195,17 @@ class GlobalLog extends ActiveRecord
 	/**
 	 * @return ActiveQuery|null
 	 */
-	public function getUser(): ?ActiveQuery
+	public function getUserFrontend(): ?ActiveQuery
 	{
-		if ($this->gl_app_id === 'app-frontend') {
-			return $this->hasOne(Employee::class, ['id' => 'gl_app_user_id']);
-		}
+		return $this->hasOne(Employee::class, ['id' => 'gl_app_user_id']);
+	}
 
-		if ($this->gl_app_id === 'app-webapi') {
-			return $this->hasOne(ApiUser::class, ['au_id' => 'gl_app_user_id']);
-		}
-
-		return null;
+	/**
+	 * @return ActiveQuery|null
+	 */
+	public function getUserApi(): ?ActiveQuery
+	{
+		return $this->hasOne(ApiUser::class, ['au_id' => 'gl_app_user_id']);
 	}
 
 	/**
@@ -207,7 +213,7 @@ class GlobalLog extends ActiveRecord
 	 */
 	public function isAppFrontend(): bool
 	{
-		return $this->gl_app_id === 'app-frontend';
+		return $this->gl_app_id === self::APP_FRONTEND;
 	}
 
 	/**
@@ -215,7 +221,15 @@ class GlobalLog extends ActiveRecord
 	 */
 	public function isAppWebApi(): bool
 	{
-		return $this->gl_app_id === 'app-webapi';
+		return $this->gl_app_id === self::APP_WEBAPI;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isAppConsole(): bool
+	{
+		return $this->gl_app_id === self::APP_CONSOLE;
 	}
 
 }

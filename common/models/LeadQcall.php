@@ -11,6 +11,7 @@ use Yii;
  * @property string $lqc_dt_from
  * @property string $lqc_dt_to
  * @property int $lqc_weight
+ * @property $lqc_created_dt
  *
  * @property Lead $lqcLead
  */
@@ -36,6 +37,7 @@ class LeadQcall extends \yii\db\ActiveRecord
             [['lqc_dt_from', 'lqc_dt_to'], 'safe'],
             [['lqc_lead_id'], 'unique'],
             [['lqc_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lqc_lead_id' => 'id']],
+            ['lqc_created_dt', 'string'],
         ];
     }
 
@@ -49,6 +51,7 @@ class LeadQcall extends \yii\db\ActiveRecord
             'lqc_dt_from' => 'Date Time From',
             'lqc_dt_to' => 'Date Time To',
             'lqc_weight' => 'Weight',
+            'lqc_created_dt' => 'Created',
         ];
     }
 
