@@ -6,11 +6,11 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
 use sales\access\EmployeeAccess;
+use sales\guards\lead\TakeGuard;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
-use yii\web\ForbiddenHttpException;
 
 /**
  * Class LeadAssignService
@@ -19,6 +19,7 @@ use yii\web\ForbiddenHttpException;
  * @property UserRepository $userRepository
  * @property ServiceFinder $serviceFinder
  * @property TransactionManager $transactionManager
+ * @property TakeGuard $takeGuard
  */
 class LeadAssignService
 {
@@ -27,18 +28,21 @@ class LeadAssignService
     private $userRepository;
     private $serviceFinder;
     private $transactionManager;
+    private $takeGuard;
 
     public function __construct(
         LeadRepository $leadRepository,
         UserRepository $userRepository,
         ServiceFinder $serviceFinder,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        TakeGuard $takeGuard
     )
     {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
         $this->serviceFinder = $serviceFinder;
         $this->transactionManager = $transactionManager;
+        $this->takeGuard = $takeGuard;
     }
 
     /**
@@ -46,7 +50,6 @@ class LeadAssignService
      * @param $user
      * @param int|null $creatorId
      * @param string|null $reason
-     * @throws ForbiddenHttpException
      * @throws \Throwable
      */
     public function take($lead, $user, ?int $creatorId = null, ?string $reason = ''): void
@@ -55,7 +58,7 @@ class LeadAssignService
         $user = $this->serviceFinder->userFind($user);
 
         EmployeeAccess::leadAccess($lead, $user);
-        self::checkAccess($lead, $user);
+        $this->checkAccess($lead, $user);
 
         if ($lead->isCompleted()) {
             throw new \DomainException('Lead is completed!');
@@ -80,7 +83,6 @@ class LeadAssignService
      * @param $user
      * @param int|null $creatorId
      * @param string|null $reason
-     * @throws ForbiddenHttpException
      * @throws \Throwable
      */
     public function takeOver($lead, $user, ?int $creatorId = null, ?string $reason = ''): void
@@ -89,7 +91,7 @@ class LeadAssignService
         $user = $this->serviceFinder->userFind($user);
 
         EmployeeAccess::leadAccess($lead, $user);
-        self::checkAccess($lead, $user);
+        $this->checkAccess($lead, $user);
 
         if ($lead->isCompleted()) {
             throw new \DomainException('Lead is completed!');
@@ -112,19 +114,12 @@ class LeadAssignService
     /**
      * @param Lead $lead
      * @param Employee $user
-     * @throws ForbiddenHttpException
      */
-    private static function checkAccess(Lead $lead, Employee $user): void
+    private function checkAccess(Lead $lead, Employee $user): void
     {
         if ($lead->isPending() && $user->isAgent()) {
-            $isAccessNewLead = $user->accessTakeNewLead();
-            if (!$isAccessNewLead) {
-                throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
-            }
-            $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
-            if (!$isAccessNewLeadByFrequency['access']) {
-                throw new ForbiddenHttpException('Access is denied (frequency) - "Take lead"');
-            }
+            $this->takeGuard->minPercentGuard($user);
+            $this->takeGuard->frequencyMinutesGuard($user);
         }
     }
 
