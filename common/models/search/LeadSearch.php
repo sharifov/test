@@ -82,6 +82,7 @@ class LeadSearch extends Lead
     public $lastActionRangeTime;
     public $soldRangeTime;
     public $createTimeRange;
+    public $createdType;
 
     public $last_ticket_date;
 
@@ -111,9 +112,9 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['datetime_start', 'datetime_end'], 'safe'],
+            [['datetime_start', 'datetime_end', 'createdType'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
@@ -480,11 +481,16 @@ class LeadSearch extends Lead
             'l_answered'    => $this->l_answered,
             'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
             'l_init_price'  => $this->l_init_price,
-            'request_ip'    => $this->request_ip
+            'request_ip'    => $this->request_ip,
+            'l_type_create' => $this->l_type_create
         ]);
 
         if($this->statuses) {
             $query->andWhere(['status' => $this->statuses]);
+        }
+
+        if($this->createdType) {
+            $query->andWhere(['l_type_create' => $this->createdType]);
         }
 
         if ($this->createdRangeTime) {
