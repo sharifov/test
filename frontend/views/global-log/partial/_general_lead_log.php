@@ -25,6 +25,7 @@ echo GridView::widget([
 		'class' => 'table table-striped table-bordered table-responsive'
 	],
 	'columns' => [
+		'gl_id',
 		[
 			'header' => 'Who made the changes',
 			'attribute' => 'gl_app_user_id',
@@ -74,7 +75,7 @@ echo GridView::widget([
 					]);
 				}
 
-				return 'Data log not formatted yet';
+				return '';
 			},
 			'filter' => false,
 			'enableSorting' => false,
