@@ -78,7 +78,8 @@ class ClientManageService
             $phone = ClientPhone::create(
                 $phoneForm->phone,
                 $client->id,
-				$phoneForm->type ?? null
+				$phoneForm->type ?? null,
+                $phoneForm->comments ?? null
             );
             $this->clientPhoneRepository->save($phone);
         }

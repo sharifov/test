@@ -11,6 +11,7 @@ use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
+use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
@@ -458,6 +459,37 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clone->employee_id = null;
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
+    }
+
+    /**
+     * @param $phoneNumber
+     * @param $clientId
+     * @param $projectId
+     * @param $sourceId
+     * @param $gmt
+     * @return Lead
+     */
+    public static function createByIncomingCall(
+        $phoneNumber,
+        $clientId,
+        $projectId,
+        $sourceId,
+        $gmt
+    ): self
+    {
+        $lead = new static();
+        $lead->l_client_phone = $phoneNumber;
+        $lead->client_id = $clientId;
+        $lead->project_id = $projectId;
+        $lead->source_id = $sourceId;
+        $lead->offset_gmt = $gmt;
+        $lead->uid = self::generateUid();
+        $lead->gid = self::generateGid();
+        $lead->status = self::STATUS_PENDING;
+        $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
+        $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
+        $lead->recordEvent(new LeadCreatedByIncomingCallEvent($lead));
+        return $lead;
     }
 
     /**

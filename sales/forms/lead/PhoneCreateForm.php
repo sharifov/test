@@ -14,6 +14,8 @@ use yii\base\Model;
  * @property string $help - only for View for multiInput Widget
  * @property boolean $required
  * @property string $message
+ * @property string $comments
+ * @property $type
  */
 class PhoneCreateForm extends Model
 {
@@ -44,6 +46,8 @@ class PhoneCreateForm extends Model
 
     public $message = 'Phone cannot be blank.';
 
+    public $comments;
+
 
 	/**
      * @return array
@@ -62,7 +66,9 @@ class PhoneCreateForm extends Model
 			[['type', 'client_id', 'id'], 'integer'],
 			['type', 'checkTypeForExistence'],
 			[['phone', 'client_id'], 'unique', 'targetClass' => ClientPhone::class,  'targetAttribute' => ['phone', 'client_id'], 'message' => 'Client already has this phone number', 'except' => 'update'],
-			['phone', 'checkUniqueClientPhone', 'on' => 'update']
+			['phone', 'checkUniqueClientPhone', 'on' => 'update'],
+
+            ['comments', 'string']
 		];
     }
 
