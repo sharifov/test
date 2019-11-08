@@ -6,7 +6,10 @@ use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
+use common\models\Lead2;
+use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
+use common\models\Quote;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\GlobalLog;
@@ -90,7 +93,7 @@ class GlobalLogSearch extends GlobalLog
 	 */
 	public function searchByLead($params): ActiveDataProvider
 	{
-		$query = self::find();
+		$query = self::find()->select('*');
 
 		$dataProvider = new ActiveDataProvider([
 			'query' => $query,
@@ -103,31 +106,44 @@ class GlobalLogSearch extends GlobalLog
 			return $dataProvider;
 		}
 
-		$query->andFilterWhere([
-			'gl_obj_id' => $this->leadId,
-		]);
+		$queryLead = GlobalLog::find()->alias('gl')
+			->where(['gl_obj_id' => $this->leadId])
+			->andWhere(['or', ['gl_model' => Lead::class], ['gl_model' => Lead2::class]]);
 
-		$subQuery = (new Query())->select(['cp.id'])
-			->from(ClientPhone::tableName() . ' as cp')
-			->join('JOIN', Client::tableName() . ' as client', 'client.id = cp.client_id')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => $this->leadId] );
-		$query->orFilterWhere(['IN', 'gl_obj_id', $subQuery]);
+		$queryQuote = GlobalLog::find()->alias('gl')
+			->innerJoin('quotes AS q', 'gl.gl_obj_id = q.id')
+			->where(['q.lead_id' => $this->leadId,  'gl.gl_model' => Quote::class]);
 
-		$subQuery = (new Query())->select(['ce.id'])
-			->from(ClientEmail::tableName() . ' as ce')
-			->join('JOIN', Client::tableName() . ' as client', 'client.id = ce.client_id')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = client.id and lead.id = :leadId', [':leadId' => $this->leadId] );
-		$query->orFilterWhere(['IN', 'gl_obj_id', $subQuery]);
+		$queryLeadPreferences = GlobalLog::find()->alias('gl')
+			->innerJoin('lead_preferences AS lp', 'gl.gl_obj_id = lp.id')
+			->where(['lp.lead_id' => $this->leadId,  'gl.gl_model' => LeadPreferences::class]);
 
-		$subQuery = (new Query())->select(['c.id'])
-			->from(Client::tableName() . ' as c')
-			->join('JOIN', Lead::tableName() . ' as lead', 'lead.client_id = c.id and lead.id = :leadId', [':leadId' => $this->leadId] );
-		$query->orFilterWhere(['IN', 'gl_obj_id', $subQuery]);
+		$queryLeadFlightSegments = GlobalLog::find()->alias('gl')
+			->innerJoin('lead_flight_segments AS lfp', 'gl.gl_obj_id = lfp.id')
+			->where(['lfp.lead_id' => $this->leadId,  'gl.gl_model' => LeadFlightSegment::class]);
 
-		$subQuery = (new Query())->select(['lp.id'])
-			->from(LeadPreferences::tableName() . ' as lp')
-			->where(['lead_id' => $this->leadId]);
-		$query->orFilterWhere(['IN', 'gl_obj_id', $subQuery]);
+		$queryClientPhone = GlobalLog::find()->alias('gl')
+			->innerJoin('client_phone as cp', 'cp.id = gl.gl_obj_id')
+			->innerJoin( 'clients as client', 'client.id = cp.client_id')
+			->innerJoin( 'leads as l', 'l.client_id = client.id and l.id = :leadId and gl.gl_model = :glModelPhone', [':leadId' => $this->leadId, ':glModelPhone' => ClientPhone::class]);
+
+		$queryClientEmail = GlobalLog::find()->alias('gl')
+			->join('join', 'client_email as ce', 'ce.id = gl.gl_obj_id')
+			->join('join', 'clients as client', 'client.id = ce.client_id')
+			->join('join', 'leads as l', 'l.client_id = client.id and l.id = :leadId and gl.gl_model = :glModelEmail', [':leadId' => $this->leadId, ':glModelEmail' => ClientEmail::class]);
+
+		$queryClient = GlobalLog::find()->alias('gl')
+			->join('join', 'clients as client', 'client.id = gl.gl_obj_id')
+			->join('join', 'leads as l', 'l.client_id = client.id and l.id = :leadId and gl.gl_model = :glModelClient', [':leadId' => $this->leadId, ':glModelClient' => Client::class]);
+
+		$query->from(['tbl' => $queryLead->union($queryQuote)
+										->union($queryLeadPreferences)
+										->union($queryLeadFlightSegments)
+										->union($queryClientPhone)
+										->union($queryClientEmail)
+										->union($queryClient)])
+			->orderBy(['gl_id' => SORT_ASC]);
+
 
 		return $dataProvider;
 	}
