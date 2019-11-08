@@ -117,8 +117,6 @@ class TestController extends FController
     {
 
 
-        $quote = Lead::findOne(271137);
-
 
         die;
         return $this->render('blank');

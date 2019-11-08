@@ -195,9 +195,9 @@ if($project){
 <!--    	--><?php //endif;?>
 
         <?php  if (!empty($leadModel->bo_flight_id) && $leadModel->isOwner($user->id) && $leadModel->isBooked()) {
-            $title = empty($leadModel->additionalInformationForm[0]->pnr)
+            $title = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr)
                 ? 'Create PNR' : 'PNR Created';
-            $options = empty($leadModel->additionalInformationForm[0]->pnr) ? [
+            $options = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr) ? [
                 'class' => 'btn btn-success add-pnr',
                 'id' => 'create-pnr',
                 'data-url' => Url::to(['lead/add-pnr', 'leadId' => $leadModel->id])

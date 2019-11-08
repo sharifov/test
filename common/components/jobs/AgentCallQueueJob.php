@@ -76,8 +76,8 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                     $originalAgentId = $call->c_created_user_id;
                     $isCalled = false;
 
-                    if(!$originalAgentId && $call->c_lead_id && $call->cLead2) {
-                        $originalAgentId = $call->cLead2->employee_id;
+                    if(!$originalAgentId && $call->c_lead_id && $call->cLead) {
+                        $originalAgentId = $call->cLead->employee_id;
                     }
 
                     if(!$originalAgentId && $call->c_case_id && $call->cCase) {

@@ -258,7 +258,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     public $totalProfit;
     public $splitProfitPercentSum = 0;
     public $splitTipsPercentSum = 0;
-    public $additionalInformationForm;
+
     public $l_client_time;
 
     public $enableActiveRecordEvents = true;
@@ -283,10 +283,47 @@ class Lead extends ActiveRecord implements AggregateRoot
         return 'leads';
     }
 
-    public function init()
+//    public function init()
+//    {
+//        parent::init();
+//        $this->additionalInformationForm = [new LeadAdditionalInformation()];
+//    }
+
+    private $additionalInformationForm;
+
+    /**
+     * @return LeadAdditionalInformation[]
+     */
+    public function getAdditionalInformationForm(): array
     {
-        parent::init();
-        $this->additionalInformationForm = [new LeadAdditionalInformation()];
+        if ($this->additionalInformationForm !== null) {
+            return $this->additionalInformationForm;
+        }
+
+        if (!empty($this->additional_information)) {
+            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
+        } else {
+            $this->additionalInformationForm = [new LeadAdditionalInformation()];
+        }
+
+        return $this->additionalInformationForm;
+    }
+
+    /**
+     * @return LeadAdditionalInformation
+     */
+    public function getAdditionalInformationFormFirstElement(): LeadAdditionalInformation
+    {
+        return $this->getAdditionalInformationForm()[0];
+    }
+
+    /**
+     * @param string|null $pnr
+     */
+    public function setAdditionalInformationFormFirstElementPnr(?string $pnr): void
+    {
+        $additionalInfo = $this->getAdditionalInformationFormFirstElement();
+        $additionalInfo->pnr = $pnr;
     }
 
     /**
@@ -2923,7 +2960,7 @@ Reason: {reason}
             $this->additional_information = json_encode($this->additional_information);
         } else {
             $separateInfo = [];
-            foreach ($this->additionalInformationForm as $additionalInformation) {
+            foreach ($this->getAdditionalInformationForm() as $additionalInformation) {
                 $separateInfo[] = $additionalInformation->attributes;
             }
             $this->additional_information = json_encode($separateInfo);
@@ -2932,13 +2969,13 @@ Reason: {reason}
         parent::afterValidate();
     }
 
-    public function afterFind()
-    {
-        parent::afterFind();
+//    public function afterFind()
+//    {
+//        parent::afterFind();
 
-        if (!empty($this->additional_information)) {
-            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
-        }
+//        if (!empty($this->additional_information)) {
+//            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
+//        }
 
 //        $this->totalTips = $this->tips ? $this->tips/2 : 0;
 
@@ -2965,7 +3002,7 @@ Reason: {reason}
 
 //        $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
 //        $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
-    }
+//    }
 
     private $totalTips;
 

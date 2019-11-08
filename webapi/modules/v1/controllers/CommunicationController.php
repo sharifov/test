@@ -684,7 +684,7 @@ class CommunicationController extends ApiBaseController
             if($call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusCanceled() || $call->isStatusFailed()) {
 
                 if ($call->c_lead_id) {
-                    $lead = $call->cLead2;
+                    $lead = $call->cLead;
                     if ($lead && (int) $lead->l_call_status_id !== Lead::CALL_STATUS_CANCEL) {
                         $lead->l_call_status_id = Lead::CALL_STATUS_CANCEL;
                         if (!$lead->save()) {

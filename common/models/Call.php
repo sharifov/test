@@ -62,7 +62,6 @@ use Locale;
  * @property Client $cClient
  * @property Department $cDep
  * @property Lead $cLead
- * @property Lead2 $cLead2
  * @property Call $cParent
  * @property Call[] $calls
  * @property Project $cProject
@@ -462,14 +461,6 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCLead2()
-    {
-        return $this->hasOne(Lead2::class, ['id' => 'c_lead_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getCParent()
     {
         return $this->hasOne(self::class, ['c_id' => 'c_parent_id']);
@@ -581,7 +572,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
         if ($this->c_parent_id === null && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
 
-            if (($lead = $this->cLead2) && $lead->l_call_status_id !== Lead::CALL_STATUS_READY) {
+            if (($lead = $this->cLead) && $lead->l_call_status_id !== Lead::CALL_STATUS_READY) {
                 $lead->l_call_status_id = Lead::CALL_STATUS_READY;
                 if (!$lead->save(false)) {
                     Yii::error('Call:afterSave:Lead:callStatus:ready');
@@ -626,8 +617,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             if ($lead->leadQcall) {
                 $lead->createOrUpdateQCall();
             }
-//            if ($this->cLead2->leadQcall) {
-//                $this->cLead2->createOrUpdateQCall();
+//            if ($this->cLead->leadQcall) {
+//                $this->cLead->createOrUpdateQCall();
 //            }
         }
 
@@ -711,7 +702,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'Call:afterSave:Lead:update');
                         }
                     }
-//                    $lead = $this->cLead2;
+//                    $lead = $this->cLead;
 //
 //                    if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
 //                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
@@ -774,8 +765,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
             }
 
-            if ($this->c_lead_id && $this->cLead2 && $this->cLead2->employee_id) {
-                $userListNotifications[$this->cLead2->employee_id] = $this->cLead2->employee_id;
+            if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
+                $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
             }
 
             if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
@@ -803,19 +794,19 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             //}
         }
 
-        if($this->c_lead_id && $this->cLead2) {
+        if($this->c_lead_id && $this->cLead) {
             if (($isChangedStatus || $insert) && $this->isIn() && $this->isEnded()) {
-                if ((int) $this->cLead2->l_call_status_id === Lead::CALL_STATUS_QUEUE) {
-                    $lead = $this->cLead2;
+                if ((int) $this->cLead->l_call_status_id === Lead::CALL_STATUS_QUEUE) {
+                    $lead = $this->cLead;
                     $lead->l_call_status_id = Lead::CALL_STATUS_READY;
                     if(!$lead->update()) {
-                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead2:update');
+                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
                     }
                 }
             }
 
             if ($this->isOut()) {
-                $this->cLead2->updateLastAction();
+                $this->cLead->updateLastAction();
             }
         }
 
