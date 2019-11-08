@@ -547,26 +547,14 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     /**
      * @param int|null $userId
-     * @param bool $useRelation
      * @return bool
      */
-    public function isOwner(?int $userId, bool $useRelation = true): bool
+    public function isOwner(?int $userId): bool
     {
         if ($userId === null) {
             return false;
         }
-        if ($useRelation) {
-            return $this->employee && $this->employee->id === $userId;
-        }
         return $this->employee_id === $userId;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isIOwner(): bool
-    {
-        return $this->isOwner(Yii::$app->user->id, false);
     }
 
     /**
@@ -957,7 +945,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             return;
         }
 
-        if (!$this->isOwner($newOwnerId, false)) {
+        if (!$this->isOwner($newOwnerId)) {
             $this->setOwner($newOwnerId);
         }
     }
@@ -2353,6 +2341,7 @@ Reason: {reason}
     {
         $lead = new self();
         $lead->l_client_phone = $phoneNumber;
+        $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
 
         $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 

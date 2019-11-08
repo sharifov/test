@@ -156,7 +156,7 @@ use yii\widgets\Pjax;
                     <div class="col-md-4 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
 
                         <?php
-                        if($call->c_lead_id && $call->cLead2 && $call->cLead2->employee_id === $userModel->id) {
+                        if($call->c_lead_id && $call->cLead && $call->cLead->isOwner($userModel->id)) {
                             echo '<span class="label label-info">Your Lead</span>';
                         }
                         ?>
