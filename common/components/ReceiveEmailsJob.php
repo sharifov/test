@@ -98,8 +98,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     $cicleCount--;
                 } elseif (isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
 
-                	print_r($res['data']['emails']);die;
-
                     foreach ($res['data']['emails'] as $mail) {
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
