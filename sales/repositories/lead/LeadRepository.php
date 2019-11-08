@@ -12,6 +12,7 @@ use sales\repositories\Repository;
  * @property EventDispatcher $eventDispatcher
  * @method null|Lead get(int $id)
  * @method null|Lead getByGid(string $gid)
+ * @method null|Lead getByUid(string $gid)
  */
 class LeadRepository extends Repository
 {
@@ -51,6 +52,19 @@ class LeadRepository extends Repository
     }
 
     /**
+     * @param string $uid
+     * @return Lead
+     */
+    public function findByUid(string $uid): Lead
+    {
+        if ($lead = Lead::findOne(['uid' => $uid])) {
+            return $lead;
+        }
+        throw new NotFoundException('Lead is not found');
+    }
+
+
+    /**
      * @param $requestHash
      * @return Lead|null
      */
@@ -79,6 +93,36 @@ class LeadRepository extends Repository
                 ]
             ])->andWhere(['<>', 'id', $current])->asArray()->all();
     }
+
+	/**
+	 * @param int $clientId
+	 * @return Lead
+	 */
+    public function getActiveByClientId(int $clientId): Lead
+	{
+		return Lead::find()
+			->where(['client_id' => $clientId,
+					 'status' => [
+					 	Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE,
+						Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]
+			])
+			->orderBy(['id' => SORT_DESC])
+			->limit(1)
+			->one();
+	}
+
+	/**
+	 * @param int $clientId
+	 * @return Lead
+	 */
+	public function getByClientId(int $clientId): Lead
+	{
+		return Lead::find()
+			->where(['client_id' => $clientId])
+			->orderBy(['id' => SORT_DESC])
+			->limit(1)
+			->one();
+	}
 
     /**
      * @param Lead $lead

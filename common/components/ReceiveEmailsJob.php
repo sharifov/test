@@ -3,6 +3,7 @@
 namespace common\components;
 
 
+use sales\services\email\EmailService;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use Yii;
@@ -15,11 +16,20 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 
-
+/**
+ * Class ReceiveEmailsJob
+ * @package common\components
+ *
+ * @property EmailService
+ */
 class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 {
+	/**
+	 * @var EmailService
+	 */
+	private $emailService;
 
-    public $last_email_id = 0;
+	public $last_email_id = 0;
 
     public $request_data = [];
 
@@ -40,6 +50,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
         //Yii::info(VarDumper::dumpAsString(['last_email_id' => $this->last_email_id, 'request_data' => $this->request_data]), 'info\JOB:ReceiveEmailsJob');
 
         try {
+        	$this->emailService = Yii::createObject(EmailService::class);
+
             if ((int)$this->last_email_id < 1) {
                 \Yii::error('Not found last_email_id (' . $this->last_email_id . ')', 'ReceiveEmailsJob:execute');
                 return true;
@@ -68,6 +80,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
             $communication = Yii::$app->communication;
 
             $leadArray = [];
+            $caseArray = [];
             $userArray = [];
 
             while ($accessEmailRequest && $cicleCount < 100) {
@@ -84,6 +97,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     \Yii::error(VarDumper::dumpAsString($res['error']), 'ReceiveEmailsJob:execute');
                     $cicleCount--;
                 } elseif (isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
+
+                	print_r($res['data']['emails']);die;
 
                     foreach ($res['data']['emails'] as $mail) {
                         $filter['last_id'] = $mail['ei_id'] + 1;
@@ -122,7 +137,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
                         $email->e_message_id = $mail['ei_message_id'];
 
-                        $lead_id = $email->detectLeadId();
+                        $lead_id = $this->emailService->detectLeadId($email);
+                        $case_id = $this->emailService->detectCaseId($email);
                         $users = $email->getUsersIdByEmail();
 
                         $user_id = 0;
@@ -140,6 +156,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             // \Yii::info('Email Detected LeadId ' . $lead_id . ' from ' . $email->e_email_from, 'info\ReceiveEmailsJob:execute');
                             $leadArray[$lead_id] = $lead_id;
                         }
+
+                        if ($case_id) {
+							$caseArray[$case_id] = $case_id;
+						}
 
                         if (!$email->save()) {
                             \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
@@ -176,6 +196,13 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                 foreach ($leadArray as $lead_id) {
                     // Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
                     Notifications::sendSocket('getNewNotification', ['lead_id' => $lead_id]);
+                }
+            }
+
+            if ($caseArray) {
+                foreach ($caseArray as $case_id) {
+                    // Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
+                    Notifications::sendSocket('getNewNotification', ['case_id' => $case_id]);
                 }
             }
         } catch (\Throwable $e) {
