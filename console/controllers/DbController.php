@@ -6,16 +6,19 @@ use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadLog;
+use common\models\LeadQcall;
 use common\models\Quote;
 use frontend\models\UserSiteActivity;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\services\lead\qcall\CalculateDateService;
 use sales\services\log\GlobalLogFormatAttrService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Exception;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
@@ -49,6 +52,30 @@ class DbController extends Controller
 	{
 		parent::__construct($id, $module, $config);
 		$this->globalLogFormatAttrService = $globalLogFormatAttrService;
+	}
+
+    public function actionLeadQcall()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $leads = Lead::find()
+            ->andWhere(['status' => 1])
+            ->andWhere(['NOT IN', 'id', (new Query())->select('lqc_lead_id')->from(LeadQcall::tableName())])
+            ->all();
+        foreach ($leads as $lead) {
+
+            $lq = new LeadQcall();
+            $lq->lqc_lead_id = $lead->id;
+            $lq->lqc_weight = 0;
+            $lq->lqc_created_dt = $lead->created;
+
+            $lq->lqc_dt_from = date('Y-m-d H:i:s');
+            $lq->lqc_dt_to = date('Y-m-d H:i:s', strtotime('+3 days'));
+
+            if (!$lq->save()) {
+                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 
 	/**
