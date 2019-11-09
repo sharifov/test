@@ -562,20 +562,28 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         parent::afterSave($insert, $changedAttributes);
 
+        $leadRepository = Yii::createObject(LeadRepository::class);
+
         $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
 
         if ($this->c_parent_id && $this->isOut() && ($lead = $this->cLead) && $lead->isCallPrepare()) {
-            $lead->callProcessing();
-            $lead->save();
+            try {
+                $lead->callProcessing();
+                $leadRepository->save($lead);
+            } catch (\Throwable $e) {
+                Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:afterSave:Lead:callProcessing');
+            }
         }
 
         if ($this->c_parent_id === null && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
 
-            if (($lead = $this->cLead) && $lead->l_call_status_id !== Lead::CALL_STATUS_READY) {
-                $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-                if (!$lead->save(false)) {
-                    Yii::error('Call:afterSave:Lead:callStatus:ready');
+            if (($lead = $this->cLead) && !$lead->isCallReady()) {
+                try {
+                    $lead->callReady();
+                    $leadRepository->save($lead);
+                } catch (\Throwable $e) {
+                    Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:afterSave:Lead:callReady');
                 }
             }
 
@@ -603,11 +611,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
                     if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
                         try {
-                            $repo = Yii::createObject(LeadRepository::class);
                             $lead->followUp(null, null, 'Redial Pending max attempts reached');
-                            $repo->save($lead);
+                            $leadRepository->save($lead);
                         } catch (\Throwable $e) {
-                            Yii::error($e, 'Call:AfterSave:Lead follow up');
+                            Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead follow up');
                         }
                     }
 
@@ -687,10 +694,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->isPending()) {
                         Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
                         try {
-                            $repo = Yii::createObject(LeadRepository::class);
                             $lead->answered();
                             $lead->processing($this->c_created_user_id, null, 'Call AutoCreated Lead');
-                            $repo->save($lead);
+                            $leadRepository->save($lead);
                             if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
                                 $qCall->delete();
                             }
@@ -698,7 +704,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                             $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
                             Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
                         } catch (\Throwable $e) {
-                            Yii::error(VarDumper::dumpAsString($e->getMessage()), 'Call:afterSave:Lead:update');
+                            Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:afterSave:Lead:Answered:Processing');
                         }
                     }
 //                    $lead = $this->cLead;
@@ -793,13 +799,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             //}
         }
 
-        if($this->c_lead_id && $this->cLead) {
+        if($this->c_lead_id && ($lead = $this->cLead)) {
             if (($isChangedStatus || $insert) && $this->isIn() && $this->isEnded()) {
-                if ((int) $this->cLead->l_call_status_id === Lead::CALL_STATUS_QUEUE) {
-                    $lead = $this->cLead;
-                    $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-                    if(!$lead->update()) {
-                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
+                if ($lead->isCallQueue()) {
+                    try {
+                        $lead->callReady();
+                        $leadRepository->save($lead);
+                    } catch (\Throwable $e) {
+                        Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead:isCallQueue:callReady');
                     }
                 }
             }

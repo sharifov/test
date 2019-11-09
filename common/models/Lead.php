@@ -1151,6 +1151,32 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->l_call_status_id === self::CALL_STATUS_PROCESS;
     }
 
+    public function callCancel(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_CANCEL);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallCancel(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_CANCEL;
+    }
+
+    public function callQueue(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_QUEUE);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallQueue(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_QUEUE;
+    }
+
     public function callReady(): void
     {
         $this->setCallStatus(self::CALL_STATUS_READY);

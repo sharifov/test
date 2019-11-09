@@ -18,6 +18,7 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use sales\repositories\lead\LeadRepository;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -684,12 +685,13 @@ class CommunicationController extends ApiBaseController
             if($call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusCanceled() || $call->isStatusFailed()) {
 
                 if ($call->c_lead_id) {
-                    $lead = $call->cLead;
-                    if ($lead && (int) $lead->l_call_status_id !== Lead::CALL_STATUS_CANCEL) {
-                        $lead->l_call_status_id = Lead::CALL_STATUS_CANCEL;
-                        if (!$lead->save()) {
-                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors),
-                                'API:Communication:voiceDefault:Lead:save');
+                    if (($lead = $call->cLead) && !$lead->isCallCancel()) {
+                        try {
+                            $leadRepository = Yii::createObject(LeadRepository::class);
+                            $lead->callCancel();
+                            $leadRepository->save($lead);
+                        } catch (\Throwable $e) {
+                            Yii::error('LeadId: ' . $lead->id . ' Message: ' . $e->getMessage() ,'API:Communication:voiceDefault:Lead:save');
                         }
                     }
                 }
