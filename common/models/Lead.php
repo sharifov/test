@@ -31,6 +31,8 @@ use sales\helpers\lead\LeadHelper;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
+use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\QCallService;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
@@ -2535,7 +2537,20 @@ Reason: {reason}
                 LeadFlow::addStateFlow($this);
 
                 if ($this->scenario === self::SCENARIO_API) {
-                    $this->createOrUpdateQCall();
+                    try {
+                        $service = Yii::createObject(QCallService::class);
+                        $service->create(
+                            $this->id,
+                            new Config(
+                                $this->status,
+                                $this->getCountOutCallsLastFlow()
+                            ),
+                            ($this->project_id * 10),
+                            $this->offset_gmt
+                        );
+                    } catch (\Throwable $e) {
+                        Yii::error($e, 'Lead:AfterSave:QCallService:create');
+                    }
                 }
 
                 /*$job = new QuickSearchInitPriceJob();

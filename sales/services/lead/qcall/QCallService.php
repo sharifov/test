@@ -26,15 +26,14 @@ class QCallService
 
     /**
      * @param int $leadId
-     * @param int $status
-     * @param int $callCount
+     * @param Config $config
      * @param int $weight
      * @param string|null $clientGmt
      */
-    public function create(int $leadId, int $status, int $callCount, int $weight, ?string $clientGmt): void
+    public function create(int $leadId, Config $config, int $weight, ?string $clientGmt): void
     {
-        if (!$config = $this->findConfig($status, $callCount)) {
-            Yii::warning('QCallService:create. Config not found for status: ' . $status . ', callCount: ' . $callCount);
+        if (!$qConfig = $this->findConfig($config)) {
+            Yii::warning('QCallService:create. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
             return;
         }
 
@@ -44,9 +43,9 @@ class QCallService
         }
 
         $interval = (new CalculateDateService())->calculate(
-            $config->qc_time_from,
-            $config->qc_time_to,
-            $config->qc_client_time_enable,
+            $qConfig->qc_time_from,
+            $qConfig->qc_time_to,
+            $qConfig->qc_client_time_enable,
             $clientGmt,
             'now'
         );
@@ -57,27 +56,21 @@ class QCallService
     }
 
     /**
-     * @param int $leadId
-     * @param int $status
-     * @param int $callCount
+     * @param LeadQcall $qCall
+     * @param Config $config
      * @param string|null $clientGmt
      */
-    public function updateInterval(int $leadId, int $status, int $callCount, ?string $clientGmt): void
+    public function updateInterval(LeadQcall $qCall, Config $config, ?string $clientGmt): void
     {
-        if (!$config = $this->findConfig($status, $callCount)) {
-            Yii::warning('QCallService:updateInterval. Config not found for status: ' . $status . ', callCount: ' . $callCount);
-            return;
-        }
-
-        if (!$qCall = $this->findQcall($leadId)) {
-            Yii::error('QCallService:updateInterval. Not found record LeadId: ' . $leadId);
+        if (!$qConfig = $this->findConfig($config)) {
+            Yii::warning('QCallService:updateInterval. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
             return;
         }
 
         $interval = (new CalculateDateService())->calculate(
-            $config->qc_time_from,
-            $config->qc_time_to,
-            $config->qc_client_time_enable,
+            $qConfig->qc_time_from,
+            $qConfig->qc_time_to,
+            $qConfig->qc_client_time_enable,
             $clientGmt,
             'now'
         );
@@ -95,7 +88,7 @@ class QCallService
     public function remove(int $leadId): void
     {
         if (!$qCall = $this->findQcall($leadId)) {
-            Yii::error('QCallService:remove. Not found leadId: ' . $leadId);
+//            Yii::warning('QCallService:remove. Not found leadId: ' . $leadId);
             return;
         }
         $this->repository->remove($qCall);
@@ -111,14 +104,13 @@ class QCallService
     }
 
     /**
-     * @param int $status
-     * @param int $callCount
+     * @param Config $config
      * @return QcallConfig|null
      */
-    private function findConfig(int $status, int $callCount):? QcallConfig
+    private function findConfig(Config $config):? QcallConfig
     {
-        return QcallConfig::find()->where(['qc_status_id' => $status])
-            ->andWhere(['<=', 'qc_call_att', $callCount])
+        return QcallConfig::find()->where(['qc_status_id' => $config->status])
+            ->andWhere(['<=', 'qc_call_att', $config->callCount])
             ->orderBy(['qc_call_att' => SORT_DESC])->limit(1)->one();
     }
 }

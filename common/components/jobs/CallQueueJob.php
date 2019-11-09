@@ -127,9 +127,9 @@ class CallQueueJob extends BaseObject implements JobInterface
                             }
                             $call->c_lead_id = $lead->id;
                             if (!$lead->isCallReady() && $call->isEnded()) {
+                                $leadRepository = Yii::createObject(LeadRepository::class);
                                 $lead->callReady();
-                                $repo = Yii::createObject(LeadRepository::class);
-                                $repo->save($lead);
+                                $leadRepository->save($lead);
                             }
                             if (!$originalAgentId && $lead && $lead->employee_id) {
                                 $originalAgentId = $lead->employee_id;

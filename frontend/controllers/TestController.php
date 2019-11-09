@@ -40,7 +40,9 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
+use sales\services\lead\LeadManageService;
 use sales\services\lead\qcall\CalculateDateService;
+use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\DayTimeHours;
 use sales\services\lead\qcall\QCallService;
 use sales\services\TransactionManager;
@@ -116,7 +118,10 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $lead = Lead::findOne(271722);
 
+        $qCallService = Yii::createObject(QCallService::class);
+        $qCallService->updateInterval($lead->leadQcall, new Config($lead->status, $lead->getCountOutCallsLastFlow()), $lead->offset_gmt);
 
         die;
         return $this->render('blank');

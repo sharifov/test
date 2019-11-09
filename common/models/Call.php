@@ -10,6 +10,8 @@ use sales\entities\EventTrait;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
+use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\QCallService;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
@@ -622,11 +624,13 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             }
 
             if ($lead->leadQcall) {
-                $lead->createOrUpdateQCall();
+                try {
+                    $qCallService = Yii::createObject(QCallService::class);
+                    $qCallService->updateInterval($lead->leadQcall, new Config($lead->status, $lead->getCountOutCallsLastFlow()), $lead->offset_gmt);
+                } catch (\Throwable $e) {
+                    Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:QCallService:updateInterval');
+                }
             }
-//            if ($this->cLead->leadQcall) {
-//                $this->cLead->createOrUpdateQCall();
-//            }
         }
 
         if (!$insert) {
@@ -694,15 +698,18 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->isPending()) {
                         Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
                         try {
+
                             $lead->answered();
                             $lead->processing($this->c_created_user_id, null, 'Call AutoCreated Lead');
                             $leadRepository->save($lead);
-                            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
-                                $qCall->delete();
-                            }
+
+                            $qCallService = Yii::createObject(QCallService::class);
+                            $qCallService->remove($lead->id);
+
                             Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                             $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
                             Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
+
                         } catch (\Throwable $e) {
                             Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:afterSave:Lead:Answered:Processing');
                         }
