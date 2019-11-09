@@ -574,6 +574,11 @@ class Lead extends ActiveRecord implements AggregateRoot
         $this->setAnswered(true);
     }
 
+    public function notAnswered()
+    {
+        $this->setAnswered(false);
+    }
+
     /**
      * @param bool $value
      */

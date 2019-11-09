@@ -688,9 +688,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
                         try {
                             $repo = Yii::createObject(LeadRepository::class);
+                            $lead->answered();
                             $lead->processing($this->c_created_user_id, null, 'Call AutoCreated Lead');
-                            // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
-                            $lead->l_answered = true;
                             $repo->save($lead);
                             if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
                                 $qCall->delete();
