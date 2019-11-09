@@ -2327,6 +2327,17 @@ Reason: {reason}
 
 
     /**
+     * @return int
+     */
+    public function getCountOutCallsLastFlow(): int
+    {
+        if ($this->lastLeadFlow) {
+            return (int)$this->lastLeadFlow->lf_out_calls;
+        }
+        return 0;
+    }
+
+    /**
      * @return bool
      */
     public function createOrUpdateQCall(): bool
@@ -2353,10 +2364,11 @@ Reason: {reason}
             }
 
             $date = (new CalculateDateService())->calculate(
+                $qcConfig->qc_time_from,
+                $qcConfig->qc_time_to,
                 $qcConfig->qc_client_time_enable,
                 $this->offset_gmt,
-                $qcConfig->qc_time_from,
-                $qcConfig->qc_time_to
+                'now'
             );
 
             $lq->lqc_dt_from = $date->from;
