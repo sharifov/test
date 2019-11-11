@@ -5,12 +5,12 @@ namespace sales\events\lead;
 use common\models\Lead;
 
 /**
- * Class LeadCreatedByIncomingCallEvent
+ * Class LeadCreatedByApi
  *
  * @property Lead $lead
  * @property string $created
  */
-class LeadCreatedByIncomingCallEvent implements LeadableEventInterface
+class LeadCreatedByApiEvent implements LeadableEventInterface
 {
     public $lead;
     public $created;

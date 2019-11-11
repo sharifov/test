@@ -11,7 +11,7 @@ use sales\services\lead\LeadFlowLogService;
  *
  * @property LeadFlowLogService $leadFlowLogService
  */
-class LeadCreatedByIncomingCallListener
+class LeadCreatedByIncomingCallLogListener
 {
     private $leadFlowLogService;
 
@@ -40,7 +40,7 @@ class LeadCreatedByIncomingCallListener
                 $event->created
             );
         } catch (\Throwable $e) {
-            Yii::error($e, 'Listeners:LeadCreatedByIncomingCallListener');
+            Yii::error($e, 'Listeners:LeadCreatedByIncomingCallLogListener');
         }
     }
 }

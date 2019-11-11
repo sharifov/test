@@ -2,7 +2,7 @@
 
 namespace sales\listeners\lead;
 
-use sales\events\lead\LeadCreatedByIncomingCallEvent;
+use sales\events\lead\LeadableEventInterface;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\QCallService;
 
@@ -24,11 +24,11 @@ class LeadQcallAddListener
     }
 
     /**
-     * @param LeadCreatedByIncomingCallEvent $event
+     * @param LeadableEventInterface $event
      */
-    public function handle(LeadCreatedByIncomingCallEvent $event): void
+    public function handle(LeadableEventInterface $event): void
     {
-        $lead = $event->lead;
+        $lead = $event->getLead();
         try {
             $this->service->create(
                 $lead->id,
@@ -42,6 +42,5 @@ class LeadQcallAddListener
         } catch (\Throwable $e) {
             \Yii::error($e, 'LeadQcallAddListener');
         }
-
     }
 }

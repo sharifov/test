@@ -12,6 +12,7 @@ use yii\base\Model;
  * @property string $help - only for View for multiInput Widget
  * @property boolean $required
  * @property string $message
+ * @property $type
  */
 class EmailCreateForm extends Model
 {

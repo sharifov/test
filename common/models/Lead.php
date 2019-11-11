@@ -11,6 +11,7 @@ use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
+use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
@@ -494,6 +495,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $lead;
     }
 
+    public static function createByApi(): self
+    {
+        $lead = new static();
+        $lead->gid = self::generateGid();
+        $lead->scenario = self::SCENARIO_API;
+        $lead->l_type_create = self::TYPE_CREATE_API;
+        $lead->recordEvent(new LeadCreatedByApiEvent($lead));
+        return $lead;
+    }
+
     /**
      * @param array $segments
      * @return bool
@@ -522,7 +533,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return string
      */
-    private static function generateUid(): string
+    public static function generateUid(): string
     {
         return uniqid();
     }
@@ -530,7 +541,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return string
      */
-    private static function generateGid(): string
+    public static function generateGid(): string
     {
         return md5(uniqid('', true));
     }
@@ -2967,7 +2978,7 @@ Reason: {reason}
     {
         if (parent::beforeSave($insert)) {
 
-            if ($this->enableActiveRecordEvents) {
+//            if ($this->enableActiveRecordEvents) {
 
                 if ($insert) {
                     //$this->created = date('Y-m-d H:i:s');
@@ -2983,7 +2994,7 @@ Reason: {reason}
                         'source_id' => $this->source_id
                     ]);
                     if ($leadExistByUID !== null) {
-                        $this->uid = uniqid();
+                        $this->uid = self::generateUid();
                     }
 
                     /*if(!$this->gid) {
@@ -2995,11 +3006,11 @@ Reason: {reason}
                 }
 
                 if (!$this->uid) {
-                    $this->uid = uniqid();
+                    $this->uid = self::generateUid();
                 }
 
-                if(!$this->gid) {
-                    $this->gid = md5(uniqid('', true));
+                if (!$this->gid) {
+                    $this->gid = self::generateGid();
                 }
 
                 $this->adults = (int) $this->adults;
@@ -3008,7 +3019,7 @@ Reason: {reason}
                 $this->bo_flight_id = (int) $this->bo_flight_id;
                 $this->agents_processing_fee = ($this->adults + $this->children) * self::AGENT_PROCESSING_FEE_PER_PAX;
 
-            }
+//            }
 
             return true;
         }

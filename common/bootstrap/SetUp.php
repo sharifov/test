@@ -12,6 +12,7 @@ use sales\entities\cases\events\CasesSolvedStatusEvent;
 use sales\entities\cases\events\CasesTrashStatusEvent;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
+use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
@@ -35,7 +36,8 @@ use sales\listeners\cases\CasesTrashStatusEventLogListener;
 use sales\listeners\lead\LeadBookedEventLogListener;
 use sales\listeners\lead\LeadBookedNotificationsListener;
 use sales\listeners\lead\LeadCallExpertRequestEventListener;
-use sales\listeners\lead\LeadCreatedByIncomingCallListener;
+use sales\listeners\lead\LeadCreatedByApiLogEventListener;
+use sales\listeners\lead\LeadCreatedByIncomingCallLogListener;
 use sales\listeners\lead\LeadCreatedCloneByUserEventListener;
 use sales\listeners\lead\LeadCreatedEventListener;
 use sales\listeners\lead\LeadDuplicateDetectedEventListener;
@@ -102,7 +104,11 @@ class SetUp implements BootstrapInterface
                     LeadSnoozeNotificationsListener::class,
                 ],
                 LeadCreatedByIncomingCallEvent::class => [
-                    LeadCreatedByIncomingCallListener::class,
+                    LeadCreatedByIncomingCallLogListener::class,
+                    LeadQcallAddListener::class,
+                ],
+                LeadCreatedByApiEvent::class => [
+                    LeadCreatedByApiLogEventListener::class,
                     LeadQcallAddListener::class,
                 ],
 

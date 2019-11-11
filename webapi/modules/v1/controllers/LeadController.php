@@ -13,6 +13,7 @@ use common\models\Sources;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
+use sales\services\lead\LeadCreateApiService;
 use sales\services\lead\LeadHashGenerator;
 use sales\services\TransactionManager;
 use webapi\models\ApiLead;
@@ -29,18 +30,21 @@ class LeadController extends ApiBaseController
     private $leadHashGenerator;
     private $leadRepository;
     private $transactionManager;
+    private $leadCreateApiService;
 
     public function __construct($id,
                                 $module,
                                 LeadHashGenerator $leadHashGenerator,
                                 LeadRepository $leadRepository,
                                 TransactionManager $transactionManager,
+                                LeadCreateApiService $leadCreateApiService,
                                 $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->leadHashGenerator = $leadHashGenerator;
         $this->leadRepository = $leadRepository;
         $this->transactionManager = $transactionManager;
+        $this->leadCreateApiService = $leadCreateApiService;
     }
 
     /**
@@ -344,269 +348,274 @@ class LeadController extends ApiBaseController
         }
 
         $response = [];
-        $transaction = Yii::$app->db->beginTransaction();
 
 
-        $client = null;
-        $lead = new Lead();
-        $lead->scenario = Lead::SCENARIO_API;
-        $lead->l_type_create = Lead::TYPE_CREATE_API;
-
-        if($modelLead->phones) {
-            foreach ($modelLead->phones as $phone) {
-                $phone = trim($phone);
-                if(!$phone) {
-                    continue;
-                }
-
-                $lead->l_client_phone = $phone;
-
-                $phoneModel = ClientPhone::find()->where(['phone' => $phone])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-
-                if($phoneModel && $phoneModel->client) {
-                    $client = $phoneModel->client;
-                    break;
-                }
-            }
-        }
-
-        if ($modelLead->emails) {
-            foreach ($modelLead->emails as $email) {
-
-                $email = mb_strtolower(trim($email));
-
-                if(!$email) {
-                    continue;
-                }
-                $lead->l_client_email = $email;
-            }
-        }
+        $lead = $this->leadCreateApiService->createByApi($modelLead, $this->apiProject);
 
 
-        if(!$client) {
-            $client = new Client();
-
-            if ($modelLead->client_first_name) {
-                $client->first_name = $modelLead->client_first_name;
-            } else {
-                $client->first_name = 'ClientName';
-            }
-
-            if ($modelLead->client_last_name) {
-                $client->last_name = $modelLead->client_last_name;
-            }
-            if ($modelLead->client_middle_name) {
-                $client->middle_name = $modelLead->client_middle_name;
-            }
-        }
-
-
-
-        if (!$client->save()) {
-            throw new UnprocessableEntityHttpException($this->errorToString($client->errors));
-        }
-
-
-
-        //$lead->scenario = Lead::SCENARIO_API;
-        $lead->attributes = $modelLead->attributes;
-
-        $lead->client_id = $client->id;
-        if (!$lead->status) {
-            $lead->status = Lead::STATUS_PENDING;
-        }
-
-        if (!$lead->uid) {
-            $lead->uid = uniqid();
-        }
-
+//        $transaction = Yii::$app->db->beginTransaction();
 //
-//        if ($modelLead->flights) {
-//            $flightCount = count($modelLead->flights);
 //
-//            if ($flightCount === 1) {
-//                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
-//            } elseif ($flightCount === 2) {
-//                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
-//            } else {
-//                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
+//        $client = null;
+//        $lead = new Lead();
+//        $lead->scenario = Lead::SCENARIO_API;
+//        $lead->l_type_create = Lead::TYPE_CREATE_API;
+//
+//        if($modelLead->phones) {
+//            foreach ($modelLead->phones as $phone) {
+//                $phone = trim($phone);
+//                if(!$phone) {
+//                    continue;
+//                }
+//
+//                $lead->l_client_phone = $phone;
+//
+//                $phoneModel = ClientPhone::find()->where(['phone' => $phone])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+//
+//                if($phoneModel && $phoneModel->client) {
+//                    $client = $phoneModel->client;
+//                    break;
+//                }
 //            }
 //        }
-
-
-        if (!$lead->cabin) {
-            $lead->cabin = Lead::CABIN_ECONOMY;
-        }
-
-        if (!$lead->children) {
-            $lead->children = 0;
-        }
-        if (!$lead->infants) {
-            $lead->infants = 0;
-        }
-        if (!$lead->request_ip) {
-            $lead->request_ip = Yii::$app->request->remoteIP;
-        }
-
-        if ($this->apiProject) {
-            $lead->project_id = $this->apiProject->id;
-        }
-
-
-
-        if(!$lead->l_client_lang && $modelLead->user_language) {
-            $lead->l_client_lang = $modelLead->user_language;
-        }
-
-        if(!$lead->l_client_ua && $modelLead->user_agent) {
-            $lead->l_client_ua = $modelLead->user_agent;
-        }
-
-        if(!$lead->l_client_first_name && $modelLead->client_first_name) {
-            $lead->l_client_first_name = $modelLead->client_first_name;
-        }
-
-        if(!$lead->l_client_last_name && $modelLead->client_last_name) {
-            $lead->l_client_last_name = $modelLead->client_last_name;
-        }
-
-        $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-
-        $request_hash = $this->leadHashGenerator->generate(
-            $modelLead->request_ip,
-            $modelLead->project_id,
-            $modelLead->adults,
-            $modelLead->children,
-            $modelLead->infants,
-            $modelLead->cabin,
-            $modelLead->phones,
-            $modelLead->flights
-        );
-
-        if ($duplicate = $this->leadRepository->getByRequestHash($request_hash)) {
-            $lead->duplicate($duplicate->id, $modelLead->employee_id, null);
-            Yii::info('Warning: detected duplicate Lead (Origin id: ' . $duplicate->id . ', Hash: ' . $request_hash . ')', 'nfo\API:Lead:duplicate');
-        }
-
-        if ($request_hash && $lead->isEmptyRequestHash()) {
-            $lead->setRequestHash($request_hash);
-        }
-
-//        $request_hash = $modelLead->getRequestHash();
 //
-//        $duplicateLead = Lead::find()
-//            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
-//            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
+//        if ($modelLead->emails) {
+//            foreach ($modelLead->emails as $email) {
 //
-//        if($duplicateLead) {
-//            $lead->l_duplicate_lead_id = $duplicateLead->id;
-//            $lead->status = Lead::STATUS_TRASH;
-//            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
+//                $email = mb_strtolower(trim($email));
+//
+//                if(!$email) {
+//                    continue;
+//                }
+//                $lead->l_client_email = $email;
+//            }
 //        }
 //
 //
-//        if(!$lead->l_request_hash && $request_hash) {
-//            $lead->l_request_hash = $request_hash;
+//        if(!$client) {
+//            $client = new Client();
+//
+//            if ($modelLead->client_first_name) {
+//                $client->first_name = $modelLead->client_first_name;
+//            } else {
+//                $client->first_name = 'ClientName';
+//            }
+//
+//            if ($modelLead->client_last_name) {
+//                $client->last_name = $modelLead->client_last_name;
+//            }
+//            if ($modelLead->client_middle_name) {
+//                $client->middle_name = $modelLead->client_middle_name;
+//            }
 //        }
-
-
-
-
-
-        if (!$lead->validate()) {
-            if ($errors = $lead->getErrors()) {
-                throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);
-            } else {
-                throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
-            }
-        }
-
-        if (!$lead->save()) {
-            Yii::error(print_r($lead->errors, true), 'API:Lead:create:Lead:save');
-            $transaction->rollBack();
-            throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
-        }
-
-        if (!$lead->trip_type) {
-            $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
-        }
-
-        if ($modelLead->flights) {
-
-            $segmentsDTO = [];
-
-            foreach ($modelLead->flights as $flight) {
-                $flightModel = new LeadFlightSegment();
-                $flightModel->scenario = LeadFlightSegment::SCENARIO_CREATE_API;
-
-
-                $flightModel->lead_id = $lead->id;
-                $flightModel->origin = $flight['origin'];
-                $flightModel->destination = $flight['destination'];
-                $flightModel->departure = $flight['departure'];
-
-                $segmentsDTO[] = new SegmentDTO($flight['origin'], $flight['destination']);
-
-                if (!$flightModel->save()) {
-                    Yii::error(print_r($flightModel->errors, true), 'API:Lead:create:LeadFlightSegment:save');
-                    $transaction->rollBack();
-                    throw new UnprocessableEntityHttpException($this->errorToString($flightModel->errors), 10);
-                }
-            }
-
-            $lead->setTripType(LeadTripTypeCalculator::calculate(...$segmentsDTO));
-        }
-
-
-        if ($modelLead->emails) {
-            foreach ($modelLead->emails as $email) {
-
-                $email = mb_strtolower(trim($email));
-
-                $emailExist = ClientEmail::find()->where(['email' => $email, 'client_id' => $client->id])->exists();
-                if($emailExist) {
-                    continue;
-                }
-
-                $emailModel = new ClientEmail();
-
-                $emailModel->client_id = $client->id;
-                $emailModel->email = $email;
-                $emailModel->created = date('Y-m-d H:i:s');
-
-                if (!$emailModel->save()) {
-                    Yii::error(print_r($emailModel->errors, true), 'API:Lead:create:ClientEmail:save');
-                    $transaction->rollBack();
-                    throw new UnprocessableEntityHttpException($this->errorToString($emailModel->errors), 11);
-                }
-            }
-        }
-
-        if ($modelLead->phones) {
-            foreach ($modelLead->phones as $phone) {
-
-                $phone = trim($phone);
-
-                $phoneExist = ClientPhone::find()->where(['phone' => $phone, 'client_id' => $client->id])->exists();
-                if($phoneExist) {
-                    continue;
-                }
-
-                $phoneModel = new ClientPhone();
-
-                $phoneModel->client_id = $client->id;
-                $phoneModel->phone = $phone;
-                $phoneModel->created = date('Y-m-d H:i:s');
-
-                if (!$phoneModel->save()) {
-                    Yii::error(print_r($phoneModel->errors, true), 'API:Lead:create:ClientPhone:save');
-                    $transaction->rollBack();
-                    throw new UnprocessableEntityHttpException($this->errorToString($phoneModel->errors), 12);
-                }
-            }
-        }
-
-        $transaction->commit();
+//
+//
+//
+//        if (!$client->save()) {
+//            throw new UnprocessableEntityHttpException($this->errorToString($client->errors));
+//        }
+//
+//
+//
+//        //$lead->scenario = Lead::SCENARIO_API;
+//        $lead->attributes = $modelLead->attributes;
+//
+//        $lead->client_id = $client->id;
+//        if (!$lead->status) {
+//            $lead->status = Lead::STATUS_PENDING;
+//        }
+//
+//        if (!$lead->uid) {
+//            $lead->uid = uniqid();
+//        }
+//
+////
+////        if ($modelLead->flights) {
+////            $flightCount = count($modelLead->flights);
+////
+////            if ($flightCount === 1) {
+////                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
+////            } elseif ($flightCount === 2) {
+////                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+////            } else {
+////                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
+////            }
+////        }
+//
+//
+//        if (!$lead->cabin) {
+//            $lead->cabin = Lead::CABIN_ECONOMY;
+//        }
+//
+//        if (!$lead->children) {
+//            $lead->children = 0;
+//        }
+//        if (!$lead->infants) {
+//            $lead->infants = 0;
+//        }
+//        if (!$lead->request_ip) {
+//            $lead->request_ip = Yii::$app->request->remoteIP;
+//        }
+//
+//        if ($this->apiProject) {
+//            $lead->project_id = $this->apiProject->id;
+//        }
+//
+//
+//
+//        if(!$lead->l_client_lang && $modelLead->user_language) {
+//            $lead->l_client_lang = $modelLead->user_language;
+//        }
+//
+//        if(!$lead->l_client_ua && $modelLead->user_agent) {
+//            $lead->l_client_ua = $modelLead->user_agent;
+//        }
+//
+//        if(!$lead->l_client_first_name && $modelLead->client_first_name) {
+//            $lead->l_client_first_name = $modelLead->client_first_name;
+//        }
+//
+//        if(!$lead->l_client_last_name && $modelLead->client_last_name) {
+//            $lead->l_client_last_name = $modelLead->client_last_name;
+//        }
+//
+//        $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+//
+//        $request_hash = $this->leadHashGenerator->generate(
+//            $modelLead->request_ip,
+//            $modelLead->project_id,
+//            $modelLead->adults,
+//            $modelLead->children,
+//            $modelLead->infants,
+//            $modelLead->cabin,
+//            $modelLead->phones,
+//            $modelLead->flights
+//        );
+//
+//        if ($duplicate = $this->leadRepository->getByRequestHash($request_hash)) {
+//            $lead->duplicate($duplicate->id, $modelLead->employee_id, null);
+//            Yii::info('Warning: detected duplicate Lead (Origin id: ' . $duplicate->id . ', Hash: ' . $request_hash . ')', 'nfo\API:Lead:duplicate');
+//        }
+//
+//        if ($request_hash && $lead->isEmptyRequestHash()) {
+//            $lead->setRequestHash($request_hash);
+//        }
+//
+////        $request_hash = $modelLead->getRequestHash();
+////
+////        $duplicateLead = Lead::find()
+////            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
+////            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
+////
+////        if($duplicateLead) {
+////            $lead->l_duplicate_lead_id = $duplicateLead->id;
+////            $lead->status = Lead::STATUS_TRASH;
+////            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
+////        }
+////
+////
+////        if(!$lead->l_request_hash && $request_hash) {
+////            $lead->l_request_hash = $request_hash;
+////        }
+//
+//
+//
+//
+//
+//        if (!$lead->validate()) {
+//            if ($errors = $lead->getErrors()) {
+//                throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);
+//            } else {
+//                throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
+//            }
+//        }
+//
+//        if (!$lead->save()) {
+//            Yii::error(print_r($lead->errors, true), 'API:Lead:create:Lead:save');
+//            $transaction->rollBack();
+//            throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
+//        }
+//
+//        if (!$lead->trip_type) {
+//            $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+//        }
+//
+//        if ($modelLead->flights) {
+//
+//            $segmentsDTO = [];
+//
+//            foreach ($modelLead->flights as $flight) {
+//                $flightModel = new LeadFlightSegment();
+//                $flightModel->scenario = LeadFlightSegment::SCENARIO_CREATE_API;
+//
+//
+//                $flightModel->lead_id = $lead->id;
+//                $flightModel->origin = $flight['origin'];
+//                $flightModel->destination = $flight['destination'];
+//                $flightModel->departure = $flight['departure'];
+//
+//                $segmentsDTO[] = new SegmentDTO($flight['origin'], $flight['destination']);
+//
+//                if (!$flightModel->save()) {
+//                    Yii::error(print_r($flightModel->errors, true), 'API:Lead:create:LeadFlightSegment:save');
+//                    $transaction->rollBack();
+//                    throw new UnprocessableEntityHttpException($this->errorToString($flightModel->errors), 10);
+//                }
+//            }
+//
+//            $lead->setTripType(LeadTripTypeCalculator::calculate(...$segmentsDTO));
+//        }
+//
+//
+//        if ($modelLead->emails) {
+//            foreach ($modelLead->emails as $email) {
+//
+//                $email = mb_strtolower(trim($email));
+//
+//                $emailExist = ClientEmail::find()->where(['email' => $email, 'client_id' => $client->id])->exists();
+//                if($emailExist) {
+//                    continue;
+//                }
+//
+//                $emailModel = new ClientEmail();
+//
+//                $emailModel->client_id = $client->id;
+//                $emailModel->email = $email;
+//                $emailModel->created = date('Y-m-d H:i:s');
+//
+//                if (!$emailModel->save()) {
+//                    Yii::error(print_r($emailModel->errors, true), 'API:Lead:create:ClientEmail:save');
+//                    $transaction->rollBack();
+//                    throw new UnprocessableEntityHttpException($this->errorToString($emailModel->errors), 11);
+//                }
+//            }
+//        }
+//
+//        if ($modelLead->phones) {
+//            foreach ($modelLead->phones as $phone) {
+//
+//                $phone = trim($phone);
+//
+//                $phoneExist = ClientPhone::find()->where(['phone' => $phone, 'client_id' => $client->id])->exists();
+//                if($phoneExist) {
+//                    continue;
+//                }
+//
+//                $phoneModel = new ClientPhone();
+//
+//                $phoneModel->client_id = $client->id;
+//                $phoneModel->phone = $phone;
+//                $phoneModel->created = date('Y-m-d H:i:s');
+//
+//                if (!$phoneModel->save()) {
+//                    Yii::error(print_r($phoneModel->errors, true), 'API:Lead:create:ClientPhone:save');
+//                    $transaction->rollBack();
+//                    throw new UnprocessableEntityHttpException($this->errorToString($phoneModel->errors), 12);
+//                }
+//            }
+//        }
+//
+//        $transaction->commit();
 
 
         try {
@@ -617,7 +626,7 @@ class LeadController extends ApiBaseController
 
         } catch (\Throwable $e) {
 
-            $transaction->rollBack();
+//            $transaction->rollBack();
             Yii::error($e->getTraceAsString(), 'API:lead:create:try');
             if (Yii::$app->request->get('debug')) $message = $e->getTraceAsString();
             else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';

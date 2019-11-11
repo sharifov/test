@@ -110,7 +110,7 @@ class ClientManageService
      * @param Client $client
      * @param EmailCreateForm $emailForm
      */
-    private function addEmail(Client $client, EmailCreateForm $emailForm): void
+    public function addEmail(Client $client, EmailCreateForm $emailForm): void
     {
         if (!$emailForm->email) {
             return;
