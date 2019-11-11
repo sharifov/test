@@ -2,6 +2,8 @@
 
 namespace sales\services\lead\qcall;
 
+use common\models\Lead;
+use sales\repositories\lead\LeadFlowRepository;
 use sales\repositories\lead\LeadQcallRepository;
 use Yii;
 use common\models\LeadQcall;
@@ -11,17 +13,34 @@ use common\models\QcallConfig;
  * Class QCallService
  *
  * @property LeadQcallRepository $repository
+ * @property LeadFlowRepository $leadFlowRepository
  */
 class QCallService
 {
     private $repository;
+    private $leadFlowRepository;
 
     /**
      * @param LeadQcallRepository $repository
+     * @param LeadFlowRepository $leadFlowRepository
      */
-    public function __construct(LeadQcallRepository $repository)
+    public function __construct(
+        LeadQcallRepository $repository,
+        LeadFlowRepository $leadFlowRepository
+    )
     {
         $this->repository = $repository;
+        $this->leadFlowRepository = $leadFlowRepository;
+    }
+
+    public function createOrUpdate(Lead $lead): void
+    {
+        if ($lq = $lead->leadQcall) {
+            $this->updateInterval($lq, new Config($lead->status, $lead->getCountOutCallsLastFlow()), $lead->offset_gmt);
+
+        } else {
+            $this->create($lead->id, new Config($lead->status, $lead->getCountOutCallsLastFlow()), ($lead->project_id * 10), $lead->offset_gmt);
+        }
     }
 
     /**
@@ -37,7 +56,7 @@ class QCallService
             return;
         }
 
-        if (LeadQcall::find()->andWhere(['lqc_lead_id' => $leadId])->exists()) {
+        if ($this->isExists($leadId)) {
             Yii::error('QCallService:create. LeadId: ' . $leadId . ' is exists');
             return;
         }
@@ -94,6 +113,14 @@ class QCallService
         $this->repository->remove($qCall);
     }
 
+    public function resetAttempts(Lead $lead): void
+    {
+        if ($lastLeadFlow = $lead->lastLeadFlow) {
+            $lastLeadFlow->resetAttempts();
+            $this->leadFlowRepository->save($lastLeadFlow);
+        }
+    }
+
     /**
      * @param int $leadId
      * @return LeadQcall|null
@@ -112,5 +139,14 @@ class QCallService
         return QcallConfig::find()->where(['qc_status_id' => $config->status])
             ->andWhere(['<=', 'qc_call_att', $config->callCount])
             ->orderBy(['qc_call_att' => SORT_DESC])->limit(1)->one();
+    }
+
+    /**
+     * @param int $leadId
+     * @return bool
+     */
+    private function isExists(int $leadId): bool
+    {
+        return LeadQcall::find()->andWhere(['lqc_lead_id' => $leadId])->exists();
     }
 }

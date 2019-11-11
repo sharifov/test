@@ -80,6 +80,11 @@ class LeadFlow extends \yii\db\ActiveRecord
         $this->lf_time_duration = (int) (strtotime($this->lf_end_dt) - strtotime($this->created));
     }
 
+    public function resetAttempts(): void
+    {
+        $this->lf_out_calls = 0;
+    }
+
     /**
      * {@inheritdoc}
      */
