@@ -225,6 +225,17 @@ class ClientManageService
         return $client;
     }
 
+	/**
+	 * @param string $phoneNumber
+	 * @return bool
+	 */
+    public function checkIfPhoneIsTest(string $phoneNumber): bool
+	{
+		$testPhones = \Yii::$app->params['settings']['test_phone_list'] ?? \Yii::$app->params['test_phone_list'];
+
+		return in_array($phoneNumber, $testPhones ?? [], false);
+	}
+
     /**
      * @param PhoneCreateForm[] $clientPhones
      * @return array

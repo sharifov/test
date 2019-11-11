@@ -170,6 +170,14 @@ class LeadQcallSearch extends LeadQcall
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
+        if ($user->checkIfUsersIpIsAllowed()) {
+        	$isTest = 1;
+		} else {
+        	$isTest = 0;
+		}
+
+		$query->andWhere([Lead::tableName() . '.l_is_test' => $isTest]);
+
         $query->addSelect([
             'countClientPhones' => (new Query())
                 ->select('count(*)')

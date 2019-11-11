@@ -1972,6 +1972,27 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $dateTime;
     }
 
+	/**
+	 * @return string|null
+	 */
+    public function findEmployeeIp(): ?string
+	{
+		$ip = Yii::$app->request->userIP;
+
+		if (!$ip) {
+			$ip = Yii::$app->request->remoteIP;
+		}
+
+		return $ip;
+	}
+
+	public function checkIfUsersIpIsAllowed(): bool
+	{
+		$allowedIp = Yii::$app->params['settings']['test_allow_ip_address_list'] ?? Yii::$app->params['test_allow_ip_address_list'];
+
+		return in_array($this->findEmployeeIp(), $allowedIp ?? [], false);
+	}
+
     /**
      * @return EmployeeQuery
      */
