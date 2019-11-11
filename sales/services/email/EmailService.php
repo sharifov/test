@@ -9,7 +9,6 @@ use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use Yii;
-use yii\helpers\VarDumper;
 
 /**
  * Class EmailService
@@ -121,7 +120,6 @@ class EmailService
 		if (!empty($matches[1])) {
 			foreach ($matches[1] as $messageId) {
 				$messageArr = explode('.', $messageId);
-				Yii::error(VarDumper::dumpAsString($messageArr), 'MyError');
 				if (!empty($messageArr[6])) {
 					$case_id = (int) $messageArr[6];
 

@@ -205,7 +205,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
             }
         } catch (\Throwable $e) {
             \Yii::error($e->getTraceAsString(), 'ReceiveEmailsJob:execute');
-            \Yii::error(VarDumper::dumpAsString($e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine()), 'ReceiveEmailsJob:execute');
         }
         if ($debug) {
             echo "cicleCount:" . $cicleCount . " countTotal:" . $countTotal . PHP_EOL;
