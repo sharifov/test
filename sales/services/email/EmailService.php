@@ -9,6 +9,7 @@ use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use Yii;
+use yii\helpers\VarDumper;
 
 /**
  * Class EmailService
@@ -50,7 +51,7 @@ class EmailService
 		try {
 			$lead = $this->getLeadFromSubjectByIdOrHash($subject);
 
-			if(!$lead && $lead = $this->getLeadFromSubjectByKivTag($email->e_ref_message_id)) {
+			if(!$lead && !$lead = $this->getLeadFromSubjectByKivTag($email->e_ref_message_id)) {
 				$lead = $this->getLeadByLastEmail($email->e_email_from);
 			}
 		} catch (NotFoundException $exception) {
@@ -73,7 +74,7 @@ class EmailService
 		try {
 			$case = $this->getCaseFromSubjectByIdOrHash($subject);
 
-			if(!$case && $case = $this->getCaseFromSubjectByKivTag($email->e_ref_message_id)) {
+			if(!$case && !$case = $this->getCaseFromSubjectByKivTag($email->e_ref_message_id)) {
 				$case = $this->getCaseByLastEmail($email->e_email_from);
 			}
 		} catch (NotFoundException $exception) {
@@ -120,8 +121,9 @@ class EmailService
 		if (!empty($matches[1])) {
 			foreach ($matches[1] as $messageId) {
 				$messageArr = explode('.', $messageId);
-				if (!empty($messageArr[2])) {
-					$case_id = (int) $messageArr[2];
+				Yii::error(VarDumper::dumpAsString($messageArr), 'MyError');
+				if (!empty($messageArr[6])) {
+					$case_id = (int) $messageArr[6];
 
 					$case = $this->casesRepository->find($case_id);
 					if($case) {

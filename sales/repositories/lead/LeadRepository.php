@@ -13,6 +13,8 @@ use sales\repositories\Repository;
  * @method null|Lead get(int $id)
  * @method null|Lead getByGid(string $gid)
  * @method null|Lead getByUid(string $gid)
+ * @method null|Lead getActiveByClientId(int $clientId)
+ * @method null|Lead getByClientId(int $clientId)
  */
 class LeadRepository extends Repository
 {
@@ -96,9 +98,9 @@ class LeadRepository extends Repository
 
 	/**
 	 * @param int $clientId
-	 * @return Lead
+	 * @return null|Lead
 	 */
-    public function getActiveByClientId(int $clientId): Lead
+    public function findActiveByClientId(int $clientId): ?Lead
 	{
 		return Lead::find()
 			->where(['client_id' => $clientId,
@@ -113,9 +115,9 @@ class LeadRepository extends Repository
 
 	/**
 	 * @param int $clientId
-	 * @return Lead
+	 * @return null|Lead
 	 */
-	public function getByClientId(int $clientId): Lead
+	public function findByClientId(int $clientId): ?Lead
 	{
 		return Lead::find()
 			->where(['client_id' => $clientId])
