@@ -163,7 +163,9 @@ class LeadQcallSearch extends LeadQcall
 
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
 
-        $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+        if (!$user->isAdmin()) {
+            $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+        }
 
         if ($user->isAgent() || $user->isSupervision()) {
             $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
@@ -213,9 +215,7 @@ class LeadQcallSearch extends LeadQcall
             'lqc_dt_from' => SORT_ASC
         ]);
 
-        if ((bool)Yii::$app->params['settings']['enable_redial_show_lead_limit']) {
-            $query->limit((int)$user->userParams->up_inbox_show_limit_leads);
-        }
+
 
         // add conditions that should always apply here
 
@@ -232,6 +232,11 @@ class LeadQcallSearch extends LeadQcall
                 'pageSize' => 40,
             ],*/
         ]);
+
+        if ((bool)Yii::$app->params['settings']['enable_redial_show_lead_limit'] && $user->userParams->up_inbox_show_limit_leads !== null) {
+            $query->limit((int)$user->userParams->up_inbox_show_limit_leads);
+            $dataProvider->pagination = false;
+        }
 
         $this->load($params);
 
