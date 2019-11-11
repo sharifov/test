@@ -225,7 +225,7 @@ $lists = new ListsAccess($user->id);
 
                 $str = $clientName . '<br>';
 
-                if ($user->isAgent() && $lead->isOwner($user->id, false)) {
+                if ($user->isAgent() && $lead->isOwner($user->id)) {
                     $str .= '- // - // - // -';
                 } elseif ($lead->client) {
                     $str .= $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';

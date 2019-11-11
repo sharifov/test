@@ -492,10 +492,11 @@ class Lead2 extends \yii\db\ActiveRecord
             }
 
             $date = (new CalculateDateService())->calculate(
+                $qcConfig->qc_time_from,
+                $qcConfig->qc_time_to,
                 $qcConfig->qc_client_time_enable,
                 $this->offset_gmt,
-                $qcConfig->qc_time_from,
-                $qcConfig->qc_time_to
+                'now'
             );
 
             $lq->lqc_dt_from = $date->from;

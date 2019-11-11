@@ -1054,7 +1054,7 @@ class LeadSearch extends Lead
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find()->with('project', 'source');
 
-        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source')->joinWith('leadFlowSold' );
+        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source', 'employee')->joinWith('leadFlowSold' );
         $this->load($params);
         $leadTable = Lead::tableName();
 
@@ -1227,6 +1227,8 @@ class LeadSearch extends Lead
             $query->andWhere('1=2');
         }
 
+        $query->with(['employee']);
+
         return $dataProvider;
     }
 
@@ -1276,6 +1278,8 @@ class LeadSearch extends Lead
             $query->andFilterWhere(['>=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
+
+        $query->with(['employee']);
 
         return $dataProvider;
     }
@@ -1359,7 +1363,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'leadChecklists', 'leadChecklists.lcType']);
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */

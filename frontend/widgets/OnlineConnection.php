@@ -8,7 +8,7 @@
 namespace frontend\widgets;
 
 
-use common\models\Lead2;
+use common\models\Lead;
 use sales\entities\cases\Cases;
 use Yii;
 
@@ -37,7 +37,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
             if(!$leadId) {
                 $gid = Yii::$app->request->get('gid');
                 if($gid) {
-                    $lead = Lead2::find()->select(['id'])->where(['gid' => $gid])->asArray()->one();
+                    $lead = Lead::find()->select(['id'])->where(['gid' => $gid])->asArray()->one();
                     if ($lead && $lead['id']) {
                         $leadId = $lead['id'];
                         unset($lead);

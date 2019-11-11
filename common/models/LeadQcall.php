@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use sales\services\lead\qcall\Interval;
 use Yii;
 
 /**
@@ -17,6 +18,36 @@ use Yii;
  */
 class LeadQcall extends \yii\db\ActiveRecord
 {
+
+    /**
+     * @param int $leadId
+     * @param int $weight
+     * @param Interval $interval
+     * @return LeadQcall
+     */
+    public static function create(
+        int $leadId,
+        int $weight,
+        Interval $interval
+    ): self
+    {
+        $lq = new static();
+        $lq->lqc_lead_id = $leadId;
+        $lq->lqc_weight = $weight;
+        $lq->lqc_dt_from = $interval->fromFormat();
+        $lq->lqc_dt_to = $interval->toFormat();
+        $lq->lqc_created_dt = date('Y-m-d H:i:s');
+        return $lq;
+    }
+
+    /**
+     * @param Interval $interval
+     */
+    public function updateInterval(Interval $interval): void
+    {
+        $this->lqc_dt_from = $interval->fromFormat();
+        $this->lqc_dt_to = $interval->toFormat();
+    }
 
     /**
      * {@inheritdoc}

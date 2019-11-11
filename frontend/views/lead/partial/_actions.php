@@ -88,7 +88,7 @@ $takeConditions = false;
 if (!$leadModel->isNewRecord) {
 
     $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isPending() || $leadModel->isProcessing()) && $leadModel->getAppliedAlternativeQuotes() === null);
-    $processingConditions = $leadModel->isIOwner() && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
+    $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
     if($processingConditions){
         if ($user->canRoles(['admin', 'supervision'])) {
@@ -163,7 +163,7 @@ if($project){
 
             <div class="panel-main__actions">
     	<?php if ($takeConditions){
-            if (!$leadModel->isIOwner() && ($leadModel->isProcessing() || $leadModel->isOnHold())) {
+            if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold())) {
                echo $buttonTakeOver;
             } elseif ($leadModel->isPending() || $leadModel->isFollowUp()) {
                 echo $buttonTake;
@@ -194,10 +194,10 @@ if($project){
 <!--        	--><?//= $buttonsSubAction[0];?>
 <!--    	--><?php //endif;?>
 
-        <?php if (!empty($leadModel->bo_flight_id) && $leadModel->isIOwner() && $leadModel->isBooked()) {
-            $title = empty($leadModel->additionalInformationForm->pnr)
+        <?php  if (!empty($leadModel->bo_flight_id) && $leadModel->isOwner($user->id) && $leadModel->isBooked()) {
+            $title = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr)
                 ? 'Create PNR' : 'PNR Created';
-            $options = empty($leadModel->additionalInformationForm->pnr) ? [
+            $options = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr) ? [
                 'class' => 'btn btn-success add-pnr',
                 'id' => 'create-pnr',
                 'data-url' => Url::to(['lead/add-pnr', 'leadId' => $leadModel->id])
@@ -205,7 +205,7 @@ if($project){
                 'class' => 'btn btn-default',
             ];
             echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
-        } ?>
+        }  ?>
 
 
 
