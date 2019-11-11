@@ -89,7 +89,7 @@ class EmailService
 	 * @param string $subject
 	 * @return Cases
 	 */
-	private function getCaseFromSubjectByIdOrHash(string $subject): Cases
+	private function getCaseFromSubjectByIdOrHash(string $subject): ?Cases
 	{
 		preg_match('~\[cid:(\d+)\]~si', $subject, $matches);
 
