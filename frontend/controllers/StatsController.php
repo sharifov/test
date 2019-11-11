@@ -302,36 +302,25 @@ class StatsController extends FController
         $avgProfitPerAgent = $searchLeader->searchTopTeams('teamsProfitPerAgent', $period);
         $teamConversion = $searchLeader->searchTopTeams('teamsConversion', $period);
 
+        $params = [
+            'profitDataProvider' => $profitDataProvider,
+            'soldDataProvider' => $soldDataProvider,
+            'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
+            'tipsDataProvider' => $tipsDataProvider,
+            'agentsBoardsSettings' => $agentsBoardsSettings,
+            'teamsBoardsSettings' => $teamsBoardsSettings,
+            'conversionDataProvider' => $conversionDataProvider,
+            'teamsProfitDataProvider' => $teamsProfitDataProvider,
+            'avgSoldLeadsDataProvider' => $avgSoldLeadsDataProvider,
+            'avgProfitPerPax' => $avgProfitPerPax,
+            'avgProfitPerAgent' => $avgProfitPerAgent,
+            'teamConversion' => $teamConversion
+        ];
+
         if (Yii::$app->request->isAjax) {
-            return $this->renderPartial('agent-ratings', [
-                'profitDataProvider' => $profitDataProvider,
-                'soldDataProvider' => $soldDataProvider,
-                'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
-                'tipsDataProvider' => $tipsDataProvider,
-                'agentsBoardsSettings' => $agentsBoardsSettings,
-                'teamsBoardsSettings' => $teamsBoardsSettings,
-                'conversionDataProvider' => $conversionDataProvider,
-                'teamsProfitDataProvider' => $teamsProfitDataProvider,
-                'avgSoldLeadsDataProvider' => $avgSoldLeadsDataProvider,
-                'avgProfitPerPax' => $avgProfitPerPax,
-                'avgProfitPerAgent' => $avgProfitPerAgent,
-                'teamConversion' => $teamConversion
-            ]);
+            return $this->renderPartial('agent-ratings', $params);
         } else {
-            return $this->render('agent-ratings', [
-                'profitDataProvider' => $profitDataProvider,
-                'soldDataProvider' => $soldDataProvider,
-                'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
-                'tipsDataProvider' => $tipsDataProvider,
-                'agentsBoardsSettings' => $agentsBoardsSettings,
-                'teamsBoardsSettings' => $teamsBoardsSettings,
-                'conversionDataProvider' => $conversionDataProvider,
-                'teamsProfitDataProvider' => $teamsProfitDataProvider,
-                'avgSoldLeadsDataProvider' => $avgSoldLeadsDataProvider,
-                'avgProfitPerPax' => $avgProfitPerPax,
-                'avgProfitPerAgent' => $avgProfitPerAgent,
-                'teamConversion' => $teamConversion
-            ]);
+            return $this->render('agent-ratings', $params);
         }
     }
 }

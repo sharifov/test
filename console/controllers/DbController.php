@@ -10,14 +10,22 @@ use common\models\Quote;
 use frontend\models\UserSiteActivity;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\services\log\GlobalLogFormatAttrService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
+use yii\db\ActiveRecord;
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
+/**
+ * Class DbController
+ * @package console\controllers
+ *
+ * @property GlobalLogFormatAttrService $globalLogFormatAttrService
+ */
 class DbController extends Controller
 {
 
@@ -25,8 +33,25 @@ class DbController extends Controller
 		'\\common\\models\\',
 		'\\frontend\\models\\'
 	];
+	/**
+	 * @var GlobalLogFormatAttrService
+	 */
+	private $globalLogFormatAttrService;
 
-    /**
+	/**
+	 * DbController constructor.
+	 * @param $id
+	 * @param $module
+	 * @param GlobalLogFormatAttrService $globalLogFormatAttrService
+	 * @param array $config
+	 */
+	public function __construct($id, $module, GlobalLogFormatAttrService $globalLogFormatAttrService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->globalLogFormatAttrService = $globalLogFormatAttrService;
+	}
+
+	/**
      * @throws \yii\db\Exception
      */
     public function actionConvertCollate()
@@ -247,6 +272,7 @@ ORDER BY lf.lead_id, id';
 	{
 		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 		$time_start = microtime(true);
+		\Yii::$app->db->pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 
 		$leadLog = LeadLog::find()->where(['>=', 'created', '2019-06-01 00:00:00'])->asArray();
 		$leadLogCount = $leadLog->count();
@@ -257,48 +283,81 @@ ORDER BY lf.lead_id, id';
 
 		$c = 0;
 
-		foreach ($leadLog->each($limit) as $log) {
-			if (($c % $limit) === 0) {
-				if ($leadLogCount > 0) {
-					$percent = round($c * 100 / $leadLogCount, 1);
-				} else {
-					$percent = 0;
+		$iter = (int)($leadLogCount / $limit);
+
+		$offset = 0;
+
+		for($i = 0; $i <= $iter; $i++) {
+			foreach (($leadLog->limit($limit)->offset($offset)->all()) as $log) {
+				if (($c % $limit) === 0) {
+					if ($leadLogCount > 0) {
+						$percent = round($c * 100 / $leadLogCount, 1);
+					} else {
+						$percent = 0;
+					}
+
+					$memory = Yii::$app->formatter->asShortSize(memory_get_usage(), 1);
+
+					printf(" --- [%s] (%s) %s ---\n", $percent . '%', $memory, $this->ansiFormat( 'Current processed rows: ' . $c . ' of ' . $leadLogCount, Console::FG_PURPLE));
 				}
 
-				$memory = Yii::$app->formatter->asShortSize(memory_get_usage(), 1);
+				$message = json_decode($log['message'], true);
 
-				printf(" --- [%s] (%s) %s ---\n", $percent . '%', $memory, $this->ansiFormat( 'Current processed rows: ' . $c . ' of ' . $leadLogCount, Console::FG_PURPLE));
+				$modelPath = $this->getModelPath($message['model']);
+
+				if (!$modelPath) {
+					echo 'Log will not be inserted, because the model ' . $message['model'] . ' was not found.' . PHP_EOL;
+					continue;
+				}
+
+				$action = array_search($message['title'], GlobalLog::getActionTypeList(), false);
+
+				$this->removeDuplicatesFromOldNewAttributes($message['oldParams'], $message['newParams']);
+
+				$c++;
+				if (empty($message['oldParams']) && empty($message['newParams'])) {
+					continue;
+				}
+
+				if ($message['model'] !== 'Lead') {
+					if(!isset($message['newParams']['id'])) {
+						if (preg_match('/\((.*?)\)/si', $message['model'], $output)) {
+							$modelRowHashId = $output[1];
+
+							$modelRowId = $this->findModelRowId($modelPath, $modelRowHashId, $log['lead_id']);
+
+							if (!$modelRowId) {
+								continue;
+							}
+						} else {
+							continue;
+						}
+					} else {
+						$modelRowId = $message['newParams']['id'];
+					}
+				} else {
+					$modelRowId = $log['lead_id'];
+				}
+
+				$formattedAttr = $this->globalLogFormatAttrService->formatAttr($modelPath, json_encode($message['oldParams']), json_encode($message['newParams']));
+
+				if (empty($formattedAttr)) {
+					continue;
+				}
+
+				$globalLog->log(new LogDTO(
+					$modelPath,
+					$modelRowId,
+					$log['employee_id'] ? 'app-frontend' : 'app-webapi',
+					$log['employee_id'] ?? null,
+					json_encode($message['oldParams']),
+					json_encode($message['newParams']),
+					$formattedAttr,
+					$action ?: null,
+					$log['created'] ?? null
+				));
 			}
-
-			$message = json_decode($log['message'], true);
-
-			$modelPath = $this->getModelPath($message['model']);
-
-			if (!$modelPath) {
-				echo 'Log will not be inserted, because the model ' . $message['model'] . ' was not found.' . PHP_EOL;
-				continue;
-			}
-
-			$action = array_search($message['title'], GlobalLog::getActionTypeList(), false);
-
-			$this->removeDuplicatesFromOldNewAttributes($message['oldParams'], $message['newParams']);
-
-			if (empty($message['oldParams']) && empty($message['newParams'])) {
-				continue;
-			}
-
-			$globalLog->log(new LogDTO(
-				$modelPath,
-				$log['lead_id'],
-				$log['employee_id'] ? 'app-frontend' : 'app-webapi',
-				$log['employee_id'] ?? null,
-				json_encode($message['oldParams']),
-				json_encode($message['newParams']),
-				null,
-				$action ?: null,
-				$log['created'] ?? null
-			));
-			$c++;
+			$offset += $limit;
 		}
 
 		$time_end = microtime(true);
@@ -314,6 +373,49 @@ ORDER BY lf.lead_id, id';
 		} catch (Exception $e) {
 			echo $e->getMessage() . PHP_EOL;
 		}
+	}
+
+	/**
+	 * @param string $modelPath
+	 * @param int $leadId
+	 * @return int|null
+	 * @throws InvalidConfigException
+	 */
+	public function findModelRowByLeadId(string $modelPath, int $leadId): ?int
+	{
+		echo 'findModelByLeadId' . PHP_EOL;
+		/* @var ActiveRecord $model */
+		$model = Yii::createObject($modelPath);
+
+		$row = $model::find()
+			->select('id')
+			->andWhere([
+				'lead_id' => $leadId
+			])->all();
+
+		return count($row) !== 1 ? $row[0]->id : null;
+	}
+
+	/**
+	 * @param string $modelPath
+	 * @param string $modelRowHashId
+	 * @param int $leadId
+	 * @return int|null
+	 * @throws InvalidConfigException
+	 */
+	private function findModelRowId(string $modelPath, string $modelRowHashId, int $leadId): ?int
+	{
+		/* @var ActiveRecord $model */
+		$model = Yii::createObject($modelPath);
+
+		$row = $model::find()
+			->select('id')
+			->andWhere([
+			'uid' => $modelRowHashId,
+			'lead_id' => $leadId
+		])->limit(1)->one();
+
+		return $row->id ?? null;
 	}
 
 	/**
@@ -340,7 +442,7 @@ ORDER BY lf.lead_id, id';
 	private function removeDuplicatesFromOldNewAttributes(array &$oldAttributes, array &$newAttributes): void
 	{
 		foreach ($newAttributes as $key => $value) {
-			if (array_key_exists($key, $newAttributes) && $newAttributes[$key] == $oldAttributes[$key]) {
+			if ((array_key_exists($key, $newAttributes) && ($newAttributes[$key] == $oldAttributes[$key] || (empty($newAttributes[$key]) && empty($oldAttributes[$key]))))) {
 				unset($newAttributes[$key], $oldAttributes[$key]);
 			}
 		}

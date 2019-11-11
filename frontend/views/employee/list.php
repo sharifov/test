@@ -577,6 +577,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                                 <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', ['min' => -1, 'max' => 1000]) ?>
                                 <?= $form->field($multipleForm, 'autoRedial')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
                                 <?= $form->field($multipleForm, 'kpiEnable')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                                <?= $form->field($multipleForm, 'leaderBoardEnabled')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
                                 <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>
                             </div>
                         </div>

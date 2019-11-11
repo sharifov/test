@@ -196,6 +196,9 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                         <div class="col-md-3">
                             <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
                         </div>
+                        <div class="col-md-3">
+                            <?= $form->field($modelUserParams, 'up_leaderboard_enabled')->checkbox() ?>
+                        </div>
                     </div>
 
 

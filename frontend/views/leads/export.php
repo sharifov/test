@@ -51,6 +51,19 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
 
         [
+            'attribute' => 'uid',
+        ],
+
+        [
+            'label' => 'Created',
+            'attribute' => 'l_type_create',
+            'value' => function(\common\models\Lead $model) {
+                return Lead::TYPE_CREATE_LIST[$model->l_type_create] ?? '-';
+            },
+            'filter' => \common\models\Lead::TYPE_CREATE_LIST
+        ],
+
+        [
             'attribute' => 'status',
             'value' => function(\common\models\Lead $model) {
                 return $model->getStatusName(false);

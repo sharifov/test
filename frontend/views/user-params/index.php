@@ -73,6 +73,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_min_percent_for_take_leads',
             'up_call_expert_limit',
             [
+                'attribute' => 'up_leaderboard_enabled',
+                'format' => 'raw',
+                'value' => function(\common\models\UserParams $model) {
+                    return $model->up_leaderboard_enabled ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                },
+                'contentOptions' => ['class' => 'text-right'],
+            ],
+
+            [
                 'attribute' => 'up_updated_dt',
                 'value' => function(\common\models\UserParams $model) {
                 return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));

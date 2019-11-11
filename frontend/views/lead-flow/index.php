@@ -127,9 +127,10 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 //'label' => 'Status end date',
                 'attribute' => 'lf_time_duration',
                 'value' => function(\common\models\LeadFlow $model) {
-                    return $model->lf_time_duration ?: '-';
+                    return $model->lf_time_duration ? '<span class="" title="' . Yii::$app->formatter->asDuration($model->lf_time_duration) . '">' . gmdate('H:i:s', $model->lf_time_duration) . '</span>': '-';
                 },
-                //'format' => 'raw',
+                'options' => ['style' => 'width:110px'],
+                'format' => 'raw',
 
             ],
             [

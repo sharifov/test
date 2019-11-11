@@ -82,6 +82,7 @@ class LeadSearch extends Lead
     public $lastActionRangeTime;
     public $soldRangeTime;
     public $createTimeRange;
+    public $createdType;
 
     public $last_ticket_date;
 
@@ -111,9 +112,9 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['datetime_start', 'datetime_end'], 'safe'],
+            [['datetime_start', 'datetime_end', 'createdType'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
@@ -480,11 +481,16 @@ class LeadSearch extends Lead
             'l_answered'    => $this->l_answered,
             'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
             'l_init_price'  => $this->l_init_price,
-            'request_ip'    => $this->request_ip
+            'request_ip'    => $this->request_ip,
+            'l_type_create' => $this->l_type_create
         ]);
 
         if($this->statuses) {
             $query->andWhere(['status' => $this->statuses]);
+        }
+
+        if($this->createdType) {
+            $query->andWhere(['l_type_create' => $this->createdType]);
         }
 
         if ($this->createdRangeTime) {
@@ -855,9 +861,12 @@ class LeadSearch extends Lead
         if($this->client_phone) {
 
             $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
-            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
+            if ($this->client_phone) {
+                $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '',
+                        $this->client_phone);
+            }
 
-            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['=', 'phone', $this->client_phone]);
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['phone' => $this->client_phone]);
             $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
@@ -2240,10 +2249,14 @@ class LeadSearch extends Lead
                              SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS leadsWithoutRTS,
                              (SELECT username FROM `employees` WHERE id=employee_id) as username
                              FROM leads']);
+            $query->leftJoin('user_params', 'user_params.up_user_id = employee_id')
+                ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = employee_id')
                 ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
             $query->groupBy(['employee_id']);
         } else {
+            $query->leftJoin('user_params', 'user_params.up_user_id = e.id')
+                ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->from('employees AS e')->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id')
                 ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
         }
@@ -2334,6 +2347,9 @@ class LeadSearch extends Lead
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND (updated '.$between_condition.')');
         }
+
+        $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
+            ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
 
         $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
             ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
