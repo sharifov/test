@@ -78,7 +78,8 @@ class ClientManageService
             $phone = ClientPhone::create(
                 $phoneForm->phone,
                 $client->id,
-				$phoneForm->type ?? null
+				$phoneForm->type ?? null,
+                $phoneForm->comments ?? null
             );
             $this->clientPhoneRepository->save($phone);
         }
@@ -109,7 +110,7 @@ class ClientManageService
      * @param Client $client
      * @param EmailCreateForm $emailForm
      */
-    private function addEmail(Client $client, EmailCreateForm $emailForm): void
+    public function addEmail(Client $client, EmailCreateForm $emailForm): void
     {
         if (!$emailForm->email) {
             return;

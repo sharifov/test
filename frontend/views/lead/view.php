@@ -113,13 +113,13 @@ $lead = $leadForm->getLead();
             <?php \yii\widgets\Pjax::end()?>
         </div>
         <div class="col-md-6">
-            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$leadForm->getLead()->isOwner(Yii::$app->user->id, false)):?>
+            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$leadForm->getLead()->isOwner(Yii::$app->user->id)):?>
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Client information is not available in VIEW MODE, please take lead!</p>
                 </div>
 
-            <?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->isFollowUp() || ($leadForm->getLead()->isPending() && !$leadForm->getLead()->isNewRecord) ) && !$leadForm->getLead()->isOwner(Yii::$app->user->id, false)):?>
+            <?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->isFollowUp() || ($leadForm->getLead()->isPending() && !$leadForm->getLead()->isNewRecord) ) && !$leadForm->getLead()->isOwner(Yii::$app->user->id)):?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>

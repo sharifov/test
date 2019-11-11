@@ -44,9 +44,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Profit',
             'value' => function (\common\models\Lead $model) {
 
-                if ($model->finalProfit) {
-                    $model->totalProfit = $model->finalProfit;
-                    $totalProfitTxt = $model->finalProfit;
+                if ($model->getFinalProfit()) {
+                    $model->totalProfit = $model->getFinalProfit();
+                    $totalProfitTxt = $model->getFinalProfit();
                 } else {
                     //$totalProfitTxt = 0;
 
@@ -135,17 +135,17 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Tips',
             'value' => function (\common\models\Lead $model) {
-                if($model->totalTips == 0) {
+                if($model->getTotalTips() == 0) {
                     return '-';
                 }
-                $totalTipsTxt = "<strong>$" . number_format($model->totalTips, 2) . "</strong>";
+                $totalTipsTxt = "<strong>$" . number_format($model->getTotalTips(), 2) . "</strong>";
 
                 $splitTipsTxt = '';
                 $splitTips = $model->getAllTipsSplits();
                 $return = [];
                 foreach ($splitTips as $split) {
                     $model->splitTipsPercentSum += $split->ts_percent;
-                    $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->totalTips), 2);
+                    $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->getTotalTips()), 2);
                 }
                 if (!empty($return)) {
                     $splitTipsTxt = implode('<br/>', $return);
@@ -155,7 +155,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 if ($model->splitTipsPercentSum > 0) {
                     $mainAgentPercent -= $model->splitTipsPercentSum;
                 }
-                $mainAgentTipsTxt = "<strong>$" . number_format($model->totalTips * $mainAgentPercent / 100, 2) . "</strong>";
+                $mainAgentTipsTxt = "<strong>$" . number_format($model->getTotalTips() * $mainAgentPercent / 100, 2) . "</strong>";
 
                 return 'Tips: '.$totalTipsTxt . ($splitTipsTxt ? '<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
                     ($model->employee ? $model->employee->username : 'Main agent').' tips: '.$mainAgentTipsTxt;

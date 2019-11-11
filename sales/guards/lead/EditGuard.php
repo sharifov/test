@@ -18,7 +18,7 @@ class EditGuard
         if ($user->isAdmin()) {
             return;
         }
-        if ($lead->isOwner($user->id, false)) {
+        if ($lead->isOwner($user->id)) {
             return;
         }
         if ($user->isAgent()) {

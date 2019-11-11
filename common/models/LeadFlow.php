@@ -181,27 +181,29 @@ class LeadFlow extends \yii\db\ActiveRecord
 
         //return $stateFlow->save();
 
-        if ($stateFlow->save()) {
-            if ($lead->employee_id) {
-                if ($checkLists = LeadChecklist::find()
-                    ->andWhere(['lc_user_id' => $lead->employee_id, 'lc_lead_id' => $lead->id])
-                    ->orderBy(['lc_created_dt' => SORT_ASC])
-                    ->all()
-                ) {
-                    foreach ($checkLists as $checkList) {
-                        $leadFlowChecklist = new LeadFlowChecklist();
-                        $leadFlowChecklist->lfc_lf_id = $stateFlow->id;
-                        $leadFlowChecklist->lfc_lc_type_id = $checkList->lc_type_id;
-                        $leadFlowChecklist->lfc_lc_user_id = $checkList->lc_user_id;
-                        if (!$leadFlowChecklist->save()) {
-                            Yii::error(VarDumper::dumpAsString($leadFlowChecklist->errors), 'LeadFlow:addStateFlow:leadFlowChecklist:save');
-                        }
-                    }
-                }
-            }
-        } else {
-            Yii::error(VarDumper::dumpAsString($stateFlow->errors), 'LeadFlow:addStateFlow:stateFlow:save');
-        }
+        //todo
+
+//        if ($stateFlow->save()) {
+//            if ($lead->employee_id) {
+//                if ($checkLists = LeadChecklist::find()
+//                    ->andWhere(['lc_user_id' => $lead->employee_id, 'lc_lead_id' => $lead->id])
+//                    ->orderBy(['lc_created_dt' => SORT_ASC])
+//                    ->all()
+//                ) {
+//                    foreach ($checkLists as $checkList) {
+//                        $leadFlowChecklist = new LeadFlowChecklist();
+//                        $leadFlowChecklist->lfc_lf_id = $stateFlow->id;
+//                        $leadFlowChecklist->lfc_lc_type_id = $checkList->lc_type_id;
+//                        $leadFlowChecklist->lfc_lc_user_id = $checkList->lc_user_id;
+//                        if (!$leadFlowChecklist->save()) {
+//                            Yii::error(VarDumper::dumpAsString($leadFlowChecklist->errors), 'LeadFlow:addStateFlow:leadFlowChecklist:save');
+//                        }
+//                    }
+//                }
+//            }
+//        } else {
+//            Yii::error(VarDumper::dumpAsString($stateFlow->errors), 'LeadFlow:addStateFlow:stateFlow:save');
+//        }
     }
 
     /**

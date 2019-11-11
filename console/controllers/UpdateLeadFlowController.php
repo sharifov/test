@@ -4,7 +4,7 @@
 namespace console\controllers;
 
 
-use common\models\Lead2;
+use common\models\Lead;
 use sales\temp\LeadFlowUpdate;
 use yii\console\Controller;
 
@@ -19,7 +19,7 @@ class UpdateLeadFlowController extends Controller
 
         $start = time();
 
-        $query = Lead2::find()
+        $query = Lead::find()
             ->orderBy(['created' => SORT_ASC])
             ->with([
                 'leadLogs' => function ($query) {

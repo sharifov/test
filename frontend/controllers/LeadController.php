@@ -1102,10 +1102,10 @@ class LeadController extends FController
                         'errors' => $errors
                     ];
                 } else {
-                    $lead->additionalInformationForm[0]->pnr = $attr['pnr'];
+                    $lead->setAdditionalInformationFormFirstElementPnr($attr['pnr']);
                     $quote = $lead->getAppliedAlternativeQuotes();
                     if ($quote !== null) {
-                        $quote->record_locator = $lead->additionalInformationForm[0]->pnr;
+                        $quote->record_locator = $lead->getAdditionalInformationFormFirstElement()->pnr;
                         $quote->save();
                     }
                     $lead->save();
@@ -1113,13 +1113,13 @@ class LeadController extends FController
                         'FlightRequest' => [
                             'id' => $lead->bo_flight_id,
                             'sub_sources_id' => $lead->source_id,
-                            'pnr' => $lead->additionalInformationForm[0]->pnr
+                            'pnr' => $lead->getAdditionalInformationFormFirstElement()->pnr
                         ]
                     ];
                     $result = BackOffice::sendRequest('lead/add-pnr', 'POST', json_encode($data));
                     if ($result['status'] != 'Success') {
                         $quote->record_locator = null;
-                        $lead->additionalInformationForm[0]->pnr = null;
+                        $lead->setAdditionalInformationFormFirstElementPnr(null);
                         $quote->save();
                         $lead->save();
                         Yii::$app->getSession()->setFlash('warning', sprintf(
@@ -2391,7 +2391,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalProfit = $lead->finalProfit ?: $lead->getBookedQuote()->getEstimationProfit();
+            $totalProfit = $lead->getFinalProfit() ?: $lead->getBookedQuote()->getEstimationProfit();
             $splitForm = new ProfitSplitForm($lead);
 
             $mainAgentProfit = $totalProfit;
@@ -2473,7 +2473,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalTips = $lead->totalTips;
+            $totalTips = $lead->getTotalTips();
             $splitForm = new TipsSplitForm($lead);
 
             $mainAgentTips = $totalTips;
