@@ -1977,13 +1977,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 	 */
     public function findEmployeeIp(): ?string
 	{
-		$ip = Yii::$app->request->userIP;
-
-		if (!$ip) {
-			$ip = Yii::$app->request->remoteIP;
-		}
-
-		return $ip;
+		return Yii::$app->request->remoteIP;
 	}
 
 	public function checkIfUsersIpIsAllowed(): bool

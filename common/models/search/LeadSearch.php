@@ -41,6 +41,7 @@ use yii\helpers\VarDumper;
  * @property $smsOffers
  * @property $emailOffers
  * @property $quoteType
+ * @property int $l_is_test
  */
 class LeadSearch extends Lead
 {
@@ -97,6 +98,7 @@ class LeadSearch extends Lead
     public $emailOffers;
     public $quoteType;
 
+    public $l_is_test;
 
     private $leadBadgesRepository;
 
@@ -115,7 +117,7 @@ class LeadSearch extends Lead
             [['datetime_start', 'datetime_end', 'createdType'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
-            [['email_status', 'quote_status'], 'integer'],
+            [['email_status', 'quote_status', 'l_is_test'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
 
@@ -135,6 +137,7 @@ class LeadSearch extends Lead
             ['remainingDays', 'filter', 'filter' => static function($value) {
                 return (int)$value;
             }, 'skipOnEmpty' => true],
+			['l_is_test', 'in', 'range' => [0,1]],
 
         ];
     }
@@ -232,7 +235,8 @@ class LeadSearch extends Lead
             'l_answered'    => $this->l_answered,
             'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
             'l_init_price'  => $this->l_init_price,
-            'request_ip'    => $this->request_ip
+            'request_ip'    => $this->request_ip,
+			'l_is_test'		=> $this->l_is_test
         ]);
 
         if($this->statuses) {
@@ -1645,6 +1649,7 @@ class LeadSearch extends Lead
             $leadTable . '.cabin' => $this->cabin,
             $leadTable . '.request_ip' => $this->request_ip,
             $leadTable . '.l_init_price' => $this->l_init_price,
+			$leadTable . '.l_is_test' => $this->l_is_test
         ]);
 
         if ($this->limit > 0) {
@@ -1686,6 +1691,10 @@ class LeadSearch extends Lead
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
+
+		if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
+			$query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
+		}
 
         // grid filtering conditions
         $query->andFilterWhere([

@@ -25,6 +25,7 @@ use yii\helpers\VarDumper;
  * @property $cabin
  * @property $attempts
  * @property $deadline
+ * @property $l_is_test
  */
 class LeadQcallSearch extends LeadQcall
 {
@@ -34,6 +35,7 @@ class LeadQcallSearch extends LeadQcall
     public $cabin;
     public $attempts;
     public $deadline;
+    public $l_is_test;
 
     /**
      * {@inheritdoc}
@@ -41,13 +43,14 @@ class LeadQcallSearch extends LeadQcall
     public function rules()
     {
         return [
-            [['lqc_lead_id', 'lqc_weight'], 'integer'],
+            [['lqc_lead_id', 'lqc_weight', 'l_is_test', 'deadline'], 'integer'],
 
-            [['lqc_dt_from', 'lqc_dt_to', 'current_dt'], 'safe'],
+            [['lqc_dt_from', 'lqc_dt_to', 'current_dt', 'l_is_test', 'deadline'], 'safe'],
 
             ['projectId', 'integer'],
             ['leadStatus', 'integer'],
             ['cabin', 'in', 'range' => array_keys(Lead::CABIN_LIST)],
+            ['l_is_test', 'in', 'range' => [0,1]],
             ['attempts', 'integer'],
         ];
     }
@@ -170,13 +173,9 @@ class LeadQcallSearch extends LeadQcall
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
-        if ($user->checkIfUsersIpIsAllowed()) {
-        	$isTest = 1;
-		} else {
-        	$isTest = 0;
+        if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
+			$query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
 		}
-
-		$query->andWhere([Lead::tableName() . '.l_is_test' => $isTest]);
 
         $query->addSelect([
             'countClientPhones' => (new Query())
@@ -214,13 +213,6 @@ class LeadQcallSearch extends LeadQcall
             ]);
         }
 
-        $query->addOrderBy([
-//            'expired' => SORT_DESC,
-            'deadline' => SORT_ASC,
-            'attempts' => SORT_ASC,
-            'lqc_dt_from' => SORT_ASC
-        ]);
-
         if ((bool)Yii::$app->params['settings']['enable_redial_show_lead_limit']) {
             $query->limit((int)$user->userParams->up_inbox_show_limit_leads);
         }
@@ -229,13 +221,20 @@ class LeadQcallSearch extends LeadQcall
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-//            'sort'=> [
-//                'defaultOrder' => [
-//                    'lqc_dt_to' => SORT_ASC,
-//                    'attempts' => SORT_ASC,
-//                    'lqc_dt_from' => SORT_ASC,
-//                ]
-//            ],
+            'sort'=> [
+                'defaultOrder' => [
+                    'deadline' => SORT_ASC,
+                    'attempts' => SORT_ASC,
+                    'lqc_dt_from' => SORT_ASC,
+                ],
+				'attributes' => [
+					'deadline',
+					'attempts',
+					'lqc_dt_from',
+					'lqc_dt_to',
+					'lqc_lead_id'
+				]
+            ],
             /*'pagination' => [
                 'pageSize' => 40,
             ],*/
@@ -257,9 +256,15 @@ class LeadQcallSearch extends LeadQcall
             Lead::tableName() . '.project_id' => $this->projectId,
             Lead::tableName() . '.status' => $this->leadStatus,
             Lead::tableName() . '.cabin' => $this->cabin,
+			Lead::tableName() . '.l_is_test' => $this->l_is_test,
         ]);
 
-//        VarDumper::dump($query->createCommand()->getRawSql());die;
+        $dataProvider->sort->attributes['l_is_test'] = [
+        	'asc' => ['l_is_test' => SORT_ASC],
+        	'desc' => ['l_is_test' => SORT_DESC],
+		];
+
+//        VarDumper::dump($dataProvider);die;
         return $dataProvider;
     }
 

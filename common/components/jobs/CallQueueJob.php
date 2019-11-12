@@ -123,7 +123,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                         try {
                             $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
                             if (!$lead) {
-                                $lead = (Yii::createObject(LeadManageService::class))->createByIncomingCall($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
+                                $lead = (Yii::createObject(LeadManageService::class))->createByIncomingCall($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt, $this->clientManageService->checkIfPhoneIsTest($call->c_from));
                             }
                             $call->c_lead_id = $lead->id;
                             if (!$lead->isCallReady() && $call->isEnded()) {

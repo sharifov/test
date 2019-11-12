@@ -87,23 +87,24 @@ class LeadManageService
         $this->transaction = $transaction;
     }
 
-    /**
-     * @param string $phoneNumber
-     * @param int $projectId
-     * @param int $sourceId
-     * @param string $gmt
-     * @return Lead
-     * @throws \Throwable
-     */
-    public function createByIncomingCall(string $phoneNumber = '', int $projectId = 0, int $sourceId = 0, $gmt = ''): Lead
+	/**
+	 * @param string $phoneNumber
+	 * @param int $projectId
+	 * @param int $sourceId
+	 * @param string $gmt
+	 * @param bool $isTest
+	 * @return Lead
+	 * @throws \Throwable
+	 */
+    public function createByIncomingCall(string $phoneNumber = '', int $projectId = 0, int $sourceId = 0, $gmt = '', $isTest = false): Lead
     {
-        $lead = $this->transaction->wrap(function() use ($phoneNumber, $projectId, $sourceId, $gmt) {
+        $lead = $this->transaction->wrap(function() use ($phoneNumber, $projectId, $sourceId, $gmt, $isTest) {
 
             $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $phoneNumber, 'comments' => 'incoming'])]);
 
             $sourceId = $this->getSourceId($sourceId, $projectId);
 
-            $lead = Lead::createByIncomingCall($phoneNumber, $client->id, $projectId, $sourceId, $gmt);
+            $lead = Lead::createByIncomingCall($phoneNumber, $client->id, $projectId, $sourceId, $gmt, $isTest);
 
             $this->leadRepository->save($lead);
 

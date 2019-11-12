@@ -95,6 +95,7 @@ use yii\helpers\VarDumper;
  * @property int $l_dep_id
  * @property boolean $l_delayed_charge
  * @property int $l_type_create
+ * @property int $l_is_test
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -341,7 +342,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
             [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id', 'l_is_test'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
@@ -464,20 +465,22 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $clone;
     }
 
-    /**
-     * @param $phoneNumber
-     * @param $clientId
-     * @param $projectId
-     * @param $sourceId
-     * @param $gmt
-     * @return Lead
-     */
+	/**
+	 * @param $phoneNumber
+	 * @param $clientId
+	 * @param $projectId
+	 * @param $sourceId
+	 * @param $gmt
+	 * @param bool $isTest
+	 * @return Lead
+	 */
     public static function createByIncomingCall(
         $phoneNumber,
         $clientId,
         $projectId,
         $sourceId,
-        $gmt
+        $gmt,
+		$isTest = false
     ): self
     {
         $lead = new static();
@@ -492,6 +495,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
         $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
         $lead->recordEvent(new LeadCreatedByIncomingCallEvent($lead));
+        $lead->l_is_test = (int)$isTest;
         return $lead;
     }
 

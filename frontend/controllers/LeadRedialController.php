@@ -59,8 +59,10 @@ class LeadRedialController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
+		$params = Yii::$app->request->queryParams;
+		$params['is_test'] = Yii::$app->request->get('is_test', 0);
         $searchModel = new LeadQcallSearch();
-        $dataProvider = $searchModel->searchByRedial(Yii::$app->request->queryParams, $user);
+        $dataProvider = $searchModel->searchByRedial($params, $user);
         $dataProviderLastCalls = $searchModel->searchLastCalls([], $user);
 
         $guard = [];

@@ -286,6 +286,11 @@ use frontend\extensions\DatePicker;
                     ?>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False',1 => 'True'], ['prompt' => '-'])->label('Is Test') ?>
+                </div>
+            </div>
         </div>
     </div>
 
