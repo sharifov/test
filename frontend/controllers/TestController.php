@@ -33,6 +33,8 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\helpers\user\UserFinder;
+use sales\model\user\entity\ShiftTime;
+use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesStatusLogRepository;
@@ -121,58 +123,9 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $data = [
-            'lead' => [
-                'sub_sources_code' => 'WCFDCV',
-                'source_id' => 5,
-                'adults' => '1',
-                'cabin' => 'E',
-                'emails' => [
-                    0 => '1@1.1',
-                    1 => '2@2.2',
-                ],
-                'phones' => [
-                    0 => '+77750550002',
 
-                ],
-                'flights' => [
-                    0 => [
-                        'origin' => 'SEA',
-                        'destination' => 'ABJ',
-                        'departure' => '01/03/2020',
-                    ],
-                    1 => [
-                        'origin' => 'ABJ',
-                        'destination' => 'SEA',
-                        'departure' => '01/01/2020',
-                    ],
-                    2 => [
-                        'origin' => 'ABJ',
-                        'destination' => 'SEA',
-                        'departure' => '01/02/2020',
-                    ]
-                ],
-                'trip_type' => 'RT',
-                'children' => '0',
-                'infants' => '0',
-                'uid' => 'WD32A3D',
-                'request_ip' => '89.187.177.211',
-                'discount_id' => '3428564',
-                'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36',
-                'offset_gmt' => null,
-                'user_language' => null,
-            ]
-        ];
-
-
-//        VarDumper::dump($data);;die;
-        $apiLead = New ApiLead();
-        $apiLead->load($data);
-//        VarDumper::dump($apiLead);;die;
-        $service = Yii::createObject(LeadCreateApiService::class);
-        $project = Project::findOne(6);
-        $service->createByApi($apiLead, $project);
-
+        $user = Employee::findOne(295);
+        VarDumper::dump($user->getShiftTime());
         die;
         return $this->render('blank');
 
