@@ -125,7 +125,7 @@ class TestController extends FController
     {
 
         $user = Employee::findOne(295);
-        VarDumper::dump($user->getShiftTime());
+        VarDumper::dump($user->accessTakeLeadByFrequencyMinutes());
         die;
         return $this->render('blank');
 

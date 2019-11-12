@@ -1713,7 +1713,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $access = true;
         $takeDt = new \DateTime();
-        $timeZone = $this->userParams->up_timezone ?: 'UTC';
 
         if (
             ($params = $this->userParams)
@@ -1721,13 +1720,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             && ($lastTakenDt = $this->getLastTakenLeadDt())
         ) {
 
-            $lastTakenUTC = new \DateTime($lastTakenDt);
-            $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
+            $nextTakeUTC = (new \DateTime($lastTakenDt, new \DateTimeZone('UTC')))
+                ->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
 
-            $nowUTC = new \DateTime();
-            $nowUTC->setTimezone(new \DateTimeZone('UTC'));
-
-            $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
+            $nowUTC = new \DateTime('now', new \DateTimeZone('UTC'));
 
             if ($nextTakeUTC > $nowUTC) {
                 $access = false;
@@ -1736,7 +1732,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         }
 
-        $takeDt->setTimezone(new \DateTimeZone($timeZone));
+        $takeDt->setTimezone(new \DateTimeZone($this->userParams->up_timezone ?: 'UTC'));
         $takeDtUTC = $takeDt->setTimezone(new \DateTimeZone('UTC'));
 
         return ['access' => $access, 'takeDt' => $takeDt, 'takeDtUTC' => $takeDtUTC];
