@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 use yii\db\Query;
@@ -20,7 +19,7 @@ use yii\db\Query;
  *
  * @property Client $client
  */
-class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
+class ClientEmail extends \yii\db\ActiveRecord
 {
 
     use EventTrait;

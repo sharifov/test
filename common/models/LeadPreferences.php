@@ -3,7 +3,6 @@
 namespace common\models;
 
 use common\models\local\LeadLogMessage;
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 
@@ -22,7 +21,7 @@ use Yii;
  *
  * @property Lead $lead
  */
-class LeadPreferences extends \yii\db\ActiveRecord implements AggregateRoot
+class LeadPreferences extends \yii\db\ActiveRecord
 {
 
     use EventTrait;
