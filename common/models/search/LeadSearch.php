@@ -2376,4 +2376,47 @@ class LeadSearch extends Lead
 
         return $dataProvider = new SqlDataProvider($paramsData);
     }
+
+    public function leadFlowReport()
+    {
+        $date_from = Employee::convertTimeFromUserDtToUTC(strtotime('2019-10-15'));
+        $date_to = Employee::convertTimeFromUserDtToUTC(strtotime('2019-11-02'));
+        $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+
+        $query = new Query();
+
+        /*$query->from('lead_flow AS lf');
+        $query->leftJoin('leads');
+        $query->groupBy(['employee_id']);*/
+
+
+        $query->select(['employee_id, (SELECT username FROM `employees` WHERE id=employee_id) as username,
+                                      
+                       (SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND lf_from_status_id='.Lead::STATUS_PENDING.' AND status='.Lead::STATUS_PROCESSING.' AND lf_owner_id = l.employee_id) AS newTotal,
+                       (SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND lf_from_status_id='.Lead::STATUS_PENDING.' AND status='.Lead::STATUS_PROCESSING.' AND lf_owner_id = l.employee_id AND employee_id = l.employee_id AND lf_description = "Take") AS inboxLeadsTaken,
+                       (SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND lf_from_status_id='.Lead::STATUS_PENDING.' AND status='.Lead::STATUS_PROCESSING.' AND lf_owner_id = l.employee_id AND lf_description = "Call AutoCreated Lead") AS callLeadsTaken,
+                       (SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND lf_from_status_id='.Lead::STATUS_PENDING.' AND status='.Lead::STATUS_PROCESSING.' AND lf_owner_id = l.employee_id AND lf_description = "Lead redial") AS redialLeadsTaken, 
+                       
+                       (SELECT COUNT(*) FROM lead_flow lf LEFT JOIN leads ls ON lf.lead_id = ls.id  WHERE (lf.created ' . $between_condition . ') AND ls.clone_id IS NULL AND lf.lf_from_status_id IS NULL AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = l.employee_id AND lf.employee_id = l.employee_id AND lf_description = "Manual create") AS leadsCreated,
+                       
+                       (SELECT COUNT(*) FROM lead_flow lf LEFT JOIN leads ls ON lf.lead_id = ls.id  WHERE (lf.created ' . $between_condition . ') AND ls.clone_id IS NULL AND lf.lf_from_status_id IS NOT NULL AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = l.employee_id AND lf.employee_id = l.employee_id AND lf_description <> "Manual create") AS leadsCloned,
+                             
+                       (SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND lf_from_status_id='.Lead::STATUS_FOLLOW_UP.' AND status='.Lead::STATUS_PROCESSING.' AND lf_owner_id = l.employee_id) AS followUpTotal,                       
+                       (SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND lf_from_status_id='.Lead::STATUS_FOLLOW_UP.' AND status='.Lead::STATUS_PROCESSING.' AND lf_owner_id = l.employee_id AND employee_id = l.employee_id) AS followUpTotalTaken,
+                       
+                       (SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND lf_from_status_id='.Lead::STATUS_PROCESSING.' AND status='.Lead::STATUS_TRASH.' AND lf_owner_id = l.employee_id AND employee_id = l.employee_id) AS trashLeads,
+                       (SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND lf_from_status_id='.Lead::STATUS_PROCESSING.' AND status='.Lead::STATUS_SOLD.' AND lf_owner_id = l.employee_id) AS soldLeads
+                                             
+                       
+                       FROM leads AS l where employee_id IS NOT NULL']);
+
+        $query->groupBy(['employee_id']);
+
+
+
+        $command = $query->createCommand();
+        $sql = $command->sql;
+
+        var_dump($sql); die();
+    }
 }
