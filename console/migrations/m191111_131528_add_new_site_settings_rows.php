@@ -14,9 +14,7 @@ class m191111_131528_add_new_site_settings_rows extends Migration
     {
 		$setting = new \common\models\Setting();
 
-		$testPhones = [
-			'+37378077519'
-		];
+		$testPhones = [];
 
 		$setting->s_key = 'test_phone_list';
 		$setting->s_name = 'Test Phone List';
@@ -30,9 +28,7 @@ class m191111_131528_add_new_site_settings_rows extends Migration
 
 		$setting = new \common\models\Setting();
 
-		$allowedIp = [
-			'127.0.0.1'
-		];
+		$allowedIp = [];
 
 		$setting->s_key = 'test_allow_ip_address_list';
 		$setting->s_name = 'Allowed Ip List';
