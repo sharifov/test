@@ -20,6 +20,10 @@ use yii\helpers\Url;
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'rowOptions' => static function (LeadQcallSearch $model, $index, $widget, $grid) {
+        if ($model->l_is_test) {
+        	return ['style' => 'background-color:#d4c67f;'];
+		}
+
         if (!$model->deadline) {
             return ['class' => 'danger'];
         }
@@ -193,7 +197,7 @@ use yii\helpers\Url;
         [
             'attribute' => 'attempts',
             'filter' => false,
-
+			'enableSorting' => false,
             'visible' => !$user->isAgent(),
         ],
         [
@@ -236,6 +240,27 @@ use yii\helpers\Url;
                 return floor((strtotime($model->lqc_dt_to) - time()) / 60);
             },
         ],
+		[
+			'label' => 'Is Test',
+			'attribute' => 'l_is_test',
+			'value' => static function (LeadQcall $model) {
+				if ($model->l_is_test) {
+					$label = '<label class="label label-success">True</label>';
+				} else {
+					$label = '<label class="label label-danger">False</label>';
+				}
+				return $label;
+			},
+			'options' => [
+				'style' => 'width:120px'
+			],
+			'format' => 'raw',
+			'filter' => [
+				1 => 'True',
+				0 => 'False'
+			],
+			'visible' => ($user->checkIfUsersIpIsAllowed() || Yii::$app->request->get('is_test'))
+		],
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{call}',

@@ -83,4 +83,10 @@ return [
         'direct_agent_user_limit' => 3,
     ],
     'use_browser_call_access' => true,
+	'test_phone_list' => [
+//		'+37378077519'
+	],
+	'test_allow_ip_address_list' => [
+//		'127.0.0.1'
+	]
 ];
