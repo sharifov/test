@@ -287,6 +287,30 @@ class Lead extends ActiveRecord implements AggregateRoot
         return 'leads';
     }
 
+    /**
+     * @return bool
+     */
+    public function isManuallyCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_MANUALLY;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIncomingCallCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_INCOMING_CALL;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isApiCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_API;
+    }
+
 //    public function init()
 //    {
 //        parent::init();
