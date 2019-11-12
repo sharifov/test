@@ -286,7 +286,7 @@ class LeadQcallSearch extends LeadQcall
             $query->andFilterWhere([
                 Lead::tableName() . '.l_call_status_id' => $this->l_call_status_id
             ]);
-            $query->andHaving([
+            $query->andFilterHaving([
                 'attempts' => $this->attempts
             ]);
         }
