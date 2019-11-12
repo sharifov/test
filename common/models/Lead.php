@@ -2008,13 +2008,13 @@ class Lead extends ActiveRecord implements AggregateRoot
 
                             if($offset < 0) {
                                 if($offset > -10) {
-                                    $offsetStr = '-0'.$offset.':00';
+                                    $offsetStr = '-0'.abs($offset).':00';
                                 } else {
-                                    $offsetStr = '-'.$offset.':00';
+                                    $offsetStr = $offset.':00';
                                 }
                             }
 
-                            if($offset == 0) {
+                            if($offset === 0) {
                                 $offsetStr = '-00:00';
                             }
 
