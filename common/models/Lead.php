@@ -3578,6 +3578,7 @@ Reason: {reason}
                         'uid' => $quoteModel->uid,
                         'cabinClass' => $quoteModel->cabin,
                         'tripType' => $quoteModel->trip_type,
+						'hasSeparates' =>  $quoteModel->getTicketSegments() ? true : false
 
                         //'airlineCode' => $quoteModel->main_airline_code,
                         //'offerData' =>  $quoteModel->getInfoForEmail2()
