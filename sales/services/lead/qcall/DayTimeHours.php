@@ -40,4 +40,32 @@ class DayTimeHours
         return !$this->startHour && !$this->startMinutes && !$this->endHour &&! $this->endMinutes;
     }
 
+    /**
+     * @param $value
+     * @return string
+     */
+    private static function format($value): string
+    {
+        if (strlen($value) === 1) {
+            return '0' . $value;
+        }
+        return $value;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStart(): string
+    {
+        return self::format($this->startHour) . ':' . self::format($this->startMinutes) . ':00';
+    }
+
+    /**
+     * @return string
+     */
+    public function getEnd(): string
+    {
+        return self::format($this->endHour) . ':' . self::format($this->endMinutes) . ':00';
+    }
+
 }

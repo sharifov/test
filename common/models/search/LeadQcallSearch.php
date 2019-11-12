@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use sales\services\lead\qcall\DayTimeHours;
 use Yii;
 use common\models\Call;
 use common\models\ClientPhone;
@@ -34,6 +35,7 @@ class LeadQcallSearch extends LeadQcall
     public $cabin;
     public $attempts;
     public $deadline;
+    public $l_call_status_id;
 
     /**
      * {@inheritdoc}
@@ -49,6 +51,7 @@ class LeadQcallSearch extends LeadQcall
             ['leadStatus', 'integer'],
             ['cabin', 'in', 'range' => array_keys(Lead::CABIN_LIST)],
             ['attempts', 'integer'],
+            ['l_call_status_id', 'integer'],
         ];
     }
 
@@ -206,7 +209,30 @@ class LeadQcallSearch extends LeadQcall
             $query->addOrderBy([
                'isFresh' => SORT_DESC
             ]);
+
+            $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . ".offset_gmt) )";
+//            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+            $query->addSelect(['is_in_day_time_hours' =>
+                new Expression('if ( '.$expression . " > " . $freshTime .'  AND ' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+            ]);
+            $query->addOrderBy([
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
+
+        } else {
+            $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . ".offset_gmt) )";
+//            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+            $query->addSelect(['is_in_day_time_hours' =>
+                new Expression('if (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+            ]);
+            $query->addOrderBy([
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
         }
+
+
 
         $query->addOrderBy([
 //            'expired' => SORT_DESC,
@@ -255,6 +281,15 @@ class LeadQcallSearch extends LeadQcall
             Lead::tableName() . '.status' => $this->leadStatus,
             Lead::tableName() . '.cabin' => $this->cabin,
         ]);
+
+        if ($user->isAdmin()) {
+            $query->andFilterWhere([
+                Lead::tableName() . '.l_call_status_id' => $this->l_call_status_id
+            ]);
+            $query->andHaving([
+                'attempts' => $this->attempts
+            ]);
+        }
 
 //        VarDumper::dump($query->createCommand()->getRawSql());die;
         return $dataProvider;

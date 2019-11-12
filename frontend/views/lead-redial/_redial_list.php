@@ -37,12 +37,14 @@ use yii\helpers\Url;
             'visible' => $user->isAdmin(),
         ],
         [
+            'attribute' => 'l_call_status_id',
             'label' => 'Call status',
             'value' => static function (LeadQcall $model) {
                 return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
             },
             'format' => 'raw',
-            'visible' => $user->isAdmin()
+            'visible' => $user->isAdmin(),
+            'filter' =>  Lead::CALL_STATUS_LIST,
         ],
         [
             'label' => 'Project',
@@ -83,7 +85,8 @@ use yii\helpers\Url;
             'options' => [
                 'style' => 'width:160px'
             ],
-            'format' => 'raw'
+            'format' => 'raw',
+            'visible' => !$user->isAgent(),
         ],
         [
             'header' => 'Client time',
@@ -92,6 +95,7 @@ use yii\helpers\Url;
                 return ClientTimeFormatter::dayHoursFormat($model->lqcLead->getClientTime2(), $model->lqcLead->offset_gmt);
             },
             'options' => ['style' => 'width:90px'],
+            'visible' => !$user->isAgent(),
         ],
         [
             'label' => 'Client / Phones',
@@ -192,7 +196,7 @@ use yii\helpers\Url;
 //                ],
         [
             'attribute' => 'attempts',
-            'filter' => false,
+//            'filter' => false,
 
             'visible' => !$user->isAgent(),
         ],
