@@ -210,6 +210,10 @@ class LeadRedialService
             $flowDescriptions = self::getFlowDescriptions();
             $this->takeGuard->minPercentGuard($user, $flowDescriptions);
         }
+
+        if ((bool)\Yii::$app->params['settings']['enable_redial_shift_time_limits']) {
+            $this->takeGuard->shiftTimeGuard($user);
+        }
     }
 
     /**

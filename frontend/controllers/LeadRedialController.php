@@ -81,6 +81,14 @@ class LeadRedialController extends FController
             $guard[] = $e->getMessage();
         }
 
+        if ((bool)\Yii::$app->params['settings']['enable_redial_shift_time_limits']) {
+            try {
+                $this->takeGuard->shiftTimeGuard($user);
+            } catch (\DomainException $e) {
+                $guard[] = $e->getMessage();
+            }
+        }
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
