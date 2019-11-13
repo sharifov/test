@@ -226,7 +226,7 @@ class CasesController extends FController
                         Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->e_email_to . '</strong>');
                     }
 
-                    $this->refresh('#communication-form');
+                    $this->refresh(); //'#communication-form'
 
                 } else {
                     $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));

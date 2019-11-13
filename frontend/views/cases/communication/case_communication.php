@@ -263,18 +263,21 @@ $c_type_id = $comForm->c_type_id;
                             echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                             echo Yii::$app->session->getFlash('send-success');
                             echo '</div>';
+                            $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
                         }
 
                         if(Yii::$app->session->hasFlash('sms-send-success')) {
                             echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                             echo Yii::$app->session->getFlash('sms-send-success');
                             echo '</div>';
+                            $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
                         }
 
                         if(Yii::$app->session->hasFlash('send-error')) {
                             echo '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                             echo Yii::$app->session->getFlash('send-error');
                             echo '</div>';
+                            $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
                         }
 
                         echo $form->errorSummary($comForm);
@@ -474,48 +477,15 @@ $c_type_id = $comForm->c_type_id;
                         <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
                         <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
 
+                     <?php
+                        if ($comForm->c_preview_email) {
+                            $this->registerJs("$('#modal-email-preview').modal('show');");
+                         }
 
-
-                    <?/*php if($comForm->c_voice_status === 1):?>
-                        <?php
-                        $js = "
-                            var previewPopup = $('#modal-email-preview');
-                            //previewPopup.find('.modal-body').html(data);
-                            previewPopup.modal('show');";
-
-                        $this->registerJs($js);
-
-                        ?>
-                    <?php endif; */?>
-
-
-                    <?php if($comForm->c_preview_email):?>
-                        <?php
-                            $js = "
-                            var previewPopup = $('#modal-email-preview');
-                            //previewPopup.find('.modal-body').html(data);
-                            previewPopup.modal('show');";
-
-                            $this->registerJs($js);
-
-                        ?>
-                    <?php endif; ?>
-
-
-
-                    <?php if($comForm->c_preview_sms):?>
-                        <?php
-                        $js = "
-                            var previewPopup = $('#modal-sms-preview');
-                            //previewPopup.find('.modal-body').html(data);
-                            previewPopup.modal('show');";
-
-                        $this->registerJs($js);
-                        ?>
-                    <?php endif; ?>
-
-
-
+                         if ($comForm->c_preview_sms) {
+                            $this->registerJs("$('#modal-sms-preview').modal('show');");
+                         }
+                     ?>
 
                     <?php
     $js = <<<JS
