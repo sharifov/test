@@ -59,7 +59,8 @@ class LeadPreferencesForm extends Model
 	public function rules(): array
 	{
 		return [
-			[['marketPrice', 'clientsBudget'], 'number', 'min' => 500, 'max' => 99000],
+			[['marketPrice'], 'number'],
+			[['clientsBudget'], 'number'],
 			['numberStops', 'integer'],
 			['numberStops', 'in', 'range' => array_keys(LeadPreferencesHelper::listNumberStops())],
 			['notesForExperts', 'string'],
