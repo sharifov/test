@@ -30,7 +30,7 @@ $user = Yii::$app->user->identity;
 
 	<?= $form->errorSummary($editName); ?>
 
-	<?= $form->field($editName, 'firstName')->textInput() ?>
+	<?= $form->field($editName, 'firstName')->textInput(['required' => true]) ?>
 
 	<?= $form->field($editName, 'lastName')->textInput() ?>
 
