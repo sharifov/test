@@ -114,7 +114,7 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['datetime_start', 'datetime_end', 'createdType'], 'safe'],
+            [['datetime_start', 'datetime_end', 'createdType', 'createTimeRange'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
             [['email_status', 'quote_status', 'l_is_test'], 'integer'],
