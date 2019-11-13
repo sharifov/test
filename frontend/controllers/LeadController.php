@@ -13,6 +13,7 @@ use common\models\EmailTemplateType;
 use common\models\Lead;
 use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
+use common\models\LeadFlow;
 use common\models\LeadLog;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
@@ -2109,7 +2110,7 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                $lead = $this->leadManageService->create($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create');
+                $lead = $this->leadManageService->create($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {

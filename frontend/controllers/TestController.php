@@ -7,6 +7,7 @@ use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\LeadFlow;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
@@ -33,6 +34,8 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\helpers\user\UserFinder;
+use sales\model\user\entity\ShiftTime;
+use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesStatusLogRepository;
@@ -43,6 +46,7 @@ use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadCreateApiService;
 use sales\services\lead\LeadManageService;
+use sales\services\lead\LeadRedialService;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\DayTimeHours;
@@ -121,57 +125,7 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $data = [
-            'lead' => [
-                'sub_sources_code' => 'WCFDCV',
-                'source_id' => 5,
-                'adults' => '1',
-                'cabin' => 'E',
-                'emails' => [
-                    0 => '1@1.1',
-                    1 => '2@2.2',
-                ],
-                'phones' => [
-                    0 => '+77750550002',
 
-                ],
-                'flights' => [
-                    0 => [
-                        'origin' => 'SEA',
-                        'destination' => 'ABJ',
-                        'departure' => '01/03/2020',
-                    ],
-                    1 => [
-                        'origin' => 'ABJ',
-                        'destination' => 'SEA',
-                        'departure' => '01/01/2020',
-                    ],
-                    2 => [
-                        'origin' => 'ABJ',
-                        'destination' => 'SEA',
-                        'departure' => '01/02/2020',
-                    ]
-                ],
-                'trip_type' => 'RT',
-                'children' => '0',
-                'infants' => '0',
-                'uid' => 'WD32A3D',
-                'request_ip' => '89.187.177.211',
-                'discount_id' => '3428564',
-                'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36',
-                'offset_gmt' => null,
-                'user_language' => null,
-            ]
-        ];
-
-
-//        VarDumper::dump($data);;die;
-        $apiLead = New ApiLead();
-        $apiLead->load($data);
-//        VarDumper::dump($apiLead);;die;
-        $service = Yii::createObject(LeadCreateApiService::class);
-        $project = Project::findOne(6);
-        $service->createByApi($apiLead, $project);
 
         die;
         return $this->render('blank');

@@ -5,7 +5,6 @@ namespace common\models;
 use common\components\BackOffice;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 use yii\base\ErrorException;
@@ -53,7 +52,7 @@ use common\components\SearchService;
  * @property QuoteTrip[] $quoteTrips
  * @property Airline[] $mainAirline
  */
-class Quote extends \yii\db\ActiveRecord implements AggregateRoot
+class Quote extends \yii\db\ActiveRecord
 {
 
     use EventTrait;

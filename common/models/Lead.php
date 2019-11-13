@@ -6,7 +6,6 @@ use common\components\EmailService;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
@@ -148,7 +147,7 @@ use yii\helpers\VarDumper;
  * @property $quoteType
  *
  */
-class Lead extends ActiveRecord implements AggregateRoot
+class Lead extends ActiveRecord
 {
     use EventTrait;
 
@@ -286,6 +285,30 @@ class Lead extends ActiveRecord implements AggregateRoot
     public static function tableName() : string
     {
         return 'leads';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isManuallyCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_MANUALLY;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIncomingCallCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_INCOMING_CALL;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isApiCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_API;
     }
 
 //    public function init()

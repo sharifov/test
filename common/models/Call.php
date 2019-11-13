@@ -3,7 +3,6 @@
 namespace common\models;
 
 use sales\access\EmployeeDepartmentAccess;
-use sales\entities\AggregateRoot;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
@@ -74,7 +73,7 @@ use Locale;
  * @property Cases[] $cases
  * @property ConferenceParticipant[] $conferenceParticipants
  */
-class Call extends \yii\db\ActiveRecord implements AggregateRoot
+class Call extends \yii\db\ActiveRecord
 {
     
     use EventTrait;
@@ -699,7 +698,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         try {
 
                             $lead->answered();
-                            $lead->processing($this->c_created_user_id, null, 'Call AutoCreated Lead');
+                            $lead->processing($this->c_created_user_id, null, LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD);
                             $leadRepository->save($lead);
 
                             $qCallService = Yii::createObject(QCallService::class);

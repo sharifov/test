@@ -6,6 +6,8 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
 use common\models\search\EmployeeSearch;
 use sales\access\EmployeeGroupAccess;
+use sales\model\user\entity\ShiftTime;
+use sales\model\user\entity\StartTime;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -39,6 +41,7 @@ use yii\web\NotFoundHttpException;
  * @property array $form_roles
  * @property array $departmentAccess
  * @property array $projectAccess
+ * @property ShiftTime $shiftTime
  *
  * @property Lead[] $leads
  * @property Department[] $departments
@@ -101,7 +104,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $user_projects;
     public $user_departments;
 
-    public $shiftData = [];
+    private $shiftTime;
     public $currentShiftTaskInfoSummary = [];
 
     private $cache = [];
@@ -432,8 +435,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
             $shiftTime = $this->getShiftTime();
 
-            if (isset($shiftTime['start_utc_dt']) && $shiftTime['start_utc_dt']) {
-                $startShiftDateTime = date('Y-m-d', strtotime($shiftTime['start_utc_dt']) - (3 * 60 * 60));
+            if ($shiftTime->startUtcDt) {
+                $startShiftDateTime = date('Y-m-d', strtotime($shiftTime->startUtcDt) - (3 * 60 * 60));
             } else {
                 $startShiftDateTime = date('Y-m-d', strtotime('-3 hours'));
             }
@@ -1107,8 +1110,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $shiftTime = $this->getShiftTime();
 
         $stats = [];
-        if (isset($shiftTime['start_utc_dt']) && $shiftTime['start_utc_dt']) {
-            $startShiftDate = date('Y-m-d', strtotime($shiftTime['start_utc_dt']));
+        if ($shiftTime->startUtcDt) {
+            $startShiftDate = date('Y-m-d', strtotime($shiftTime->startUtcDt));
         } else {
             $startShiftDate = date('Y-m-d');
         }
@@ -1156,11 +1159,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $flowDescriptions
      * @return string
      */
-    public function getLastTakenLeadDt(): string
+    public function getLastTakenLeadDt(array $flowDescriptions = []): string
     {
-        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id)->one()) {
+        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id, $flowDescriptions)->one()) {
             return $leadFlow['created'];
         }
         return '';
@@ -1553,67 +1557,76 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $timezoneList;
     }
 
-
     /**
-     * @return array
+     * @return ShiftTime
      * @throws \Exception
      */
-    public function getShiftTime(): array
+    public function getShiftTime(): ShiftTime
     {
-        $shiftData = [];
-
-        if ($this->shiftData) {
-            return $this->shiftData;
+        if ($this->shiftTime !== null) {
+            return $this->shiftTime;
         }
 
         if ($this->userParams) {
-            $this->userParams->up_work_minutes = ($this->userParams->up_work_minutes)?:480;
+
+            $this->userParams->up_work_minutes = $this->userParams->up_work_minutes ?: 480;
             $startTime = $this->userParams->up_work_start_tm;
-            $workHours = (int)$this->userParams->up_work_minutes * 60;
-            $timeZone = $this->userParams->up_timezone ?: 'UTC';
+            $workSeconds = (int)$this->userParams->up_work_minutes * 60;
 
-            if ($startTime && $workHours) {
-                $currentTimeUTC = new \DateTime();
-                $currentTimeUTC->setTimezone(new \DateTimeZone('UTC'));
-
-                $startShiftTimeUTC = new \DateTime(date('Y-m-d') . ' ' . $startTime, new \DateTimeZone($timeZone));
-                $startShiftTimeUTC->setTimezone(new \DateTimeZone('UTC'));
-
-                $endShiftTimeUTC = clone $startShiftTimeUTC;
-                $endShiftTimeUTC->add(new \DateInterval('PT' . $workHours . 'S'));
-
-                $endShiftMinutes = $endShiftTimeUTC->format('H')*60 + $endShiftTimeUTC->format('i');
-                $currentMinutes = $currentTimeUTC->format('H')*60 + $currentTimeUTC->format('i');
-
-                if($startShiftTimeUTC->format('d') != $endShiftTimeUTC->format('d')){
-                    //var_dump($currentMinutes, $endShiftMinutes, ($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes));
-                    if($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes){
-                        $startShiftTimeUTC->modify('-1 day');
-                        $endShiftTimeUTC->modify('-1 day');
-                    }
-
-                }
-                // $startShiftTimeDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
-                // $endShiftTimeDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
-                // echo $startShiftTimeUTC.' - '.$endShiftTimeUTC; exit;
-
-                $startTS = $startShiftTimeUTC->getTimestamp();
-                $endTS = $endShiftTimeUTC->getTimestamp();
-
-                $shiftData['start_utc_ts'] = $startTS;
-                $shiftData['end_utc_ts'] = $endTS;
-
-                $shiftData['start_period_utc_ts'] = $endTS - (24 * 60 * 60);
-
-                $shiftData['start_utc_dt'] = $startShiftTimeUTC->format('Y-m-d H:i:s');
-                $shiftData['end_utc_dt'] = $endShiftTimeUTC->format('Y-m-d H:i:s');
-
-                $shiftData['start_period_utc_dt'] = date('Y-m-d H:i:s', $shiftData['start_period_utc_ts']);
+            if ($startTime && $workSeconds) {
+                $this->shiftTime = new ShiftTime(
+                    new StartTime($startTime),
+                    $workSeconds,
+                    ($this->userParams->up_timezone ?: 'UTC')
+                );
             }
-            $this->shiftData = $shiftData;
+
+//            if ($startTime && $workHours) {
+//                $currentTimeUTC = new \DateTime();
+//                $currentTimeUTC->setTimezone(new \DateTimeZone('UTC'));
+//
+//                $startShiftTimeUTC = new \DateTime(date('Y-m-d') . ' ' . $startTime, new \DateTimeZone($timeZone));
+//                $startShiftTimeUTC->setTimezone(new \DateTimeZone('UTC'));
+//
+//                $endShiftTimeUTC = clone $startShiftTimeUTC;
+//                $endShiftTimeUTC->add(new \DateInterval('PT' . $workHours . 'S'));
+//
+//                $endShiftMinutes = $endShiftTimeUTC->format('H')*60 + $endShiftTimeUTC->format('i');
+//                $currentMinutes = $currentTimeUTC->format('H')*60 + $currentTimeUTC->format('i');
+//
+//                if($startShiftTimeUTC->format('d') != $endShiftTimeUTC->format('d')){
+//                    //var_dump($currentMinutes, $endShiftMinutes, ($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes));
+//                    if($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes){
+//                        $startShiftTimeUTC->modify('-1 day');
+//                        $endShiftTimeUTC->modify('-1 day');
+//                    }
+//
+//                }
+//                // $startShiftTimeDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
+//                // $endShiftTimeDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
+//                // echo $startShiftTimeUTC.' - '.$endShiftTimeUTC; exit;
+//
+//                $startTS = $startShiftTimeUTC->getTimestamp();
+//                $endTS = $endShiftTimeUTC->getTimestamp();
+//
+//                $shiftData['start_utc_ts'] = $startTS;
+//                $shiftData['end_utc_ts'] = $endTS;
+//
+//                $shiftData['start_period_utc_ts'] = $endTS - (24 * 60 * 60);
+//
+//                $shiftData['start_utc_dt'] = $startShiftTimeUTC->format('Y-m-d H:i:s');
+//                $shiftData['end_utc_dt'] = $endShiftTimeUTC->format('Y-m-d H:i:s');
+//
+//                $shiftData['start_period_utc_dt'] = date('Y-m-d H:i:s', $shiftData['start_period_utc_ts']);
+//            }
+//            $this->shiftData = $shiftData;
         }
 
-        return $shiftData;
+        if ($this->shiftTime === null) {
+            $this->shiftTime = new ShiftTime();
+        }
+
+        return $this->shiftTime;
     }
 
 
@@ -1623,17 +1636,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function checkShiftTime(): bool
     {
-        $shiftData = $this->getShiftTime();
+        $shiftTime = $this->getShiftTime();
 
-        if ($shiftData) {
+        if (!$shiftTime->isEmpty()) {
             $currentTS = time();
-            $startTS = $shiftData['start_utc_ts'] ?? 0;
-            $endTS = $shiftData['end_utc_ts'] ?? 0;
-
-            /* VarDumper::dump($shiftData, 10, true);
-            echo $currentTS.' '.date('Y-m-d H:i:s',$currentTS);
-            die; */
-
+            $startTS = $shiftTime->startUtcTs ?: 0;
+            $endTS = $shiftTime->endUtcTs ?: 0;
             if ($startTS <= $currentTS && $endTS >= $currentTS) {
                 return true;
             }
@@ -1643,29 +1651,36 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $flowDescriptions ['Manual create', 'Call AutoCreated Lead']
      * @return int|string
      * @throws \Exception
      */
-    public function getCountNewLeadCurrentShift()
+    public function getCountNewLeadCurrentShift(array $flowDescriptions = [])
     {
-        $shift = $this->getShiftTime();
-        // VarDumper::dump($shift, 10, true);
-        $endDT = $shift['end_utc_dt'];
-        $startDT = $shift['start_period_utc_dt'];
-        $query = LeadFlow::find()->where(['>=', 'created', $startDT])->andWhere(['<=', 'created', $endDT])
-            ->andWhere(['employee_id' => $this->id, 'lf_from_status_id' => Lead::STATUS_PENDING, 'status' => Lead::STATUS_PROCESSING]);
+        $shiftTime = $this->getShiftTime();
 
-        // echo $query->createCommand()->getRawSql();
+        $default = [LeadFlow::DESCRIPTION_TAKE];
+        $description = array_merge($default, $flowDescriptions);
+
+        $query = LeadFlow::find()
+            ->where(['>=', 'created', $shiftTime->endLastPeriodDt])
+            ->andWhere(['<=', 'created', $shiftTime->endUtcDt])
+//            ->andWhere(['employee_id' => $this->id])
+            ->andWhere(['lf_owner_id' => $this->id])
+            ->andWhere(['lf_description' => $description])
+//            ->andWhere(['lf_from_status_id' => Lead::STATUS_PENDING])
+            ->andWhere(['status' => Lead::STATUS_PROCESSING]);
 
         $count = $query->count();
         return $count;
     }
 
     /**
+     * @param array $flowDescriptions
      * @return bool
      * @throws \Exception
      */
-    public function accessTakeNewLead(): bool
+    public function accessTakeNewLead(array $flowDescriptions = []): bool
     {
         $access = false;
         //$shift = $this->getShiftTime();
@@ -1682,7 +1697,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 if ($currentShiftTaskInfoSummary['completedTasksPercent'] >= $params->up_min_percent_for_take_leads) {
                     $access = true;
                 } else {
-                    $countNewLeads = $this->getCountNewLeadCurrentShift();
+                    $countNewLeads = $this->getCountNewLeadCurrentShift($flowDescriptions);
 
                     if (!$params->up_default_take_limit_leads) {
                         $access = true;
@@ -1699,28 +1714,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $flowDescriptions
      * @return array
      * @throws \Exception
      */
-    public function accessTakeLeadByFrequencyMinutes(): array
+    public function accessTakeLeadByFrequencyMinutes(array $flowDescriptions = []): array
     {
         $access = true;
         $takeDt = new \DateTime();
-        $timeZone = $this->userParams->up_timezone ?: 'UTC';
 
         if (
             ($params = $this->userParams)
             && ($frequencyMinutes = $params->up_frequency_minutes)
-            && ($lastTakenDt = $this->getLastTakenLeadDt())
+            && ($lastTakenDt = $this->getLastTakenLeadDt($flowDescriptions))
         ) {
 
-            $lastTakenUTC = new \DateTime($lastTakenDt);
-            $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
+            $nextTakeUTC = (new \DateTime($lastTakenDt, new \DateTimeZone('UTC')))
+                ->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
 
-            $nowUTC = new \DateTime();
-            $nowUTC->setTimezone(new \DateTimeZone('UTC'));
-
-            $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
+            $nowUTC = new \DateTime('now', new \DateTimeZone('UTC'));
 
             if ($nextTakeUTC > $nowUTC) {
                 $access = false;
@@ -1729,7 +1741,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         }
 
-        $takeDt->setTimezone(new \DateTimeZone($timeZone));
+        $takeDt->setTimezone(new \DateTimeZone($this->userParams->up_timezone ?: 'UTC'));
         $takeDtUTC = $takeDt->setTimezone(new \DateTimeZone('UTC'));
 
         return ['access' => $access, 'takeDt' => $takeDt, 'takeDtUTC' => $takeDtUTC];

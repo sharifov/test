@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
@@ -27,7 +26,7 @@ use yii\db\ActiveQuery;
  * @property ClientPhone[] $clientPhones
  * @property Lead[] $leads
  */
-class Client extends ActiveRecord implements AggregateRoot
+class Client extends ActiveRecord
 {
 
     use EventTrait;
