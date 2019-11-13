@@ -103,7 +103,7 @@ if(!$mailList || !is_array($mailList)) {
             <td width="100px"><?=($nr++)?></td>
             <td><?=Html::encode($mail)?></td>
         </tr>
-        <? endforeach; ?>
+        <?php endforeach; ?>
 
     </table>
 

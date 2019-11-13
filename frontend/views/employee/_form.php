@@ -173,7 +173,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                                 ?>
                             </div>
 
-                        <? endif; ?>
+                        <?php endif; ?>
                     </div>
 
                 </div>

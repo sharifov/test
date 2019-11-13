@@ -82,7 +82,7 @@ $lists = new ListsAccess($user->id);
 
     <?php if ($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
-            <? //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+            <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle' => "modal", 'data-target' => "#modalUpdate"]) ?>
         </p>
     <?php endif; ?>

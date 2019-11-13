@@ -158,13 +158,13 @@ $lead = $leadForm->getLead();
                                         'pjax' => 0
                                     ],
                                 ]) ?>
-                            <? else: ?>
+                            <?php else: ?>
                                 <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>
-                            <? endif;?>
+                            <?php endif;?>
 
-                        <? else: ?>
+                        <?php else: ?>
                             <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>
-                        <? endif; ?>
+                        <?php endif; ?>
 
                     </div>
 

@@ -276,7 +276,7 @@ $duration = 10;
                                 <td><?=Html::encode($upp->uppProject->name)?></td>
                                 <td><?=Html::encode($upp->upp_tw_phone_number)?></td>
                             </tr>
-                        <? endforeach; ?>
+                        <?php endforeach; ?>
                     </table>
                 <?php endif; ?>
             </div>
