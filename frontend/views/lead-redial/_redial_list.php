@@ -4,6 +4,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
+use dosamigos\datepicker\DatePicker;
 use sales\formatters\client\ClientTimeFormatter;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
@@ -199,8 +200,8 @@ use yii\helpers\Url;
 //                ],
         [
             'attribute' => 'attempts',
-            'filter' => false,
-			'enableSorting' => false,
+//            'filter' => false,
+//			'enableSorting' => false,
             'visible' => !$user->isAgent(),
         ],
         [
@@ -213,7 +214,19 @@ use yii\helpers\Url;
                 return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
             },
             'format' => 'raw',
-            'visible' => $user->isAdmin()
+            'visible' => $user->isAdmin(),
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'lqc_dt_from',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
         [
             'attribute' => 'lqc_dt_to',
@@ -221,7 +234,19 @@ use yii\helpers\Url;
                 return $model->lqc_dt_to ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_to)) : '-';
             },
             'format' => 'raw',
-            'visible' => $user->isAdmin()
+            'visible' => $user->isAdmin(),
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'lqc_dt_to',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
 //                [
 //                    'label' => 'Duration',

@@ -27,6 +27,7 @@ use yii\helpers\VarDumper;
  * @property $attempts
  * @property $deadline
  * @property $l_is_test
+ * @property $l_call_status_id
  */
 class LeadQcallSearch extends LeadQcall
 {
@@ -47,7 +48,8 @@ class LeadQcallSearch extends LeadQcall
         return [
             [['lqc_lead_id', 'lqc_weight', 'l_is_test', 'deadline'], 'integer'],
 
-            [['lqc_dt_from', 'lqc_dt_to', 'current_dt', 'l_is_test', 'deadline'], 'safe'],
+            [['current_dt', 'l_is_test', 'deadline'], 'safe'],
+            [['lqc_dt_from', 'lqc_dt_to'], 'string'],
 
             ['projectId', 'integer'],
             ['leadStatus', 'integer'],
@@ -314,15 +316,36 @@ class LeadQcallSearch extends LeadQcall
 
 //        VarDumper::dump($dataProvider);die;
         if ($user->isAdmin()) {
+
             $query->andFilterWhere([
                 Lead::tableName() . '.l_call_status_id' => $this->l_call_status_id
             ]);
-            $query->andFilterHaving([
-                'attempts' => $this->attempts
-            ]);
+
+            if ($this->attempts === '0') {
+                $query->andHaving(['attempts' => 0]);
+
+            } else {
+                $query->andFilterHaving(['attempts' => $this->attempts]);
+            }
+
+            if ($this->lqc_dt_from) {
+                $query->andFilterWhere(['>=', 'lqc_dt_from', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_from))])
+                    ->andFilterWhere(['<=', 'lqc_dt_from', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_from) + 3600 * 24)]);
+            }
+
+            if ($this->lqc_dt_to) {
+                $query->andFilterWhere(['>=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to))])
+                    ->andFilterWhere(['<=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to) + 3600 * 24)]);
+            }
+
+            if ($this->lqc_weight === '0') {
+                $query->andWhere(['lqc_weight' => 0]);
+            } else {
+                $query->andFilterWhere(['lqc_weight' => $this->lqc_weight]);
+            }
         }
 
-//		VarDumper::dump($dataProvider->getSort());die;
+//		VarDumper::dump($query->createCommand()->getRawSql());die;
 
         return $dataProvider;
     }
