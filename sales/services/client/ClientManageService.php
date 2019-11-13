@@ -227,14 +227,20 @@ class ClientManageService
     }
 
 	/**
-	 * @param string $phoneNumber
-	 * @return bool
+	 * @param array $phoneNumbers
+	 * @return int
 	 */
-    public function checkIfPhoneIsTest(string $phoneNumber): bool
+    public function checkIfPhoneIsTest(array $phoneNumbers): int
 	{
 		$testPhones = \Yii::$app->params['settings']['test_phone_list'] ?? \Yii::$app->params['test_phone_list'];
 
-		return in_array($phoneNumber, $testPhones ?? [], false);
+		foreach ($phoneNumbers as $phoneNumber) {
+			if (in_array($phoneNumber, $testPhones ?? [], false)) {
+				return 1;
+			}
+		}
+
+		return 0;
 	}
 
     /**

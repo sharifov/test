@@ -144,6 +144,8 @@ class LeadCreateApiService
 
             $this->calculateTripType($modelLead->flights, $lead);
 
+            $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest($modelLead->phones);
+
             if (!$lead->validate()) {
                 if ($errors = $lead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);

@@ -494,7 +494,6 @@ class Lead extends ActiveRecord
 	 * @param $projectId
 	 * @param $sourceId
 	 * @param $gmt
-	 * @param bool $isTest
 	 * @return Lead
 	 */
     public static function createByIncomingCall(
@@ -502,8 +501,7 @@ class Lead extends ActiveRecord
         $clientId,
         $projectId,
         $sourceId,
-        $gmt,
-		$isTest = false
+        $gmt
     ): self
     {
         $lead = new static();
@@ -518,7 +516,6 @@ class Lead extends ActiveRecord
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
         $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
         $lead->recordEvent(new LeadCreatedByIncomingCallEvent($lead));
-        $lead->l_is_test = (int)$isTest;
         return $lead;
     }
 

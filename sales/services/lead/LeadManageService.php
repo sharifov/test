@@ -96,15 +96,18 @@ class LeadManageService
 	 * @return Lead
 	 * @throws \Throwable
 	 */
-    public function createByIncomingCall(string $phoneNumber = '', int $projectId = 0, int $sourceId = 0, $gmt = '', $isTest = false): Lead
+    public function createByIncomingCall(string $phoneNumber = '', int $projectId = 0, int $sourceId = 0, $gmt = ''): Lead
     {
-        $lead = $this->transaction->wrap(function() use ($phoneNumber, $projectId, $sourceId, $gmt, $isTest) {
+        $lead = $this->transaction->wrap(function() use ($phoneNumber, $projectId, $sourceId, $gmt) {
 
             $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $phoneNumber, 'comments' => 'incoming'])]);
 
             $sourceId = $this->getSourceId($sourceId, $projectId);
 
-            $lead = Lead::createByIncomingCall($phoneNumber, $client->id, $projectId, $sourceId, $gmt, $isTest);
+
+            $lead = Lead::createByIncomingCall($phoneNumber, $client->id, $projectId, $sourceId, $gmt);
+
+            $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$phoneNumber]);
 
             $this->leadRepository->save($lead);
 
@@ -241,6 +244,8 @@ class LeadManageService
 //        }
 
         $lead->setTripType($this->calculateTripType($form->segments));
+
+        $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest($phones);
 
         $leadId = $this->leadRepository->save($lead);
 
