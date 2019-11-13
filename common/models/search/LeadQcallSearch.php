@@ -199,75 +199,82 @@ class LeadQcallSearch extends LeadQcall
                 ->limit(1)
         ]);
 
-        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date("Y-m-d H:i:s") . "', lqc_dt_to )/60))";
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date('Y-m-d H:i:s') . "', lqc_dt_to )/60))";
         $query->addSelect(['deadline' =>
-            new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
+            new Expression('if (' . $deadlineExpr . ' > 0, ' . $deadlineExpr . ' , 0) ')
         ]);
 
 //        $query->addSelect(['expired' =>
 //            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
 //        ]);
 
+		$customDefaultOrder = [];
+
         if (($freshTime = (int)Yii::$app->params['settings']['redial_fresh_time']) > 0) {
-            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date("Y-m-d H:i:s") . "')";
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date('Y-m-d H:i:s') . "')";
             $query->addSelect(['isFresh' =>
-                new Expression("if (" . $expression . " <= " . $freshTime . ", 1, 0) ")
+                new Expression('if (' . $expression . ' <= ' . $freshTime . ', 1, 0) ')
             ]);
-            $query->addOrderBy([
-               'isFresh' => SORT_DESC
-            ]);
+//            $query->addOrderBy([
+//               'isFresh' => SORT_DESC
+//            ]);
 
             $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
-            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . ".offset_gmt) )";
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
 //            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
             $query->addSelect(['is_in_day_time_hours' =>
-                new Expression('if ( '.$expression . " > " . $freshTime .'  AND ' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+                new Expression('if ( '.$expression . ' > ' . $freshTime .'  AND ' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
             ]);
-            $query->addOrderBy([
-                'is_in_day_time_hours' => SORT_DESC
-            ]);
+//            $query->addOrderBy([
+//                'is_in_day_time_hours' => SORT_DESC
+//            ]);
+			$customDefaultOrder = [
+				'isFresh' => SORT_DESC,
+				'is_in_day_time_hours' => SORT_DESC
+			];
 
         } else {
             $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
-            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . ".offset_gmt) )";
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
 //            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
             $query->addSelect(['is_in_day_time_hours' =>
                 new Expression('if (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
             ]);
-            $query->addOrderBy([
-                'is_in_day_time_hours' => SORT_DESC
-            ]);
+//            $query->addOrderBy([
+//                'is_in_day_time_hours' => SORT_DESC
+//            ]);
+			$customDefaultOrder = ['is_in_day_time_hours' => SORT_DESC];
         }
 
+//        $query->addOrderBy([
+////            'expired' => SORT_DESC,
+//            'deadline' => SORT_ASC,
+//            'attempts' => SORT_ASC,
+//            'lqc_dt_from' => SORT_ASC
+//        ]);
 
-        if ((bool)Yii::$app->params['settings']['enable_redial_show_lead_limit']) {
-            $query->limit((int)$user->userParams->up_inbox_show_limit_leads);
-        }
+		$defaultOrder = [
+			'deadline' => SORT_ASC,
+			'attempts' => SORT_ASC,
+			'lqc_dt_from' => SORT_ASC,
+		];
 
-
-        $query->addOrderBy([
-//            'expired' => SORT_DESC,
-            'deadline' => SORT_ASC,
-            'attempts' => SORT_ASC,
-            'lqc_dt_from' => SORT_ASC
-        ]);
+        $defaultOrder = array_merge($customDefaultOrder, $defaultOrder);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> [
-                'defaultOrder' => [
-                    'deadline' => SORT_ASC,
-                    'attempts' => SORT_ASC,
-                    'lqc_dt_from' => SORT_ASC,
-                ],
+                'defaultOrder' => $defaultOrder,
 				'attributes' => [
 					'deadline',
 					'attempts',
 					'lqc_dt_from',
 					'lqc_dt_to',
-					'lqc_lead_id'
+					'lqc_lead_id',
+					'is_in_day_time_hours',
+					'isFresh'
 				]
             ],
             /*'pagination' => [
@@ -315,7 +322,7 @@ class LeadQcallSearch extends LeadQcall
             ]);
         }
 
-//        VarDumper::dump($query->createCommand()->getRawSql());die;
+//		VarDumper::dump($dataProvider->getSort());die;
 
         return $dataProvider;
     }

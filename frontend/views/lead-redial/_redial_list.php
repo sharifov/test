@@ -20,13 +20,12 @@ use yii\helpers\Url;
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'rowOptions' => static function (LeadQcallSearch $model, $index, $widget, $grid) {
-        if ($model->l_is_test) {
-        	return ['style' => 'background-color:#d4c67f;'];
-		}
-
         if (!$model->deadline) {
             return ['class' => 'danger'];
         }
+        if ($model->l_is_test) {
+        	return ['class' => 'info'];
+		}
     },
     'columns' => [
         ['class' => 'yii\grid\SerialColumn'],
