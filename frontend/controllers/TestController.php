@@ -7,6 +7,7 @@ use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\LeadFlow;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
@@ -45,6 +46,7 @@ use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadCreateApiService;
 use sales\services\lead\LeadManageService;
+use sales\services\lead\LeadRedialService;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\DayTimeHours;
@@ -124,8 +126,7 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $user = Employee::findOne(295);
-        VarDumper::dump($user->accessTakeLeadByFrequencyMinutes());
+
         die;
         return $this->render('blank');
 

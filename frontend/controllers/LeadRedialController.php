@@ -65,14 +65,16 @@ class LeadRedialController extends FController
 
         $guard = [];
 
+        $flowDescriptions = LeadRedialService::getFlowDescriptions();
+
         try {
-            $this->takeGuard->frequencyMinutesGuard($user);
+            $this->takeGuard->frequencyMinutesGuard($user, $flowDescriptions);
         } catch (\DomainException $e) {
             $guard[] = $e->getMessage();
         }
 
         try {
-            $this->takeGuard->minPercentGuard($user);
+            $this->takeGuard->minPercentGuard($user, $flowDescriptions);
         } catch (\DomainException $e) {
             $guard[] = $e->getMessage();
         }

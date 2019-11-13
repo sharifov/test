@@ -1159,11 +1159,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $flowDescriptions
      * @return string
      */
-    public function getLastTakenLeadDt(): string
+    public function getLastTakenLeadDt(array $flowDescriptions = []): string
     {
-        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id)->one()) {
+        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id, $flowDescriptions)->one()) {
             return $leadFlow['created'];
         }
         return '';
@@ -1650,18 +1651,24 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $flowDescriptions ['Manual create', 'Call AutoCreated Lead']
      * @return int|string
      * @throws \Exception
      */
-    public function getCountNewLeadCurrentShift()
+    public function getCountNewLeadCurrentShift(array $flowDescriptions = [])
     {
         $shiftTime = $this->getShiftTime();
+
+        $default = [LeadFlow::DESCRIPTION_TAKE];
+        $description = array_merge($default, $flowDescriptions);
 
         $query = LeadFlow::find()
             ->where(['>=', 'created', $shiftTime->endLastPeriodDt])
             ->andWhere(['<=', 'created', $shiftTime->endUtcDt])
-            ->andWhere(['employee_id' => $this->id])
-            ->andWhere(['lf_from_status_id' => Lead::STATUS_PENDING])
+//            ->andWhere(['employee_id' => $this->id])
+            ->andWhere(['lf_owner_id' => $this->id])
+            ->andWhere(['lf_description' => $description])
+//            ->andWhere(['lf_from_status_id' => Lead::STATUS_PENDING])
             ->andWhere(['status' => Lead::STATUS_PROCESSING]);
 
         $count = $query->count();
@@ -1669,10 +1676,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $flowDescriptions
      * @return bool
      * @throws \Exception
      */
-    public function accessTakeNewLead(): bool
+    public function accessTakeNewLead(array $flowDescriptions = []): bool
     {
         $access = false;
         //$shift = $this->getShiftTime();
@@ -1689,7 +1697,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 if ($currentShiftTaskInfoSummary['completedTasksPercent'] >= $params->up_min_percent_for_take_leads) {
                     $access = true;
                 } else {
-                    $countNewLeads = $this->getCountNewLeadCurrentShift();
+                    $countNewLeads = $this->getCountNewLeadCurrentShift($flowDescriptions);
 
                     if (!$params->up_default_take_limit_leads) {
                         $access = true;
@@ -1706,10 +1714,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param array $flowDescriptions
      * @return array
      * @throws \Exception
      */
-    public function accessTakeLeadByFrequencyMinutes(): array
+    public function accessTakeLeadByFrequencyMinutes(array $flowDescriptions = []): array
     {
         $access = true;
         $takeDt = new \DateTime();
@@ -1717,7 +1726,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if (
             ($params = $this->userParams)
             && ($frequencyMinutes = $params->up_frequency_minutes)
-            && ($lastTakenDt = $this->getLastTakenLeadDt())
+            && ($lastTakenDt = $this->getLastTakenLeadDt($flowDescriptions))
         ) {
 
             $nextTakeUTC = (new \DateTime($lastTakenDt, new \DateTimeZone('UTC')))

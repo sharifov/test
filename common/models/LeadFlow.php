@@ -32,6 +32,10 @@ class LeadFlow extends \yii\db\ActiveRecord
 
     use EventTrait;
 
+    public const DESCRIPTION_TAKE = 'Take';
+    public const DESCRIPTION_MANUAL_CREATE = 'Manual create';
+    public const DESCRIPTION_CALL_AUTO_CREATED_LEAD = 'Call AutoCreated Lead';
+
     /**
      * @return string
      */

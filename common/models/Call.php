@@ -698,7 +698,7 @@ class Call extends \yii\db\ActiveRecord
                         try {
 
                             $lead->answered();
-                            $lead->processing($this->c_created_user_id, null, 'Call AutoCreated Lead');
+                            $lead->processing($this->c_created_user_id, null, LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD);
                             $leadRepository->save($lead);
 
                             $qCallService = Yii::createObject(QCallService::class);
