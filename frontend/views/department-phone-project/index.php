@@ -49,6 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'dpp_phone_number',
+            'dpp_default:boolean',
             [
                 'attribute' => 'dpp_dep_id',
                 'value' => function (\common\models\DepartmentPhoneProject $model) {

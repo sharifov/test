@@ -32,6 +32,7 @@ use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\forms\cases\CasesUpdateForm;
+use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -52,6 +53,7 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -745,7 +747,9 @@ class CasesController extends FController
      */
     public function actionCreate()
     {
-        $form = new CasesCreateByWebForm(Yii::$app->user->identity);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $form = new CasesCreateByWebForm($user);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $case = $this->casesCreateService->createByWeb($form);
@@ -768,7 +772,9 @@ class CasesController extends FController
      */
     public function actionCreateValidation(): array
     {
-        $form = new CasesCreateByWebForm(Yii::$app->user->identity);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $form = new CasesCreateByWebForm($user);
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($form);
@@ -776,31 +782,30 @@ class CasesController extends FController
         throw new BadRequestHttpException();
     }
 
+
     /**
      * @return array
-     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
      */
     public function actionCheckPhoneForExistence(): array
     {
-    	try {
-			$response = [];
-			$clientPhone = Yii::$app->request->post('clientPhone') ?? null;
-			Yii::$app->response->format = Response::FORMAT_JSON;
-			if (Yii::$app->request->isAjax && $clientPhone) {
+        if (!Yii::$app->request->isAjax) {
+            throw new ForbiddenHttpException('Access denied', 10);
+        }
 
-				if ($cases = $this->casesRepository->findOpenCasesByPhone($clientPhone)) {
-					$casesLink = '';
-					foreach ($cases as $case) {
-						$casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
-					}
-					$response['clientPhoneResponse'] = 'This number is already used in ' . $casesLink;
-				}
-				return $response;
-			}
-		} catch (\Throwable $exception) {
-    		return $response;
-		}
-		throw new BadRequestHttpException();
+        $response = [];
+        $clientPhone = Yii::$app->request->post('clientPhone');
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if ($clientPhone && $cases = $this->casesRepository->getOpenCasesByPhone($clientPhone)) {
+            $casesLink = '';
+            foreach ($cases as $case) {
+                $casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
+            }
+            $response['clientPhoneResponse'] = 'This number is already used in ' . $casesLink;
+        }
+
+        return $response;
     }
 
     /**
@@ -814,7 +819,7 @@ class CasesController extends FController
         if ($categories = $this->casesCategoryRepository->getAllByDep($id)) {
             $str .= '<option>Choose a category</option>';
             foreach ($categories as $category) {
-                $str .= '<option value="' . $category->cc_key . '">' . $category->cc_name . '</option>';
+                $str .= '<option value="' . Html::encode($category->cc_key) . '">' . Html::encode($category->cc_name) . '</option>';
             }
         } else {
             $str = '<option>-</option>';
@@ -1176,18 +1181,7 @@ class CasesController extends FController
 				Yii::$app->request->post('cssSaleData')) {
 
 				$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
-
-				if (
-					!$caseSale->cssCs->isOwner($user->getId()) &&
-					!$user->isAdmin() &&
-					!$user->isSuperAdmin() &&
-					!$user->isExSuper() &&
-					!$user->isSupSuper()
-				) {
-					throw new \Exception('Access Denied');
-				} elseif (!$caseSale->cssCs->isProcessing()) {
-					throw new \Exception('Case is not in status: Processing');
-				}
+				$this->checkAccessToManageCaseSaleInfo($caseSale);
 
 				$form = new CasesSaleForm($caseSale, $this->casesSaleService);
 
@@ -1246,28 +1240,13 @@ class CasesController extends FController
 
 			Yii::$app->response->format = Response::FORMAT_JSON;
 
-			$user = Yii::$app->user->identity;
-
 			$out = [
 				'error' => 0,
 				'message' => ''
 			];
 
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
-
-			if (
-				!$caseSale->cssCs->isOwner($user->getId()) &&
-				!$user->isAdmin() &&
-				!$user->isSuperAdmin() &&
-				!$user->isExSuper() &&
-				!$user->isSupSuper()
-			) {
-				throw new \Exception('Access Denied.', -1);
-			} else if (!$caseSale->css_need_sync_bo) {
-				throw new \Exception('Data is already synchronized.', -2);
-			} else if (!$caseSale->cssCs->isProcessing()) {
-				throw new \Exception('Case is not in status: Processing', -3);
-			}
+			$this->checkAccessToManageCaseSaleInfo($caseSale);
 
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
 			$updatedData['sale_id'] = $caseSaleId;
@@ -1304,7 +1283,7 @@ class CasesController extends FController
 				}
 			} else {
 				$out['error'] = 1;
-				$out['message'] = 'BO request Error: ' . json_decode($response->content, true)['message'] ?? '';
+				$out['message'] = 'BO request Error: ' . (json_decode($response->content, true)['message'] ?? '');
 			}
 
 		} catch (\Throwable $throwable) {
@@ -1317,5 +1296,25 @@ class CasesController extends FController
 		}
 
 		return $out;
+	}
+
+	/**
+	 * @param CaseSale $caseSale
+	 * @return bool
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	private function checkAccessToManageCaseSaleInfo(CaseSale $caseSale): bool
+	{
+		$caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
+		$canManageSaleInfo = $caseGuard->canManageSaleInfo(
+			$caseSale,
+			Yii::$app->user->identity,
+			json_decode((string)$caseSale->css_sale_data, true)['passengers'] ?? []);
+
+		if ($canManageSaleInfo) {
+			throw new \DomainException($canManageSaleInfo, -3);
+		}
+
+		return true;
 	}
 }

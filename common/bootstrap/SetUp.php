@@ -51,6 +51,8 @@ use sales\listeners\lead\LeadSoldEventLogListener;
 use sales\listeners\lead\LeadSoldNotificationsListener;
 use sales\listeners\lead\LeadTaskEventListener;
 use sales\listeners\lead\LeadTrashEventLogListener;
+use sales\services\log\GlobalLogDBService;
+use sales\logger\db\GlobalLogInterface;
 use yii\base\BootstrapInterface;
 use yii\di\Container;
 
@@ -61,6 +63,8 @@ class SetUp implements BootstrapInterface
         $container = \Yii::$container;
 
         $container->setSingleton(EventDispatcher::class, DeferredEventDispatcher::class);
+
+        $container->set(GlobalLogInterface::class, GlobalLogDBService::class);
 
         $container->setSingleton(DeferredEventDispatcher::class, function (Container $container) {
             return new DeferredEventDispatcher(new SimpleEventDispatcher($container, [

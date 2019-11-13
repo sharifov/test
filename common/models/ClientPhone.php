@@ -115,9 +115,23 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
             [['phone'], PhoneInputValidator::class],
 
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
-            [['phone', 'client_id'], 'unique', 'targetAttribute' => ['phone', 'client_id']]
+            [['phone', 'client_id'], 'unique', 'targetAttribute' => ['phone', 'client_id']],
+
+            ['type', 'in', 'range' => array_keys(self::PHONE_TYPE)]
         ];
     }
+
+	/**
+	 * @return array
+	 */
+    public function formatValue(): array
+	{
+		return [
+			'type' => static function ($value) {
+				return self::PHONE_TYPE[$value];
+			}
+		];
+	}
 
     /**
      * {@inheritdoc}

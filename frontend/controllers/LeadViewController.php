@@ -4,18 +4,25 @@ namespace frontend\controllers;
 
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\LeadPreferences;
 use common\models\search\ClientSearch;
+use frontend\models\LeadForm;
 use sales\access\ClientInfoAccess;
+use sales\access\EmployeeGroupAccess;
+use sales\access\LeadPreferencesAccess;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
+use sales\forms\lead\LeadPreferencesForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\services\client\ClientManageService;
 use common\models\Quote;
 use sales\forms\lead\CloneQuoteByUidForm;
 use sales\services\lead\LeadCloneQuoteService;
+use sales\services\lead\LeadPreferencesManageService;
 use Yii;
 use common\models\Lead;
 use common\models\search\lead\LeadSearchByIp;
+use yii\base\Model;
 use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 use yii\helpers\VarDumper;
@@ -28,6 +35,7 @@ use yii\widgets\ActiveForm;
  *
  * @property  LeadCloneQuoteService $leadCloneQuoteService
  * @property  ClientManageService $clientManageService
+ * @property  LeadPreferencesManageService $leadPreferencesManageService
  */
 class LeadViewController extends FController
 {
@@ -43,11 +51,17 @@ class LeadViewController extends FController
 	private $leadCloneQuoteService;
 
 	/**
+	 * @var LeadPreferencesManageService
+	 */
+	private $leadPreferencesManageService;
+
+	/**
 	 * LeadViewController constructor.
 	 * @param $id
 	 * @param $module
 	 * @param ClientManageService $clientManageService
 	 * @param LeadCloneQuoteService $leadCloneQuoteService
+	 * @param LeadPreferencesManageService $leadPreferencesManageService
 	 * @param array $config
 	 */
 	public function __construct(
@@ -55,10 +69,12 @@ class LeadViewController extends FController
 		$module,
 		ClientManageService $clientManageService,
 		LeadCloneQuoteService $leadCloneQuoteService,
+		LeadPreferencesManageService $leadPreferencesManageService,
 		$config = [])
 	{
 		$this->clientManageService = $clientManageService;
 		$this->leadCloneQuoteService = $leadCloneQuoteService;
+		$this->leadPreferencesManageService = $leadPreferencesManageService;
 		parent::__construct($id, $module, $config);
 	}
 
@@ -226,14 +242,14 @@ class LeadViewController extends FController
 
 				$response['error'] = false;
 				$response['message'] = 'New phone was successfully added: ' . $form->phone;
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_phone', [
+				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
 					'clientPhones' => $lead->client->clientPhones,
 					'lead' => $lead,
 					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
 				]);
 			} else {
 				$response['error'] = true;
-				$response['message'] = $form->getErrors();
+				$response['message'] = $this->getParsedErrors($form->getErrors());
 			}
 
 			Yii::$app->response->format = Response::FORMAT_JSON;
@@ -242,7 +258,7 @@ class LeadViewController extends FController
 			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientPhone:Throwable');
 		}
 
-		throw new NotFoundHttpException();
+		throw new BadRequestHttpException();
 	}
 
 	/**
@@ -337,14 +353,14 @@ class LeadViewController extends FController
 
 				$response['error'] = false;
 				$response['message'] = 'Phone was successfully updated: ' . $form->phone;
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_phone', [
+				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
 					'clientPhones' => $lead->client->clientPhones,
 					'lead' => $lead,
 					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
 				]);
 			} else {
 				$response['error'] = true;
-				$response['message'] = $form->getErrors();
+				$response['message'] = $this->getParsedErrors($form->getErrors());
 			}
 
 			Yii::$app->response->format = Response::FORMAT_JSON;
@@ -353,7 +369,7 @@ class LeadViewController extends FController
 			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientPhone:Throwable');
 		}
 
-		throw new NotFoundHttpException();
+		throw new BadRequestHttpException();
 	}
 
 	/**
@@ -430,23 +446,22 @@ class LeadViewController extends FController
 
 				$response['error'] = false;
 				$response['message'] = 'New email was successfully added: ' . $form->email;
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_email', [
+				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
 					'clientEmails' => $lead->client->clientEmails,
 					'lead' => $lead,
 					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
 				]);
 			} else {
 				$response['error'] = true;
-				$response['message'] = $form->getErrors();
+				$response['message'] = $this->getParsedErrors($form->getErrors());
 			}
 
-			Yii::$app->response->format = Response::FORMAT_JSON;
-			return $response;
+			return $this->asJson($response);
 		} catch (\Throwable $e) {
 			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxAddClientEmail:Throwable');
 		}
 
-		throw new NotFoundHttpException();
+		throw new BadRequestHttpException();
 	}
 
 	/**
@@ -541,14 +556,14 @@ class LeadViewController extends FController
 
 				$response['error'] = false;
 				$response['message'] = 'Email was successfully updated: ' . $form->email;
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_email', [
+				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
 					'clientEmails' => $lead->client->clientEmails,
 					'lead' => $lead,
 					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
 				]);
 			} else {
 				$response['error'] = true;
-				$response['message'] = $form->getErrors();
+				$response['message'] = $this->getParsedErrors($form->getErrors());
 			}
 
 			Yii::$app->response->format = Response::FORMAT_JSON;
@@ -557,7 +572,7 @@ class LeadViewController extends FController
 			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientEmail:Throwable');
 		}
 
-		throw new NotFoundHttpException();
+		throw new BadRequestHttpException();
 	}
 
 	/**
@@ -619,30 +634,23 @@ class LeadViewController extends FController
 	 */
 	public function actionAjaxEditClientName()
 	{
-		try {
-			$form = new ClientCreateForm();
+		$form = new ClientCreateForm();
 
-			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+		if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-				$client = $this->clientManageService->updateClient($form);
+			$client = $this->clientManageService->updateClient($form);
 
-				$response['error'] = false;
-				$response['message'] = 'User name was successfully updated';
-				$response['html'] = $this->renderAjax('/lead/partial/_client_manage_name', [
-					'client' => $client
-				]);
-			} else {
-				$response['error'] = true;
-				$response['message'] = $form->getErrors();
-			}
-
-			Yii::$app->response->format = Response::FORMAT_JSON;
-			return $response;
-		} catch (\Throwable $e) {
-			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientName:Throwable');
+			$response['error'] = false;
+			$response['message'] = 'User name was successfully updated';
+			$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_name', [
+				'client' => $client
+			]);
+		} else {
+			$response['error'] = true;
+			$response['message'] = $this->getParsedErrors($form->getErrors());
 		}
 
-		throw new NotFoundHttpException();
+		return $this->asJson($response);
 	}
 
     /**
@@ -687,6 +695,70 @@ class LeadViewController extends FController
         throw new BadRequestHttpException();
     }
 
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 * @throws NotFoundHttpException
+	 */
+    public function actionAjaxEditLeadPreferencesModalContent(): string
+	{
+		if (Yii::$app->request->isAjax) {
+			$gid = Yii::$app->request->get('gid');
+			if ($lead = $this->findLeadByGid($gid)) {
+				$leadPreferencesForm = new LeadPreferencesForm($lead);
+				return $this->renderAjax('partial/_lead_preferences_edit_modal_content', [
+					'leadPreferencesForm' => $leadPreferencesForm,
+					'gid' => $lead->gid
+				]);
+			}
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @throws BadRequestHttpException
+	 * @throws HttpException
+	 * @throws NotFoundHttpException
+	 * @throws \Throwable
+	 */
+	public function actionAjaxEditLeadPreferences(): Response
+	{
+		if (Yii::$app->request->isAjax) {
+			$gid = Yii::$app->request->get('gid');
+			$lead = $this->findLeadByGid($gid);
+			if (!LeadPreferencesAccess::isUserCanManageLeadPreference($lead, Yii::$app->user->id)) {
+				throw new HttpException(403, 'Access Denied');
+			}
+
+			try {
+				$form = new LeadPreferencesForm($lead);
+				if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+					$this->leadPreferencesManageService->edit($form, $lead);
+
+					$lead->refresh();
+
+					$response['error'] = false;
+					$response['message'] = 'Lead preferences successfully updated';
+					$response['html'] = $this->renderAjax('/lead/partial/_lead_preferences', [
+						'lead' => $lead
+					]);
+				}else {
+					$response['error'] = true;
+					$response['message'] = $this->getParsedErrors($form->getErrors());
+				}
+			} catch (\Throwable $e) {
+				Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditLeadPreferences:Throwable');
+				$response['message'] = 'Internal Server error; Try again letter';
+				$response['error'] = true;
+			}
+
+			return $this->asJson($response);
+		}
+
+		throw new BadRequestHttpException();
+	}
+
     /**
      * @param string $gid
      * @return Lead the loaded model
@@ -699,6 +771,17 @@ class LeadViewController extends FController
         }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+	/**
+	 * @param array $errors
+	 * @return string
+	 */
+    private function getParsedErrors(array $errors): string
+	{
+		return implode('<br>', array_map(static function ($errors) {
+			return implode('<br>', $errors);
+		}, $errors));
+	}
 
     /**
      * @param $uid

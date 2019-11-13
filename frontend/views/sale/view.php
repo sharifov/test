@@ -3,6 +3,7 @@
 use common\models\CaseSale;
 use kartik\editable\Editable;
 use kartik\popover\PopoverX;
+use sales\guards\cases\CaseManageSaleInfoGuard;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -20,7 +21,12 @@ if(Yii::$app->request->isPjax) {
 $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 
 //$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
-
+$caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
+if (!empty($caseSaleModel)) {
+    $canManageSaleInfo =  $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->user->identity, $data['passengers'] ?? []);
+} else {
+    $canManageSaleInfo = true;
+}
 ?>
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
@@ -204,10 +210,13 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
     <div class="row">
         <div class="col-md-12">
             <h2>Passengers</h2>
-			<?php if(isset($data['passengers']) && $data['passengers']): ?>
+			<?php if( !empty($data['passengers']) ): ?>
                 <table class="table table-bordered table-hover" id="passengers">
                     <thead>
                     <tr>
+                        <?php if(!empty($csId) && $canManageSaleInfo): ?>
+                            <th></th>
+                        <?php endif; ?>
                         <th>First name</th>
                         <th>Ticket number</th>
                         <th>Type</th>
@@ -222,6 +231,9 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
                     <tbody>
 					<?php foreach($data['passengers'] as $key => $passenger): ?>
                         <tr>
+							<?php if(!empty($csId) &&  $canManageSaleInfo): ?>
+                                <td style="width: 30px;" class="text-center"><span data-toggle="tooltip" title="<?= $canManageSaleInfo ?>" class="label label-default bg-orange"><i class="fa fa-info"></i></span></td>
+							<?php endif; ?>
                             <td>
 								<?php
 								/*
@@ -246,41 +258,41 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
                             <td><?=Html::encode($passenger['type'])?></td>
                             <td>
 								<?php
-                                if (isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) :
-                                $editable = Editable::begin([
-									'name' => 'cssSaleData[passengers]['.$key.'][birth_date]',
-									'header' => 'Date of Birth',
-									'asPopover' => true,
-									'inputType' => Editable::INPUT_DATE,
-									'displayValue' => date('d M Y', strtotime($passenger['birth_date'])),
-									'value' => date('d M Y', strtotime($passenger['birth_date'])),
-									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
-									'options' => [
-										'convertFormat'=>true,
-										'pluginOptions'=>[
-                                            'format'=>'php:d M Y',
-                                            'autoclose'=>true,
-//                                            'type' =>
+								if (!$canManageSaleInfo):
+                                    $editable = Editable::begin([
+                                        'name' => 'cssSaleData[passengers]['.$key.'][birth_date]',
+                                        'header' => 'Date of Birth',
+                                        'asPopover' => true,
+                                        'inputType' => Editable::INPUT_DATE,
+                                        'displayValue' => date('d M Y', strtotime($passenger['birth_date'])),
+                                        'value' => date('d M Y', strtotime($passenger['birth_date'])),
+                                        'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'options' => [
+                                            'convertFormat'=>true,
+                                            'pluginOptions'=>[
+                                                'format'=>'php:d M Y',
+                                                'autoclose'=>true,
+    //                                            'type' =>
+                                            ],
+                                            'class' => 'cssSaleData_passengers_birth_date'
                                         ],
-                                        'class' => 'cssSaleData_passengers_birth_date'
-									],
-									'pluginEvents' => [
-										"editableSuccess"=>"function (event, val, form, data) {
-										    console.log(form);
-										    document.activateButtonSync(data);
-										}",
-									],
-                                    'pjaxContainerId' => 'pjax-sale-list'
-								]);
+                                        'pluginEvents' => [
+                                            'editableSuccess' => 'function (event, val, form, data) {
+                                                console.log(form);
+                                                document.activateButtonSync(data);
+                                            }',
+                                        ],
+                                        'pjaxContainerId' => 'pjax-sale-list'
+                                    ]);
 								?>
-                                <?php  $editable->beforeInput = Html::hiddenInput("cssSaleData[passengers][".$key."][type]", Html::encode($passenger['type'])); ?>
+                                <?php  $editable->beforeInput = Html::hiddenInput('cssSaleData[passengers][' .$key. '][type]', Html::encode($passenger['type'])); ?>
                                 <?php  Editable::end(); else: ?>
                                     <?= date('d M Y', strtotime($passenger['birth_date'])) ?>
-                                <? endif; ?>
+                                <?php endif; ?>
                             </td>
                             <td>
-								<? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()):
-                                        echo Editable::widget([
+								<?php if (!$canManageSaleInfo):
+								    echo Editable::widget([
                                             'name' => 'cssSaleData[passengers]['.$key.'][gender]',
                                             'header' => 'Gender',
                                             'asPopover' => true,
@@ -289,9 +301,9 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
                                             'value' => Html::encode($passenger['gender']),
                                             'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                             'pluginEvents' => [
-                                                "editableSuccess"=>"function (event, val, form, data) {
+                                                'editableSuccess' => 'function (event, val, form, data) {
                                                     document.activateButtonSync(data);
-                                                }",
+                                                }',
                                             ],
                                             'pjaxContainerId' => 'pjax-sale-list'
                                         ]);
@@ -301,7 +313,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                             </td>
                             <td>
-								<? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) {
+								<?php if (!$canManageSaleInfo) {
                                     echo Editable::widget([
                                         'name' => 'cssSaleData[passengers]['.$key.'][meal]',
                                         'header' => 'Meal',
@@ -312,9 +324,9 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
                                         'value' => Html::encode(!empty($passenger['meal']) && is_array($passenger['meal']) ? reset($passenger['meal']) : null),
                                         'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'pluginEvents' => [
-                                            "editableSuccess"=>"function (event, val, form, data) {
+                                            'editableSuccess' => 'function (event, val, form, data) {
                                                 document.activateButtonSync(data);
-                                            }",
+                                            }',
                                         ],
                                         'placement' => PopoverX::ALIGN_TOP_LEFT,
                                         'pjaxContainerId' => 'pjax-sale-list'
@@ -329,7 +341,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                             </td>
                             <td>
-								<? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) {
+								<?php if(!$canManageSaleInfo) {
 									echo Editable::widget([
 										'name' => 'cssSaleData[passengers][' . $key . '][wheelchair]',
 										'header' => 'Wheelchair',
@@ -340,9 +352,9 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
 										'options' => ['prompt' => 'Select wheelchair...'],
 										'pluginEvents' => [
-											"editableSuccess" => "function (event, val, form, data) {
+											'editableSuccess' => 'function (event, val, form, data) {
 										    document.activateButtonSync(data);
-										}",
+										}',
 										],
 										'placement' => PopoverX::ALIGN_TOP_LEFT,
 										'pjaxContainerId' => 'pjax-sale-list'
@@ -357,7 +369,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                             </td>
                             <td>
-                                <? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) {
+                                <?php if(!$canManageSaleInfo) {
 									echo Editable::widget([
 										'name' => 'cssSaleData[passengers][' . $key . '][ff_numbers]',
 										'header' => 'Frequent Fayer',
@@ -366,9 +378,9 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 										'value' => Html::encode(!empty($passenger['ff_numbers']) && is_array($passenger['ff_numbers']) ? reset($passenger['ff_numbers']) : null),
 										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
 										'pluginEvents' => [
-											"editableSuccess" => "function (event, val, form, data) {
+											'editableSuccess' => 'function (event, val, form, data) {
 										    document.activateButtonSync(data);
-										}",
+										}',
 										],
 										'placement' => PopoverX::ALIGN_TOP_LEFT,
 										'pjaxContainerId' => 'pjax-sale-list'
@@ -383,7 +395,7 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 								?>
                             </td>
                             <td>
-								<? if(isset($caseSaleModel) && $caseSaleModel->cssCs->isProcessing()) {
+								<?php if(!$canManageSaleInfo) {
                                     echo Editable::widget([
                                         'name' => 'cssSaleData[passengers]['.$key.'][kt_numbers]',
                                         'header' => 'KTN',
@@ -392,9 +404,9 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
                                         'value' => Html::encode(!empty($passenger['kt_numbers']) && is_array($passenger['kt_numbers']) ? reset($passenger['kt_numbers']) : null),
                                         'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'pluginEvents' => [
-                                            "editableSuccess"=>"function (event, val, form, data) {
+                                            'editableSuccess' => 'function (event, val, form, data) {
                                                 document.activateButtonSync(data);
-                                            }",
+                                            }',
                                         ],
                                         'placement' => PopoverX::ALIGN_LEFT,
                                         'pjaxContainerId' => 'pjax-sale-list'
@@ -538,6 +550,8 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
                             }
                         });
                     });
+                    
+    $('#passengers span[data-toggle="tooltip"]').tooltip();
 JS;
 $this->registerJs($js);
     ?>

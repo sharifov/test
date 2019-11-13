@@ -19,6 +19,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use Mpdf\Tag\P;
 use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeAccessQuery;
@@ -46,6 +47,8 @@ use sales\repositories\TestRepository;
 use sales\services\api\communication\CommunicationService;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
+use sales\services\lead\qcall\CalculateDateService;
+use sales\services\lead\qcall\DayTimeHours;
 use sales\services\TransactionManager;
 use sales\StatusLog;
 use sales\temp\LeadFlowUpdate;
@@ -122,26 +125,19 @@ class TestController extends FController
     public function actionTest()
     {
 
+      die;
 
-        $quote = Quote::findOne(570780);
 
-//        VarDumper::dump($quote->quotePrices);
+        $call = Call::findOne(1035611);
+        $call->c_status_id = Call::STATUS_RINGING;
+//        $call->c_status_id = Call::STATUS_IN_PROGRESS;
+//        $call->c_status_id = Call::STATUS_COMPLETED;
+//        $call->c_status_id = Call::STATUS_BUSY;
+//        $call->c_status_id = Call::STATUS_NO_ANSWER;
+//        $call->c_status_id = Call::STATUS_FAILED;
+//        $call->c_status_id = Call::STATUS_CANCELED;
 
-        $adt = 0;
-        $chd = 0;
-        $inf = 0;
-
-        foreach ($quote->quotePrices as $item) {
-            if ($item->passenger_type === 'ADT') {
-                $adt++;
-            } elseif ($item->passenger_type === 'CHD') {
-                $chd++;
-            } elseif ($item->passenger_type === 'INF') {
-                $inf++;
-            }
-        }
-        echo $adt . '  ' . $chd . ' ' . $inf;
-
+        $call->save();
         die;
         return $this->render('blank');
 

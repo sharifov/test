@@ -61,7 +61,24 @@ use \common\models\Call;
                 <?php endif; ?>
             </td>
             <td class="text-center" style="width:130px">
-                <span class="badge badge-info"><?=$model->cProject ? $model->cProject->name : '-'?></span><br>
+                <?php if ($model->c_source_type_id === Call::SOURCE_CONFERENCE_CALL):?>
+
+                    <?php
+                    $roomName = null;
+                    if ($model->conferenceParticipants) {
+                        foreach ($model->conferenceParticipants as $cPart) {
+                            $roomName = $cPart->cpCf->cfCr->cr_name;
+                            break;
+                        }
+                    }
+                    ?>
+
+                    <?php if ($roomName):?>
+                        <span class="badge badge-blue"><?= Html::encode($roomName) ?></span>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <span class="badge badge-info"><?=$model->cProject ? Html::encode($model->cProject->name) : '-'?></span>
+                <?php endif; ?><br>
                 <?php if($model->cDep):?>
                     <span class="label label-warning"><?=$model->cDep ? Html::encode($model->cDep->dep_name) : '-'?></span>
                 <?php endif; ?>

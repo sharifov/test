@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\jobs\QuickSearchInitPriceJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadLogMessage;
+use sales\services\lead\qcall\CalculateDateService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -58,6 +59,7 @@ use yii\helpers\VarDumper;
  * @property double $l_init_price
  * @property string $l_last_action_dt
  * @property int $l_dep_id
+ * @property int $l_type_create
  *
  * @property Call[] $calls
  * @property Email[] $emails
@@ -128,6 +130,7 @@ class Lead2 extends \yii\db\ActiveRecord
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
             [['source_id'], 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['source_id' => 'id']],
             [['l_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['l_dep_id' => 'dep_id']],
+            ['l_type_create', 'integer']
         ];
     }
 
@@ -485,10 +488,18 @@ class Lead2 extends \yii\db\ActiveRecord
                 $lq = new LeadQcall();
                 $lq->lqc_lead_id = $this->id;
                 $lq->lqc_weight = $this->project_id * 10;
+                $lq->lqc_created_dt = date('Y-m-d H:i:s');
             }
 
-            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
-            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+            $date = (new CalculateDateService())->calculate(
+                $qcConfig->qc_client_time_enable,
+                $this->offset_gmt,
+                $qcConfig->qc_time_from,
+                $qcConfig->qc_time_to
+            );
+
+            $lq->lqc_dt_from = $date->from;
+            $lq->lqc_dt_to = $date->to;
 
             if (!$lq->save()) {
                 Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead2:createOrUpdateQCall:LeadQcall:save');
@@ -571,11 +582,15 @@ class Lead2 extends \yii\db\ActiveRecord
 	 * @param string $phoneNumber
 	 * @param int $project_id
 	 * @param int $source_id
+	 * @param $gmt
 	 * @return Lead2
 	 */
-    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0): Lead2
+    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0, $gmt): Lead2
     {
         $lead = new self();
+        $lead->l_client_phone = $phoneNumber;
+        $lead->l_type_create = Lead::TYPE_CREATE_INCOMING_CALL;
+
         $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
         if($clientPhone) {
@@ -604,6 +619,7 @@ class Lead2 extends \yii\db\ActiveRecord
             $lead->project_id = $project_id;
             $lead->source_id = $source_id;
             $lead->l_call_status_id = Lead::CALL_STATUS_QUEUE;
+            $lead->offset_gmt = $gmt;
             $source = null;
 
 			if ($source_id) {

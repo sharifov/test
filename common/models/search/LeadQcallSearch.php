@@ -2,20 +2,40 @@
 
 namespace common\models\search;
 
+use sales\services\lead\qcall\DayTimeHours;
+use Yii;
+use common\models\Call;
+use common\models\ClientPhone;
 use common\models\Employee;
+use common\models\Lead;
+use common\models\LeadFlow;
+use sales\access\EmployeeProjectAccess;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\LeadQcall;
 use yii\db\Expression;
+use yii\db\Query;
+use yii\helpers\VarDumper;
 
 /**
  * LeadQcallSearch represents the model behind the search form of `common\models\LeadQcall`.
  *
  * @property string $current_dt
+ * @property $projectId
+ * @property $leadStatus
+ * @property $cabin
+ * @property $attempts
+ * @property $deadline
  */
 class LeadQcallSearch extends LeadQcall
 {
     public $current_dt;
+    public $projectId;
+    public $leadStatus;
+    public $cabin;
+    public $attempts;
+    public $deadline;
+    public $l_call_status_id;
 
     /**
      * {@inheritdoc}
@@ -26,6 +46,12 @@ class LeadQcallSearch extends LeadQcall
             [['lqc_lead_id', 'lqc_weight'], 'integer'],
 
             [['lqc_dt_from', 'lqc_dt_to', 'current_dt'], 'safe'],
+
+            ['projectId', 'integer'],
+            ['leadStatus', 'integer'],
+            ['cabin', 'in', 'range' => array_keys(Lead::CABIN_LIST)],
+            ['attempts', 'integer'],
+            ['l_call_status_id', 'integer'],
         ];
     }
 
@@ -121,6 +147,227 @@ class LeadQcallSearch extends LeadQcall
         ]);
 
         $query->with(['lqcLead', 'lqcLead.project', 'lqcLead.source', 'lqcLead.employee']);
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchByRedial($params, Employee $user): ActiveDataProvider
+    {
+        $query = self::find()->select('*');
+
+        $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
+
+        $query->joinWith('lqcLead');
+
+        $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+
+        if (!$user->isAdmin()) {
+            $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+        }
+
+        if ($user->isAgent() || $user->isSupervision()) {
+            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
+            $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
+        }
+
+        $query->addSelect([
+            'countClientPhones' => (new Query())
+                ->select('count(*)')
+                ->from(ClientPhone::tableName())
+                ->andWhere(ClientPhone::tableName() . '.client_id = ' . Lead::tableName() . '.client_id')
+        ]);
+        $query->andHaving(['>', 'countClientPhones', 0]);
+
+        $query->addSelect([
+            'attempts' => (new Query())
+                ->select('lf_out_calls')
+                ->from(LeadFlow::tableName())
+                ->andWhere(LeadFlow::tableName() . '.lead_id = lqc_lead_id')
+                ->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])
+                ->limit(1)
+        ]);
+
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date("Y-m-d H:i:s") . "', lqc_dt_to )/60))";
+        $query->addSelect(['deadline' =>
+            new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
+        ]);
+
+//        $query->addSelect(['expired' =>
+//            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
+//        ]);
+
+        if (($freshTime = (int)Yii::$app->params['settings']['redial_fresh_time']) > 0) {
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date("Y-m-d H:i:s") . "')";
+            $query->addSelect(['isFresh' =>
+                new Expression("if (" . $expression . " <= " . $freshTime . ", 1, 0) ")
+            ]);
+            $query->addOrderBy([
+               'isFresh' => SORT_DESC
+            ]);
+
+            $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . ".offset_gmt) )";
+//            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+            $query->addSelect(['is_in_day_time_hours' =>
+                new Expression('if ( '.$expression . " > " . $freshTime .'  AND ' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+            ]);
+            $query->addOrderBy([
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
+
+        } else {
+            $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . ".offset_gmt) )";
+//            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+            $query->addSelect(['is_in_day_time_hours' =>
+                new Expression('if (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+            ]);
+            $query->addOrderBy([
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
+        }
+
+
+
+        $query->addOrderBy([
+//            'expired' => SORT_DESC,
+            'deadline' => SORT_ASC,
+            'attempts' => SORT_ASC,
+            'lqc_dt_from' => SORT_ASC
+        ]);
+
+
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+//            'sort'=> [
+//                'defaultOrder' => [
+//                    'lqc_dt_to' => SORT_ASC,
+//                    'attempts' => SORT_ASC,
+//                    'lqc_dt_from' => SORT_ASC,
+//                ]
+//            ],
+            /*'pagination' => [
+                'pageSize' => 40,
+            ],*/
+        ]);
+
+        if ((bool)Yii::$app->params['settings']['enable_redial_show_lead_limit'] && $user->userParams->up_inbox_show_limit_leads !== null) {
+            $query->limit((int)$user->userParams->up_inbox_show_limit_leads);
+            $dataProvider->pagination = false;
+        }
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        if (!$user->isAgent()) {
+            $query->andFilterWhere(['lqc_lead_id' => $this->lqc_lead_id]);
+        }
+
+        $query->andFilterWhere([
+            Lead::tableName() . '.project_id' => $this->projectId,
+            Lead::tableName() . '.status' => $this->leadStatus,
+            Lead::tableName() . '.cabin' => $this->cabin,
+        ]);
+
+        if ($user->isAdmin()) {
+            $query->andFilterWhere([
+                Lead::tableName() . '.l_call_status_id' => $this->l_call_status_id
+            ]);
+            $query->andFilterHaving([
+                'attempts' => $this->attempts
+            ]);
+        }
+
+//        VarDumper::dump($query->createCommand()->getRawSql());die;
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchLastCalls($params, Employee $user): ActiveDataProvider
+    {
+        $query = self::find()->select('*');
+
+        $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
+
+        $query->joinWith('lqcLead');
+
+        $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
+
+        if ($user->isAgent() || $user->isSupervision()) {
+            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
+            $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
+        }
+
+        $query->addSelect([
+            'countClientPhones' => (new Query())
+                ->select('count(*)')
+                ->from(ClientPhone::tableName())
+                ->andWhere(ClientPhone::tableName() . '.client_id = ' . Lead::tableName() . '.client_id')
+        ]);
+        $query->andHaving(['>', 'countClientPhones', 0]);
+
+        $query->addSelect([
+            'attempts' => (new Query())
+                ->select('lf_out_calls')
+                ->from(LeadFlow::tableName())
+                ->andWhere(LeadFlow::tableName() . '.lead_id = lqc_lead_id')
+                ->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])
+                ->limit(1)
+        ]);
+
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date("Y-m-d H:i:s") . "', lqc_dt_to )/60))";
+        $query->addSelect(['deadline' =>
+            new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
+        ]);
+
+        $query->andWhere([
+            'lqc_lead_id' => Call::find()
+                ->select('c_lead_id')
+                ->andWhere([
+                    'c_lead_id' => self::find()->select('lqc_lead_id'),
+                    'c_call_type_id' => Call::CALL_TYPE_OUT,
+                    'c_created_user_id' => $user->id,
+                    'c_source_type_id' => Call::SOURCE_REDIAL_CALL
+                ])
+//                    ->andWhere(['IS NOT', 'c_parent_id', null])
+                ->groupBy(['c_lead_id'])
+                ->orderBy('MAX(c_id)')
+        ]);
+
+        $query->addOrderBy(['l_last_action_dt' => SORT_DESC]);
+
+        $query->limit((int)\Yii::$app->params['settings']['qcall_count_last_dialed_leads']);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => false,
+            'sort' => false
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
 
         return $dataProvider;
     }

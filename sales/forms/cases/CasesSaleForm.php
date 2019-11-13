@@ -176,13 +176,16 @@ class CasesSaleForm extends Model
 	 */
 	private function birthDateRangeValidator($attribute, $value)
 	{
-		$currentDate = date('Y-m-d');
-
 		$birthDate = new \DateTime($value);
 		$type = $this->passengers['type'] ?? null;
 
 		if (!$type) {
 			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': cant validate, passenger type is not provided.');
+		}
+
+		$currentDate = time();
+		if ($birthDate->getTimestamp() > $currentDate) {
+			$this->addError($attribute, $this->getAttributeLabel($attribute) . ': passenger birth date cannot be greater then the current date.');
 		}
 
 		$passengerBirthDateRange = CaseSale::PASSENGER_TYPE_BIRTH_DATE_RANGE[$type] ?? null;

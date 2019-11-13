@@ -1,6 +1,7 @@
 <?php
 
 use sales\access\ListsAccess;
+use sales\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;
@@ -199,7 +200,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
-                return $model->getClientTime2();
+                return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             'options' => [
                 'style' => 'width:90px'

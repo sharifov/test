@@ -184,10 +184,13 @@ SearchResult = function(props) {
                                 baggage = 1;
                                 cnt = 0;
                                 $(selector).each(function(idx){
-                                    let obj = $(selector+'[data-baggage="'+baggage+'"]');
                                     cnt++;
+                                    let obj = $(selector+'[data-baggage="1"]');
                                     $(obj).removeClass('hide');
                                     $(obj).addClass('filtered');
+                                    let obj2 = $(selector+'[data-baggage="2"]');
+                                    $(obj2).removeClass('hide');
+                                    $(obj2).addClass('filtered');
                                     filterApplied = true;
                                 });
                                 break;

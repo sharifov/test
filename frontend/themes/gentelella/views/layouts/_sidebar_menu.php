@@ -74,6 +74,9 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                 ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
+                ['label' => 'Conference Room', 'url' => ['/conference-room/index'], 'icon' => 'comment'],
+                ['label' => 'Conferences', 'url' => ['/conference/index'], 'icon' => 'comment'],
+                ['label' => 'Conference Participant', 'url' => ['/conference-participant/index'], 'icon' => 'phone'],
             ]
         ];
 
@@ -92,6 +95,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
+                ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
             ]
         ];
 
@@ -135,6 +139,10 @@ $isSuperAdmin = $user->canRole('superadmin');
 
         if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
             $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
+        }
+
+        if (($profile = $user->userProfile) && $profile->up_auto_redial) {
+            $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
         }
 
         $menuLItems[] = ['label' => 'Lead Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
@@ -257,10 +265,12 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bars'],
+                ['label' => 'Action Logs', 'url' => ['/log/action'], 'icon' => 'bars'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
+				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
             ]
         ];
 

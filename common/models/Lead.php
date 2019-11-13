@@ -29,6 +29,7 @@ use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
+use sales\services\lead\qcall\CalculateDateService;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
@@ -89,6 +90,7 @@ use yii\helpers\VarDumper;
  * @property string $l_last_action_dt
  * @property int $l_dep_id
  * @property boolean $l_delayed_charge
+ * @property int $l_type_create
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -225,6 +227,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     public const CALL_STATUS_CANCEL     = 3;
     public const CALL_STATUS_DONE       = 4;
     public const CALL_STATUS_QUEUE      = 5;
+    public const CALL_STATUS_PREPARE    = 6;
 
     public const CALL_STATUS_LIST = [
         self::CALL_STATUS_NONE      => 'None',
@@ -233,8 +236,18 @@ class Lead extends ActiveRecord implements AggregateRoot
         self::CALL_STATUS_CANCEL    => 'Cancel',
         self::CALL_STATUS_DONE      => 'Done',
         self::CALL_STATUS_QUEUE     => 'Queue',
+        self::CALL_STATUS_PREPARE   => 'Prepare',
     ];
 
+    public const TYPE_CREATE_MANUALLY = 1;
+    public const TYPE_CREATE_INCOMING_CALL = 2;
+    public const TYPE_CREATE_API = 3;
+
+    public const TYPE_CREATE_LIST = [
+        self::TYPE_CREATE_MANUALLY => 'Manually',
+        self::TYPE_CREATE_INCOMING_CALL => 'Incoming call',
+        self::TYPE_CREATE_API => 'Api',
+    ];
 
     public const SCENARIO_API = 'scenario_api';
     public const SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
@@ -317,6 +330,8 @@ class Lead extends ActiveRecord implements AggregateRoot
 
             ['l_delayed_charge', 'boolean'],
             ['l_delayed_charge', 'default', 'value' => false],
+
+            ['l_type_create', 'in', 'range' => array_keys(self::TYPE_CREATE_LIST)],
         ];
     }
 
@@ -337,6 +352,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      * @param $clientEmail
      * @param $depId
      * @param $delayedCharge
+     * @param $typeCreate
      * @return Lead
      */
     public static function create(
@@ -354,7 +370,8 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clientPhone,
         $clientEmail,
         $depId,
-        $delayedCharge
+        $delayedCharge,
+        $typeCreate
     ): self
     {
         $lead = new static();
@@ -375,6 +392,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
+        $lead->l_type_create = $typeCreate;
         $lead->status = null;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
@@ -484,6 +502,11 @@ class Lead extends ActiveRecord implements AggregateRoot
         }
     }
 
+    public function answered()
+    {
+        $this->setAnswered(true);
+    }
+
     /**
      * @param bool $value
      */
@@ -538,6 +561,14 @@ class Lead extends ActiveRecord implements AggregateRoot
             return $this->employee && $this->employee->id === $userId;
         }
         return $this->employee_id === $userId;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIOwner(): bool
+    {
+        return $this->isOwner(Yii::$app->user->id, false);
     }
 
     /**
@@ -1035,6 +1066,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         if (!$this->isReject()) {
             $this->setStatus(self::STATUS_REJECT);
         }
+    }
+
+    public function callPrepare()
+    {
+        $this->setCallStatus(self::CALL_STATUS_PREPARE);
+    }
+
+    public function isCallPrepare()
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_PREPARE;
     }
 
     public function callProcessing(): void
@@ -1967,13 +2008,13 @@ class Lead extends ActiveRecord implements AggregateRoot
 
                             if($offset < 0) {
                                 if($offset > -10) {
-                                    $offsetStr = '-0'.$offset.':00';
+                                    $offsetStr = '-0'.abs($offset).':00';
                                 } else {
-                                    $offsetStr = '-'.$offset.':00';
+                                    $offsetStr = $offset.':00';
                                 }
                             }
 
-                            if($offset == 0) {
+                            if($offset === 0) {
                                 $offsetStr = '-00:00';
                             }
 
@@ -2211,10 +2252,18 @@ Reason: {reason}
                 $lq = new LeadQcall();
                 $lq->lqc_lead_id = $this->id;
                 $lq->lqc_weight = $this->project_id * 10;
+                $lq->lqc_created_dt = date('Y-m-d H:i:s');
             }
 
-            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
-            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+            $date = (new CalculateDateService())->calculate(
+                $qcConfig->qc_client_time_enable,
+                $this->offset_gmt,
+                $qcConfig->qc_time_from,
+                $qcConfig->qc_time_to
+            );
+
+            $lq->lqc_dt_from = $date->from;
+            $lq->lqc_dt_to = $date->to;
 
             if (!$lq->save()) {
                 Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');
@@ -2453,13 +2502,46 @@ Reason: {reason}
         return '';
     }
 
-
     /**
-     * @return string
+     * @return \DateTime|null
      * @throws \Exception
      */
-    public function getClientTime2(): string
+    public function getClientTime2():? \DateTime
     {
+        $clientDt = null;
+        $offset = false;
+
+        if ($this->offset_gmt) {
+            $offset = str_replace('.', ':', $this->offset_gmt);
+        } elseif ($this->leadFlightSegments) {
+            $firstSegment = $this->leadFlightSegments[0] ?? null;
+            if ($firstSegment && ($airport = Airport::findIdentity($firstSegment->origin)) && $airport->dst) {
+                $offset = $airport->dst;
+            }
+        }
+
+        if ($offset) {
+            if (is_numeric($offset) && $offset > 0) {
+                $offset = '+' . $offset;
+            }
+            $clientDt = new \DateTime();
+            $timezoneName = timezone_name_from_abbr('', (int)$offset * 3600, date('I', time()));
+            if ($timezoneName) {
+                $timezone = new \DateTimeZone($timezoneName);
+                $clientDt->setTimezone($timezone);
+            }
+        }
+
+        return $clientDt;
+    }
+
+    /**
+     * @return \DateTime|null
+     * @throws \Exception
+     */
+    public function getClientTime2Old()
+    {
+
         $clientTime = '-';
         $offset = false;
 
@@ -2525,7 +2607,8 @@ Reason: {reason}
 
             //$offset = '-2';
 
-            $timezoneName = timezone_name_from_abbr('',intval($offset) * 3600, true);
+
+            $timezoneName = timezone_name_from_abbr('',(int)$offset * 3600, date('I', time()));
 
             /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
            // $clientTime = Yii::$app->formatter->asTime() $date->format('H:i');
@@ -3910,6 +3993,16 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         return $min;
     }
+
+	/**
+	 * @param int $delayedCharged
+	 * @param string $notesForExperts
+	 */
+    public function editDelayedChargeAndNote(int $delayedCharged, string $notesForExperts): void
+	{
+		$this->l_delayed_charge = $delayedCharged;
+		$this->notes_for_experts = strip_tags($notesForExperts);
+	}
 
     /**
      * @return LeadQuery

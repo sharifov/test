@@ -50,7 +50,7 @@ class SearchService
             self::GDS_SABRE         => 'Sabre',
             self::GDS_AMADEUS       => 'Amadeus',
             self::GDS_TRAVELPORT    => 'TravelPort',
-            self::GDS_AIRWANDER     => 'AirWander',
+            self::GDS_AIRWANDER     => 'Combined',
             self::GDS_TRAVELFUSION  => 'TravelFusion',
             self::GDS_COCKPIT       => 'Cockpit',
             self::GDS_ONEPOINT      => 'OnePoint',
@@ -264,5 +264,17 @@ class SearchService
             Lead::TRIP_TYPE_MULTI_DESTINATION => 'openjaw'
         ];
         return $mapping[$type];
+    }
+
+    /**
+     * @param string $countryName
+     * @return string
+     */
+    public static function getRecheckBaggageText(string $countryName = ''): string
+    {
+        $str = "This unique itinerary cannot be found elsewhere.\n
+The connection in " . $countryName . " is not provided by the airlines. You will need to leave the visa-free transit zone and enter " . $countryName . " to check in for your next flight — passing through security and a visa check at immigration";
+        // The layover time is long enough for the transfer and it's protected by the " . $projectName . ' Guarantee in case of any delay.';
+        return $str;
     }
 }

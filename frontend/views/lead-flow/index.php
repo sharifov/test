@@ -58,6 +58,16 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'filter' => \common\models\Lead::STATUS_LIST,
                 'options' => ['style' => 'width:180px'],
             ],
+
+            [
+                'attribute' => 'lf_description',
+                'value' => static function (\common\models\LeadFlow $model) {
+                    return $model->lf_description ?: '-';
+                },
+                //'options' => ['style' => 'width:80px'],
+                'format' => 'text'
+            ],
+
             //'lead_id',
             [
                 //'label' => 'Lead UID',
@@ -117,16 +127,24 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 //'label' => 'Status end date',
                 'attribute' => 'lf_time_duration',
                 'value' => function(\common\models\LeadFlow $model) {
-                    return $model->lf_time_duration ?: '-';
+                    return $model->lf_time_duration ? '<span class="" title="' . Yii::$app->formatter->asDuration($model->lf_time_duration) . '">' . gmdate('H:i:s', $model->lf_time_duration) . '</span>': '-';
                 },
-                //'format' => 'raw',
+                'options' => ['style' => 'width:110px'],
+                'format' => 'raw',
 
             ],
             [
-                    'label' => 'Created by',
+                'label' => 'Created by',
                 'attribute' => 'employee_id',
-                'value' => function(\common\models\LeadFlow $model) {
-                    return $model->employee ? '<i class="fa fa-user"></i> '. Html::encode($model->employee->username) : '-';
+                'value' =>  static function(\common\models\LeadFlow $model) {
+
+                    if ($model->employee) {
+                        $roles = $model->employee->getRoles();
+                    } else {
+                        $roles = [];
+                    }
+
+                    return $model->employee ? '<i class="fa fa-user"></i> '. Html::encode($model->employee->username) . ' ('.implode(', ', $roles).')' : '-';
                 },
                 'format' => 'raw',
                 'filter' => $userList
@@ -140,21 +158,21 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'format' => 'raw',
                 'filter' => $userList
             ],
-            [
-                //'attribute' => 'username',
-                'label' => 'Owner Role',
-                'value' => function (\common\models\LeadFlow $model) {
-                    if($model->owner) {
-                        $roles = $model->owner->getRoles();
-                    } else {
-                        $roles = [];
-                    }
-                    return $roles ? implode(', ', $roles) : '-';
-                },
-                'options' => ['style' => 'width:150px'],
-                //'format' => 'raw'
-            ],
-            [
+//            [
+//                //'attribute' => 'username',
+//                'label' => 'Created by Role',
+//                'value' => function (\common\models\LeadFlow $model) {
+//                    if($model->employee) {
+//                        $roles = $model->employee->getRoles();
+//                    } else {
+//                        $roles = [];
+//                    }
+//                    return $roles ? implode(', ', $roles) : '-';
+//                },
+//                'options' => ['style' => 'width:150px'],
+//                //'format' => 'raw'
+//            ],
+            /*[
                 'label' => 'User Groups',
                 //'attribute' => 'user_group_id',
                 'value' => function (\common\models\LeadFlow $model) {
@@ -176,9 +194,18 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 },
                 'format' => 'raw',
                 //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
-            ],
+            ],*/
 
-            'lf_out_calls',
+            //'lf_description:text',
+
+            [
+                'attribute' => 'lf_out_calls',
+                'value' => function (\common\models\LeadFlow $model) {
+                    return $model->lf_out_calls ?: '-';
+                },
+                'options' => ['style' => 'width:80px'],
+                //'format' => 'raw'
+            ],
 
             //'employee_id',
             //'status',

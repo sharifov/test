@@ -181,7 +181,6 @@ class QuoteController extends FController
 
                                         if(isset($tripEntry['segments']) && is_array($tripEntry['segments'])) {
                                             foreach ($tripEntry['segments'] as $segmentEntry){
-
                                                 $segment = new QuoteSegment();
                                                 $segment->qs_departure_airport_code = $segmentEntry['departureAirportCode'];
                                                 if(isset($segmentEntry['departureAirportTerminal']) && !empty($segmentEntry['departureAirportTerminal'])){
@@ -215,6 +214,10 @@ class QuoteController extends FController
                                                 if(isset($segmentEntry['meal'])){
                                                     $segment->qs_meal = $segmentEntry['meal'];
                                                 }
+                                                if (isset($segmentEntry['recheckBaggage'])){
+                                                    $segment->qs_recheck_baggage = $segmentEntry['recheckBaggage'];
+                                                }
+
                                                 $segment->qs_stop = $segmentEntry['stop'];
                                                 $segment->qs_air_equip_type = $segmentEntry['airEquipType'];
                                                 $segment->qs_key = '#'.$segmentEntry['flightNumber'].

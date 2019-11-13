@@ -6,6 +6,9 @@ use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallUserGroup;
 use common\models\ClientPhone;
+use common\models\Conference;
+use common\models\ConferenceParticipant;
+use common\models\ConferenceRoom;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
@@ -38,6 +41,9 @@ class CommunicationController extends ApiBaseController
     public const TYPE_VOIP_GATHER       = 'voip_gather';
     public const TYPE_VOIP_CLIENT       = 'voip_client';
     public const TYPE_VOIP_FINISH       = 'voip_finish';
+    public const TYPE_VOIP_CONFERENCE   = 'voip_conference';
+    public const TYPE_VOIP_CONFERENCE_RECORD   = 'voip_conference_record';
+
 
     public const TYPE_UPDATE_EMAIL_STATUS = 'update_email_status';
     public const TYPE_UPDATE_SMS_STATUS = 'update_sms_status';
@@ -204,6 +210,12 @@ class CommunicationController extends ApiBaseController
             case self::TYPE_VOIP_CLIENT:
                 $response = $this->voiceClient($post);
                 break;
+            case self::TYPE_VOIP_CONFERENCE:
+                $response = $this->voiceConferenceCallback($post);
+                break;
+            case self::TYPE_VOIP_CONFERENCE_RECORD:
+                $response = $this->voiceConferenceRecordCallback($post);
+                break;
             case self::TYPE_VOIP_FINISH:
                 $response = $this->voiceFinish($post);
                 break;
@@ -262,6 +274,12 @@ class CommunicationController extends ApiBaseController
             }
 
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+            $conferenceRoom = ConferenceRoom::find()->where(['cr_phone_number' => $incoming_phone_number, 'cr_enabled' => true])->orderBy(['cr_id' => SORT_DESC])->limit(1)->one();
+
+            if ($conferenceRoom) {
+                return $this->startConference($conferenceRoom, $postCall);
+            }
 
             $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             if ($departmentPhone) {
@@ -510,6 +528,15 @@ class CommunicationController extends ApiBaseController
                 $upp = null;
 
                 if ($call->isOut()) {
+
+                    if (
+                        isset($callOriginalData['c_source_type_id'])
+                        && $callOriginalData['c_source_type_id']
+                        && (int)$callOriginalData['c_source_type_id'] === Call::SOURCE_REDIAL_CALL
+                    ) {
+                            $call->c_source_type_id = Call::SOURCE_REDIAL_CALL;
+                    }
+
                     if (!$call->c_client_id && $call->c_to) {
                         $clientPhone = ClientPhone::find()->where(['phone' => $call->c_to])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                         if ($clientPhone && $clientPhone->client_id) {
@@ -602,26 +629,26 @@ class CommunicationController extends ApiBaseController
 //                }
 //            }
 
-            if($call->c_lead_id && $lead = $call->cLead) {
-                if ($lead->isPending() && $lead->isCallProcessing()) {
-
-                    $delayTimeMin = $lead->getDelayPendingTime();
-                    $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+' . $delayTimeMin . ' minutes'));
-                    $lead->employee_id = null;
-                    $lead->callReady();
-
-                    if (!$lead->save()) {
-                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save');
-                    }
-                }
-
-                if ($lead->isProcessing() && !$lead->isCallDone()) {
-                    $lead->callDone();
-                    if (!$lead->save()) {
-                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save2');
-                    }
-                }
-            }
+//            if($call->c_lead_id && $lead = $call->cLead) {
+//                if ($lead->isPending() && $lead->isCallProcessing()) {
+//
+//                    $delayTimeMin = $lead->getDelayPendingTime();
+//                    $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+' . $delayTimeMin . ' minutes'));
+//                    $lead->employee_id = null;
+//                    $lead->callReady();
+//
+//                    if (!$lead->save()) {
+//                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save');
+//                    }
+//                }
+//
+//                if ($lead->isProcessing() && !$lead->isCallDone()) {
+//                    $lead->callDone();
+//                    if (!$lead->save()) {
+//                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save2');
+//                    }
+//                }
+//            }
             if(!$call->save()) {
                 Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceClient:Call:save');
             }
@@ -667,7 +694,15 @@ class CommunicationController extends ApiBaseController
                     }
                 }
 
-            } /*else {
+            }
+
+
+//            if ($call->c_source_type_id === Call::SOURCE_CONFERENCE_CALL && isset($callData['CallStatus'])) {
+//                $call->c_call_status = $callData['CallStatus'];
+//                $call->setStatusByTwilioStatus($call->c_call_status);
+//            }
+
+            /*else {
                 $call->c_call_status = $call_status;
                 $call->setStatusByTwilioStatus($call_status);
             }*/
@@ -686,8 +721,8 @@ class CommunicationController extends ApiBaseController
                 $call->c_call_duration = 1;
             }*/
 
-            if(!$call->save()) {
-                Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call2:save');
+            if (!$call->save()) {
+                Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
             }
 
         } else {
@@ -1885,4 +1920,293 @@ class CommunicationController extends ApiBaseController
         }
         return $responseData;
     }
+
+
+    /**
+     * @param ConferenceRoom $conferenceRoom
+     * @param array $postCall
+     * @return array
+     */
+    private function startConference(ConferenceRoom $conferenceRoom, array $postCall): array
+    {
+
+        // Yii::info(VarDumper::dumpAsString($postCall), 'info\API:startConference');
+
+        $vr = new VoiceResponse();
+
+        try {
+
+            $call = $this->findOrCreateCallByData($postCall);
+            $call->c_source_type_id = Call::SOURCE_CONFERENCE_CALL;
+            if (!$call->save()) {
+                Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:startConference:Call:save');
+            }
+
+            $sayParam = ['language' => 'en-US'];   // ['language' => 'en-US', 'voice' => 'alice']
+
+            if ($conferenceRoom->cr_start_dt && strtotime($conferenceRoom->cr_start_dt) > time() ) {
+                $vr->say('This conference room has not started yet', $sayParam);
+                $vr->reject(['reason' => 'busy']);
+                Yii::warning('Conference (id: ' . $conferenceRoom->cr_id . ') has not started yet', 'API:CommunicationController:startConference:start');
+                return $this->getResponseChownData($vr);
+            }
+
+            if ($conferenceRoom->cr_end_dt && strtotime($conferenceRoom->cr_end_dt) < time() ) {
+                $vr->say('This conference room has already ended', $sayParam);
+                $vr->reject(['reason' => 'busy']);
+                Yii::warning('Conference (id: ' . $conferenceRoom->cr_id . ') has already ended', 'API:CommunicationController:startConference:end');
+                return $this->getResponseChownData($vr);
+            }
+
+            $vr->pause(['length' => 3]);
+            if ($conferenceRoom->cr_welcome_message) {
+                $vr->say($conferenceRoom->cr_welcome_message, $sayParam);
+            }
+
+            if ($conferenceRoom->cr_moderator_phone_number && $conferenceRoom->cr_moderator_phone_number === $call->c_from) {
+                $vr->pause(['length' => 1]);
+                $vr->say('You are the moderator of this conference.', $sayParam);
+                $conferenceRoom->cr_param_start_conference_on_enter = true;
+                $conferenceRoom->cr_param_end_conference_on_exit = true;
+                $conferenceRoom->cr_param_muted = false;
+            } else {
+                $conferenceRoom->cr_param_start_conference_on_enter = false;
+                $conferenceRoom->cr_param_end_conference_on_exit = false;
+            }
+
+            // $vr->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
+
+            $dial = $vr->dial('');
+            $params = $conferenceRoom->getCreatedTwParams();
+
+            //$vr->pause(['length' => 3]);
+            $dial->conference($conferenceRoom->cr_key, $params);
+
+            /*$conference = new Conference();
+            $conference->cf_cr_id = $conferenceRoom->cr_id;
+            $conference->cf_options = @json_encode($conferenceRoom->attributes);
+            $conference->cf_status_id = Conference::STATUS_START;
+            if (!$conference->save()) {
+                Yii::error(VarDumper::dumpAsString($conference->errors), 'API:CommunicationController:startConference:Conference:save');
+            }*/
+
+
+        } catch (\Throwable $e) {
+
+            $vr->say('Conference Error!');
+            $vr->reject(['reason' => 'busy']);
+            return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine());
+        }
+
+        return $this->getResponseChownData($vr);
+    }
+
+
+
+    private function voiceConferenceCallback(array $post = []): array
+    {
+
+        $response = [];
+
+        // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceConferenceCallback');
+
+        //$agentId = null;
+
+        if (isset($post['conferenceData']['ConferenceSid']) && $post['conferenceData']['ConferenceSid']) {
+
+            $conferenceData = $post['conferenceData'];
+            $conferenceSid = mb_substr($conferenceData['ConferenceSid'], 0, 34);
+
+
+            $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
+
+            if (!$conference) {
+
+                $conferenceRoom = ConferenceRoom::find()->where(['cr_key' => $conferenceData['FriendlyName'], 'cr_enabled' => true])->limit(1)->one();
+
+                if ($conferenceRoom) {
+                    $conference = new Conference();
+                    $conference->cf_cr_id = $conferenceRoom->cr_id;
+                    $conference->cf_options = @json_encode($conferenceRoom->attributes);
+                    $conference->cf_status_id = Conference::STATUS_START;
+                    $conference->cf_sid = $conferenceSid;
+                    if (!$conference->save()) {
+                        Yii::error(VarDumper::dumpAsString($conference->errors),
+                            'API:CommunicationController:startConference:Conference:save');
+                    }
+                } else {
+                    Yii::warning('Not found ConferenceRoom by key: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
+                        'API:CommunicationController:startConference:conferenceData:notfound');
+                }
+            }
+
+
+            if ($conference) {
+
+                /*
+                 *  conference-end
+                    conference-start
+                    participant-leave
+                    participant-join
+                    participant-mute
+                    participant-unmute
+                    participant-hold
+                    participant-unhold
+                    participant-speech-start
+                    participant-speech-stop
+                 */
+
+
+                //$cf->cf_sid
+                if ($conferenceData['StatusCallbackEvent'] === 'conference-end') {
+                    $conference->cf_status_id = Conference::STATUS_END;
+                    if (!$conference->save()) {
+                        Yii::error(VarDumper::dumpAsString($conference->errors),
+                            'API:CommunicationController:startConference:Conference:save-end');
+                    }
+                } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-join') {
+
+                    $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+
+                    $cPart = new ConferenceParticipant();
+                    $cPart->cp_cf_id = $conference->cf_id;
+                    $cPart->cp_call_sid = $conferenceData['CallSid'];
+                    if ($call) {
+                        $cPart->cp_call_id = $call->c_id;
+                    }
+                    $cPart->cp_status_id = ConferenceParticipant::STATUS_JOIN;
+                    $cPart->cp_join_dt = date('Y-m-d H:i:s');
+                    if(!$cPart->save()) {
+                        Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-join');
+                    }
+
+                    // $conference->cf_status_id = Conference::STATUS_START;
+                } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-leave') {
+                    //$conference->cf_status_id = Conference::STATUS_START;
+
+                    //$call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+
+                    $cPart = ConferenceParticipant::find()->where(['cp_call_sid' => $conferenceData['CallSid']])->one();
+
+                    if ($cPart) {
+                        $cPart->cp_status_id = ConferenceParticipant::STATUS_LEAVE;
+                        $cPart->cp_leave_dt = date('Y-m-d H:i:s');
+                        if (!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors),
+                                'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-leave');
+                        }
+                    } else {
+                        Yii::warning('Not found ConferenceParticipant by callSid: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
+                            'API:CommunicationController:voiceConferenceCallback:conferenceData:notfound');
+                    }
+                }
+
+
+
+            }
+
+//            if(!$call->save()) {
+//                Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call2:save');
+//            }
+
+        } else {
+            //Yii::error('Not found POST[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceDefault:callData:notFound');
+            $response['error'] = 'Not found POST[conferenceData][ConferenceSid]';
+            Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceCallback:notFound');
+        }
+
+
+        return $response;
+    }
+
+    private function voiceConferenceRecordCallback(array $post = []): array
+    {
+
+        $response = [];
+
+        // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceConferenceRecordCallback');
+
+        //$agentId = null;
+
+        if (isset($post['conferenceData']['ConferenceSid']) && $post['conferenceData']['ConferenceSid']) {
+
+            $conferenceData = $post['conferenceData'];
+            $conferenceSid = mb_substr($conferenceData['ConferenceSid'], 0, 34);
+
+
+            $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
+
+
+            // $callSid = $conferenceData['CallSid'] ?? null;
+            $conferenceSid = $conferenceData['ConferenceSid'] ?? null;
+            $recordingSid = $conferenceData['RecordingSid'] ?? null;
+            $recordingUrl = $conferenceData['RecordingUrl'] ?? null;
+            $recordingDuration = $conferenceData['RecordingDuration'] ?? null;
+
+
+            if ($conference) {
+
+                if ($recordingUrl) {
+                    $conference->cf_recording_url = $recordingUrl;
+                }
+
+                if ($recordingDuration) {
+                    $conference->cf_recording_duration = $recordingDuration;
+                }
+
+                if ($recordingSid) {
+                    $conference->cf_recording_sid = $recordingSid;
+                }
+
+                $conference->cf_updated_dt = date('Y-m-d H:i:s');
+                if ($conference->save()) {
+                    $response['conference'] = $conference->attributes;
+
+                } else {
+                    Yii::error(VarDumper::dumpAsString($conference->errors), 'API:TwilioController:actionConferenceRecordingStatusCallback:Conference:update');
+                    $response['error'] = VarDumper::dumpAsString($conference->errors);
+                }
+
+
+
+            } else {
+                $response['error'] = 'Not found Conference SID: ' . $conferenceSid;
+                Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceRecordCallback:notFound');
+            }
+
+//            if(!$call->save()) {
+//                Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call2:save');
+//            }
+
+        } else {
+            //Yii::error('Not found POST[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceDefault:callData:notFound');
+            $response['error'] = 'Not found POST[conferenceData][ConferenceSid]';
+            Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceRecordCallback:notFoundData');
+        }
+
+        return $response;
+    }
+
+
+    /**
+     * @param VoiceResponse $vr
+     * @param int $status
+     * @param int $code
+     * @param string $message
+     * @return array
+     */
+    private function getResponseChownData(VoiceResponse $vr, int $status = 200, int $code = 0, string $message = ''): array
+    {
+        $response['twml'] = (string) $vr;
+        $responseData = [
+            'status' => $status,
+            'name' => ($status === 200 ? 'Success' : 'Error'),
+            'code' => $code,
+            'message' => $message,
+            'data' => ['response' => $response]
+        ];
+
+        return $responseData;
+    }
+
 }

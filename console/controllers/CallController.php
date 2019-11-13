@@ -21,15 +21,15 @@ class CallController extends Controller
     public function actionUpdateStatus()
     {
         echo $this->ansiFormat('starting console script...' . PHP_EOL, Console::FG_GREEN);
-        $dt5Min = (new \DateTime('now'))->modify('-5 minutes')->format('Y-m-d H:i:s');
-        $dt20Min = (new \DateTime('now'))->modify('-60 minutes')->format('Y-m-d H:i:s');
-        $dt1Hour= (new \DateTime('now'))->modify('-1 hour')->format('Y-m-d H:i:s');
+        $dtRinging = (new \DateTime('now'))->modify('-5 minutes')->format('Y-m-d H:i:s');
+        $dtQueue = (new \DateTime('now'))->modify('-60 minutes')->format('Y-m-d H:i:s');
+        $dtInProgress= (new \DateTime('now'))->modify('-90 minutes')->format('Y-m-d H:i:s');
 
         $items = [];
 
         $items_queued = Call::find()
             ->where(['c_status_id' => Call::STATUS_QUEUE])
-            ->andWhere(['<=', 'c_created_dt', $dt20Min])
+            ->andWhere(['<=', 'c_created_dt', $dtQueue])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();
 
@@ -41,7 +41,7 @@ class CallController extends Controller
 
         $items_ringing = Call::find()
             ->where(['c_status_id' => Call::STATUS_RINGING])
-            ->andWhere(['<=', 'c_created_dt', $dt5Min])
+            ->andWhere(['<=', 'c_created_dt', $dtRinging])
             ->andWhere(['IS NOT', 'c_parent_id', null])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();
@@ -53,7 +53,7 @@ class CallController extends Controller
 
         $items_inprogress = Call::find()
             ->where(['c_status_id' =>  Call::STATUS_IN_PROGRESS])
-            ->andWhere(['<=', 'c_created_dt', $dt1Hour])
+            ->andWhere(['<=', 'c_created_dt', $dtInProgress])
             ->andWhere(['IS NOT', 'c_parent_id', null])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();

@@ -8,7 +8,9 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
+use common\models\search\LeadSearch;
 use common\models\search\LeadTaskSearch;
+use common\models\Setting;
 use common\models\Sms;
 use common\models\Email;
 use common\models\UserParams;
@@ -270,6 +272,66 @@ class StatsController extends FController
                 'actions' => $actionList
             ]);
         }
+    }
 
+    public function actionAgentRatings()
+    {
+        $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
+        $searchLeader = new LeadSearch();
+
+        $agentsSettings = Setting::find()->where(['s_key' => 'agents_ratings'])->asArray()->one();
+        $teamsSettings = Setting::find()->where(['s_key' => 'teams_ratings'])->asArray()->one();
+        $agentsBoardsSettings = json_decode($agentsSettings['s_value'], true);
+        $teamsBoardsSettings = json_decode($teamsSettings['s_value'], true);
+
+        if(Yii::$app->request->isPost){
+           $period = Yii::$app->request->post('period');
+        } else {
+           $period = 'currentWeek';
+        }
+
+        $profitDataProvider = $searchLeader->searchTopAgents('finalProfit', $period);
+        $soldDataProvider = $searchLeader->searchTopAgents('soldLeads', $period);
+        $profitPerPaxDataProvider = $searchLeader->searchTopAgents('profitPerPax', $period);
+        $tipsDataProvider = $searchLeader->searchTopAgents('tips', $period);
+        $conversionDataProvider = $searchLeader->searchTopAgents('leadConversion', $period);
+
+        $teamsProfitDataProvider = $searchLeader->searchTopTeams('teamsProfit', $period);
+        $avgSoldLeadsDataProvider = $searchLeader->searchTopTeams('teamsSoldLeads', $period);
+        $avgProfitPerPax = $searchLeader->searchTopTeams('teamsProfitPerPax', $period);
+        $avgProfitPerAgent = $searchLeader->searchTopTeams('teamsProfitPerAgent', $period);
+        $teamConversion = $searchLeader->searchTopTeams('teamsConversion', $period);
+
+        if (Yii::$app->request->isAjax) {
+            return $this->renderPartial('agent-ratings', [
+                'profitDataProvider' => $profitDataProvider,
+                'soldDataProvider' => $soldDataProvider,
+                'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
+                'tipsDataProvider' => $tipsDataProvider,
+                'agentsBoardsSettings' => $agentsBoardsSettings,
+                'teamsBoardsSettings' => $teamsBoardsSettings,
+                'conversionDataProvider' => $conversionDataProvider,
+                'teamsProfitDataProvider' => $teamsProfitDataProvider,
+                'avgSoldLeadsDataProvider' => $avgSoldLeadsDataProvider,
+                'avgProfitPerPax' => $avgProfitPerPax,
+                'avgProfitPerAgent' => $avgProfitPerAgent,
+                'teamConversion' => $teamConversion
+            ]);
+        } else {
+            return $this->render('agent-ratings', [
+                'profitDataProvider' => $profitDataProvider,
+                'soldDataProvider' => $soldDataProvider,
+                'profitPerPaxDataProvider' => $profitPerPaxDataProvider,
+                'tipsDataProvider' => $tipsDataProvider,
+                'agentsBoardsSettings' => $agentsBoardsSettings,
+                'teamsBoardsSettings' => $teamsBoardsSettings,
+                'conversionDataProvider' => $conversionDataProvider,
+                'teamsProfitDataProvider' => $teamsProfitDataProvider,
+                'avgSoldLeadsDataProvider' => $avgSoldLeadsDataProvider,
+                'avgProfitPerPax' => $avgProfitPerPax,
+                'avgProfitPerAgent' => $avgProfitPerAgent,
+                'teamConversion' => $teamConversion
+            ]);
+        }
     }
 }

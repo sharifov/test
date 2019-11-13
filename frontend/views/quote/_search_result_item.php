@@ -23,15 +23,22 @@ $preSegment = null;
 $airportChange = false;
 $freeBaggage = false;
 $baggagePerSegment = [];
+$technicalStopCnt = 0;
+
 foreach ($result['trips'] as $trip){
     if(isset($trip['duration'])){
         $totalDuration[] = $trip['duration'];
         $totalDurationSum += $trip['duration'];
     }
     $stopCnt = count($trip['segments']) - 1;
+
+    //\yii\helpers\VarDumper::dump($result['trips'], 10, true); exit;
+
+
     foreach ($trip['segments'] as $segment){
         if(isset($segment['stop']) && $segment['stop'] > 0){
             $stopCnt += $segment['stop'];
+            $technicalStopCnt += $segment['stop'];
         }
         if($preSegment !== null && $segment['departureAirportCode'] != $preSegment['arrivalAirportCode']){
             $airportChange = true;
@@ -52,6 +59,9 @@ foreach ($result['trips'] as $trip){
     $time[] = ['departure' => $firstSegment['departureTime'],'arrival' => $lastSegment['arrivalTime']];
     $stops[] = $stopCnt;
 }
+
+
+
 if (!empty($baggagePerSegment)) {
     if (min($baggagePerSegment) == 1) {
         $bagFilter = 1;
@@ -84,6 +94,19 @@ if (!empty($baggagePerSegment)) {
             <div class="quote__seats">
                 Seats left: <strong class="text-danger"><i class="fa fa-fire"></i> <?= $result['maxSeats']?></strong>
             </div>
+
+            <?php if(isset($result['tickets']) && $result['tickets']):?>
+                <div class="quote__seats">
+                    <span class="fa fa-ticket warning"></span> Separate Ticket (<?=count($result['tickets'])?>)
+                </div>
+            <?php endif;?>
+
+            <?php if($technicalStopCnt):?>
+                <div class="quote__seats" title="Technical Stops">
+                    <span class="fa fa-warning danger"></span>Tech Stops (<?= $technicalStopCnt?>)
+                </div>
+            <?php endif;?>
+
         </div>
         <div class="quote__heading-right text-success">
             <strong class="quote__quote-price">$<?= $price?></strong>
@@ -105,14 +128,20 @@ if (!empty($baggagePerSegment)) {
                 $previousSegment = null;
                 $marketingAirlines = [];
                 $airlineNames = [];
+                $needRecheck = false;
                 foreach ($trip['segments'] as $segment){
                     if(!in_array(SearchService::getCabin($segment['cabin']), $cabins)){
                         $cabins[] = SearchService::getCabin($segment['cabin']);
                     }
+
+                    if (isset($segment['recheckBaggage']) && $segment['recheckBaggage'] == true){
+                        $needRecheck = true;
+                    }
+
                     if(isset($segment['stop']) && $segment['stop'] > 0){
                         $stopCnt += $segment['stop'];
                     }
-                    if(isset($segment['baggage']) && $hasFreeBaggage == false){
+                    if($hasFreeBaggage === false && isset($segment['baggage'])){
                         foreach ($segment['baggage'] as $baggage){
                             if(isset($baggage['allowPieces']) && $baggage['allowPieces'] > 0){
                                 $freeBaggageInfo = 'Free baggage - '.$baggage['allowPieces'].'pcs';
@@ -124,7 +153,7 @@ if (!empty($baggagePerSegment)) {
                             }
                         }
                     }
-                    if($previousSegment !== null && $segment['departureAirportCode'] != $previousSegment['arrivalAirportCode']){
+                    if($previousSegment !== null && $segment['departureAirportCode'] !== $previousSegment['arrivalAirportCode']){
                         $hasAirportChange = true;
                     }
                     if(!in_array($segment['marketingAirline'], $marketingAirlines)){
@@ -188,6 +217,24 @@ if (!empty($baggagePerSegment)) {
                   title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>" data-original-title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>">
 				<i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
 			</span>
+
+            <?php
+
+                if ($needRecheck) {
+                    $bagText = 'Bag re-check may be required'; //SearchService::getRecheckBaggageText();
+                } else {
+                    $bagText = 'Bag re-check not required';
+                }
+
+
+            ?>
+
+            <span class="quote__badge quote__badge--warning <?=$needRecheck ? '' : 'quote__badge--disabled'?>" data-toggle="tooltip"
+                  title="<?= Html::encode($bagText)?>"
+                  data-original-title="<?= Html::encode($bagText)?>">
+				<i class="fa fa-warning"></i>
+			</span>
+
             <span class="quote__badge <?php if($hasAirportChange):?>quote__badge--warning<?php else:?>quote__badge--disabled<?php endif;?>"
                   data-toggle="tooltip" title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>" data-original-title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>">
 				<i class="fa fa-exchange"></i>
@@ -248,6 +295,13 @@ if (!empty($baggagePerSegment)) {
                             <div class="trip__details trip-detailed" id="flight-leg-1">
                                 <!--Segment1-->
                                 <?php foreach ($trip['segments'] as $key => $segment):?>
+
+                                    <?php
+                                        $projectName = '';
+                                        $departCountryName =  $locations[$segment['departureAirportCode']]['city'] ?? $segment['departureAirportCode'];
+                                        $arrivalCountryName =  $locations[$segment['arrivalAirportCode']]['city'] ?? $segment['arrivalAirportCode'];
+                                    ?>
+
                                     <?php if($key > 0):?>
                                         <?php $prevSegment = $trip['segments'][$key-1];?>
                                         <div class="trip-detailed__layover">
@@ -301,6 +355,7 @@ if (!empty($baggagePerSegment)) {
                                                     <?php break; endforeach;?>
                                             <?php endif;?>
                                             <?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
+                                            <?php if ($segment['recheckBaggage']):?> <h5 class="danger" title="<?=\yii\helpers\Html::encode(SearchService::getRecheckBaggageText($departCountryName))?>"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
                                             <?php if(isset($segment['stop']) && $segment['stop'] > 0):?>
 
                                                 <h5 class="danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment['stop']])?></h5>
@@ -344,9 +399,9 @@ if (!empty($baggagePerSegment)) {
 
 
         <div class="quote__footer-left">
-            <?php if(isset($result['tickets']) && $result['tickets']):?>
-                <span class="fa fa-warning warning"></span> Separate Ticket (<?=count($result['tickets'])?>)
-            <?php endif;?>
+<!--            --><?php //if(isset($result['tickets']) && $result['tickets']):?>
+<!--                <span class="fa fa-warning warning"></span> Separate Ticket (--><?//=count($result['tickets'])?><!--)-->
+<!--            --><?php //endif;?>
         </div>
         <div class="quote__footer-right">
             <?= Html::button('<i class="fa fa-eye"></i>&nbsp; <span>Details</span>', [

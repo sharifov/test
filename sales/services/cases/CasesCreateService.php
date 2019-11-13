@@ -4,6 +4,7 @@ namespace sales\services\cases;
 
 use sales\entities\cases\Cases;
 use sales\forms\cases\CasesCreateByWebForm;
+use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientManageService;
@@ -44,13 +45,17 @@ class CasesCreateService
     /**
      * @param CasesCreateByWebForm $form
      * @return Cases
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function createByWeb(CasesCreateByWebForm $form): Cases
     {
         $case = $this->transaction->wrap(function () use ($form) {
 
-            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->clientPhone])]);
+            $client = $this->clientManageService->getOrCreate(
+                [new PhoneCreateForm(['phone' => $form->clientPhone])],
+                [new EmailCreateForm(['email' => $form->clientEmail])]
+            );
+
             $case = Cases::createByWeb(
                 $form->projectId,
                 $form->category,
@@ -60,6 +65,7 @@ class CasesCreateService
                 $form->description
             );
             $this->casesRepository->save($case);
+
             return $case;
 
         });

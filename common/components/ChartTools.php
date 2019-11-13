@@ -77,4 +77,40 @@ class ChartTools
         }
         return $weeksRanges;
     }
+
+    public static function getWeek($periodName){
+        $week = [];
+        $startWeek = strtotime("last monday -12", strtotime($periodName));
+        $endWeek = strtotime("next sunday midnight -36", $startWeek);
+        $week['start'] = $startWeek;
+        $week['end'] = $endWeek;
+
+        return $week;
+    }
+
+    public static function getCurrentMonth(){
+        $month = [];
+        $month['start'] = strtotime('first day of this month noon');
+        $month['end'] = strtotime('last day of this month noon -24');
+        return $month;
+    }
+
+    /* $start_week = strtotime("last monday noon", strtotime("today"));
+        $end_week = strtotime("next sunday", strtotime("today"));
+        $start = date("Y-m-d H:i",$start_week);
+        $end = date("Y-m-d",$end_week);
+        $currentWeek = $start.' to '.$end;
+
+
+        $previous_week = strtotime("-1 week");
+        $start_week = strtotime("last monday noon",$previous_week);
+        $end_week = strtotime("next sunday",$start_week);
+        $start_week = date("Y-m-d H:i",$start_week);
+        $end_week = date("Y-m-d",$end_week);
+        $lastWeek =  $start_week.' to '.$end_week ;
+
+        $currentMonthStart = date('Y-m-01');
+        $currentMonthEnd  = date('Y-m-t');
+        $currentMonth = $currentMonthStart.' to '.$currentMonthEnd ;
+     */
 }

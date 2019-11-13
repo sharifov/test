@@ -16,6 +16,7 @@
  * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  */
 
+use sales\formatters\client\ClientTimeFormatter;
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 
@@ -66,11 +67,12 @@ $lead = $leadForm->getLead();
                     <?php endif; ?>
                     <div class="page-header__general-item">
                         <strong>Client:</strong>
-                        <?= $leadForm->getLead()->getClientTime2(); ?>
+                        <?= ClientTimeFormatter::format($leadForm->getLead()->getClientTime2(), $leadForm->getLead()->offset_gmt); ?>
                     </div>
                     <div class="page-header__general-item">
                         <strong>UID:</strong>
-                        <span><?= Html::a($leadForm->getLead()->uid, '#', ['id' => 'view-flow-transition']) ?></span>
+                        <span><?=Html::encode($leadForm->getLead()->uid)?></span>
+                            <?//= Html::a($leadForm->getLead()->uid, '#', ['id' => 'view-flow-transition']) ?>
                     </div>
 
                     <div class="page-header__general-item">
@@ -102,21 +104,51 @@ $lead = $leadForm->getLead();
             <br>
         </div>
 
-        <div class="col-md-7">
-
+        <div class="col-md-6">
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
-                <?= $this->render('partial/_flightDetails', [
-                    'itineraryForm' => $itineraryForm,
-                    'leadForm' => $leadForm
-                ]) ?>
+            <?= $this->render('partial/_flightDetails', [
+                'itineraryForm' => $itineraryForm,
+                'leadForm' => $leadForm
+            ]) ?>
             <?php \yii\widgets\Pjax::end()?>
+        </div>
+        <div class="col-md-6">
+            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$leadForm->getLead()->isOwner(Yii::$app->user->id, false)):?>
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Warning!</h4>
+                    <p>Client information is not available in VIEW MODE, please take lead!</p>
+                </div>
+
+            <?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->isFollowUp() || ($leadForm->getLead()->isPending() && !$leadForm->getLead()->isNewRecord) ) && !$leadForm->getLead()->isOwner(Yii::$app->user->id, false)):?>
+
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Warning!</h4>
+                    <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
+                </div>
+
+            <?php else: ?>
+
+                <?= $this->render('client-info/client_info', [
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'is_manager' => $is_manager,
+                ]) ?>
+
+            <?php endif;?>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <div class="col-md-6">
+
+
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
                 <div class="row">
                     <div class="col-md-12">
                         <?php if(!$leadForm->getLead()->l_answered): ?>
 
-                            <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_PROCESSING):?>
+                            <?php if($leadForm->getLead()->isProcessing()):?>
                                 <?= Html::a(($leadForm->getLead()->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $leadForm->getLead()->id, 'act' => 'answer'], [
                                     'class' => 'btn '.($leadForm->getLead()->l_answered ? 'btn-success' : 'btn-info'),
                                     'data-pjax' => false,
@@ -142,13 +174,35 @@ $lead = $leadForm->getLead();
 
 
 
-			<?php if (!$leadForm->getLead()->isNewRecord):?>
+
+        	<?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $leadForm->getLead()->employee_id !== Yii::$app->user->id):?>
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Warning!</h4>
+                    <p>Lead Preferences is not available in VIEW MODE, please take lead!</p>
+                </div>
+			<?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->isFollowUp() || ($leadForm->getLead()->isPending() && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id !== Yii::$app->user->id):?>
+
+                <div class="alert alert-warning" role="alert">
+                    <h4 class="alert-heading">Warning!</h4>
+                    <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
+                </div>
+            <?php else: ?>
+                <div id="lead-preferences">
+                    <?= $this->render('partial/_lead_preferences', [
+                        'lead' => $lead,
+                        'leadForm' => $leadForm
+                    ]) ?>
+                </div>
+            <?php endif; ?>
+
+
+            <?php if (!$leadForm->getLead()->isNewRecord):?>
 
                 <?= $this->render('quotes/quote_list', [
-                        'dataProvider' => $quotesProvider,
-                        'lead' => $lead,
-                        'leadForm' => $leadForm,
-                        'is_manager' => $is_manager,
+                    'dataProvider' => $quotesProvider,
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'is_manager' => $is_manager,
                 ]); ?>
 
             <?php endif;?>
@@ -167,7 +221,7 @@ $lead = $leadForm->getLead();
                     'lead' => $leadForm->getLead(),
                     'dataProviderNotes'  => $dataProviderNotes,
                     'modelNote'  => $modelNote,
-                ]); ?>
+                ]) ?>
 
                 <?/*= $this->render('partial/_leadLog', [
                     'logs' => $leadForm->getLead()->leadLogs
@@ -178,7 +232,7 @@ $lead = $leadForm->getLead();
         </div>
 
 
-        <div class="col-md-5">
+        <div class="col-md-6">
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
                 <?= $this->render('checklist/lead_checklist', [
@@ -228,43 +282,13 @@ $lead = $leadForm->getLead();
 
             <?php endif;?>
         </div>
+
+        <div class="clearfix"></div>
+        <br/>
+        <br/>
+
     </div>
 
-	<aside class="sidebar right-sidebar sl-right-sidebar">
-    	 <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()):?>
-			<div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">Warning!</h4>
-                <p>Client information is not available in VIEW MODE, please take lead!</p>
-            </div>
-
-    	 <?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP || ($leadForm->getLead()->status == \common\models\Lead::STATUS_PENDING && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id != Yii::$app->user->id):?>
-
-            <div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">Warning!</h4>
-                <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
-            </div>
-
-        <?php else: ?>
-            <?= $this->render('partial/_client', [
-                'leadForm' => $leadForm
-            ]);
-            ?>
-        <?php endif; ?>
-        <?= $this->render('partial/_preferences', [
-            'leadForm' => $leadForm
-        ]);
-        ?>
-        <?php
-        if (Yii::$app->user->can('updateLead', ['leadId' => $itineraryForm->leadId])) : ?>
-            <div class="text-center">
-                <?= Html::submitButton('<span class="fa fa-check"></span> Save', [
-                    'id' => 'submit-lead-form-btn',
-                    'class' => 'btn btn-success'
-                ]) ?>
-            </div>
-        <?php endif; ?>
-
-    </aside>
 
 </div>
 
@@ -278,7 +302,7 @@ if (!$leadForm->getLead()->isNewRecord) {
 
     $js = <<<JS
 
-    $('#view-flow-transition').click(function() {
+    $('#view-flow-transition').on('click', function() {
         $('#preloader').removeClass('hidden');
         var editBlock = $('#get-request-flow-transition');
         editBlock.find('.modal-body').html('');
@@ -315,3 +339,23 @@ JS;
 
     $this->registerJs($js);
 }
+
+$jsCode = <<<JS
+
+    $(document).on('click', '.showModalButton', function(){
+        var id = $(this).data('modal_id');
+        var url = $(this).data('content-url');
+
+        $('#modal-' + id).find('.modal-header').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        
+        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+
+        $.post(url, function(data) {
+            $('#modal-' + id).find('.modal-body').html(data);
+        });
+       return false;
+    });
+    
+JS;
+
+$this->registerJs($jsCode);

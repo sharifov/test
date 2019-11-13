@@ -98,7 +98,7 @@ use yii\helpers\Html;
                                             foreach ($emails as $k => $email) {
                                                 $data[] = '<i class="fa fa-envelope"></i> 
                                                            <code class="' . $email::getEmailTypeTextDecoration($email->type) . '"
-                                                                 title="' . $email::getEmailType($email->type) . '">'.Html::encode($email->email) . '</code> ' . $email::getPhoneTypeLabel($email->type);
+                                                                 title="' . $email::getEmailType($email->type) . '">'.Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type);
                                             }
                                         }
 

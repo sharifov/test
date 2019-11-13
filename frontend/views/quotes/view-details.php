@@ -24,14 +24,18 @@ use yii\helpers\Html;
                         <div class="trip__details trip-detailed" id="flight-leg-1">
                             <!--Segment1-->
                             <?php foreach ($segments as $key => $segment):?>
-                                <?php if($key > 0):?>
+                                <?php if($key > 0):
+
+                                    //$ticketBgColor = $segment->qs_ticket_id;
+
+                                    ?>
                                     <?php $prevSegment = $segments[$key-1];?>
                                     <div class="trip-detailed__layover">
                                         <span class="trip-detailed__layover-location">Layover in <?= (!$segment->departureAirport)?:$segment->departureAirport->city;?> (<?= $segment->qs_departure_airport_code?>)</span>
                                         <span class="trip-detailed__layover-duration"><?= SearchService::getLayoverDuration($prevSegment->qs_arrival_time,$segment->qs_departure_time)?></span>
                                     </div>
                                 <?php endif;?>
-                                <div class="trip-detailed__segment segment">
+                                <div class="trip-detailed__segment segment" style="background-color: <?=$segment->getTicketColor()?>">
                                     <div class="segment__wrapper">
                                         <div class="segment__options">
                                             <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $segment->qs_marketing_airline?>.png" alt="<?= $segment->qs_marketing_airline?>" class="segment__airline-logo">
@@ -90,7 +94,7 @@ use yii\helpers\Html;
                                             <?php endforeach;?>
                                         <?php endif;?>
                                         <?php if(isset($segment->qs_meal)):?><span class="badge badge-light" title="<?= $segment->qs_meal?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
-
+                                        <?php if ($segment->qs_recheck_baggage == true && $segment->qs_recheck_baggage !== null):?> <h5 class="danger"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
                                         <?php if(isset($segment->qs_stop) && $segment->qs_stop > 0):?>
 
                                             <h5 class="danger">

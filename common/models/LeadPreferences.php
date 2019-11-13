@@ -45,6 +45,18 @@ class LeadPreferences extends \yii\db\ActiveRecord implements AggregateRoot
         return $preferences;
     }
 
+	/**
+	 * @param int $marketPrice
+	 * @param int $clientBudget
+	 * @param int $numberStops
+	 */
+    public function edit($marketPrice, $clientBudget, $numberStops)
+	{
+		$this->market_price = $marketPrice;
+		$this->clients_budget = $clientBudget;
+		$this->number_stops = $numberStops;
+	}
+
     /**
      * {@inheritdoc}
      */
@@ -52,6 +64,8 @@ class LeadPreferences extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['lead_id', 'number_stops'], 'integer'],
+			[['lead_id', 'numberStops'], 'filter', 'filter' => 'intval'],
+			[['marketPrice', 'clientsBudget'], 'filter', 'filter' => 'floatval'],
             [['notes'], 'string'],
             [['clients_budget', 'market_price'], 'number'],
             [['pref_language', 'pref_currency', 'pref_airline'], 'string', 'max' => 255],
@@ -87,9 +101,9 @@ class LeadPreferences extends \yii\db\ActiveRecord implements AggregateRoot
 
     public function beforeValidate()
     {
-        $this->clients_budget = floatval($this->clients_budget);
-        $this->market_price = floatval($this->market_price);
-        $this->number_stops = intval($this->number_stops);
+        $this->clients_budget = (float)$this->clients_budget;
+        $this->market_price = (float)$this->market_price;
+        $this->number_stops = (int)$this->number_stops;
 
         return parent::beforeValidate();
     }

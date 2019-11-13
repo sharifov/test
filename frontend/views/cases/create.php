@@ -58,6 +58,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]) ?>
                 <div class="phone-notify"></div>
 
+                <?= $form->field($model, 'clientEmail')->textInput(['maxlength' => true]) ?>
+
                 <?= $form->field($model, 'subject')->textInput(['maxlength' => true]) ?>
 
                 <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
