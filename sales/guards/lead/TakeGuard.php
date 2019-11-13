@@ -30,4 +30,14 @@ class TakeGuard
             throw new \DomainException('Access is denied (limit)');
         }
     }
+
+    /**
+     * @param Employee $user
+     */
+    public function shiftTimeGuard(Employee $user): void
+    {
+        if (!$user->checkShiftTime()) {
+            throw new \DomainException('New leads are only available on your shift.');
+        }
+    }
 }

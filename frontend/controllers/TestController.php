@@ -126,6 +126,8 @@ class TestController extends FController
     public function actionTest()
     {
 
+        $user = Employee::findOne(295);
+        VarDumper::dump($user->checkShiftTime());
 
         die;
         return $this->render('blank');
