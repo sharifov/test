@@ -525,8 +525,12 @@ class Lead extends ActiveRecord
         $lead->gid = self::generateGid();
         $lead->scenario = self::SCENARIO_API;
         $lead->l_type_create = self::TYPE_CREATE_API;
-        $lead->recordEvent(new LeadCreatedByApiEvent($lead));
         return $lead;
+    }
+
+    public function eventLeadCreatedByApiEvent(): void
+    {
+        $this->recordEvent(new LeadCreatedByApiEvent($this, $this->status));
     }
 
     /**
