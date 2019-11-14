@@ -17,6 +17,7 @@ use yii\console\Controller;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\helpers\VarDumper;
 
 /**
  * Class LoggerController
@@ -53,18 +54,18 @@ class LoggerController extends Controller
 
 	public function actionFormatLogManagedAttr(): void
 	{
-		$logs = GlobalLog::find()->where(['gl_formatted_attr' => null])->limit(16000)->all();
+		$logs = GlobalLog::find()->where(['gl_formatted_attr' => null])->limit(1000)->all();
 
 		foreach ($logs as $log) {
 			$log->gl_formatted_attr = $this->globalLogFormatAttrService->formatAttr($log->gl_model, $log->gl_old_attr, $log->gl_new_attr);
 
 			if (!empty($log->gl_formatted_attr)) {
 				if (!$log->save()) {
-					\Yii::error('Error while saving log: ' . $this->getParsedErrors($log->getErrors()), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
+					\Yii::error('Error: ' . VarDumper::dumpAsString($log->errors), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
 				}
-			} else if (!$log->delete()) {
+			} /*else if (!$log->delete()) {
 				\Yii::error('Error while deleting log: ' . $this->getParsedErrors($log->getErrors()), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
-			}
+			}*/
 		}
 	}
 }
