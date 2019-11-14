@@ -91,7 +91,14 @@ class ClientManageService
     public function updatePhone(PhoneCreateForm $form): void
 	{
 		$phone = $this->clientPhoneRepository->find($form->id);
-		$phone->edit($form->phone, $form->type);
+//		$phone->edit($form->phone, $form->type);
+		if ($form->phone !== null) {
+			$phone->phone = $form->phone;
+		}
+
+		if ($form->type !== null) {
+			$phone->type = $form->type;
+		}
 		$this->clientPhoneRepository->save($phone);
 	}
 
@@ -131,7 +138,15 @@ class ClientManageService
 	public function updateEmail(EmailCreateForm $form): void
 	{
 		$email = $this->clientEmailRepository->find($form->id);
-		$email->edit($form->email, $form->type);
+		// $email->editEmail($form->email), $form->type);
+		if ($form->email !== null) {
+			$email->email = $form->email;
+		}
+
+		if ($form->type !== null) {
+			$email->type = $form->type;
+		}
+
 		$this->clientEmailRepository->save($email);
 	}
 

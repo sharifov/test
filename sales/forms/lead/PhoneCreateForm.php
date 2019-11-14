@@ -55,19 +55,18 @@ class PhoneCreateForm extends Model
     public function rules(): array
     {
         return [
-//            ['phone', 'required'],
             ['phone', 'validateRequired', 'skipOnEmpty' => false],
-            ['phone', 'string', 'max' => 100],
+			['phone', 'default', 'value' => null],
+			['phone', 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],
             ['phone', 'filter', 'filter' => static function($value) {
-                return str_replace(['-', ' '], '', trim($value));
+				return $value === null ? null : str_replace(['-', ' '], '', trim($value));
             }],
 			['phone', 'checkForExistence'],
 			[['type', 'client_id', 'id'], 'integer'],
 			['type', 'checkTypeForExistence'],
 			[['phone', 'client_id'], 'unique', 'targetClass' => ClientPhone::class,  'targetAttribute' => ['phone', 'client_id'], 'message' => 'Client already has this phone number', 'except' => 'update'],
 			['phone', 'checkUniqueClientPhone', 'on' => 'update'],
-
             ['comments', 'string']
 		];
     }

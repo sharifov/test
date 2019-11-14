@@ -143,10 +143,3 @@ div#call-controls input {
   max-width: 200px;
   padding: 5px;
 }
-
-.yellow {
-    color: #e3c300;
-}
-.text-line-through {
-    text-decoration: line-through;
-}
