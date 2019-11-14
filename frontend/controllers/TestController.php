@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
+use common\models\Client;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
@@ -33,6 +34,7 @@ use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\guards\ClientPhoneGuard;
 use sales\helpers\user\UserFinder;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
@@ -126,8 +128,22 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $user = Employee::findOne(295);
-        VarDumper::dump($user->checkShiftTime());
+
+        $phones = [
+            new PhoneCreateForm(['phone' => '+111']),
+            new PhoneCreateForm(['phone' => '+222']),
+            new PhoneCreateForm(['phone' => '+333']),
+        ];
+
+        $emails = [
+            new EmailCreateForm(['email' => '1111@1.1']),
+            new EmailCreateForm(['email' => '2222@2.2']),
+            new EmailCreateForm(['email' => '3333@3.3']),
+        ];
+
+        $client = $this->clientManageService->getOrCreate($phones, $emails);
+        VarDumper::dump($client);
+
 
         die;
         return $this->render('blank');

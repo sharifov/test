@@ -18,6 +18,7 @@ use sales\repositories\client\ClientRepository;
  * @property ClientRepository $clientRepository
  * @property ClientPhoneRepository $clientPhoneRepository
  * @property ClientEmailRepository $clientEmailRepository
+ * @property InternalPhoneGuard $internalPhoneGuard
  */
 class ClientManageService
 {
@@ -25,18 +26,26 @@ class ClientManageService
     private $clientRepository;
     private $clientPhoneRepository;
     private $clientEmailRepository;
+    private $internalPhoneGuard;
 
     /**
      * ClientManageService constructor.
      * @param ClientRepository $clientRepository
      * @param ClientPhoneRepository $clientPhoneRepository
      * @param ClientEmailRepository $clientEmailRepository
+     * @param InternalPhoneGuard $internalPhoneGuard
      */
-    public function __construct(ClientRepository $clientRepository, ClientPhoneRepository $clientPhoneRepository, ClientEmailRepository $clientEmailRepository)
+    public function __construct(
+        ClientRepository $clientRepository,
+        ClientPhoneRepository $clientPhoneRepository,
+        ClientEmailRepository $clientEmailRepository,
+        InternalPhoneGuard $internalPhoneGuard
+    )
     {
         $this->clientRepository = $clientRepository;
         $this->clientPhoneRepository = $clientPhoneRepository;
         $this->clientEmailRepository = $clientEmailRepository;
+        $this->internalPhoneGuard = $internalPhoneGuard;
     }
 
     /**
@@ -74,6 +83,9 @@ class ClientManageService
         if (!$phoneForm->phone) {
             return;
         }
+
+        $this->internalPhoneGuard->guard($phoneForm->phone);
+
         if (!$this->clientPhoneRepository->exists($client->id, $phoneForm->phone)) {
             $phone = ClientPhone::create(
                 $phoneForm->phone,
@@ -235,6 +247,8 @@ class ClientManageService
     {
         try {
             $client = $this->getOrCreateByPhones($phones, $clientForm);
+        } catch (InternalPhoneException $e) {
+            throw $e;
         } catch (\DomainException $e) {
             $client = $this->getOrCreateByEmails($emails, $clientForm);
         }
