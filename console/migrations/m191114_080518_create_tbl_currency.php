@@ -28,43 +28,24 @@ class m191114_080518_create_tbl_currency extends Migration
 
 
         $this->createTable('{{%currency}}',	[
-            'cp_id'                 => $this->primaryKey(),
-            'cp_cf_id'              => $this->integer()->notNull(),
-            'cp_call_sid'           => $this->string(34)->unique(),
-            'cp_call_id'            => $this->integer(),
-            'cp_status_id'          => $this->smallInteger(),
-            'cp_join_dt'            => $this->dateTime(),
-            'cp_leave_dt'           => $this->dateTime(),
+            'cur_code'           => $this->string(3)->notNull()->unique(),
+            'cur_name'           => $this->string(34)->unique(),
+            'cur_symbol'         => $this->string(3),
+            'cur_rate'           => $this->float(),
+            'cur_enabled'        => $this->boolean()->defaultValue(true),
+            'cur_default'        => $this->boolean()->defaultValue(false),
+            'cur_created_dt'     => $this->dateTime(),
+            'cur_updated_dt'     => $this->dateTime(),
         ], $tableOptions);
 
-        $this->addForeignKey('FK-conference_participant_cp_cf_id', '{{%conference_participant}}', ['cp_cf_id'], '{{%conference}}', ['cf_id'], 'CASCADE', 'CASCADE');
-        $this->addForeignKey('FK-conference_participant_cp_call_id', '{{%conference_participant}}', ['cp_call_id'], '{{%call}}', ['c_id'], 'CASCADE', 'CASCADE');
+        $this->addPrimaryKey('PK-currency-cur_code', '{{%currency}}', ['cur_code']);
+        (new \console\migrations\RbacMigrationService())->up($this->routes, $this->roles);
 
-        $this->createIndex('IND-conference_participant_cp_call_sid', '{{%conference_participant}}', ['cp_call_sid']);
-
-
-        $auth = Yii::$app->authManager;
-
-        foreach ($this->routes as $route) {
-
-            $permission = $auth->getPermission($route);
-            if(!$permission) {
-                $permission = $auth->createPermission($route);
-                $auth->add($permission);
-            }
-
-            foreach ($this->roles as $role) {
-                if (!$auth->hasChild($auth->getRole($role), $permission)) {
-                    $auth->addChild($auth->getRole($role), $permission);
-                }
-            }
-        }
-
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%currency}}');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -73,22 +54,11 @@ class m191114_080518_create_tbl_currency extends Migration
     public function safeDown()
     {
 
-        $this->dropTable('{{%conference_participant}}');
+        $this->dropTable('{{%currency}}');
 
+        (new \console\migrations\RbacMigrationService())->down($this->routes, $this->roles);
 
-        $auth = Yii::$app->authManager;
-
-        foreach ($this->routes as $route) {
-            foreach ($this->roles as $role) {
-                if ($permission = $auth->getPermission($route)) {
-                    //$auth->remove($permission);
-                    if ($auth->hasChild($auth->getRole($role), $permission)) {
-                        $auth->removeChild($auth->getRole($role), $permission);
-                    }
-                }
-            }
-        }
-
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%currency}}');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
