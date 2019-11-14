@@ -122,6 +122,7 @@ use yii\helpers\Url;
 
                 return $str;
             },
+            'visible' => !$user->isAgent(),
         ],
         [
             'label' => 'Depart',
