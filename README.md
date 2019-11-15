@@ -308,6 +308,7 @@ CRONs
 20   0  *  *  *     php /var/www/sale/yii db/clear-user-site-activity-logs
 */5 * * * *         php /var/www/sale/yii logger/format-log-managed-attr
 */5 * * * *         php /var/www/sale/yii lead/return-lead-to-ready
+10   1-3  *  *  *     php /var/www/sale/yii service/update-currency
 ```
 
 ```
