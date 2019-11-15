@@ -56,6 +56,14 @@ return [
             'username' => 'sales',
             'password' => '',
         ],
+
+        'currency' => [
+            'class' => \common\components\CurrencyService::class,
+            'url' => 'https://airsearch.api.travelinsides.com/v1/',
+            'username' => 'crm',
+            'password' => '',
+        ],
+
         'queue_email_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
             'host' => 'localhost',
