@@ -15,7 +15,7 @@ use common\models\UserParams;
 use common\models\UserProfile;
 use frontend\models\UserMultipleForm;
 use Yii;
-use yii\bootstrap\Html;
+use yii\bootstrap4\Html;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;

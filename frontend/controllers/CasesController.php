@@ -1269,7 +1269,7 @@ class CasesController extends FController
 				}
 
 				if (!empty($error)) {
-					$out['errorHtml'] =  \yii\bootstrap\Alert::widget([
+					$out['errorHtml'] =  \yii\bootstrap4\Alert::widget([
 						'options' => [
 							'class' => 'alert-danger'
 						],

@@ -12,7 +12,7 @@ return [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
-    'layout' => '@frontend/themes/gentelella/views/layouts/main.php',
+    'layout' => '@frontend/themes/gentelella_v2/views/layouts/main.php',
     'components' => [
         'request' => [
             'baseUrl' => '',
