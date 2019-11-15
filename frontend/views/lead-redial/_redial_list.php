@@ -21,9 +21,9 @@ use yii\helpers\Url;
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'rowOptions' => static function (LeadQcallSearch $model, $index, $widget, $grid) {
-        if (!$model->deadline) {
-            return ['class' => 'danger'];
-        }
+//        if (!$model->deadline) {
+//            return ['class' => 'danger'];
+//        }
         if ($model->l_is_test) {
         	return ['class' => 'info'];
 		}
@@ -267,6 +267,7 @@ use yii\helpers\Url;
                 }
                 return floor((strtotime($model->lqc_dt_to) - time()) / 60);
             },
+            'visible' => !$user->isAgent(),
         ],
 		[
 			'label' => 'Is Test',

@@ -45,6 +45,7 @@ $user = Yii::$app->user->identity;
                             return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($lead->created));
                         },
                         'format' => 'raw',
+                        'visible' => !$user->isAgent(),
                     ],
                     [
                         'label' => 'Pending Time',
@@ -60,6 +61,7 @@ $user = Yii::$app->user->identity;
                             'style' => 'width:180px'
                         ],
                         'format' => 'raw',
+                        'visible' => !$user->isAgent(),
                     ],
 
                 ],
@@ -107,6 +109,7 @@ $user = Yii::$app->user->identity;
                         'value' => static function (Lead $lead) {
                             return ClientTimeFormatter::dayHoursFormat($lead->getClientTime2(), $lead->offset_gmt);
                         },
+                        'visible' => !$user->isAgent(),
                     ],
                 ],
             ]) ?>

@@ -142,8 +142,11 @@ class ClientController extends FController
 
         $providers = [];
 
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
 //        if (Yii::$app->user->can('leadSection')) {
-            $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id, Yii::$app->user->id);
+            $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id, $user);
 //        }
 //        if (Yii::$app->user->can('caseSection')) {
             $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id, Yii::$app->user->id);
@@ -183,15 +186,15 @@ class ClientController extends FController
 
     /**
      * @param int $clientId
-     * @param int $userId
+     * @param Employee $user
      * @return ActiveDataProvider
      * @throws \ReflectionException
      */
-    private function getLeadsDataProvider(int $clientId, int $userId): ActiveDataProvider
+    private function getLeadsDataProvider(int $clientId, Employee $user): ActiveDataProvider
     {
         $params[LeadSearchByClient::getShortName()]['clientId'] = $clientId;
 
-        $dataProvider = (new LeadSearchByClient())->search($params, $userId);
+        $dataProvider = (new LeadSearchByClient())->search($params, $user);
 
         $dataProvider->query->orderBy(['l_last_action_dt' => SORT_DESC]);
 
