@@ -234,6 +234,7 @@ class Lead extends ActiveRecord
     public const CALL_STATUS_DONE       = 4;
     public const CALL_STATUS_QUEUE      = 5;
     public const CALL_STATUS_PREPARE    = 6;
+    public const CALL_STATUS_BUGGED    = 7;
 
     public const CALL_STATUS_LIST = [
         self::CALL_STATUS_NONE      => 'None',
@@ -243,6 +244,7 @@ class Lead extends ActiveRecord
         self::CALL_STATUS_DONE      => 'Done',
         self::CALL_STATUS_QUEUE     => 'Queue',
         self::CALL_STATUS_PREPARE   => 'Prepare',
+        self::CALL_STATUS_BUGGED   => 'Bugged',
     ];
 
     public const TYPE_CREATE_MANUALLY = 1;
@@ -1165,14 +1167,24 @@ class Lead extends ActiveRecord
         }
     }
 
-    public function callPrepare()
+    public function callPrepare(): void
     {
         $this->setCallStatus(self::CALL_STATUS_PREPARE);
     }
 
-    public function isCallPrepare()
+    public function isCallPrepare(): bool
     {
         return $this->l_call_status_id === self::CALL_STATUS_PREPARE;
+    }
+
+    public function callBugged(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_BUGGED);
+    }
+
+    public function isCallBugged(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_BUGGED;
     }
 
     public function callProcessing(): void

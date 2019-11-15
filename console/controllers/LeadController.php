@@ -2,10 +2,14 @@
 
 namespace console\controllers;
 
+use common\models\Call;
 use common\models\Lead;
+use common\models\LeadFlow;
+use common\models\LeadQcall;
 use common\models\Task;
 use sales\repositories\lead\LeadRepository;
 use yii\console\Controller;
+use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use Yii;
@@ -44,7 +48,7 @@ class LeadController extends Controller
                 /** @var Lead $lead */
                 $lead->callReady();
                 $this->leadRepository->save($lead);
-                $report[$lead->id] = 'Lead: ' . $lead->id . ' updated';
+                $report[$lead->id] = 'Lead: ' . $lead->id . ' -> callReady';
             } catch (\Throwable $e) {
                 $report[] = 'Lead: ' . $lead->id . ' not updated';
                 Yii::error($e, 'Lead:ReturnToCallReadyStatus');
@@ -54,11 +58,68 @@ class LeadController extends Controller
             echo $item . PHP_EOL;
         }
 
-        $message = '0 leads returned';
+        $message = '0 leads returned to call ready';
         if (count($report) > 0) {
-            $message = count($report) .' leads returned. [' . implode(', ', array_keys($report)) . ']';
+            $message = count($report) .' leads returned to call ready. [' . implode(', ', array_keys($report)) . ']';
         }
-        Yii::info($message, 'info\CronReturnLeadToReady');
+
+        Yii::info($message, 'info\CronReturnLead');
+
+        //**********
+
+        $report = [];
+
+        foreach ($this->getBuggedLeads() as $lead) {
+            try {
+                /** @var Lead $lead */
+                $lead->callBugged();
+                $this->leadRepository->save($lead);
+                $report[$lead->id] = 'Lead: ' . $lead->id . ' -> callBugged';
+            } catch (\Throwable $e) {
+                $report[] = 'Lead: ' . $lead->id . ' not updated';
+                Yii::error($e, 'Lead:ReturnToCallBuggedStatus');
+            }
+        }
+
+        foreach ($report as $item) {
+            echo $item . PHP_EOL;
+        }
+
+        $message = '0 leads returned to call bugged';
+        if (count($report) > 0) {
+            $message = count($report) .' leads returned to call bugged. [' . implode(', ', array_keys($report)) . ']';
+        }
+
+        Yii::info($message, 'info\CronReturnLead');
+    }
+
+    /**
+     * @return array Leads
+     */
+    private function getBuggedLeads(): array
+    {
+        $countRedialCalls = (int)Yii::$app->params['settings']['redial_calls_bugged'];
+        $leads = Lead::find()->select('*')
+            ->addSelect(['last_lead_flow_count' =>
+                (new Query())->select(['lf_out_calls'])
+                    ->from(LeadFlow::tableName())
+                    ->andWhere(LeadFlow::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
+                    ->orderBy([LeadFlow::tableName() . '.created' => SORT_DESC])
+                    ->limit(1)
+            ])
+            ->addSelect(['count_redial_calls' =>
+                (new Query())->select('count(*)')
+                    ->from(Call::tableName())
+                    ->andWhere(['c_source_type_id' => Call::SOURCE_REDIAL_CALL])
+                    ->andWhere(Call::tableName() . '.c_lead_id = ' . Lead::tableName() . '.id')
+            ])
+            ->innerJoin(LeadQcall::tableName(), Lead::tableName() . '.id = ' . LeadQcall::tableName() . '.lqc_lead_id')
+            ->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_BUGGED])
+            ->andHaving(['last_lead_flow_count' => 0])
+            ->andHaving(['>', 'count_redial_calls', $countRedialCalls])
+//            ->createCommand()->getRawSql();
+            ->all();
+        return $leads;
     }
 
     /**

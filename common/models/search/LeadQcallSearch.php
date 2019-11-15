@@ -176,7 +176,12 @@ class LeadQcallSearch extends LeadQcall
         }
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
+            $query->andWhere(['NOT IN', 'l_call_status_id', [
+                Lead::CALL_STATUS_PROCESS,
+                Lead::CALL_STATUS_PREPARE,
+                Lead::CALL_STATUS_QUEUE,
+                Lead::CALL_STATUS_BUGGED,
+            ]]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
