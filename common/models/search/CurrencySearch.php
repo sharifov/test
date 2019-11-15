@@ -18,7 +18,7 @@ class CurrencySearch extends Currency
     {
         return [
             [['cur_code', 'cur_name', 'cur_symbol', 'cur_created_dt', 'cur_updated_dt', 'cur_synch_dt'], 'safe'],
-            [['cur_rate', 'cur_system_rate'], 'number'],
+            [['cur_base_rate', 'cur_app_rate', 'cur_app_percent'], 'number'],
             [['cur_enabled', 'cur_default', 'cur_sort_order'], 'integer'],
         ];
     }
@@ -47,6 +47,10 @@ class CurrencySearch extends Currency
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['cur_sort_order' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -59,8 +63,9 @@ class CurrencySearch extends Currency
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cur_rate' => $this->cur_rate,
-            'cur_system_rate' => $this->cur_system_rate,
+            'cur_base_rate' => $this->cur_base_rate,
+            'cur_app_rate' => $this->cur_app_rate,
+            'cur_app_percent' => $this->cur_app_percent,
             'cur_enabled' => $this->cur_enabled,
             'cur_default' => $this->cur_default,
             'cur_sort_order' => $this->cur_sort_order,

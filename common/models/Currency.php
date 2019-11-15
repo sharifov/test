@@ -14,8 +14,9 @@ use yii\helpers\VarDumper;
  * @property string $cur_code
  * @property string $cur_name
  * @property string $cur_symbol
- * @property double $cur_rate
- * @property double $cur_system_rate
+ * @property double $cur_base_rate
+ * @property double $cur_app_rate
+ * @property double $cur_app_percent
  * @property bool $cur_enabled
  * @property bool $cur_default
  * @property int $cur_sort_order
@@ -40,7 +41,7 @@ class Currency extends \yii\db\ActiveRecord
     {
         return [
             [['cur_code', 'cur_name', 'cur_symbol'], 'required'],
-            [['cur_rate', 'cur_system_rate'], 'number'],
+            [['cur_base_rate', 'cur_app_rate', 'cur_app_percent'], 'number'],
             [['cur_enabled', 'cur_default'], 'boolean'],
             [['cur_sort_order'], 'integer'],
             [['cur_created_dt', 'cur_updated_dt', 'cur_synch_dt'], 'safe'],
@@ -76,14 +77,15 @@ class Currency extends \yii\db\ActiveRecord
             'cur_code' => 'Code',
             'cur_name' => 'Name',
             'cur_symbol' => 'Symbol',
-            'cur_rate' => 'Bank Rate',
-            'cur_system_rate' => 'System Rate',
+            'cur_base_rate' => 'Base Rate',
+            'cur_app_rate' => 'App Rate',
+            'cur_app_percent' => 'App Percent',
             'cur_enabled' => 'Enabled',
             'cur_default' => 'Default',
             'cur_sort_order' => 'Sort Order',
-            'cur_created_dt' => 'Created Dt',
-            'cur_updated_dt' => 'Updated Dt',
-            'cur_synch_dt' => 'Synch Dt',
+            'cur_created_dt' => 'Created Date',
+            'cur_updated_dt' => 'Updated Date',
+            'cur_synch_dt' => 'Synch Date',
         ];
     }
 
@@ -113,46 +115,105 @@ class Currency extends \yii\db\ActiveRecord
 
         //VarDumper::dump($currencyResponse); exit;
 
-        if($currencyResponse && isset($currencyResponse['data']['rates'])) {
+        if($currencyResponse && isset($currencyResponse['data']['extra'])) {
             $curData = $currencyResponse['data'];
 
             //VarDumper::dump($curData['rates']); exit;
 
-            foreach ($curData['rates'] as $curCode => $rateVal) {
-                $curCode = substr($curCode, -3);
+//            foreach ($curData['extra'] as $curCode => $rateVal) {
+//                $curCode = substr($curCode, -3);
+//
+//                if (!$curCode) {
+//                    continue;
+//                }
+//
+//                $currency = self::findOne(['cur_code' => $curCode]);
+//                if (!$currency) {
+//                    continue;
+//                    $currency = new self();
+//                    $currency->cur_code = $curCode;
+//                    $currency->cur_default = false;
+//                    $currency->cur_enabled = false;
+//                    $data['created'][] = $currency->cur_code;
+//                } else {
+//
+//                    $currency->cur_app_rate = (float) $rateVal;
+//                    $currency->cur_base_rate = (float) $rateVal;
+//                    //$currency->cur_base_rate = (float) $rateVal;
+//
+//                    if (isset($curData['updated'])) {
+//                        $date = \DateTime::createFromFormat(DATE_RFC3339, $curData['updated']);
+//                        $currency->cur_synch_dt = $date->format('Y-m-d H:i:s');
+//                    }
+//
+//                    $data['updated'][] = $curCode;
+//                }
+//
+//            }
 
-                if (!$curCode) {
+
+            foreach ($curData['extra'] as $curItem) {
+
+                if (!isset($curItem['code'])) {
                     continue;
                 }
 
-                $currency = self::findOne(['cur_code' => $curCode]);
+                $currency = self::findOne(['cur_code' => $curItem['code']]);
                 if (!$currency) {
-                    continue;
+
                     $currency = new self();
-                    $currency->cur_code = $curCode;
-                    $currency->cur_default = false;
-                    $currency->cur_enabled = false;
+                    $currency->cur_code = $curItem['code'];
+                    $currency->cur_name = $curItem['name'];
+                    $currency->cur_symbol = $curItem['symbol'];
+                    $currency->cur_sort_order = $curItem['sort'];
+                    $currency->cur_default = $curItem['isDefault'];
+                    $currency->cur_enabled = $curItem['isEnabled'];
+
                     $data['created'][] = $currency->cur_code;
+
                 } else {
 
-                    $currency->cur_rate = (float) $rateVal;
-                    $currency->cur_system_rate = (float) $rateVal;
-
-                    if (isset($curData['updated'])) {
-                        $date = \DateTime::createFromFormat(DATE_RFC3339, $curData['updated']);
-                        $currency->cur_synch_dt = $date->format('Y-m-d H:i:s');
+                    if ($currency->cur_name !== $curItem['name']) {
+                        $currency->cur_name = $curItem['name'];
                     }
 
-                    $data['updated'][] = $curCode;
-                    if (!$currency->save()) {
-                        Yii::error($curCode . ': ' . VarDumper::dumpAsString($currency->errors), 'Currency:synchronization:save');
+                    if ($currency->cur_symbol !== $curItem['symbol']) {
+                        $currency->cur_symbol = $curItem['symbol'];
                     }
+
+                    if ($currency->cur_default !== $curItem['isDefault']) {
+                        $currency->cur_default = (bool) $curItem['isDefault'];
+                    }
+
+                    if ($currency->cur_enabled !== $curItem['isEnabled']) {
+                        $currency->cur_enabled = (bool) $curItem['isEnabled'];
+                    }
+
+                    if ($currency->cur_sort_order !== $curItem['sort']) {
+                        $currency->cur_sort_order = (int) $curItem['sort'];
+                    }
+
+                    $data['updated'][] = $currency->cur_code;
+                }
+
+                if (isset($curData['updated'])) {
+                    $date = \DateTime::createFromFormat(DATE_RFC3339, $curData['updated']);
+                    $currency->cur_synch_dt = $date->format('Y-m-d H:i:s');
+                }
+
+                $currency->cur_base_rate = (float) $curItem['rate'];
+                $currency->cur_app_rate = (float) $curItem['appRate'];
+                $currency->cur_app_percent = (float) $curItem['rateReservePercent'];
+
+                if (!$currency->save()) {
+                    Yii::error($currency->cur_code . ': ' . VarDumper::dumpAsString($currency->errors), 'Currency:synchronization:save');
                 }
 
             }
 
+
         } else {
-            $data['error'] = 'Not found response[data][rates]';
+            $data['error'] = 'Not found response[data][extra]';
         }
 
         return $data;
@@ -164,8 +225,8 @@ class Currency extends \yii\db\ActiveRecord
      */
     public static function getList() : array
     {
-        $query = self::find()->where(['cur_enabled' => true])->orderBy(['etp_name' => SORT_ASC]);
+        $query = self::find()->where(['cur_enabled' => true])->orderBy(['cur_sort_order' => SORT_ASC]);
         $data = $query->asArray()->all();
-        return ArrayHelper::map($data, 'etp_id', 'etp_name');
+        return ArrayHelper::map($data, 'cur_code', 'cur_code');
     }
 }

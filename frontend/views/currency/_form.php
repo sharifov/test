@@ -26,9 +26,11 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="col-md-2">
 
-        <?= $form->field($model, 'cur_rate')->input('number', ['step' => 0.00001]) ?>
+        <?= $form->field($model, 'cur_base_rate')->input('number', ['step' => 0.00001]) ?>
 
-        <?= $form->field($model, 'cur_system_rate')->input('number', ['step' => 0.00001]) ?>
+        <?= $form->field($model, 'cur_app_rate')->input('number', ['step' => 0.00001]) ?>
+
+        <?= $form->field($model, 'cur_app_percent')->input('number', ['step' => 0.01]) ?>
 
         <?= $form->field($model, 'cur_sort_order')->dropDownList(range(0, 10), range(0, 10)) ?>
 

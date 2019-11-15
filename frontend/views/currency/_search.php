@@ -24,9 +24,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cur_symbol') ?>
 
-    <?= $form->field($model, 'cur_rate') ?>
+    <?= $form->field($model, 'cur_base_rate') ?>
 
-    <?= $form->field($model, 'cur_system_rate') ?>
+    <?= $form->field($model, 'cur_app_rate') ?>
+
+    <?php // echo $form->field($model, 'cur_app_percent') ?>
 
     <?php // echo $form->field($model, 'cur_enabled') ?>
 
