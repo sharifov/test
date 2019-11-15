@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel common\models\search\CurrencySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Currency';
+$this->title = 'Currency List';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="currency-index">

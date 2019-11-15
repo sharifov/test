@@ -12,30 +12,41 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'cur_code')->textInput(['maxlength' => true]) ?>
+    <div class="row">
+        <div class="col-md-3">
+        <?= $form->field($model, 'cur_code')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'cur_name')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'cur_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'cur_symbol')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'cur_symbol')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'cur_rate')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'cur_enabled')->checkbox() ?>
 
-    <?= $form->field($model, 'cur_system_rate')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'cur_default')->checkbox() ?>
+        </div>
+        <div class="col-md-2">
 
-    <?= $form->field($model, 'cur_enabled')->textInput() ?>
+        <?= $form->field($model, 'cur_rate')->input('number', ['step' => 0.00001]) ?>
 
-    <?= $form->field($model, 'cur_default')->textInput() ?>
+        <?= $form->field($model, 'cur_system_rate')->input('number', ['step' => 0.00001]) ?>
 
-    <?= $form->field($model, 'cur_sort_order')->textInput() ?>
+        <?= $form->field($model, 'cur_sort_order')->dropDownList(range(0, 10), range(0, 10)) ?>
 
-    <?//= $form->field($model, 'cur_created_dt')->textInput() ?>
 
-    <?//= $form->field($model, 'cur_updated_dt')->textInput() ?>
 
-    <?= $form->field($model, 'cur_synch_dt')->textInput() ?>
 
+
+        <?//= $form->field($model, 'cur_created_dt')->textInput() ?>
+
+        <?//= $form->field($model, 'cur_updated_dt')->textInput() ?>
+
+        <?//= $form->field($model, 'cur_synch_dt')->textInput() ?>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
     <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Save Currency', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
