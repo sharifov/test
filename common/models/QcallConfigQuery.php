@@ -9,26 +9,17 @@ namespace common\models;
  */
 class QcallConfigQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
     /**
-     * {@inheritdoc}
-     * @return QcallConfig[]|array
+     * @param int|null $status
+     * @param int|null $callCount
+     * @return QcallConfig|null
      */
-    public function all($db = null)
+    public function config(?int $status, ?int $callCount):? QcallConfig
     {
-        return parent::all($db);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return QcallConfig|array|null
-     */
-    public function one($db = null)
-    {
-        return parent::one($db);
+        return $this->andWhere(['qc_status_id' => $status])
+            ->andWhere(['<=', 'qc_call_att', $callCount])
+            ->orderBy(['qc_call_att' => SORT_DESC])
+            ->limit(1)
+            ->one();
     }
 }

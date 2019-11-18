@@ -230,6 +230,22 @@ class LeadRedialController extends FController
     }
 
     /**
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionPhoneNumberFrom(): Response
+    {
+        $gid = Yii::$app->request->post('gid');
+        $lead = $this->findLeadById($gid);
+        try {
+            $phoneFrom = $this->leadRedialService->findOrUpdatePhoneNumberFrom($lead);
+            return $this->asJson(['success' => true, 'phoneFrom' => $phoneFrom]);
+        } catch (\DomainException $e) {
+            return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
      * @param $gid
      * @return Lead
      * @throws NotFoundHttpException

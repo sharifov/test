@@ -2,15 +2,21 @@
 
 namespace sales\services\lead;
 
+use Yii;
 use common\models\Call;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
+use common\models\Project;
 use common\models\search\LeadQcallSearch;
 use sales\access\EmployeeAccess;
 use sales\guards\lead\TakeGuard;
 use sales\repositories\lead\LeadRepository;
+use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
+use sales\services\lead\qcall\QCallService;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
 use yii\helpers\VarDumper;
@@ -255,5 +261,37 @@ class LeadRedialService
             $flowDescriptions[] = LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD;
         }
         return $flowDescriptions;
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string
+     */
+    public function findOrUpdatePhoneNumberFrom(Lead $lead): string
+    {
+        if (($qCall = $lead->leadQcall) && ($phoneFrom = $qCall->lqc_call_from) && DepartmentPhoneProject::find()->isRedial($phoneFrom)) {
+            return $phoneFrom;
+        }
+
+        if ($qCall) {
+            try {
+                $phoneFrom = (Yii::createObject(QCallService::class))->updateCallFrom(
+                    $qCall,
+                    new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                    new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                );
+                if ($phoneFrom) {
+                    return $phoneFrom;
+                }
+            } catch (\Throwable $e) {
+                Yii::error($e, 'LeadRedialService:findPhoneNumberFrom:QCallService:updateCallFrom');
+            }
+        }
+
+        if (($phone = Project::findOne($lead->project_id)) && $phone->contactInfo->phone) {
+            return $phone->contactInfo->phone;
+        }
+
+        throw new \DomainException('Not found phoneFrom for LeadId: ' . $lead->id);
     }
 }

@@ -17,9 +17,9 @@ use yii\web\JqueryAsset;
 /** @var RedialUrl $viewUrl */
 /** @var RedialUrl $takeUrl */
 /** @var RedialUrl $reservationUrl */
+/** @var RedialUrl $phoneNumberFromUrl */
 /** @var string $script */
 
-/** @var string $phoneFrom */
 /** @var ClientPhonesDTO[] $phonesTo */
 /** @var int $projectId */
 /** @var int $redialAutoTakeSeconds */
@@ -132,7 +132,7 @@ $("#redial-lead-actions-block-call").on('click', function (e) {
         return ;
     }
     $('.group-redial-lead-phone-to').hide();
-    leadRedialReservationAndCall(phoneTo);
+    getPhoneNumberFromAndNext(phoneTo);
 });
 
 $("#redial-lead-actions-take").on('click', function (e) {
@@ -152,10 +152,10 @@ function hideActionBlock() {
     $('#redial-lead-actions-block *').hide();
 }
 
-function leadRedialCall(phoneTo) {
+function leadRedialCall(phoneFrom, phoneTo) {
     $("#redial-lead-call-status-block-text").html('Processing ...');
     $('#redial-lead-call-status-block').show();
-    webCallLeadRedial('{$phoneFrom}', phoneTo, {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
+    webCallLeadRedial(phoneFrom, phoneTo, {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
 }
 
 function callInProgress() {
@@ -163,6 +163,30 @@ function callInProgress() {
     $("#redial-lead-call-status-block-text").html('In progress ...');
     showActionBlock();
     startTimer({$redialAutoTakeSeconds});
+}
+
+function getPhoneNumberFromAndNext(phoneTo) {
+    new PNotify({title: "Take Lead", type: "info", text: 'Get "from phone number"', hide: true});
+    $.ajax({
+        type: '{$phoneNumberFromUrl->method}',
+        url: '{$phoneNumberFromUrl->url}',
+        data: {$phoneNumberFromUrl->getData()}
+    })
+    .done(function(data) {
+        if (data.success) {
+            new PNotify({title: "Take Lead", type: "success", text: 'Phone number found', hide: true});
+            leadRedialReservationAndNext(data.phoneFrom, phoneTo);
+        } else {
+           let text = 'Error. Try again later';
+           if (data.message) {
+               text = data.message;
+           }
+           new PNotify({title: "Take Lead", type: "error", text: text, hide: true});
+        }
+    })
+    .fail(function() {
+        new PNotify({title: "Take lead", type: "error", text: 'Try again later.', hide: true});
+    })
 }
 
 function leadRedialTake() {
@@ -199,7 +223,7 @@ function leadRedialTake() {
     })
 }
 
-function leadRedialReservationAndCall(phoneTo) {
+function leadRedialReservationAndNext(phoneFrom, phoneTo) {
     new PNotify({title: "Take Lead", type: "info", text: 'Reservation for call', hide: true});
     $.ajax({
         type: '{$reservationUrl->method}',
@@ -209,7 +233,7 @@ function leadRedialReservationAndCall(phoneTo) {
     .done(function(data) {
         if (data.success) {
             new PNotify({title: "Take Lead: Reservation", type: "success", text: 'Lead reserved', hide: true});
-            leadRedialCall(phoneTo);
+            leadRedialCall(phoneFrom, phoneTo);
         } else {
            let text = 'Error. Try again later';
            if (data.message) {
