@@ -93,12 +93,13 @@ class CurrencyService extends Component
 
 
     /**
+     * @param bool $extra
      * @param string|null $sourceCurrencyCode
      * @param array $rateCurrencyList
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function getRate(?string $sourceCurrencyCode, array $rateCurrencyList = []) : array
+    public function getRate(bool $extra = true, ?string $sourceCurrencyCode, array $rateCurrencyList = []) : array
     {
         $out = ['error' => false, 'data' => []];
         $data = [];
@@ -111,14 +112,18 @@ class CurrencyService extends Component
             $data['currencies'] = implode(',', $rateCurrencyList);
         }
 
+        if ($extra) {
+            $data['extra'] = 'true';
+        }
+
 
         $response = $this->sendRequest('rate', $data, 'get');
 
         if ($response->isOk) {
-            if (isset($response->data['rates'])) {
+            if (isset($response->data['quotes'])) {
                 $out['data'] = $response->data;
             } else {
-                $out['error'] = 'Not found in response array data key [rates]';
+                $out['error'] = 'Not found in response array data key [quotes]';
             }
         } else {
             $out['error'] = $response->content;

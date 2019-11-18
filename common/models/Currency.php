@@ -111,12 +111,14 @@ class Currency extends \yii\db\ActiveRecord
         ];
 
         $currencyService = Yii::$app->currency;
-        $currencyResponse = $currencyService->getRate('USD');
+        $currencyResponse = $currencyService->getRate(true, 'USD');
 
-        //VarDumper::dump($currencyResponse); exit;
+        // VarDumper::dump($currencyResponse); exit;
 
-        if($currencyResponse && isset($currencyResponse['data']['extra'])) {
+        if($currencyResponse && isset($currencyResponse['data']['quotes'])) {
             $curData = $currencyResponse['data'];
+
+
 
             //VarDumper::dump($curData['rates']); exit;
 
@@ -152,7 +154,7 @@ class Currency extends \yii\db\ActiveRecord
 //            }
 
 
-            foreach ($curData['extra'] as $curItem) {
+            foreach ($curData['quotes'] as $curItem) {
 
                 if (!isset($curItem['code'])) {
                     continue;
@@ -165,9 +167,18 @@ class Currency extends \yii\db\ActiveRecord
                     $currency->cur_code = $curItem['code'];
                     $currency->cur_name = $curItem['name'];
                     $currency->cur_symbol = $curItem['symbol'];
-                    $currency->cur_sort_order = $curItem['sort'];
-                    $currency->cur_default = $curItem['isDefault'];
-                    $currency->cur_enabled = $curItem['isEnabled'];
+
+                    if (isset($curItem['sort'])) {
+                        $currency->cur_sort_order = $curItem['sort'];
+                    }
+
+                    if (isset($curItem['isDefault'])) {
+                        $currency->cur_default = $curItem['isDefault'];
+                    }
+
+                    if (isset($curItem['isEnabled'])) {
+                        $currency->cur_enabled = $curItem['isEnabled'];
+                    }
 
                     $data['created'][] = $currency->cur_code;
 
@@ -181,15 +192,15 @@ class Currency extends \yii\db\ActiveRecord
                         $currency->cur_symbol = $curItem['symbol'];
                     }
 
-                    if ($currency->cur_default !== $curItem['isDefault']) {
+                    if (isset($curItem['isDefault']) && $currency->cur_default !== $curItem['isDefault']) {
                         $currency->cur_default = (bool) $curItem['isDefault'];
                     }
 
-                    if ($currency->cur_enabled !== $curItem['isEnabled']) {
+                    if (isset($curItem['isEnabled']) && $currency->cur_enabled !== $curItem['isEnabled']) {
                         $currency->cur_enabled = (bool) $curItem['isEnabled'];
                     }
 
-                    if ($currency->cur_sort_order !== $curItem['sort']) {
+                    if (isset($curItem['sort']) && $currency->cur_sort_order !== $curItem['sort']) {
                         $currency->cur_sort_order = (int) $curItem['sort'];
                     }
 
@@ -201,8 +212,8 @@ class Currency extends \yii\db\ActiveRecord
                     $currency->cur_synch_dt = $date->format('Y-m-d H:i:s');
                 }
 
-                $currency->cur_base_rate = (float) $curItem['rate'];
-                $currency->cur_app_rate = (float) $curItem['appRate'];
+                $currency->cur_base_rate = (float) $curItem['bankRate'];
+                $currency->cur_app_rate = round((float) $curItem['systemRate'], 5);
                 $currency->cur_app_percent = (float) $curItem['rateReservePercent'];
 
                 if (!$currency->save()) {
@@ -213,7 +224,7 @@ class Currency extends \yii\db\ActiveRecord
 
 
         } else {
-            $data['error'] = 'Not found response[data][extra]';
+            $data['error'] = 'Not found response[data][quotes]';
         }
 
         return $data;

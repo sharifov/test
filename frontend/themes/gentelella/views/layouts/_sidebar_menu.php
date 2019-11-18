@@ -231,6 +231,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'],
                 ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
                 ['label' => 'Currency List', 'url' => ['/currency/index'], 'icon' => 'dollar'],
+                ['label' => 'Product Types', 'url' => ['/product-type/index']],
             ]
         ];
 
