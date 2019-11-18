@@ -52,7 +52,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'cur_symbol',
             'cur_base_rate',
             'cur_app_rate',
-            'cur_app_percent',
+            [
+                'attribute' => 'cur_app_percent',
+                'value' => static function(\common\models\Currency $model) {
+                    return $model->cur_app_percent . ' %';
+                }
+            ],
             'cur_enabled:boolean',
             'cur_default:boolean',
             //'cur_created_dt',

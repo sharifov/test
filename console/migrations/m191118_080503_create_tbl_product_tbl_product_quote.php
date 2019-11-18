@@ -13,6 +13,7 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
         '/order/*',
         '/offer/*',
         '/offer-product/*',
+        '/invoice/*',
     ];
 
     public $roles = [
@@ -53,6 +54,7 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
         $this->addForeignKey('FK-offer-of_updated_user_id', '{{%offer}}', ['of_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
         $this->createIndex('IND-offer-of_gid', '{{%offer}}', ['of_gid'], true);
+        $this->createIndex('IND-offer-of_status_id', '{{%offer}}', ['of_status_id']);
 
 
 
@@ -90,6 +92,8 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
         $this->addForeignKey('FK-order-pr_updated_user_id', '{{%order}}', ['or_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
         $this->createIndex('IND-order-or_gid', '{{%order}}', ['or_gid'], true);
+        $this->createIndex('IND-order-or_status_id', '{{%order}}', ['or_status_id']);
+        $this->createIndex('IND-order-or_pay_status_id', '{{%order}}', ['or_pay_status_id']);
 
 
         $this->createTable('{{%product}}',	[
@@ -113,6 +117,8 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
 
         $this->addForeignKey('FK-product-pr_created_user_id', '{{%product}}', ['pr_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-product-pr_updated_user_id', '{{%product}}', ['pr_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+
+        $this->createIndex('IND-product-pr_status_id', '{{%product}}', ['pr_status_id']);
 
 
         $this->createTable('{{%product_quote}}',	[
@@ -143,6 +149,10 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
         ], $tableOptions);
 
         $this->createIndex('IND-product_quote-pq_gid', '{{%product_quote}}', ['pq_gid'], true);
+        $this->createIndex('IND-product_quote-pq_status_id', '{{%product_quote}}', ['pq_status_id']);
+
+        $this->addForeignKey('FK-product_quote-pq_origin_currency', '{{%product_quote}}', ['pq_origin_currency'], '{{%currency}}', ['cur_code'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-product_quote-pq_client_currency', '{{%product_quote}}', ['pq_client_currency'], '{{%currency}}', ['cur_code'], 'SET NULL', 'CASCADE');
 
         $this->addForeignKey('FK-product_quote-pq_product_id', '{{%product_quote}}', ['pq_product_id'], '{{%product}}', ['pr_id'], 'CASCADE', 'CASCADE');
         $this->addForeignKey('FK-product_quote-pq_order_id', '{{%product_quote}}', ['pq_order_id'], '{{%order}}', ['or_id'], 'SET NULL', 'CASCADE');
@@ -162,12 +172,44 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
         ], $tableOptions);
 
 
+        $this->addPrimaryKey('PK-offer_product', '{{%offer_product}}', ['op_offer_id', 'op_product_quote_id']);
+
         $this->addForeignKey('FK-offer_product-op_offer_id', '{{%offer_product}}', ['op_offer_id'], '{{%offer}}', ['of_id'], 'CASCADE', 'CASCADE');
         $this->addForeignKey('FK-offer_product-op_product_quote_id', '{{%offer_product}}', ['op_product_quote_id'], '{{%product_quote}}', ['pq_id'], 'CASCADE', 'CASCADE');
 
         $this->addForeignKey('FK-offer_product-op_created_user_id', '{{%offer_product}}', ['op_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
 
+
+        $this->createTable('{{%invoice}}',	[
+            'inv_id'                    => $this->primaryKey(),
+            'inv_gid'                   => $this->string(32)->notNull()->unique(),
+            'inv_uid'                   => $this->string(15)->unique(),
+            'inv_order_id'              => $this->integer()->notNull(),
+            'inv_status_id'             => $this->tinyInteger(),
+
+            'inv_sum'                   => $this->decimal(8,2)->notNull(),
+            'inv_client_sum'            => $this->decimal(8,2)->notNull(),
+            'inv_client_currency'       => $this->string(3),
+            'inv_currency_rate'         => $this->decimal(8,5),
+
+            'inv_description'           => $this->text(),
+
+            'inv_created_user_id'       => $this->integer(),
+            'inv_updated_user_id'       => $this->integer(),
+            'inv_created_dt'            => $this->dateTime(),
+            'inv_updated_dt'            => $this->dateTime()
+        ], $tableOptions);
+
+
+        $this->addForeignKey('FK-invoice-inv_lead_id', '{{%invoice}}', ['inv_order_id'], '{{%order}}', ['or_id'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey('FK-invoice-inv_client_currency', '{{%invoice}}', ['inv_client_currency'], '{{%currency}}', ['cur_code'], 'SET NULL', 'CASCADE');
+
+        $this->addForeignKey('FK-invoice-inv_created_user_id', '{{%invoice}}', ['inv_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-invoice-inv_updated_user_id', '{{%invoice}}', ['inv_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+
+        $this->createIndex('IND-invoice-inv_gid', '{{%invoice}}', ['inv_gid'], true);
+        $this->createIndex('IND-invoice-inv_status_id', '{{%invoice}}', ['inv_status_id']);
 
 
         (new \console\migrations\RbacMigrationService())->up($this->routes, $this->roles);

@@ -216,6 +216,7 @@ class Currency extends \yii\db\ActiveRecord
                 $currency->cur_app_rate = round((float) $curItem['systemRate'], 5);
                 $currency->cur_app_percent = (float) $curItem['rateReservePercent'];
 
+
                 if (!$currency->save()) {
                     Yii::error($currency->cur_code . ': ' . VarDumper::dumpAsString($currency->errors), 'Currency:synchronization:save');
                 }
