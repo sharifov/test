@@ -230,8 +230,22 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
                 ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'],
                 ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
-                ['label' => 'Currency List', 'url' => ['/currency/index'], 'icon' => 'dollar'],
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'New Data',
+            'url' => 'javascript:',
+            'icon' => 'list',
+            'items' => [
+                ['label' => 'Currency List', 'url' => ['/currency/index']],
                 ['label' => 'Product Types', 'url' => ['/product-type/index']],
+                ['label' => 'Products', 'url' => ['/product/index']],
+                ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],
+                ['label' => 'Orders', 'url' => ['/order/index']],
+                ['label' => 'Offers', 'url' => ['/offer/index']],
+                ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
+                ['label' => 'Invoices', 'url' => ['/invoice/index']],
             ]
         ];
 

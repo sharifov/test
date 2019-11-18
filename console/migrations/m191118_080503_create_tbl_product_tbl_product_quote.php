@@ -54,8 +54,8 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
         $this->addForeignKey('FK-offer-of_updated_user_id', '{{%offer}}', ['of_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
         $this->createIndex('IND-offer-of_gid', '{{%offer}}', ['of_gid'], true);
+        $this->createIndex('IND-offer-of_uid', '{{%offer}}', ['of_uid'], true);
         $this->createIndex('IND-offer-of_status_id', '{{%offer}}', ['of_status_id']);
-
 
 
         $this->createTable('{{%order}}',	[
@@ -81,7 +81,7 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
             'or_created_user_id'        => $this->integer(),
             'or_updated_user_id'        => $this->integer(),
             'or_created_dt'             => $this->dateTime(),
-            'ot_updated_dt'             => $this->dateTime()
+            'or_updated_dt'             => $this->dateTime()
         ], $tableOptions);
 
 
@@ -92,6 +92,7 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
         $this->addForeignKey('FK-order-pr_updated_user_id', '{{%order}}', ['or_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
         $this->createIndex('IND-order-or_gid', '{{%order}}', ['or_gid'], true);
+        $this->createIndex('IND-order-or_uid', '{{%order}}', ['or_uid'], true);
         $this->createIndex('IND-order-or_status_id', '{{%order}}', ['or_status_id']);
         $this->createIndex('IND-order-or_pay_status_id', '{{%order}}', ['or_pay_status_id']);
 
@@ -109,7 +110,7 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
             'pr_created_user_id'    => $this->integer(),
             'pr_updated_user_id'    => $this->integer(),
             'pr_created_dt'         => $this->dateTime(),
-            'pt_updated_dt'         => $this->dateTime()
+            'pr_updated_dt'         => $this->dateTime()
         ], $tableOptions);
 
 
@@ -214,7 +215,7 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
 
         (new \console\migrations\RbacMigrationService())->up($this->routes, $this->roles);
 
-        Yii::$app->db->getSchema()->refreshTableSchema('{{%product_type}}');
+        //Yii::$app->db->getSchema()->refreshTableSchema('{{%product_type}}');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -227,11 +228,16 @@ class m191118_080503_create_tbl_product_tbl_product_quote extends Migration
     public function safeDown()
     {
 
-        $this->dropTable('{{%product_type}}');
+        $this->dropTable('{{%invoice}}');
+        $this->dropTable('{{%offer_product}}');
+        $this->dropTable('{{%product_quote}}');
+        $this->dropTable('{{%product}}');
+        $this->dropTable('{{%order}}');
+        $this->dropTable('{{%offer}}');
 
         (new \console\migrations\RbacMigrationService())->down($this->routes, $this->roles);
 
-        Yii::$app->db->getSchema()->refreshTableSchema('{{%product_type}}');
+        //Yii::$app->db->getSchema()->refreshTableSchema('{{%product_type}}');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
