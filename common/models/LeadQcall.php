@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use Faker\Provider\DateTime;
 use sales\services\lead\qcall\Interval;
 use Yii;
 
@@ -14,6 +15,7 @@ use Yii;
  * @property int $lqc_weight
  * @property $lqc_created_dt
  * @property $lqc_call_from
+ * @property DateTime $lqc_reservation_time
  *
  * @property Lead $lqcLead
  */
@@ -70,6 +72,14 @@ class LeadQcall extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param \DateTime $dt
+     */
+    public function updateReservationTime(\DateTime $dt): void
+    {
+        $this->lqc_reservation_time = $dt->format('Y-m-d H:i:s');
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -90,6 +100,7 @@ class LeadQcall extends \yii\db\ActiveRecord
             [['lqc_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lqc_lead_id' => 'id']],
             ['lqc_created_dt', 'string'],
             ['lqc_call_from', 'string'],
+            ['lqc_reservation_time', 'string'],
         ];
     }
 
@@ -105,6 +116,7 @@ class LeadQcall extends \yii\db\ActiveRecord
             'lqc_weight' => 'Weight',
             'lqc_created_dt' => 'Created',
             'lqc_call_from' => 'Call from',
+            'lqc_reservation_time' => 'Reservation time',
         ];
     }
 

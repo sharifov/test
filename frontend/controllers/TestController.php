@@ -11,6 +11,7 @@ use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
+use common\models\LeadQcall;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
@@ -132,26 +133,9 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $lead = Lead::findOne(8656);
-        $service = (Yii::createObject(QCallService::class));
-
-        $service->updateInterval(
-            $lead->leadQcall,
-            new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-            $lead->offset_gmt,
-            new FindPhoneParams($lead->project_id, $lead->l_dep_id)
-        );
-        die;
-        $service->create(
-            $lead->id,
-            new Config(
-                $lead->status,
-                $lead->getCountOutCallsLastFlow()
-            ),
-            ($lead->project_id * 10),
-            $lead->offset_gmt,
-            new FindPhoneParams($lead->project_id, $lead->l_dep_id)
-        );
+       $qcall = LeadQcall::findOne(8656);
+       $service = Yii::createObject(QCallService::class);
+       $service->updateReservationTime($qcall);
         die;
         return $this->render('blank');
 

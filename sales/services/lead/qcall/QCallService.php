@@ -11,6 +11,7 @@ use Yii;
 use common\models\LeadQcall;
 use common\models\QcallConfig;
 use yii\db\ActiveQuery;
+use yii\helpers\VarDumper;
 
 /**
  * Class QCallService
@@ -152,6 +153,14 @@ class QCallService
         $this->leadQcallRepository->save($qCall);
 
         return $phone;
+    }
+
+    public function reservation(LeadQcall $qCall): void
+    {
+        $seconds = (int)Yii::$app->params['settings']['redial_reservation_time'];
+        $dt = (new \DateTime('now', new \DateTimeZone('UTC')))->add(new \DateInterval('PT' . $seconds . 'S'));
+        $qCall->updateReservationTime($dt);
+        $this->leadQcallRepository->save($qCall);
     }
 
     /**
