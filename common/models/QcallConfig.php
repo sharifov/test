@@ -19,6 +19,7 @@ use yii\db\ActiveRecord;
  * @property string $qc_updated_dt
  * @property int $qc_created_user_id
  * @property int $qc_updated_user_id
+ * @property int $qc_phone_switch
  *
  * @property Employee $qcCreatedUser
  * @property Employee $qcUpdatedUser
@@ -45,6 +46,7 @@ class QcallConfig extends \yii\db\ActiveRecord
             [['qc_status_id', 'qc_call_att'], 'unique', 'targetAttribute' => ['qc_status_id', 'qc_call_att']],
             [['qc_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qc_created_user_id' => 'id']],
             [['qc_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qc_updated_user_id' => 'id']],
+            ['qc_phone_switch', 'boolean'],
         ];
     }
 
@@ -85,6 +87,7 @@ class QcallConfig extends \yii\db\ActiveRecord
             'qc_updated_dt' => 'Updated Dt',
             'qc_created_user_id' => 'Created User ID',
             'qc_updated_user_id' => 'Updated User ID',
+            'qc_phone_switch' => 'Phone switch',
         ];
     }
 

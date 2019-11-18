@@ -6,6 +6,8 @@ use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientPhone;
+use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
@@ -18,6 +20,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
@@ -52,6 +55,7 @@ use sales\services\lead\LeadRedialService;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\DayTimeHours;
+use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use sales\services\TransactionManager;
 use sales\temp\LeadFlowUpdate;
@@ -128,24 +132,8 @@ class TestController extends FController
     public function actionTest()
     {
 
-
-        $phones = [
-            new PhoneCreateForm(['phone' => '+111']),
-            new PhoneCreateForm(['phone' => '+222']),
-            new PhoneCreateForm(['phone' => '+333']),
-        ];
-
-        $emails = [
-            new EmailCreateForm(['email' => '1111@1.1']),
-            new EmailCreateForm(['email' => '2222@2.2']),
-            new EmailCreateForm(['email' => '3333@3.3']),
-        ];
-
-        $client = $this->clientManageService->getOrCreate($phones, $emails);
-        VarDumper::dump($client);
-
-
-        die;
+       (Yii::createObject(QCallService::class))->test();
+//        die;
         return $this->render('blank');
 
     }

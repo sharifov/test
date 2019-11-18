@@ -41,6 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'qc_time_from',
             'qc_time_to',
             'qc_client_time_enable:boolean',
+            'qc_phone_switch:boolean',
 
 //            [
 //                'attribute' => 'qc_created_user_id',

@@ -32,6 +32,7 @@ use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use Yii;
 use yii\base\InvalidArgumentException;
@@ -2593,7 +2594,8 @@ Reason: {reason}
                                 $this->getCountOutCallsLastFlow()
                             ),
                             ($this->project_id * 10),
-                            $this->offset_gmt
+                            $this->offset_gmt,
+                            new FindPhoneParams($this->project_id, $this->l_dep_id)
                         );
                     } catch (\Throwable $e) {
                         Yii::error($e, 'Lead:AfterSave:QCallService:create');
