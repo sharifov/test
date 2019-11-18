@@ -28,6 +28,7 @@ class UserMultipleForm extends Model
     public $autoRedial;
     public $kpiEnable;
     public $status_id;
+    public $leaderBoardEnabled;
 
     /**
      * @inheritdoc
@@ -39,7 +40,7 @@ class UserMultipleForm extends Model
             [['user_list_json'], 'required'],
             [['baseAmount', 'commissionPercent'], 'number'],
             [['up_call_expert_limit', 'status_id', 'inboxShowLimitLeads', 'defaultTakeLimitLeads', 'minPercentForTakeLeads', 'frequencyMinutes'], 'integer'],
-            [['user_list_json', 'userDepartment', 'userRole', 'workStart', 'workMinutes', 'timeZone', 'autoRedial', 'kpiEnable'], 'safe'],
+            [['user_list_json', 'userDepartment', 'userRole', 'workStart', 'workMinutes', 'timeZone', 'autoRedial', 'kpiEnable', 'leaderBoardEnabled'], 'safe'],
             [['user_list_json'], 'filter', 'filter' => function ($value) {
                 try {
                     $data = \yii\helpers\Json::decode($value);
@@ -82,7 +83,8 @@ class UserMultipleForm extends Model
             'timeZone' => 'Timezone',
             'frequencyMinutes' => 'Take Frequency Minutes',
             'autoRedial' => 'Auto redial',
-            'kpiEnable' => 'KPI enable'
+            'kpiEnable' => 'KPI enable',
+            'leaderBoardEnabled' => 'Leader Board Enabled'
         ];
     }
 }

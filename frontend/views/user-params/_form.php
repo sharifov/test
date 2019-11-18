@@ -38,7 +38,7 @@ use common\models\Employee;
 
         <?= $form->field($model, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000])?>
 
-
+        <?= $form->field($model, 'up_leaderboard_enabled')->checkbox() ?>
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

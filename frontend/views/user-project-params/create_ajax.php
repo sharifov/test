@@ -83,7 +83,7 @@ $this->title = 'Create Project Params';
 
                 <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
 
-                <? //= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
+                <?php //= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
 
                 <?//= Html::input('hidden', 'redirect', Yii::$app->request->get('redirect')) ?>
 

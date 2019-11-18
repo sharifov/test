@@ -41,6 +41,7 @@ use yii\helpers\VarDumper;
  * @property $smsOffers
  * @property $emailOffers
  * @property $quoteType
+ * @property int $l_is_test
  */
 class LeadSearch extends Lead
 {
@@ -82,6 +83,7 @@ class LeadSearch extends Lead
     public $lastActionRangeTime;
     public $soldRangeTime;
     public $createTimeRange;
+    public $createdType;
 
     public $last_ticket_date;
 
@@ -96,6 +98,7 @@ class LeadSearch extends Lead
     public $emailOffers;
     public $quoteType;
 
+    public $l_is_test;
 
     private $leadBadgesRepository;
 
@@ -111,10 +114,10 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['datetime_start', 'datetime_end'], 'safe'],
+            [['datetime_start', 'datetime_end', 'createdType', 'createTimeRange'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
-            [['email_status', 'quote_status'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
+            [['email_status', 'quote_status', 'l_is_test'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
 
@@ -134,6 +137,7 @@ class LeadSearch extends Lead
             ['remainingDays', 'filter', 'filter' => static function($value) {
                 return (int)$value;
             }, 'skipOnEmpty' => true],
+			['l_is_test', 'in', 'range' => [0,1]],
 
         ];
     }
@@ -231,7 +235,8 @@ class LeadSearch extends Lead
             'l_answered'    => $this->l_answered,
             'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
             'l_init_price'  => $this->l_init_price,
-            'request_ip'    => $this->request_ip
+            'request_ip'    => $this->request_ip,
+			'l_is_test'		=> $this->l_is_test
         ]);
 
         if($this->statuses) {
@@ -480,11 +485,16 @@ class LeadSearch extends Lead
             'l_answered'    => $this->l_answered,
             'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
             'l_init_price'  => $this->l_init_price,
-            'request_ip'    => $this->request_ip
+            'request_ip'    => $this->request_ip,
+            'l_type_create' => $this->l_type_create
         ]);
 
         if($this->statuses) {
             $query->andWhere(['status' => $this->statuses]);
+        }
+
+        if($this->createdType) {
+            $query->andWhere(['l_type_create' => $this->createdType]);
         }
 
         if ($this->createdRangeTime) {
@@ -1048,7 +1058,7 @@ class LeadSearch extends Lead
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find()->with('project', 'source');
 
-        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source')->joinWith('leadFlowSold' );
+        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source', 'employee')->joinWith('leadFlowSold' );
         $this->load($params);
         $leadTable = Lead::tableName();
 
@@ -1221,6 +1231,8 @@ class LeadSearch extends Lead
             $query->andWhere('1=2');
         }
 
+        $query->with(['employee']);
+
         return $dataProvider;
     }
 
@@ -1270,6 +1282,8 @@ class LeadSearch extends Lead
             $query->andFilterWhere(['>=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
+
+        $query->with(['employee']);
 
         return $dataProvider;
     }
@@ -1353,7 +1367,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'leadChecklists', 'leadChecklists.lcType']);
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */
@@ -1635,6 +1649,7 @@ class LeadSearch extends Lead
             $leadTable . '.cabin' => $this->cabin,
             $leadTable . '.request_ip' => $this->request_ip,
             $leadTable . '.l_init_price' => $this->l_init_price,
+			$leadTable . '.l_is_test' => $this->l_is_test
         ]);
 
         if ($this->limit > 0) {
@@ -1676,6 +1691,10 @@ class LeadSearch extends Lead
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
+
+		if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
+			$query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
+		}
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -2223,7 +2242,7 @@ class LeadSearch extends Lead
 
         if ($category == 'profitPerPax'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT AVG(final_profit / adults + children) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT AVG(final_profit / (adults + children)) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
         }
 
         if ($category == 'tips'){
@@ -2235,12 +2254,18 @@ class LeadSearch extends Lead
             $query->select(['employee_id, 
                              (SUM(CASE WHEN status IN('.Lead::STATUS_SOLD.','.Lead::STATUS_BOOKED.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
                              SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END)) AS leadConversion,
+                             SUM(CASE WHEN status IN('.Lead::STATUS_SOLD.','.Lead::STATUS_BOOKED.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS leadsToProcessing,
+                             SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS leadsWithoutRTS,
                              (SELECT username FROM `employees` WHERE id=employee_id) as username
                              FROM leads']);
+            $query->leftJoin('user_params', 'user_params.up_user_id = employee_id')
+                ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = employee_id')
                 ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
             $query->groupBy(['employee_id']);
         } else {
+            $query->leftJoin('user_params', 'user_params.up_user_id = e.id')
+                ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->from('employees AS e')->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id')
                 ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
         }
@@ -2310,7 +2335,7 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsProfitPerPax'){
-            $query->addSelect(['ug_name', 'AVG(final_profit / adults + children) as teamsProfitPerPax']);
+            $query->addSelect(['ug_name', 'AVG(final_profit / (adults + children)) as teamsProfitPerPax']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
         }
@@ -2322,12 +2347,18 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsConversion'){
-            $query->addSelect(['ug_name', ' 
+            $query->addSelect(['ug_name,  
                              (SUM(CASE WHEN status IN('.Lead::STATUS_SOLD.','.Lead::STATUS_BOOKED.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
-                             SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END))  as teamsConversion']);
+                             SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END))  as teamsConversion,
+                             SUM(CASE WHEN status IN('.Lead::STATUS_SOLD.','.Lead::STATUS_BOOKED.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS teamLeadsToProcessing,
+                             SUM(CASE WHEN status NOT IN('.Lead::STATUS_REJECT.', '.Lead::STATUS_TRASH.', '.Lead::STATUS_SNOOZE.') AND (updated '.$between_condition.') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status='.Lead::STATUS_PROCESSING.' AND employee_id=lf_owner_id AND lf_from_status_id='.Lead::STATUS_SNOOZE.' OR lf_from_status_id='.Lead::STATUS_PENDING.' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS teamLeadsWithoutRTS
+            ']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND (updated '.$between_condition.')');
         }
+
+        $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
+            ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
 
         $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
             ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);

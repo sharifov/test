@@ -5,6 +5,7 @@ namespace sales\services\lead;
 use common\models\Call;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
 use sales\access\EmployeeAccess;
@@ -201,11 +202,17 @@ class LeadRedialService
         }
 
         if ((bool)\Yii::$app->params['settings']['enable_take_frequency_minutes']) {
-            $this->takeGuard->frequencyMinutesGuard($user);
+            $flowDescriptions = self::getFlowDescriptions();
+            $this->takeGuard->frequencyMinutesGuard($user, $flowDescriptions);
         }
 
         if ((bool)\Yii::$app->params['settings']['enable_min_percent_take_leads']) {
-            $this->takeGuard->minPercentGuard($user);
+            $flowDescriptions = self::getFlowDescriptions();
+            $this->takeGuard->minPercentGuard($user, $flowDescriptions);
+        }
+
+        if ((bool)\Yii::$app->params['settings']['enable_redial_shift_time_limits']) {
+            $this->takeGuard->shiftTimeGuard($user);
         }
     }
 
@@ -233,5 +240,20 @@ class LeadRedialService
         if (!in_array($lead->id, $leadIds, true)) {
             throw new \DomainException('Lead is not exist on last dialed leads');
         }
+    }
+
+    /**
+     * @return array
+     */
+    public static function getFlowDescriptions(): array
+    {
+        $flowDescriptions = [];
+        if ((bool)\Yii::$app->params['settings']['count_taken_leads_created_manually']) {
+            $flowDescriptions[] = LeadFlow::DESCRIPTION_MANUAL_CREATE;
+        }
+        if ((bool)\Yii::$app->params['settings']['count_taken_leads_incoming_call']) {
+            $flowDescriptions[] = LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD;
+        }
+        return $flowDescriptions;
     }
 }

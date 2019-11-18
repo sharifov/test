@@ -39,7 +39,8 @@ $user = Yii::$app->user->identity;
 		])->widget(PhoneInput::class, [
 			'options' => [
 				'class' => 'form-control lead-form-input-element',
-				'id' => 'edit-phone'
+				'id' => 'edit-phone',
+                'required' => true
 			],
 			'jsOptions' => [
 				'nationalMode' => false,

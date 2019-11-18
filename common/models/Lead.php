@@ -6,11 +6,12 @@ use common\components\EmailService;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
+use sales\events\lead\LeadCreatedByApiEvent;
+use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
@@ -30,6 +31,8 @@ use sales\helpers\lead\LeadHelper;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
+use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\QCallService;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
@@ -91,15 +94,18 @@ use yii\helpers\VarDumper;
  * @property int $l_dep_id
  * @property boolean $l_delayed_charge
  * @property int $l_type_create
+ * @property int $l_is_test
  *
  * @property double $finalProfit
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
  * @property int $quotesExpertCount
- * @property double $agentProcessingFee
+ * @property double $agentsProcessingFee
  * @property double $agents_processing_fee
  * @property string $l_client_time
  * @property boolean $enableActiveRecordEvents
+ * @property $totalTips
+ * @property $processingFeePerPax
  *
  * @property $status_description;
  *
@@ -141,7 +147,7 @@ use yii\helpers\VarDumper;
  * @property $quoteType
  *
  */
-class Lead extends ActiveRecord implements AggregateRoot
+class Lead extends ActiveRecord
 {
     use EventTrait;
 
@@ -252,15 +258,11 @@ class Lead extends ActiveRecord implements AggregateRoot
     public const SCENARIO_API = 'scenario_api';
     public const SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
 
-    public $additionalInformationForm;
     public $status_description;
     public $totalProfit;
     public $splitProfitPercentSum = 0;
-    public $totalTips;
     public $splitTipsPercentSum = 0;
 
-    public $finalProfit = 0;
-    public $agentProcessingFee = 0.00;
     public $l_client_time;
 
     public $enableActiveRecordEvents = true;
@@ -285,10 +287,71 @@ class Lead extends ActiveRecord implements AggregateRoot
         return 'leads';
     }
 
-    public function init()
+    /**
+     * @return bool
+     */
+    public function isManuallyCreated(): bool
     {
-        parent::init();
-        $this->additionalInformationForm = [new LeadAdditionalInformation()];
+        return $this->l_type_create === self::TYPE_CREATE_MANUALLY;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIncomingCallCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_INCOMING_CALL;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isApiCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_API;
+    }
+
+//    public function init()
+//    {
+//        parent::init();
+//        $this->additionalInformationForm = [new LeadAdditionalInformation()];
+//    }
+
+    private $additionalInformationForm;
+
+    /**
+     * @return LeadAdditionalInformation[]
+     */
+    public function getAdditionalInformationForm(): array
+    {
+        if ($this->additionalInformationForm !== null) {
+            return $this->additionalInformationForm;
+        }
+
+        if (!empty($this->additional_information)) {
+            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
+        } else {
+            $this->additionalInformationForm = [new LeadAdditionalInformation()];
+        }
+
+        return $this->additionalInformationForm;
+    }
+
+    /**
+     * @return LeadAdditionalInformation
+     */
+    public function getAdditionalInformationFormFirstElement(): LeadAdditionalInformation
+    {
+        return $this->getAdditionalInformationForm()[0];
+    }
+
+    /**
+     * @param string|null $pnr
+     */
+    public function setAdditionalInformationFormFirstElementPnr(?string $pnr): void
+    {
+        $additionalInfo = $this->getAdditionalInformationFormFirstElement();
+        $additionalInfo->pnr = $pnr;
     }
 
     /**
@@ -302,7 +365,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
             [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id', 'l_is_test'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
@@ -425,6 +488,51 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $clone;
     }
 
+	/**
+	 * @param $phoneNumber
+	 * @param $clientId
+	 * @param $projectId
+	 * @param $sourceId
+	 * @param $gmt
+	 * @return Lead
+	 */
+    public static function createByIncomingCall(
+        $phoneNumber,
+        $clientId,
+        $projectId,
+        $sourceId,
+        $gmt
+    ): self
+    {
+        $lead = new static();
+        $lead->l_client_phone = $phoneNumber;
+        $lead->client_id = $clientId;
+        $lead->project_id = $projectId;
+        $lead->source_id = $sourceId;
+        $lead->offset_gmt = $gmt;
+        $lead->uid = self::generateUid();
+        $lead->gid = self::generateGid();
+        $lead->status = self::STATUS_PENDING;
+        $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
+        $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
+        $lead->recordEvent(new LeadCreatedByIncomingCallEvent($lead));
+        return $lead;
+    }
+
+    public static function createByApi(): self
+    {
+        $lead = new static();
+        $lead->gid = self::generateGid();
+        $lead->scenario = self::SCENARIO_API;
+        $lead->l_type_create = self::TYPE_CREATE_API;
+        return $lead;
+    }
+
+    public function eventLeadCreatedByApiEvent(): void
+    {
+        $this->recordEvent(new LeadCreatedByApiEvent($this, $this->status));
+    }
+
     /**
      * @param array $segments
      * @return bool
@@ -453,7 +561,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return string
      */
-    private static function generateUid(): string
+    public static function generateUid(): string
     {
         return uniqid();
     }
@@ -461,7 +569,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return string
      */
-    private static function generateGid(): string
+    public static function generateGid(): string
     {
         return md5(uniqid('', true));
     }
@@ -507,6 +615,11 @@ class Lead extends ActiveRecord implements AggregateRoot
         $this->setAnswered(true);
     }
 
+    public function notAnswered()
+    {
+        $this->setAnswered(false);
+    }
+
     /**
      * @param bool $value
      */
@@ -549,26 +662,14 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     /**
      * @param int|null $userId
-     * @param bool $useRelation
      * @return bool
      */
-    public function isOwner(?int $userId, bool $useRelation = true): bool
+    public function isOwner(?int $userId): bool
     {
         if ($userId === null) {
             return false;
         }
-        if ($useRelation) {
-            return $this->employee && $this->employee->id === $userId;
-        }
         return $this->employee_id === $userId;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isIOwner(): bool
-    {
-        return $this->isOwner(Yii::$app->user->id, false);
     }
 
     /**
@@ -959,7 +1060,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             return;
         }
 
-        if (!$this->isOwner($newOwnerId, false)) {
+        if (!$this->isOwner($newOwnerId)) {
             $this->setOwner($newOwnerId);
         }
     }
@@ -1089,6 +1190,32 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function isCallProcessing(): bool
     {
         return $this->l_call_status_id === self::CALL_STATUS_PROCESS;
+    }
+
+    public function callCancel(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_CANCEL);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallCancel(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_CANCEL;
+    }
+
+    public function callQueue(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_QUEUE);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallQueue(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_QUEUE;
     }
 
     public function callReady(): void
@@ -1283,6 +1410,22 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getCalls()
+    {
+        return $this->hasMany(Call::class, ['c_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmails()
+    {
+        return $this->hasMany(Email::class, ['e_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getLeadCallExperts()
     {
         return $this->hasMany(LeadCallExpert::class, ['lce_lead_id' => 'id']);
@@ -1380,6 +1523,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getReasons()
+    {
+        return $this->hasMany(Reason::class, ['lead_id' => 'id']);
+    }
+
+    /**
      * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
@@ -1410,6 +1561,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function getLeadPreferences(): ActiveQuery
     {
         return $this->hasOne(LeadPreferences::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadTasks()
+    {
+        return $this->hasMany(LeadTask::class, ['lt_lead_id' => 'id']);
     }
 
     /**
@@ -1452,6 +1611,13 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->hasMany(ProfitSplit::class, ['ps_lead_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPsUsers()
+    {
+        return $this->hasMany(Employee::class, ['id' => 'ps_user_id'])->viaTable('profit_split', ['ps_lead_id' => 'id']);
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -2233,6 +2399,17 @@ Reason: {reason}
 
 
     /**
+     * @return int
+     */
+    public function getCountOutCallsLastFlow(): int
+    {
+        if ($this->lastLeadFlow) {
+            return (int)$this->lastLeadFlow->lf_out_calls;
+        }
+        return 0;
+    }
+
+    /**
      * @return bool
      */
     public function createOrUpdateQCall(): bool
@@ -2245,6 +2422,9 @@ Reason: {reason}
         }
 
         $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
+
+        // Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig ? $qcConfig->attributes : null]), 'info\createOrUpdateQCall');
+
         $lq = $this->leadQcall;
 
         if ($qcConfig) {
@@ -2256,10 +2436,11 @@ Reason: {reason}
             }
 
             $date = (new CalculateDateService())->calculate(
+                $qcConfig->qc_time_from,
+                $qcConfig->qc_time_to,
                 $qcConfig->qc_client_time_enable,
                 $this->offset_gmt,
-                $qcConfig->qc_time_from,
-                $qcConfig->qc_time_to
+                'now'
             );
 
             $lq->lqc_dt_from = $date->from;
@@ -2281,6 +2462,108 @@ Reason: {reason}
         return false;
     }
 
+    /**
+     * @param string $phoneNumber
+     * @param int|null $project_id
+     * @param bool $sql
+     * @return array|string|ActiveRecord|null
+     */
+    public static function findLastLeadByClientPhone(string $phoneNumber = '', ?int $project_id = null, bool $sql = false)
+    {
+        $query = self::find()->innerJoinWith(['client.clientPhones'])
+            ->where(['client_phone.phone' => $phoneNumber])
+            ->andWhere(['<>', 'leads.status', self::STATUS_TRASH])
+            ->orderBy(['leads.id' => SORT_DESC])
+            ->limit(1);
+
+        if ($project_id) {
+            $query->andWhere(['leads.project_id' => $project_id]);
+        }
+
+        return $sql ? $query->createCommand()->getRawSql() : $query->one();
+    }
+
+    /**
+     * @param string $phoneNumber
+     * @param int $project_id
+     * @param int $source_id
+     * @param $gmt
+     * @return static
+     */
+    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0, $gmt): self
+    {
+        $lead = new self();
+        $lead->l_client_phone = $phoneNumber;
+        $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
+
+        $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+        if($clientPhone) {
+            $client = $clientPhone->client;
+        } else {
+            $client = new Client();
+            $client->first_name = 'ClientName';
+            $client->created = date('Y-m-d H:i:s');
+
+            if($client->save()) {
+                $clientPhone = new ClientPhone();
+                $clientPhone->phone = $phoneNumber;
+                $clientPhone->client_id = $client->id;
+                $clientPhone->comments = 'incoming';
+                if (!$clientPhone->save()) {
+                    Yii::error(VarDumper::dumpAsString($clientPhone->errors), 'Model:Lead:createNewLeadByPhone:ClientPhone:save');
+                }
+            }
+        }
+
+        if($client) {
+
+            $lead->status = self::STATUS_PENDING;
+            //$lead->employee_id = $this->c_created_user_id;
+            $lead->client_id = $client->id;
+            $lead->project_id = $project_id;
+            $lead->source_id = $source_id;
+            $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
+            $lead->offset_gmt = $gmt;
+            $source = null;
+
+            if ($source_id) {
+                $source = Sources::findOne(['id' => $lead->source_id]);
+            }
+
+            if (!$source) {
+                $source = Sources::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+            }
+
+            if($source) {
+                $lead->source_id = $source->id;
+            }
+
+            if ($lead->save()) {
+                /*self::updateAll(['c_lead_id' => $lead->id], ['c_id' => $this->c_id]);
+
+                if($lead->employee_id) {
+                    $task = Task::find()->where(['t_key' => Task::TYPE_MISSED_CALL])->limit(1)->one();
+
+                    if ($task) {
+                        $lt = new LeadTask();
+                        $lt->lt_lead_id = $lead->id;
+                        $lt->lt_task_id = $task->t_id;
+                        $lt->lt_user_id = $lead->employee_id;
+                        $lt->lt_date = date('Y-m-d');
+                        if (!$lt->save()) {
+                            Yii::error(VarDumper::dumpAsString($lt->errors), 'Model:Lead:createNewLeadByPhone:LeadTask:save');
+                        }
+                    }
+                }*/
+
+            } else {
+                Yii::error(VarDumper::dumpAsString($lead->errors), 'Model:Lead:createNewLeadByPhone:Lead:save');
+            }
+        }
+
+        return $lead;
+    }
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -2293,7 +2576,20 @@ Reason: {reason}
                 LeadFlow::addStateFlow($this);
 
                 if ($this->scenario === self::SCENARIO_API) {
-                    $this->createOrUpdateQCall();
+                    try {
+                        $service = Yii::createObject(QCallService::class);
+                        $service->create(
+                            $this->id,
+                            new Config(
+                                $this->status,
+                                $this->getCountOutCallsLastFlow()
+                            ),
+                            ($this->project_id * 10),
+                            $this->offset_gmt
+                        );
+                    } catch (\Throwable $e) {
+                        Yii::error($e, 'Lead:AfterSave:QCallService:create');
+                    }
                 }
 
                 /*$job = new QuickSearchInitPriceJob();
@@ -2710,7 +3006,7 @@ Reason: {reason}
     {
         if (parent::beforeSave($insert)) {
 
-            if ($this->enableActiveRecordEvents) {
+//            if ($this->enableActiveRecordEvents) {
 
                 if ($insert) {
                     //$this->created = date('Y-m-d H:i:s');
@@ -2726,7 +3022,7 @@ Reason: {reason}
                         'source_id' => $this->source_id
                     ]);
                     if ($leadExistByUID !== null) {
-                        $this->uid = uniqid();
+                        $this->uid = self::generateUid();
                     }
 
                     /*if(!$this->gid) {
@@ -2737,8 +3033,12 @@ Reason: {reason}
                     //$this->updated = date('Y-m-d H:i:s');
                 }
 
-                if(!$this->gid) {
-                    $this->gid = md5(uniqid('', true));
+                if (!$this->uid) {
+                    $this->uid = self::generateUid();
+                }
+
+                if (!$this->gid) {
+                    $this->gid = self::generateGid();
                 }
 
                 $this->adults = (int) $this->adults;
@@ -2747,7 +3047,7 @@ Reason: {reason}
                 $this->bo_flight_id = (int) $this->bo_flight_id;
                 $this->agents_processing_fee = ($this->adults + $this->children) * self::AGENT_PROCESSING_FEE_PER_PAX;
 
-            }
+//            }
 
             return true;
         }
@@ -2789,7 +3089,7 @@ Reason: {reason}
             $this->additional_information = json_encode($this->additional_information);
         } else {
             $separateInfo = [];
-            foreach ($this->additionalInformationForm as $additionalInformation) {
+            foreach ($this->getAdditionalInformationForm() as $additionalInformation) {
                 $separateInfo[] = $additionalInformation->attributes;
             }
             $this->additional_information = json_encode($separateInfo);
@@ -2798,24 +3098,100 @@ Reason: {reason}
         parent::afterValidate();
     }
 
-    public function afterFind()
-    {
-        parent::afterFind();
+//    public function afterFind()
+//    {
+//        parent::afterFind();
 
-        if (!empty($this->additional_information)) {
-            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
+//        if (!empty($this->additional_information)) {
+//            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
+//        }
+
+//        $this->totalTips = $this->tips ? $this->tips/2 : 0;
+
+//        $processing_fee_per_pax = self::AGENT_PROCESSING_FEE_PER_PAX;
+//
+//        if($this->employee_id && $this->employee) {
+//            $groups = $this->employee->ugsGroups;
+//            if($groups) {
+//                foreach ($groups as $group) {
+//                    if($group->ug_processing_fee) {
+//                        $processing_fee_per_pax = $group->ug_processing_fee;
+//                        break;
+//                    }
+//                }
+//                unset($groups);
+//            }
+//        }
+//
+//        if($this->final_profit !== null) {
+//            $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
+//        } else {
+//            $this->finalProfit = $this->final_profit;
+//        }
+
+//        $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
+//        $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
+//    }
+
+    private $totalTips;
+
+    public function getTotalTips()
+    {
+        if ($this->totalTips !== null) {
+            return $this->totalTips;
         }
 
         $this->totalTips = $this->tips ? $this->tips/2 : 0;
 
-        $processing_fee_per_pax = self::AGENT_PROCESSING_FEE_PER_PAX;
+        return $this->totalTips;
+    }
 
-        if($this->employee_id && $this->employee) {
+    private $agentsProcessingFee;
+
+    public function getAgentsProcessingFee()
+    {
+        if ($this->agentsProcessingFee !== null) {
+            return $this->agentsProcessingFee;
+        }
+
+        $this->agentsProcessingFee = $this->agents_processing_fee ?: ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+
+        return $this->agentsProcessingFee;
+    }
+
+    private $finalProfit;
+
+    public function getFinalProfit()
+    {
+        if ($this->finalProfit !== null) {
+            return $this->finalProfit;
+        }
+
+        if ($this->final_profit !== null) {
+            $this->finalProfit = (float)$this->final_profit - ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+        } else {
+            $this->finalProfit = null;
+        }
+
+        return $this->finalProfit;
+    }
+
+    private $processingFeePerPax;
+
+    public function getProcessingFeePerPax()
+    {
+        if ($this->processingFeePerPax !== null) {
+            return $this->processingFeePerPax;
+        }
+
+        $this->processingFeePerPax = self::AGENT_PROCESSING_FEE_PER_PAX;
+
+        if ($this->employee_id && $this->employee) {
             $groups = $this->employee->ugsGroups;
-            if($groups) {
+            if ($groups) {
                 foreach ($groups as $group) {
-                    if($group->ug_processing_fee) {
-                        $processing_fee_per_pax = $group->ug_processing_fee;
+                    if ($group->ug_processing_fee) {
+                        $this->processingFeePerPax = $group->ug_processing_fee;
                         break;
                     }
                 }
@@ -2823,14 +3199,7 @@ Reason: {reason}
             }
         }
 
-        if($this->final_profit !== null) {
-            $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
-        } else {
-            $this->finalProfit = $this->final_profit;
-        }
-
-        $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
-        $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
+        return $this->processingFeePerPax;
     }
 
     /**
@@ -3233,6 +3602,7 @@ Reason: {reason}
                         'uid' => $quoteModel->uid,
                         'cabinClass' => $quoteModel->cabin,
                         'tripType' => $quoteModel->trip_type,
+						'hasSeparates' =>  $quoteModel->getTicketSegments() ? true : false
 
                         //'airlineCode' => $quoteModel->main_airline_code,
                         //'offerData' =>  $quoteModel->getInfoForEmail2()

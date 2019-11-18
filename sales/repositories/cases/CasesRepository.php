@@ -16,7 +16,7 @@ use sales\repositories\Repository;
  * @method null|Cases getByClient(int $clientId)
  * @method null|Cases getByClientProjectDepartment(int $clientId, int $projectId, ?int $departmentId)
  * @method null|Cases getByGid(string $gid)
- * @method null|Cases getOpenCasesByPhone(string $phone)
+ * @method null|Cases getByClientWithAnyStatus(string $gid)
  */
 class CasesRepository extends Repository
 {
@@ -48,6 +48,20 @@ class CasesRepository extends Repository
         throw new NotFoundException('Case is not found');
     }
 
+	/**
+	 * @param int $clientId
+	 * @return Cases
+	 */
+    public function findByClientWithAnyStatus(int $clientId): Cases
+	{
+		if ($case = Cases::find()
+			->andWhere(['cs_client_id' => $clientId])
+			->orderBy(['cs_id' => SORT_DESC])
+			->limit(1)->one()) {
+			return $case;
+		}
+		throw new NotFoundException('Case is not found');
+	}
 
     /**
      * @param int $clientId

@@ -106,7 +106,7 @@ function timezoneList()
 
 
 
-    <? if ($dataStats): ?>
+    <?php if ($dataStats): ?>
         <div class="row">
             <div class="col-md-12">
 
@@ -122,9 +122,9 @@ function timezoneList()
                     function drawChart() {
                         var data = google.visualization.arrayToDataTable([
                             ['Days', 'All', 'Pending', 'Booked', 'Sold', {role: 'annotation'}],
-                            <? foreach($dataStats as $k => $item):?>
+                            <?php foreach($dataStats as $k => $item):?>
                             ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['pending_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?=($item['done_count'] )?>'],
-                            <? endforeach;?>
+                            <?php endforeach;?>
 
                             <?//=$item['sum_price'].'$'?>
                         ]);
@@ -153,7 +153,7 @@ function timezoneList()
                 </script>
             </div>
         </div>
-    <? endif; ?>
+    <?php endif; ?>
 
     <hr/>
 
@@ -161,7 +161,7 @@ function timezoneList()
         <div class="col-md-12">
             <div class="col-md-4">
                 <div id="chart_div_projects"></div>
-                <? if ($dataSources): ?>
+                <?php if ($dataSources): ?>
 
                         <?
                         $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
@@ -171,7 +171,7 @@ function timezoneList()
                             function drawBasic1() {
                                 var data = google.visualization.arrayToDataTable([
                                     ['Project', 'Count'],
-                                    <? foreach($dataSources as $k => $item):
+                                    <?php foreach($dataSources as $k => $item):
 
                                         $user = \common\models\ApiUser::findOne($item['al_user_id']);
                                         if(!$user) continue;
@@ -180,8 +180,8 @@ function timezoneList()
                                         if(!$project) continue;
 
                                     ?>
-                                    ['<? echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
-                                    <? endforeach;?>
+                                    ['<?php echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
+                                    <?php endforeach;?>
                                 ]);
 
                                 var options = {
@@ -194,13 +194,13 @@ function timezoneList()
                             }
                         </script>
 
-                <? endif; ?>
+                <?php endif; ?>
             </div>
 
 
             <div class="col-md-4">
                 <div id="chart_div2"></div>
-                <? if($dataEmployee): ?>
+                <?php if($dataEmployee): ?>
 
                         <?
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
@@ -210,13 +210,13 @@ function timezoneList()
                             function drawBasic2() {
                                 var data = google.visualization.arrayToDataTable([
                                     ['Employee', 'Count of leads'],
-                                    <? foreach($dataEmployee as $k => $item):
+                                    <?php foreach($dataEmployee as $k => $item):
                                         $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
                                         if(!$employee) continue;
 
                                     ?>
-                                    ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                    <? endforeach;?>
+                                    ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
+                                    <?php endforeach;?>
                                 ]);
 
                                 var options = {
@@ -229,12 +229,12 @@ function timezoneList()
                             }
                         </script>
 
-                <? endif; ?>
+                <?php endif; ?>
             </div>
 
             <div class="col-md-4">
                 <div id="chart_div3"></div>
-                <? if ($dataEmployeeSold): ?>
+                <?php if ($dataEmployeeSold): ?>
 
                         <?
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
@@ -244,13 +244,13 @@ function timezoneList()
                             function drawBasic3() {
                                 var data = google.visualization.arrayToDataTable([
                                     ['Employee', 'Count of leads'],
-                                    <? foreach($dataEmployeeSold as $k => $item):
+                                    <?php foreach($dataEmployeeSold as $k => $item):
                                     $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
                                     if(!$employee) continue;
 
                                     ?>
-                                    ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                    <? endforeach;?>
+                                    ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
+                                    <?php endforeach;?>
                                 ]);
 
                                 var options = {
@@ -263,7 +263,7 @@ function timezoneList()
                             }
                         </script>
 
-                <? endif; ?>
+                <?php endif; ?>
             </div>
 
 

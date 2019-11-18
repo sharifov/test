@@ -236,6 +236,7 @@ class LeadViewController extends FController
 
 			$form = new PhoneCreateForm();
 			$form->client_id = $lead->client_id;
+			$form->required = true;
 
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 				$this->clientManageService->addPhone($lead->client, $form);
@@ -343,11 +344,15 @@ class LeadViewController extends FController
 			$form = new PhoneCreateForm();
 			$form->scenario = 'update';
 
+			$form->load(Yii::$app->request->post());
 
-			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-				if ($lead->isOwner(Yii::$app->user->id) && $user->isSimpleAgent() && $phone = ClientPhone::findOne($form->id)) {
-					$form->phone = $phone->phone;
-				}
+			if (!($user->isAdmin() || $user->isSuperAdmin())) {
+				$form->phone = null;
+			} else {
+				$form->required = true;
+			}
+
+			if ($form->validate()) {
 
 				$this->clientManageService->updatePhone($form);
 
@@ -440,6 +445,7 @@ class LeadViewController extends FController
 		try {
 			$form = new EmailCreateForm();
 			$form->client_id = $lead->client_id;
+			$form->required = true;
 
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 				$this->clientManageService->addEmails($lead->client, [$form]);
@@ -511,6 +517,7 @@ class LeadViewController extends FController
 		try {
 			$form = new EmailCreateForm();
 			$form->scenario = 'update';
+			$form->required = true;
 
 			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
 
@@ -546,12 +553,15 @@ class LeadViewController extends FController
 			$form = new EmailCreateForm();
 			$form->scenario = 'update';
 
-			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+			$form->load(Yii::$app->request->post());
 
-				if ($lead->isOwner(Yii::$app->user->id) && $user->isSimpleAgent() && $email = ClientEmail::findOne($form->id)) {
-					$form->email = $email->email;
-				}
+			if (!($user->isAdmin() || $user->isSuperAdmin())) {
+				$form->email = null;
+			} else {
+				$form->required = true;
+			}
 
+			if ($form->validate()) {
 				$this->clientManageService->updateEmail($form);
 
 				$response['error'] = false;

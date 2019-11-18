@@ -386,7 +386,26 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
 
-
+		[
+			'label' => 'Is Test',
+			'attribute' => 'l_is_test',
+			'value' => static function (\common\models\Lead $model) {
+				if ($model->l_is_test) {
+					$label = '<label class="label label-success">True</label>';
+				} else {
+					$label = '<label class="label label-danger">False</label>';
+				}
+				return $label;
+			},
+			'options' => [
+				'style' => 'width:180px'
+			],
+			'format' => 'raw',
+			'filter' => [
+				1 => 'True',
+				0 => 'False'
+			]
+		],
 
         [
             'class' => 'yii\grid\ActionColumn',

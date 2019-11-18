@@ -47,9 +47,9 @@ use yii\widgets\Pjax;
                     <td style="width: 10%">Pax</td>
                     <td>Sale Created Date</td>
                     <td>Added Date</td>
-                    <? if ($caseModel->isProcessing()): ?>
+                    <?php if ($caseModel->isProcessing()): ?>
                         <td>Sync with B/O</td>
-                    <? endif; ?>
+                    <?php endif; ?>
                 </tr>
             </table>
 

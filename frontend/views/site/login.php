@@ -63,7 +63,7 @@ use common\models\LoginForm;
     </div>
 
 
-<? /*
+<?php /*
 <div class="login-wrapper">
     <div class="site-login panel panel-primary">
         <div class="panel-heading">

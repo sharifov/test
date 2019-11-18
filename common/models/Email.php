@@ -452,6 +452,7 @@ class Email extends \yii\db\ActiveRecord
         $arr[] = $this->e_project_id;
         $arr[] = $this->e_lead_id;
         $arr[] = $this->e_email_from;
+        $arr[] = $this->e_case_id;
 
         $message = '<' . implode('.', $arr) . '>';
         return $message;
@@ -467,62 +468,62 @@ class Email extends \yii\db\ActiveRecord
         // $subject = 'RE Hello [uid:lkasdjlkjkl234]';
         // $ref_message_id = '<kiv.1.6.345.alex.connor@gmail.com> <qwewqeqweqwe.qweqwe@mail.com> <aasdfkjal.sfasldfkl@gmail.com>';
 
-        $subject = $this->e_email_subject;
-
-        $matches = [];
-        $lead = null;
-
-        preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
-
-        if(isset($matches[1]) && $matches[1]) {
-            $lead_id = (int) $matches[1];
-            $lead = Lead::find()->where(['id' => $lead_id])->one();
-        }
-
-        if(!$lead) {
-            $matches = [];
-            preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
-            if(isset($matches[1]) && $matches[1]) {
-                $lead = Lead::find()->where(['uid' => $matches[1]])->one();
-            }
-        }
-
-        //preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
-
-        if(!$lead) {
-            $matches = [];
-            preg_match_all('~<kiv\.(.+)>~iU', $this->e_ref_message_id, $matches);
-            if (isset($matches[1]) && $matches[1]) {
-                foreach ($matches[1] as $messageId) {
-                    $messageArr = explode('.', $messageId);
-                    if (isset($messageArr[2]) && $messageArr[2]) {
-                        $lead_id = (int) $messageArr[2];
-
-                        $lead = Lead::find()->where(['id' => $lead_id])->one();
-                        if($lead) {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        if($lead) {
-            $this->e_lead_id = $lead->id;
-        } else {
-            $clientEmail = ClientEmail::find()->where(['email' => $this->e_email_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            if($clientEmail && $clientEmail->client_id) {
-                $lead = Lead::find()->where(['client_id' => $clientEmail->client_id, 'status' => [Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE, Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                if(!$lead) {
-                    $lead = Lead::find()->where(['client_id' => $clientEmail->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                }
-                if($lead) {
-                    $this->e_lead_id = $lead->id;
-                }
-            }
-        }
-
-        return $this->e_lead_id;
+//        $subject = $this->e_email_subject;
+//
+//        $matches = [];
+//        $lead = null;
+//
+//        preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
+//
+//        if(isset($matches[1]) && $matches[1]) {
+//            $lead_id = (int) $matches[1];
+//            $lead = Lead::find()->where(['id' => $lead_id])->one();
+//        }
+//
+//        if(!$lead) {
+//            $matches = [];
+//            preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
+//            if(isset($matches[1]) && $matches[1]) {
+//                $lead = Lead::find()->where(['uid' => $matches[1]])->one();
+//            }
+//        }
+//
+//        //preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
+//
+//        if(!$lead) {
+//            $matches = [];
+//            preg_match_all('~<kiv\.(.+)>~iU', $this->e_ref_message_id, $matches);
+//            if (isset($matches[1]) && $matches[1]) {
+//                foreach ($matches[1] as $messageId) {
+//                    $messageArr = explode('.', $messageId);
+//                    if (isset($messageArr[2]) && $messageArr[2]) {
+//                        $lead_id = (int) $messageArr[2];
+//
+//                        $lead = Lead::find()->where(['id' => $lead_id])->one();
+//                        if($lead) {
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        if($lead) {
+//            $this->e_lead_id = $lead->id;
+//        } else {
+//            $clientEmail = ClientEmail::find()->where(['email' => $this->e_email_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+//            if($clientEmail && $clientEmail->client_id) {
+//                $lead = Lead::find()->where(['client_id' => $clientEmail->client_id, 'status' => [Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE, Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+//                if(!$lead) {
+//                    $lead = Lead::find()->where(['client_id' => $clientEmail->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+//                }
+//                if($lead) {
+//                    $this->e_lead_id = $lead->id;
+//                }
+//            }
+//        }
+//
+//        return $this->e_lead_id;
     }
 
 

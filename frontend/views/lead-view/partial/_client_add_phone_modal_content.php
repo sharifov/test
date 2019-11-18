@@ -40,6 +40,7 @@ $addPhone->client_id = $lead->client_id;
             ])->widget(PhoneInput::class, [
                 'options' => [
                     'class' => 'form-control lead-form-input-element',
+                    'required' => true
                 ],
                 'jsOptions' => [
                     'nationalMode' => false,

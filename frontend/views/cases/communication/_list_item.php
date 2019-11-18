@@ -50,7 +50,7 @@ use \common\models\Call;
 
             <?php if($call->c_call_type_id == Call::CALL_TYPE_IN):?>
                 <div class="chat__sender">Call from (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
-            <? else: ?>
+            <?php else: ?>
                 <div class="chat__sender">Call from <b><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>, (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
             <?php endif;?>
 
@@ -62,7 +62,7 @@ use \common\models\Call;
                     <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
                     Your browser does not support the audio element
                 </audio>
-            <? else: ?>
+            <?php else: ?>
                 <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_status?></div>
             <?php endif;?>
             <div><?=$call->c_call_duration > 0 ? 'Duration: ' . Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
@@ -94,7 +94,7 @@ use \common\models\Call;
                 <?php if($mail->e_type_id == Email::TYPE_INBOX):?>
                     <div class="chat__sender">Email from (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?>> )</strong>
                             to (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
-                <? else: ?>
+                <?php else: ?>
                     <div class="chat__sender">Email from <?=($mail->eCreatedUser ? Html::encode($mail->eCreatedUser->username) : '-') ?>, (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?></strong>>) to
                         (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
                 <?php endif;?>
@@ -135,7 +135,7 @@ use \common\models\Call;
         <div class="chat__message-heading">
             <?php if($sms->s_type_id == Sms::TYPE_INBOX):?>
                 <div class="chat__sender">SMS from <strong><?=Html::encode($sms->s_phone_from)?></strong> to <strong><?=Html::encode($sms->s_phone_to)?></strong></div>
-            <? else: ?>
+            <?php else: ?>
                 <div class="chat__sender">SMS from <strong><?=($sms->sCreatedUser ? Html::encode($sms->sCreatedUser->username) : '-') ?>, (<?=Html::encode($sms->s_phone_from)?>)</strong> to <strong><?=Html::encode($sms->s_phone_to)?></strong></div>
             <?php endif; ?>
             <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($sms->s_created_dt))?> <?=$sms->s_language_id ? '('.$sms->s_language_id.')' : ''?></div> <?php //11:01AM | June 9?>

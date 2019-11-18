@@ -32,6 +32,12 @@ class LeadFlow extends \yii\db\ActiveRecord
 
     use EventTrait;
 
+    public const DESCRIPTION_TAKE = 'Take';
+    public const DESCRIPTION_MANUAL_CREATE = 'Manual create';
+    public const DESCRIPTION_CALL_AUTO_CREATED_LEAD = 'Call AutoCreated Lead';
+
+    public const REASON_CREATED_BY_API = 'Created by API';
+
     /**
      * @return string
      */
@@ -78,6 +84,11 @@ class LeadFlow extends \yii\db\ActiveRecord
     {
         $this->lf_end_dt = $nextCreated ? date('Y-m-d H:i:s', strtotime($nextCreated)) : date('Y-m-d H:i:s');
         $this->lf_time_duration = (int) (strtotime($this->lf_end_dt) - strtotime($this->created));
+    }
+
+    public function resetAttempts(): void
+    {
+        $this->lf_out_calls = 0;
     }
 
     /**
@@ -181,27 +192,29 @@ class LeadFlow extends \yii\db\ActiveRecord
 
         //return $stateFlow->save();
 
-        if ($stateFlow->save()) {
-            if ($lead->employee_id) {
-                if ($checkLists = LeadChecklist::find()
-                    ->andWhere(['lc_user_id' => $lead->employee_id, 'lc_lead_id' => $lead->id])
-                    ->orderBy(['lc_created_dt' => SORT_ASC])
-                    ->all()
-                ) {
-                    foreach ($checkLists as $checkList) {
-                        $leadFlowChecklist = new LeadFlowChecklist();
-                        $leadFlowChecklist->lfc_lf_id = $stateFlow->id;
-                        $leadFlowChecklist->lfc_lc_type_id = $checkList->lc_type_id;
-                        $leadFlowChecklist->lfc_lc_user_id = $checkList->lc_user_id;
-                        if (!$leadFlowChecklist->save()) {
-                            Yii::error(VarDumper::dumpAsString($leadFlowChecklist->errors), 'LeadFlow:addStateFlow:leadFlowChecklist:save');
-                        }
-                    }
-                }
-            }
-        } else {
-            Yii::error(VarDumper::dumpAsString($stateFlow->errors), 'LeadFlow:addStateFlow:stateFlow:save');
-        }
+        //todo
+
+//        if ($stateFlow->save()) {
+//            if ($lead->employee_id) {
+//                if ($checkLists = LeadChecklist::find()
+//                    ->andWhere(['lc_user_id' => $lead->employee_id, 'lc_lead_id' => $lead->id])
+//                    ->orderBy(['lc_created_dt' => SORT_ASC])
+//                    ->all()
+//                ) {
+//                    foreach ($checkLists as $checkList) {
+//                        $leadFlowChecklist = new LeadFlowChecklist();
+//                        $leadFlowChecklist->lfc_lf_id = $stateFlow->id;
+//                        $leadFlowChecklist->lfc_lc_type_id = $checkList->lc_type_id;
+//                        $leadFlowChecklist->lfc_lc_user_id = $checkList->lc_user_id;
+//                        if (!$leadFlowChecklist->save()) {
+//                            Yii::error(VarDumper::dumpAsString($leadFlowChecklist->errors), 'LeadFlow:addStateFlow:leadFlowChecklist:save');
+//                        }
+//                    }
+//                }
+//            }
+//        } else {
+//            Yii::error(VarDumper::dumpAsString($stateFlow->errors), 'LeadFlow:addStateFlow:stateFlow:save');
+//        }
     }
 
     /**

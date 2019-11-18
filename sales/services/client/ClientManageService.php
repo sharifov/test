@@ -78,7 +78,8 @@ class ClientManageService
             $phone = ClientPhone::create(
                 $phoneForm->phone,
                 $client->id,
-				$phoneForm->type ?? null
+				$phoneForm->type ?? null,
+                $phoneForm->comments ?? null
             );
             $this->clientPhoneRepository->save($phone);
         }
@@ -90,7 +91,14 @@ class ClientManageService
     public function updatePhone(PhoneCreateForm $form): void
 	{
 		$phone = $this->clientPhoneRepository->find($form->id);
-		$phone->edit($form->phone, $form->type);
+//		$phone->edit($form->phone, $form->type);
+		if ($form->phone !== null) {
+			$phone->phone = $form->phone;
+		}
+
+		if ($form->type !== null) {
+			$phone->type = $form->type;
+		}
 		$this->clientPhoneRepository->save($phone);
 	}
 
@@ -109,7 +117,7 @@ class ClientManageService
      * @param Client $client
      * @param EmailCreateForm $emailForm
      */
-    private function addEmail(Client $client, EmailCreateForm $emailForm): void
+    public function addEmail(Client $client, EmailCreateForm $emailForm): void
     {
         if (!$emailForm->email) {
             return;
@@ -130,7 +138,15 @@ class ClientManageService
 	public function updateEmail(EmailCreateForm $form): void
 	{
 		$email = $this->clientEmailRepository->find($form->id);
-		$email->edit($form->email, $form->type);
+		// $email->editEmail($form->email), $form->type);
+		if ($form->email !== null) {
+			$email->email = $form->email;
+		}
+
+		if ($form->type !== null) {
+			$email->type = $form->type;
+		}
+
 		$this->clientEmailRepository->save($email);
 	}
 
@@ -224,6 +240,23 @@ class ClientManageService
         }
         return $client;
     }
+
+	/**
+	 * @param array $phoneNumbers
+	 * @return int
+	 */
+    public function checkIfPhoneIsTest(array $phoneNumbers): int
+	{
+		$testPhones = \Yii::$app->params['settings']['test_phone_list'] ?? \Yii::$app->params['test_phone_list'];
+
+		foreach ($phoneNumbers as $phoneNumber) {
+			if (in_array($phoneNumber, $testPhones ?? [], false)) {
+				return 1;
+			}
+		}
+
+		return 0;
+	}
 
     /**
      * @param PhoneCreateForm[] $clientPhones

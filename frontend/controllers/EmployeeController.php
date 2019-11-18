@@ -266,6 +266,16 @@ class EmployeeController extends FController
                             }
                         }
 
+                        if (is_numeric($multipleForm->leaderBoardEnabled)) {
+                            $upLde = $user->userParams;
+                            if($upLde) {
+                                $upLde->up_leaderboard_enabled = $multipleForm->leaderBoardEnabled;
+                                if(!$upLde->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upLde->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
                         if (is_numeric($multipleForm->commissionPercent)) {
                             $upCP = $user->userParams;
                             if($upCP) {

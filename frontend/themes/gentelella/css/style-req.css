@@ -5482,3 +5482,11 @@ input[disabled] + .radio-tab__text {
     border-top-color: #F39C12;
 }
 /******* END CASE SALE INFO ********/
+
+/****** FOR CLIENT PHONE/EMAIL *****/
+.yellow {
+    color: #e3c300;
+}
+.text-line-through {
+    text-decoration: line-through;
+}

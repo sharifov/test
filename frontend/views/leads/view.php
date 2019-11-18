@@ -294,14 +294,14 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                 ],
             ]) ?>
 
-            <? /*if($model->request_ip_detail): ?>
+            <?php /*if($model->request_ip_detail): ?>
             <pre>
                 <?
                     $data = @json_decode($model->request_ip_detail);
                     \yii\helpers\VarDumper::dump($data, 10, true);
                 ?>
             </pre>
-            <? endif;*/ ?>
+            <?php endif;*/ ?>
         </div>
 
     </div>

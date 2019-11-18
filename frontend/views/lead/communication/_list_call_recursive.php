@@ -8,11 +8,16 @@ use \common\models\Call;
     <table class="table table-condensed" style="background-color: rgba(255, 255,255, .7)">
         <?php foreach ($callList as $callItem):?>
             <tr>
-                <?php if (Yii::$app->user->identity->isAdmin()):?>
-                    <td style="width:50px">
-                        <u title="SID: <?=Html::encode($callItem->c_call_sid)?>"><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
-                    </td>
-                <?php endif; ?>
+                <td style="width:80px">
+                    <?php if (Yii::$app->user->identity->isAdmin()):?>
+                        <u title="SID: <?=Html::encode($callItem->c_call_sid)?>"><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u>
+                    <?php endif; ?>
+
+                    <?php if ($callItem->cDep):?>
+                        <br>
+                        <?= Html::encode($callItem->cDep->dep_name)?>
+                    <?php endif; ?>
+                </td>
                 <td class="text-left">
                     <?=$callItem->getStatusIcon()?>  <?=$callItem->getStatusName()?>
                 </td>
@@ -28,11 +33,11 @@ use \common\models\Call;
                     <?php endif;?>
                 </td>
                 <td class="text-center">
-                    <?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
+                    <small><?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?></small>
                 </td>
 
                 <td class="text-center" style="width: 90px">
-                    <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?>
+                    <small><i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?></small>
                 </td>
 
                 <td class="text-left" style="width:150px">
@@ -53,6 +58,7 @@ use \common\models\Call;
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
+
                 </td>
             </tr>
             <?php if ($callItem->calls):?>

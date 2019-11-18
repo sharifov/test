@@ -186,7 +186,7 @@ JS;
 
 
 
-    <? endif; ?>
+    <?php endif; ?>
 
     <?php Pjax::begin(); ?>
     <div class="panel panel-default">

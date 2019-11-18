@@ -3,7 +3,6 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\AttributeBehavior;
@@ -30,7 +29,7 @@ use common\components\CheckPhoneNumberJob;
  *
  * @property Client $client
  */
-class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
+class ClientPhone extends \yii\db\ActiveRecord
 {
 
     use EventTrait;
@@ -80,14 +79,16 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 	 * @param string $phone
 	 * @param int $clientId
 	 * @param int|null $phoneType
+	 * @param string|null $comments
 	 * @return ClientPhone
 	 */
-    public static function create(string $phone, int $clientId, int $phoneType = null): self
+    public static function create(string $phone, int $clientId, int $phoneType = null, string $comments = null): self
     {
         $clientPhone = new static();
         $clientPhone->phone = $phone;
         $clientPhone->client_id = $clientId;
         $clientPhone->type = $phoneType;
+        $clientPhone->comments = $comments;
         return $clientPhone;
     }
 

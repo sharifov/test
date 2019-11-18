@@ -39,7 +39,8 @@ $user = Yii::$app->user->identity;
 			]
 		])->textInput([
 			'class' => 'form-control email lead-form-input-element',
-			'type' => 'email'
+			'type' => 'email',
+            'required' => true
 		])
 		?>
 	<?php endif; ?>

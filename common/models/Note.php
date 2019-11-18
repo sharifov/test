@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 
@@ -18,7 +17,7 @@ use Yii;
  * @property Employee $employee
  * @property Lead $lead
  */
-class Note extends \yii\db\ActiveRecord implements AggregateRoot
+class Note extends \yii\db\ActiveRecord
 {
 
     use EventTrait;

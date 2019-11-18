@@ -5,7 +5,6 @@ namespace common\models;
 use common\components\BackOffice;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 use yii\base\ErrorException;
@@ -53,7 +52,7 @@ use common\components\SearchService;
  * @property QuoteTrip[] $quoteTrips
  * @property Airline[] $mainAirline
  */
-class Quote extends \yii\db\ActiveRecord implements AggregateRoot
+class Quote extends \yii\db\ActiveRecord
 {
 
     use EventTrait;
@@ -332,8 +331,8 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
     public function getFinalProfit()
     {
         $final = $this->lead->final_profit;
-        if($this->lead->agents_processing_fee){
-            $final -= $this->lead->agents_processing_fee;
+        if($this->lead->getAgentsProcessingFee()){
+            $final -= $this->lead->getAgentsProcessingFee();
         }else{
             $final -= ($this->lead->adults + $this->lead->children)*Lead::AGENT_PROCESSING_FEE_PER_PAX;
         }
@@ -387,8 +386,8 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
      */
     public function getProcessingFee()
     {
-        if($this->lead->agents_processing_fee)
-            return $this->lead->agents_processing_fee;
+        if($this->lead->getAgentsProcessingFee())
+            return $this->lead->getAgentsProcessingFee();
 
         if(!$this->employee){
             $employee = $this->lead->employee;

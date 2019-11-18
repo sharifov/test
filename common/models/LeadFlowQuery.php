@@ -9,14 +9,27 @@ class LeadFlowQuery extends ActiveQuery
 
     /**
      * @param $userId
+     * @param array $flowDescriptions ['Manual create', 'Call AutoCreated Lead']
      * @return $this
      */
-    public function lastTakenByUserId($userId): self
+    public function lastTakenByUserId($userId, array $flowDescriptions = []): self
     {
-        return $this->andWhere([
-            'employee_id' => $userId,
-            'lf_from_status_id' => Lead::STATUS_PENDING,
+        $default = [LeadFlow::DESCRIPTION_TAKE];
+        $descriptions = array_merge($default, $flowDescriptions);
+
+        $query =  $this->andWhere([
+//            'employee_id' => $userId,
+            'lf_owner_id' => $userId,
             'status' => Lead::STATUS_PROCESSING,
-        ])->asArray()->orderBy(['created' => SORT_DESC])->limit(1);
+            'lf_description' => $descriptions,
+        ]);
+
+        if (!in_array(LeadFlow::DESCRIPTION_MANUAL_CREATE, $descriptions, false)) {
+            $query->andWhere(['lf_from_status_id' => Lead::STATUS_PENDING]);
+        }
+
+        $query->asArray()->orderBy(['created' => SORT_DESC])->limit(1);
+
+        return $query;
     }
 }

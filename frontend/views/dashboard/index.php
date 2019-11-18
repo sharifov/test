@@ -224,7 +224,7 @@ JS;
             <!-- Timeline Event Detail View Area (optional) -->
             <div class="timeline-event-view"></div>
 
-        <? endif; ?>
+        <?php endif; ?>
 
         <br>
 
