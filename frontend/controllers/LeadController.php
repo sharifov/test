@@ -13,6 +13,7 @@ use common\models\EmailTemplateType;
 use common\models\Lead;
 use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
+use common\models\LeadFlow;
 use common\models\LeadLog;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
@@ -933,17 +934,23 @@ class LeadController extends FController
             ->where(['s_lead_id' => $lead->id]);
 
 
-        $query3 = (new \yii\db\Query())
-            ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
-            ->from('call')
-            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
+//        $query3 = (new \yii\db\Query())
+//            ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
+//            ->from('call')
+//            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
 
+        $query3 = (new \yii\db\Query())
+            ->addSelect(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
+            ->addSelect([new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
+            ->from('call')
+            ->where(['c_lead_id' => $lead->id])
+            ->addGroupBy(['id']);
 
         $unionQuery = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)->union($query3)])
             ->orderBy(['created_dt' => SORT_ASC]);
 
-        //echo $query1->count(); exit;
+//        echo $query3->createCommand()->getRawSql(); exit;
 
         $dataProviderCommunication = new ActiveDataProvider([
             'query' => $unionQuery,
@@ -1102,10 +1109,10 @@ class LeadController extends FController
                         'errors' => $errors
                     ];
                 } else {
-                    $lead->additionalInformationForm[0]->pnr = $attr['pnr'];
+                    $lead->setAdditionalInformationFormFirstElementPnr($attr['pnr']);
                     $quote = $lead->getAppliedAlternativeQuotes();
                     if ($quote !== null) {
-                        $quote->record_locator = $lead->additionalInformationForm[0]->pnr;
+                        $quote->record_locator = $lead->getAdditionalInformationFormFirstElement()->pnr;
                         $quote->save();
                     }
                     $lead->save();
@@ -1113,13 +1120,13 @@ class LeadController extends FController
                         'FlightRequest' => [
                             'id' => $lead->bo_flight_id,
                             'sub_sources_id' => $lead->source_id,
-                            'pnr' => $lead->additionalInformationForm[0]->pnr
+                            'pnr' => $lead->getAdditionalInformationFormFirstElement()->pnr
                         ]
                     ];
                     $result = BackOffice::sendRequest('lead/add-pnr', 'POST', json_encode($data));
                     if ($result['status'] != 'Success') {
                         $quote->record_locator = null;
-                        $lead->additionalInformationForm[0]->pnr = null;
+                        $lead->setAdditionalInformationFormFirstElementPnr(null);
                         $quote->save();
                         $lead->save();
                         Yii::$app->getSession()->setFlash('warning', sprintf(
@@ -2109,7 +2116,7 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                $lead = $this->leadManageService->create($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create');
+                $lead = $this->leadManageService->create($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {
@@ -2391,7 +2398,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalProfit = $lead->finalProfit ?: $lead->getBookedQuote()->getEstimationProfit();
+            $totalProfit = $lead->getFinalProfit() ?: $lead->getBookedQuote()->getEstimationProfit();
             $splitForm = new ProfitSplitForm($lead);
 
             $mainAgentProfit = $totalProfit;
@@ -2473,7 +2480,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalTips = $lead->totalTips;
+            $totalTips = $lead->getTotalTips();
             $splitForm = new TipsSplitForm($lead);
 
             $mainAgentTips = $totalTips;

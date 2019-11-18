@@ -2,27 +2,24 @@
 
 namespace frontend\controllers;
 
-use common\components\CountEvent;
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
+use common\models\Client;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
-use common\models\Lead2;
+use common\models\LeadFlow;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
 use common\models\Sources;
-use common\models\Test1;
 use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
-use Mpdf\Tag\P;
 use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
-use sales\access\EmployeeAccessQuery;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\access\EmployeeSourceAccess;
@@ -30,30 +27,36 @@ use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesCategory;
+use sales\events\lead\LeadCreatedByApiEvent;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\guards\ClientPhoneGuard;
 use sales\helpers\user\UserFinder;
+use sales\model\user\entity\ShiftTime;
+use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesStatusLogRepository;
 use sales\repositories\lead\LeadBadgesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
-use sales\repositories\TestRepository;
-use sales\services\api\communication\CommunicationService;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
+use sales\services\lead\LeadCreateApiService;
+use sales\services\lead\LeadManageService;
+use sales\services\lead\LeadRedialService;
 use sales\services\lead\qcall\CalculateDateService;
+use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\DayTimeHours;
+use sales\services\lead\qcall\QCallService;
 use sales\services\TransactionManager;
-use sales\StatusLog;
 use sales\temp\LeadFlowUpdate;
-use SebastianBergmann\CodeCoverage\Report\PHP;
 use Twilio\TwiML\VoiceResponse;
+use webapi\models\ApiLead;
 use Yii;
 use yii\base\Event;
 use yii\caching\DbDependency;
@@ -125,19 +128,23 @@ class TestController extends FController
     public function actionTest()
     {
 
-      die;
+
+        $phones = [
+            new PhoneCreateForm(['phone' => '+111']),
+            new PhoneCreateForm(['phone' => '+222']),
+            new PhoneCreateForm(['phone' => '+333']),
+        ];
+
+        $emails = [
+            new EmailCreateForm(['email' => '1111@1.1']),
+            new EmailCreateForm(['email' => '2222@2.2']),
+            new EmailCreateForm(['email' => '3333@3.3']),
+        ];
+
+        $client = $this->clientManageService->getOrCreate($phones, $emails);
+        VarDumper::dump($client);
 
 
-        $call = Call::findOne(1035611);
-        $call->c_status_id = Call::STATUS_RINGING;
-//        $call->c_status_id = Call::STATUS_IN_PROGRESS;
-//        $call->c_status_id = Call::STATUS_COMPLETED;
-//        $call->c_status_id = Call::STATUS_BUSY;
-//        $call->c_status_id = Call::STATUS_NO_ANSWER;
-//        $call->c_status_id = Call::STATUS_FAILED;
-//        $call->c_status_id = Call::STATUS_CANCELED;
-
-        $call->save();
         die;
         return $this->render('blank');
 

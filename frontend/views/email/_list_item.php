@@ -13,10 +13,10 @@ use yii\widgets\ActiveForm;
 
 <?php if($modelEmailView && $modelEmailView->e_id == $model->e_id):?>
 <div style="padding: 8px; background-color: rgba(175,255,236,0.5); color: darkgreen">
-<? else: ?>
+<?php else: ?>
 
 <a style="color: <?=($model->e_is_deleted ? 'darkred' : ($model->e_is_new ? 'blue' : 'black'))?>" href="<?=\yii\helpers\Url::current(['id' => $model->e_id, 'action' => null, 'edit_id' => null, 'reply_id' => null ])?>" class="view_email" data-email-id="<?=$model->e_id?>">
-<? endif; ?>
+<?php endif; ?>
 
     <div class="mail_list">
         <div class="left">
@@ -64,9 +64,9 @@ use yii\widgets\ActiveForm;
 <?php if($modelEmailView && $modelEmailView->e_id == $model->e_id):?>
     </div>
 
-<? else: ?>
+<?php else: ?>
 </a>
-<? endif; ?>
+<?php endif; ?>
 
 <?php
 /*

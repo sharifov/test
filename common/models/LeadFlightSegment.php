@@ -3,7 +3,6 @@
 namespace common\models;
 
 use common\models\local\LeadLogMessage;
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -29,7 +28,7 @@ use yii\db\ActiveRecord;
  *
  * @property Lead $lead
  */
-class LeadFlightSegment extends \yii\db\ActiveRecord implements AggregateRoot
+class LeadFlightSegment extends \yii\db\ActiveRecord
 {
 
     use EventTrait;

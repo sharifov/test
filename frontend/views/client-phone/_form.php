@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
 
 
 
-    <? //= $form->field($model, 'client_id')->textInput() ?>
+    <?php //= $form->field($model, 'client_id')->textInput() ?>
 
     <div class="col-md-6">
     <?= $form->field($model, 'client_id')->input('number', ['min' => 1]) ?>

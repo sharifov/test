@@ -107,7 +107,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                         <span class=" fa fa-angle-down"></span>
                                     </a>
                                     <ul class="dropdown-menu dropdown-usermenu pull-right">
-                                        <? /*<li><a href="javascript:;">  Profile</a>
+                                        <?php /*<li><a href="javascript:;">  Profile</a>
                                 </li>
                                 <li>
                                     <a href="javascript:;">
@@ -149,7 +149,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
                 </div>
                 <!-- /top navigation -->
-            <? endif;?>
+            <?php endif;?>
 
             <main class="main-content">
             <!-- page content -->

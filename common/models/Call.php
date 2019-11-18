@@ -3,13 +3,14 @@
 namespace common\models;
 
 use sales\access\EmployeeDepartmentAccess;
-use sales\entities\AggregateRoot;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
+use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\QCallService;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
@@ -62,7 +63,6 @@ use Locale;
  * @property Client $cClient
  * @property Department $cDep
  * @property Lead $cLead
- * @property Lead2 $cLead2
  * @property Call $cParent
  * @property Call[] $calls
  * @property Project $cProject
@@ -73,7 +73,7 @@ use Locale;
  * @property Cases[] $cases
  * @property ConferenceParticipant[] $conferenceParticipants
  */
-class Call extends \yii\db\ActiveRecord implements AggregateRoot
+class Call extends \yii\db\ActiveRecord
 {
     
     use EventTrait;
@@ -462,14 +462,6 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCLead2()
-    {
-        return $this->hasOne(Lead2::class, ['id' => 'c_lead_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getCParent()
     {
         return $this->hasOne(self::class, ['c_id' => 'c_parent_id']);
@@ -571,20 +563,28 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         parent::afterSave($insert, $changedAttributes);
 
+        $leadRepository = Yii::createObject(LeadRepository::class);
+
         $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
 
         if ($this->c_parent_id && $this->isOut() && ($lead = $this->cLead) && $lead->isCallPrepare()) {
-            $lead->callProcessing();
-            $lead->save();
+            try {
+                $lead->callProcessing();
+                $leadRepository->save($lead);
+            } catch (\Throwable $e) {
+                Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:afterSave:Lead:callProcessing');
+            }
         }
 
         if ($this->c_parent_id === null && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
 
-            if (($lead = $this->cLead2) && $lead->l_call_status_id !== Lead::CALL_STATUS_READY) {
-                $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-                if (!$lead->save(false)) {
-                    Yii::error('Call:afterSave:Lead:callStatus:ready');
+            if (($lead = $this->cLead) && !$lead->isCallReady()) {
+                try {
+                    $lead->callReady();
+                    $leadRepository->save($lead);
+                } catch (\Throwable $e) {
+                    Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:afterSave:Lead:callReady');
                 }
             }
 
@@ -598,7 +598,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
                 $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                 if ($lf) {
-                    $lf->lf_out_calls = (int) $lf->lf_out_calls + 1;
+                    $lf->lf_out_calls = (int)$lf->lf_out_calls + 1;
                     if (!$lf->update()) {
                         Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
                     }
@@ -612,11 +612,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
                     if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
                         try {
-                            $repo = Yii::createObject(LeadRepository::class);
                             $lead->followUp(null, null, 'Redial Pending max attempts reached');
-                            $repo->save($lead);
+                            $leadRepository->save($lead);
                         } catch (\Throwable $e) {
-                            Yii::error($e, 'Call:AfterSave:Lead follow up');
+                            Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead follow up');
                         }
                     }
 
@@ -624,11 +623,13 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             }
 
             if ($lead->leadQcall) {
-                $lead->createOrUpdateQCall();
+                try {
+                    $qCallService = Yii::createObject(QCallService::class);
+                    $qCallService->updateInterval($lead->leadQcall, new Config($lead->status, $lead->getCountOutCallsLastFlow()), $lead->offset_gmt);
+                } catch (\Throwable $e) {
+                    Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:QCallService:updateInterval');
+                }
             }
-//            if ($this->cLead2->leadQcall) {
-//                $this->cLead2->createOrUpdateQCall();
-//            }
         }
 
         if (!$insert) {
@@ -649,7 +650,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     }
                 }
 
-                if ((int) $this->c_source_type_id !== self::SOURCE_CONFERENCE_CALL && $this->isIn()) {
+                if ((int)$this->c_source_type_id !== self::SOURCE_CONFERENCE_CALL && $this->isIn()) {
                     if (!$this->c_parent_id) {
                         $isCallUserAccepted = CallUserAccess::find()->where([
                             'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
@@ -684,34 +685,34 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
 
-
-            if(( $this->c_lead_id || $this->c_case_id ) && $isChangedStatus && $this->isIn() && $this->isStatusInProgress() && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, self::STATUS_QUEUE], true)) {
+            if (($this->c_lead_id || $this->c_case_id) && $isChangedStatus && $this->isIn() && $this->isStatusInProgress() && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, self::STATUS_QUEUE], true)) {
 
                 $host = \Yii::$app->params['url_address'] ?? '';
 
-                if($this->c_lead_id && (int) $this->c_dep_id === Department::DEPARTMENT_SALES) {
+                if ($this->c_lead_id && (int)$this->c_dep_id === Department::DEPARTMENT_SALES) {
 
                     $lead = $this->cLead;
 
                     if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->isPending()) {
                         Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
                         try {
-                            $repo = Yii::createObject(LeadRepository::class);
-                            $lead->processing($this->c_created_user_id, null, 'Call AutoCreated Lead');
-                            // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
-                            $lead->l_answered = true;
-                            $repo->save($lead);
-                            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
-                                $qCall->delete();
-                            }
+
+                            $lead->answered();
+                            $lead->processing($this->c_created_user_id, null, LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD);
+                            $leadRepository->save($lead);
+
+                            $qCallService = Yii::createObject(QCallService::class);
+                            $qCallService->remove($lead->id);
+
                             Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                             $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
                             Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
+
                         } catch (\Throwable $e) {
-                            Yii::error(VarDumper::dumpAsString($e->getMessage()), 'Call:afterSave:Lead:update');
+                            Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:afterSave:Lead:Answered:Processing');
                         }
                     }
-//                    $lead = $this->cLead2;
+//                    $lead = $this->cLead;
 //
 //                    if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
 //                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
@@ -730,7 +731,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
 
 
-                if($this->c_case_id && ((int) $this->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $this->c_dep_id === Department::DEPARTMENT_SUPPORT)) {
+                if ($this->c_case_id && ((int)$this->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int)$this->c_dep_id === Department::DEPARTMENT_SUPPORT)) {
                     $case = $this->cCase;
 
                     if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
@@ -774,8 +775,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
             }
 
-            if ($this->c_lead_id && $this->cLead2 && $this->cLead2->employee_id) {
-                $userListNotifications[$this->cLead2->employee_id] = $this->cLead2->employee_id;
+            if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
+                $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
             }
 
             if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
@@ -794,7 +795,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
 
                 foreach ($userListNotifications as $userId) {
-                    Notifications::create($userId, $title, $message,Notifications::TYPE_WARNING,true);
+                    Notifications::create($userId, $title, $message, Notifications::TYPE_WARNING, true);
                     // Notifications::socket($userId, null, 'getNewNotification', [], true);
                     $userListSocketNotification[$userId] = $userId;
                 }
@@ -803,19 +804,48 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             //}
         }
 
-        if($this->c_lead_id && $this->cLead2) {
+        if (
+            ($insert || $isChangedStatus)
+            && $this->isIn()
+            && ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy())
+            && ($lead = $this->cLead)
+        ) {
+            $qCallService = Yii::createObject(QCallService::class);
+
+            if ($lead->isFollowUp()) {
+                try {
+                    $lead->pending($lead->employee_id, null, 'missed call');
+                    $leadRepository->save($lead);
+                    $qCallService->remove($lead->id);
+                    $qCallService->create($lead->id, new Config($lead->status, $lead->getCountOutCallsLastFlow()), ($lead->project_id * 10), $lead->offset_gmt);
+                } catch (\Throwable $e) {
+                    Yii::error($e->getMessage(), 'Call:afterSave:Lead:pending');
+                }
+            } elseif ($lead->isPending()) {
+                try {
+                    $qCallService->resetAttempts($lead);
+                    $qCallService->remove($lead->id);
+                    $qCallService->create($lead->id, new Config($lead->status, $lead->getCountOutCallsLastFlow()), ($lead->project_id * 10), $lead->offset_gmt);
+                } catch (\Throwable $e) {
+                    Yii::error($e->getMessage(), 'Call:afterSave:Lead:resetAttempts');
+                }
+            }
+        }
+
+        if($this->c_lead_id && ($lead = $this->cLead)) {
             if (($isChangedStatus || $insert) && $this->isIn() && $this->isEnded()) {
-                if ((int) $this->cLead2->l_call_status_id === Lead::CALL_STATUS_QUEUE) {
-                    $lead = $this->cLead2;
-                    $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-                    if(!$lead->update()) {
-                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead2:update');
+                if ($lead->isCallQueue()) {
+                    try {
+                        $lead->callReady();
+                        $leadRepository->save($lead);
+                    } catch (\Throwable $e) {
+                        Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead:isCallQueue:callReady');
                     }
                 }
             }
 
             if ($this->isOut()) {
-                $this->cLead2->updateLastAction();
+                $this->cLead->updateLastAction();
             }
         }
 

@@ -154,7 +154,7 @@ use \common\models\Call;
         <div class="chat__message-heading">
             <?php if($sms->s_type_id == Sms::TYPE_INBOX):?>
                 <div class="chat__sender">SMS from <strong><?=Html::encode($sms->s_phone_from)?></strong> to <strong><?=Html::encode($sms->s_phone_to)?></strong></div>
-            <? else: ?>
+            <?php else: ?>
                 <div class="chat__sender">SMS from <strong><?=($sms->sCreatedUser ? Html::encode($sms->sCreatedUser->username) : '-') ?>, (<?=Html::encode($sms->s_phone_from)?>)</strong> to <strong><?=Html::encode($sms->s_phone_to)?></strong></div>
             <?php endif; ?>
             <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($sms->s_created_dt))?> <?=$sms->s_language_id ? '('.$sms->s_language_id.')' : ''?></div> <?php //11:01AM | June 9?>

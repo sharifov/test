@@ -2,20 +2,26 @@
 namespace console\controllers;
 
 use common\models\Airline;
+use common\models\ClientPhone;
+use common\models\DepartmentPhoneProject;
 use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadLog;
+use common\models\LeadQcall;
 use common\models\Quote;
+use common\models\UserProjectParams;
 use frontend\models\UserSiteActivity;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\services\lead\qcall\CalculateDateService;
 use sales\services\log\GlobalLogFormatAttrService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Exception;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
@@ -49,6 +55,70 @@ class DbController extends Controller
 	{
 		parent::__construct($id, $module, $config);
 		$this->globalLogFormatAttrService = $globalLogFormatAttrService;
+	}
+
+    public function actionRemoveClientSystemPhones()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        $systemPhones = [];
+
+        foreach (DepartmentPhoneProject::find()->select(['dpp_phone_number'])->asArray()->all() as $phone) {
+            if ($phone['dpp_phone_number']) {
+                $systemPhones[$phone['dpp_phone_number']] = $phone['dpp_phone_number'];
+            }
+        }
+
+        $countDepartmentPhoneProject = count($systemPhones);
+
+        printf("\n --- Found %s phones from DepartmentPhoneProject ---\n", $this->ansiFormat($countDepartmentPhoneProject, Console::FG_YELLOW));
+
+        foreach (UserProjectParams::find()->select(['upp_phone_number', 'upp_tw_phone_number'])->asArray()->all() as $phone) {
+            if ($phone['upp_phone_number']) {
+                $systemPhones[$phone['upp_phone_number']] = $phone['upp_phone_number'];
+            }
+            if ($phone['upp_tw_phone_number']) {
+                $systemPhones[$phone['upp_tw_phone_number']] = $phone['upp_tw_phone_number'];
+            }
+        }
+
+        $countUserProjectParams = count($systemPhones) - $countDepartmentPhoneProject;
+
+        printf("\n --- Found %s phones from UserProjectParams ---\n", $this->ansiFormat($countUserProjectParams, Console::FG_YELLOW));
+
+        $countClientPhones = ClientPhone::find()->andWhere(['phone' => $systemPhones])->count();
+
+        printf("\n --- Found %s phones from ClientPhones ---\n", $this->ansiFormat($countClientPhones, Console::FG_YELLOW));
+
+        $countDeleted = ClientPhone::deleteAll(['phone' => $systemPhones]);
+
+        printf("\n --- Deleted %s ClientPhones ---\n", $this->ansiFormat($countDeleted, Console::FG_YELLOW));
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+	}
+
+    public function actionLeadQcall()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $leads = Lead::find()
+            ->andWhere(['status' => 1])
+            ->andWhere(['NOT IN', 'id', (new Query())->select('lqc_lead_id')->from(LeadQcall::tableName())])
+            ->all();
+        foreach ($leads as $lead) {
+
+            $lq = new LeadQcall();
+            $lq->lqc_lead_id = $lead->id;
+            $lq->lqc_weight = 0;
+            $lq->lqc_created_dt = $lead->created;
+
+            $lq->lqc_dt_from = date('Y-m-d H:i:s');
+            $lq->lqc_dt_to = date('Y-m-d H:i:s', strtotime('+3 days'));
+
+            if (!$lq->save()) {
+                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 
 	/**

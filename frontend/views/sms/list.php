@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td width="100px"><?=($nr++)?></td>
                         <td><?=Html::encode($phone)?></td>
                     </tr>
-                <? endforeach; ?>
+                <?php endforeach; ?>
 
             </table>
 

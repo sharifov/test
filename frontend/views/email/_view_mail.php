@@ -24,7 +24,7 @@ use yii\widgets\ActiveForm;
                             'method' => 'post',
                         ],*/
                     ]) ?>
-                <? endif; ?>
+                <?php endif; ?>
                 <?php if($model->e_type_id == \common\models\Email::TYPE_INBOX): ?>
                     <?= Html::a('<i class="fa fa-reply"></i> Reply', \yii\helpers\Url::current(['id' => null, 'reply_id' => $model->e_id, 'edit_id' => null]), [
                         'class' => 'btn btn-sm btn-primary',
@@ -36,7 +36,7 @@ use yii\widgets\ActiveForm;
                             'method' => 'post',
                         ],*/
                     ]) ?>
-                <? endif; ?>
+                <?php endif; ?>
 
                 <?php /*<button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Forward"><i class="fa fa-share"></i></button>
                 <button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Print"><i class="fa fa-print"></i></button>*/ ?>

@@ -4,6 +4,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
+use dosamigos\datepicker\DatePicker;
 use sales\formatters\client\ClientTimeFormatter;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
@@ -20,9 +21,12 @@ use yii\helpers\Url;
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'rowOptions' => static function (LeadQcallSearch $model, $index, $widget, $grid) {
-        if (!$model->deadline) {
-            return ['class' => 'danger'];
-        }
+//        if (!$model->deadline) {
+//            return ['class' => 'danger'];
+//        }
+        if ($model->l_is_test) {
+        	return ['class' => 'info'];
+		}
     },
     'columns' => [
         ['class' => 'yii\grid\SerialColumn'],
@@ -37,12 +41,14 @@ use yii\helpers\Url;
             'visible' => $user->isAdmin(),
         ],
         [
+            'attribute' => 'l_call_status_id',
             'label' => 'Call status',
             'value' => static function (LeadQcall $model) {
                 return Lead::CALL_STATUS_LIST[$model->lqcLead->l_call_status_id] ?? '-';
             },
             'format' => 'raw',
-            'visible' => $user->isAdmin()
+            'visible' => $user->isAdmin(),
+            'filter' =>  Lead::CALL_STATUS_LIST,
         ],
         [
             'label' => 'Project',
@@ -83,7 +89,8 @@ use yii\helpers\Url;
             'options' => [
                 'style' => 'width:160px'
             ],
-            'format' => 'raw'
+            'format' => 'raw',
+            'visible' => !$user->isAgent(),
         ],
         [
             'header' => 'Client time',
@@ -92,6 +99,7 @@ use yii\helpers\Url;
                 return ClientTimeFormatter::dayHoursFormat($model->lqcLead->getClientTime2(), $model->lqcLead->offset_gmt);
             },
             'options' => ['style' => 'width:90px'],
+            'visible' => !$user->isAgent(),
         ],
         [
             'label' => 'Client / Phones',
@@ -192,8 +200,8 @@ use yii\helpers\Url;
 //                ],
         [
             'attribute' => 'attempts',
-            'filter' => false,
-
+//            'filter' => false,
+//			'enableSorting' => false,
             'visible' => !$user->isAgent(),
         ],
         [
@@ -206,7 +214,19 @@ use yii\helpers\Url;
                 return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
             },
             'format' => 'raw',
-            'visible' => $user->isAdmin()
+            'visible' => $user->isAdmin(),
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'lqc_dt_from',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
         [
             'attribute' => 'lqc_dt_to',
@@ -214,7 +234,19 @@ use yii\helpers\Url;
                 return $model->lqc_dt_to ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_to)) : '-';
             },
             'format' => 'raw',
-            'visible' => $user->isAdmin()
+            'visible' => $user->isAdmin(),
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'lqc_dt_to',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
 //                [
 //                    'label' => 'Duration',
@@ -235,7 +267,29 @@ use yii\helpers\Url;
                 }
                 return floor((strtotime($model->lqc_dt_to) - time()) / 60);
             },
+            'visible' => !$user->isAgent(),
         ],
+		[
+			'label' => 'Is Test',
+			'attribute' => 'l_is_test',
+			'value' => static function (LeadQcall $model) {
+				if ($model->l_is_test) {
+					$label = '<label class="label label-success">True</label>';
+				} else {
+					$label = '<label class="label label-danger">False</label>';
+				}
+				return $label;
+			},
+			'options' => [
+				'style' => 'width:120px'
+			],
+			'format' => 'raw',
+			'filter' => [
+				1 => 'True',
+				0 => 'False'
+			],
+			'visible' => ($user->checkIfUsersIpIsAllowed() || Yii::$app->request->get('is_test'))
+		],
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{call}',

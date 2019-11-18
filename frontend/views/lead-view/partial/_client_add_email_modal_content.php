@@ -34,13 +34,14 @@ $addEmail->client_id = $lead->client_id;
 	<?php if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
         <?=
         $form->field($addEmail, 'email', [
-        'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
-        'options' => [
-        'class' => 'form-group'
-        ]
+            'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
+            'options' => [
+                'class' => 'form-group'
+            ]
         ])->textInput([
-        'class' => 'form-control email lead-form-input-element',
-        'type' => 'email'
+            'class' => 'form-control email lead-form-input-element',
+            'type' => 'email',
+            'required' => true
         ])
         ?>
 	<?php endif; ?>

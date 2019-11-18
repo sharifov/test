@@ -27,7 +27,7 @@ use common\models\QuoteStatusLog;
                 <tr>
                     <th><?= \common\models\Quote::getLabelByStatus($item->status) ?></th>
                     <th><?= empty($item->employee) ? 'System' : $item->employee->username ?></th>
-                    <th><?= $item->created ?></th>
+                    <th><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(strtotime($item->created)) ?></th>
                 </tr>
             <?php endforeach;
         else : ?>

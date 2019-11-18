@@ -333,7 +333,7 @@ echo GridView::widget([
     ],*/
 
     'rowOptions' => static function (Lead $lead) {
-        if ($lead->isProcessing() && $lead->isOwner(Yii::$app->user->id, false)) {
+        if ($lead->isProcessing() && $lead->isOwner(Yii::$app->user->id)) {
             return [
                 'class' => 'highlighted'
             ];

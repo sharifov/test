@@ -1,10 +1,14 @@
 <?php
 
 use common\models\Client;
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var $model Client */
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 ?>
 <div class="row">
@@ -53,6 +57,7 @@ use yii\widgets\DetailView;
                         return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                     },
                     'format' => 'html',
+                    'visible' => !$user->isAgent(),
                 ],
                 [
                     'attribute' => 'updated',
@@ -60,6 +65,7 @@ use yii\widgets\DetailView;
                         return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                     },
                     'format' => 'html',
+                    'visible' => !$user->isAgent(),
                 ],
             ],
         ]) ?>

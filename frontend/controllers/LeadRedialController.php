@@ -59,22 +59,34 @@ class LeadRedialController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
+		$params = Yii::$app->request->queryParams;
+		$params['is_test'] = Yii::$app->request->get('is_test', 0);
         $searchModel = new LeadQcallSearch();
-        $dataProvider = $searchModel->searchByRedial(Yii::$app->request->queryParams, $user);
+        $dataProvider = $searchModel->searchByRedial($params, $user);
         $dataProviderLastCalls = $searchModel->searchLastCalls([], $user);
 
         $guard = [];
 
+        $flowDescriptions = LeadRedialService::getFlowDescriptions();
+
         try {
-            $this->takeGuard->frequencyMinutesGuard($user);
+            $this->takeGuard->frequencyMinutesGuard($user, $flowDescriptions);
         } catch (\DomainException $e) {
             $guard[] = $e->getMessage();
         }
 
         try {
-            $this->takeGuard->minPercentGuard($user);
+            $this->takeGuard->minPercentGuard($user, $flowDescriptions);
         } catch (\DomainException $e) {
             $guard[] = $e->getMessage();
+        }
+
+        if ((bool)\Yii::$app->params['settings']['enable_redial_shift_time_limits']) {
+            try {
+                $this->takeGuard->shiftTimeGuard($user);
+            } catch (\DomainException $e) {
+                $guard[] = $e->getMessage();
+            }
         }
 
         return $this->render('index', [

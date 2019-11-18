@@ -7,15 +7,21 @@ use Yii;
 class CalculateDateService
 {
 
-    public function calculate(bool $clientTimeEnable, ?string $clientGmt, int $from, int $to): Date
+    public function calculate(
+        int $from,
+        int $to,
+        bool $clientTimeEnable,
+        ?string $clientGmt,
+        string $time = 'now'
+    ): Interval
     {
         $fromInterval = new \DateInterval('PT' . $from . 'M');
         $toInterval = new \DateInterval('PT' . $to . 'M');
 
         if (!$clientTimeEnable || !$clientGmt) {
-            return new Date(
-                (new \DateTimeImmutable())->add($fromInterval)->format('Y-m-d H:i:s'),
-                (new \DateTimeImmutable())->add($toInterval)->format('Y-m-d H:i:s')
+            return new Interval(
+                (new \DateTimeImmutable($time))->add($fromInterval),
+                (new \DateTimeImmutable($time))->add($toInterval)
             );
         }
 
@@ -32,7 +38,7 @@ class CalculateDateService
             $clientTimeZone = new \DateTimeZone('UTC');
         }
 
-        $currentTimeClient = (new \DateTimeImmutable())->setTimezone($clientTimeZone);
+        $currentTimeClient = (new \DateTimeImmutable($time))->setTimezone($clientTimeZone);
 
         $availableFromClient = $currentTimeClient->setTime($dayTimeHours->startHour, $dayTimeHours->startMinutes);
 
@@ -50,9 +56,9 @@ class CalculateDateService
             $setupTo = $setupFrom->add($toInterval);
         }
 
-        return new Date(
-            $setupFrom->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
-            $setupTo->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s')
+        return new Interval(
+            $setupFrom->setTimezone(new \DateTimeZone('UTC')),
+            $setupTo->setTimezone(new \DateTimeZone('UTC'))
         );
     }
 

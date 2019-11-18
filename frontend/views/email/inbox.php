@@ -118,7 +118,7 @@ $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                                 <div class="col-md-5">
                                     <?php if($is_admin):?>
                                         <?=Html::dropDownList('email_project_id', Yii::$app->request->get('email_project_id'), $projectList, ['prompt' => 'All projects', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
-                                    <? endif; ?>
+                                    <?php endif; ?>
 
                                     <?=Html::dropDownList('email_email', Yii::$app->request->get('email_email'), $mailList, ['prompt' => 'All emails', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                 </div>
@@ -161,7 +161,7 @@ $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                         <div class="col-sm-9 mail_view">
                             <?php if($modelEmailView): ?>
                                 <?=$this->render('_view_mail', ['model' => $modelEmailView])?>
-                            <? elseif(Yii::$app->request->get('action') === 'new' || Yii::$app->request->get('edit_id') || Yii::$app->request->get('reply_id')): ?>
+                            <?php elseif(Yii::$app->request->get('action') === 'new' || Yii::$app->request->get('edit_id') || Yii::$app->request->get('reply_id')): ?>
 
                                 <?php
                                     if(Yii::$app->request->get('action') === 'new') {
@@ -176,9 +176,9 @@ $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                                 ?>
 
                                 <?=$this->render('_new_mail', ['model' => $modelNewEmail, 'mailList' => $mailList, 'action' => $action])?>
-                            <? else: ?>
+                            <?php else: ?>
                                 <?=$this->render('_stats', ['model' => $modelNewEmail, 'mailList' => $mailList])?>
-                            <? endif; ?>
+                            <?php endif; ?>
 
                         </div>
                         <!-- /CONTENT MAIL -->

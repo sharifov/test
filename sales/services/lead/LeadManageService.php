@@ -2,11 +2,15 @@
 
 namespace sales\services\lead;
 
+use common\models\Client;
+use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
+use common\models\Sources;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
+use sales\forms\lead\PhoneCreateForm;
 use sales\forms\lead\PreferencesCreateForm;
 use sales\forms\lead\SegmentCreateForm;
 use sales\forms\lead\SegmentEditForm;
@@ -81,6 +85,55 @@ class LeadManageService
         $this->casesRepository = $casesRepository;
         $this->casesManageService = $casesManageService;
         $this->transaction = $transaction;
+    }
+
+	/**
+	 * @param string $phoneNumber
+	 * @param int $projectId
+	 * @param int $sourceId
+	 * @param string $gmt
+	 * @param bool $isTest
+	 * @return Lead
+	 * @throws \Throwable
+	 */
+    public function createByIncomingCall(string $phoneNumber = '', int $projectId = 0, int $sourceId = 0, $gmt = ''): Lead
+    {
+        $lead = $this->transaction->wrap(function() use ($phoneNumber, $projectId, $sourceId, $gmt) {
+
+            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $phoneNumber, 'comments' => 'incoming'])]);
+
+            $sourceId = $this->getSourceId($sourceId, $projectId);
+
+
+            $lead = Lead::createByIncomingCall($phoneNumber, $client->id, $projectId, $sourceId, $gmt);
+
+            $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$phoneNumber]);
+
+            $this->leadRepository->save($lead);
+
+            return $lead;
+
+        });
+
+        return $lead;
+    }
+
+    /**
+     * @param int $sourceId
+     * @param int $projectId
+     * @return int
+     */
+    private function getSourceId(int $sourceId, int $projectId): int
+    {
+        if ($sourceId && ($source = Sources::findOne(['id' => $sourceId]))) {
+            return $source->id;
+        }
+
+        if ($source = Sources::find()->select('id')->where(['project_id' => $projectId, 'default' => true])->one()) {
+            return $source->id;
+        }
+
+        return $sourceId;
     }
 
     /**
@@ -191,6 +244,8 @@ class LeadManageService
 //        }
 
         $lead->setTripType($this->calculateTripType($form->segments));
+
+        $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest($phones);
 
         $leadId = $this->leadRepository->save($lead);
 

@@ -4,8 +4,8 @@ namespace sales\forms\lead;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\ClientPhone;
-use common\models\DepartmentPhoneProject;
-use common\models\UserProjectParams;
+use sales\services\client\InternalPhoneException;
+use sales\services\client\InternalPhoneGuard;
 use yii\base\Model;
 
 /**
@@ -14,6 +14,8 @@ use yii\base\Model;
  * @property string $help - only for View for multiInput Widget
  * @property boolean $required
  * @property string $message
+ * @property string $comments
+ * @property $type
  */
 class PhoneCreateForm extends Model
 {
@@ -44,6 +46,8 @@ class PhoneCreateForm extends Model
 
     public $message = 'Phone cannot be blank.';
 
+    public $comments;
+
 
 	/**
      * @return array
@@ -51,19 +55,30 @@ class PhoneCreateForm extends Model
     public function rules(): array
     {
         return [
-//            ['phone', 'required'],
             ['phone', 'validateRequired', 'skipOnEmpty' => false],
-            ['phone', 'string', 'max' => 100],
+			['phone', 'default', 'value' => null],
+			['phone', 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],
             ['phone', 'filter', 'filter' => static function($value) {
-                return str_replace(['-', ' '], '', trim($value));
+				return $value === null ? null : str_replace(['-', ' '], '', trim($value));
             }],
-			['phone', 'checkForExistence'],
+            ['phone', 'internalPhoneValidate'],
 			[['type', 'client_id', 'id'], 'integer'],
 			['type', 'checkTypeForExistence'],
 			[['phone', 'client_id'], 'unique', 'targetClass' => ClientPhone::class,  'targetAttribute' => ['phone', 'client_id'], 'message' => 'Client already has this phone number', 'except' => 'update'],
-			['phone', 'checkUniqueClientPhone', 'on' => 'update']
+			['phone', 'checkUniqueClientPhone', 'on' => 'update'],
+            ['comments', 'string'],
 		];
+    }
+
+    public function internalPhoneValidate($attribute): void
+    {
+        try {
+            $guard = \Yii::createObject(InternalPhoneGuard::class);
+            $guard->guard($this->phone);
+        } catch (InternalPhoneException $e) {
+            $this->addError($attribute, $e->getMessage());
+        }
     }
 
     public function validateRequired($attribute, $params): void
@@ -72,19 +87,6 @@ class PhoneCreateForm extends Model
             $this->addError($attribute, $this->message);
         }
     }
-
-	/**
-	 * @param $attribute
-	 * @param $params
-	 */
-	public function checkForExistence($attribute, $params): void
-	{
-		if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $this->phone])->exists()) {
-			$this->addError($attribute, 'This phone number is not allowed (General)');
-		} elseif (UserProjectParams::find()->where(['upp_tw_phone_number' => $this->phone])->exists()) {
-			$this->addError($attribute, 'This phone number is not allowed (Direct)');
-		}
-	}
 
 	/**
 	 * @param $attribute

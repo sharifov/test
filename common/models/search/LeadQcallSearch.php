@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use sales\services\lead\qcall\DayTimeHours;
 use Yii;
 use common\models\Call;
 use common\models\ClientPhone;
@@ -25,6 +26,8 @@ use yii\helpers\VarDumper;
  * @property $cabin
  * @property $attempts
  * @property $deadline
+ * @property $l_is_test
+ * @property $l_call_status_id
  */
 class LeadQcallSearch extends LeadQcall
 {
@@ -34,6 +37,8 @@ class LeadQcallSearch extends LeadQcall
     public $cabin;
     public $attempts;
     public $deadline;
+    public $l_is_test;
+    public $l_call_status_id;
 
     /**
      * {@inheritdoc}
@@ -41,14 +46,17 @@ class LeadQcallSearch extends LeadQcall
     public function rules()
     {
         return [
-            [['lqc_lead_id', 'lqc_weight'], 'integer'],
+            [['lqc_lead_id', 'lqc_weight', 'l_is_test', 'deadline'], 'integer'],
 
-            [['lqc_dt_from', 'lqc_dt_to', 'current_dt'], 'safe'],
+            [['current_dt', 'l_is_test', 'deadline'], 'safe'],
+            [['lqc_dt_from', 'lqc_dt_to'], 'string'],
 
             ['projectId', 'integer'],
             ['leadStatus', 'integer'],
             ['cabin', 'in', 'range' => array_keys(Lead::CABIN_LIST)],
+            ['l_is_test', 'in', 'range' => [0,1]],
             ['attempts', 'integer'],
+            ['l_call_status_id', 'integer'],
         ];
     }
 
@@ -163,12 +171,23 @@ class LeadQcallSearch extends LeadQcall
 
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
 
-        $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+        if (!$user->isAdmin()) {
+            $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+        }
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
+            $query->andWhere(['NOT IN', 'l_call_status_id', [
+                Lead::CALL_STATUS_PROCESS,
+                Lead::CALL_STATUS_PREPARE,
+                Lead::CALL_STATUS_QUEUE,
+                Lead::CALL_STATUS_BUGGED,
+            ]]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
+
+        if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
+			$query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
+		}
 
         $query->addSelect([
             'countClientPhones' => (new Query())
@@ -187,51 +206,93 @@ class LeadQcallSearch extends LeadQcall
                 ->limit(1)
         ]);
 
-        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date("Y-m-d H:i:s") . "', lqc_dt_to )/60))";
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date('Y-m-d H:i:s') . "', lqc_dt_to )/60))";
         $query->addSelect(['deadline' =>
-            new Expression("if (" . $deadlineExpr . " > 0, " . $deadlineExpr . " , 0) ")
+            new Expression('if (' . $deadlineExpr . ' > 0, ' . $deadlineExpr . ' , 0) ')
         ]);
 
 //        $query->addSelect(['expired' =>
 //            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
 //        ]);
 
+		$customDefaultOrder = [];
+
         if (($freshTime = (int)Yii::$app->params['settings']['redial_fresh_time']) > 0) {
-            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date("Y-m-d H:i:s") . "')";
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date('Y-m-d H:i:s') . "')";
             $query->addSelect(['isFresh' =>
-                new Expression("if (" . $expression . " <= " . $freshTime . ", 1, 0) ")
+                new Expression('if (' . $expression . ' <= ' . $freshTime . ', 1, 0) ')
             ]);
-            $query->addOrderBy([
-               'isFresh' => SORT_DESC
+//            $query->addOrderBy([
+//               'isFresh' => SORT_DESC
+//            ]);
+
+            $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
+//            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+            $query->addSelect(['is_in_day_time_hours' =>
+                new Expression('if ( '.$expression . ' > ' . $freshTime .'  AND ' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
             ]);
+//            $query->addOrderBy([
+//                'is_in_day_time_hours' => SORT_DESC
+//            ]);
+			$customDefaultOrder = [
+				'isFresh' => SORT_DESC,
+				'is_in_day_time_hours' => SORT_DESC
+			];
+
+        } else {
+            $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
+            $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
+//            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
+            $query->addSelect(['is_in_day_time_hours' =>
+                new Expression('if (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+            ]);
+//            $query->addOrderBy([
+//                'is_in_day_time_hours' => SORT_DESC
+//            ]);
+			$customDefaultOrder = ['is_in_day_time_hours' => SORT_DESC];
         }
 
-        $query->addOrderBy([
-//            'expired' => SORT_DESC,
-            'deadline' => SORT_ASC,
-            'attempts' => SORT_ASC,
-            'lqc_dt_from' => SORT_ASC
-        ]);
+//        $query->addOrderBy([
+////            'expired' => SORT_DESC,
+//            'deadline' => SORT_ASC,
+//            'attempts' => SORT_ASC,
+//            'lqc_dt_from' => SORT_ASC
+//        ]);
 
-        if ((bool)Yii::$app->params['settings']['enable_redial_show_lead_limit']) {
-            $query->limit((int)$user->userParams->up_inbox_show_limit_leads);
-        }
+		$defaultOrder = [
+			'deadline' => SORT_ASC,
+			'attempts' => SORT_ASC,
+			'lqc_dt_from' => SORT_ASC,
+		];
+
+        $defaultOrder = array_merge($customDefaultOrder, $defaultOrder);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-//            'sort'=> [
-//                'defaultOrder' => [
-//                    'lqc_dt_to' => SORT_ASC,
-//                    'attempts' => SORT_ASC,
-//                    'lqc_dt_from' => SORT_ASC,
-//                ]
-//            ],
+            'sort'=> [
+                'defaultOrder' => $defaultOrder,
+				'attributes' => [
+					'deadline',
+					'attempts',
+					'lqc_dt_from',
+					'lqc_dt_to',
+					'lqc_lead_id',
+					'is_in_day_time_hours',
+					'isFresh'
+				]
+            ],
             /*'pagination' => [
                 'pageSize' => 40,
             ],*/
         ]);
+
+        if ((bool)Yii::$app->params['settings']['enable_redial_show_lead_limit'] && $user->userParams->up_inbox_show_limit_leads !== null) {
+            $query->limit((int)$user->userParams->up_inbox_show_limit_leads);
+            $dataProvider->pagination = false;
+        }
 
         $this->load($params);
 
@@ -249,9 +310,48 @@ class LeadQcallSearch extends LeadQcall
             Lead::tableName() . '.project_id' => $this->projectId,
             Lead::tableName() . '.status' => $this->leadStatus,
             Lead::tableName() . '.cabin' => $this->cabin,
+			Lead::tableName() . '.l_is_test' => $this->l_is_test,
         ]);
 
-//        VarDumper::dump($query->createCommand()->getRawSql());die;
+
+        $dataProvider->sort->attributes['l_is_test'] = [
+        	'asc' => ['l_is_test' => SORT_ASC],
+        	'desc' => ['l_is_test' => SORT_DESC],
+		];
+
+//        VarDumper::dump($dataProvider);die;
+        if ($user->isAdmin()) {
+
+            $query->andFilterWhere([
+                Lead::tableName() . '.l_call_status_id' => $this->l_call_status_id
+            ]);
+
+            if ($this->attempts === '0') {
+                $query->andHaving(['attempts' => 0]);
+
+            } else {
+                $query->andFilterHaving(['attempts' => $this->attempts]);
+            }
+
+            if ($this->lqc_dt_from) {
+                $query->andFilterWhere(['>=', 'lqc_dt_from', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_from))])
+                    ->andFilterWhere(['<=', 'lqc_dt_from', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_from) + 3600 * 24)]);
+            }
+
+            if ($this->lqc_dt_to) {
+                $query->andFilterWhere(['>=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to))])
+                    ->andFilterWhere(['<=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to) + 3600 * 24)]);
+            }
+
+            if ($this->lqc_weight === '0') {
+                $query->andWhere(['lqc_weight' => 0]);
+            } else {
+                $query->andFilterWhere(['lqc_weight' => $this->lqc_weight]);
+            }
+        }
+
+//		VarDumper::dump($query->createCommand()->getRawSql());die;
+
         return $dataProvider;
     }
 
