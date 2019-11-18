@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'dpp_phone_number',
-            'dpp_default:boolean',
+            'dpp_redial:boolean',
             //'dpp_source_id',
             [
                 'attribute' => 'dpp_source_id',
@@ -71,6 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'dpp_params',
             'dpp_ivr_enable:boolean',
             'dpp_enable:boolean',
+            'dpp_description:text',
             [
                 'attribute' => 'dpp_updated_user_id',
                 'value' => function (\common\models\DepartmentPhoneProject $model) {

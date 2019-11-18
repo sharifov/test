@@ -13,6 +13,7 @@ use Yii;
  * @property string $lqc_dt_to
  * @property int $lqc_weight
  * @property $lqc_created_dt
+ * @property $lqc_call_from
  *
  * @property Lead $lqcLead
  */
@@ -23,12 +24,14 @@ class LeadQcall extends \yii\db\ActiveRecord
      * @param int $leadId
      * @param int $weight
      * @param Interval $interval
+     * @param string|null $callFrom
      * @return LeadQcall
      */
     public static function create(
         int $leadId,
         int $weight,
-        Interval $interval
+        Interval $interval,
+        ?string $callFrom
     ): self
     {
         $lq = new static();
@@ -36,6 +39,7 @@ class LeadQcall extends \yii\db\ActiveRecord
         $lq->lqc_weight = $weight;
         $lq->lqc_dt_from = $interval->fromFormat();
         $lq->lqc_dt_to = $interval->toFormat();
+        $lq->lqc_call_from = $callFrom;
         $lq->lqc_created_dt = date('Y-m-d H:i:s');
         return $lq;
     }
@@ -47,6 +51,22 @@ class LeadQcall extends \yii\db\ActiveRecord
     {
         $this->lqc_dt_from = $interval->fromFormat();
         $this->lqc_dt_to = $interval->toFormat();
+    }
+
+    /**
+     * @param string|null $callFrom
+     */
+    public function updateCallFrom(?string $callFrom): void
+    {
+        if ($callFrom === null) {
+            return;
+        }
+        $this->lqc_call_from = $callFrom;
+    }
+
+    public function removeCallFrom(): void
+    {
+        $this->lqc_call_from = null;
     }
 
     /**
@@ -69,6 +89,7 @@ class LeadQcall extends \yii\db\ActiveRecord
             [['lqc_lead_id'], 'unique'],
             [['lqc_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lqc_lead_id' => 'id']],
             ['lqc_created_dt', 'string'],
+            ['lqc_call_from', 'string'],
         ];
     }
 
@@ -83,6 +104,7 @@ class LeadQcall extends \yii\db\ActiveRecord
             'lqc_dt_to' => 'Date Time To',
             'lqc_weight' => 'Weight',
             'lqc_created_dt' => 'Created',
+            'lqc_call_from' => 'Call from',
         ];
     }
 

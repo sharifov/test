@@ -20,7 +20,8 @@ use yii\db\ActiveRecord;
  * @property bool $dpp_enable
  * @property int $dpp_updated_user_id
  * @property string $dpp_updated_dt
- * @property bool $dpp_default
+ * @property bool $dpp_redial
+ * @property string $dpp_description
  *
  * @property array $user_group_list
  *
@@ -62,7 +63,8 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             [['dpp_source_id'], 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['dpp_source_id' => 'id']],
             [['dpp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['dpp_updated_user_id' => 'id']],
 
-            ['dpp_default', 'boolean']
+            ['dpp_redial', 'boolean'],
+            ['dpp_description', 'string', 'max' => 255],
         ];
     }
 
@@ -82,7 +84,8 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             'dpp_enable' => 'Enable',
             'dpp_updated_user_id' => 'Updated User',
             'dpp_updated_dt' => 'Updated Date',
-            'dpp_default' => 'Default phone',
+            'dpp_redial' => 'Redial phone',
+            'dpp_description' => 'Description',
         ];
     }
 
