@@ -69,16 +69,20 @@ class LeadRedialController extends FController
 
         $flowDescriptions = LeadRedialService::getFlowDescriptions();
 
-        try {
-            $this->takeGuard->frequencyMinutesGuard($user, $flowDescriptions);
-        } catch (\DomainException $e) {
-            $guard[] = $e->getMessage();
+        if ((bool)\Yii::$app->params['settings']['enable_take_frequency_minutes']) {
+            try {
+                $this->takeGuard->frequencyMinutesGuard($user, $flowDescriptions);
+            } catch (\DomainException $e) {
+                $guard[] = $e->getMessage();
+            }
         }
 
-        try {
-            $this->takeGuard->minPercentGuard($user, $flowDescriptions);
-        } catch (\DomainException $e) {
-            $guard[] = $e->getMessage();
+        if ((bool)\Yii::$app->params['settings']['enable_min_percent_take_leads']) {
+            try {
+                $this->takeGuard->minPercentGuard($user, $flowDescriptions);
+            } catch (\DomainException $e) {
+                $guard[] = $e->getMessage();
+            }
         }
 
         if ((bool)\Yii::$app->params['settings']['enable_redial_shift_time_limits']) {

@@ -1668,7 +1668,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 //            ->andWhere(['employee_id' => $this->id])
             ->andWhere(['lf_owner_id' => $this->id])
             ->andWhere(['lf_description' => $description])
-//            ->andWhere(['lf_from_status_id' => Lead::STATUS_PENDING])
+            ->andWhere(['lf_from_status_id' => Lead::STATUS_PENDING])
             ->andWhere(['status' => Lead::STATUS_PROCESSING]);
 
         $count = $query->count();

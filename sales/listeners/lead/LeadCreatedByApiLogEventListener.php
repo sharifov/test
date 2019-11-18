@@ -2,6 +2,7 @@
 
 namespace sales\listeners\lead;
 
+use common\models\LeadFlow;
 use Yii;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\services\lead\LeadFlowLogService;
@@ -32,11 +33,11 @@ class LeadCreatedByApiLogEventListener
         try {
             $this->leadFlowLogService->log(
                 $lead->id,
-                $lead->status,
+                $event->newStatus,
                 null,
                 $lead->employee_id,
                 null,
-                'Created by API',
+                LeadFlow::REASON_CREATED_BY_API,
                 $event->created
             );
         } catch (\Throwable $e) {

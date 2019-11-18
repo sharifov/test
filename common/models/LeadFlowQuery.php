@@ -19,7 +19,7 @@ class LeadFlowQuery extends ActiveQuery
         return $this->andWhere([
 //            'employee_id' => $userId,
             'lf_owner_id' => $userId,
-//            'lf_from_status_id' => Lead::STATUS_PENDING,
+            'lf_from_status_id' => Lead::STATUS_PENDING,
             'status' => Lead::STATUS_PROCESSING,
             ])->andWhere(['lf_description' => $description])
             ->asArray()->orderBy(['created' => SORT_DESC])->limit(1);
