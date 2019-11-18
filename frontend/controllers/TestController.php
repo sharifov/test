@@ -132,8 +132,27 @@ class TestController extends FController
     public function actionTest()
     {
 
-       (Yii::createObject(QCallService::class))->test();
-//        die;
+        $lead = Lead::findOne(8656);
+        $service = (Yii::createObject(QCallService::class));
+
+        $service->updateInterval(
+            $lead->leadQcall,
+            new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+            $lead->offset_gmt,
+            new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+        );
+        die;
+        $service->create(
+            $lead->id,
+            new Config(
+                $lead->status,
+                $lead->getCountOutCallsLastFlow()
+            ),
+            ($lead->project_id * 10),
+            $lead->offset_gmt,
+            new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+        );
+        die;
         return $this->render('blank');
 
     }

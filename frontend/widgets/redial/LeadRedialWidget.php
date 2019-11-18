@@ -5,6 +5,9 @@ namespace frontend\widgets\redial;
 use common\models\Call;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
+use sales\services\lead\qcall\QCallService;
 use Yii;
 use common\models\ClientPhone;
 use common\models\Lead;
@@ -18,8 +21,8 @@ use yii\base\Widget;
  * @property RedialUrl $viewUrl
  * @property RedialUrl $takeUrl
  * @property RedialUrl $reservationUrl
+ * @property RedialUrl $phoneNumberFromUrl
  * @property string $script
- * @property string $phoneFrom
  * @property ClientPhonesDTO[] $phonesTo
  */
 class LeadRedialWidget extends Widget
@@ -33,9 +36,9 @@ class LeadRedialWidget extends Widget
 
     public $reservationUrl;
 
-    public $script;
+    public $phoneNumberFromUrl;
 
-    public $phoneFrom;
+    public $script;
 
     public $phonesTo;
 
@@ -49,10 +52,13 @@ class LeadRedialWidget extends Widget
             throw new \InvalidArgumentException('viewUrl property must be RedialUrl');
         }
         if (!$this->takeUrl instanceof RedialUrl) {
-            throw new \InvalidArgumentException('viewUrl property must be RedialUrl');
+            throw new \InvalidArgumentException('takeUrl property must be RedialUrl');
         }
         if (!$this->reservationUrl instanceof RedialUrl) {
             throw new \InvalidArgumentException('reservationUrl property must be RedialUrl');
+        }
+        if (!$this->phoneNumberFromUrl instanceof RedialUrl) {
+            throw new \InvalidArgumentException('phoneNumberFromUrl property must be RedialUrl');
         }
     }
 
@@ -65,9 +71,9 @@ class LeadRedialWidget extends Widget
             'lead' => $this->lead,
             'viewUrl' => $this->viewUrl,
             'takeUrl' => $this->takeUrl,
+            'phoneNumberFromUrl' => $this->phoneNumberFromUrl,
             'reservationUrl' => $this->reservationUrl,
             'script' => $this->script,
-            'phoneFrom' => $this->findPhoneFrom(),
             'phonesTo' => $this->findPhonesTo(),
             'projectId' => $this->findProjectId(),
             'redialAutoTakeSeconds' => $this->findRedialAutoTakeSeconds(),
@@ -80,40 +86,6 @@ class LeadRedialWidget extends Widget
     private function findRedialAutoTakeSeconds(): int
     {
         return Yii::$app->params['settings']['redial_auto_take_seconds'] ?? 10;
-    }
-
-    /**
-     * @return string
-     */
-    private function findPhoneFrom(): string
-    {
-        if ($this->phoneFrom) {
-            return $this->phoneFrom;
-        }
-
-        $query = DepartmentPhoneProject::find()
-            ->andWhere(['dpp_project_id' => $this->lead->project_id])
-            ->andWhere(['dpp_default' => true]);
-
-        if ($this->lead->l_dep_id === null) {
-            $query->andWhere(['or',
-                ['dpp_dep_id' => Department::DEPARTMENT_SALES],
-                ['IS', 'dpp_dep_id', NULL]
-            ]);
-         } else {
-            $query->andWhere(['dpp_dep_id' => $this->lead->l_dep_id]);
-        }
-
-        if ($phone = $query->one()) {
-            return $phone->dpp_phone_number;
-        }
-
-        if ($phone = Project::findOne($this->lead->project_id)) {
-            if ($phone->contactInfo->phone) {
-                return $phone->contactInfo->phone;
-            }
-        }
-        throw new \DomainException('Not found phoneFrom for LeadId: ' . $this->lead->id);
     }
 
     /**

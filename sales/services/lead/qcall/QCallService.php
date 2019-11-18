@@ -3,7 +3,6 @@
 namespace sales\services\lead\qcall;
 
 use common\models\Call;
-use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use sales\repositories\lead\LeadFlowRepository;
@@ -12,49 +11,42 @@ use Yii;
 use common\models\LeadQcall;
 use common\models\QcallConfig;
 use yii\db\ActiveQuery;
-use yii\helpers\VarDumper;
 
 /**
  * Class QCallService
  *
- * @property LeadQcallRepository $repository
+ * @property LeadQcallRepository $leadQcallRepository
  * @property LeadFlowRepository $leadFlowRepository
  */
 class QCallService
 {
-    private $repository;
+    private $leadQcallRepository;
     private $leadFlowRepository;
 
     /**
-     * @param LeadQcallRepository $repository
+     * @param LeadQcallRepository $leadQcallRepository
      * @param LeadFlowRepository $leadFlowRepository
      */
     public function __construct(
-        LeadQcallRepository $repository,
+        LeadQcallRepository $leadQcallRepository,
         LeadFlowRepository $leadFlowRepository
     )
     {
-        $this->repository = $repository;
+        $this->leadQcallRepository = $leadQcallRepository;
         $this->leadFlowRepository = $leadFlowRepository;
     }
 
-    public function test()
-    {
-        $findPhoneParams = new FindPhoneParams(6,1);
-        $query = $this->getDepartmentRedialPhonesQuery($findPhoneParams);
-        $dump = $this->findPhoneWithMinimumAttemptsByDate($query);
-        VarDumper::dump($dump);
-    }
-
+    /**
+     * @param Lead $lead
+     */
     public function createOrUpdate(Lead $lead): void
     {
         if ($lq = $lead->leadQcall) {
             $this->updateInterval(
                 $lq,
-                new Config($lead->status,
-                    $lead->getCountOutCallsLastFlow()),
+                new Config($lead->status, $lead->getCountOutCallsLastFlow()),
                 $lead->offset_gmt,
-                new FindPhoneParams($lead->project_id, $lead->l_dep_id, $lead->id)
+                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
             );
 
         } else {
@@ -74,8 +66,16 @@ class QCallService
      * @param int $weight
      * @param string|null $clientGmt
      * @param FindPhoneParams $findPhoneParams
+     * @param string|null $phoneFrom
      */
-    public function create(int $leadId, Config $config, int $weight, ?string $clientGmt, FindPhoneParams $findPhoneParams): void
+    public function create(
+        int $leadId,
+        Config $config,
+        int $weight,
+        ?string $clientGmt,
+        FindPhoneParams $findPhoneParams,
+        ?string $phoneFrom = null
+    ): void
     {
         if (!$qConfig = $this->findConfig($config)) {
             Yii::warning('QCallService:create. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
@@ -95,11 +95,11 @@ class QCallService
             'now'
         );
 
-        $phone = $this->findPhone(null, $qConfig->qc_phone_switch, $findPhoneParams);
+        $phone = $phoneFrom ?: $this->findPhone(null, $qConfig->qc_phone_switch, $findPhoneParams);
 
         $qCall = LeadQcall::create($leadId, $weight, $interval, $phone);
 
-        $this->repository->save($qCall);
+        $this->leadQcallRepository->save($qCall);
     }
 
     /**
@@ -125,11 +125,33 @@ class QCallService
 
         $qCall->updateInterval($interval);
 
-        $phone = $this->findPhone($qCall->lqc_call_from, $qConfig->qc_phone_switch, $findPhoneParams);
+        $phone = $this->findPhone($qCall->lqc_call_from, $qConfig->qc_phone_switch, $findPhoneParams, $qCall->lqc_lead_id);
 
         $qCall->updateCallFrom($phone);
 
-        $this->repository->save($qCall);
+        $this->leadQcallRepository->save($qCall);
+    }
+
+    /**
+     * @param LeadQcall $qCall
+     * @param Config $config
+     * @param FindPhoneParams $findPhoneParams
+     * @return string|null
+     */
+    public function updateCallFrom(LeadQcall $qCall, Config $config, FindPhoneParams $findPhoneParams):? string
+    {
+        if (!$qConfig = $this->findConfig($config)) {
+            Yii::warning('QCallService:updateCallFrom. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
+            return null;
+        }
+
+        $phone = $this->findPhone(null, $qConfig->qc_phone_switch, $findPhoneParams);
+
+        $qCall->updateCallFrom($phone);
+
+        $this->leadQcallRepository->save($qCall);
+
+        return $phone;
     }
 
     /**
@@ -143,7 +165,7 @@ class QCallService
 //            Yii::warning('QCallService:remove. Not found leadId: ' . $leadId);
             return;
         }
-        $this->repository->remove($qCall);
+        $this->leadQcallRepository->remove($qCall);
     }
 
     public function resetAttempts(Lead $lead): void
@@ -158,11 +180,12 @@ class QCallService
      * @param string|null $callFrom
      * @param $phoneSwitch
      * @param FindPhoneParams $findPhoneParams
+     * @param int|null $leadId
      * @return string|null
      */
-    private function findPhone(?string $callFrom, $phoneSwitch, FindPhoneParams $findPhoneParams):? string
+    private function findPhone(?string $callFrom, $phoneSwitch, FindPhoneParams $findPhoneParams, ?int $leadId = null):? string
     {
-        $phonesQuery = $this->getDepartmentRedialPhonesQuery($findPhoneParams);
+        $phonesQuery = DepartmentPhoneProject::find()->redialPhones($findPhoneParams->projectId, $findPhoneParams->departmentId);
         $clone = clone $phonesQuery;
         $count = (int)$clone->count();
 
@@ -171,7 +194,7 @@ class QCallService
         }
 
         if ($count === 1) {
-            return ($phonesQuery->one())->dpp_phone_number;
+            return ($phonesQuery->asArray()->one())['dpp_phone_number'];
         }
 
         if ($callFrom === null) {
@@ -179,7 +202,7 @@ class QCallService
         }
 
         if ($callFrom !== null && $phoneSwitch) {
-            return $this->findPhoneWithMinimumAttemptsByLead($phonesQuery, $findPhoneParams->leadId);
+            return $this->findPhoneWithMinimumAttemptsByLead($phonesQuery, $leadId);
         }
 
         return $callFrom;
@@ -203,14 +226,15 @@ class QCallService
             ->andWhere(['c_lead_id' => $leadId])
             ->groupBy(['c_from'])
             ->orderBy(['count_calls' => SORT_ASC])
+            ->asArray()
             ->limit(1)
             ->one();
 
         if ($call) {
-            return $call->c_from;
+            return $call['c_from'];
         }
 
-        return $this->getDefaultPhone($phonesQuery);
+        return $this->getFirstPhone($phonesQuery);
     }
 
     /**
@@ -231,51 +255,28 @@ class QCallService
             ->andWhere(['>', 'c_created_dt', $dt->format('Y-m-d H:i:s')])
             ->groupBy(['c_from'])
             ->orderBy(['count_calls' => SORT_ASC])
+            ->asArray()
             ->limit(1)
             ->one();
 
         if ($call) {
-            return $call->c_from;
+            return $call['c_from'];
         }
 
-        return $this->getDefaultPhone($phonesQuery);
+        return $this->getFirstPhone($phonesQuery);
     }
 
     /**
      * @param ActiveQuery $phonesQuery
      * @return string|null
      */
-    private function getDefaultPhone(ActiveQuery $phonesQuery):? string
+    private function getFirstPhone(ActiveQuery $phonesQuery):? string
     {
         /** @var DepartmentPhoneProject $phone */
         if ($phone = $phonesQuery->limit(1)->one()) {
             return $phone->dpp_phone_number;
         }
         return null;
-    }
-
-    /**
-     * @param FindPhoneParams $findPhoneParams
-     * @return ActiveQuery
-     */
-    private function getDepartmentRedialPhonesQuery(FindPhoneParams $findPhoneParams): ActiveQuery
-    {
-        $query = DepartmentPhoneProject::find()
-            ->select(['dpp_phone_number'])
-            ->andWhere(['dpp_project_id' => $findPhoneParams->projectId])
-            ->andWhere(['dpp_redial' => true])
-            ->andWhere(['IS NOT', 'dpp_phone_number', null]);
-
-        if ($findPhoneParams->departmentId === null) {
-            $query->andWhere(['or',
-                ['dpp_dep_id' => Department::DEPARTMENT_SALES],
-                ['IS', 'dpp_dep_id', NULL]
-            ]);
-        } else {
-            $query->andWhere(['dpp_dep_id' => $findPhoneParams->departmentId]);
-        }
-
-        return $query;
     }
 
     /**
@@ -293,9 +294,7 @@ class QCallService
      */
     private function findConfig(Config $config):? QcallConfig
     {
-        return QcallConfig::find()->where(['qc_status_id' => $config->status])
-            ->andWhere(['<=', 'qc_call_att', $config->callCount])
-            ->orderBy(['qc_call_att' => SORT_DESC])->limit(1)->one();
+        return QcallConfig::find()->config($config->status, $config->callCount);
     }
 
     /**

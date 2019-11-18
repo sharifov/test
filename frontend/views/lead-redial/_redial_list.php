@@ -102,6 +102,10 @@ use yii\helpers\Url;
             'visible' => !$user->isAgent(),
         ],
         [
+            'attribute' => 'lqc_call_from',
+            'visible' => $user->isAdmin(),
+        ],
+        [
             'label' => 'Client / Phones',
             'format' => 'raw',
             'value' => static function (LeadQcall $model) {

@@ -9,26 +9,42 @@ namespace common\models;
  */
 class DepartmentPhoneProjectQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
     /**
-     * {@inheritdoc}
-     * @return DepartmentPhoneProject[]|array
+     * @param int|null $projectId
+     * @param int|null $departmentId
+     * @return $this
      */
-    public function all($db = null)
+    public function redialPhones(?int $projectId, ?int $departmentId): self
     {
-        return parent::all($db);
+        $query = $this
+            ->select(['dpp_phone_number'])
+            ->andWhere(['dpp_enable' => true])
+            ->andWhere(['dpp_project_id' => $projectId])
+            ->andWhere(['dpp_redial' => true])
+            ->andWhere(['IS NOT', 'dpp_phone_number', null]);
+
+        if ($departmentId === null) {
+            $query->andWhere(['or',
+                ['dpp_dep_id' => Department::DEPARTMENT_SALES],
+                ['IS', 'dpp_dep_id', NULL]
+            ]);
+        } else {
+            $query->andWhere(['dpp_dep_id' => $departmentId]);
+        }
+
+        return $query;
     }
 
     /**
-     * {@inheritdoc}
-     * @return DepartmentPhoneProject|array|null
+     * @param string $phoneNumber
+     * @return bool
      */
-    public function one($db = null)
+    public function isRedial(string $phoneNumber): bool
     {
-        return parent::one($db);
+        return $this
+            ->andWhere(['dpp_enable' => true])
+            ->andWhere(['dpp_phone_number' => $phoneNumber])
+            ->andWhere(['dpp_redial'=> true])
+            ->exists();
     }
 }
