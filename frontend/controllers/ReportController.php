@@ -123,7 +123,11 @@ class ReportController extends FController
     public function actionLeadsReport()
     {
         $searchModel = new LeadSearch();
-        $dataProvider = $searchModel->leadFlowReport();
+        $params = Yii::$app->request->queryParams;
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->leadFlowReport($params, $user);
 
         return $this->render('leads-report', [
             'searchModel' => $searchModel,

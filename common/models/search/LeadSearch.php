@@ -10,6 +10,7 @@ use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
 use common\models\Sms;
+use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use sales\access\EmployeeProjectAccess;
 use sales\repositories\lead\LeadBadgesRepository;
@@ -100,6 +101,11 @@ class LeadSearch extends Lead
 
     public $l_is_test;
 
+    public $lfOwnerId;
+    public $userGroupId;
+    public $departmentId;
+    public $projectId;
+
     private $leadBadgesRepository;
 
     public function __construct($config = [])
@@ -116,7 +122,7 @@ class LeadSearch extends Lead
         return [
             [['datetime_start', 'datetime_end', 'createdType', 'createTimeRange'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create', 'lfOwnerId', 'userGroupId', 'departmentId'], 'integer'],
             [['email_status', 'quote_status', 'l_is_test'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
@@ -2392,40 +2398,131 @@ class LeadSearch extends Lead
         return $dataProvider = new SqlDataProvider($paramsData);
     }
 
-    public function leadFlowReport()
+    /**
+     * @param $params
+     * @param $user Employee
+     * @return SqlDataProvider
+     * @throws \Exception
+     */
+    public function leadFlowReport($params, $user):SqlDataProvider
     {
-        $date_from = Employee::convertTimeFromUserDtToUTC(strtotime('2019-05-02'));
-        $date_to = Employee::convertTimeFromUserDtToUTC(strtotime('2019-11-13'));
-        $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+        $this->load($params);
+        $timezone = $user->timezone;
+        $userTZ = Employee::timezoneList(false)[$timezone];
+
+        //var_dump($params); die();
+
+        /*$date_from = Employee::convertTimeFromUserDtToUTC(strtotime('2019-09-30 00:00:00'));
+        $date_to = Employee::convertTimeFromUserDtToUTC(strtotime('2019-10-31 00:00:00'));
+        $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";*/
+
+        if ($this->createTimeRange != null) {
+            $dates = explode(' - ', $this->createTimeRange);
+            $hourSub = date('G', strtotime($dates[0]));
+            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]));
+            $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]));
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+        } else {
+            $hourSub = date('G', strtotime(date('Y-m-d 00:00')));
+            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 00:00')));
+            $date_to = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 23:59')));
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+        }
+
+        if($this->lfOwnerId != null){
+            $queryByOwner = " AND lf.lf_owner_id = '{$this->lfOwnerId}'";
+        } else {
+            $queryByOwner = '';
+        }
+
+        if ($this->departmentId != null)
+        {
+            $userIdsByDepartment = UserDepartment::find()->select(['ud_user_id'])->where(['=', 'ud_dep_id', $this->departmentId])->asArray()->all();
+            $employeesFromDep = "'" . implode("', '", array_map(function ($entry) {
+                    return $entry['ud_user_id'];
+                }, $userIdsByDepartment)) . "'";
+            $queryByDepartment = " AND lf.lf_owner_id in " . "(" . $employeesFromDep .")";
+        } else {
+            $queryByDepartment = '';
+        }
+
+        if($this->userGroupId != null){
+            $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->userGroupId])->asArray()->all();
+            $employees = "'" . implode("', '", array_map(function ($entry) {
+                    return $entry['ugs_user_id'];
+                }, $userIdsByGroup)) . "'";
+            $queryByGroup = " AND lf.lf_owner_id in " . "(" . $employees .")";
+        } else {
+            $queryByGroup = '';
+        }
 
         $query = new Query();
 
+        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '")) as created_date, COUNT(*) as cnt,
+        
+            (SELECT COUNT(*) AS cnt FROM lead_flow WHERE DATE(created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = 1 AND `status` = 2) AS newTotal,
+    
+            (SELECT COUNT(*) AS cnt FROM lead_flow WHERE DATE(created) = created_date AND user_id = lf_owner_id AND user_id = employee_id AND `lf_from_status_id` = 1 AND `status` = 2 AND lf_description = "Take") AS inboxLeadsTaken,
+    
+            (SELECT COUNT(*) AS cnt FROM lead_flow WHERE DATE(created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = 1 AND `status` = 2 AND lf_description = "Call AutoCreated Lead") AS callLeadsTaken,
+    
+            (SELECT COUNT(*) AS cnt FROM lead_flow WHERE DATE(created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = 1 AND `status` = 2 AND lf_description = "Lead redial") AS redialLeadsTaken,
+    
+            (SELECT SUM(CASE WHEN ls.clone_id IS NULL THEN 1 ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = 2) AS leadsCreated,
+    
+            (SELECT SUM(CASE WHEN ls.clone_id IS NOT NULL THEN 1 ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = 2  AND lfw.lf_description <> "Manual create") AS leadsCloned,
+    
+            (SELECT COUNT(*) AS cnt FROM lead_flow WHERE DATE(created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = 5 AND `status` = 2) AS followUpTotal,
+    
+            (SELECT COUNT(*) AS cnt FROM lead_flow WHERE DATE(created) = created_date AND user_id = lf_owner_id AND user_id = employee_id AND `lf_from_status_id` = 5 AND `status` = 2) AS followUpLeadsTaken,
+    
+            (SELECT COUNT(*) AS cnt FROM lead_flow WHERE DATE(created) = created_date AND user_id = lf_owner_id AND user_id = employee_id AND `lf_from_status_id` = 2 AND `status` = 11) AS trashLeads,
+    
+            (SELECT COUNT(*) AS cnt FROM lead_flow WHERE DATE(created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = 2 AND `status` = 10) AS soldLeads,
+    
+            (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND lf_from_status_id =2 AND lfw.status = 10) AS profit,
+    
+            (SELECT SUM(CASE WHEN ls.tips IS NOT NULL THEN ls.tips ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND lf_from_status_id =2 AND lfw.status = 10) AS tips
+    
+            
+            FROM lead_flow AS lf WHERE lf.created ' .$between_condition. ' AND lf.lf_owner_id IS NOT NULL '. $queryByOwner . $queryByGroup . $queryByDepartment. '        
+        ']);
 
-        /*$query->select(['e.id', 'e.username']);
-
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.lf_from_status_id='.Lead::STATUS_PENDING.' AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = e.id) AS newTotal']);
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.lf_from_status_id='.Lead::STATUS_PENDING.' AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = e.id AND lf.employee_id = e.id AND lf.lf_description = "Take") AS inboxLeadsTaken']);
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.lf_from_status_id='.Lead::STATUS_PENDING.' AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = e.id AND lf.lf_description = "Call AutoCreated Lead") AS callLeadsTaken']);
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.lf_from_status_id='.Lead::STATUS_PENDING.' AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = e.id AND lf.lf_description = "Lead redial") AS redialLeadsTaken']);
-
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf LEFT JOIN leads ls ON lf.lead_id = ls.id  WHERE (lf.created ' . $between_condition . ') AND ls.clone_id IS NULL AND lf.lf_from_status_id IS NULL AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = e.id AND lf.employee_id = e.id AND lf_description = "Manual create") AS leadsCreated']);
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf LEFT JOIN leads ls ON lf.lead_id = ls.id  WHERE (lf.created ' . $between_condition . ') AND ls.clone_id IS NOT NULL AND lf.lf_from_status_id IS NULL AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = e.id AND lf.employee_id = e.id AND lf_description <> "Manual create") AS leadsCloned']);
-
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.lf_from_status_id='.Lead::STATUS_FOLLOW_UP.' AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = e.id) AS followUpTotal']);
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.lf_from_status_id='.Lead::STATUS_FOLLOW_UP.' AND lf.status='.Lead::STATUS_PROCESSING.' AND lf.lf_owner_id = e.id AND lf.employee_id = e.id) AS followUpTotalTaken']);
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.lf_from_status_id='.Lead::STATUS_PROCESSING.' AND lf.status='.Lead::STATUS_TRASH.' AND lf.lf_owner_id = e.id AND lf.employee_id = e.id) AS trashLeads']);
-        $query->addSelect(['(SELECT COUNT(DISTINCT(lf.lead_id)) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.lf_from_status_id='.Lead::STATUS_PROCESSING.' AND lf.status='.Lead::STATUS_SOLD.' AND lf.lf_owner_id = e.id) AS soldLeads']);
-
-        $query->addSelect(['(SELECT SUM(ls.final_profit) FROM leads ls LEFT JOIN lead_flow lf ON ls.id = lf.lead_id  WHERE (ls.created ' . $between_condition . ') AND ls.employee_id = e.id AND  lf.lf_from_status_id = '.Lead::STATUS_PROCESSING.' AND lf.status='.Lead::STATUS_SOLD.' AND lf.lf_owner_id = e.id) AS profit']);
-        $query->addSelect(['(SELECT SUM(ls.tips) FROM leads ls LEFT JOIN lead_flow lf ON ls.id = lf.lead_id  WHERE (ls.created ' . $between_condition . ') AND ls.employee_id = e.id AND  lf.lf_from_status_id = '.Lead::STATUS_PROCESSING.' AND lf.status='.Lead::STATUS_SOLD.' AND lf.lf_owner_id = e.id) AS tips']);
-
-
-        $query->from('employees AS e');*/
-
+        $query->groupBy(['DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '")), lf.lf_owner_id']);
+        $query->orderBy(['user_id' => SORT_ASC, 'created_date' => SORT_ASC]);
 
         $command = $query->createCommand();
         $sql = $command->sql;
 
-        var_dump($sql); die();
+        //var_dump($sql); die();
+
+        $paramsData = [
+            'sql' => $sql,
+            'sort' => [
+                //'defaultOrder' => ['username' => SORT_ASC],
+                'attributes' => [
+                    'user_id',
+                    'created_date',
+                    'newTotal',
+                    'inboxLeadsTaken',
+                    'callLeadsTaken',
+                    'redialLeadsTaken',
+                    'leadsCreated',
+                    'leadsCloned',
+                    'followUpTotal',
+                    'followUpLeadsTaken',
+                    'trashLeads',
+                    'soldLeads',
+                    'profit',
+                    'tips'
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ];
+
+        $dataProvider = new SqlDataProvider($paramsData);
+        return $dataProvider;
     }
 }

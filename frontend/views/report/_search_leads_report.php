@@ -6,7 +6,7 @@ use sales\access\EmployeeDepartmentAccess;
 
 <div class="calls-search">
     <?php $form = ActiveForm::begin([
-        'action' => ['report/calls-report'],
+        'action' => ['report/leads-report'],
         'method' => 'get',
     ]); ?>
 
@@ -14,13 +14,15 @@ use sales\access\EmployeeDepartmentAccess;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-12">
-                    <?/*= $form->field($model, 'createTimeRange', [
+                    <?= $form->field($model, 'createTimeRange', [
                         'options' => ['class' => 'form-group']
                     ])->widget(\kartik\daterange\DateRangePicker::class, [
                         'presetDropdown' => false,
                         'hideInput' => true,
                         'convertFormat' => true,
                         'pluginOptions' => [
+                            'minDate' => date("Y-m-d H:i", strtotime("- 61 days")),
+                            'maxDate' => date("Y-m-d H:i"),
                             'timePicker' => true,
                             'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
@@ -29,38 +31,28 @@ use sales\access\EmployeeDepartmentAccess;
                                 'separator' => ' - '
                             ]
                         ]
-                    ])->label('Calls Created Date');
-                    */?>
+                    ])->label('Created Date');
+                    ?>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
-                    <?/*= $form->field($model, 'c_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => '-'])->label('Username') */?>
+                    <?= $form->field($model, 'lfOwnerId')->dropDownList($list->getEmployees(), ['prompt' => '-'])->label('User') ?>
                 </div>
                 <div class="col-md-6">
-                    <?/*= $form->field($model, 'callDepId')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-'])->label('Department') */?>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="row">
-                <div class="col-md-6">
-                    <?/*= $form->field($model, 'c_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-'])->label('Project') */?>
-                </div>
-                <div class="col-md-6">
-                    <?/*= $form->field($model, 'userGroupId')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '-'])->label('User Group') */?>
+                    <?= $form->field($model, 'departmentId')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-'])->label('User Department') ?>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
-                    <?/*= $form->field($model, 'call_duration_from')->input('number', ['min' => 0]) */?>
+                    <?= $form->field($model, 'userGroupId')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '-'])->label('User Group') ?>
                 </div>
                 <div class="col-md-6">
-                    <?/*= $form->field($model, 'call_duration_to')->input('number', ['min' => 0]) */?>
+                    <?= $form->field($model, 'projectId')->dropDownList(\common\models\Project::getList(), ['prompt' => '-'])->label('Project') ?>
                 </div>
             </div>
         </div>
@@ -71,7 +63,7 @@ use sales\access\EmployeeDepartmentAccess;
             <br>
             <div class="form-group text-center">
                 <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['name' => 'search', 'class' => 'btn btn-primary']) ?>
-                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['report/calls-report'], ['class' => 'btn btn-warning']) ?>
+                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['report/leads-report'], ['class' => 'btn btn-warning']) ?>
             </div>
         </div>
     </div>
