@@ -2239,13 +2239,13 @@ class LeadSearch extends Lead
             $query->leftJoin('user_params', 'user_params.up_user_id = employee_id')
                 ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = employee_id')
-                ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
+                ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
             $query->groupBy(['employee_id']);
         } else {
             $query->leftJoin('user_params', 'user_params.up_user_id = e.id')
                 ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->from('employees AS e')->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id')
-                ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
+                ->andWhere(['in', 'auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
         }
 
         $command = $query->createCommand();
@@ -2339,7 +2339,7 @@ class LeadSearch extends Lead
             ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
 
         $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
-            ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT]);
+            ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
         $query->from('user_group' );
         $query->groupBy('ug_name');
 
