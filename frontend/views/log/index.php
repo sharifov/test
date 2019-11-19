@@ -152,9 +152,9 @@ $jsCode = <<<JS
         
         //alert($(this).attr('title'));
         $('#modalHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
-        /*$.get($(this).attr('href'), function(data) {
+        $.get($(this).attr('href'), function(data) {
           $('#modal').find('#modalContent').html(data);
-        });*/
+        });
        return false;
     });
 JS;
