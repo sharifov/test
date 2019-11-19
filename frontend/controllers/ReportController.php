@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\search\CallSearch;
 use common\models\search\EmployeeSearch;
+use common\models\search\LeadFlowSearch;
 use common\models\search\LeadSearch;
 use frontend\models\SoldReportForm;
 use common\models\Employee;
@@ -108,7 +109,6 @@ class ReportController extends FController
     {
         $searchModel = new CallSearch();
         $params = Yii::$app->request->queryParams;
-        //var_dump($params); die();
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
@@ -117,6 +117,21 @@ class ReportController extends FController
         return $this->render('calls-report', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionLeadsReport()
+    {
+        $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->leadFlowReport($params, $user);
+
+        return $this->render('leads-report', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
         ]);
     }
 }
