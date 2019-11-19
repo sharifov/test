@@ -43,6 +43,23 @@ use yii\db\ActiveRecord;
  */
 class ProductQuote extends \yii\db\ActiveRecord
 {
+
+    public const STATUS_PENDING         = 1;
+    public const STATUS_IN_PROGRESS     = 2;
+    public const STATUS_DONE            = 3;
+    public const STATUS_MODIFIED        = 4;
+    public const STATUS_DECLINED        = 5;
+    public const STATUS_CANCELED        = 6;
+
+    public const STATUS_LIST        = [
+        self::STATUS_PENDING        => 'Pending',
+        self::STATUS_IN_PROGRESS    => 'In progress',
+        self::STATUS_DONE           => 'Done',
+        self::STATUS_MODIFIED       => 'Modified',
+        self::STATUS_DECLINED       => 'Declined',
+        self::STATUS_CANCELED       => 'Canceled',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -206,5 +223,21 @@ class ProductQuote extends \yii\db\ActiveRecord
     public static function find()
     {
         return new ProductQuoteQuery(get_called_class());
+    }
+
+    /**
+     * @return array
+     */
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return self::STATUS_LIST[$this->pq_status_id] ?? '';
     }
 }

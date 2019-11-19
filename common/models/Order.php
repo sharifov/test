@@ -39,6 +39,34 @@ use yii\db\ActiveRecord;
  */
 class Order extends \yii\db\ActiveRecord
 {
+
+    public const STATUS_PENDING         = 1;
+    public const STATUS_IN_PROGRESS     = 2;
+    public const STATUS_DONE            = 3;
+    public const STATUS_MODIFIED        = 4;
+    public const STATUS_DECLINED        = 5;
+    public const STATUS_CANCELED        = 6;
+
+    public const STATUS_LIST        = [
+        self::STATUS_PENDING        => 'Pending',
+        self::STATUS_IN_PROGRESS    => 'In progress',
+        self::STATUS_DONE           => 'Done',
+        self::STATUS_MODIFIED       => 'Modified',
+        self::STATUS_DECLINED       => 'Declined',
+        self::STATUS_CANCELED       => 'Canceled',
+    ];
+
+    public const PAY_STATUS_NOT_PAID        = 1;
+    public const PAY_STATUS_PAID            = 2;
+    public const PAY_STATUS_PARTIAL_PAID    = 3;
+
+    public const PAY_STATUS_LIST        = [
+        self::PAY_STATUS_NOT_PAID           => 'Not paid',
+        self::PAY_STATUS_PAID               => 'Paid',
+        self::PAY_STATUS_PARTIAL_PAID       => 'Partial paid',
+    ];
+
+
     /**
      * {@inheritdoc}
      */
@@ -177,5 +205,37 @@ class Order extends \yii\db\ActiveRecord
     public static function find()
     {
         return new OrderQuery(get_called_class());
+    }
+
+    /**
+     * @return array
+     */
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getPayStatusList(): array
+    {
+        return self::PAY_STATUS_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return self::STATUS_LIST[$this->or_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getPayStatusName(): string
+    {
+        return self::STATUS_LIST[$this->or_pay_status_id] ?? '';
     }
 }

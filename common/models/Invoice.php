@@ -32,6 +32,17 @@ use yii\db\ActiveRecord;
  */
 class Invoice extends \yii\db\ActiveRecord
 {
+
+    public const STATUS_NOT_PAID        = 1;
+    public const STATUS_PAID            = 2;
+    public const STATUS_PARTIAL_PAID    = 3;
+
+    public const STATUS_LIST        = [
+        self::STATUS_NOT_PAID           => 'Not paid',
+        self::STATUS_PAID               => 'Paid',
+        self::STATUS_PARTIAL_PAID       => 'Partial paid',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -147,5 +158,21 @@ class Invoice extends \yii\db\ActiveRecord
     public static function find()
     {
         return new InvoiceQuery(get_called_class());
+    }
+
+    /**
+     * @return array
+     */
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return self::STATUS_LIST[$this->inv_status_id] ?? '';
     }
 }
