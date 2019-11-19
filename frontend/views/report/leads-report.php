@@ -114,6 +114,15 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'attribute' => 'toFollowUp',
+            'value' => function($data) {
+                return $data['toFollowUp'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+        ],
+        [
             'attribute' => 'followUpLeadsTaken',
             'value' => function($data) {
                 return $data['followUpLeadsTaken'] ?: '-';
@@ -134,7 +143,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'attribute' => 'trashLeads',
             'value' => function($data) {
-                return $data['tips'] ?: '-';
+                return $data['trashLeads'] ?: '-';
             },
             'contentOptions' => [
                 'class' => 'text-center'
@@ -143,7 +152,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'attribute' => 'soldLeads',
             'value' => function($data) {
-                return $data['tips'] ?: '-';
+                return $data['soldLeads'] ?: '-';
             },
             'contentOptions' => [
                 'class' => 'text-center'
@@ -152,7 +161,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'attribute' => 'profit',
             'value' => function($data) {
-                return $data['tips'] ?: '-';
+                return number_format($data['profit']) ?: '-';
             },
             'contentOptions' => [
                 'class' => 'text-center'
@@ -161,7 +170,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'attribute' => 'tips',
             'value' => function($data) {
-                return $data['tips'] ?: '-';
+                return number_format($data['tips']) ?: '-';
             },
             'contentOptions' => [
                 'class' => 'text-center'
