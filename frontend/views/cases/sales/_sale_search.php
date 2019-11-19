@@ -244,7 +244,7 @@ yii\bootstrap\Modal::end();
 $jsCode = <<<JS
     $(document).on('click', '.showModalCaseInfo', function(){
         
-        $('#modalCaseInfo').modal('show').find('#modalCaseInfoContent').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#modalCaseInfo').modal('show').find('#modalCaseInfoContent').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         //$('#modal').modal('show');
         
         //alert($(this).attr('title'));

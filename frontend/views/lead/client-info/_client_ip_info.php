@@ -33,7 +33,7 @@ if (($count = LeadSearchByIp::count($lead->request_ip, Yii::$app->user->id)) > 1
     $js = <<<JS
     $(document).on('click', '#button-cnt-ip', function(e) {
         e.preventDefault();
-        $('#modal-ip-cnt-ip .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#modal-ip-cnt-ip .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#modal-ip-cnt-ip .modal-header').html('<h2>Leads</h2>');
         $('#modal-ip-cnt-ip').modal();
         $.get('$url', {gid:'$gid'}, function (data) {
