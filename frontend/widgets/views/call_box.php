@@ -356,7 +356,7 @@ $js = <<<JS
     $(document).on('click', '#btn-client-details', function(e) {
         e.preventDefault();
         var client_id = $(this).data('client-id');
-        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#call-box-modal .modal-title').html('Client Details (' + client_id + ')');
         $('#call-box-modal').modal();
         $.post(clientInfoUrl, {client_id: client_id},
@@ -368,7 +368,7 @@ $js = <<<JS
     
     $(document).on('click', '#btn-missed-calls', function(e) {
         e.preventDefault();
-        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#call-box-modal .modal-title').html('Missed Calls');
         $('#call-box-modal').modal();
         $.post(missedCallsUrl, 
@@ -381,7 +381,7 @@ $js = <<<JS
     $(document).on('click', '#btn-call-info', function(e) {
         e.preventDefault();
         var callId = $(this).data('call-id');
-        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#call-box-modal .modal-title').html('Call Info');
         $('#call-box-modal').modal();
         $.post(callInfoUrl, {id: callId}, 

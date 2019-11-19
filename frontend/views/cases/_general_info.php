@@ -125,7 +125,7 @@ $js = <<<JS
     $(document).on('click', '#btn-case-update', function(){
             var modal = $('#modalCaseSm');
             //$('#search-sale-panel').toggle();
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
             
             $.get('$caseUpdateAjaxUrl', function(data) {
