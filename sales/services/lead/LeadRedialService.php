@@ -19,6 +19,8 @@ use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
+use yii\helpers\VarDumper;
+
 /**
  * Class LeadRedialService
  *
@@ -69,6 +71,10 @@ class LeadRedialService
 
         $lead->callPrepare();
         $this->leadRepository->save($lead);
+
+        if ($qCall = $lead->leadQcall) {
+            $this->qCallService->resetReservation($qCall);
+        }
     }
 
     /**

@@ -139,7 +139,7 @@ class QCallService
      * @param FindPhoneParams $findPhoneParams
      * @return string|null
      */
-    public function updateCallFrom(LeadQcall $qCall, Config $config, FindPhoneParams $findPhoneParams):? string
+    public function updateCallFrom(LeadQcall $qCall, Config $config, FindPhoneParams $findPhoneParams): ?string
     {
         if (!$qConfig = $this->findConfig($config)) {
             Yii::warning('QCallService:updateCallFrom. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
@@ -164,6 +164,20 @@ class QCallService
         $seconds = (int)Yii::$app->params['settings']['redial_reservation_time'];
         $dt = (new \DateTime('now', new \DateTimeZone('UTC')))->add(new \DateInterval('PT' . $seconds . 'S'));
         $qCall->reservation($dt, $userId);
+        $this->leadQcallRepository->save($qCall);
+    }
+
+    /**
+     * @param LeadQcall $qCall
+     */
+    public function resetReservation(LeadQcall $qCall): void
+    {
+        $minutes = (int)Yii::$app->params['settings']['redial_failed_time_difference'];
+        $qCall->updateReservationTime(new \DateTime('now', new \DateTimeZone('UTC')));
+        $qCall->updateInterval(new Interval(
+            (new \DateTimeImmutable($qCall->lqc_dt_from))->add(new \DateInterval('PT' . $minutes . 'M')),
+            (new \DateTimeImmutable($qCall->lqc_dt_to))->add(new \DateInterval('PT' . $minutes . 'M'))
+        ));
         $this->leadQcallRepository->save($qCall);
     }
 
@@ -196,7 +210,7 @@ class QCallService
      * @param int|null $leadId
      * @return string|null
      */
-    private function findPhone(?string $callFrom, $phoneSwitch, FindPhoneParams $findPhoneParams, ?int $leadId = null):? string
+    private function findPhone(?string $callFrom, $phoneSwitch, FindPhoneParams $findPhoneParams, ?int $leadId = null): ?string
     {
         $phonesQuery = DepartmentPhoneProject::find()->redialPhones($findPhoneParams->projectId, $findPhoneParams->departmentId);
         $clone = clone $phonesQuery;
@@ -226,7 +240,7 @@ class QCallService
      * @param int|null $leadId
      * @return string|null
      */
-    private function findPhoneWithMinimumAttemptsByLead(ActiveQuery $phonesQuery, ?int $leadId):? string
+    private function findPhoneWithMinimumAttemptsByLead(ActiveQuery $phonesQuery, ?int $leadId): ?string
     {
         if ($leadId === null) {
             return null;
@@ -254,7 +268,7 @@ class QCallService
      * @param ActiveQuery $phonesQuery
      * @return string|null
      */
-    private function findPhoneWithMinimumAttemptsByDate(ActiveQuery $phonesQuery):? string
+    private function findPhoneWithMinimumAttemptsByDate(ActiveQuery $phonesQuery): ?string
     {
         $hours = (int)Yii::$app->params['settings']['redial_default_phone_history_hours'];
         $interval = new \DateInterval('PT' . $hours . 'H');
@@ -283,7 +297,7 @@ class QCallService
      * @param ActiveQuery $phonesQuery
      * @return string|null
      */
-    private function getFirstPhone(ActiveQuery $phonesQuery):? string
+    private function getFirstPhone(ActiveQuery $phonesQuery): ?string
     {
         /** @var DepartmentPhoneProject $phone */
         if ($phone = $phonesQuery->limit(1)->one()) {
@@ -296,7 +310,7 @@ class QCallService
      * @param int $leadId
      * @return LeadQcall|null
      */
-    private function findQcall(int $leadId):? LeadQcall
+    private function findQcall(int $leadId): ?LeadQcall
     {
         return LeadQcall::find()->andWhere(['lqc_lead_id' => $leadId])->one();
     }
@@ -305,7 +319,7 @@ class QCallService
      * @param Config $config
      * @return QcallConfig|null
      */
-    private function findConfig(Config $config):? QcallConfig
+    private function findConfig(Config $config): ?QcallConfig
     {
         return QcallConfig::find()->config($config->status, $config->callCount);
     }
