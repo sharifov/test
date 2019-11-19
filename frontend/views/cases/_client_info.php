@@ -142,7 +142,7 @@ $clientUpdateAjaxUrl = \yii\helpers\Url::to(['cases/client-update', 'gid' => $ca
 $js = <<<JS
      $(document).on('click', '#btn-add-phone', function(){
            var modal = $('#modalCaseSm');                
-           modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+           modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
            modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
            
            $.get('$addPhoneAjaxUrl', function(data) {
@@ -154,7 +154,7 @@ $js = <<<JS
      $(document).on('click', '#btn-add-email', function(){
             var modal = $('#modalCaseSm');
             //$('#search-sale-panel').toggle();
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
             
             $.get('$addEmailAjaxUrl', function(data) {
@@ -167,7 +167,7 @@ $js = <<<JS
     $(document).on('click', '#btn-client-update', function(){
             var modal = $('#modalCaseSm');
             //$('#search-sale-panel').toggle();
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
             
             $.get('$clientUpdateAjaxUrl', function(data) {

@@ -33,9 +33,8 @@ $list = new ListsAccess($user->id);
 
         <div class="row">
             <div class="col-md-12">
-
-                <div id="loading" style="text-align:center; display: none">
-                    <img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"/>
+                <div id="loading" style="text-align:center;font-size: 60px;display: none">
+                    <i class="fa fa-spin fa-spinner"></i> Loading ...
                 </div>
 
                 <div id="redial-call-box-wrapper">
