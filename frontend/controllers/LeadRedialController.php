@@ -4,11 +4,13 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Lead;
+use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
 use sales\access\ListsAccess;
 use sales\guards\lead\TakeGuard;
 use sales\services\lead\LeadRedialService;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -108,7 +110,7 @@ class LeadRedialController extends FController
     public function actionShow(): Response
     {
         $gid = Yii::$app->request->post('gid');
-        $lead = $this->findLeadById($gid);
+        $lead = $this->findLeadByGid($gid);
         return $this->asJson([
             'success' => true,
             'data' => $this->renderAjax('show', ['lead' => $lead])
@@ -131,13 +133,96 @@ class LeadRedialController extends FController
         ]);
     }
 
+    /**
+     * @param int $userId
+     * @return array
+     */
+    private function guardAlreadyReservedOneLead(int $userId): array
+    {
+        if ($currentLead = LeadQcall::find()->currentReservedLeadByUser($userId)->one()) {
+            if ($lead = $currentLead->lqcLead) {
+                return [
+                    'success' => false,
+                    'message' => 'You already reserved one Lead. Try again later.',
+                    'data' => $this->renderAjax('redial_from_queue', ['lead' => $lead])
+                ];
+            }
+            return [
+                'success' => false,
+                'message' => 'You already reserved one Lead, but Lead not found. Try again later.',
+            ];
+        }
+        return [];
+    }
+
+    public function actionNext(): Response
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($data = $this->guardAlreadyReservedOneLead($user->id)) {
+            return $this->asJson($data);
+        }
+
+        $dataProvider = (new LeadQcallSearch())->searchByRedial([], $user);
+        $query = $dataProvider->query;
+        $query->addOrderBy(($dataProvider->sort)->getOrders())->limit(1);
+
+        foreach ($query->all() as $model) {
+            try {
+                $lead = $this->findLeadById($model->lqc_lead_id);
+                $this->leadRedialService->redial($lead, $user);
+                return $this->asJson([
+                    'success' => true,
+                    'data' => $this->renderAjax('redial_from_queue', ['lead' => $lead])
+                ]);
+            } catch (\DomainException $e) {
+                return $this->asJson([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+        }
+
+        return $this->asJson([
+            'success' => false,
+            'message' => 'Not found Leads. Try again.'
+        ]);
+    }
+
+    /**
+     * @param int $userId
+     * @param int $leadId
+     * @return array
+     */
+    private function guardAlreadyReservedCurrentLead(int $userId, int $leadId): array
+    {
+        if (($currentLead = LeadQcall::find()->currentReservedLeadByUser($userId)->one()) && $currentLead->isEqual($leadId)) {
+            if ($lead = $currentLead->lqcLead) {
+                return [
+                    'success' => false,
+                    'message' => 'You already reserved this Lead.',
+                    'data' => $this->renderAjax('redial_from_queue', ['lead' => $lead])
+                ];
+            }
+            return [
+                'success' => false,
+                'message' => 'You already reserved this Lead, but Lead not found. Try again later.',
+            ];
+        }
+        return [];
+    }
 
     public function actionRedial(): Response
     {
         $gid = Yii::$app->request->post('gid');
-        $lead = $this->findLeadById($gid);
+        $lead = $this->findLeadByGid($gid);
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+
+        if ($data = $this->guardAlreadyReservedCurrentLead($user->id, $lead->id)) {
+            return $this->asJson($data);
+        }
 
         try {
             $this->leadRedialService->redial($lead, $user);
@@ -148,6 +233,7 @@ class LeadRedialController extends FController
                 'message' => $e->getMessage()
             ]);
         }
+
         return $this->asJson([
             'success' => true,
             'data' => $this->renderAjax('redial_from_queue', ['lead' => $lead])
@@ -161,7 +247,7 @@ class LeadRedialController extends FController
     public function actionReservation(): Response
     {
         $gid = Yii::$app->request->post('gid');
-        $lead = $this->findLeadById($gid);
+        $lead = $this->findLeadByGid($gid);
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
@@ -180,7 +266,7 @@ class LeadRedialController extends FController
     public function actionRedialFromLastCalls(): string
     {
         $gid = Yii::$app->request->post('gid');
-        $lead = $this->findLeadById($gid);
+        $lead = $this->findLeadByGid($gid);
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
@@ -200,7 +286,7 @@ class LeadRedialController extends FController
     public function actionReservationFromLastCall(): Response
     {
         $gid = Yii::$app->request->post('gid');
-        $lead = $this->findLeadById($gid);
+        $lead = $this->findLeadByGid($gid);
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
@@ -220,7 +306,7 @@ class LeadRedialController extends FController
     public function actionTake(): Response
     {
         $gid = Yii::$app->request->post('gid');
-        $lead = $this->findLeadById($gid);
+        $lead = $this->findLeadByGid($gid);
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
@@ -239,7 +325,7 @@ class LeadRedialController extends FController
     public function actionPhoneNumberFrom(): Response
     {
         $gid = Yii::$app->request->post('gid');
-        $lead = $this->findLeadById($gid);
+        $lead = $this->findLeadByGid($gid);
         try {
             $phoneFrom = $this->leadRedialService->findOrUpdatePhoneNumberFrom($lead);
             return $this->asJson(['success' => true, 'phoneFrom' => $phoneFrom]);
@@ -253,9 +339,22 @@ class LeadRedialController extends FController
      * @return Lead
      * @throws NotFoundHttpException
      */
-    protected function findLeadById($gid): Lead
+    protected function findLeadByGid($gid): Lead
     {
         if ($model = Lead::findOne(['gid' => $gid])) {
+            return $model;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @param $id
+     * @return Lead
+     * @throws NotFoundHttpException
+     */
+    protected function findLeadById($id): Lead
+    {
+        if ($model = Lead::findOne($id)) {
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');

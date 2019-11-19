@@ -31,6 +31,10 @@ $list = new ListsAccess($user->id);
             <?= UserInfoProgress::widget(['user' => $user])?>
         </div>
 
+        <?= Html::button('<i class="fa fa-phone"></i> New Call', [
+            'class' => 'btn btn-success btn-lg lead-next-btn'
+        ])?>
+
         <div class="row">
             <div class="col-md-12">
                 <div id="loading" style="text-align:center;font-size: 60px;display: none">
@@ -39,9 +43,9 @@ $list = new ListsAccess($user->id);
 
                 <div id="redial-call-box-wrapper">
                     <div id="redial-call-box">
-                        <div class="text-center badge badge-warning call-status" style="font-size: 35px">
+                       <?php /* <div class="text-center badge badge-warning call-status" style="font-size: 35px">
                             <span id="text-status-call">Ready</span>
-                        </div>
+                        </div> */ ?>
                     </div>
                 </div>
 
@@ -88,6 +92,7 @@ $list = new ListsAccess($user->id);
 
 <?php
 
+$nextUrl = Url::to(['lead-redial/next']);
 
 $js = <<<JS
 
@@ -107,8 +112,10 @@ function loadRedialCallBoxBlock(type, url, data) {
                text = data.message;
            }
             new PNotify({title: "Lead redial", type: "error", text: text, hide: true});
+        } 
+        if (data.data) {
+            $("#redial-call-box-wrapper").html(data.data);
         }
-        $("#redial-call-box-wrapper").html(data.data);
     })
     .fail(function() {
         $("#loading").hide();
@@ -118,6 +125,10 @@ function loadRedialCallBoxBlock(type, url, data) {
 
 $("body").on("click", ".lead-redial-btn", function(e) {
     loadRedialCallBoxBlock('post', $(this).data('url'), {gid: $(this).data('gid')});
+});
+
+$("body").on("click", ".lead-next-btn", function(e) {
+    loadRedialCallBoxBlock('post', '{$nextUrl}');
 });
 
 JS;

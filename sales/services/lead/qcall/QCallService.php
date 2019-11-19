@@ -167,11 +167,6 @@ class QCallService
         $this->leadQcallRepository->save($qCall);
     }
 
-    public function isReservedExists(int $leadId): bool
-    {
-        return LeadQcall::find()->andWhere(['lqc_reservation_user_id' => $leadId])->exists();
-    }
-
     /**
      * @param int $leadId
      * @throws \Throwable

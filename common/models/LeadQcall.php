@@ -100,6 +100,24 @@ class LeadQcall extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param int $userId
+     * @return bool
+     */
+    public function isReservedByUser(int $userId): bool
+    {
+        return $this->isReservationUser($userId) && $this->isReserved();
+    }
+
+    /**
+     * @param int $leadId
+     * @return bool
+     */
+    public function isEqual(int $leadId): bool
+    {
+        return $this->lqc_lead_id === $leadId;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()

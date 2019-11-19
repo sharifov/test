@@ -166,7 +166,7 @@ function callInProgress() {
 }
 
 function getPhoneNumberFromAndNext(phoneTo) {
-    new PNotify({title: "Take Lead", type: "info", text: 'Get "from phone number"', hide: true});
+    // new PNotify({title: "Take Lead", type: "info", text: 'Get "from phone number"', hide: true});
     $.ajax({
         type: '{$phoneNumberFromUrl->method}',
         url: '{$phoneNumberFromUrl->url}',
@@ -174,7 +174,7 @@ function getPhoneNumberFromAndNext(phoneTo) {
     })
     .done(function(data) {
         if (data.success) {
-            new PNotify({title: "Take Lead", type: "success", text: 'Phone number found', hide: true});
+            // new PNotify({title: "Take Lead", type: "success", text: 'Phone number found', hide: true});
             leadRedialReservationAndNext(data.phoneFrom, phoneTo);
         } else {
            let text = 'Error. Try again later';
@@ -232,7 +232,7 @@ function leadRedialReservationAndNext(phoneFrom, phoneTo) {
     })
     .done(function(data) {
         if (data.success) {
-            new PNotify({title: "Take Lead: Reservation", type: "success", text: 'Lead reserved', hide: true});
+            new PNotify({title: "Take Lead: Reservation", type: "success", text: 'Success', hide: true});
             leadRedialCall(phoneFrom, phoneTo);
         } else {
            let text = 'Error. Try again later';

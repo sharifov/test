@@ -53,8 +53,8 @@ class LeadRedialService
     }
 
     /**
-     * @param $lead
-     * @param $user
+     * @param int|Lead $lead
+     * @param int|Employee $user
      * @throws \yii\web\ForbiddenHttpException
      */
     public function reservation($lead, $user): void
@@ -72,8 +72,8 @@ class LeadRedialService
     }
 
     /**
-     * @param $lead
-     * @param $user
+     * @param int|Lead $lead
+     * @param int|Employee $user
      * @throws \yii\web\ForbiddenHttpException
      */
     public function redial($lead, $user): void
@@ -125,8 +125,8 @@ class LeadRedialService
     }
 
     /**
-     * @param $lead
-     * @param $user
+     * @param int|Lead $lead
+     * @param int|Employee $user
      * @param $creatorId
      * @throws \Throwable
      */
@@ -210,7 +210,7 @@ class LeadRedialService
             throw new \DomainException('Cant call before Date Time From');
         }
 
-        if ($this->qCallService->isReservedExists($user->id)) {
+        if (LeadQcall::find()->isUserReservedOtherLead($user->id, $lead->id)) {
             throw new \DomainException('You already reserved one Lead. Try again later.');
         }
 

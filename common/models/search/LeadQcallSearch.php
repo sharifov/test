@@ -268,6 +268,7 @@ class LeadQcallSearch extends LeadQcall
 			'deadline' => SORT_ASC,
 			'attempts' => SORT_ASC,
 			'lqc_dt_from' => SORT_ASC,
+            'lqc_lead_id' => SORT_DESC,
 		];
 
         $defaultOrder = array_merge($customDefaultOrder, $defaultOrder);
