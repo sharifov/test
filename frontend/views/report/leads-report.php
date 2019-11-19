@@ -38,7 +38,7 @@ $list = new ListsAccess(Yii::$app->user->id);
     $gridColumns = [
         [
             'label' => 'Username',
-            'attribute' => 'user_id',
+            'attribute' => 'lfOwnerId',
             'value' => function ($searchModel) {
                 $employee = \common\models\Employee::findone($searchModel['user_id']);
                 return $employee->username;
@@ -52,47 +52,121 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         [
             'attribute' => 'newTotal',
+            'value' => function($data) {
+                return $data['newTotal'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'inboxLeadsTaken',
+            'value' => function($data) {
+                return $data['inboxLeadsTaken'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'callLeadsTaken',
+            'value' => function($data) {
+                return $data['callLeadsTaken'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'redialLeadsTaken',
+            'value' => function($data) {
+                return $data['redialLeadsTaken'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'leadsCreated',
+            'value' => function($data) {
+                return $data['leadsCreated'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'leadsCloned',
+            'value' => function($data) {
+                return $data['leadsCloned'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'followUpTotal',
+            'value' => function($data) {
+                return $data['followUpTotal'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'followUpLeadsTaken',
+            'value' => function($data) {
+                return $data['followUpLeadsTaken'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'label' => 'Follow Up Leads Assigned By',
             'value' => function ($searchModel) {
-                return $searchModel['followUpTotal'] - $searchModel['followUpLeadsTaken'];
+                return $searchModel['followUpTotal'] - $searchModel['followUpLeadsTaken'] ?: '-';
             },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'trashLeads',
+            'value' => function($data) {
+                return $data['tips'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'soldLeads',
+            'value' => function($data) {
+                return $data['tips'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'profit',
+            'value' => function($data) {
+                return $data['tips'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         [
             'attribute' => 'tips',
+            'value' => function($data) {
+                return $data['tips'] ?: '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
-
     ];
 
     $fullExportMenu = \kartik\export\ExportMenu::widget([

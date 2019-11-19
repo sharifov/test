@@ -2,6 +2,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use sales\access\EmployeeDepartmentAccess;
+use common\models\Lead;
 ?>
 
 <div class="calls-search">
@@ -53,6 +54,13 @@ use sales\access\EmployeeDepartmentAccess;
                 </div>
                 <div class="col-md-6">
                     <?= $form->field($model, 'projectId')->dropDownList(\common\models\Project::getList(), ['prompt' => '-'])->label('Project') ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $form->field($model, 'createdType')->dropDownList(Lead::TYPE_CREATE_LIST, ['prompt' => '-'])->label('Lead Created Type') ?>
                 </div>
             </div>
         </div>
