@@ -19,9 +19,6 @@ use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
-use yii\helpers\VarDumper;
-use yii\web\ForbiddenHttpException;
-
 /**
  * Class LeadRedialService
  *
@@ -29,6 +26,7 @@ use yii\web\ForbiddenHttpException;
  * @property ServiceFinder $serviceFinder
  * @property TransactionManager $transactionManager
  * @property TakeGuard $takeGuard
+ * @property QCallService $qCallService
  */
 class LeadRedialService
 {
@@ -37,18 +35,21 @@ class LeadRedialService
     private $serviceFinder;
     private $transactionManager;
     private $takeGuard;
+    private $qCallService;
 
     public function __construct(
         LeadRepository $leadRepository,
         ServiceFinder $serviceFinder,
         TransactionManager $transactionManager,
-        TakeGuard $takeGuard
+        TakeGuard $takeGuard,
+        QCallService $qCallService
     )
     {
         $this->leadRepository = $leadRepository;
         $this->serviceFinder = $serviceFinder;
         $this->transactionManager = $transactionManager;
         $this->takeGuard = $takeGuard;
+        $this->qCallService = $qCallService;
     }
 
     /**
@@ -84,6 +85,10 @@ class LeadRedialService
 
         $this->guardUserFree($user);
         $this->guardLeadForCall($lead, $user);
+
+        if ($qCall = $lead->leadQcall) {
+            $this->qCallService->reservation($qCall, $user->id);
+        }
     }
 
     /**
@@ -139,9 +144,7 @@ class LeadRedialService
         $lead->processing($user->id, $creatorId, 'Lead redial');
 
         $this->transactionManager->wrap(function () use ($lead) {
-            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
-                $qCall->delete();
-            }
+            $this->qCallService->remove($lead->id);
             $this->leadRepository->save($lead);
         });
     }
@@ -205,6 +208,14 @@ class LeadRedialService
 
         if (strtotime(date('Y-m-d H:i:s')) < strtotime($leadQCall->lqc_dt_from)) {
             throw new \DomainException('Cant call before Date Time From');
+        }
+
+        if ($this->qCallService->isReservedExists($user->id)) {
+            throw new \DomainException('You already reserved one Lead. Try again later.');
+        }
+
+        if ($leadQCall->isReserved() && !$leadQCall->isReservationUser($user->id)) {
+            throw new \DomainException('Lead reserved. Try again later.');
         }
 
         if ((bool)\Yii::$app->params['settings']['enable_take_frequency_minutes']) {

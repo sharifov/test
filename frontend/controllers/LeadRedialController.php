@@ -131,11 +131,8 @@ class LeadRedialController extends FController
         ]);
     }
 
-    /**
-     * @return string
-     * @throws NotFoundHttpException
-     */
-    public function actionRedial(): string
+
+    public function actionRedial(): Response
     {
         $gid = Yii::$app->request->post('gid');
         $lead = $this->findLeadById($gid);
@@ -145,10 +142,16 @@ class LeadRedialController extends FController
         try {
             $this->leadRedialService->redial($lead, $user);
         } catch (\DomainException $e) {
-            return $this->renderAjax('error', ['message' => $e->getMessage()]);
+            return $this->asJson([
+                'success' => false,
+                'data' => $this->renderAjax('error', ['message' => $e->getMessage()]),
+                'message' => $e->getMessage()
+            ]);
         }
-
-        return $this->renderAjax('redial_from_queue', ['lead' => $lead]);
+        return $this->asJson([
+            'success' => true,
+            'data' => $this->renderAjax('redial_from_queue', ['lead' => $lead])
+        ]);
     }
 
     /**

@@ -155,12 +155,21 @@ class QCallService
         return $phone;
     }
 
-    public function reservation(LeadQcall $qCall): void
+    /**
+     * @param LeadQcall $qCall
+     * @param int $userId
+     */
+    public function reservation(LeadQcall $qCall, int $userId): void
     {
         $seconds = (int)Yii::$app->params['settings']['redial_reservation_time'];
         $dt = (new \DateTime('now', new \DateTimeZone('UTC')))->add(new \DateInterval('PT' . $seconds . 'S'));
-        $qCall->updateReservationTime($dt);
+        $qCall->reservation($dt, $userId);
         $this->leadQcallRepository->save($qCall);
+    }
+
+    public function isReservedExists(int $leadId): bool
+    {
+        return LeadQcall::find()->andWhere(['lqc_reservation_user_id' => $leadId])->exists();
     }
 
     /**

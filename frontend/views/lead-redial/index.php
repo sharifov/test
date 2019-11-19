@@ -101,7 +101,14 @@ function loadRedialCallBoxBlock(type, url, data) {
     })
     .done(function(data) {
         $("#loading").hide();
-        $("#redial-call-box-wrapper").html(data);
+        if (!data.success) {
+           let text = 'Error. Try again later';
+           if (data.message) {
+               text = data.message;
+           }
+            new PNotify({title: "Lead redial", type: "error", text: text, hide: true});
+        }
+        $("#redial-call-box-wrapper").html(data.data);
     })
     .fail(function() {
         $("#loading").hide();

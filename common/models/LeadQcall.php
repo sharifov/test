@@ -15,7 +15,8 @@ use Yii;
  * @property int $lqc_weight
  * @property $lqc_created_dt
  * @property $lqc_call_from
- * @property DateTime $lqc_reservation_time
+ * @property string $lqc_reservation_time
+ * @property int $lqc_reservation_user_id
  *
  * @property Lead $lqcLead
  */
@@ -73,10 +74,29 @@ class LeadQcall extends \yii\db\ActiveRecord
 
     /**
      * @param \DateTime $dt
+     * @param int $userId
      */
-    public function updateReservationTime(\DateTime $dt): void
+    public function reservation(\DateTime $dt, int $userId): void
     {
         $this->lqc_reservation_time = $dt->format('Y-m-d H:i:s');
+        $this->lqc_reservation_user_id = $userId;
+    }
+
+    /**
+     * @param int $userId
+     * @return bool
+     */
+    public function isReservationUser(int $userId): bool
+    {
+        return $this->lqc_reservation_user_id === $userId;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isReserved(): bool
+    {
+        return $this->lqc_reservation_time !== null && strtotime(date('Y-m-d H:i:s')) < strtotime($this->lqc_reservation_time);
     }
 
     /**
@@ -101,6 +121,7 @@ class LeadQcall extends \yii\db\ActiveRecord
             ['lqc_created_dt', 'string'],
             ['lqc_call_from', 'string'],
             ['lqc_reservation_time', 'string'],
+            ['lqc_reservation_user_id', 'integer'],
         ];
     }
 

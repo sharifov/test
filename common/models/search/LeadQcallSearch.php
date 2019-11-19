@@ -173,6 +173,10 @@ class LeadQcallSearch extends LeadQcall
 
         if (!$user->isAdmin()) {
             $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+            $query->andWhere(['or',
+                ['<=', 'lqc_reservation_time', date('Y-m-d H:i:s')],
+                ['IS', 'lqc_reservation_time', null]
+            ]);
         }
 
         if ($user->isAgent() || $user->isSupervision()) {

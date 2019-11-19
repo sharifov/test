@@ -133,9 +133,7 @@ class TestController extends FController
     public function actionTest()
     {
 
-       $qcall = LeadQcall::findOne(8656);
-       $service = Yii::createObject(QCallService::class);
-       $service->updateReservationTime($qcall);
+
         die;
         return $this->render('blank');
 
