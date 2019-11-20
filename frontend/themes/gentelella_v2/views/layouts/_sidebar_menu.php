@@ -17,9 +17,9 @@ $isSuperAdmin = $user->canRole('superadmin');
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
     <div class="menu_section">
-        <br>
-        <br>
-        <br>
+<!--        <br>-->
+<!--        <br>-->
+<!--        <br>-->
         <?php
 
         $menuItems = [];
@@ -118,7 +118,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                 ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index'], 'icon' => 'bell'],
                 ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
-                ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'quora'],
+                ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'quora', 'iconPrefix' => 'fab'],
                 ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'dollar'],
                 ['label' => 'Export Leads', 'url' => ['/leads/export'], 'icon' => 'export'],
                 ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate'], 'icon' => 'copy'],

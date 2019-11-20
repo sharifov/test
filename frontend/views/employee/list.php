@@ -541,8 +541,8 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
     <div class="row">
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-body">
+            <div class="card card-default">
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <?= $form->field($multipleForm, 'userDepartment')->dropDownList(\common\models\Department::getList(), ['prompt' => '']) ?>
@@ -568,18 +568,16 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                             <?= $form->field($multipleForm, 'inboxShowLimitLeads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
                             <?= $form->field($multipleForm, 'defaultTakeLimitLeads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <?= $form->field($multipleForm, 'minPercentForTakeLeads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                                <?= $form->field($multipleForm, 'frequencyMinutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
-                                <?= $form->field($multipleForm, 'baseAmount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
-                                <?= $form->field($multipleForm, 'commissionPercent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                                <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', ['min' => -1, 'max' => 1000]) ?>
-                                <?= $form->field($multipleForm, 'autoRedial')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                                <?= $form->field($multipleForm, 'kpiEnable')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                                <?= $form->field($multipleForm, 'leaderBoardEnabled')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                                <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>
-                            </div>
+                        <div class="col-md-6">
+                            <?= $form->field($multipleForm, 'minPercentForTakeLeads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                            <?= $form->field($multipleForm, 'frequencyMinutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
+                            <?= $form->field($multipleForm, 'baseAmount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
+                            <?= $form->field($multipleForm, 'commissionPercent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                            <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', ['min' => -1, 'max' => 1000]) ?>
+                            <?= $form->field($multipleForm, 'autoRedial')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?= $form->field($multipleForm, 'kpiEnable')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?= $form->field($multipleForm, 'leaderBoardEnabled')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>
                         </div>
                         <div class="col-md-12">
                             <div class="form-group text-center">

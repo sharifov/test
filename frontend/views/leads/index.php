@@ -677,6 +677,7 @@ $lists = new ListsAccess($user->id);
         'striped' => false,
         'condensed' => false,
         'responsive' => true,
+        'bsVersion' => '4.x',
         'hover' => true,
         'floatHeader' => true,
         'floatHeaderOptions' => [
@@ -713,8 +714,8 @@ $lists = new ListsAccess($user->id);
 
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-default">
-                    <div class="panel-body">
+                <div class="card card-default">
+                    <div class="card-body">
                         <?php
 
                         if ($user->isAdmin()) {

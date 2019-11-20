@@ -253,7 +253,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
             </div>
             <?php
             if (!$model->isNewRecord) : ?>
-                <div class="well form-inline">
+                <div class="well">
                     <div class="form-group">
                         <?= $form->field($model, 'acl_rules_activated', [
                             'template' => '{input}'
@@ -271,13 +271,13 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
                         $js = <<<JS
     $('#acl-rule-id').click(function() {
-        $(this).addClass('hidden');
-        $('#$idForm').removeClass('hidden');
+        $(this).addClass('d-none');
+        $('#$idForm').removeClass('d-none');
     });
 
     $('#close-btn').click(function() {
-        $('#acl-rule-id').removeClass('hidden');
-        $('#$idForm').addClass('hidden');
+        $('#acl-rule-id').removeClass('d-none');
+        $('#$idForm').addClass('d-none');
     });
 
     $('#submit-btn').click(function() {
@@ -294,7 +294,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 JS;
                         $this->registerJs($js);
                         ?>
-                        <div class="form-group hidden" id="<?= $idForm ?>">
+                        <div class="form-group d-none" id="<?= $idForm ?>">
                             <?= $form->field($aclModel, 'employee_id', [
                                 'options' => [
                                     'tag' => false
@@ -506,7 +506,7 @@ JS;
 
 
         <?php /*
-        <div class="panel panel-default">
+        <div class="card card-default">
             <div class="panel-heading collapsing-heading">
                 <?= Html::a('Seller Contact Info <i class="collapsing-heading__arrow"></i>', '#seller-contact-info', [
                     'data-toggle' => 'collapse',
@@ -549,7 +549,7 @@ JS;
 <?php
 $js = <<<JS
 
-    $('#activity-modal').on('hidden.bs.modal', function () {
+    $('#activity-modal').on('d-none.bs.modal', function () {
         // $('#modal-dialog').find('.modal-content').html('');
         $.pjax.reload({container:'#pjax-grid-upp'});
     });

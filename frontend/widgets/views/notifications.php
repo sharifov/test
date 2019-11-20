@@ -4,7 +4,7 @@
 ?>
 <?php yii\widgets\Pjax::begin(['id' => 'notify-pjax', 'timeout' => false, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => [
         'tag' => 'li',
-        'class' => 'dropdown',
+        'class' => 'dropdown open',
         'role' => 'presentation',
 ]])?>
     <a href="javascript:;" class="dropdown-toggle info-number" title="Notifications" data-toggle="dropdown" aria-expanded="false">
@@ -14,7 +14,7 @@
         <?php endif;?>
     </a>
 
-    <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
+    <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
         <?php
 
         $soundPlay = false;

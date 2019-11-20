@@ -68,15 +68,15 @@ $this->registerJs($js);
 ?>
 
 <div class="panel panel-main">
-    <div class="panel-body">
-        <div class="panel panel-default">
+    <div class="card-body">
+        <div class="card card-default">
             <?php
             $form = ActiveForm::begin([
                 'id' => $formId,
                 'successCssClass' => '',
             ])
             ?>
-            <div class="panel-body">
+            <div class="card-body">
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="table-responsive">

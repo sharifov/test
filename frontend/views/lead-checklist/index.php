@@ -28,7 +28,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'action' => ['index'],
             'method' => 'get',
             'options' => [
-                'data-pjax' => 1
+                'data-pjax' => 1,
+                'style' => 'width: 100%;'
             ],
         ]); ?>
 

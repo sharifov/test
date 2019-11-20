@@ -4,7 +4,7 @@
 /* @var $content string */
 
 use yii\helpers\Html;
-$bundle = yiister\gentelella_v2\assets\Asset::register($this);
+$bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 ?>
 <?php $this->beginPage(); ?>
 <!DOCTYPE html>

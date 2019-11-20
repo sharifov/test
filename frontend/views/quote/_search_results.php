@@ -19,7 +19,9 @@ if($result && (isset($result['count']) && $result['count'] > 0)):
         modal.find('.modal-header h2').html($(this).data('title'));
         var target = $($(this).data('target')).html();
         modal.find('.modal-body').html(target);
+        modal.css('z-index', '1052');
         modal.modal('show');
+        $('.modal-backdrop.show').last().css('z-index', '1051');
     });
 
     $(document).on('change', '#sort_search', function(e) {

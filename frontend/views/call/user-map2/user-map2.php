@@ -246,9 +246,9 @@ function renderChildCallsRecursive2($calls): void {
 
 
                 <?php if($dataProviderOnlineDep1):?>
-                <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
-                    <div class="panel-body">
+                <div class="card card-default">
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
+                    <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnlineDep1,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
@@ -267,9 +267,9 @@ function renderChildCallsRecursive2($calls): void {
 
 
                 <?php if($dataProviderOnlineDep2):?>
-                <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
-                    <div class="panel-body">
+                <div class="card card-default">
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
+                    <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnlineDep2,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
@@ -287,9 +287,9 @@ function renderChildCallsRecursive2($calls): void {
                 <?php endif;?>
 
                 <?php if($dataProviderOnlineDep3):?>
-                <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
-                    <div class="panel-body">
+                <div class="card card-default">
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
+                    <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnlineDep3,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
@@ -307,9 +307,9 @@ function renderChildCallsRecursive2($calls): void {
                 <?php endif;?>
 
                 <?php if($dataProviderOnline):?>
-                <div class="panel panel-default">
-<!--                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?//=$dataProviderOnline->totalCount?><!--)</div>-->
-                    <div class="panel-body">
+                <div class="card card-default">
+<!--                    <div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?//=$dataProviderOnline->totalCount?><!--)</div>-->
+                    <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
@@ -330,9 +330,9 @@ function renderChildCallsRecursive2($calls): void {
 
             <div class="col-md-5">
 
-                <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS (Updated: <i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>)</div>
-                    <div class="panel-body">
+                <div class="card card-default">
+                    <div class="card-header"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS (Updated: <i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>)</div>
+                    <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProvider3,
                             'emptyText' => '<div class="text-center">Not found calls</div><br>',
@@ -351,9 +351,9 @@ function renderChildCallsRecursive2($calls): void {
 
             <div class="col-md-5">
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
-                <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-list"></i> Last <?=$dataProvider2->count?> ended Calls</div>
-                    <div class="panel-body">
+                <div class="card card-default">
+                    <div class="card-header"><i class="fa fa-list"></i> Last <?=$dataProvider2->count?> ended Calls</div>
+                    <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProvider2,
 

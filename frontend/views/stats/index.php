@@ -94,9 +94,9 @@ $userId = Yii::$app->user->id;
     </div>
 
     <?php Pjax::begin(); ?>
-    <div class="panel panel-default">
-        <div class="panel-heading"><i class="fa fa-bar-chart"></i> Employees Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
-        <div class="panel-body">
+    <div class="card card-default">
+        <div class="card-header"><i class="fa fa-bar-chart"></i> Employees Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
+        <div class="card-body">
             <div class="row">
                 <?php $form = ActiveForm::begin([
                     'action' => ['index'],

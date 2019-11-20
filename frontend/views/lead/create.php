@@ -58,7 +58,7 @@ $this->title = 'Create Lead';
                             <span style="font-weight: 600; font-size: 18px;">Flight Request</span>
                         </div>
                         <div class="separator"></div>
-                        <div class="request-form collapse in" id="request" aria-expanded="true">
+                        <div class="request-form collapse in show" id="request" aria-expanded="true">
                             <div class="panel panel-primary sl-request-wrap">
 
 

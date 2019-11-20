@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <div class="panel panel-default">
+    <div class="card card-default">
         <div class="panel-body panel-collapse collapse in">
 
             <p>

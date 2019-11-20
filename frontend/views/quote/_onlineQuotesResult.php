@@ -47,7 +47,7 @@ $this->registerJs($js);
 <div>
     <?php foreach ($alternativeQuotes as $key => $alternativeQuote): ?>
         <div class="panel panel-info panel-wrapper sl-quote" id="<?= $alternativeQuote['key'] ?>">
-            <div class="panel-heading">
+            <div class="card-header">
                 <div class="row">
                     <div class="col-md-5">
                         <?= sprintf('%d. | PCC: %s | Seats: %d | Duration: %s',
@@ -65,7 +65,7 @@ $this->registerJs($js);
                     </div>
                 </div>
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div class="sl-quote__content">
                     <div class="sl-quote__pricing">
                         <div class="row">

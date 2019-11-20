@@ -181,7 +181,7 @@ yii\bootstrap\Modal::end();
 yii\bootstrap\Modal::begin([
     'id' => 'modalCase',
     //'headerOptions' => ['id' => 'modalCaseHeader'],
-    'size' => \yii\bootstrap\Modal::SIZE_DEFAULT,
+    'size' => \yii\bootstrap\Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 ?>

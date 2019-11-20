@@ -109,7 +109,7 @@ class LeadController extends FController
 //            if (in_array($action->id, ['create'])) {
 //                //Yii::$app->setLayoutPath('@frontend/views/layouts');
 //                //$this->layout = 'sale';
-//                $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
+//                $this->layout = '@app/themes/gentelella_v2/views/layouts/main_lead';
 //            }
 //            return true;
 //        }

@@ -189,9 +189,9 @@ JS;
     <?php endif; ?>
 
     <?php Pjax::begin(); ?>
-    <div class="panel panel-default">
-        <div class="panel-heading">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
-        <div class="panel-body">
+    <div class="card card-default">
+        <div class="card-header">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
+        <div class="card-body">
 
             <div class="row">
 

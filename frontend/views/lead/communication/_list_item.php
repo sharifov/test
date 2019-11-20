@@ -65,7 +65,7 @@ use \common\models\Call;
                 <?php endif; ?>
                 <i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt))?></div>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <?php if($call->c_recording_url):?>
 
 
@@ -107,7 +107,7 @@ use \common\models\Call;
     ?>
 
         <div class="chat__message chat__message--<?=($mail->e_type_id == Email::TYPE_INBOX ? 'client' : 'system')?> chat__message--email">
-            <div class="chat__icn"><i class="fa fa-envelope-open"></i></div>
+            <div class="chat__icn"><i class="fa fa-envelope-o"></i></div>
             <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
             <div class="chat__message-heading">
                 <?php if($mail->e_type_id == Email::TYPE_INBOX):?>
@@ -119,7 +119,7 @@ use \common\models\Call;
                 <?php endif;?>
                 <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '('.$mail->e_language_id.')' : ''?></div> <?php //11:01AM | June 9?>
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <h5 class="chat__subtitle"><?=Html::encode($mail->e_email_subject)?></h5>
                 <div class="">
                     <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->e_email_body_html), 300, '...', null, true)?>
@@ -159,7 +159,7 @@ use \common\models\Call;
             <?php endif; ?>
             <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($sms->s_created_dt))?> <?=$sms->s_language_id ? '('.$sms->s_language_id.')' : ''?></div> <?php //11:01AM | June 9?>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <?=nl2br(Html::encode($sms->s_sms_text))?>
         </div>
     </div>

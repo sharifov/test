@@ -25,9 +25,9 @@ $template = <<<HTML
 HTML;
 ?>
 
-<div class="panel panel-default">
-    <div class="panel-heading">Logging</div>
-    <div class="panel-body">
+<div class="card card-default">
+    <div class="card-header">Logging</div>
+    <div class="card-body">
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,

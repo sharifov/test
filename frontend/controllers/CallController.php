@@ -232,7 +232,7 @@ class CallController extends FController
     public function actionUserMap()
     {
 
-        $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
@@ -333,7 +333,7 @@ class CallController extends FController
     public function actionUserMap2()
     {
 
-        $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;

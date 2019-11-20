@@ -76,6 +76,10 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                 <?= $this->render('_navbar_left', ['host' => $host, 'grav_url' => $gravUrl]) ?>
                 <!-- /navbar left -->
 
+                <div class="grav-img-sm">
+					<?=Html::img($gravUrl, ['alt' => 'avatar', 'class' => 'img-circle profile_img', 'title' => $user->full_name])?>
+                </div>
+
                 <!-- sidebar menu -->
                 <?= $this->render('_sidebar_menu') ?>
                 <!-- /sidebar menu -->
@@ -91,50 +95,29 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
         <div class="top_nav">
 
             <div class="nav_menu">
-                <nav class="" role="navigation">
-                    <div class="nav toggle">
-                        <a id="menu_toggle"><i class="fa fa-bars"></i></a>
-                    </div>
+                <div class="nav toggle">
+                    <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+                </div>
 
-<!--                    <div class="nav" style="padding-top: 14px; float: left" >-->
-<!--                        --><?php //if (Yii::$app->user->can('/lead/create')): ?>
-<!--                            --><?//=Html::a('<i class="fa fa-plus"></i> new Lead', ['/lead/create'], ['class' => 'btn btn-sm btn-primary', 'style' => 'margin:0'])?>
-<!--                        --><?php //endif; ?>
-<!---->
-<!--                        --><?php //if (Yii::$app->user->can('/lead/create')): ?>
-<!--                            --><?//=Html::a('<i class="fa fa-plus"></i> new Case', ['/cases/create'], ['class' => 'btn btn-sm btn-primary', 'style' => 'margin:0'])?>
-<!--                        --><?php //endif; ?>
-<!--                    </div>-->
-
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
+                <nav class="nav navbar-nav">
+                    <ul class="navbar-right">
+                        <li class="nav-item dropdown open">
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 
                                 <?=Html::img($gravUrl, ['alt' => 'avatar'])?>
-                                <b><?=implode(', ', $user->getRoles()) ?></b>:
+                                <span>
+                                    <b><?=implode(', ', $user->getRoles()) ?></b>:
+                                </span>
                                 <?=Html::encode($user->username)?>
-
-                                <span class=" fa fa-angle-down"></span>
                             </a>
                             <ul class="dropdown-menu dropdown-usermenu pull-right">
-                                <?php /*<li><a href="javascript:;">  Profile</a>
-                                </li>
-                                <li>
-                                    <a href="javascript:;">
-                                        <span class="badge bg-red pull-right">50%</span>
-                                        <span>Settings</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="javascript:;">Help</a>
-                                </li>*/ ?>
-
                                 <li>
                                     <?=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
                                         ['title' => 'My Profile']) ?>
+                                </li>
+                                <li>
                                     <?=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/site/logout'],
                                         ['title' => 'Logout']) ?>
-
                                 </li>
                             </ul>
                         </li>
@@ -146,9 +129,8 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                             <?= frontend\widgets\Notifications::widget() ?>
 
 
-                        <li>
-                            <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator">
-                            </a>
+                        <li class="nav-item">
+                            <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>
                         </li>
 
                         <?/*php endif;*/?>
@@ -184,13 +166,15 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
             <?php endif; ?>
             <div class="clearfix"></div>
             <div class="row">
-                <?php echo yii\widgets\Breadcrumbs::widget([
-                    'homeLink' => [
-                        'label' => false,
-                        'template' => '<li><a href="'.Yii::$app->urlManager->createUrl('/').'">Home</a></li>',
-                    ],
-                    'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-                ]);?>
+                <div class="col-md-12">
+                    <?php echo \yii\bootstrap4\Breadcrumbs::widget([
+                        'homeLink' => [
+                            'label' => false,
+                            'template' => '<li class="breadcrumb-item"><a href="'.Yii::$app->urlManager->createUrl('/').'">Home</a></li>',
+                        ],
+                        'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+                    ]);?>
+                </div>
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <?=\frontend\themes\gentelella_v2\widgets\FlashAlert::widget()?>
                     <?= $content ?>

@@ -19,7 +19,7 @@ class ThemeAsset extends AssetBundle
         'css/custom.min.css',
     ];
     public $js = [
-        'js/custom.min.js',
+        'js/custom.js',
     ];
     public $depends = [
 		BootstrapPluginAsset::class,

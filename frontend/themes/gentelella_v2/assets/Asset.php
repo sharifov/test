@@ -14,11 +14,13 @@ class Asset extends \yii\web\AssetBundle
 
     public $css = [
         'css/style-req.css?v=1',
+        'css/media.css',
     ];
 
     public $js = [
-        'js/util.js'
-    ];
+        'js/util.js',
+		'js/extension.js',
+	];
 
     public $depends = [
 		ThemeAsset::class,

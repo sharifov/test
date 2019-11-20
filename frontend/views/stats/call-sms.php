@@ -36,9 +36,9 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
     <div class="stats-call-sms">
         <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
         <?php Pjax::begin(); ?>
-        <div class="panel panel-default">
-            <div class="panel-heading"><i class="fa fa-bar-chart"></i> Call & SMS Stats</div>
-            <div class="panel-body">
+        <div class="card card-default">
+            <div class="card-header"><i class="fa fa-bar-chart"></i> Call & SMS Stats</div>
+            <div class="card-body">
                 <div class="row">
                     <?php $form = ActiveForm::begin([
                         'action' => ['call-sms'],

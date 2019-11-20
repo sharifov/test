@@ -92,7 +92,8 @@ class Menu extends \yii\widgets\Menu
             $renderedItem,
             [
                 '{icon}' => isset($item['icon'])
-                    ? new Icon($item['icon'], ArrayHelper::getValue($item, 'iconOptions', []))
+                    ? new Icon($item['iconPrefix'] ?? 'fa', $item['icon'])
+//                    ? new Icon($item['icon'], ArrayHelper::getValue($item, 'iconOptions', []))
                     : '',
                 '{badge}' => (
                     isset($item['badge'])
@@ -100,8 +101,9 @@ class Menu extends \yii\widgets\Menu
                         : ''
                     ) . (
                     isset($item['items']) && count($item['items']) > 0
-                        ? (new Icon('chevron-down'))->tag('span')
-                        : ''
+                        ? (new Icon('fa','chevron-down', ['tag' => 'span']))
+//						? (new Icon('chevron-down'))->tag('span')
+						: ''
                     ),
             ]
         );
