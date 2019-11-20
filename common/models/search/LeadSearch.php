@@ -2241,7 +2241,7 @@ class LeadSearch extends Lead
 
         if ($category == 'finalProfit'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT SUM(CASE WHEN final_profit > 0 THEN final_profit ELSE 0 END) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT SUM(CASE WHEN final_profit > 0 THEN final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX .' END) * (adults + children))  ELSE 0 END) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
         }
 
         if ($category == 'soldLeads'){
@@ -2332,7 +2332,7 @@ class LeadSearch extends Lead
         $query = new Query();
 
         if ($category == 'teamsProfit'){
-            $query->addSelect(['ug_name', 'SUM(CASE WHEN final_profit > 0 THEN final_profit ELSE 0 END) as teamsProfit']);
+            $query->addSelect(['ug_name', 'SUM(CASE WHEN final_profit > 0 THEN final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX .' END) * (adults + children))  ELSE 0 END) as teamsProfit']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
         }
