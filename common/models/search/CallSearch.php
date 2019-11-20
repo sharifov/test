@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\Department;
 use common\models\Employee;
+use Faker\Provider\DateTime;
 use kartik\daterange\DateRangeBehavior;
 use sales\repositories\call\CallSearchRepository;
 use yii\base\Model;
@@ -364,7 +365,7 @@ class CallSearch extends Call
         $this->load($params);
 
         $timezone = $user->timezone;
-        $userTZ = Employee::timezoneList(false)[$timezone];
+        $userTZ = Employee::timezoneList(false)[$timezone] ?? date('P');
 
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);

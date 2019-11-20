@@ -226,7 +226,7 @@ return [
         ],
         'rbac' => [
             'class' => 'yii2mod\rbac\Module',
-            'layout' => '@frontend/themes/gentelella/views/layouts/main',
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main',
             'as access' => [
                 'class' => yii2mod\rbac\filters\AccessControl::class,
                 'rules' => [

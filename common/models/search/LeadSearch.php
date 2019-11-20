@@ -12,6 +12,7 @@ use common\models\Employee;
 use common\models\Sms;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use Faker\Provider\DateTime;
 use sales\access\EmployeeProjectAccess;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
@@ -2409,7 +2410,7 @@ class LeadSearch extends Lead
     {
         $this->load($params);
         $timezone = $user->timezone;
-        $userTZ = Employee::timezoneList(false)[$timezone];
+        $userTZ = Employee::timezoneList(false)[$timezone] ?? date('P');
 
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
