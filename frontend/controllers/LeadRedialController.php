@@ -167,6 +167,7 @@ class LeadRedialController extends FController
         $dataProvider = (new LeadQcallSearch())->searchByRedial([], $user);
         $query = $dataProvider->query;
         $query->addOrderBy(($dataProvider->sort)->getOrders())->limit(1);
+//        VarDumper::dump($query->createCommand()->getRawSql());die;
 
         foreach ($query->all() as $model) {
             try {
