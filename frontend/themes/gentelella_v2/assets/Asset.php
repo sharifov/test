@@ -13,8 +13,7 @@ class Asset extends \yii\web\AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        'css/style-req.css?v=1',
-        'css/media.css',
+        'css/style-req.css?v=1'
     ];
 
     public $js = [
