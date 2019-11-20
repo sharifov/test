@@ -2,6 +2,8 @@
 
 namespace modules\hotel;
 
+use yii\helpers\ArrayHelper;
+
 /**
  * hotel module definition class
  */
@@ -19,6 +21,16 @@ class HotelModule extends \yii\base\Module
     {
         parent::init();
 
+
+
+        $config = require __DIR__ . '/config/config.php'; /*ArrayHelper::merge(
+            require __DIR__ . '/config/config.php'
+        );*/
+
+        //\Yii::configure($this, require __DIR__ . '/config.php');
+        \Yii::configure($this, $config);
+
+
         //$this->controllerNamespace = 'modules\hotel\controllers';
         $this->setViewPath('@modules/hotel/views');
         // custom initialization code goes here
@@ -33,6 +45,6 @@ class HotelModule extends \yii\base\Module
      */
     public static function t($category, $message, $params = [], $language = null)
     {
-        return \Yii::t('modules/main/' . $category, $message, $params, $language);
+        return \Yii::t('modules/hotel/' . $category, $message, $params, $language);
     }
 }
