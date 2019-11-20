@@ -73,14 +73,23 @@ class EmployeeAcl extends \yii\db\ActiveRecord
         $this->updated = date('Y-m-d H:i:s');
     }
 
-    public static function isActiveIPRule($ip)
+    /**
+     * @param string $ip
+     * @param int|null $userId
+     * @return bool
+     */
+    public static function isActiveIPRule(string $ip, ?int $userId = null): bool
     {
-        $id = Yii::$app->user->id ? Yii::$app->user->id : 0;
+        if (!$userId) {
+            $userId = Yii::$app->user->id ?: 0;
+        }
 
-        return self::findOne([
+        $isActive = self::find()->where([
             'active' => true,
             'mask' => trim($ip),
-            'employee_id' => $id
-        ]);
+            'employee_id' => $userId
+        ])->exists();
+
+        return $isActive;
     }
 }
