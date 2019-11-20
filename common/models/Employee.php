@@ -1660,16 +1660,20 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $shiftTime = $this->getShiftTime();
 
         $default = [LeadFlow::DESCRIPTION_TAKE];
-        $description = array_merge($default, $flowDescriptions);
+        $descriptions = array_merge($default, $flowDescriptions);
 
         $query = LeadFlow::find()
             ->where(['>=', 'created', $shiftTime->endLastPeriodDt])
             ->andWhere(['<=', 'created', $shiftTime->endUtcDt])
 //            ->andWhere(['employee_id' => $this->id])
             ->andWhere(['lf_owner_id' => $this->id])
-            ->andWhere(['lf_description' => $description])
-//            ->andWhere(['lf_from_status_id' => Lead::STATUS_PENDING])
-            ->andWhere(['status' => Lead::STATUS_PROCESSING]);
+            ->andWhere(['lf_description' => $descriptions]);
+
+        if (!in_array(LeadFlow::DESCRIPTION_MANUAL_CREATE, $descriptions, false)) {
+            $query->andWhere(['lf_from_status_id' => Lead::STATUS_PENDING]);
+        }
+
+        $query->andWhere(['status' => Lead::STATUS_PROCESSING]);
 
         $count = $query->count();
         return $count;

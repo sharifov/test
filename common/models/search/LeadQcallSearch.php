@@ -173,16 +173,32 @@ class LeadQcallSearch extends LeadQcall
 
         if (!$user->isAdmin()) {
             $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+            $query->andWhere(['or',
+                ['<=', 'lqc_reservation_time', date('Y-m-d H:i:s')],
+                ['IS', 'lqc_reservation_time', null]
+            ]);
         }
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
+            $query->andWhere(['NOT IN', 'l_call_status_id', [
+                Lead::CALL_STATUS_PROCESS,
+                Lead::CALL_STATUS_PREPARE,
+                Lead::CALL_STATUS_QUEUE,
+                Lead::CALL_STATUS_BUGGED,
+            ]]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
         if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
 			$query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
 		}
+
+        $redialSame = (int)Yii::$app->params['settings']['redial_same_deadline_priority'];
+        $samePriority = "TIMESTAMPDIFF(MINUTE, lqc_dt_to, '" . date('Y-m-d H:i:s') . "')";
+        $query->addSelect([
+            'same_priority' =>
+                new Expression('if (' . $samePriority . ' <= ' . $redialSame . ', 1, 0) ')
+        ]);
 
         $query->addSelect([
             'countClientPhones' => (new Query())
@@ -256,9 +272,12 @@ class LeadQcallSearch extends LeadQcall
 //        ]);
 
 		$defaultOrder = [
+		    'same_priority' => SORT_DESC,
+            'lqc_weight' => SORT_ASC,
 			'deadline' => SORT_ASC,
 			'attempts' => SORT_ASC,
 			'lqc_dt_from' => SORT_ASC,
+            'lqc_lead_id' => SORT_ASC,
 		];
 
         $defaultOrder = array_merge($customDefaultOrder, $defaultOrder);
@@ -270,13 +289,15 @@ class LeadQcallSearch extends LeadQcall
             'sort'=> [
                 'defaultOrder' => $defaultOrder,
 				'attributes' => [
-					'deadline',
-					'attempts',
-					'lqc_dt_from',
-					'lqc_dt_to',
-					'lqc_lead_id',
-					'is_in_day_time_hours',
-					'isFresh'
+                    'isFresh',
+                    'is_in_day_time_hours',
+                    'same_priority',
+                    'lqc_weight',
+                    'deadline',
+                    'attempts',
+                    'lqc_dt_from',
+                    'lqc_dt_to',
+                    'lqc_lead_id',
 				]
             ],
             /*'pagination' => [

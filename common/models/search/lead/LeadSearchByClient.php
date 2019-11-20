@@ -2,6 +2,7 @@
 
 namespace common\models\search\lead;
 
+use common\models\Employee;
 use common\models\Lead;
 use sales\access\EmployeeProjectAccess;
 use yii\base\Model;
@@ -30,10 +31,10 @@ class LeadSearchByClient extends Model
 
     /**
      * @param $params
-     * @param int $userId
+     * @param Employee $user
      * @return ActiveDataProvider
      */
-    public function search($params, $userId): ActiveDataProvider
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = Lead::find()->with('client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments');
 
@@ -47,6 +48,10 @@ class LeadSearchByClient extends Model
             ],
         ]);
 
+        if ($user->isAgent()) {
+            $query->andWhere(['<>', Lead::tableName() . '.status', Lead::STATUS_PENDING]);
+        }
+
         $this->load($params);
 
         if (!$this->validate()) {
@@ -56,7 +61,7 @@ class LeadSearchByClient extends Model
 
         $query->andWhere(['client_id' => $this->clientId]);
 
-        $query->andWhere(['project_id' => array_keys(EmployeeProjectAccess::getProjects($userId))]);
+        $query->andWhere(['project_id' => array_keys(EmployeeProjectAccess::getProjects($user->id))]);
 
         return $dataProvider;
     }

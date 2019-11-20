@@ -32,6 +32,7 @@ use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use Yii;
 use yii\base\InvalidArgumentException;
@@ -234,6 +235,7 @@ class Lead extends ActiveRecord
     public const CALL_STATUS_DONE       = 4;
     public const CALL_STATUS_QUEUE      = 5;
     public const CALL_STATUS_PREPARE    = 6;
+    public const CALL_STATUS_BUGGED    = 7;
 
     public const CALL_STATUS_LIST = [
         self::CALL_STATUS_NONE      => 'None',
@@ -243,6 +245,7 @@ class Lead extends ActiveRecord
         self::CALL_STATUS_DONE      => 'Done',
         self::CALL_STATUS_QUEUE     => 'Queue',
         self::CALL_STATUS_PREPARE   => 'Prepare',
+        self::CALL_STATUS_BUGGED   => 'Bugged',
     ];
 
     public const TYPE_CREATE_MANUALLY = 1;
@@ -525,8 +528,12 @@ class Lead extends ActiveRecord
         $lead->gid = self::generateGid();
         $lead->scenario = self::SCENARIO_API;
         $lead->l_type_create = self::TYPE_CREATE_API;
-        $lead->recordEvent(new LeadCreatedByApiEvent($lead));
         return $lead;
+    }
+
+    public function eventLeadCreatedByApiEvent(): void
+    {
+        $this->recordEvent(new LeadCreatedByApiEvent($this, $this->status));
     }
 
     /**
@@ -1165,14 +1172,24 @@ class Lead extends ActiveRecord
         }
     }
 
-    public function callPrepare()
+    public function callPrepare(): void
     {
         $this->setCallStatus(self::CALL_STATUS_PREPARE);
     }
 
-    public function isCallPrepare()
+    public function isCallPrepare(): bool
     {
         return $this->l_call_status_id === self::CALL_STATUS_PREPARE;
+    }
+
+    public function callBugged(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_BUGGED);
+    }
+
+    public function isCallBugged(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_BUGGED;
     }
 
     public function callProcessing(): void
@@ -2581,7 +2598,8 @@ Reason: {reason}
                                 $this->getCountOutCallsLastFlow()
                             ),
                             ($this->project_id * 10),
-                            $this->offset_gmt
+                            $this->offset_gmt,
+                            new FindPhoneParams($this->project_id, $this->l_dep_id)
                         );
                     } catch (\Throwable $e) {
                         Yii::error($e, 'Lead:AfterSave:QCallService:create');

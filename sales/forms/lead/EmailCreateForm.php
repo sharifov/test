@@ -48,11 +48,12 @@ class EmailCreateForm extends Model
     {
         return [
             ['email', 'validateRequired', 'skipOnEmpty' => false],
+			['email', 'default', 'value' => null],
             ['email', 'string', 'max' => 100],
             ['email', 'email'],
 			[['type', 'client_id', 'id'], 'integer'],
 			['email', 'filter', 'filter' => static function($value) {
-                return mb_strtolower(trim($value));
+                return $value === null ? null : mb_strtolower(trim($value));
             }],
 			[['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
 			[['email', 'client_id'], 'unique', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['email', 'client_id'], 'except' => 'update', 'message' => 'Client already has this email',],

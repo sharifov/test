@@ -24,5 +24,10 @@ echo LeadRedialWidget::widget([
         'post',
         ['gid' => $lead->gid]
     ),
+    'phoneNumberFromUrl' => new RedialUrl(
+        Url::to(['lead-redial/phone-number-from']),
+        'post',
+        ['gid' => $lead->gid]
+    ),
     'script' => 'reloadCallFunction();',
 ]);

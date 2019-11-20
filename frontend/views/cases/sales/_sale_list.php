@@ -162,7 +162,7 @@ yii\bootstrap\Modal::end();
 $jsCode = <<<JS
     $(document).on('click', '#search-sale-btn', function(){
         $('#search-sale-panel').toggle();
-        //$('#modalSaleSearch').modal('show').find('#modalLeadSearchContent').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        //$('#modalSaleSearch').modal('show').find('#modalLeadSearchContent').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         //$('#modalSaleSearchHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
        return false;
     });

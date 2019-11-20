@@ -2,6 +2,7 @@
 
 namespace sales\services\lead;
 
+use common\models\LeadFlow;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\lead\LeadSegmentRepository;
@@ -130,8 +131,10 @@ class LeadCreateApiService
             );
 
             if ($duplicate = $this->leadRepository->getByRequestHash($request_hash)) {
+                $lead->status = null;
                 $lead->duplicate($duplicate->id, $modelLead->employee_id, null);
-                Yii::info('Warning: detected duplicate Lead (Origin id: ' . $duplicate->id . ', Hash: ' . $request_hash . ')', 'nfo\API:Lead:duplicate');
+            } else {
+                $lead->eventLeadCreatedByApiEvent();
             }
 
             if ($request_hash && $lead->isEmptyRequestHash()) {

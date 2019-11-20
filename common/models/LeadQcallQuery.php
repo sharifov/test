@@ -9,26 +9,26 @@ namespace common\models;
  */
 class LeadQcallQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
     /**
-     * {@inheritdoc}
-     * @return LeadQcall[]|array
+     * @param int $userId
+     * @param int $leadId
+     * @return bool
      */
-    public function all($db = null)
+    public function isUserReservedOtherLead(int $userId, int $leadId): bool
     {
-        return parent::all($db);
+        return $this
+            ->andWhere(['lqc_reservation_user_id' => $userId])
+            ->andWhere(['<>', 'lqc_lead_id', $leadId])
+            ->andWhere(['IS NOT', 'lqc_reservation_time', null])
+            ->andWhere(['>=', 'lqc_reservation_time', date('Y-m-d H:i:s')])
+            ->exists();
     }
 
-    /**
-     * {@inheritdoc}
-     * @return LeadQcall|array|null
-     */
-    public function one($db = null)
+    public function currentReservedLeadByUser(int $userId): self
     {
-        return parent::one($db);
+        return $this
+            ->andWhere(['lqc_reservation_user_id' => $userId])
+            ->andWhere(['IS NOT', 'lqc_reservation_time', null])
+            ->andWhere(['>=', 'lqc_reservation_time', date('Y-m-d H:i:s')]);
     }
 }

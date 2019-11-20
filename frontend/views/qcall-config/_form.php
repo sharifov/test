@@ -28,6 +28,8 @@ use yii\widgets\ActiveForm;
             </div>
         </div>
 
+     <?= $form->field($model, 'qc_phone_switch')->checkbox() ?>
+
 <!--    --><?//= $form->field($model, 'qc_created_dt')->textInput() ?>
 <!---->
 <!--    --><?//= $form->field($model, 'qc_updated_dt')->textInput() ?>

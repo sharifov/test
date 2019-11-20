@@ -4,10 +4,14 @@ namespace frontend\controllers;
 
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
+use common\models\Client;
 use common\models\ClientPhone;
+use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
+use common\models\LeadQcall;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
@@ -17,6 +21,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
@@ -33,6 +38,7 @@ use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\guards\ClientPhoneGuard;
 use sales\helpers\user\UserFinder;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
@@ -50,6 +56,7 @@ use sales\services\lead\LeadRedialService;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\DayTimeHours;
+use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use sales\services\TransactionManager;
 use sales\temp\LeadFlowUpdate;
@@ -125,9 +132,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-
-        $user = Employee::findOne(295);
-        VarDumper::dump($user->checkShiftTime());
 
         die;
         return $this->render('blank');

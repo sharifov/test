@@ -2,19 +2,24 @@
 
 namespace sales\services\lead;
 
+use Yii;
 use common\models\Call;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
+use common\models\Project;
 use common\models\search\LeadQcallSearch;
 use sales\access\EmployeeAccess;
 use sales\guards\lead\TakeGuard;
 use sales\repositories\lead\LeadRepository;
+use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
+use sales\services\lead\qcall\QCallService;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
 use yii\helpers\VarDumper;
-use yii\web\ForbiddenHttpException;
 
 /**
  * Class LeadRedialService
@@ -23,6 +28,7 @@ use yii\web\ForbiddenHttpException;
  * @property ServiceFinder $serviceFinder
  * @property TransactionManager $transactionManager
  * @property TakeGuard $takeGuard
+ * @property QCallService $qCallService
  */
 class LeadRedialService
 {
@@ -31,23 +37,26 @@ class LeadRedialService
     private $serviceFinder;
     private $transactionManager;
     private $takeGuard;
+    private $qCallService;
 
     public function __construct(
         LeadRepository $leadRepository,
         ServiceFinder $serviceFinder,
         TransactionManager $transactionManager,
-        TakeGuard $takeGuard
+        TakeGuard $takeGuard,
+        QCallService $qCallService
     )
     {
         $this->leadRepository = $leadRepository;
         $this->serviceFinder = $serviceFinder;
         $this->transactionManager = $transactionManager;
         $this->takeGuard = $takeGuard;
+        $this->qCallService = $qCallService;
     }
 
     /**
-     * @param $lead
-     * @param $user
+     * @param int|Lead $lead
+     * @param int|Employee $user
      * @throws \yii\web\ForbiddenHttpException
      */
     public function reservation($lead, $user): void
@@ -62,11 +71,15 @@ class LeadRedialService
 
         $lead->callPrepare();
         $this->leadRepository->save($lead);
+
+        if ($qCall = $lead->leadQcall) {
+            $this->qCallService->resetReservation($qCall);
+        }
     }
 
     /**
-     * @param $lead
-     * @param $user
+     * @param int|Lead $lead
+     * @param int|Employee $user
      * @throws \yii\web\ForbiddenHttpException
      */
     public function redial($lead, $user): void
@@ -78,6 +91,10 @@ class LeadRedialService
 
         $this->guardUserFree($user);
         $this->guardLeadForCall($lead, $user);
+
+        if ($qCall = $lead->leadQcall) {
+            $this->qCallService->reservation($qCall, $user->id);
+        }
     }
 
     /**
@@ -114,8 +131,8 @@ class LeadRedialService
     }
 
     /**
-     * @param $lead
-     * @param $user
+     * @param int|Lead $lead
+     * @param int|Employee $user
      * @param $creatorId
      * @throws \Throwable
      */
@@ -133,9 +150,7 @@ class LeadRedialService
         $lead->processing($user->id, $creatorId, 'Lead redial');
 
         $this->transactionManager->wrap(function () use ($lead) {
-            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
-                $qCall->delete();
-            }
+            $this->qCallService->remove($lead->id);
             $this->leadRepository->save($lead);
         });
     }
@@ -201,6 +216,14 @@ class LeadRedialService
             throw new \DomainException('Cant call before Date Time From');
         }
 
+        if (LeadQcall::find()->isUserReservedOtherLead($user->id, $lead->id)) {
+            throw new \DomainException('You already reserved one Lead. Try again later.');
+        }
+
+        if ($leadQCall->isReserved() && !$leadQCall->isReservationUser($user->id)) {
+            throw new \DomainException('Lead reserved. Try again later.');
+        }
+
         if ((bool)\Yii::$app->params['settings']['enable_take_frequency_minutes']) {
             $flowDescriptions = self::getFlowDescriptions();
             $this->takeGuard->frequencyMinutesGuard($user, $flowDescriptions);
@@ -255,5 +278,37 @@ class LeadRedialService
             $flowDescriptions[] = LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD;
         }
         return $flowDescriptions;
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string
+     */
+    public function findOrUpdatePhoneNumberFrom(Lead $lead): string
+    {
+        if (($qCall = $lead->leadQcall) && ($phoneFrom = $qCall->lqc_call_from) && DepartmentPhoneProject::find()->isRedial($phoneFrom)) {
+            return $phoneFrom;
+        }
+
+        if ($qCall) {
+            try {
+                $phoneFrom = (Yii::createObject(QCallService::class))->updateCallFrom(
+                    $qCall,
+                    new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                    new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                );
+                if ($phoneFrom) {
+                    return $phoneFrom;
+                }
+            } catch (\Throwable $e) {
+                Yii::error($e, 'LeadRedialService:findPhoneNumberFrom:QCallService:updateCallFrom');
+            }
+        }
+
+        if (($phone = Project::findOne($lead->project_id)) && $phone->contactInfo->phone) {
+            return $phone->contactInfo->phone;
+        }
+
+        throw new \DomainException('Not found phoneFrom for LeadId: ' . $lead->id);
     }
 }

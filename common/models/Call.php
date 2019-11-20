@@ -10,6 +10,7 @@ use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
 use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use Yii;
 use DateTime;
@@ -625,7 +626,12 @@ class Call extends \yii\db\ActiveRecord
             if ($lead->leadQcall) {
                 try {
                     $qCallService = Yii::createObject(QCallService::class);
-                    $qCallService->updateInterval($lead->leadQcall, new Config($lead->status, $lead->getCountOutCallsLastFlow()), $lead->offset_gmt);
+                    $qCallService->updateInterval(
+                        $lead->leadQcall,
+                        new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                        $lead->offset_gmt,
+                        new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                    );
                 } catch (\Throwable $e) {
                     Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:QCallService:updateInterval');
                 }
@@ -817,7 +823,13 @@ class Call extends \yii\db\ActiveRecord
                     $lead->pending($lead->employee_id, null, 'missed call');
                     $leadRepository->save($lead);
                     $qCallService->remove($lead->id);
-                    $qCallService->create($lead->id, new Config($lead->status, $lead->getCountOutCallsLastFlow()), ($lead->project_id * 10), $lead->offset_gmt);
+                    $qCallService->create(
+                        $lead->id,
+                        new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                        ($lead->project_id * 10),
+                        $lead->offset_gmt,
+                        new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                    );
                 } catch (\Throwable $e) {
                     Yii::error($e->getMessage(), 'Call:afterSave:Lead:pending');
                 }
@@ -825,7 +837,13 @@ class Call extends \yii\db\ActiveRecord
                 try {
                     $qCallService->resetAttempts($lead);
                     $qCallService->remove($lead->id);
-                    $qCallService->create($lead->id, new Config($lead->status, $lead->getCountOutCallsLastFlow()), ($lead->project_id * 10), $lead->offset_gmt);
+                    $qCallService->create(
+                        $lead->id,
+                        new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                        ($lead->project_id * 10),
+                        $lead->offset_gmt,
+                        new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                    );
                 } catch (\Throwable $e) {
                     Yii::error($e->getMessage(), 'Call:afterSave:Lead:resetAttempts');
                 }

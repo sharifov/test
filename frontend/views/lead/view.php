@@ -348,7 +348,7 @@ $jsCode = <<<JS
 
         $('#modal-' + id).find('.modal-header').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
         
-        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
 
         $.post(url, function(data) {
             $('#modal-' + id).find('.modal-body').html(data);

@@ -465,7 +465,7 @@ use yii\helpers\Html;
         if (connection && connection.parameters.CallSid) {
             let callSid = connection.parameters.CallSid;
             let modal = $('#web-phone-redirect-agents-modal');
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             modal.modal('show').find('.modal-header').html('<h3>Transfer Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
 
             $.post(ajaxCallRedirectGetAgents, { sid: callSid }) // , user_id: userId
@@ -753,7 +753,7 @@ $js = <<<JS
         obj.attr('disabled', true);
         
         let modal = $('#web-phone-redirect-agents-modal');
-        modal.find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         
         if(connection && connection.parameters.CallSid) {
             updateAgentStatus(connection, false, 1);
@@ -803,7 +803,7 @@ $js = <<<JS
             }
             
             let modal = $('#web-phone-redirect-agents-modal');
-            modal.find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             // connection.accept();
             //console.error(connection.parameters);
             
@@ -889,7 +889,7 @@ $js = <<<JS
         //alert(phoneNumber);
         e.preventDefault();
         
-        $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#web-phone-dial-modal').modal();
         
         $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id},
