@@ -60,8 +60,17 @@ class GlobalAcl extends \yii\db\ActiveRecord
         $this->updated = date('Y-m-d H:i:s');
     }
 
-    public static function isActiveIPRule($ip)
+    /**
+     * @param string|null $ip
+     * @return bool
+     */
+    public static function isActiveIPRule(?string $ip): bool
     {
-        return self::findOne(['active' => true, 'mask' => trim($ip)]);
+        $isActive = self::find()->where([
+            'active' => true,
+            'mask' => trim($ip)
+        ])->exists();
+
+        return $isActive;
     }
 }

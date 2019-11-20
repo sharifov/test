@@ -64,7 +64,7 @@ class LoginForm extends Model
                 if($user->acl_rules_activated) {
                     $clientIP = $this->getClientIPAddress();
 
-                    if ($clientIP == 'UNKNOWN' ||  (GlobalAcl::isActiveIPRule($clientIP) === null && EmployeeAcl::isActiveIPRule($clientIP) === null)) {
+                    if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
 
                         $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
                         //Yii::$app->user->logout();
