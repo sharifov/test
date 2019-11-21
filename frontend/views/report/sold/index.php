@@ -168,10 +168,10 @@ $this->registerJs($js);
             <div class="panel-footer">
                 <div class="actions-btn-group">
                     <?php
-                    $searchButton = '<span class="btn-icon"><i class="fa fa-search"></i></span><span>Report</span>';
+                    $searchButton = '<i class="fa fa-search"></i> Report';
                     ?>
                     <?= Html::button($searchButton, [
-                        'class' => 'btn btn-with-icon btn-primary'
+                        'class' => 'btn btn-primary'
 
                     ]) ?>
                 </div>

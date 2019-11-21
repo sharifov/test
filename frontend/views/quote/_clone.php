@@ -45,13 +45,13 @@ $this->registerJs($js);
 ]) ?>
 <div class="alternatives__item">
     <div class="btn-wrapper">
-        <?= Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', [
+        <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
             'id' => 'cancel-alt-quote',
-            'class' => 'btn btn-danger btn-with-icon'
+            'class' => 'btn btn-danger'
         ]) ?>
-        <?= Html::submitButton('<span class="btn-icon"><i class="fa fa-save"></i></span><span>Confirm</span>', [
+        <?= Html::submitButton('<i class="fa fa-save"></i> Confirm', [
                 'id' => 'save-alt-quote',
-                'class' => 'btn btn-primary btn-with-icon'
+                'class' => 'btn btn-primary'
             ]) ?>
     </div>
 </div>

@@ -7,29 +7,9 @@
  * @var $user \common\models\Employee
  */
 
-
-/*$is_manager = false;
-if(Yii::$app->user->identity->canRole('admin') || Yii::$app->user->identity->canRole('supervision')) {
-    $is_manager = true;
-}*/
-
 use common\models\LeadCallExpert;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\widgets\ActiveForm;
-use yii\widgets\Pjax;
-
-//$title = (!$leadForm->getLead()->called_expert) ? 'Call Expert' : ' Expert Called';
-/*$options = (!$leadForm->getLead()->called_expert) ? [
-    'class' => 'btn btn-success btn-with-icon',
-    'id' => 'btn-call-expert',
-    'data-url' => Url::to(['lead/call-expert', 'id' => $leadForm->getLead()->id])
-] : [
-    'class' => 'btn btn-default btn-with-icon',
-];*/
-//echo Html::a('<span class="btn-icon"><i class="fa fa-bell"></i></span> <span class="btn-text">Call</span>', null, $options);
-
-
 
 $user = Yii::$app->user->identity;
 

@@ -156,18 +156,18 @@ if (!$alert) :
     </div>
     <div class="btn-wrapper">
         <?php
-        echo Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', [
+        echo Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
                 'id' => 'cancel-sent-email',
-                'class' => 'btn btn-danger btn-with-icon'
+                'class' => 'btn btn-danger'
             ]) . ' ';
         if ($preview) {
-            echo Html::submitButton('<span class="btn-icon"><i class="fa fa-envelope"></i></span><span>Send</span>', [
-                'class' => 'btn btn-primary btn-with-icon'
+            echo Html::submitButton('<i class="fa fa-envelope"></i> Send', [
+                'class' => 'btn btn-primary'
             ]);
         } else {
-            echo Html::button('<span class="btn-icon"><i class="fa fa-eye"></i></span><span>Preview</span>', [
+            echo Html::button('<i class="fa fa-eye"></i> Preview', [
                 'id' => 'preview-email',
-                'class' => 'btn btn-primary btn-with-icon'
+                'class' => 'btn btn-primary'
             ]);
         }
         ?>
@@ -192,12 +192,12 @@ if (!$alert) :
         </div>
     <?php endif; ?>
     <div class="btn-wrapper">
-        <?= Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', [
+        <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
             'id' => 'cancel-sent-email',
-            'class' => 'btn btn-danger btn-with-icon'
+            'class' => 'btn btn-danger'
         ]) ?>
-        <?= Html::submitButton('<span class="btn-icon"><i class="fa fa-envelope"></i></span><span>Send</span>', [
-            'class' => 'btn btn-primary btn-with-icon'
+        <?= Html::submitButton('<i class="fa fa-envelope"></i> Send', [
+            'class' => 'btn btn-primary'
         ]) ?>
     </div>
 <?php endif; ?>

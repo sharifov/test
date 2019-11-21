@@ -180,8 +180,8 @@ if($project){
 
 <!--    	--><?php //if(count($buttonsSubAction) > 1):?>
 <!--    	<div class="dropdown inline-block">-->
-<!--            --><?//= Html::a('<span class="btn-icon"><i class="fa fa-ellipsis-v"></i></span><span class="btn-text">Action</span>', null, [
-//                'class' => 'btn btn-default btn-with-icon',
+<!--            --><?//= Html::a('<i class="fa fa-ellipsis-v"></i> Action', null, [
+//                'class' => 'btn btn-default',
 //                'data-toggle' => 'dropdown'
 //            ]) ?>
 <!--            <ul class="dropdown-menu" aria-labelledby="dLabel">-->

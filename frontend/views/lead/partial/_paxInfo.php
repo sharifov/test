@@ -66,13 +66,13 @@ $this->registerJs($js);
                     </div>
                 </div>
                 <div class="col-md-6 text-right">
-                    <?= Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', [
+                    <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
                         'id' => 'cancel-pax',
-                        'class' => 'btn btn-danger btn-with-icon'
+                        'class' => 'btn btn-danger'
                     ]) ?>
-                    <?= Html::button('<span class="btn-icon"><i class="fa fa-save"></i></span><span>Save</span>', [
+                    <?= Html::button('<i class="fa fa-save"></i> Save', [
                         'id' => 'save-pnr-pax',
-                        'class' => 'btn btn-primary btn-with-icon'
+                        'class' => 'btn btn-primary'
                     ]) ?>
                 </div>
             </div>

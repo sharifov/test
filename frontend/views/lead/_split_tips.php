@@ -59,9 +59,9 @@ $this->registerJs($js);?>
 	<div class="col-md-4">Total tips: $<?= number_format($totalTips,2)?></div>
 	<div class="col-md-4">Tips for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-tips"><?= $mainAgentTips?></span></div>
 	<div class="col-md-4">
-	<?= Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span>Add Agent</span>', [
+	<?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
             'id' => 'new-split-tips-button',
-            'class' => 'btn btn-success btn-with-icon pull-right' ,
+            'class' => 'btn btn-success pull-right' ,
         ]); ?>
 	</div>
 </div>
@@ -115,8 +115,8 @@ $this->registerJs($js);?>
 </script>
 <?php $this->registerJs(str_replace(['<script>', '</script>'], '', ob_get_clean())); ?>
 <div class="btn-wrapper">
-    <?=Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', ['id' => 'cancel-btn','class' => 'btn btn-danger btn-with-icon'])?>
-    <?=Html::submitButton('<span class="btn-icon"><i class="fa fa-save"></i></span><span>Confirm</span>', ['id' => 'save-btn','class' => 'btn btn-primary btn-with-icon'])?>
+    <?=Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', ['id' => 'cancel-btn','class' => 'btn btn-danger'])?>
+    <?=Html::submitButton('<i class="fa fa-save"></i> Confirm', ['id' => 'save-btn','class' => 'btn btn-primary'])?>
 </div>
 <?php \yii\widgets\ActiveForm::end() ?>
 <?php yii\widgets\Pjax::end() ?>
