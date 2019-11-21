@@ -9,7 +9,7 @@ use frontend\models\LeadForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 
 $leadModel = $leadForm->getLead();
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadModel->id]);
@@ -252,7 +252,7 @@ if($project){
                 ])?>
 
             <?php Modal::begin(['id' => 'split-profit-modal',
-                'header' => '<h2>Split profit</h2>',
+                'title' => 'Split profit',
                 'size' => Modal::SIZE_LARGE
             ])?>
             <?php Modal::end()?>
@@ -265,7 +265,7 @@ if($project){
                     ])?>
 
                 <?php Modal::begin(['id' => 'split-tips-modal',
-                    'header' => '<h2>Split tips</h2>',
+                    'title' => 'Split tips',
                     'size' => Modal::SIZE_LARGE
                 ])?>
                 <?php Modal::end()?>
@@ -310,36 +310,36 @@ if($project){
 </style>
 
 <?php Modal::begin(['id' => 'search-results__modal',
-    'header' => '<h2>Search results</h2>',
+    'title' => 'Search results',
     'size' => Modal::SIZE_LARGE
 ])?>
 <?php Modal::end()?>
 
 <?php Modal::begin(['id' => 'flight-details__modal',
-    'header' => '<h2></h2>',
+    'title' => 'Flight details',
     'size' => Modal::SIZE_DEFAULT,
 ])?>
 <?php Modal::end()?>
 
 <?php Modal::begin(['id' => 'search-result-quote__modal',
-    'header' => '<h2>Add quote</h2>',
+    'title' => 'Add quote',
     'size' => Modal::SIZE_LARGE,
 ])?>
 <?php Modal::end()?>
 <?php Modal::begin(['id' => 'preview-send-quotes',
-    'header' => '<h2>Preview email</h2>',
+    'title' => 'Preview email',
     'size' => Modal::SIZE_LARGE,
 ])?>
 <?php Modal::end()?>
 
 <?php Modal::begin(['id' => 'modal-info',
-    'header' => '<h2>Info</h2>',
+    'title' => 'Info',
     'size' => Modal::SIZE_LARGE,
 ])?>
 <?php Modal::end()?>
 
 <?php Modal::begin(['id' => 'modal-info-d',
-    'header' => '<h2>Info</h2>',
+    'title' => 'Info',
     'size' => Modal::SIZE_DEFAULT,
 ])?>
 <?php Modal::end()?>
@@ -467,7 +467,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
     $(document).on('click','#quick-search-quotes-btn', function (e) {
         //$('#popover-quick-search').popover('hide');
         e.preventDefault();
-        var url = $('#quick-search-quotes-btn').data('url');
+        let url = $('#quick-search-quotes-btn').data('url');
         $('#preloader').removeClass('d-none');
         var modal = $('#search-results__modal');
         
@@ -665,7 +665,7 @@ $js = <<<JS
         e.preventDefault();
         var url = $(this).data('url');
         var modal = $('#modal-info');
-        modal.find('.modal-header h2').text('Lead Activity Logs');
+        modal.find('.modal-header').text('Lead Activity Logs');
         modal.find('.modal-body').html('');
         $('#preloader').removeClass('hidden');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {

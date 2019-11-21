@@ -5,7 +5,7 @@ use sales\access\ClientInfoAccess;
 use sales\access\EmployeeGroupAccess;
 use yii\bootstrap\ActiveForm;
 use frontend\models\LeadForm;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -52,7 +52,7 @@ $manageClientInfoAccess = ClientInfoAccess::isUserCanManageLeadClientInfo($lead,
 			<?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess): ?>
 
 				 <div class="">
-                     <?= Html::button('<i class="fa fa-plus"></i> <i class="fa fa-phone"></i>', [
+                     <?= Html::button('<i class="fas fa-plus"></i> <i class="fa fa-phone"></i>', [
 						'id' => 'client-new-phone-button',
 						'data-modal_id' => 'client-manage-info',
 						'title' => 'Add Phone',
@@ -60,7 +60,7 @@ $manageClientInfoAccess = ClientInfoAccess::isUserCanManageLeadClientInfo($lead,
 						'class' => 'btn btn-primary showModalButton'
 					]) ?>
 
-                     <?= Html::button('<i class="fa fa-plus"></i> <i class="fa fa-envelope"></i>', [
+                     <?= Html::button('<i class="fas fa-plus"></i> <i class="fa fa-envelope"></i>', [
 						'id' => 'client-new-email-button',
 						'data-modal_id' => 'client-manage-info',
 						'title' => 'Add Email',
@@ -68,7 +68,7 @@ $manageClientInfoAccess = ClientInfoAccess::isUserCanManageLeadClientInfo($lead,
 						'class' => 'btn btn-primary showModalButton'
 					]) ?>
 
-                     <?= Html::button('<i class="fa fa-pencil"></i> <i class="fa fa-user"></i>', [
+                     <?= Html::button('<i class="fas fa-pencil"></i> <i class="fa fa-user"></i>', [
 						'id' => 'client-edit-user-name-button',
 						'data-modal_id' => 'client-manage-info',
 						'title' => 'Update user name',
@@ -161,33 +161,12 @@ $manageClientInfoAccess = ClientInfoAccess::isUserCanManageLeadClientInfo($lead,
 
 <?= Modal::widget([
     'id' => 'modal-client-manage-info',
-    'bodyOptions' => [
-        'class' => 'modal-body'
-    ],
-    'size' => 'modal-sm',
+    'size' => Modal::SIZE_SMALL,
 ]) ?>
 
 <?= Modal::widget([
 	'id' => 'modal-client-large',
-	'bodyOptions' => [
-		'class' => 'modal-body'
-	],
-	'size' => 'modal-lg',
-]);
+	'size' => Modal::SIZE_LARGE,
+])
 ?>
 
-    <style type="text/css">
-        @media screen and (min-width: 768px) {
-            .modal-dialog {
-                width: 700px; /* New width for default modal */
-            }
-            .modal-sm {
-                width: 350px; /* New width for small modal */
-            }
-        }
-        @media screen and (min-width: 992px) {
-            .modal-lg {
-                width: 70%; /* New width for large modal */
-            }
-        }
-    </style>

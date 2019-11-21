@@ -3,7 +3,7 @@
 use common\models\Lead;
 use common\models\search\lead\LeadSearchByIp;
 use yii\helpers\Html;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 use yii\helpers\Url;
 use yii\web\View;
 
@@ -13,6 +13,7 @@ use yii\web\View;
 if (($count = LeadSearchByIp::count($lead->request_ip, Yii::$app->user->id)) > 1) {
 
     Modal::begin([
+        'title' => '',
         'id' => 'modal-ip-cnt-ip',
         'size' => 'modal-lg',
         'clientOptions' => ['backdrop' => 'static'],

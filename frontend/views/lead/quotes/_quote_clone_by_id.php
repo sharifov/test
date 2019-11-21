@@ -4,15 +4,15 @@ use common\models\Lead;
 use sales\forms\lead\CloneQuoteByUidForm;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 
 /** @var Lead $lead */
 
 Modal::begin([
     'id' => 'modal-clone-quote-by-id',
-    'size' => 'modal-xs',
-    'clientOptions' => ['backdrop' => 'static'],
-    'header' => '<h4 class="modal-title">Clone Quote</h4>',
+    'size' => Modal::SIZE_SMALL,
+    //'clientOptions' => ['backdrop' => 'static'],
+    'title' => 'Clone Quote',
 ]);
 
 $cloneQuoteForm = new CloneQuoteByUidForm();

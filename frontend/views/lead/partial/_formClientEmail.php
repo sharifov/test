@@ -11,6 +11,7 @@ use yii\widgets\ActiveForm;
 use common\models\ClientEmail;
 use yii\helpers\Html;
 use frontend\models\LeadForm;
+use yii\bootstrap4\Modal;
 
 ?>
 
@@ -142,14 +143,14 @@ use frontend\models\LeadForm;
             ]);
 
 
-            yii\bootstrap\Modal::begin([
-                'headerOptions' => ['id' => 'modal-header-' . $key],
+            Modal::begin([
+                'title' => '',
                 'id' => 'modal-email-cnt-' . $key,
-                'size' => 'modal-lg',
+                'size' => Modal::SIZE_LARGE,
                 'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
             ]);
             echo $emailContent; //"<div id='modalContent'></div>";
-            yii\bootstrap\Modal::end();
+            Modal::end();
 
             echo Html::button('<i class="fa fa-user"></i> '.$emailCount, [
                 'id' => 'email-cnt-' . $key,

@@ -12,6 +12,7 @@ use common\models\ClientPhone;
 use yii\helpers\Html;
 use frontend\models\LeadForm;
 use borales\extensions\phoneInput\PhoneInput;
+use yii\bootstrap4\Modal;
 //use frontend\extensions\PhoneInput;
 
 ?>
@@ -121,14 +122,14 @@ use borales\extensions\phoneInput\PhoneInput;
                     ]);
 
 
-            yii\bootstrap\Modal::begin([
-                'headerOptions' => ['id' => 'modal-header-' . $key],
+            Modal::begin([
+                'title' => '',
                 'id' => 'modal-phone-cnt-' . $key,
-                'size' => 'modal-lg',
+                'size' => Modal::SIZE_LARGE,
                 'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
             ]);
             echo $phoneContent; //"<div id='modalContent'></div>";
-            yii\bootstrap\Modal::end();
+            Modal::end();
 
 
             $template .= '<span class="input-group-btn">'.Html::button('<i class="fa fa-user"></i> '.$phoneCount, [
