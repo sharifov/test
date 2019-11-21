@@ -5621,10 +5621,6 @@ input[disabled] + .radio-tab__text {
     flex-direction: row-reverse;
     align-items: center;
 }
-.modal-header {
-    flex-direction: row-reverse;
-    align-items: center;
-}
 
 /*.modal:nth-of-type(even) {z-index: 1051 !important;}*/
 
