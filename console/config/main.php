@@ -20,7 +20,20 @@ return [
             'class' => 'yii\console\controllers\FixtureController',
             'namespace' => 'common\fixtures',
         ],
-        'translate' => \lajax\translatemanager\commands\TranslatemanagerController::class
+        'translate' => \lajax\translatemanager\commands\TranslatemanagerController::class,
+        'migrate' => [
+            'class' => 'yii\console\controllers\MigrateController',
+            'migrationNamespaces' => [
+                //'app\migrations',
+                'modules\hotel\migrations',
+            ],
+        ],
+
+//        'migrate-hotel' => [
+//            'class' => 'yii\console\controllers\MigrateController',
+//            'migrationNamespaces' => ['modules\hotel\migrations'],
+//           // 'migrationTable' => 'migration_module',
+//        ],
     ],
     'components' => [
         'log' => [

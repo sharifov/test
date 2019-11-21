@@ -197,6 +197,12 @@ return [
             ],
             'viewPath' => '@frontend/views/rbac',
         ],
+
+
+        'hotel' => [
+            'class' => \modules\hotel\HotelModule::class,
+        ],
+
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,

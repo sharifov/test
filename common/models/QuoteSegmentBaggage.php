@@ -58,8 +58,8 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
             [['qsb_pax_code', 'qsb_airline_code'], 'string', 'max' => 3],
             [['qsb_allow_unit'], 'string', 'max' => 4],
             [['qsb_allow_max_weight', 'qsb_allow_max_size'], 'string', 'max' => 100],
-            [['qsb_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::className(), 'targetAttribute' => ['qsb_segment_id' => 'qs_id']],
-            [['qsb_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['qsb_updated_user_id' => 'id']],
+            [['qsb_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::class, 'targetAttribute' => ['qsb_segment_id' => 'qs_id']],
+            [['qsb_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qsb_updated_user_id' => 'id']],
         ];
     }
 
@@ -89,7 +89,7 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
      */
     public function getQsbSegment()
     {
-        return $this->hasOne(QuoteSegment::className(), ['qs_id' => 'qsb_segment_id']);
+        return $this->hasOne(QuoteSegment::class, ['qs_id' => 'qsb_segment_id']);
     }
 
     /**
@@ -97,7 +97,7 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
      */
     public function getQsbUpdatedUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'qsb_updated_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'qsb_updated_user_id']);
     }
 
     public function getInfo()

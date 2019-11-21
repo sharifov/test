@@ -35,7 +35,10 @@ abstract class BaseApplication extends yii\base\Application
  *
  * @property \aki\telegram\Telegram $telegram The Telegram component. This property is read-only. Extended component.
  * @property \common\components\CommunicationService $communication The CommunicationService component. This property is read-only. Extended component.
+ * @property \common\components\CurrencyService $currency The CurrencyService component.
  * @property \yii\queue\beanstalk\Queue $queue_job The beanstalk Queue. This property is read-only. Extended component.
+ *
+ *
  *
  */
 class WebApplication extends yii\web\Application

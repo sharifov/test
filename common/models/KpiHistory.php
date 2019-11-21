@@ -50,8 +50,8 @@ class KpiHistory extends \yii\db\ActiveRecord
             [['kh_date_dt', 'kh_created_dt', 'kh_updated_dt', 'kh_agent_approved_dt', 'kh_super_approved_dt'], 'safe'],
             [['kh_base_amount', 'kh_profit_bonus', 'kh_manual_bonus', 'kh_estimation_profit'], 'number'],
             [['kh_description'], 'string'],
-            [['kh_super_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['kh_super_id' => 'id']],
-            [['kh_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['kh_user_id' => 'id']],
+            [['kh_super_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['kh_super_id' => 'id']],
+            [['kh_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['kh_user_id' => 'id']],
         ];
     }
 
@@ -99,7 +99,7 @@ class KpiHistory extends \yii\db\ActiveRecord
      */
     public function getKhSuper()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'kh_super_id']);
+        return $this->hasOne(Employee::class, ['id' => 'kh_super_id']);
     }
 
     /**
@@ -107,7 +107,7 @@ class KpiHistory extends \yii\db\ActiveRecord
      */
     public function getKhUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'kh_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'kh_user_id']);
     }
 
     public function getSalary()
