@@ -24,104 +24,103 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
 <div id="agent-leader-board" class="col-md-12">
     <div class="row">
         <?php if ($agentsBoardsSettings['finalProfit']) : ?>
-        <div id="finalProfit" class="col-md-3" style="width: 20%">
-            <div class="card card-default">
-                <div class="card-header"><i class="fa fa-users"></i> Top - AGENT By FINAL PROFIT</div>
-                <div class="card-body">
-                    <?= \yii\widgets\ListView::widget([
-                        'dataProvider' => $profitDataProvider,
-                        'emptyText' => '<div class="text-center">Not found online users</div><br>',
-                        'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
-                        'itemView' => function ($model, $key, $index, $widget) {
-                            if ($index <= 14) {
-                                return $this->render('ratings/_list_item_ratings', ['model' => $model, 'index' => $index]);
-                            }
-                        },
-                        'itemOptions' => [
-                            //'class' => 'item',
-                            //'tag' => false,
-                        ],
-                    ])?>
+            <div id="finalProfit" class="col" style="width: 20%;">
+                <div class="card card-default">
+                    <div class="card-header"><i class="fa fa-users"></i> Top - AGENT By FINAL PROFIT</div>
+                    <div class="card-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $profitDataProvider,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                if ($index <= 14) {
+                                    return $this->render('ratings/_list_item_ratings', ['model' => $model, 'index' => $index]);
+                                }
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
                 </div>
             </div>
-        </div>
-
         <?php endif;?>
 
         <?php if ($agentsBoardsSettings['soldLeads']) : ?>
-        <div id="soldLeads" class="col-md-3" style="width: 20%">
-            <div class="card card-default">
-                <div class="card-header"><i class="fa fa-users"></i> Top - AGENT by SOLD LEADS </div>
-                <div class="card-body">
-                    <?= \yii\widgets\ListView::widget([
-                        'dataProvider' => $soldDataProvider,
-                        'emptyText' => '<div class="text-center">Not found online users</div><br>',
-                        'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
-                        'itemView' => function ($model, $key, $index, $widget) {
-                            if ($index <= 14) {
-                                return $this->render('ratings/_list_item_ratings', ['model' => $model, 'index' => $index]);
-                            }
-                        },
-                        'itemOptions' => [
-                            //'class' => 'item',
-                            //'tag' => false,
-                        ],
-                    ])?>
+            <div id="soldLeads" class="col" style="width: 20%;">
+                <div class="card card-default" >
+                    <div class="card-header"><i class="fa fa-users"></i> Top - AGENT by SOLD LEADS </div>
+                    <div class="card-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $soldDataProvider,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                if ($index <= 14) {
+                                    return $this->render('ratings/_list_item_ratings', ['model' => $model, 'index' => $index]);
+                                }
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php endif;?>
 
         <?php if ($agentsBoardsSettings['profitPerPax']) : ?>
-        <div id="profitPerPax" class="col-md-3" style="width: 20%">
-            <div class="card card-default">
-                <div class="card-header"><i class="fa fa-users"></i> Top - AGENT by PROFIT PER PAX </div>
-                <div class="card-body">
-                    <?= \yii\widgets\ListView::widget([
-                        'dataProvider' => $profitPerPaxDataProvider,
-                        'emptyText' => '<div class="text-center">Not found online users</div><br>',
-                        'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
-                        'itemView' => function ($model, $key, $index, $widget) {
-                            if ($index <= 14) {
-                                return $this->render('ratings/_list_item_ratings', ['model' => $model, 'index' => $index]);
-                            }
-                        },
-                        'itemOptions' => [
-                            //'class' => 'item',
-                            //'tag' => false,
-                        ],
-                    ])?>
+            <div id="profitPerPax" class="col" style="width: 20%;">
+                <div class="card card-default">
+                    <div class="card-header"><i class="fa fa-users"></i> Top - AGENT by AVERAGE PROFIT PER PAX </div>
+                    <div class="card-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $profitPerPaxDataProvider,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                if ($index <= 14) {
+                                    return $this->render('ratings/_list_item_ratings', ['model' => $model, 'index' => $index]);
+                                }
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php endif;?>
 
         <?php if ($agentsBoardsSettings['tips']) : ?>
-        <div id="tips" class="col-md-3" style="width: 20%">
-            <div class="card card-default">
-                <div class="card-header"><i class="fa fa-users"></i> Top - AGENT By TIPS</div>
-                <div class="card-body">
-                    <?= \yii\widgets\ListView::widget([
-                        'dataProvider' => $tipsDataProvider,
-                        'emptyText' => '<div class="text-center">Not found online users</div><br>',
-                        'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
-                        'itemView' => function ($model, $key, $index, $widget) {
-                            if ($index <= 14) {
-                                return $this->render('ratings/_list_item_ratings', ['model' => $model, 'index' => $index]);
-                            }
-                        },
-                        'itemOptions' => [
-                            //'class' => 'item',
-                            //'tag' => false,
-                        ],
-                    ])?>
+            <div id="tips" class="col" style="width: 20%;">
+                <div class="card card-default">
+                    <div class="card-header"><i class="fa fa-users"></i> Top - AGENT By TIPS</div>
+                    <div class="card-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $tipsDataProvider,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                if ($index <= 14) {
+                                    return $this->render('ratings/_list_item_ratings', ['model' => $model, 'index' => $index]);
+                                }
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php endif;?>
 
         <?php if ($agentsBoardsSettings['leadConversion']) : ?>
-            <div id="finalProfit" class="col-md-3" style="width: 20%">
+            <div id="finalProfit" class="col" style="width: 20%;">
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> Top - AGENT By NEW LEAD CONVERSION</div>
                     <div class="card-body">
@@ -142,11 +141,12 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     </div>
                 </div>
             </div>
-
         <?php endif;?>
+    </div>
 
+    <div class="row mt-3">
         <?php if ($teamsBoardsSettings['teamsProfit']) : ?>
-            <div id="finalProfit" class="col-md-3" style="width: 20%">
+            <div id="finalProfit" class="col" style="width: 20%;">
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> Top - Team By PROFIT</div>
                     <div class="card-body">
@@ -167,11 +167,10 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     </div>
                 </div>
             </div>
-
         <?php endif;?>
 
         <?php if ($teamsBoardsSettings['teamsSoldLeads']) : ?>
-            <div id="finalProfit" class="col-md-3" style="width: 20%">
+            <div id="finalProfit" class="col" style="width: 20%;">
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> Top - Average Sold Leads per Agent</div>
                     <div class="card-body">
@@ -192,11 +191,10 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     </div>
                 </div>
             </div>
-
         <?php endif;?>
 
         <?php if ($teamsBoardsSettings['teamsProfitPerPax']) : ?>
-            <div id="finalProfit" class="col-md-3" style="width: 20%">
+            <div id="finalProfit" class="col" style="width: 20%;">
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> Top - Average Profit Per Pax</div>
                     <div class="card-body">
@@ -217,11 +215,10 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     </div>
                 </div>
             </div>
-
         <?php endif;?>
 
         <?php if ($teamsBoardsSettings['teamsProfitPerAgent']) : ?>
-            <div id="finalProfit" class="col-md-3" style="width: 20%">
+            <div id="finalProfit" class="col" style="width: 20%;">
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> Top - Average Profit Per Agent</div>
                     <div class="card-body">
@@ -242,11 +239,10 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     </div>
                 </div>
             </div>
-
         <?php endif;?>
 
         <?php if ($teamsBoardsSettings['teamsConversion']) : ?>
-            <div id="finalProfit" class="col-md-3" style="width: 20%">
+            <div id="finalProfit" class="col" style="width: 20%;">
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> Top - Team by Conversion</div>
                     <div class="card-body">
@@ -267,8 +263,6 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     </div>
                 </div>
             </div>
-
         <?php endif;?>
-
     </div>
 </div>

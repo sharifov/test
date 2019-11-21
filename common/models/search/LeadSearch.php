@@ -2252,7 +2252,7 @@ class LeadSearch extends Lead
 
         if ($category == 'profitPerPax'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT AVG(CASE WHEN final_profit > 0 THEN final_profit / (adults + children) ELSE 0 END) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT AVG(CASE WHEN final_profit > 0 THEN (final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX. ' END) * (adults + children))) / (adults + children) ELSE 0 END) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
         }
 
         if ($category == 'tips'){
@@ -2345,13 +2345,13 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsProfitPerPax'){
-            $query->addSelect(['ug_name', 'AVG(final_profit / (adults + children)) as teamsProfitPerPax']);
+            $query->addSelect(['ug_name', 'AVG(CASE WHEN final_profit > 0 THEN (final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX. ' END) * (adults + children))) / (adults + children) ELSE 0 END) as teamsProfitPerPax']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
         }
 
         if ($category == 'teamsProfitPerAgent'){
-            $query->addSelect(['ug_name', 'AVG(final_profit) / COUNT(DISTINCT(user_group_assign.ugs_user_id)) as teamsProfitPerAgent']);
+            $query->addSelect(['ug_name', 'SUM(final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX. ' END) * (adults + children))) / COUNT(DISTINCT(user_group_assign.ugs_user_id)) as teamsProfitPerAgent']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
         }
