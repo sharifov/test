@@ -92,6 +92,14 @@ class LeadFlow extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param int $attempts
+     */
+    public function changeAttempts(int $attempts): void
+    {
+        $this->lf_out_calls = $attempts;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules()

@@ -6,7 +6,7 @@ use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
 use dosamigos\datepicker\DatePicker;
 use sales\formatters\client\ClientTimeFormatter;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -14,10 +14,12 @@ use yii\helpers\Url;
 /* @var $searchModel common\models\search\LeadQcallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $guard array */
+/** @var Employee $user */
 
 ?>
 
 <?= GridView::widget([
+    'id' => 'redialGrid',
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'rowOptions' => static function (LeadQcallSearch $model, $index, $widget, $grid) {
@@ -29,6 +31,10 @@ use yii\helpers\Url;
 		}
     },
     'columns' => [
+        [
+            'class' => '\kartik\grid\CheckboxColumn',
+            'visible' => $user->isAdmin(),
+        ],
         ['class' => 'yii\grid\SerialColumn'],
         [
             'label' => 'Status',

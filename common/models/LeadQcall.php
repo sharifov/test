@@ -126,6 +126,28 @@ class LeadQcall extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param $weight
+     * @param $from
+     * @param $to
+     * @param $created
+     */
+    public function multipleUpdate($weight, $from, $to, $created): void
+    {
+        if ($weight) {
+            $this->lqc_weight = $weight;
+        }
+        if ($from) {
+            $this->lqc_dt_from = $from;
+        }
+        if ($to) {
+            $this->lqc_dt_to = $to;
+        }
+        if ($created) {
+            $this->lqc_created_dt = $created;
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
