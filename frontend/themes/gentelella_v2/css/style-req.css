@@ -5770,5 +5770,10 @@ input[disabled] + .radio-tab__text {
     .card-footer {
         overflow-x: auto;
     }
+    .panel-main__actions {
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+    }
 }
 /***** END MEDIA ******/

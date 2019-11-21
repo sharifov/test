@@ -134,80 +134,82 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             ]) ?>
         </div>
         <div class="col-md-3">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'id',
-                    'uid',
-                    'gid',
-                    'l_request_hash',
+            <div class="table-responsive">
+                <?= DetailView::widget([
+                    'model' => $model,
+                    'attributes' => [
+                        'id',
+                        'uid',
+                        'gid',
+                        'l_request_hash',
 
-                    [
-                        'attribute' => 'employee_id',
-                        'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
-                        },
-                    ],
-
-                    //'employee_id',
-
-                    [
-                        'attribute' => 'l_init_price',
-                        //'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
-                        },
-                    ],
-
-                    [
-                        'attribute' => 'status',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getStatusName(true);
-                        },
-                        'format' => 'raw',
-
-                    ],
-
-                    [
-                        'attribute' => 'l_duplicate_lead_id',
-                        'label' => 'Duplicate from',
-                        'value' => function (\common\models\Lead $model) {
-                            return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-
-                    ],
-
-                    [
-                        'attribute' => 'project_id',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->project ? $model->project->name : '-';
-                        },
-
-                    ],
-
-                    [
-                        'attribute' => 'source_id',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->source ? $model->source->name : '-';
-                        },
-                        'visible' => !$isAgent
-                    ],
-
-                    [
-                            'label' => 'Type create',
-                            'attribute' => 'l_type_create',
-                            'value' => static function (Lead $lead) {
-                                if ($lead->l_type_create === null) {
-                                    return '';
-                                }
-                                return Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? 'Undefined';
+                        [
+                            'attribute' => 'employee_id',
+                            'format' => 'raw',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
                             },
-                    ],
+                        ],
 
-                ],
-            ]) ?>
+                        //'employee_id',
+
+                        [
+                            'attribute' => 'l_init_price',
+                            //'format' => 'raw',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
+                            },
+                        ],
+
+                        [
+                            'attribute' => 'status',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->getStatusName(true);
+                            },
+                            'format' => 'raw',
+
+                        ],
+
+                        [
+                            'attribute' => 'l_duplicate_lead_id',
+                            'label' => 'Duplicate from',
+                            'value' => function (\common\models\Lead $model) {
+                                return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+                            },
+                            'format' => 'raw',
+
+                        ],
+
+                        [
+                            'attribute' => 'project_id',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->project ? $model->project->name : '-';
+                            },
+
+                        ],
+
+                        [
+                            'attribute' => 'source_id',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->source ? $model->source->name : '-';
+                            },
+                            'visible' => !$isAgent
+                        ],
+
+                        [
+                                'label' => 'Type create',
+                                'attribute' => 'l_type_create',
+                                'value' => static function (Lead $lead) {
+                                    if ($lead->l_type_create === null) {
+                                        return '';
+                                    }
+                                    return Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? 'Undefined';
+                                },
+                        ],
+
+                    ],
+                ]) ?>
+            </div>
         </div>
         <div class="col-md-3">
             <div class="table-responsive">
