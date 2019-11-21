@@ -71,7 +71,7 @@ use yii\helpers\Url;
 			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                 <?php $priceData = $model->getPricesData();	?>
 
-                <?php if($model->status == $model::STATUS_APPLIED && $model->lead->final_profit !== null):?>
+                <?php if($model->isApplied() && $model->lead->final_profit !== null):?>
                     <button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
                      data-content='<?= $model->getEstimationProfitText();?>'>
                         <?= '$'.$model->getFinalProfit();?>
@@ -91,15 +91,12 @@ use yii\helpers\Url;
 		</div>
 		<div class="quote__heading-right">
 
-
-            <div class="btn-group" role="group" aria-label="...">
-
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="fa fa-list-ul"></span>
+            <div class="dropdown">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                        <span class="fas fa-list-ul"></span>
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu">
+                    <div class="dropdown-menu">
                         <?/*<li>
                             <?= Html::a('<i class="fa fa-eye"></i> Details', null, [
                                 'class' => 'quote_details__btn',
@@ -109,28 +106,27 @@ use yii\helpers\Url;
                             ]) ?>
                         </li>*/?>
 
-                        <li>
+
                             <?= Html::a('<i class="fa fa-search"></i> Details', null, [
-                                'class' => 'btn-quote-details',
+                                'class' => 'btn-quote-details dropdown-item',
                                 'data-id' => $model->id,
                                 'data-title' => implode(', ',$tripsInfo),
                                 'data-url' => Url::to(['quotes/ajax-details', 'id' => $model->id]),
                                 //'data-target' => '#quote_detail_'.$model->uid,
                                 'title' => 'Details'
                             ]) ?>
-                        </li>
 
 
-                        <li>
+
+
                             <?= Html::a('<i class="fa fa-list"></i> Status logs', null, [
-                                'class' => 'view-status-log sl-quote__status-log',
+                                'class' => 'view-status-log sl-quote__status-log dropdown-item',
                                 'data-id' => $model->id,
                                 'title' => 'View status log'
                             ]) ?>
-                        </li>
-                        <li>
+
                             <?= Html::a('<i title="" class="fa fa-list-alt"></i> Reserv. dump', null, [
-                                'class' => 'popover-class',
+                                'class' => 'popover-class dropdown-item',
                                 'title' => 'Reservation Dump',
                                 'data-toggle' => 'popover',
                                 'data-html' => 'true',
@@ -142,35 +138,34 @@ use yii\helpers\Url;
                                     <button class="btn btn-primary btn-clipboard popover-dump-copy" data-clipboard-text="'.$model->reservation_dump.'"><i class="fa fa-copy"></i></button>
                                     '.str_replace("\n", '<br/>', $model->reservation_dump).'
                                     </div>',
-                            ]);?>
-                        </li>
+                            ])?>
+
 
                         <?php if ($appliedQuote === null): ?>
-                            <li>
+
                                 <?php  echo Html::a('<i class="fa fa-copy"></i> Clone', null, [
-                                    'class' => 'clone-quote-by-uid-self',
+                                    'class' => 'clone-quote-by-uid-self dropdown-item',
                                     'data-uid' => $model->uid,
                                    // 'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
                                     'title' => 'Clone'
                                 ]);
                                 ?>
-                            </li>
+
                         <?php endif; ?>
 
-                        <?php if($model->status != Quote::STATUS_DECLINED):?>
-                        <li>
+                        <?php if(!$model->isDeclined()):?>
+
                             <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
+                                    'class' => 'dropdown-item',
                                 'target'    => '_blank',
                                 'title'     => 'View checkout',
                                 'data-pjax' => 0
                             ]);
                             ?>
-                        </li>
-                        <?php endif; ?>
-                    </ul>
-                </div>
-            </div>
 
+                        <?php endif; ?>
+                    </div>
+                </div>
 		</div>
 	</div>
 	<div class="quote__wrapper">

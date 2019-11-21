@@ -337,18 +337,6 @@ if($project){
 ])?>
 <?php Modal::end()?>
 
-<?php Modal::begin(['id' => 'modal-info',
-    'title' => 'Info',
-    'size' => Modal::SIZE_LARGE,
-])?>
-<?php Modal::end()?>
-
-<?php Modal::begin(['id' => 'modal-info-d',
-    'title' => 'Info',
-    'size' => Modal::SIZE_DEFAULT,
-])?>
-<?php Modal::end()?>
-
 
 <?php
 
@@ -659,8 +647,8 @@ $js = <<<JS
     $('#btn-lead-logs').on('click', function(e) {
         e.preventDefault();
         let url = $(this).data('url');
-        let modal = $('#modal-info');
-        modal.find('.modal-header').text('Lead Activity Logs');
+        let modal = $('#modal-lg');
+        $('#modal-lg-label').html('Old Lead Activity Logs');
         modal.find('.modal-body').html('');
         $('#preloader').removeClass('hidden');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {

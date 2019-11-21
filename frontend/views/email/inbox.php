@@ -43,14 +43,6 @@ $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
     <div class="row">
 
-
-        <div id="preloader" class="overlay" style="display: none">
-            <div class="preloader">
-                <span class="fa fa-spinner fa-pulse fa-3x fa-fw"></span>
-                <div class="preloader__text">Loading...</div>
-            </div>
-        </div>
-
         <div class="col-md-12">
             <div class="x_panel">
                 <div class="x_title">
