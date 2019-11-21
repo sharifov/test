@@ -6,7 +6,7 @@
 /* @var $use_browser_call_access bool */
 
 use yii\helpers\Url;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 use yii\helpers\Html;
 
 \frontend\assets\WebPhoneAsset::register($this);
@@ -120,7 +120,7 @@ use yii\helpers\Html;
 
 <?php Modal::begin([
     'id' => 'web-phone-dial-modal',
-    'header' => '<h4 class="modal-title">Phone Dial</h4>',
+    'title' => 'Phone Dial',
     'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
 ]); ?>
 <?php Modal::end(); ?>
@@ -128,7 +128,7 @@ use yii\helpers\Html;
 
 <?php Modal::begin([
     'id' => 'web-phone-send-digit-modal',
-    'header' => '<h4 class="modal-title">Send digit</h4>',
+    'title' => 'Send digit',
     'size' => 'modal-sm',
 ]);
 ?>
@@ -162,7 +162,7 @@ use yii\helpers\Html;
 
 <?php Modal::begin([
     'id' => 'web-phone-redirect-agents-modal',
-    'header' => '<h4 class="modal-title">Transfer Call</h4>',
+    'title' => 'Transfer Call',
     //'size' => 'modal-sm',
 ]);
 ?>
@@ -466,7 +466,7 @@ use yii\helpers\Html;
             let callSid = connection.parameters.CallSid;
             let modal = $('#web-phone-redirect-agents-modal');
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            modal.modal('show').find('.modal-header').html('<h3>Transfer Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
 
             $.post(ajaxCallRedirectGetAgents, { sid: callSid }) // , user_id: userId
                 .done(function(data) {

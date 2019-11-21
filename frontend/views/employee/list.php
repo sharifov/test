@@ -1,4 +1,4 @@
-<?php
+<?php use yii\grid\ActionColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
@@ -8,17 +8,19 @@
 
 use sales\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
-//use yii\grid\GridView;
 use kartik\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+use yii\bootstrap4\Modal;
 
 $this->title = 'User List';
 $this->params['breadcrumbs'][] = $this->title;
 
-$isUM = Yii::$app->user->identity->canRole('userManager');
-$isAdmin = Yii::$app->user->identity->canRoles(['admin', 'superadmin']);
-$isSuperAdmin = Yii::$app->user->identity->canRole('superadmin');
+$user = Yii::$app->user->identity;
+
+$isUM = $user->canRole('userManager');
+$isAdmin = $user->canRoles(['admin', 'superadmin']);
+$isSuperAdmin = $user->canRole('superadmin');
 
 if ($isAdmin || $isSuperAdmin) {
     $userList = \common\models\Employee::getList();
@@ -27,7 +29,7 @@ if ($isAdmin || $isSuperAdmin) {
 }
 $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
-//Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+//Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : $user->getUserGroupList()
 
 ?>
 <div class="employee-index">
@@ -65,7 +67,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
     )*/
     ?>
 
-    <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
+    <?php if($user->canRoles(['admin', 'supervision'])) : ?>
         <p>
             <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
@@ -85,7 +87,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         //'layout'=>'{summary}'.Html::activeDropDownList($searchModel, 'perpage', [10 => 10, 30 => 30, 20 => 20, 50 => 50, 100 => 100],['id'=>'perpage'])."{items}<br/>{pager}",
         'pjax' => false,
         //'layout' => $template,
-        'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
+        'rowOptions' => static function (\common\models\Employee $model, $index, $widget, $grid) {
             if ($model->isDeleted()) {
                 return ['class' => 'danger'];
             }
@@ -103,33 +105,33 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
             ],
 
             [
-                'class' => 'yii\grid\ActionColumn',
+                'class' => ActionColumn::class,
                 'template' => '{update} {projects} {groups} {switch}',
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
                     },*/
-                    'update' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
+                    'update' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
                     },
-                    'projects' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
+                    'projects' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
                         return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
                     },
-                    'groups' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
+                    'groups' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
                         return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
                     },
-                    'switch' => function (\common\models\Employee $model, $key, $index)  use ($isAdmin, $isUM) {
+                    'switch' => static function (\common\models\Employee $model, $key, $index)  use ($isAdmin, $isUM) {
                         return ($isAdmin && !$model->canRoles(['superadmin', 'admin']));
                     },
                 ],
                 'buttons' => [
-                    'projects' => function ($url, \common\models\Employee $model, $key) {
+                    'projects' => static function ($url, \common\models\Employee $model, $key) {
                         return Html::a('<span class="fa fa-list"></span>', ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id], ['title' => 'Projects', 'target' => '_blank']);
                     },
-                    'groups' => function ($url, \common\models\Employee $model, $key) {
+                    'groups' => static function ($url, \common\models\Employee $model, $key) {
                         return Html::a('<span class="fa fa-users"></span>', ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id], ['title' => 'User Groups', 'target' => '_blank']);
                     },
-                    'switch' => function ($url, \common\models\Employee $model, $key) {
+                    'switch' => static function ($url, \common\models\Employee $model, $key) {
                         return Html::a('<span class="fa fa-sign-in"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
                             'confirm' => 'Are you sure you want to switch user?',
                             //'method' => 'get',
@@ -236,7 +238,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left', 'style' => 'width: 280px'],
-                'filter' => $isAdmin ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                'filter' => $isAdmin ? \common\models\UserGroup::getList() : $user->getUserGroupList()
             ],
 
             [
@@ -441,7 +443,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
             [
                 'label' => 'Bonuses',
-                'value' => function(\common\models\Employee $model) {
+                'value' => static function (\common\models\Employee $model) {
                     if($params = $model->userParams) {
                         $str = '<table class="table table-bordered" style="font-size:10px">';
                         $str .= '<tr><td>Bonus Active</td><td>'. ($params->up_bonus_active ? 'Yes':'No') . '</td></tr>';
@@ -464,7 +466,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
             [
                 'label' => 'Other params',
                 //'attribute' => 'created_at',
-                'value' => function(\common\models\Employee $model) {
+                'value' => static function(\common\models\Employee $model) {
                     if($params = $model->userParams) {
                         $str = '<table class="table table-bordered" style="font-size:10px">';
                         $str .= '<tr><td>'.$params->getAttributeLabel('up_inbox_show_limit_leads').'</td><td>'.$params->up_inbox_show_limit_leads.'</td></tr>';
@@ -498,7 +500,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
             [
                 'attribute' => 'updated_at',
-                'value' => function(\common\models\Employee $model) {
+                'value' => static function (\common\models\Employee $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated_at));
                 },
                 'format' => 'raw',
@@ -531,11 +533,9 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
     <?php
 
-    \yii\bootstrap\Modal::begin([
-        'header' => '<b>Multiple update selected Users</b>',
-        // 'toggleButton' => ['label' => 'click me'],
+    Modal::begin([
+        'title' => 'Multiple update selected Users',
         'id' => 'modalUpdate'
-        // 'size' => 'modal-lg',
     ]);
     ?>
 
@@ -589,7 +589,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
             </div>
         </div>
 
-        <?php \yii\bootstrap\Modal::end(); ?>
+        <?php Modal::end(); ?>
         <?php endif; ?>
 
         <?php \yii\bootstrap\ActiveForm::end(); ?>
@@ -600,19 +600,11 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         $js = <<<JS
 
     $(document).ready(function () {
-        
         $(document).on('click', '#btn-submit-multiple-update', function() {
             var keys = $('#user-list-grid').yiiGridView('getSelectedRows');
             $('#user_list_json').attr('value', JSON.stringify(keys));
         });
-        
-        /*$('#user-list-update-form').on('beforeSubmit', function () {
-           
-            return true;
-        });*/
-    
     }); 
-
 
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
@@ -621,18 +613,10 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
     /*$(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
     });*/
-   
-    //$('[data-toggle="tooltip"]').tooltip();
-
 
 JS;
+
         $this->registerJs($js, \yii\web\View::POS_READY);
-
-        /*$this->registerJs('$("#user-list-update-form").on("beforeSubmit", function (e) {
-        $("#modalUpdate .close").click();
-    $("#modalUpdate").modal("hide");
-    });', \yii\web\View::POS_READY);*/
-
         ?>
     </div>
 </div>

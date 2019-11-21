@@ -1,4 +1,7 @@
 <?php
+
+use yii\grid\ActionColumn;
+
 /**
  * @var $this \yii\web\View
  * @var $modelUserParams \common\models\UserParams
@@ -393,17 +396,6 @@ JS;
                 );
                 ?>
 
-
-
-                <?php /*<div class="modal fade" id="modal-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content loader-lg">
-
-                        </div>
-                    </div>
-                </div>*/ ?>
-
-
             </p>
 
 
@@ -480,7 +472,7 @@ JS;
 
 
                     [
-                        'class' => 'yii\grid\ActionColumn',
+                        'class' => ActionColumn::class,
                         'template' => '{update} {delete}',
                         'controller' => 'user-project-params',
                         //'headerOptions' => ['width' => '20%', 'class' => '',],
@@ -537,13 +529,10 @@ JS;
     ?>
 </div>
 
-<?php \yii\bootstrap\Modal::begin([
+<?php \yii\bootstrap4\Modal::begin([
     'id' => 'activity-modal',
-    //'header' => '<h4 class="modal-title">View Image</h4>',
-    //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
-
 ]); ?>
-<?php \yii\bootstrap\Modal::end(); ?>
+<?php \yii\bootstrap4\Modal::end(); ?>
 
 
 <?php

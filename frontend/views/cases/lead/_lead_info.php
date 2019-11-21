@@ -1,7 +1,8 @@
 <?php
 
-use kartik\grid\GridView;use yii\helpers\Html;
-use yii\helpers\Url;use yii\widgets\Pjax;
+use yii\helpers\Html;
+use yii\widgets\Pjax;
+use yii\bootstrap4\Modal;
 
 /* @var $this yii\web\View */
 /* @var $leadModel \common\models\Lead */
@@ -265,10 +266,9 @@ $isAgent = false;
 
 
 <?php
-yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modalLeadSearchHeader'],
+Modal::begin([
     'id' => 'modalLeadSearch',
-    'size' => 'modal-lg',
+    'size' => Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 ?>
@@ -577,12 +577,12 @@ echo $this->render('_search_lead_form', [
 
 
 <?php
-yii\bootstrap\Modal::end();
+Modal::end();
 
 $jsCode = <<<JS
     $(document).on('click', '#search-lead-btn', function(){
         $('#modalLeadSearch').modal('show').find('#modalLeadSearchContent').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        $('#modalLeadSearchHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modalLeadSearch-label').html($(this).attr('title'));
        return false;
     });
 

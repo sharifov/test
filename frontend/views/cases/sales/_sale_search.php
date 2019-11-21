@@ -211,35 +211,17 @@ use yii\widgets\Pjax;
     </div>
 </div>
 
-<style type="text/css">
-    @media screen and (min-width: 768px) {
-        .modal-dialog {
-            width: 700px; /* New width for default modal */
-        }
-        .modal-sm {
-            width: 350px; /* New width for small modal */
-        }
-    }
-    @media screen and (min-width: 992px) {
-        .modal-lg {
-            width: 80%; /* New width for large modal */
-        }
-    }
-    .grid-view pre {
-        max-width: 1000px;
-    }
-</style>
 
 
 <?php
-yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modalHeader'],
+yii\bootstrap4\Modal::begin([
+    'title' => 'Case Info',
     'id' => 'modalCaseInfo',
-    'size' => 'modal-lg',
+    'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 echo "<div id='modalCaseInfoContent'></div>";
-yii\bootstrap\Modal::end();
+yii\bootstrap4\Modal::end();
 
 $jsCode = <<<JS
     $(document).on('click', '.showModalCaseInfo', function(){
@@ -248,7 +230,7 @@ $jsCode = <<<JS
         //$('#modal').modal('show');
         
         //alert($(this).attr('title'));
-        $('#modalHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modalCaseInfo-label').html($(this).attr('title'));
         $.get($(this).attr('href'), function(data) {
             $('#modalCaseInfo').find('#modalCaseInfoContent').html(data);
         });

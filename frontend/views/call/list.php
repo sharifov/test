@@ -4,6 +4,8 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use yii\bootstrap4\Modal;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -301,11 +303,11 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <?php
-\yii\bootstrap\Modal::begin([
-    'header' => '<b>Call Recording</b>',
+Modal::begin([
+    'title' => 'Call Recording',
     // 'toggleButton' => ['label' => 'click me'],
     'id' => 'modalCallRecording',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE,
+    'size' => Modal::SIZE_LARGE,
 ]);
 ?>
     <div class="row">
@@ -313,7 +315,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         </div>
     </div>
-<?php \yii\bootstrap\Modal::end(); ?>
+<?php Modal::end(); ?>
 
 
 <?php

@@ -4,8 +4,9 @@ use common\models\Call;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+use yii\bootstrap4\Modal;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -287,11 +288,10 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 </div>
 
 <?php
-\yii\bootstrap\Modal::begin([
-    'header' => '<b>Call Recording</b>',
-    // 'toggleButton' => ['label' => 'click me'],
+Modal::begin([
+    'title' => 'Call Recording',
     'id' => 'modalCallRecording',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE,
+    'size' => Modal::SIZE_LARGE,
 ]);
 ?>
     <div class="row">
@@ -299,7 +299,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
         </div>
     </div>
-<?php \yii\bootstrap\Modal::end(); ?>
+<?php Modal::end(); ?>
 
 
 <?php
@@ -317,4 +317,3 @@ $('#modalCallRecording').on('hidden.bs.modal', function () {
 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-?>

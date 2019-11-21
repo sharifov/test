@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
+use yii\bootstrap4\Modal;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
@@ -496,24 +497,21 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
     </div>
 
-<?php \yii\bootstrap\Modal::begin(['id' => 'modal-sms-preview',
-    'header' => '<h2>SMS preview</h2>',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE
+<?php Modal::begin([
+        'id' => 'modal-sms-preview',
+        'title' => 'SMS preview',
+        'size' => Modal::SIZE_LARGE
 ])?>
-<?php \yii\bootstrap\Modal::end()?>
-
+<?php Modal::end()?>
 
 <?php
 $js = <<<JS
-
     $('body').on('click', '.view_sms', function() {
-        var data = $(this).data('content');
-        var previewPopup = $('#modal-sms-preview');
+        let data = $(this).data('content');
+        let previewPopup = $('#modal-sms-preview');
         previewPopup.find('.modal-body').html(data);
         previewPopup.modal('show');
     });
-
-    // $('[data-toggle="popover"]').popover({ 'sanitize': false, 'html': true});
 JS;
 
 $this->registerJs($js);

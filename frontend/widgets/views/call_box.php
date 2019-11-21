@@ -1,4 +1,7 @@
 <?php
+
+use yii\bootstrap4\Modal;
+
 /* @var $model \common\models\Notifications[] */
 /* @var $newCount integer */
 /* @var $lastCall \common\models\Call */
@@ -250,13 +253,13 @@ use yii\widgets\Pjax; ?>
 
 <?= frontend\widgets\IncomingCallWidget::widget() ?>
 
-<?php \yii\bootstrap\Modal::begin([
+<?php Modal::begin([
     'id' => 'call-box-modal',
-    'header' => '<h4 class="modal-title">Missed Calls</h4>',
+    'title' => 'Missed Calls',
     'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE
+    'size' => Modal::SIZE_LARGE
 ]); ?>
-<?php \yii\bootstrap\Modal::end(); ?>
+<?php Modal::end(); ?>
 
 
 <?php
@@ -357,7 +360,7 @@ $js = <<<JS
         e.preventDefault();
         var client_id = $(this).data('client-id');
         $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        $('#call-box-modal .modal-title').html('Client Details (' + client_id + ')');
+        $('#call-box-modal-label').html('Client Details (' + client_id + ')');
         $('#call-box-modal').modal();
         $.post(clientInfoUrl, {client_id: client_id},
             function (data) {
@@ -369,7 +372,7 @@ $js = <<<JS
     $(document).on('click', '#btn-missed-calls', function(e) {
         e.preventDefault();
         $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        $('#call-box-modal .modal-title').html('Missed Calls');
+        $('#call-box-modal-label').html('Missed Calls');
         $('#call-box-modal').modal();
         $.post(missedCallsUrl, 
             function (data) {
@@ -382,7 +385,7 @@ $js = <<<JS
         e.preventDefault();
         var callId = $(this).data('call-id');
         $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        $('#call-box-modal .modal-title').html('Call Info');
+        $('#call-box-modal-label').html('Call Info');
         $('#call-box-modal').modal();
         $.post(callInfoUrl, {id: callId}, 
             function (data) {
