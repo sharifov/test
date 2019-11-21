@@ -2257,7 +2257,7 @@ class LeadSearch extends Lead
 
         if ($category == 'tips'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT SUM(tips) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT SUM(tips / 2) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
         }
 
         if ($category == 'leadConversion'){
