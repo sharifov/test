@@ -73,7 +73,7 @@ $this->registerJs($js);
                 'name',
                 [
                     'attribute' => 'link',
-                    'value' => function ($model) {
+                    'value' => static function ($model) {
                         /**
                          * @var $model Project
                          */
@@ -84,7 +84,7 @@ $this->registerJs($js);
 
                 [
                     'attribute' => 'last_update',
-                    'value' => function (\common\models\Project $model) {
+                    'value' => static function (\common\models\Project $model) {
                         return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
                     },
                     'format' => 'raw'

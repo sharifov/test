@@ -112,7 +112,7 @@ use yii\helpers\Html;
                         'c_call_sid',
                         [
                             'attribute' => 'c_call_type_id',
-                            'value' => function (\common\models\Call $model) {
+                            'value' => static function (\common\models\Call $model) {
                                 return $model->getCallTypeName();
                             },
                         ],
@@ -121,7 +121,7 @@ use yii\helpers\Html;
                         //'c_call_status',
                         [
                             'attribute' => 'c_status_id',
-                            'value' => function (\common\models\Call $model) {
+                            'value' => static function (\common\models\Call $model) {
                                 return $model->getStatusName();
                             },
                         ],
@@ -130,20 +130,20 @@ use yii\helpers\Html;
                         //'c_dep_id',
                         [
                             'attribute' => 'c_dep_id',
-                            'value' => function (\common\models\Call $model) {
+                            'value' => static function (\common\models\Call $model) {
                                 return $model->cDep ? $model->cDep->dep_name : '-';
                             },
                         ],
                         'c_caller_name',
                         [
                             'attribute' => 'c_project_id',
-                            'value' => function (\common\models\Call $model) {
+                            'value' => static function (\common\models\Call $model) {
                                 return $model->cProject ? $model->cProject->name : '-';
                             },
                         ],
                         [
                             'attribute' => 'c_created_dt',
-                            'value' => function (\common\models\Call $model) {
+                            'value' => static function (\common\models\Call $model) {
                                 return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
                             },
                             'format' => 'raw'

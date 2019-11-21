@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use common\models\Lead;
 use yii\bootstrap\ActiveForm;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 use yii\web\View;
 use yii\helpers\ArrayHelper;
 use common\models\LeadFlow;
@@ -142,7 +142,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'attribute' => 'id',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return Html::a('<i class="fa fa-file-o"></i> ' . $model->id, [
                     'lead/view', 'gid' => $model->gid
                 ], [
@@ -171,7 +171,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'attribute' => 'client_id',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->client_id ? Html::a($model->client_id, ['client/index', 'ClientSearch[id]' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',
@@ -186,7 +186,7 @@ $lists = new ListsAccess($user->id);
             // 'attribute' => 'client_id',
             'header' => 'Client name',
             'format' => 'raw',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -210,7 +210,7 @@ $lists = new ListsAccess($user->id);
         [
             'header' => 'Client / Emails / Phones',
             'format' => 'raw',
-            'value' => function (Lead $lead) use ($user) {
+            'value' => static function (Lead $lead) use ($user) {
 
                 if ($lead->client) {
                     $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
@@ -259,7 +259,7 @@ $lists = new ListsAccess($user->id);
         //'status',
         [
             'attribute' => 'status',
-            'value' => function (Lead $lead) {
+            'value' => static function (Lead $lead) {
                 $statusValue = $lead->getStatusName(true);
 
                 if ($lead->isTrash() && ($lastLeadFlow = $lead->lastLeadFlow)) {
@@ -298,7 +298,7 @@ $lists = new ListsAccess($user->id);
         [
             'attribute' => 'created',
             'label' => 'Pending Time',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
             },
             'visible' => !$isAgent,
@@ -306,7 +306,7 @@ $lists = new ListsAccess($user->id);
         ],
         [
             'attribute' => 'project_id',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->project ? $model->project->name : '-';
             },
             'filter' => $lists->getProjects(),
@@ -317,7 +317,7 @@ $lists = new ListsAccess($user->id);
         // 'source_id',
         /*[
             'attribute' => 'source_id',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
             'filter' => \common\models\Source::getList(),
@@ -326,7 +326,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'attribute' => 'trip_type',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return Lead::getFlightType($model->trip_type) ?? '-';
             },
             'filter' => Lead::TRIP_TYPE_LIST
@@ -334,7 +334,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'attribute' => 'cabin',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->getCabinClassName();
             },
             'filter' => Lead::CABIN_LIST
@@ -346,7 +346,7 @@ $lists = new ListsAccess($user->id);
 
         /*[
             'label' => 'Pax',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
             },
             'format' => 'raw',
@@ -357,7 +357,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'label' => 'Pax / Communication',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 //$str = '';
                 $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span><br>';
                 $str .= $model->getCommunicationInfo();
@@ -371,7 +371,7 @@ $lists = new ListsAccess($user->id);
 
         /*[
             'attribute' => 'adults',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->adults ?: 0;
             },
             'filter' => array_combine(range(0, 9), range(0, 9)),
@@ -382,7 +382,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'attribute' => 'children',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->children ?: '-';
             },
             'filter' => array_combine(range(0, 9), range(0, 9)),
@@ -402,7 +402,7 @@ $lists = new ListsAccess($user->id);
         [
             // 'header' => 'Grade',
             'attribute' => 'l_answered',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
             },
             'filter' => [
@@ -419,7 +419,7 @@ $lists = new ListsAccess($user->id);
 
         /*[
             'header' => 'Task Info',
-            'value' => function (Lead $model) use ($isAgent) {
+            'value' => static function (Lead $model) use ($isAgent) {
                 return '<small style="font-size: 10px">' . $model->getTaskInfo() . '</small>';
             },
             'format' => 'raw',
@@ -434,7 +434,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'header' => 'CheckList',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return '<small style="font-size: 10px">' . $model->getCheckListInfo() . '</small>';
             },
             'format' => 'raw',
@@ -449,7 +449,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'header' => 'Quotes',
-            'value' => function (Lead $model) use ($isAgent) {
+            'value' => static function (Lead $model) use ($isAgent) {
                 if ($model->quotesCount) {
                     if ($isAgent) {
                         return $model->quotesCount;
@@ -471,7 +471,7 @@ $lists = new ListsAccess($user->id);
         ],
         [
             'header' => 'Expert Quotes',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->quotesExpertCount ? Html::a($model->quotesExpertCount, [
                     'quotes/index',
                     "QuoteSearch[lead_id]" => $model->id
@@ -488,7 +488,7 @@ $lists = new ListsAccess($user->id);
         ],
         [
             'header' => 'Segments',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 $segmentData = [];
                 foreach ($model->leadFlightSegments as $sk => $segment) {
                     $segmentData[] = ($sk + 1) . '. <code>' . Html::a($segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination, [
@@ -514,7 +514,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'header' => 'Depart',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 foreach ($model->leadFlightSegments as $sk => $segment) {
                     return date('d-M-Y', strtotime($segment->departure));
                 }
@@ -539,7 +539,7 @@ $lists = new ListsAccess($user->id);
         [
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
             'filter' => $lists->getEmployees(true) ?: false
@@ -559,7 +559,7 @@ $lists = new ListsAccess($user->id);
         // 'created',
         [
             'attribute' => 'created',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
             },
             'format' => 'raw',
@@ -569,7 +569,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'attribute' => 'updated',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 $str = '-';
                 if ($model->updated) {
                     $str = '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</b>';
@@ -586,7 +586,7 @@ $lists = new ListsAccess($user->id);
 
         [
             'attribute' => 'l_last_action_dt',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 $str = '-';
                 if ($model->l_last_action_dt) {
                     $str = '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)) . '</b>';
@@ -697,13 +697,13 @@ $lists = new ListsAccess($user->id);
 
     <?php if ($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
-            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle' => "modal", 'data-target' => "#modalUpdate"]) ?>
+            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle' => 'modal', 'data-target' => '#modalUpdate']) ?>
         </p>
 
         <?php
 
         Modal::begin([
-            'header' => '<b>Multiple update selected Leads</b>',
+            'title' => 'Multiple update selected Leads',
             // 'toggleButton' => ['label' => 'click me'],
             'id' => 'modalUpdate'
             // 'size' => 'modal-lg',
@@ -765,7 +765,7 @@ $lists = new ListsAccess($user->id);
 
     <?php
     $ajaxUrl = Url::to([
-        "leads/ajax-reason-list"
+        'leads/ajax-reason-list'
     ]);
     $js = <<<JS
 

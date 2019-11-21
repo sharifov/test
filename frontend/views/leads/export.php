@@ -378,7 +378,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Quotes',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->quotesCount ? $model->quotesCount  : '-';
             },
             'format' => 'raw',
@@ -389,7 +389,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Expert Quotes',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->quotesExpertCount ? $model->quotesExpertCount: '-';
             },
             'format' => 'raw',
@@ -435,7 +435,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'attribute' => 'cabin',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST

@@ -39,7 +39,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Username',
             'attribute' => 'lfOwnerId',
-            'value' => function ($searchModel) {
+            'value' => static function ($searchModel) {
                 $employee = \common\models\Employee::findone($searchModel['user_id']);
                 return $employee->username;
             },
@@ -133,7 +133,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         [
             'label' => 'Follow Up Leads Assigned By',
-            'value' => function ($searchModel) {
+            'value' => static function ($searchModel) {
                 return $searchModel['followUpTotal'] - $searchModel['followUpLeadsTaken'] ?: '-';
             },
             'contentOptions' => [

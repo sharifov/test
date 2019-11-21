@@ -47,7 +47,7 @@ $select2Properties = [
             'name' => 'origin',
             'type' => Select2::class,
             'title' => 'Origin',
-            'value' => function ($segment) {
+            'value' => static function ($segment) {
                 return $segment['origin'];
             },
             'options' => function ($segment) use ($select2Properties) {
@@ -62,7 +62,7 @@ $select2Properties = [
             'name' => 'destination',
             'type' => Select2::class,
             'title' => 'Destination',
-            'value' => function ($segment) {
+            'value' => static function ($segment) {
                 return $segment['destination'];
             },
             'options' => function ($segment) use ($select2Properties) {
@@ -75,7 +75,7 @@ $select2Properties = [
             'name' => 'departure',
             'type' => DatePicker::class,
             'title' => 'Departure',
-            'value' => function ($segment) {
+            'value' => static function ($segment) {
                 return $segment['departure'] ? date('d-M-Y', strtotime($segment['departure'])) : date('d-M-Y');
             },
             'options' => [
@@ -100,7 +100,7 @@ $select2Properties = [
             'name' => 'flexibilityType',
             'type' => 'dropDownList',
             'title' => 'Flex (+/-)',
-            'value' => function ($segment) {
+            'value' => static function ($segment) {
                 return $segment['flexibilityType'];
             },
             'items' => LeadFlightSegmentHelper::flexibilityTypeList(),
@@ -113,7 +113,7 @@ $select2Properties = [
             'name' => 'flexibility',
             'type' => 'dropDownList',
             'title' => 'Flex (days)',
-            'value' => function ($segment) {
+            'value' => static function ($segment) {
                 return $segment['flexibility'];
             },
             'items' => LeadFlightSegmentHelper::flexibilityList(),

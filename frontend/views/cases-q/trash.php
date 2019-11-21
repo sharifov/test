@@ -48,7 +48,7 @@ $lists = new ListsAccess(Yii::$app->user->id);
             'cs_subject',
             [
                 'attribute' => 'cs_category',
-                'value' => function (CasesQSearch $model) {
+                'value' => static function (CasesQSearch $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
                 'filter' => CasesCategory::getList()
@@ -63,7 +63,7 @@ $lists = new ListsAccess(Yii::$app->user->id);
 			],
             [
                 'attribute' => 'cs_lead_id',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->lead ? $model->lead->uid : '';
                 },
             ],

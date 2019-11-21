@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     [
                         'attribute' => 'n_read_dt',
-                        'value' => function (\common\models\Notifications $model) {
+                        'value' => static function (\common\models\Notifications $model) {
                             return $model->n_read_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_read_dt)) : '-';
                         },
                         'format' => 'raw'
@@ -63,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     [
                         'attribute' => 'n_created_dt',
-                        'value' => function (\common\models\Notifications $model) {
+                        'value' => static function (\common\models\Notifications $model) {
                             return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_created_dt));
                         },
                         'format' => 'raw'

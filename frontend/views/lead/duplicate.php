@@ -46,7 +46,7 @@ $this->registerCssFile('/css/style-duplicate.css');
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->id;
             },
             'options' => [
@@ -57,7 +57,7 @@ $this->registerCssFile('/css/style-duplicate.css');
         [
             'attribute' => 'l_duplicate_lead_id',
             'label' => 'Origin',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',
@@ -69,7 +69,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 
         [
             'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
             },
             'format' => 'raw',
@@ -82,7 +82,7 @@ $this->registerCssFile('/css/style-duplicate.css');
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $str = Yii::$app->formatter->asRelativeTime(strtotime($model->created));
                 $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
@@ -97,7 +97,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 
         /*[
             'attribute' => 'created',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
             },
             'format' => 'raw',
@@ -109,7 +109,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             // 'attribute' => 'client_id',
             'header' => 'Origin Request',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
 
@@ -136,7 +136,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             // 'attribute' => 'client_id',
             'header' => 'Request Client Info',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
 
@@ -163,7 +163,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             // 'attribute' => 'client_id',
             'header' => 'Client',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -190,7 +190,7 @@ $this->registerCssFile('/css/style-duplicate.css');
         [
             'attribute' => 'clientTime',
             'label' => 'Client Time',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
@@ -199,7 +199,7 @@ $this->registerCssFile('/css/style-duplicate.css');
         [
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             'options' => [
@@ -332,7 +332,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 
 //        [
 //            'attribute' => 'Quotes ',
-//            'value' => function (\common\models\Lead $model) {
+//            'value' => static function (\common\models\Lead $model) {
 //                $quotes = $model->getQuoteSendInfo();
 //                return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>', ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
 //            },
@@ -341,7 +341,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 
         [
             'attribute' => 'Quotes',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->quotesCount;
                 return $cnt ?: '-';
             },
@@ -357,7 +357,7 @@ $this->registerCssFile('/css/style-duplicate.css');
         [
             //'attribute' => 'Quotes',
             'label' => 'Calls',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->getCountCalls();
                 return $cnt ?: '-';
             },
@@ -372,7 +372,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 
         [
             'label' => 'SMS',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->getCountSms();
                 return $cnt ?: '-';
             },
@@ -387,7 +387,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 
         [
             'label' => 'Emails',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->getCountEmails();
                 return $cnt ?: '-';
             },
@@ -404,7 +404,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             //'header' => 'Agent',
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $lists->getEmployees(),
@@ -413,7 +413,7 @@ $this->registerCssFile('/css/style-duplicate.css');
         /*[
             'attribute' => 'update',
             'label' => 'Last Update',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<span title="' . Yii::$app->formatter->asDatetime(strtotime($model->updated)) . '">' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</span>';
             },
             'format' => 'raw'
@@ -423,7 +423,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             'contentOptions' => [
                 'style' => 'max-width: 250px;'
             ],
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<pre>'. $model->getLastReasonFromLeadFlow()  . '</pre>';
             },
             'format' => 'raw'
@@ -437,7 +437,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             'options' => [
                 'class' => 'text-right'
             ],
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return Lead::getRating2($model->rating);
             },
             'format' => 'raw'

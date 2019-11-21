@@ -579,7 +579,7 @@ JS;
                         ],*/
                         [
                             'attribute' => 'username',
-                            'value' => function (\common\models\Employee $model) {
+                            'value' => static function (\common\models\Employee $model) {
                                 return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
                             },
                             'format' => 'raw',
@@ -590,7 +590,7 @@ JS;
                         /*[
                             //'attribute' => 'username',
                             'label' => 'Role',
-                            'value' => function (\common\models\Employee $model) {
+                            'value' => static function (\common\models\Employee $model) {
                                 $roles = $model->getRoles();
                                 return $roles ? implode(', ', $roles) : '-';
                             },
@@ -602,7 +602,7 @@ JS;
                         [
                             'attribute' => 'status',
                             'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                            'value' => function (\common\models\Employee $model) {
+                            'value' => static function (\common\models\Employee $model) {
                                 return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
                             },
                             'format' => 'html'
@@ -611,7 +611,7 @@ JS;
                         /*[
                             'label' => 'User Groups',
                             'attribute' => 'user_group_id',
-                            'value' => function (\common\models\Employee $model) {
+                            'value' => static function (\common\models\Employee $model) {
 
                                 $groups = $model->getUserGroupList();
                                 $groupsValueArr = [];
@@ -659,7 +659,7 @@ JS;
                         ],
                         [
                             'label' => 'Processing',
-                            'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            'value' => static function (\common\models\Employee $model) use ($searchModel) {
                                 $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->timeStart, $searchModel->timeEnd);
                                 /*return $cnt ? Html::a($cnt, ['lead-flow/index',
                                     'LeadFlowSearch[employee_id]' => $model->id,
@@ -674,7 +674,7 @@ JS;
                         ],
                         [
                             'label' => 'Booked',
-                            'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            'value' => static function (\common\models\Employee $model) use ($searchModel) {
                                 $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_BOOKED], $searchModel->timeStart, $searchModel->timeEnd);
                                 /*return $cnt ? Html::a($cnt, ['lead-flow/index',
                                     'LeadFlowSearch[employee_id]' => $model->id,
@@ -689,7 +689,7 @@ JS;
                         ],
                         [
                             'label' => 'Sold',
-                            'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            'value' => static function (\common\models\Employee $model) use ($searchModel) {
                                 $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_SOLD], $searchModel->timeStart, $searchModel->timeEnd);
                                 /*return $cnt ? Html::a($cnt, ['lead-flow/index',
                                     'LeadFlowSearch[employee_id]' => $model->id,
@@ -704,7 +704,7 @@ JS;
                         ],
                         [
                             'label' => 'Follow Up',
-                            'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            'value' => static function (\common\models\Employee $model) use ($searchModel) {
                                 $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->timeStart, $searchModel->timeEnd);
                                 /*return $cnt ? Html::a($cnt, ['lead-flow/index',
                                     'LeadFlowSearch[employee_id]' => $model->id,
@@ -719,7 +719,7 @@ JS;
                         ],
                         [
                             'label' => 'Trash',
-                            'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            'value' => static function (\common\models\Employee $model) use ($searchModel) {
                                 $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_TRASH], $searchModel->timeStart, $searchModel->timeEnd);
                                 /*return $cnt ? Html::a($cnt, ['lead-flow/index',
                                     'LeadFlowSearch[employee_id]' => $model->id,

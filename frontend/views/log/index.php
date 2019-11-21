@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     /*[
                         'attribute' => 'log_time',
                         'format' => 'html',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return '<small>'.date('Y-m-d H:i:s', $model->log_time).'</small>';
                         },
 

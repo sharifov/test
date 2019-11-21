@@ -54,7 +54,7 @@ HTML;
                 ],
                 [
                     'attribute' => 'message',
-                    'value' => function ($model) {
+                    'value' => static function ($model) {
                         return \yii\helpers\StringHelper::truncate($model->message, 100, '...', null, true);
                     },
                     'format' => 'ntext',

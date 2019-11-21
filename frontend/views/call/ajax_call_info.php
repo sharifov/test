@@ -26,14 +26,14 @@ $this->title = 'Call Id: ' . $model->c_id;
             'attributes' => [
                 [
                     'attribute' => 'c_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return Html::a($model->c_id, ['call/view2', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0]);
                     },
                     'format' => 'raw'
                 ],
                 [
                     'attribute' => 'c_project_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->cProject ? $model->cProject->name : '-';
                     },
                 ],
@@ -42,13 +42,13 @@ $this->title = 'Call Id: ' . $model->c_id;
                 //'c_call_type_id',
                 [
                     'attribute' => 'c_call_type_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->getCallTypeName();
                     },
                 ],
                 [
                     'attribute' => 'c_client_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return  $model->c_client_id ?: '-';
                     },
                 ],
@@ -76,7 +76,7 @@ $this->title = 'Call Id: ' . $model->c_id;
             //'c_created_user_id',
             [
                 'attribute' => 'c_created_user_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
                 },
                 'format' => 'raw'
@@ -84,14 +84,14 @@ $this->title = 'Call Id: ' . $model->c_id;
             //'c_created_dt',
             [
                 'attribute' => 'c_created_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'c_updated_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
                 },
                 'format' => 'raw'

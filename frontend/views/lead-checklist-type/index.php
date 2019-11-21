@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'lct_updated_user_id',
-                'value' => function (\common\models\LeadChecklistType $model) {
+                'value' => static function (\common\models\LeadChecklistType $model) {
                     return  $model->lctUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->lctUpdatedUser->username) : $model->lct_updated_user_id;
                 },
                 'format' => 'raw'

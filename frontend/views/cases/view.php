@@ -2,6 +2,7 @@
 
 use sales\helpers\cases\CasesViewRenderHelper;
 use yii\helpers\Html;
+use yii\bootstrap4\Modal;
 
 /**
  * @var $this yii\web\View
@@ -148,46 +149,31 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 
 </div>
 
-<style type="text/css">
-    @media screen and (min-width: 768px) {
-        .modal-dialog {
-            width: 800px; /* New width for default modal */
-        }
-        .modal-sm {
-            width: 350px; /* New width for small modal */
-        }
-    }
-    @media screen and (min-width: 992px) {
-        .modal-lg {
-            width: 80%; /* New width for large modal */
-        }
-    }
-</style>
 
 <?php
-yii\bootstrap\Modal::begin([
+Modal::begin([
     'id' => 'modalCaseSm',
-    //'headerOptions' => ['id' => 'modalCaseSmHeader'],
+    'title' => '',
     'size' => \yii\bootstrap\Modal::SIZE_SMALL,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 ?>
 
 <?php
-yii\bootstrap\Modal::end();
+Modal::end();
 ?>
 
 <?php
-yii\bootstrap\Modal::begin([
+Modal::begin([
     'id' => 'modalCase',
-    //'headerOptions' => ['id' => 'modalCaseHeader'],
+    'title' => '',
     'size' => \yii\bootstrap\Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 ?>
 
 <?php
-yii\bootstrap\Modal::end();
+Modal::end();
 ?>
 
 

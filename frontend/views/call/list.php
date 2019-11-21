@@ -129,7 +129,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'c_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_id;
                 },
                 'options' => ['style' => 'width: 100px']
@@ -142,7 +142,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'c_call_type_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->getCallTypeName();
                 },
                 'filter' => \common\models\Call::CALL_TYPE_LIST
@@ -150,7 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'c_source_type_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->getSourceName();
                 },
                 'filter' => \common\models\Call::SOURCE_LIST
@@ -160,7 +160,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'c_project_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->cProject ? $model->cProject->name : '-';
                 },
                 'filter' => $projectList
@@ -173,7 +173,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_call_status',
             [
                 'attribute' => 'c_status_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->getStatusLabel();
                 },
                 'format' => 'raw',
@@ -182,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_lead_id',
             [
                 'attribute' => 'c_lead_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->c_lead_id && $model->cLead->employee_id == Yii::$app->user->id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['target' => '_blank', 'data-pjax' => 0]) : $model->c_lead_id ?: '-';
                 },
                 'format' => 'raw'
@@ -190,7 +190,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'c_case_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->c_case_id && $model->cCase->cs_user_id == Yii::$app->user->id ? Html::a($model->c_lead_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['target' => '_blank', 'data-pjax' => 0]) : $model->c_case_id ?: '-';
                 },
                 'format' => 'raw'
@@ -198,7 +198,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             /*[
                 'attribute' => 'c_client_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->c_client_id ?: '-';
                 },
                 //'format' => 'raw'
@@ -211,7 +211,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_recording_url:url',
             /*[
                 'attribute' => 'c_recording_url',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
                 },
                 'format' => 'raw'
@@ -220,7 +220,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'c_recording_duration',
                 'label' => 'Recording',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->c_recording_url ? Html::button(gmdate('i:s', $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url]) : '-';
                 },
                 'format' => 'raw',
@@ -236,7 +236,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             /*[
                 'attribute' => 'c_created_user_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
                 },
                 'format' => 'raw'
@@ -246,7 +246,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             /*[
                 'attribute' => 'c_updated_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
                 },
                 'format' => 'raw'
@@ -254,7 +254,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'c_created_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
                 },
                 'format' => 'raw',

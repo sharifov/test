@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'attribute' => 'pending',
             'label' => 'Pending Time',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getPendingAfterCreate($model->created);
             },
             'format' => 'raw'
@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
             },
             'format' => 'raw',
@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Client Name',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Client Phones',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $phones = $model->client && $model->client->clientPhones ? '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
                 return $phones;
             },
@@ -104,7 +104,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Client Emails',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                 return $emails;
             },
@@ -117,7 +117,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Agent',
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $lists->getEmployees(),
@@ -125,7 +125,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Date of Issue',
             'attribute' => 'updated',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model['updated'];
             },
             'format' => 'datetime',

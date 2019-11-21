@@ -33,7 +33,7 @@ use yii\widgets\Pjax;
 
             [
                 'attribute' => 'c_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_id;
                 },
                 'enableSorting' => false,
@@ -47,7 +47,7 @@ use yii\widgets\Pjax;
 
             /*[
                 'attribute' => 'c_call_type_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->getCallTypeName();
                 },
                 'filter' => \common\models\Call::CALL_TYPE_LIST
@@ -58,7 +58,7 @@ use yii\widgets\Pjax;
 
             [
                 'attribute' => 'c_project_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->cProject ? $model->cProject->name : '-';
                 },
                 'enableSorting' => false
@@ -77,7 +77,7 @@ use yii\widgets\Pjax;
             //'c_call_status',
             [
                 'attribute' => 'c_call_status',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->getStatusLabel();
                 },
                 'enableSorting' => false,
@@ -87,7 +87,7 @@ use yii\widgets\Pjax;
             //'c_lead_id',
             [
                 'attribute' => 'c_lead_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw',
@@ -100,7 +100,7 @@ use yii\widgets\Pjax;
             //'c_recording_url:url',
             /*[
                 'attribute' => 'c_recording_url',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
                 },
                 'format' => 'raw'
@@ -113,7 +113,7 @@ use yii\widgets\Pjax;
 
             /*[
                 'attribute' => 'c_created_user_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
                 },
                 'format' => 'raw'
@@ -123,7 +123,7 @@ use yii\widgets\Pjax;
 
             /*[
                 'attribute' => 'c_updated_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
                 },
                 'format' => 'raw'
@@ -131,7 +131,7 @@ use yii\widgets\Pjax;
 
             [
                 'attribute' => 'c_created_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
                 },
                 'format' => 'raw',

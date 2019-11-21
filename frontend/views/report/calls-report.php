@@ -41,7 +41,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Username',
             'attribute' => 'c_created_user_id',
-            'value' => function ($searchModel) {
+            'value' => static function ($searchModel) {
                 $employee = \common\models\Employee::findone($searchModel['c_created_user_id']);
                 return $employee->username;
             },

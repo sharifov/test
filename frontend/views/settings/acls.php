@@ -94,7 +94,7 @@ $this->registerJs($js);
                 [
                     'header' => 'Active',
                     'format' => 'raw',
-                    'value' => function ($model) {
+                    'value' => static function ($model) {
                         /**
                          * @var $model GlobalAcl
                          */

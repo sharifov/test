@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return Html::a($model->id, ['lead/view', 'gid' => $model->gid, ['data-pjax' => 0, 'target' => '_blank']]);
             },
             'format' => 'raw'
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Profit',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 if ($model->getFinalProfit()) {
                     $model->totalProfit = $model->getFinalProfit();
@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         /*[
             'label' => 'Dynamic Profit',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
 
                 $quote = $model->getBookedQuote();
@@ -134,7 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Tips',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 if($model->getTotalTips() == 0) {
                     return '-';
                 }
@@ -165,7 +165,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Date of Issue',
             'attribute' => 'updated',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return $model['updated'];
             },
             'format' => 'datetime',
@@ -183,7 +183,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'Date of Departure',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 $quote = $model->getBookedQuote();
                 if (!empty($quote) && isset($quote['reservation_dump']) && !empty($quote['reservation_dump'])) {
                     $data = [];

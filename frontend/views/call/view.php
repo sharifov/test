@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_recording_sid',
                 [
                     'attribute' => 'c_call_type_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->getCallTypeName();
                     },
                 ],
@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_call_status',
                 [
                     'attribute' => 'c_status_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->getStatusName();
                     },
                 ],
@@ -59,21 +59,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_call_duration',
                 [
                     'attribute' => 'c_client_id',
-                    'value' => function (Call $model) {
+                    'value' => static function (Call $model) {
                         return  $model->c_client_id ?: '-';
                     },
                 ],
                 [
                     'label' => 'Department',
                     'attribute' => 'c_dep_id',
-                    'value' => function (Call $model) {
+                    'value' => static function (Call $model) {
                         return $model->cDep ? $model->cDep->dep_name : '-';
                     },
                 ],
                 [
                     'label' => 'UserGroups',
                     //'attribute' => 'c_dep_id',
-                    'value' => function (Call $model) {
+                    'value' => static function (Call $model) {
                         $userGroupList = [];
                         if ($model->cugUgs) {
                             foreach ($model->cugUgs as $userGroup) {
@@ -101,7 +101,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             /*[
                 'attribute' => 'c_uri',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_uri ? Html::a('Link', 'https://api.twilio.com'.$model->c_uri, ['target' => '_blank']) : '-';
                 },
                 'format' => 'raw'
@@ -111,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'c_created_user_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
                 },
                 'format' => 'raw'
@@ -119,14 +119,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_created_dt',
             [
                 'attribute' => 'c_created_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'c_updated_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
                 },
                 'format' => 'raw'
@@ -138,7 +138,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_project_id',
             [
                 'attribute' => 'c_project_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->cProject ? $model->cProject->name : '-';
                 },
                 'filter' => \common\models\Project::getList()
@@ -148,7 +148,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_is_deleted:boolean',
             [
                 'attribute' => 'c_price',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_price ? '$'.number_format($model->c_price, 5) : '-';
                 },
             ],

@@ -162,7 +162,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->id;
             },
             'visible' => ! $isAgent,
@@ -173,7 +173,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             //'attribute' => 'pending',
             'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $createdTS = strtotime($model->created);
 
                 $diffTime = time() - $createdTS;
@@ -190,7 +190,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'created',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
             },
 
@@ -217,7 +217,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Client',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -245,7 +245,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'clientTime',
             'label' => 'Client Time',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
@@ -269,7 +269,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'header' => 'Depart',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
 
@@ -292,7 +292,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'header' => 'Segments',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $segmentData = [];
@@ -318,7 +318,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Pax',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
             },
             'format' => 'raw',
@@ -334,7 +334,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'cabin',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST
@@ -345,7 +345,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->getClientTime();
             },
             'visible' => ! $isAgent,
@@ -369,7 +369,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Project',
             'attribute' => 'project_id',
             'filter' => false,
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->project ? $model->project->name : '-';
             },
          ],
@@ -377,7 +377,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'header' => 'Client time2',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->getClientTime2();
             },
             'options' => [

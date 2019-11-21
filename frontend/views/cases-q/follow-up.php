@@ -49,14 +49,14 @@ $lists = new ListsAccess(Yii::$app->user->id);
             'cs_subject',
             [
                 'attribute' => 'cs_category',
-                'value' => function (CasesQSearch $model) {
+                'value' => static function (CasesQSearch $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
                 'filter' => CasesCategory::getList()
             ],
             [
                 'attribute' => 'cs_lead_id',
-                'value' => function (CasesQSearch $model) {
+                'value' => static function (CasesQSearch $model) {
                     return $model->lead ? $model->lead->uid : '';
                 },
             ],
@@ -86,7 +86,7 @@ $lists = new ListsAccess(Yii::$app->user->id);
 			],
             [
                 'label' => 'Pending Time',
-                'value' => function (CasesQSearch $model) {
+                'value' => static function (CasesQSearch $model) {
                     $createdTS = strtotime($model->cs_created_dt);
     
                     $diffTime = time() - $createdTS;

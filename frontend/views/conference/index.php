@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cf_recording_duration',
                 'label' => 'Recording',
-                'value' => function (\common\models\Conference $model) {
+                'value' => static function (\common\models\Conference $model) {
                     return  $model->cf_recording_duration ? Html::button(gmdate('i:s', $model->cf_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->cf_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->cf_recording_url]) : '-';
                 },
                 'format' => 'raw',
@@ -117,11 +117,10 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <?php
-\yii\bootstrap\Modal::begin([
-    'header' => '<b>Call Recording</b>',
-    // 'toggleButton' => ['label' => 'click me'],
+\yii\bootstrap4\Modal::begin([
+    'title' => 'Call Recording',
     'id' => 'modalCallRecording',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE,
+    'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
 ]);
 ?>
     <div class="row">
@@ -129,7 +128,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         </div>
     </div>
-<?php \yii\bootstrap\Modal::end(); ?>
+<?php \yii\bootstrap4\Modal::end(); ?>
 
 
 <?php

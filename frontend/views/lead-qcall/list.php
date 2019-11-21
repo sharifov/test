@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'lqc_lead_id',
             [
                 'attribute' => 'lqc_lead_id',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
                     return Html::a($model->lqc_lead_id, ['lead/view', 'gid' => $model->lqcLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw'
@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'lqcLead.project_id',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
                     return $model->lqcLead->project ? '<span class="badge badge-info">' . Html::encode($model->lqcLead->project->name) . '</span>' : '-';
                 },
                 'format' => 'raw',
@@ -69,7 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'employee_id',
                 'format' => 'raw',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
                     return $model->lqcLead->employee ? '<i class="fa fa-user"></i> ' . $model->lqcLead->employee->username : '-';
                 },
                 'filter' => false //\common\models\Employee::getList()
@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'lqcLead.pending',
                 'label' => 'Pending Time',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
 
                     $createdTS = strtotime($model->lqcLead->created);
 
@@ -99,7 +99,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => 'Out Calls',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
                     $cnt = $model->lqcLead->getCountCalls(\common\models\Call::CALL_TYPE_OUT);
                     return $cnt ?: '-';
                 },
@@ -116,7 +116,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'lqc_weight',
             [
                 'attribute' => 'lqc_dt_from',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
                     return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
                 },
                 'format' => 'raw'
@@ -124,7 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'lqc_dt_to',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
                     return $model->lqc_dt_to ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_to)) : '-';
                 },
                 'format' => 'raw'
@@ -132,14 +132,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => 'Duration',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
                     return Yii::$app->formatter->asDuration(strtotime($model->lqc_dt_to) - strtotime($model->lqc_dt_from));
                 },
             ],
 
             [
                 'label' => 'Deadline',
-                'value' => function (\common\models\LeadQcall $model) {
+                'value' => static function (\common\models\LeadQcall $model) {
                     $timeTo = strtotime($model->lqc_dt_to);
                     return time() <= $timeTo ? Yii::$app->formatter->asDuration($timeTo - time()) : 'deadline';
                 },

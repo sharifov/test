@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'id',
             [
                 'attribute' => 'id',
-                'value' => function (\common\models\Sources $model) {
+                'value' => static function (\common\models\Sources $model) {
                     return $model->id;
                 },
                 'options' => ['style' => 'width: 100px']
@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'project_id',
             [
                 'attribute' => 'project_id',
-                'value' => function (\common\models\Sources $model) {
+                'value' => static function (\common\models\Sources $model) {
                     return $model->project ? $model->project->name : '-';
                 },
                 'filter' => \common\models\Project::getList()
@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'last_update',
             [
                 'attribute' => 'last_update',
-                'value' => function (\common\models\Sources $model) {
+                'value' => static function (\common\models\Sources $model) {
                     return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
                 },
                 'format' => 'raw',

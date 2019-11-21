@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'attribute' => 'clientTime',
             'label' => 'Client Time',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
@@ -182,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'attribute' => 'last_activity',
             'label' => 'Last Activity',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return Lead::getLastActivity($model->getLastActivityByNote());
             },
             'format' => 'raw'
@@ -191,7 +191,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'attribute' => 'updated',
             'label' => 'Last Activity',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<span title="'.Yii::$app->formatter->asDatetime(strtotime($model->updated)).'">'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</span>';
             },
             'format' => 'raw'

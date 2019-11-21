@@ -30,7 +30,7 @@ use yii\widgets\Pjax;
             ],
             [
                 'attribute' => 'csl_from_status',
-                'value' => function (CasesStatusLog $model) {
+                'value' => static function (CasesStatusLog $model) {
                     return CasesStatus::getLabel($model->csl_from_status); //'<span class="label label-info">' . CasesStatus::getName($model->csl_from_status) . '</span></h5>';
                 },
                 'format' => 'raw',
@@ -39,7 +39,7 @@ use yii\widgets\Pjax;
             ],
             [
                 'attribute' => 'csl_to_status',
-                'value' => function (CasesStatusLog $model) {
+                'value' => static function (CasesStatusLog $model) {
                     return CasesStatus::getLabel($model->csl_to_status); //'<span class="label label-info">' . CasesStatus::getName($model->csl_to_status) . '</span></h5>';
                 },
                 'format' => 'raw',
@@ -53,7 +53,7 @@ use yii\widgets\Pjax;
             [
                 'label' => 'Status start date',
                 'attribute' => 'csl_start_dt',
-                'value' => function (CasesStatusLog $model) {
+                'value' => static function (CasesStatusLog $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->csl_start_dt));
                 },
                 'format' => 'raw',
@@ -62,7 +62,7 @@ use yii\widgets\Pjax;
             [
                 'label' => 'Status end date',
                 'attribute' => 'csl_end_dt',
-                'value' => function (CasesStatusLog $model) {
+                'value' => static function (CasesStatusLog $model) {
                     return $model->csl_end_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->csl_end_dt)) : '';
                 },///
                 'format' => 'raw',
@@ -71,7 +71,7 @@ use yii\widgets\Pjax;
             [
                 'label' => 'Duration',
                 'attribute' => 'csl_time_duration',
-                'value' => function (CasesStatusLog $model) {
+                'value' => static function (CasesStatusLog $model) {
                     return $model->csl_time_duration > -1 ? Yii::$app->formatter->asDuration($model->csl_time_duration) : Yii::$app->formatter->asDuration(time() - strtotime($model->csl_start_dt));
                 },
                 'format' => 'raw',
@@ -80,7 +80,7 @@ use yii\widgets\Pjax;
             [
 //                'label' => 'Description',
                 'attribute' => 'csl_description',
-                'value' => function (CasesStatusLog $model) {
+                'value' => static function (CasesStatusLog $model) {
                     return nl2br(Html::encode($model->csl_description));
                 },
                 'format' => 'raw',
@@ -89,7 +89,7 @@ use yii\widgets\Pjax;
             [
                 'label' => 'Owner',
                 'attribute' => 'csl_owner_id',
-                'value' => function (CasesStatusLog $model) {
+                'value' => static function (CasesStatusLog $model) {
 
                     return $model->owner ? $model->owner->username : '';
                 },
@@ -97,7 +97,7 @@ use yii\widgets\Pjax;
             [
                 'label' => 'Created Agent',
                 'attribute' => 'csl_created_user_id',
-                'value' => function (CasesStatusLog $model) {
+                'value' => static function (CasesStatusLog $model) {
                     return $model->createdUser ? $model->createdUser->username : '';
                 },
             ],

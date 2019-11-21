@@ -36,7 +36,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         [
             'attribute' => 'project_id',
             'label' => 'Project',
-            'value' => function (\common\models\LeadFlow $model) {
+            'value' => static function (\common\models\LeadFlow $model) {
                 return $model->lead ? $model->lead->project->name : '-';
             },
             'filter' => $projectList,
@@ -44,7 +44,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         ],
         [
             'label' => 'Reason',
-            'value' => function (\common\models\LeadFlow $model) {
+            'value' => static function (\common\models\LeadFlow $model) {
             return $model->lead ? $model->lead->description : '-';
         },
         'format' => 'raw',

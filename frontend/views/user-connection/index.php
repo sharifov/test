@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'uc_user_id',
             [
                 'attribute' => 'uc_user_id',
-                'value' => function (\common\models\UserConnection $model) {
+                'value' => static function (\common\models\UserConnection $model) {
                     return  ($model->ucUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->ucUser->username) : $model->uc_user_id);
                 },
                 'format' => 'raw',
@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'uc_ip',
             [
                 'attribute' => 'uc_created_dt',
-                'value' => function (\common\models\UserConnection $model) {
+                'value' => static function (\common\models\UserConnection $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uc_created_dt));
                 },
                 'format' => 'raw',
@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => 'Duration',
-                'value' => function (\common\models\UserConnection $model) {
+                'value' => static function (\common\models\UserConnection $model) {
                     return Yii::$app->formatter->asRelativeTime(strtotime($model->uc_created_dt));
                 },
                 'format' => 'raw'

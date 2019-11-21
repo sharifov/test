@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'dpp_project_id',
             [
                 'attribute' => 'dpp_project_id',
-                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                'value' => static function (\common\models\DepartmentPhoneProject $model) {
                     return $model->dppProject ? '<span class="badge">' . Html::encode($model->dppProject->name) . '</span>' : '-';
                 },
                 'filter' => \common\models\Project::getList(true),
@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'dpp_dep_id',
-                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                'value' => static function (\common\models\DepartmentPhoneProject $model) {
                     return $model->dppDep ? $model->dppDep->dep_name : '-';
                 },
                 'filter' => \common\models\Department::getList()
@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => 'User Groups',
-                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                'value' => static function (\common\models\DepartmentPhoneProject $model) {
                     $userGroupList = [];
                     if ($model->dugUgs) {
                         foreach ($model->dugUgs as $userGroup) {
@@ -79,7 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'dpp_source_id',
-                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                'value' => static function (\common\models\DepartmentPhoneProject $model) {
                     return $model->dppSource ? $model->dppSource->name : '-';
                 },
                 'filter' => \common\models\Sources::getList(true)
@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'dpp_updated_user_id',
-                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                'value' => static function (\common\models\DepartmentPhoneProject $model) {
                     return $model->dpp_updated_user_id ? '<i class="fa fa-user"></i> ' .Html::encode($model->dppUpdatedUser->username) : $model->dpp_updated_user_id;
                 },
                 'format' => 'raw',
@@ -100,7 +100,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'dep_updated_dt',
-                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                'value' => static function (\common\models\DepartmentPhoneProject $model) {
                     return $model->dpp_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dpp_updated_dt)) : '-';
                 },
                 'format' => 'raw'

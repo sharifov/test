@@ -52,7 +52,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
                 [
                     'attribute' => 'username',
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
                         return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
                     },
                     'format' => 'raw'
@@ -61,7 +61,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 [
                     //'attribute' => 'username',
                     'label' => 'Role',
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
                         $roles = $model->getRoles();
                         return $roles ? implode(', ', $roles) : '-';
                     },
@@ -72,7 +72,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 [
                     'attribute' => 'status',
                     'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
                         return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
                     },
                     'format' => 'raw'
@@ -83,7 +83,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                     'attribute' => 'online',
                     //'filter' => false,
                     'filter' => [1 => 'Online', 2 => 'Offline'],
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
                         return $model->isOnline() ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>';
                     },
                     'format' => 'raw'
@@ -93,7 +93,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                     'label' => 'Call Ready',
                     'filter' => false,
                     //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
                         return $model->isCallStatusReady() ? '<span class="label label-success">Ready</span>' : '<span class="label label-warning">Occupied</span>';
                     },
                     'format' => 'raw'
@@ -103,7 +103,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                     'label' => 'Last Call Status',
                     'filter' => false,
                     //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
 
                         $call = \common\models\Call::find()->where(['c_created_user_id' => $model->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
@@ -116,7 +116,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 [
                     'label' => 'User Groups',
                     'attribute' => 'user_group_id',
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
 
                         $groups = $model->getUserGroupList();
                         $groupsValueArr = [];
@@ -138,7 +138,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 /*[
                     'label' => 'Projects access',
                     'attribute' => 'user_project_id',
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
 
                         $projects = $model->projects;
                         $projectsValueArr = [];
@@ -160,7 +160,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 [
                     'label' => 'Projects Params',
                     'attribute' => 'user_params_project_id',
-                    'value' => function (\common\models\Employee $model) {
+                    'value' => static function (\common\models\Employee $model) {
 
                         $str = '<small><table class="table table-bordered">';
 

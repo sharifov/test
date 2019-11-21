@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             [
                 'attribute' => 'lc_type_id',
-                'value' => function (\common\models\LeadChecklist $model) {
+                'value' => static function (\common\models\LeadChecklist $model) {
                     return  $model->lcType ? $model->lcType->lct_name : $model->lc_type_id;
                 },
             ],
@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'lc_user_id',
-                'value' => function (\common\models\LeadChecklist $model) {
+                'value' => static function (\common\models\LeadChecklist $model) {
                     return  $model->lcUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->lcUser->username) : $model->lc_user_id;
                 },
                 'format' => 'raw'

@@ -25,7 +25,7 @@ echo GridView::widget([
 		[
 			'header' => 'Phones',
 			'attribute' => 'client_phone',
-			'value' => function (\common\models\Client $model) {
+			'value' => static function (\common\models\Client $model) {
 
 				$phones = $model->clientPhones;
 				$data = [];
@@ -45,7 +45,7 @@ echo GridView::widget([
 		[
 			'header' => 'Emails',
 			'attribute' => 'client_email',
-			'value' => function (\common\models\Client $model) {
+			'value' => static function (\common\models\Client $model) {
 
 				$emails = $model->clientEmails;
 				$data = [];
@@ -64,7 +64,7 @@ echo GridView::widget([
 
 		[
 			'header' => 'Leads',
-			'value' => function (\common\models\Client $model) {
+			'value' => static function (\common\models\Client $model) {
 
 				$leads = $model->leads;
 				$data = [];
@@ -87,7 +87,7 @@ echo GridView::widget([
 
 		[
 			'attribute' => 'created',
-			'value' => function (\common\models\Client $model) {
+			'value' => static function (\common\models\Client $model) {
 				return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
 			},
 			'format' => 'html',

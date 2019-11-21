@@ -173,7 +173,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                         [
                             'attribute' => 'l_duplicate_lead_id',
                             'label' => 'Duplicate from',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                             },
                             'format' => 'raw',
@@ -502,10 +502,10 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
 
 <?php
-yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modal-ip-Header'],
+yii\bootstrap4\Modal::begin([
     'id' => 'modal-ip',
     'size' => 'modal-lg',
+    'title' => '',
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 
@@ -518,12 +518,12 @@ if($model->request_ip_detail){
         echo '</pre>';
     }
 }
-yii\bootstrap\Modal::end();
+yii\bootstrap4\Modal::end();
 
 
 $jsCode = <<<JS
     $(document).on('click', '#btn_show_modal', function(){
-        $('#modal-ip-Header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modal-ip-label').html($(this).attr('title'));
         $('#modal-ip').modal('show');
         return false;
     });

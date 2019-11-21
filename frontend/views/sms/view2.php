@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 [
                     'attribute' => 's_type_id',
-                    'value' => function (\common\models\Sms $model) {
+                    'value' => static function (\common\models\Sms $model) {
                         return $model->getTypeName();
                     },
                     'filter' => \common\models\Sms::FILTER_TYPE_LIST
@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 [
                     'attribute' => 's_lead_id',
-                    'value' => function (\common\models\Sms $model) {
+                    'value' => static function (\common\models\Sms $model) {
                         return Html::a($model->s_lead_id, ['lead/view', 'gid' => $model->sLead->gid], ['target' => '_blank']);
                     },
                     'format' => 'raw',
@@ -55,20 +55,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'s_project_id',
                 [
                     'attribute' => 's_project_id',
-                    'value' => function (\common\models\Sms $model) {
+                    'value' => static function (\common\models\Sms $model) {
                         return $model->sProject ? $model->sProject->name : '-';
                     },
                 ],
 
                 [
                     'attribute' => 's_phone_from',
-                    'value' => function (\common\models\Sms $model) {
+                    'value' => static function (\common\models\Sms $model) {
                         return $model->s_phone_from;
                     },
                 ],
                 [
                     'attribute' => 's_phone_to',
-                    'value' => function (\common\models\Sms $model) {
+                    'value' => static function (\common\models\Sms $model) {
                         return $model->s_phone_to;
                     },
                 ],
@@ -92,7 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'s_language_id',
             [
                 'attribute' => 's_language_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->s_language_id;
                 },
             ],
@@ -103,7 +103,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'s_priority',
             [
                 'attribute' => 's_status_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->getStatusName();
                 },
             ],
@@ -129,14 +129,14 @@ $this->params['breadcrumbs'][] = $this->title;
             's_updated_dt',*/
             /*[
                 'attribute' => 'e_updated_user_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return ($model->eUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eUpdatedUser->username) : $model->e_updated_user_id);
                 },
                 'format' => 'raw'
             ],*/
             /*[
                 'attribute' => 's_updated_dt',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_updated_dt));
                 },
                 'format' => 'raw'
@@ -144,14 +144,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 's_created_user_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 's_created_dt',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_created_dt));
                 },
                 'format' => 'raw'

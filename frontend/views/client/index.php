@@ -162,15 +162,13 @@ $this->params['breadcrumbs'][] = $this->title;
     </style>
 
 <?php
-yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modalClientHeader'],
-    //'bodyOptions' => ['id' => 'modalClientContent'],
+yii\bootstrap4\Modal::begin([
     'id' => 'modalClient',
-    'size' => 'modal-lg',
+    'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 echo "<div id='modalClientContent'></div>";
-yii\bootstrap\Modal::end();
+yii\bootstrap4\Modal::end();
 
 
 
@@ -180,7 +178,7 @@ $jsCode = <<<JS
         //e.preventDefault();
         $('#modalClient').modal('show').find('#modalClientContent').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
 
-        $('#modalClientHeader').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h4>');
+        $('#modalClient-label').html($(this).attr('title'));
         $.get($(this).attr('href'), function(data) {
           $('#modalClient').find('#modalClientContent').html(data);
         });

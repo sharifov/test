@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cs_gid',
             [
                 'attribute' => 'cs_project_id',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->project ? $model->project->name : '';
                 },
 //                'filter' => Project::getList()
@@ -40,20 +40,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'cs_subject',
             [
                 'attribute' => 'cs_category',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
 //                'filter' => CasesCategory::getList()
             ],
             [
                 'attribute' => 'cs_lead_id',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->lead ? $model->lead->uid : '';
                 },
             ],
             [
                 'attribute' => 'cs_dep_id',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->department ? $model->department->dep_name : '';
                 },
 //                'filter' => Department::getList()
@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cs_created_dt',
             [
                 'label' => 'Pending Time',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     $createdTS = strtotime($model->cs_created_dt);
     
                     $diffTime = time() - $createdTS;
@@ -85,14 +85,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Agent',
                 'format' => 'raw',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->owner ? '<i class="fa fa-user"></i> ' . $model->owner->username : '-';
                 },
             ],
             [
                 'header' => 'Last Action',
                 'format' => 'raw',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     $createdTS = strtotime($model->cs_updated_dt);
     
                     $diffTime = time() - $createdTS;

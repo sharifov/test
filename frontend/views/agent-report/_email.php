@@ -49,7 +49,7 @@ $this->registerJs($js);?>
         ],
         [
             'label' => 'Message',
-            'value' => function (\common\models\Email $model) {
+            'value' => static function (\common\models\Email $model) {
                 return '<a class="chat__details" href="#" data-id="'.$model->e_id.'"><i class="fa fa-search-plus"></i> '.$model->e_email_subject.'</a>';
                 return $model->eProject ? $model->eProject->name : '-';
             },
@@ -58,7 +58,7 @@ $this->registerJs($js);?>
         [
             'attribute' => 'e_project_id',
             'label' => 'Project',
-            'value' => function (\common\models\Email $model) {
+            'value' => static function (\common\models\Email $model) {
                 return $model->eProject ? $model->eProject->name : '-';
             },
             'filter' => $projectList,

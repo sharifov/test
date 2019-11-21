@@ -35,20 +35,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'etp_hidden:boolean',
             [
                 'attribute' => 'etp_dep_id',
-                'value' => function (\common\models\EmailTemplateType $model) {
+                'value' => static function (\common\models\EmailTemplateType $model) {
                     return $model->etpDep ? $model->etpDep->dep_name : '-';
                 },
             ],
             [
                 'attribute' => 'etp_updated_user_id',
-                'value' => function (\common\models\EmailTemplateType $model) {
+                'value' => static function (\common\models\EmailTemplateType $model) {
                     return ($model->etpUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->etpUpdatedUser->username) : $model->etp_updated_user_id);
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'etp_updated_dt',
-                'value' => function (\common\models\EmailTemplateType $model) {
+                'value' => static function (\common\models\EmailTemplateType $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->etp_updated_dt));
                 },
                 'format' => 'raw'
@@ -56,14 +56,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'etp_created_user_id',
-                'value' => function (\common\models\EmailTemplateType $model) {
+                'value' => static function (\common\models\EmailTemplateType $model) {
                     return  ($model->etpCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->etpCreatedUser->username) : $model->etp_created_user_id);
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'etp_created_dt',
-                'value' => function (\common\models\EmailTemplateType $model) {
+                'value' => static function (\common\models\EmailTemplateType $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->etp_created_dt));
                 },
                 'format' => 'raw'

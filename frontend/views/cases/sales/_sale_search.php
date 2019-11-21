@@ -66,7 +66,7 @@ use yii\widgets\Pjax;
                     // ['class' => 'yii\grid\SerialColumn'],
                     [
                         'attribute' => 'sale_id',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['saleId'] ?? '-';
                         },
                         'format' => 'raw',
@@ -81,7 +81,7 @@ use yii\widgets\Pjax;
 
                     [
                         'label' => 'Project',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['project'] ? '<span class="badge badge-info">'.Html::encode($model['project']).'</span>': '-';
                         },
                         'format' => 'raw'
@@ -89,20 +89,20 @@ use yii\widgets\Pjax;
 
                     /*[
                         'label' => 'Air Routing Id',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['airRoutingId'] ?: '-';
                         },
                     ],*/
                     [
                         'label' => 'Confirmation Number',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['confirmationNumber'] ?: '-';
                         },
                     ],
 
                     [
                         'label' => 'Status',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['saleStatus'] ?: '-';
                         },
                     ],
@@ -111,7 +111,7 @@ use yii\widgets\Pjax;
 
                     [
                         'label' => 'Trips',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             $tripArr = [];
                             if(isset($model['requestDetail']['trips'])) {
                                 foreach ($model['requestDetail']['trips'] as $trip) {
@@ -125,21 +125,21 @@ use yii\widgets\Pjax;
 
                     [
                         'label' => 'PNR Number',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['pnr'] ?: '-';
                         },
                     ],
 
                     [
                         'label' => 'Pax',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return isset($model['requestDetail']['passengersCnt']) ? $model['requestDetail']['passengersCnt']: '-';
                         },
                     ],
 
                     [
                         'label' => 'created',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['created'] ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created'])) : '-';
                         },
                         'format' => 'raw'

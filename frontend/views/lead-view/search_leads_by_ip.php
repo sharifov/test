@@ -45,7 +45,7 @@ echo GridView::widget([
         ],
         [
             'attribute' => 'status',
-            'value' => function (Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->getStatusName(true);
             },
             'format' => 'raw',

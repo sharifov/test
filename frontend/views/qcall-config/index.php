@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'qc_status_id',
             [
                 'attribute' => 'qc_status_id',
-                'value' => function (\common\models\QcallConfig $model) {
+                'value' => static function (\common\models\QcallConfig $model) {
                     return  \common\models\Lead::getStatus($model->qc_status_id);
                 },
                 'format' => 'raw',
@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 //            [
 //                'attribute' => 'qc_created_user_id',
-//                'value' => function (\common\models\QcallConfig $model) {
+//                'value' => static function (\common\models\QcallConfig $model) {
 //                    return  $model->qcCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->qcCreatedUser->username) : $model->qc_created_user_id;
 //                },
 //                'format' => 'raw',
@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'qc_updated_user_id',
-                'value' => function (\common\models\QcallConfig $model) {
+                'value' => static function (\common\models\QcallConfig $model) {
                     return  $model->qcUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->qcUpdatedUser->username) : $model->qc_updated_user_id;
                 },
                 'format' => 'raw',
@@ -63,14 +63,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_created_dt',
 //            [
 //                'attribute' => 'qc_created_dt',
-//                'value' => function (\common\models\QcallConfig $model) {
+//                'value' => static function (\common\models\QcallConfig $model) {
 //                    return $model->qc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->qc_created_dt)) : '-';
 //                },
 //                'format' => 'raw'
 //            ],
             [
                 'attribute' => 'qc_updated_dt',
-                'value' => function (\common\models\QcallConfig $model) {
+                'value' => static function (\common\models\QcallConfig $model) {
                     return $model->qc_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->qc_updated_dt)) : '-';
                 },
                 'format' => 'raw'

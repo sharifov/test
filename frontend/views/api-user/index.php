@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'au_enabled:boolean',
                     [
                         'attribute' => 'au_updated_dt',
-                        'value' => function (\common\models\ApiUser $model) {
+                        'value' => static function (\common\models\ApiUser $model) {
                             return $model->au_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->au_updated_dt)) : '-';
                         },
                         'format' => 'raw',

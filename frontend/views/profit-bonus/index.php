@@ -36,7 +36,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             [
                 'header' => 'Agent',
                 'attribute' => 'pb_user_id',
-                'value' => function (\common\models\ProfitBonus $model) {
+                'value' => static function (\common\models\ProfitBonus $model) {
                     return $model->pbUser ? '<i class="fa fa-user"></i> ' . $model->pbUser->username : '-';
                 },
                 'format' => 'raw',

@@ -472,7 +472,7 @@ $duration = 10;
 
                                                 /*[
                                                     'label' => 'Segments',
-                                                    'value' => function (\common\models\Lead $model) {
+                                                    'value' => static function (\common\models\Lead $model) {
 
                                                         $segments = $model->leadFlightSegments;
                                                         $segmentData = [];
@@ -549,7 +549,7 @@ $duration = 10;
 
                                                 /*[
                                                     'label' => 'Pax',
-                                                    'value' => function (\common\models\Lead $model) {
+                                                    'value' => static function (\common\models\Lead $model) {
                                                         return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
                                                     },
                                                     'format' => 'raw',
@@ -566,7 +566,7 @@ $duration = 10;
                                                 [
                                                     //'attribute' => 'pending',
                                                     'label' => 'Pending Time',
-                                                    'value' => function (\common\models\Lead $model) {
+                                                    'value' => static function (\common\models\Lead $model) {
                                                         $createdTS = strtotime($model->created);
 
                                                         $diffTime = time() - $createdTS;
@@ -623,7 +623,7 @@ $duration = 10;
                                             //'c_call_status',
                                             [
                                                 'attribute' => 'c_call_status',
-                                                'value' => function (\common\models\Call $model) {
+                                                'value' => static function (\common\models\Call $model) {
                                                     return $model->getStatusLabel();
                                                 },
                                                 'format' => 'raw'
@@ -633,14 +633,14 @@ $duration = 10;
                                             //'c_call_type_id',
                                             [
                                                 'attribute' => 'c_call_type_id',
-                                                'value' => function (\common\models\Call $model) {
+                                                'value' => static function (\common\models\Call $model) {
                                                     return $model->getCallTypeName();
                                                 },
                                             ],
                                             'c_from',
                                             [
                                                 'label' => 'Client Time',
-                                                'value' => function (\common\models\Call $model) {
+                                                'value' => static function (\common\models\Call $model) {
                                                     return $model->cLead ? ClientTimeFormatter::format($model->cLead->getClientTime2(), $model->cLead->offset_gmt) : '';
                                                 },
                                                 'format' => 'raw'
@@ -659,35 +659,35 @@ $duration = 10;
                                             //'c_call_duration',
                                             [
                                                 'attribute' => 'c_project_id',
-                                                'value' => function (\common\models\Call $model) {
+                                                'value' => static function (\common\models\Call $model) {
                                                     return $model->cProject ? '<span class="badge badge-info">'.$model->cProject->name .'</span>' : '-';
                                                 },
                                                 'format' => 'raw'
                                             ],
                                             /*[
                                                 'attribute' => 'c_lead_id',
-                                                'value' => function (\common\models\Call $model) {
+                                                'value' => static function (\common\models\Call $model) {
                                                     return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank']) : '';
                                                 },
                                                 'format' => 'raw'
                                             ],*/
                                             [
                                                 'attribute' => 'c_created_user_id',
-                                                'value' => function (\common\models\Call $model) {
+                                                'value' => static function (\common\models\Call $model) {
                                                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
                                                 },
                                                 'format' => 'raw'
                                             ],
                                             [
                                                 'attribute' => 'c_created_dt',
-                                                'value' => function (\common\models\Call $model) {
+                                                'value' => static function (\common\models\Call $model) {
                                                     return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
                                                 },
                                                 'format' => 'raw'
                                             ],
                                             /*[
                                                 'attribute' => 'c_updated_dt',
-                                                'value' => function (\common\models\Call $model) {
+                                                'value' => static function (\common\models\Call $model) {
                                                     return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
                                                 },
                                                 'format' => 'raw'
@@ -772,7 +772,7 @@ $duration = 10;
                 //['class' => 'yii\grid\SerialColumn'],
                 [
                     'attribute' => 'c_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->c_id;
                     },
                     'options' => ['style' => 'width: 100px']
@@ -782,14 +782,14 @@ $duration = 10;
                 //'c_call_sid',
                 /*[
                     'attribute' => 'c_call_type_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->getCallTypeName();
                     },
                     'filter' => \common\models\Call::CALL_TYPE_LIST
                 ],*/
                 [
                     'attribute' => 'c_project_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->cProject ? '<span class="badge badge-info">'.Html::encode($model->cProject->name).'</span>' : '-';
                     },
                     'format' => 'raw',
@@ -797,7 +797,7 @@ $duration = 10;
                 ],
                 [
                     'attribute' => 'c_lead_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return  $model->c_lead_id; //$model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['target' => '_blank', 'data-pjax' => 0]) : '-';
                     },
                     'format' => 'raw'
@@ -806,7 +806,7 @@ $duration = 10;
                 'c_to',
                 [
                     'attribute' => 'c_status_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->getStatusLabel();
                     },
                     'format' => 'raw',
@@ -817,7 +817,7 @@ $duration = 10;
                 'c_call_duration',
                 [
                     'attribute' => 'c_recording_url',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return  $model->c_recording_url ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
                     },
                     'format' => 'raw'
@@ -825,14 +825,14 @@ $duration = 10;
                 'c_recording_duration',
                 /*[
                     'attribute' => 'c_created_user_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
                     },
                     'format' => 'raw'
                 ],
                 [
                     'attribute' => 'c_updated_dt',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
                     },
                     'format' => 'raw'
@@ -840,7 +840,7 @@ $duration = 10;
 
                 [
                     'attribute' => 'c_created_dt',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
                     },
                     'format' => 'raw'
@@ -871,7 +871,7 @@ $duration = 10;
             [
                 'attribute' => 'id',
                 'label' => 'Lead ID',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return $model->id;
                 },
                 //'visible' => ! $isAgent,
@@ -881,7 +881,7 @@ $duration = 10;
             ],
             [
                 'label' => 'Pending Time',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     $createdTS = strtotime($model->created);
 
                     $diffTime = time() - $createdTS;
@@ -898,7 +898,7 @@ $duration = 10;
 
             [
                 'attribute' => 'created',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
 
@@ -913,7 +913,7 @@ $duration = 10;
             [
                 'header' => 'Client',
                 'format' => 'raw',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
 
                     if ($model->client) {
                         $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -941,7 +941,7 @@ $duration = 10;
         [
             'attribute' => 'clientTime',
             'label' => 'Client Time',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
@@ -965,7 +965,7 @@ $duration = 10;
 
             [
                 'header' => 'Depart',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
 
                     $segments = $model->leadFlightSegments;
 
@@ -988,7 +988,7 @@ $duration = 10;
 
             [
                 'header' => 'Segments',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
 
                     $segments = $model->leadFlightSegments;
                     $segmentData = [];
@@ -1014,7 +1014,7 @@ $duration = 10;
 
             [
                 'label' => 'Pax',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
                 },
                 'format' => 'raw',
@@ -1030,7 +1030,7 @@ $duration = 10;
 
             [
                 'attribute' => 'cabin',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return \common\models\Lead::getCabin($model->cabin) ?? '-';
                 },
                 'filter' => false //\common\models\Lead::CABIN_LIST
@@ -1041,7 +1041,7 @@ $duration = 10;
             /*[
                 'header' => 'Client time',
                 'format' => 'raw',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return $model->getClientTime();
                 },
                 'visible' => ! $isAgent,
@@ -1074,14 +1074,14 @@ $duration = 10;
                 'header' => 'Project',
                 'attribute' => 'project_id',
                 'filter' => false,
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return $model->project ? $model->project->name : '-';
                 },
             ],
 
             [
                 'attribute' => 'status',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return $model->getStatusLabel(); //Lead::STATUS_LIST[$model->status] ?? '-';
                 },
                 'filter' => false,
@@ -1092,7 +1092,7 @@ $duration = 10;
 
             [
                 'attribute' => 'l_call_status_id',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return Lead::CALL_STATUS_LIST[$model->l_call_status_id] ?? '-';
                 },
                 'filter' => Lead::CALL_STATUS_LIST
@@ -1100,14 +1100,14 @@ $duration = 10;
 
             [
                 'attribute' => 'request_ip',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return $model->request_ip;
                 },
             ],
 
             [
                 'attribute' => 'l_pending_delay_dt',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                     return $model->l_pending_delay_dt ? Yii::$app->formatter->asDatetime(strtotime($model->l_pending_delay_dt)) : '-';
                 },
             ],

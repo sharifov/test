@@ -105,7 +105,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             [
                 'attribute' => 's_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->s_id;
                 },
                 'options' => ['style' => 'width: 100px']
@@ -132,7 +132,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             [
                 'attribute' => 's_type_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->getTypeName();
                 },
                 'filter' => \common\models\Sms::TYPE_LIST
@@ -140,7 +140,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             [
                 'attribute' => 's_status_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->getStatusName();
                 },
                 'filter' => \common\models\Sms::STATUS_LIST
@@ -148,7 +148,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             [
                 'attribute' => 's_project_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->sProject ? $model->sProject->name : '-';
                 },
                 'filter' => $projectList
@@ -156,7 +156,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             [
                 'attribute' => 's_lead_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->s_lead_id ? Html::a($model->s_lead_id, ['lead/view', 'gid' => $model->sLead->gid], ['target' => '_blank']) : '-';
                 },
                 'format' => 'raw',
@@ -174,7 +174,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             [
                 'label' => 'Segments',
                 'attribute' => 's_tw_num_segments',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->s_tw_num_segments;
                 },
                 'options' => ['style' => 'width: 100px']
@@ -185,7 +185,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             //'s_language_id',
             /*[
                 'attribute' => 's_language_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->s_language_id;
                 },
                 'filter' => \lajax\translatemanager\models\Language::getLanguageNames()
@@ -194,7 +194,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             [
                 'label' => 'Comm Id',
                 'attribute' => 's_communication_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->s_communication_id;
                 },
                 'options' => ['style' => 'width: 100px']
@@ -225,14 +225,14 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             's_updated_dt',*/
             /*[
                 'attribute' => 'e_updated_user_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return ($model->eUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eUpdatedUser->username) : $model->e_updated_user_id);
                 },
                 'format' => 'raw'
             ],*/
             /*[
                 'attribute' => 's_updated_dt',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_updated_dt));
                 },
                 'format' => 'raw'
@@ -240,7 +240,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             [
                 'attribute' => 's_created_user_id',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
                 },
                 'format' => 'raw',
@@ -248,7 +248,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
             [
                 'attribute' => 's_created_dt',
-                'value' => function (\common\models\Sms $model) {
+                'value' => static function (\common\models\Sms $model) {
                     return $model->s_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
                 },
                 'format' => 'raw',
