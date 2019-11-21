@@ -67,9 +67,9 @@ $this->title = 'Emails Report';
 
 <div class="">
     <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
-    <div class="panel panel-default">
-        <div class="panel-heading"><i class="fa fa-bar-chart"></i> Emails Chart</div>
-        <div class="panel-body">
+    <div class="card card-default">
+        <div class="card-header"><i class="fa fa-bar-chart"></i> Emails Chart</div>
+        <div class="card-body">
             <div class="row">
                 <div class="col-md-12 col-sm-6 col-xs-12">
                     <div class="x_panel">

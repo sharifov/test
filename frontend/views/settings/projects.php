@@ -44,9 +44,9 @@ JS;
 $this->registerJs($js);
 ?>
 
-<div class="panel panel-default">
-    <div class="panel-heading">Projects</div>
-    <div class="panel-body">
+<div class="card card-default">
+    <div class="card-header">Projects</div>
+    <div class="card-body">
         <?php if (Yii::$app->user->identity->canRole('admin')) : ?>
             <div class="mb-20">
 

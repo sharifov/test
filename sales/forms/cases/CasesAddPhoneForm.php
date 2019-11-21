@@ -4,6 +4,8 @@
 namespace sales\forms\cases;
 
 
+use sales\services\client\InternalPhoneException;
+use sales\services\client\InternalPhoneGuard;
 use yii\base\Model;
 use sales\entities\cases\Cases;
 use borales\extensions\phoneInput\PhoneInputValidator;
@@ -32,8 +34,19 @@ class CasesAddPhoneForm extends Model
         return [
             ['phone', 'required'],
             [['phone'], PhoneInputValidator::className()],
+			['phone', 'internalPhoneValidate']
         ];
     }
+
+	public function internalPhoneValidate($attribute): void
+	{
+		try {
+			$guard = \Yii::createObject(InternalPhoneGuard::class);
+			$guard->guard($this->phone);
+		} catch (InternalPhoneException $e) {
+			$this->addError($attribute, $e->getMessage());
+		}
+	}
 
     /**
      * @return array

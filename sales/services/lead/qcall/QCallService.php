@@ -176,7 +176,7 @@ class QCallService
         $qCall->updateReservationTime(new \DateTime('now', new \DateTimeZone('UTC')));
         $qCall->updateInterval(new Interval(
             (new \DateTimeImmutable($qCall->lqc_dt_from))->add(new \DateInterval('PT' . $minutes . 'M')),
-            (new \DateTimeImmutable($qCall->lqc_dt_to))->add(new \DateInterval('PT' . $minutes . 'M'))
+            new \DateTimeImmutable($qCall->lqc_dt_to)
         ));
         $this->leadQcallRepository->save($qCall);
     }

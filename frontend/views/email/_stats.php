@@ -43,7 +43,7 @@ if(!$mailList || !is_array($mailList)) {
 
         <div class="animated flipInY col-md-2 col-sm-2 col-xs-12">
             <div class="tile-stats">
-                <div class="icon"><i class="fa fa-envelope-open"></i></div>
+                <div class="icon"><i class="fa fa-envelope-o"></i></div>
                 <div class="count">
                     <?=\common\models\Email::find()->where(['or', ['e_email_to' => $mailList], ['e_email_from' => $mailList]])
                         ->andWhere(['e_type_id' => \common\models\Email::TYPE_OUTBOX, 'DATE(e_created_dt)' => new \yii\db\Expression('DATE(NOW())'), 'e_is_deleted' => false])->count()?>

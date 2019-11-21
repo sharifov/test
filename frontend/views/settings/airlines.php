@@ -28,9 +28,9 @@ HTML;
 
 ?>
 
-<div class="panel panel-default">
-    <div class="panel-heading">Airlines</div>
-    <div class="panel-body">
+<div class="card card-default">
+    <div class="card-header">Airlines</div>
+    <div class="card-body">
         <?php if (Yii::$app->user->identity->canRole('admin')) : ?>
             <div class="mb-20">
                 <?= Html::a('Sync Airlines', '#', [

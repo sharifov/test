@@ -109,7 +109,7 @@ use \kartik\form\ActiveForm;
                     ])->label('Created DateTime Range');
                     ?>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="col-md-6">
                         <?php echo $form->field($model, 'call_duration_from')->input('number', ['min' => 0]) ?>
                     </div>

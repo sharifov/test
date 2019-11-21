@@ -40,7 +40,7 @@ use yii\helpers\VarDumper;
                         'inlineSettings' => [
                             'templateBefore' => '<div class="editable-pannel">{loading}',
                             'templateAfter' => '{buttons}{close}</div>'],
-                        'options' => ['class'=>'form-control','style'=>'width:50px;', 'placeholder'=>'Enter extra markup','resetButton' => '<i class="fas fa-ban"></i>']
+                        'options' => ['class'=>'form-control','style'=>'width:50px;', 'placeholder'=>'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>']
                     ]);?>
                 <?php else:?>
                 	<?= number_format($price['extra_mark_up'] / $price['tickets'], 2)?>

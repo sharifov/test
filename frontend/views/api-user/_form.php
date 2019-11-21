@@ -10,7 +10,7 @@ use yii\widgets\ActiveForm;
 
 <div class="api-user-form">
 
-    <div class="panel panel-default">
+    <div class="card card-default">
 
     <div class="panel-body panel-collapse collapse in">
         <?php $form = ActiveForm::begin(); ?>

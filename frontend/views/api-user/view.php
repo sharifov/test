@@ -14,7 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="panel panel-default">
+    <div class="card card-default">
         <div class="panel-body panel-collapse collapse in">
             <p>
                 <?= Html::a('Update', ['update', 'id' => $model->au_id], ['class' => 'btn btn-primary']) ?>

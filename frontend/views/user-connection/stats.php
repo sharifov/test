@@ -24,9 +24,9 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
 
 ?>
-<div class="panel panel-default">
-    <div class="panel-heading">Users Stats</div>
-    <div class="panel-body">
+<div class="card card-default">
+    <div class="card-header">Users Stats</div>
+    <div class="card-body">
         <div class="row mb-20">
             <?/*<div class="col-md-6">
                 <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Create new User', 'create', [

@@ -59,7 +59,7 @@ exit;
         </div>
     </div>
     <div id="main-container" class="container">
-        <?= \yii\widgets\Breadcrumbs::widget([
+        <?= \yii\bootstrap4\Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
         <?= Alert::widget() ?>

@@ -15,7 +15,7 @@ use common\models\EmployeeActivity;
 <?php if (true) :
     $pending = EmployeeActivity::getEmployeeLastActivity($model->id);
     ?>
-    <div class="panel panel-default">
+    <div class="card card-default">
         <div class="panel-heading collapsing-heading">
             <?php $text = sprintf('Last Activities %s', !empty($pending) ? sprintf('(Active %s ago)', $pending) : ''); ?>
             <?= Html::a($text . ' <i class="collapsing-heading__arrow"></i>', '#activity-info', [

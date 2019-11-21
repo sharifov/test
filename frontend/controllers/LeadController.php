@@ -109,7 +109,7 @@ class LeadController extends FController
 //            if (in_array($action->id, ['create'])) {
 //                //Yii::$app->setLayoutPath('@frontend/views/layouts');
 //                //$this->layout = 'sale';
-//                $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
+//                $this->layout = '@app/themes/gentelella_v2/views/layouts/main_lead';
 //            }
 //            return true;
 //        }
@@ -519,7 +519,7 @@ class LeadController extends FController
                     $data['origin'] = '';
 
 
-                    //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $data, 'ru-RU');
+                    //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $data, 'ru-RU');
                     //$mailTypes = $communication->mailTypes(7);
 
                     $content_data['email_body_html'] = $comForm->c_email_message;
@@ -560,7 +560,7 @@ class LeadController extends FController
                         $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
 
                         $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
-                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
 
                         //VarDumper::dump($content_data, 10 , true); exit;

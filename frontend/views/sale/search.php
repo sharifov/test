@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php
     //if(Yii::$app->request->isAjax) {
-    echo \yiister\gentelella\widgets\FlashAlert::widget();
+    echo \frontend\themes\gentelella_v2\widgets\FlashAlert::widget();
     //}
 
     echo $this->render('_search', [

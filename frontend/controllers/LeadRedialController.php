@@ -6,19 +6,25 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
+use frontend\widgets\multipleUpdate\redial\MultipleUpdateForm;
 use sales\access\ListsAccess;
 use sales\guards\lead\TakeGuard;
 use sales\services\lead\LeadRedialService;
+use frontend\widgets\multipleUpdate\redial\MultipleUpdateService;
 use Yii;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * Class LeadRedialController
  *
  * @property LeadRedialService $leadRedialService
  * @property TakeGuard $takeGuard
+ * @property MultipleUpdateService $multipleUpdate
  */
 class LeadRedialController extends FController
 {
@@ -42,17 +48,20 @@ class LeadRedialController extends FController
 
     private $leadRedialService;
     private $takeGuard;
+    private $multipleUpdate;
 
     public function __construct(
         $id,
         $module,
         LeadRedialService $leadRedialService,
         TakeGuard $takeGuard,
+        MultipleUpdateService $multipleUpdate,
         $config = []
     )
     {
         parent::__construct($id, $module, $config);
         $this->leadRedialService = $leadRedialService;
+        $this->multipleUpdate = $multipleUpdate;
         $this->takeGuard = $takeGuard;
     }
 
@@ -101,6 +110,48 @@ class LeadRedialController extends FController
             'dataProviderLastCalls' => $dataProviderLastCalls,
             'guard' => $guard,
         ]);
+    }
+
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
+    public function actionMultipleUpdate(): Response
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if (!$user->isAdmin()) {
+            throw new ForbiddenHttpException('Access is denied.');
+        }
+
+        $form = new MultipleUpdateForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $report = $this->multipleUpdate->update($form);
+            return $this->asJson(['success' => true, 'report' => $report]);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
+    public function actionMultipleUpdateValidate(): array
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if (!$user->isAdmin()) {
+            throw new ForbiddenHttpException('Access is denied.');
+        }
+
+        $form = new MultipleUpdateForm();
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
     }
 
     /**

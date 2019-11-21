@@ -13,7 +13,7 @@
   /*list-style: none;*/
 }
 
-.fab {
+.fabs .fab{
   display: block;
   width: 56px;
   height: 56px;
@@ -35,7 +35,7 @@
 }
 
 
-.call-status-ready {
+.fabs .call-status-ready {
   background: #84e4a6;
 }
 
@@ -53,7 +53,7 @@
 }
 
 
-.fab > i {
+.fabs .fab> i {
   font-size: 2em;
   line-height: 55px;
   -webkit-transition: all .2s ease-out;
@@ -61,7 +61,7 @@
   transition: all .2s ease-in-out;
 }
 
-.fab:not(:last-child) {
+.fabs .fab:not(:last-child) {
   width: 0;
   height: 0;
   margin: 20px auto 0;
@@ -70,12 +70,12 @@
   line-height: 40px;
 }
 
-.fab:not(:last-child) > i {
+.fabs .fab:not(:last-child) > i {
   font-size: 1.4em;
   line-height: 40px;
 }
 
-.fab:not(:last-child).is-visible {
+.fabs .fab:not(:last-child).is-visible {
   width: 40px;
   height: 40px;
   margin: 15px auto 10px;
@@ -83,32 +83,32 @@
   visibility: visible;
 }
 
-.fab:nth-last-child(1) {
+.fabs .fab:nth-last-child(1) {
   -webkit-transition-delay: 25ms;
   transition-delay: 25ms;
 }
 
-.fab:not(:last-child):nth-last-child(2) {
+.fabs .fab:not(:last-child):nth-last-child(2) {
   -webkit-transition-delay: 20ms;
   transition-delay: 20ms;
 }
 
-.fab:not(:last-child):nth-last-child(3) {
+.fabs .fab:not(:last-child):nth-last-child(3) {
   -webkit-transition-delay: 40ms;
   transition-delay: 40ms;
 }
 
-.fab:not(:last-child):nth-last-child(4) {
+.fabs .fab:not(:last-child):nth-last-child(4) {
   -webkit-transition-delay: 60ms;
   transition-delay: 60ms;
 }
 
-.fab:not(:last-child):nth-last-child(5) {
+.fabs .fab:not(:last-child):nth-last-child(5) {
   -webkit-transition-delay: 80ms;
   transition-delay: 80ms;
 }
 
-.fab:last-child:active,
+.fabs .fab:last-child:active,
   .fab:last-child:focus,
     .fab:last-child:hover {
       box-shadow: 0 0 6px rgba(0, 0, 0, .16), 0 6px 12px rgba(0, 0, 0, .32);
@@ -131,6 +131,7 @@
   -webkit-transition: all .2s ease-in-out;
   transition: all .2s ease-in-out;
   display: none;
+background-color: #fff;
 }
 
 .call_box_fullscreen {
@@ -234,6 +235,10 @@
   overflow-y: auto;
 
 }
+.call_box_body h4 {
+ font-size: 16px;
+}
+
 #call_box_body{
   height: 450px;
 }

@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use frontend\widgets\multipleUpdate\redial\MultipleUpdateWidget;
 use frontend\widgets\UserInfoProgress;
 use sales\access\ListsAccess;
 use yii\helpers\Html;
@@ -74,6 +75,16 @@ $list = new ListsAccess($user->id);
         <p></p>
 
         <div style="font-size: 30px">Redial Queue</div>
+
+        <?php if ($user->isAdmin()) : ?>
+            <?= MultipleUpdateWidget::widget([
+                    'gridId' => 'redialGrid',
+                    'script' => '$.pjax.reload({container: "#lead-redial-pjax", async: false});',
+                    'actionUrl' => Url::to(['lead-redial/multiple-update']),
+                    'validationUrl' => Url::to(['lead-redial/multiple-update-validate']),
+                    'reportWrapperId' => 'redial-call-box-wrapper'
+            ]) ?>
+        <?php endif; ?>
 
         <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>
 

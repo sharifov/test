@@ -48,9 +48,9 @@ class ProfitSplit extends \yii\db\ActiveRecord
             [['ps_lead_id', 'ps_user_id', 'ps_percent', 'ps_amount', 'ps_updated_user_id'], 'integer'],
             [['ps_updated_dt','ps_percent','ps_amount'], 'safe'],
             [['ps_user_id', 'ps_lead_id'], 'unique', 'targetAttribute' => ['ps_user_id', 'ps_lead_id']],
-            [['ps_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::className(), 'targetAttribute' => ['ps_lead_id' => 'id']],
-            [['ps_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['ps_updated_user_id' => 'id']],
-            [['ps_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['ps_user_id' => 'id']],
+            [['ps_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['ps_lead_id' => 'id']],
+            [['ps_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ps_updated_user_id' => 'id']],
+            [['ps_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ps_user_id' => 'id']],
         ];
     }
 
@@ -104,7 +104,7 @@ class ProfitSplit extends \yii\db\ActiveRecord
      */
     public function getPsLead()
     {
-        return $this->hasOne(Lead::className(), ['id' => 'ps_lead_id']);
+        return $this->hasOne(Lead::class, ['id' => 'ps_lead_id']);
     }
 
     /**
@@ -112,7 +112,7 @@ class ProfitSplit extends \yii\db\ActiveRecord
      */
     public function getPsUpdatedUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'ps_updated_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'ps_updated_user_id']);
     }
 
     /**
@@ -120,7 +120,7 @@ class ProfitSplit extends \yii\db\ActiveRecord
      */
     public function getPsUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'ps_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'ps_user_id']);
     }
 
     public function countProfit($total)

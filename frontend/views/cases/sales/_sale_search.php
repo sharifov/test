@@ -41,7 +41,7 @@ use yii\widgets\Pjax;
 
             <?php
             //if(Yii::$app->request->isAjax) {
-            echo \yiister\gentelella\widgets\FlashAlert::widget();
+            echo \frontend\themes\gentelella_v2\widgets\FlashAlert::widget();
             //}
 
             echo $this->render('_sale_search_form', [

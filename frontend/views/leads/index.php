@@ -87,7 +87,7 @@ $lists = new ListsAccess($user->id);
         </p>
     <?php endif; ?>
 
-    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
+    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple'] ?>
 
     <?php
 
@@ -674,14 +674,15 @@ $lists = new ListsAccess($user->id);
         ],*/
 
         //'bordered' => true,
-        'striped' => false,
-        'condensed' => false,
-        'responsive' => true,
+        'striped' => true,
+        'condensed' => true,
+        'responsive' => false,
+        'bsVersion' => '4.x',
         'hover' => true,
-        'floatHeader' => true,
-        'floatHeaderOptions' => [
-            'scrollingTop' => 20
-        ],
+        'floatHeader' => false,
+//        'floatHeaderOptions' => [
+//            'scrollingTop' => 20
+//        ],
         /*'showPageSummary' => true,*/
         'panel' => [
             'type' => GridView::TYPE_PRIMARY,
@@ -713,8 +714,8 @@ $lists = new ListsAccess($user->id);
 
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-default">
-                    <div class="panel-body">
+                <div class="card card-default">
+                    <div class="card-body">
                         <?php
 
                         if ($user->isAdmin()) {

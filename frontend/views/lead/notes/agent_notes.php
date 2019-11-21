@@ -85,16 +85,16 @@ use yii\widgets\Pjax;
 <?php
 $this->registerJs(
     '
-        $(document).on("click","#btn-notes-form", function() {
-            $("#div-notes-form").show();
-            $("#pjax-notes .x_content").show();
-            
-             $([document.documentElement, document.body]).animate({
-                scrollTop: $("#div-notes-form").offset().top
-            }, 1000);
-                        
-            return false;
-        });
+//        $(document).on("click","#btn-notes-form", function() {
+//            $("#div-notes-form").show();
+//            $("#pjax-notes .x_content").show();
+//            
+//             $([document.documentElement, document.body]).animate({
+//                scrollTop: $("#div-notes-form").offset().top
+//            }, 1000);
+//                        
+//            return false;
+//        });
 
         $("#pjax-notes").on("pjax:start", function () {            
             $("#btn-submit-note").attr("disabled", true).prop("disabled", true).addClass("disabled");

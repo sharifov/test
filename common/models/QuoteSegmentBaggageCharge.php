@@ -59,8 +59,8 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
             [['qsbc_pax_code'], 'string', 'max' => 3],
             [['qsbc_currency'], 'string', 'max' => 5],
             [['qsbc_max_weight', 'qsbc_max_size'], 'string', 'max' => 100],
-            [['qsbc_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::className(), 'targetAttribute' => ['qsbc_segment_id' => 'qs_id']],
-            [['qsbc_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['qsbc_updated_user_id' => 'id']],
+            [['qsbc_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::class, 'targetAttribute' => ['qsbc_segment_id' => 'qs_id']],
+            [['qsbc_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qsbc_updated_user_id' => 'id']],
         ];
     }
 
@@ -116,7 +116,7 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
      */
     public function getQsbcSegment()
     {
-        return $this->hasOne(QuoteSegment::className(), ['qs_id' => 'qsbc_segment_id']);
+        return $this->hasOne(QuoteSegment::class, ['qs_id' => 'qsbc_segment_id']);
     }
 
     /**
@@ -124,6 +124,6 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
      */
     public function getQsbcUpdatedUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'qsbc_updated_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'qsbc_updated_user_id']);
     }
 }

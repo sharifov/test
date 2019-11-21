@@ -279,7 +279,7 @@ if($project){
 
 
 <!----Popover for adding notes START---->
-<div id="popover-content-add-note" class="hidden popover-form">
+<div id="popover-content-add-note" class="d-none popover-form">
     <?php
     $note = new \common\models\Note();
     $addNoteUrl = Url::to([
@@ -468,7 +468,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         //$('#popover-quick-search').popover('hide');
         e.preventDefault();
         var url = $('#quick-search-quotes-btn').data('url');
-        $('#preloader').removeClass('hidden');
+        $('#preloader').removeClass('d-none');
         var modal = $('#search-results__modal');
         
         
@@ -478,13 +478,13 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
             data: {'gds': $('#gds-selector').val()},
             url: url,
             success: function (data) {
-                $('#preloader').addClass('hidden');
+                $('#preloader').addClass('d-none');
                 modal.find('.modal-body').html(data);
                 modal.modal('show');
             },
             error: function (error) {
                // var obj = JSON.parse(error.data); // $.parseJSON( e.data );
-                $('#preloader').addClass('hidden');
+                $('#preloader').addClass('d-none');
                 console.error(error.responseText);
                 
                 alert('Server Error: ' + error.statusText);
@@ -693,11 +693,11 @@ $this->registerJs($js);
 <?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css',[
     'depends' => [\yii\bootstrap\BootstrapAsset::class],
 ]);?>
-<?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal.css',[
-    'depends' => [\yii\bootstrap\BootstrapAsset::class],
-]);?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
+<?php //$this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal.css',[
+//    'depends' => [\yii\bootstrap4\BootstrapAsset::class],
+//]);?>
+<?php //$this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
+<?php //$this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
 <?php $this->registerJsFile('/js/search-result.js', ['depends' => [yii\web\JqueryAsset::class]])?>

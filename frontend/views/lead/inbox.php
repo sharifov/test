@@ -425,7 +425,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ?>
 <?php
-echo GridView::widget([
+echo '<div class="table-responsive">' . GridView::widget([
 
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
@@ -434,9 +434,9 @@ echo GridView::widget([
     'pjax' => false,
     'striped' => true,
     'condensed' => false,
-    'responsive' => true,
+    'responsive' => false,
     'hover' => true,
-    'floatHeader' => true,
+//    'floatHeader' => true,
     'floatHeaderOptions' => [
         'scrollingTop' => 20
     ],
@@ -473,7 +473,7 @@ echo GridView::widget([
          */
     }
 
-]);
+]) . '</div>';
 ?>
 <?php Pjax::end(); ?>
 </div>

@@ -50,7 +50,8 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             'action' => ['index'],
             'method' => 'get',
             'options' => [
-                'data-pjax' => 1
+                'data-pjax' => 1,
+                'style' => 'width: 100%;'
             ],
         ]); ?>
 

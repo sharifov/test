@@ -344,7 +344,7 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getQuoteTrips()
     {
-        return $this->hasMany(QuoteTrip::className(), ['qt_quote_id' => 'id']);
+        return $this->hasMany(QuoteTrip::class, ['qt_quote_id' => 'id']);
     }
 
     public function getDataForProfit($quoteId)

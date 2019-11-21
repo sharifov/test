@@ -1,4 +1,11 @@
 <?php
+
+use yii\web\JqueryAsset;
+use yii\bootstrap\BootstrapAsset;
+use yii\bootstrap\BootstrapPluginAsset;
+use frontend\themes\gentelella\assets\AssetLeadCommunication;
+use frontend\themes\gentelella_v2\assets\ThemeAsset;
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -12,7 +19,7 @@ return [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
-    'layout' => '@frontend/themes/gentelella/views/layouts/main.php',
+    'layout' => '@frontend/themes/gentelella_v2/views/layouts/main.php',
     'components' => [
         'request' => [
             'baseUrl' => '',
@@ -132,6 +139,40 @@ return [
                 ],
             ],
         ],
+
+		'assetManager' => [
+			'forceCopy' => true,
+			'appendTimestamp' => false,
+			'bundles' => [
+				BootstrapAsset::class => [
+					'sourcePath' => '@npm/bootstrap/dist',
+					'css' => [
+						'css/bootstrap.css'
+					],
+				],
+				BootstrapPluginAsset::class => [
+					'sourcePath' => '@npm/bootstrap/dist',
+					'js' => [
+						'js/bootstrap.bundle.js'
+					],
+					'depends' => [
+						JqueryAsset::class,
+						\yii\bootstrap4\BootstrapAsset::class,
+					],
+				],
+				AssetLeadCommunication::class => [
+					'basePath' => '@webroot',
+					'baseUrl' => '@web',
+					'js' => [
+						'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js',
+						'/js/sms_counter.min.js',
+					],
+					'depends' => [
+						ThemeAsset::class,
+					]
+				]
+			],
+		],
     ],
     'modules' => [
         'gridview' =>  [
@@ -185,7 +226,7 @@ return [
         ],
         'rbac' => [
             'class' => 'yii2mod\rbac\Module',
-            'layout' => '@frontend/themes/gentelella/views/layouts/main',
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main',
             'as access' => [
                 'class' => yii2mod\rbac\filters\AccessControl::class,
                 'rules' => [
@@ -197,6 +238,12 @@ return [
             ],
             'viewPath' => '@frontend/views/rbac',
         ],
+
+
+        'hotel' => [
+            'class' => \modules\hotel\HotelModule::class,
+        ],
+
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,
@@ -207,7 +254,8 @@ return [
                 'options' => ['class' => 'table-responsive'],
                 //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
             ],
-        ],
+			\yii\widgets\LinkPager::class => \yii\bootstrap4\LinkPager::class,
+		],
     ],
 
     /*'view' => [

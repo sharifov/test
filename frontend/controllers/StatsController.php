@@ -276,7 +276,7 @@ class StatsController extends FController
 
     public function actionAgentRatings()
     {
-        $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
         $searchLeader = new LeadSearch();
 
         $agentsSettings = Setting::find()->where(['s_key' => 'agents_ratings'])->asArray()->one();
