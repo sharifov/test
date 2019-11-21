@@ -53,7 +53,7 @@ class ApiHotelService extends Component
             $this->request->addHeaders(['Authorization' => 'Basic ' . $authStr]);
             return true;
         } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'SearchHotelService::initRequest:Throwable');
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiHotelService::initRequest:Throwable');
         }
 
         return false;
@@ -65,7 +65,7 @@ class ApiHotelService extends Component
      * @param string $method
      * @param array $headers
      * @param array $options
-     * @return \yii\httpclient\Response
+     * @return Response
      * @throws \yii\httpclient\Exception
      */
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
@@ -75,6 +75,7 @@ class ApiHotelService extends Component
         //$options = ['RETURNTRANSFER' => 1];
 
         $this->request->setMethod($method)
+            ->setFormat(Client::FORMAT_JSON)
             ->setUrl($url)
             ->setData($data);
 
@@ -93,41 +94,44 @@ class ApiHotelService extends Component
 
 
     /**
-     * @param bool $extra
-     * @param string|null $sourceCurrencyCode
-     * @param array $rateCurrencyList
+     * @param string $checkIn
+     * @param string $checkOut
+     * @param string $destination
+     * @param array $rooms
+     * @param array $params
      * @return array
-     * @throws \yii\httpclient\Exception
      */
-    public function getRate(bool $extra = true, ?string $sourceCurrencyCode, array $rateCurrencyList = []) : array
+    public function search(string $checkIn, string $checkOut, string $destination, array $rooms = [], array $params = []): array
     {
         $out = ['error' => false, 'data' => []];
-        $data = [];
 
-        if ($sourceCurrencyCode) {
-            $data['source'] = $sourceCurrencyCode;
+        $data = $params;
+
+        $data['checkIn'] = $checkIn;
+        $data['checkOut'] = $checkOut;
+        $data['destination'] = $destination;
+
+        if ($rooms) {
+            $data['rooms'] = $rooms;
         }
 
-        if ($rateCurrencyList) {
-            $data['currencies'] = implode(',', $rateCurrencyList);
-        }
+        try {
+            $response = $this->sendRequest('booking/search', $data, 'POST');
+            // VarDumper::dump($response->data, 10, true); exit;
 
-        if ($extra) {
-            $data['extra'] = 'true';
-        }
-
-
-        $response = $this->sendRequest('rate', $data, 'get');
-
-        if ($response->isOk) {
-            if (isset($response->data['quotes'])) {
-                $out['data'] = $response->data;
+            if ($response->isOk) {
+                if (isset($response->data['hotels'])) {
+                    $out['data'] = $response->data;
+                } else {
+                    $out['error'] = 'Not found in response array data key [hotels]';
+                }
             } else {
-                $out['error'] = 'Not found in response array data key [quotes]';
+                $out['error'] = 'Error ('.$response->statusCode.'): ' . $response->content;
+                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService::search');
             }
-        } else {
-            $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:SearchHotelService::search');
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiHotelService::throwable');
+            $out['error'] = 'ApiHotelService error: ' . $throwable->getMessage();
         }
 
         return $out;

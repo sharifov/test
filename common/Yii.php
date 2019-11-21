@@ -38,6 +38,8 @@ abstract class BaseApplication extends yii\base\Application
  * @property \common\components\CurrencyService $currency The CurrencyService component.
  * @property \yii\queue\beanstalk\Queue $queue_job The beanstalk Queue. This property is read-only. Extended component.
  *
+ *
+ *
  */
 class WebApplication extends yii\web\Application
 {

@@ -6,6 +6,8 @@ use yii\helpers\ArrayHelper;
 
 /**
  * hotel module definition class
+ *
+ * @property \modules\hotel\components\ApiHotelService $apiService The Hotel module.
  */
 class HotelModule extends \yii\base\Module
 {
@@ -23,9 +25,10 @@ class HotelModule extends \yii\base\Module
 
 
 
-        $config = require __DIR__ . '/config/config.php'; /*ArrayHelper::merge(
-            require __DIR__ . '/config/config.php'
-        );*/
+        $config = ArrayHelper::merge(
+            require __DIR__ . '/config/config.php',
+            require __DIR__ . '/config/config-local.php'
+        );
 
         //\Yii::configure($this, require __DIR__ . '/config.php');
         \Yii::configure($this, $config);

@@ -2,6 +2,7 @@
 
 namespace modules\hotel\controllers;
 
+use frontend\controllers\FController;
 use yii\web\Controller;
 
 /**
