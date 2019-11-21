@@ -210,62 +210,64 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             ]) ?>
         </div>
         <div class="col-md-3">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'attribute' => 'trip_type',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getFlightTypeName();
-                        },
+            <div class="table-responsive">
+                <?= DetailView::widget([
+                    'model' => $model,
+                    'attributes' => [
+                        [
+                            'attribute' => 'trip_type',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->getFlightTypeName();
+                            },
+
+                        ],
+
+                        [
+                            'attribute' => 'cabin',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->getCabinClassName();
+                            },
+
+                        ],
+
+                        /*'project_id',
+                        'source_id',
+                        'trip_type',
+                        'cabin',*/
+                        'adults',
+                        'children',
+                        'infants',
+                        'notes_for_experts:ntext',
+
+
+                        [
+                            'attribute' => 'created',
+                            'value' => function(\common\models\Lead $model) {
+                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
+                            'attribute' => 'updated',
+                            'value' => function(\common\models\Lead $model) {
+                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
+                            'attribute' => 'l_last_action_dt',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->l_last_action_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
+                            },
+                            'format' => 'raw',
+                        ],
+
 
                     ],
-
-                    [
-                        'attribute' => 'cabin',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getCabinClassName();
-                        },
-
-                    ],
-
-                    /*'project_id',
-                    'source_id',
-                    'trip_type',
-                    'cabin',*/
-                    'adults',
-                    'children',
-                    'infants',
-                    'notes_for_experts:ntext',
-
-
-                    [
-                        'attribute' => 'created',
-                        'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                        },
-                        'format' => 'raw',
-                    ],
-
-                    [
-                        'attribute' => 'updated',
-                        'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-                        },
-                        'format' => 'raw',
-                    ],
-
-                    [
-                        'attribute' => 'l_last_action_dt',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->l_last_action_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
-                        },
-                        'format' => 'raw',
-                    ],
-
-
-                ],
-            ]) ?>
+                ]) ?>
+            </div>
         </div>
 
         <div class="col-md-3">

@@ -41,73 +41,77 @@ $userId = Yii::$app->user->id;
         <h1><?=$this->title?></h1>
         <div class="row">
             <div class="col-md-3">
-                <table class="table table-bordered">
-                    <tr>
-                        <th>Server Date Time (UTC)</th>
-                        <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
-                    </tr>
-                    <tr>
-                        <th>Current Time Zone</th>
-                        <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
-                    </tr>
-                    <tr>
-                        <th>Local Date Time</th>
-                        <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
-                    </tr>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Server Date Time (UTC)</th>
+                            <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
+                        </tr>
+                        <tr>
+                            <th>Current Time Zone</th>
+                            <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
+                        </tr>
+                        <tr>
+                            <th>Local Date Time</th>
+                            <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
 
             <div class="col-md-3">
-                <table class="table table-bordered">
-                    <tr>
-                        <th>My Username:</th>
-                        <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
-                    </tr>
-                    <tr>
-                        <th>My Role:</th>
-                        <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
-                    </tr>
-                    <tr>
-                        <th>My User Groups:</th>
-                        <td><i class="fa fa-users"></i>
-                            <?php
-                            $groupsValue = '';
-                            if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
-                                $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
-                                $groupsValueArr = [];
-                                foreach ($groups as $group) {
-                                    $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>My Username:</th>
+                            <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
+                        </tr>
+                        <tr>
+                            <th>My Role:</th>
+                            <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
+                        </tr>
+                        <tr>
+                            <th>My User Groups:</th>
+                            <td><i class="fa fa-users"></i>
+                                <?php
+                                $groupsValue = '';
+                                if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                                    $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+                                    $groupsValueArr = [];
+                                    foreach ($groups as $group) {
+                                        $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                    }
+                                    $groupsValue = implode(' ', $groupsValueArr);
                                 }
-                                $groupsValue = implode(' ', $groupsValueArr);
-                            }
-                            echo $groupsValue;
-                            ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>My Project Access:</th>
-                        <td><i class="fa fa-list"></i>
-                            <?php
-                            //\yii\helpers\VarDumper::dump(Yii::$app->user->identity->projects, 10, true);
+                                echo $groupsValue;
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>My Project Access:</th>
+                            <td><i class="fa fa-list"></i>
+                                <?php
+                                //\yii\helpers\VarDumper::dump(Yii::$app->user->identity->projects, 10, true);
 
-                            $projectsValue = '';
+                                $projectsValue = '';
 
-                            //$projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
-                            $projectList = Yii::$app->user->identity->projects;
+                                //$projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
+                                $projectList = Yii::$app->user->identity->projects;
 
-                            if($projectList) {
+                                if($projectList) {
 
-                                $groupsValueArr = [];
-                                foreach ($projectList as $project) {
-                                    $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
+                                    $groupsValueArr = [];
+                                    foreach ($projectList as $project) {
+                                        $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
+                                    }
+                                    $projectsValue = implode(' ', $groupsValueArr);
                                 }
-                                $projectsValue = implode(' ', $groupsValueArr);
-                            }
-                            echo $projectsValue;
-                            ?>
-                        </td>
-                    </tr>
-                </table>
+                                echo $projectsValue;
+                                ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
 
             <div class="col-md-3">
@@ -160,26 +164,28 @@ $userId = Yii::$app->user->id;
                 //\yii\helpers\VarDumper::dump($taskSummary, 10, true);
                 ?>
 
-                <table class="table table-bordered">
-                    <tr>
-                        <th>Current Shift All tasks</th>
-                        <td><?=$taskSummary['allTasksCount']?></td>
-                    </tr>
-                    <tr>
-                        <th>Current Shift Completed tasks</th>
-                        <td><?=$taskSummary['completedTasksCount']?></td>
-                    </tr>
-                    <tr>
-                        <th>Current Shift task progress</th>
-                        <td style="width: 50%">
-                            <div class="progress" title="<?=$taskSummary['completedTasksPercent']?>%">
-                                <div class="progress-bar" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: <?=$taskSummary['completedTasksPercent']?>%;">
-                                    <?=$taskSummary['completedTasksPercent']?>%
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Current Shift All tasks</th>
+                            <td><?=$taskSummary['allTasksCount']?></td>
+                        </tr>
+                        <tr>
+                            <th>Current Shift Completed tasks</th>
+                            <td><?=$taskSummary['completedTasksCount']?></td>
+                        </tr>
+                        <tr>
+                            <th>Current Shift task progress</th>
+                            <td style="width: 50%">
+                                <div class="progress" title="<?=$taskSummary['completedTasksPercent']?>%">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: <?=$taskSummary['completedTasksPercent']?>%;">
+                                        <?=$taskSummary['completedTasksPercent']?>%
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
 

@@ -453,9 +453,9 @@ pre {
   color: #7890a2;
   padding: 3px 9px;
   font-size: 13px;
-  transition: background ease 0.5s;
+ /* transition: background ease 0.5s;
   -moz-transition: background ease 0.5s;
-  -webkit-transition: background ease 0.5s;
+  -webkit-transition: background ease 0.5s;*/
 }
 
 .form-control:focus {
@@ -1013,7 +1013,7 @@ body {
   border-color: #ff7379;
 }
 
-.sl-client-sidebar .has-error .help-block {
+.sl-client-sidebar .has-error .help-block-error {
   background-color: #e15258;
   color: #fff;
   padding: 2px 8px 3px;
@@ -1044,7 +1044,7 @@ body {
   border-color: #ff7379;
 }
 
-.right-sidebar .has-error .help-block {
+.right-sidebar .has-error .help-block-error {
   background-color: #e15258;
   color: #fff;
   padding: 2px 8px 3px;
@@ -1053,7 +1053,7 @@ body {
   margin-top: 5px;
 }
 
-.right-sidebar .has-error .help-block:after {
+.right-sidebar .has-error .help-block-error:after {
   border-left: 8px transparent solid;
   border-right: 8px transparent solid;
   border-bottom: 7px #e15258 solid;
@@ -5714,6 +5714,13 @@ input[disabled] + .radio-tab__text {
 .info-number .badge {
     top: 0;
 }
+.was-validated .form-control:valid, .form-control.is-valid {
+    background-position: center right calc(0.975em + 0.7875rem);
+}
+.kv-grid-container {
+    display: block;
+    overflow: auto;
+}
 /****** END OTHER ******/
 
 
@@ -5729,6 +5736,39 @@ input[disabled] + .radio-tab__text {
     }
     .user-profile span {
         display: none;
+    }
+    .toggle {
+        width: 50px;
+    }
+    .top_nav .navbar-right {
+        padding: 0;
+    }
+    .main-sidebars {
+        flex-direction: column;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 10px;
+    }
+    .request-form {
+        overflow: auto;
+    }
+    .page-header {
+        margin: -11px -10px 0;
+    }
+    .right-sidebar {
+        margin-top: 20px;
+    }
+    .main-sidebars .panel-main {
+        margin: 0 -10px;
+    }
+    .kv-table-wrap th, .kv-table-wrap td {
+        display: table-cell;
+    }
+    #call-map-page .card-body {
+        overflow: auto;
+    }
+    .card-footer {
+        overflow-x: auto;
     }
 }
 /***** END MEDIA ******/

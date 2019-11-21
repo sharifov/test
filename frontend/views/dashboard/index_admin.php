@@ -38,108 +38,114 @@ $userId = Yii::$app->user->id;
     <h1><?=$this->title?></h1>
     <div class="row">
         <div class="col-md-3">
-            <table class="table table-bordered">
-                <tr>
-                    <th>Server Date Time (UTC)</th>
-                    <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
-                </tr>
-                <tr>
-                    <th>Current Time Zone</th>
-                    <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
-                </tr>
-                <tr>
-                    <th>Formatted Local Date Time</th>
-                    <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
-                </tr>
-            </table>
-
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Server Date Time (UTC)</th>
+                        <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
+                    </tr>
+                    <tr>
+                        <th>Current Time Zone</th>
+                        <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
+                    </tr>
+                    <tr>
+                        <th>Formatted Local Date Time</th>
+                        <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-3">
-            <table class="table table-bordered">
-                <tr>
-                    <th>My Username:</th>
-                    <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
-                </tr>
-                <tr>
-                    <th>My Role:</th>
-                    <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
-                </tr>
-                <tr>
-                    <th>My User Groups:</th>
-                    <td><i class="fa fa-users"></i>
-                        <?php
-                        $groupsValue = '';
-                        if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
-                            $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>My Username:</th>
+                        <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
+                    </tr>
+                    <tr>
+                        <th>My Role:</th>
+                        <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
+                    </tr>
+                    <tr>
+                        <th>My User Groups:</th>
+                        <td><i class="fa fa-users"></i>
+                            <?php
+                            $groupsValue = '';
+                            if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                                $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
-                            $groupsValueArr = [];
-                            foreach ($groups as $group) {
-                                $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                $groupsValueArr = [];
+                                foreach ($groups as $group) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                }
+                                $groupsValue = implode(' ', $groupsValueArr);
                             }
-                            $groupsValue = implode(' ', $groupsValueArr);
-                        }
-                        echo $groupsValue;
-                        ?>
-                    </td>
-                </tr>
-                <tr>
-                    <th>My Project Access:</th>
-                    <td><i class="fa fa-list"></i>
-                        <?php
-                        $projectsValue = '';
+                            echo $groupsValue;
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>My Project Access:</th>
+                        <td><i class="fa fa-list"></i>
+                            <?php
+                            $projectsValue = '';
 
-                        if($projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id)) {
+                            if($projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id)) {
 
-                            $groupsValueArr = [];
-                            foreach ($projectList as $project) {
-                                $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
+                                $groupsValueArr = [];
+                                foreach ($projectList as $project) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
+                                }
+                                $projectsValue = implode(' ', $groupsValueArr);
                             }
-                            $projectsValue = implode(' ', $groupsValueArr);
-                        }
-                        echo $projectsValue;
-                        ?>
-                    </td>
-                </tr>
-            </table>
-
+                            echo $projectsValue;
+                            ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-3">
             <h4>System processes and cron jobs running:</h4>
-            <table class="table table-bordered table-condensed">
-                <tr>
-                    <th>PID</th>
-                    <th>Started</th>
-                    <th>Time</th>
-                    <th>Command</th>
-                </tr>
-                <?php if($processList): ?>
-                    <?php foreach($processList AS $proc): ?>
-                        <tr>
-                            <td><?php echo $proc['pid']; ?></td>
-                            <td><?php echo $proc['stime']; ?></td>
-                            <td><?php echo $proc['time']; ?></td>
-                            <td><?php echo $proc['command']; ?></td>
-                        </tr>
-                    <?php endforeach;?>
-                <?php endif;?>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-condensed">
+                    <tr>
+                        <th>PID</th>
+                        <th>Started</th>
+                        <th>Time</th>
+                        <th>Command</th>
+                    </tr>
+                    <?php if($processList): ?>
+                        <?php foreach($processList AS $proc): ?>
+                            <tr>
+                                <td><?php echo $proc['pid']; ?></td>
+                                <td><?php echo $proc['stime']; ?></td>
+                                <td><?php echo $proc['time']; ?></td>
+                                <td><?php echo $proc['command']; ?></td>
+                            </tr>
+                        <?php endforeach;?>
+                    <?php endif;?>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-3">
             <?php if($crontabJobList): ?>
                 <h4>Cron jobs (/etc/crontab)</h4>
-                <table class="table table-bordered table-condensed">
-                    <tr>
-                        <th>Cron jobs</th>
-                    </tr>
-                    <?php foreach($crontabJobList AS $cronJob): ?>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
                         <tr>
-                            <td><?php echo $cronJob; ?></td>
+                            <th>Cron jobs</th>
                         </tr>
-                    <?php endforeach;?>
-                </table>
+                        <?php foreach($crontabJobList AS $cronJob): ?>
+                            <tr>
+                                <td><?php echo $cronJob; ?></td>
+                            </tr>
+                        <?php endforeach;?>
+                    </table>
+                </div>
             <?php endif;?>
         </div>
 

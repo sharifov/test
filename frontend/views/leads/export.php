@@ -561,14 +561,14 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             '{toggleData}'
         ],
         'pjax' => true,
-        'pjaxSettings' => ['options' => ['id' => 'kv-pjax-container']],
+        'pjaxSettings' => ['options' => ['id' => 'kv-pjax-container'], 'style' => 'overflow: auto;'],
         //'bordered' => true,
-        'striped' => false,
-        'condensed' => false,
-        'responsive' => true,
+        'striped' => true,
+        'condensed' => true,
+        'responsive' => false,
         'hover' => true,
-        'floatHeader' => true,
-        'floatHeaderOptions' => ['scrollingTop' => 20],
+        'floatHeader' => false,
+//        'floatHeaderOptions' => ['scrollingTop' => 20],
         /*'showPageSummary' => true,*/
         'panel' => [
             'type' => GridView::TYPE_PRIMARY,
