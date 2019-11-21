@@ -5618,7 +5618,7 @@ input[disabled] + .radio-tab__text {
 #activity-modal .modal-header,
 #modal-email-templates .modal-header,
 #modal-email-view .modal-header {
-    flex-direction: row-reverse;
+    /*flex-direction: row-reverse;*/
     align-items: center;
 }
 

@@ -11,9 +11,6 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 ?>
-    <style>
-        .x_title span{color: white;}
-    </style>
 <?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
     <div class="x_panel">
         <div class="x_title" >

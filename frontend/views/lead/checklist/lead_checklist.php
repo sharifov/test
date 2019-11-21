@@ -11,9 +11,6 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 ?>
-<style>
-    .x_title span{color: white;}
-</style>
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-checklist', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">

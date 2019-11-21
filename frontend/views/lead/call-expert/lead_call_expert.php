@@ -34,9 +34,6 @@ use yii\widgets\Pjax;
 $user = Yii::$app->user->identity;
 
 ?>
-<style>
-    .x_title span{color: white;}
-</style>
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-call-expert', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">

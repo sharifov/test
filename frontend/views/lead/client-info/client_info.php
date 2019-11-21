@@ -16,9 +16,6 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id);
 
 ?>
-    <style>
-        .x_title span{color: white;}
-    </style>
 
     <div class="x_panel">
         <div class="x_title" >
