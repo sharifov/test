@@ -55,9 +55,7 @@ class LeadOwnerChangedNotificationsListener
 
         $subject = Yii::t('email', 'Lead-{id} reassigned to ({username})', ['id' => $lead->id, 'username' => $newOwner->username]);
 
-        $body = Yii::t('email', "Attention!
-Your Lead (ID: {lead_id}) has been reassigned to another agent ({name}).
-{url}",
+        $body = Yii::t('email', "Attention! Your Lead (ID: {lead_id}) has been reassigned to another agent ({name}). {url}",
             [
                 'lead_id' => $lead->id,
                 'name' => $newOwner->username,

@@ -47,9 +47,7 @@ class LeadFollowUpNotificationsListener
         $host = Yii::$app->params['url_address'];
 
         $subject = Yii::t('email', "Lead-{id} to FOLLOW-UP", ['id' => $event->lead->id]);
-        $body = Yii::t('email', 'Your Lead (ID: {lead_id}) has been changed status to FOLLOW-UP!
-Reason: {reason}
-{url}',
+        $body = Yii::t('email', 'Your Lead (ID: {lead_id}) has been changed status to FOLLOW-UP! Reason: {reason} {url}',
             [
                 'lead_id' => $event->lead->id,
                 'reason' => $event->reason ?: '-',

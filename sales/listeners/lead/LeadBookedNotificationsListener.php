@@ -59,9 +59,7 @@ class LeadBookedNotificationsListener
 
         $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
-        $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to BOOKED!
-Booked quote UID: {quote_uid}
-{url}",
+        $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to BOOKED! Booked quote UID: {quote_uid} {url}",
             [
                 'lead_id' => $lead->id,
                 'quote_uid' => $quote ? $quote->uid : '-',

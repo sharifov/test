@@ -53,9 +53,7 @@ class LeadCreatedCloneByUserEventListener
             $agent = 'System';
         }
 
-        $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
-New lead {lead_id}
-{url}",
+        $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}. New lead {lead_id} {url}",
             [
                 'agent' => $agent,
                 'url' => $host . '/lead/view/' . $lead->gid,
