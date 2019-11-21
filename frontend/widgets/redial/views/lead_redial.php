@@ -181,11 +181,11 @@ function getPhoneNumberFromAndNext(phoneTo) {
            if (data.message) {
                text = data.message;
            }
-           new PNotify({title: "Take Lead", type: "error", text: text, hide: true});
+           new PNotify({title: "Lead Redial", type: "error", text: text, hide: true});
         }
     })
     .fail(function() {
-        new PNotify({title: "Take lead", type: "error", text: 'Try again later.', hide: true});
+        new PNotify({title: "Lead Redial", type: "error", text: 'Try again later.', hide: true});
     })
 }
 

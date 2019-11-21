@@ -305,10 +305,10 @@ class LeadRedialService
             }
         }
 
-        if (($phone = Project::findOne($lead->project_id)) && $phone->contactInfo->phone) {
-            return $phone->contactInfo->phone;
-        }
+//        if (($phone = Project::findOne($lead->project_id)) && $phone->contactInfo->phone) {
+//            return $phone->contactInfo->phone;
+//        }
 
-        throw new \DomainException('Not found phoneFrom for LeadId: ' . $lead->id);
+        throw new \DomainException('Not found phoneFrom. Please, contact to administrator.');
     }
 }
