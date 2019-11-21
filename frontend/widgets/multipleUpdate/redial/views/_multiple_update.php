@@ -2,8 +2,8 @@
 
 use dosamigos\datetimepicker\DateTimePicker;
 use frontend\widgets\multipleUpdate\redial\MultipleUpdateForm;
-use yii\bootstrap\ActiveForm;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\ActiveForm;
+use yii\bootstrap4\Modal;
 use yii\helpers\Html;
 
 /** @var string $script */
@@ -21,68 +21,56 @@ use yii\helpers\Html;
 
 Modal::begin([
     'id' => 'multiple-update-modal',
-    'header' => '<b>Multiple update</b>',
-//         'toggleButton' => ['label' => 'click me'],
-    // 'size' => 'modal-lg',
+    'title' => 'Multiple update',
 ]);
 ?>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-body">
+    <?php
+    $updateForm = new MultipleUpdateForm();
+    $form = ActiveForm::begin([
+        'id' => 'multiple-update-form',
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+        'validateOnChange' => false,
+        'validateOnBlur' => false,
+        'validationUrl' => $validationUrl,
+        'action' => $actionUrl,
+    ]);
+    ?>
 
-                    <?php
-                    $updateForm = new MultipleUpdateForm();
-                    $form = ActiveForm::begin([
-                        'id' => 'multiple-update-form',
-                        'enableClientValidation' => false,
-                        'enableAjaxValidation' => true,
-                        'validateOnChange' => false,
-                        'validateOnBlur' => false,
-                        'validationUrl' => $validationUrl,
-                        'action' => $actionUrl,
-                    ]);
-                    ?>
+    <?= $form->errorSummary($updateForm) ?>
 
-                    <?= $form->errorSummary($updateForm) ?>
+    <?= $form->field($updateForm, 'ids', [
+        'template' => '{input}',
+        'options' => ['tag' => false]
+    ])->hiddenInput()->label(false) ?>
 
-                    <?= $form->field($updateForm, 'ids', [
-                        'template' => '{input}',
-                        'options' => ['tag' => false]
-                    ])->hiddenInput()->label(false) ?>
-
-                    <div class="remove-wrapper">
-                        <?= $form->field($updateForm, 'attempts')->textInput() ?>
-                        <?= $form->field($updateForm, 'weight')->textInput(['type' => 'number']) ?>
-                        <?= $form->field($updateForm, 'created')->widget(DateTimePicker::class, [
-                            'clientOptions' => ['autoclose' => true, 'format' => 'yyyy-mm-dd HH:ii',],
-                            'options' => ['autocomplete' => 'off', 'placeholder' => 'Choose Date'],
-                        ]) ?>
-                        <?= $form->field($updateForm, 'from')->widget(DateTimePicker::class, [
-                            'clientOptions' => ['autoclose' => true, 'format' => 'yyyy-mm-dd HH:ii',],
-                            'options' => ['autocomplete' => 'off', 'placeholder' => 'Choose Date'],
-                        ]) ?>
-                        <?= $form->field($updateForm, 'to')->widget(DateTimePicker::class, [
-                            'clientOptions' => ['autoclose' => true, 'format' => 'yyyy-mm-dd HH:ii',],
-                            'options' => ['autocomplete' => 'off', 'placeholder' => 'Choose Date'],
-                        ]) ?>
-                    </div>
-                    <?= $form->field($updateForm, 'remove')->dropDownList(
-                        [0 => 'No', 1 => 'Yes'],
-                        ['onChange' => 'let remove = $(this).val(); if (remove == 1) $(".remove-wrapper").hide(); else $(".remove-wrapper").show();']
-                    ) ?>
-
-                    <div class="form-group text-right">
-                        <?= Html::submitButton('<i class="fa fa-check-square"></i> Update', ['class' => 'btn btn-info']) ?>
-                    </div>
-
-                    <?php ActiveForm::end() ?>
-
-                </div>
-            </div>
-        </div>
+    <div class="remove-wrapper">
+        <?= $form->field($updateForm, 'attempts')->textInput(['type' => 'number']) ?>
+        <?= $form->field($updateForm, 'weight')->textInput(['type' => 'number']) ?>
+        <?= $form->field($updateForm, 'created')->widget(DateTimePicker::class, [
+            'clientOptions' => ['autoclose' => true, 'format' => 'yyyy-mm-dd HH:ii',],
+            'options' => ['autocomplete' => 'off', 'placeholder' => 'Choose Date'],
+        ]) ?>
+        <?= $form->field($updateForm, 'from')->widget(DateTimePicker::class, [
+            'clientOptions' => ['autoclose' => true, 'format' => 'yyyy-mm-dd HH:ii',],
+            'options' => ['autocomplete' => 'off', 'placeholder' => 'Choose Date'],
+        ]) ?>
+        <?= $form->field($updateForm, 'to')->widget(DateTimePicker::class, [
+            'clientOptions' => ['autoclose' => true, 'format' => 'yyyy-mm-dd HH:ii',],
+            'options' => ['autocomplete' => 'off', 'placeholder' => 'Choose Date'],
+        ]) ?>
     </div>
+    <?= $form->field($updateForm, 'remove')->dropDownList(
+        [0 => 'No', 1 => 'Yes'],
+        ['onChange' => 'let remove = $(this).val(); if (remove == 1) $(".remove-wrapper").hide(); else $(".remove-wrapper").show();']
+    ) ?>
+
+    <div class="form-group text-right">
+        <?= Html::submitButton('<i class="fa fa-check-square"></i> Update', ['class' => 'btn btn-info']) ?>
+    </div>
+
+    <?php ActiveForm::end() ?>
 
 <?php Modal::end(); ?>
 
@@ -117,14 +105,12 @@ $('#multiple-update-form').on('beforeSubmit', function (e) {
 
 function formatReport(report)
 {
-    return '<br> ' +
-     '<div class="panel panel-default fade in collapse" id="multiple-update-panel">' +
-        '<div class="panel-heading">Multiple update' +
-            '<button type="button" class="close" data-target="#multiple-update-panel" data-dismiss="alert"> ' +
-                '<span aria-hidden="true">&times;</span> <span class="sr-only">Close</span>' +
-             '</button>' +
-         '</div> ' +
-         '<div class="panel-body">' + report + '</div>' +
+    return '' + 
+     '<div class="card" id="multiple-update-panel" style="margin-top:10px">' + 
+        '<h5 class="card-header"> Multiple update ' +
+            ' <span class="pull-right clickable close-icon" data-effect="fadeOut"><i class="fa fa-times"></i></span>' +
+         '</h5> ' +
+         '<div class="card-body"><div class="card-text"> ' + report + ' </div></div>' +
      '</div>';
 }
 
@@ -138,6 +124,10 @@ $('body').on('click', '.multiple-update-btn', function(e) {
         $('#multipleupdateform-ids').val(ids);
         $('#multiple-update-modal').modal();        
 });
+
+$('body').on('click', '.close-icon' ,function() {
+  $(this).closest('.card').fadeOut();
+})
 
 JS;
 $this->registerJs($js);

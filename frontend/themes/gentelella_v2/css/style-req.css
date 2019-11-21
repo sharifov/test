@@ -5777,3 +5777,10 @@ input[disabled] + .radio-tab__text {
     }
 }
 /***** END MEDIA ******/
+/** ActiveForm bootstrap 4 error widget **/
+.input-group ~ .invalid-feedback:not(:empty) {
+  display: block;
+}
+.close-icon {
+  cursor: pointer;
+}

@@ -6,9 +6,8 @@ use frontend\widgets\redial\ClientPhonesDTO;
 use frontend\widgets\redial\LeadRedialViewWidget;
 use frontend\widgets\redial\RedialUrl;
 use kartik\select2\Select2;
-use yii\helpers\Html;
+use yii\bootstrap\Html;
 use yii\helpers\Url;
-use yii\helpers\VarDumper;
 use yii\web\View;
 use yii\web\JqueryAsset;
 
@@ -55,7 +54,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
             <div class="col-md-3"></div>
 
             <div class="col-md-12">
-                <div class="col-sm-2">
+                <div class="col-md-2">
 
                     <?php
                     $phones = [];
@@ -67,26 +66,25 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
                     <?= Select2::widget([
                         'id' => 'redial-lead-phone-to',
                         'name' => 'redial-lead-phone-to',
-                        'theme' => Select2::THEME_KRAJEE,
+                        'theme' => Select2::THEME_BOOTSTRAP,
                         'data' => $phones,
                         'options' => [
                             'multiple' => false
                         ],
-                        'addon' => [
-                            'append' => [
-                                'content' => Html::button('Call', [
-                                    'class' => 'btn btn-success',
-                                    'title' => 'Call',
-                                    'data-toggle' => 'tooltip',
-                                    'id' => 'redial-lead-actions-block-call',
-                                ]),
-                                'asButton' => true
-                            ]
-                        ]
                     ]) ?>
 
                 </div>
+                <div class="col-md-1">
+                    <?= Html::button('<i class="fas fa-phone"></i> Call', [
+                                    'class' => 'btn btn-success',
+                                    'data-toggle' => 'tooltip',
+                                    'id' => 'redial-lead-actions-block-call',
+                                ])
+                    ?>
+                </div>
+            </div>
 
+            <div class="col-lg-12">
                 <div id="redial-lead-actions-block">
 
                     <div id="redial-lead-actions-block-timer-countdown" style="display: none ">
