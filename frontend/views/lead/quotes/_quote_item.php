@@ -171,46 +171,6 @@ use yii\helpers\Url;
                 </div>
             </div>
 
-            <?/*
-
-			<div class="btn-group">
-				<?php if ($appliedQuote === null) {
-                    echo Html::button('<i class="fa fa-copy"></i>', [
-                        'class' => 'btn btn-primary add-clone-alt-quote',
-                        'data-uid' => $model->uid,
-                        'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
-                        'title' => 'Clone'
-                    ]);
-                } ?>
-				<?= Html::button('<i class="fa fa-list"></i>',[
-                    'style' => 'color: #ffffff;',
-                    'class' => 'view-status-log sl-quote__status-log btn btn-primary',
-                    'data-id' => $model->id,
-                    'title' => 'View status log'
-                ]) ?>
-                <?= Html::button('<i class="fa fa-eye"></i>', [
-                    'class' => 'btn btn-primary quote_details__btn',
-			        'data-title' => implode(', ',$tripsInfo),
-                    'data-target' => '#quote_detail_'.$model->uid,
-                    'title' => 'Details'
-                ]) ?>
-                <?= Html::button('<i title="" class="fa fa-terminal"></i>', [
-                    'class' => 'btn btn-primary popover-class',
-                    'title' => 'Reservation Dump',
-                    'data-toggle' => 'popover',
-                    'data-html' => 'true',
-                    'data-title' => 'Reservation Dump',
-                    'data-trigger' => 'click',
-                    'data-placement' => 'left',
-                    'data-container' => 'body',
-                    'data-content' => '<div class="popover-dump">
-                                    <button class="btn btn-primary btn-clipboard popover-dump-copy" data-clipboard-text="'.$model->reservation_dump.'"><i class="fa fa-copy"></i></button>
-                                    '.str_replace("\n", '<br/>', $model->reservation_dump).'
-                                    </div>',
-                ]);?>
-			</div>
-            */?>
-
 		</div>
 	</div>
 	<div class="quote__wrapper">

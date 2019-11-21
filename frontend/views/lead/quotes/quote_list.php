@@ -131,7 +131,7 @@ $this->registerJs($js);
 //Menu esc for Reservation dump
 
 $js = <<<JS
- $(document).keyup(function (event) {
+ $(document).on('keyup', function (event) {
         if (event.which === 27) {
             $('.popover-class').popover('hide');
         }
@@ -145,19 +145,19 @@ if ($leadForm->getLead()->isProcessing()) {
         $js = <<<JS
  $(document).on('click','.add-clone-alt-quote', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var uid = $(this).data('uid');
-        var editBlock = $('#create-quote');
+        let url = $(this).data('url');
+        let uid = $(this).data('uid');
+        let modal = $('#modal-lg');
         if (uid != 0) {
-            editBlock.find('.modal-title').html('Clone quote #' + uid);
+            $('#modal-lg-label').html('Clone quote #' + uid);
         } else {
-             editBlock.find('.modal-title').html('Add quote');
+            $('#modal-lg-label').html('Add quote');
         }
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
             $('#cancel-alt-quote').attr('data-type', 'direct');
-            editBlock.modal({
-              backdrop: 'static',
+            modal.modal({
+              // backdrop: 'static',
               show: true
             });
         });
@@ -171,7 +171,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
     $js = <<<JS
 
     $(document).on('keyup','.ext-mark-up', function (event) {
-        var key = event.keyCode ? event.keyCode : event.which;
+        let key = event.keyCode ? event.keyCode : event.which;
         validatePriceField($(this), key);
     });
 

@@ -15,7 +15,7 @@ $quote = $lead->getAppliedAlternativeQuotes();
 $js = <<<JS
     $('#cancel-pax').click(function (e) {
         e.preventDefault();
-        $('#create-quote').modal('hide');
+        $('#modal-lg').modal('hide');
     });
 
     $('#save-pnr-pax').click(function (event) {

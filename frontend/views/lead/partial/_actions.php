@@ -47,16 +47,19 @@ $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
 $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
     'class' => 'add-reason btn btn-primary',
     'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadModel->gid]),
+    'title' => 'Follow Up'
 ]);
 
 $buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
     'class' => 'add-reason btn btn-danger',
     'data-url' => Url::to(['lead-change-state/trash', 'gid' => $leadModel->gid]),
+    'title' => 'Trash'
 ]);
 
 $buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
     'class' => 'add-reason btn btn-primary',
     'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadModel->gid]),
+    'title' => 'Snooze'
 ]);
 
 
@@ -69,11 +72,13 @@ $buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
 $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
     'class' => 'add-reason btn btn-primary',
     'data-url' => \yii\helpers\Url::to(['lead-change-state/return', 'gid' => $leadModel->gid]),
+    'title' => 'Return Lead'
 ]);
 
 $buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
     'class' => 'add-reason btn btn-primary',
     'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadModel->gid]),
+    'title' => 'Reject'
 ]);
 
 $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadModel->l_answered ? 'UnAnswered' : 'Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadModel->id], [
@@ -450,13 +455,14 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
     });
 
     /***  Quick search quotes ***/
-    $('#quick-search-quotes').click(function (e) {
+    $('#quick-search-quotes').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#quick-search');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal({
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+        $('#modal-lg-label').html('Quick search quotes');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            modal.modal({
               backdrop: 'static',
               show: true
             });
@@ -513,17 +519,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
             //$('#lead-notes_for_experts').parent().addClass('has-error');
         }
     });
-
-    /*** Send email ***/
-    $('#send-email-action').click(function (e) {
-        e.preventDefault();
-        var editBlock = $('#create-quote');
-        editBlock.find('.modal-title').html('Send Email');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load($(this).data('url'), function( response, status, xhr ) {
-            editBlock.modal('show');
-        });
-    });
+    
 JS;
     $this->registerJs($js);
 }
@@ -606,65 +602,64 @@ $js = <<<JS
     });
 
     /*** Change Lead Status ***/
-    $('.add-reason').click(function (e) {
+    $('.add-reason').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#modal-error');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal('show');
+        let url = $(this).data('url');
+        let modal = $('#modal-df');
+        let title = $(this).attr('title');
+        $('#modal-df-label').html(title);
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            modal.modal('show');
         });
     });
 
-    $('.take-processing-btn').click(function (e) {
+    $('.take-processing-btn').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).attr('href');
+        let url = $(this).attr('href');
         if ($.inArray($(this).data('status'), [2, 8]) != -1) {
-            var editBlock = $('#modal-error');
-            editBlock.find('.modal-body').html('');
-            editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-                editBlock.modal('show');
+            let modal = $('#modal-lg');
+            $('#modal-lg-label').html('Take processing');
+            modal.find('.modal-body').html('');
+            modal.find('.modal-body').load(url, function( response, status, xhr ) {
+                modal.modal('show');
             });
         } else {
             window.location = url;
         }
     });
 
-    $('#view-client-actions-btn').click(function() {
-        var editBlock = $('#log-events');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load('$urlUserActions', function( response, status, xhr ) {
-            editBlock.modal('show');
-        });
-    });
+    
+       
 
     /***  Add PNR  ***/
-    $('#create-pnr').click(function (e) {
+    $('#create-pnr').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#create-quote');
-        editBlock.find('.modal-title').html('PAX INFO');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal('show');
+        let url = $(this).data('url');
+        let modal = $('#modal-df');
+        $('#modal-df-label').html('Create PNR');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            modal.modal('show');
         });
     });
 
-    $('#clone-lead').click(function (e) {
+    $('#clone-lead').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#modal-error');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal('show');
+        let url = $(this).data('url');
+        let modal = $('#modal-sm');
+        $('#modal-sm-label').html('Clone Lead');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            modal.modal('show');
         });
     });
     
     
     $('#btn-lead-logs').on('click', function(e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var modal = $('#modal-info');
+        let url = $(this).data('url');
+        let modal = $('#modal-info');
         modal.find('.modal-header').text('Lead Activity Logs');
         modal.find('.modal-body').html('');
         $('#preloader').removeClass('hidden');
@@ -677,7 +672,7 @@ $js = <<<JS
     
 
     //$(document).ready(function() {
-    var clipboard = new ClipboardJS('.btn-clipboard');
+    let clipboard = new ClipboardJS('.btn-clipboard');
 
     clipboard.on('success', function(e) {
         alert('Reservation dump copied successfully to clipboard');

@@ -58,9 +58,9 @@ $js = <<<JS
         var editBlock = $('#$formID');
         editBlock.parent().parent().removeClass('in');
         editBlock.parent().html('');
-        $('#create-quote').modal('hide');
+        $('#modal-lg').modal('hide');
         if ($(this).data('type') == 'search') {
-            $('#quick-search').modal('show');
+            //$('#quick-search').modal('show');
         }
     });
     $('#cancel-confirm-quote').click(function (e) {

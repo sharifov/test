@@ -304,11 +304,12 @@ if (!$leadForm->getLead()->isNewRecord) {
 
     $('#view-flow-transition').on('click', function() {
         $('#preloader').removeClass('hidden');
-        var editBlock = $('#get-request-flow-transition');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load('$flowTransitionUrl', function( response, status, xhr ) {
+        let modal = $('#modal-lg');
+        $('#modal-lg-label').html('Lead status logs');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load('$flowTransitionUrl', function( response, status, xhr ) {
             $('#preloader').addClass('hidden');
-            editBlock.modal('show');
+            modal.modal('show');
         });
     });
     
