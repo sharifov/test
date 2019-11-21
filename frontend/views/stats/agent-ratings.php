@@ -75,7 +75,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
         <?php if ($agentsBoardsSettings['profitPerPax']) : ?>
         <div id="profitPerPax" class="col-md-3" style="width: 20%">
             <div class="panel panel-default">
-                <div class="panel-heading"><i class="fa fa-users"></i> Top - AGENT by PROFIT PER PAX </div>
+                <div class="panel-heading"><i class="fa fa-users"></i> Top - AGENT by AVERAGE PROFIT PER PAX </div>
                 <div class="panel-body">
                     <?= \yii\widgets\ListView::widget([
                         'dataProvider' => $profitPerPaxDataProvider,
