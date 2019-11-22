@@ -73,7 +73,7 @@ class DepartmentEmailProjectController extends FController
 				foreach ($model->user_group_list as $userGroupId) {
 					$dug = new DepartmentEmailProjectUserGroup();
 					$dug->dug_ug_id = $userGroupId;
-					$dug->link('dugDpp', $model);
+					$dug->link('dugDep', $model);
 				}
 			}
 
@@ -102,7 +102,7 @@ class DepartmentEmailProjectController extends FController
 
 			if ($model->user_group_list) {
 
-				DepartmentPhoneProjectUserGroup::deleteAll(['dug_dpp_id' => $model->dpp_id]);
+				DepartmentPhoneProjectUserGroup::deleteAll(['dug_dep_id' => $model->dep_id]);
 
 				foreach ($model->user_group_list as $userGroupId) {
 					$dug = new DepartmentEmailProjectUserGroup();
