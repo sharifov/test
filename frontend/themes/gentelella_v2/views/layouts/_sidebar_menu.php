@@ -236,6 +236,22 @@ $isSuperAdmin = $user->canRole('superadmin');
         ];
 
         $menuItems[] = [
+            'label' => 'New Data',
+            'url' => 'javascript:',
+            'icon' => 'list',
+            'items' => [
+                ['label' => 'Currency List', 'url' => ['/currency/index']],
+                ['label' => 'Product Types', 'url' => ['/product-type/index']],
+                ['label' => 'Products', 'url' => ['/product/index']],
+                ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],
+                ['label' => 'Orders', 'url' => ['/order/index']],
+                ['label' => 'Offers', 'url' => ['/offer/index']],
+                ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
+                ['label' => 'Invoices', 'url' => ['/invoice/index']],
+            ]
+        ];
+
+        $menuItems[] = [
             'label' => Yii::t('menu', 'Languages'),
             'url' => 'javascript:',
             'icon' => 'language',
