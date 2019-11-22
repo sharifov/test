@@ -22,8 +22,8 @@ use common\models\Lead;
                         'hideInput' => true,
                         'convertFormat' => true,
                         'pluginOptions' => [
-                            'minDate' => date("Y-m-d H:i", strtotime("- 61 days")),
-                            'maxDate' => date("Y-m-d H:i"),
+                            'minDate' => date("Y-m-d 00:00", strtotime("- 61 days")),
+                            'maxDate' => date("Y-m-d 23:59"),
                             'timePicker' => true,
                             'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
