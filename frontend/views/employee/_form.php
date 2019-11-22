@@ -274,17 +274,17 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                         $idMaskIP = Html::getInputId($aclModel, 'mask');
 
                         $js = <<<JS
-    $('#acl-rule-id').click(function() {
+    $('#acl-rule-id').on('click', function() {
         $(this).addClass('d-none');
         $('#$idForm').removeClass('d-none');
     });
 
-    $('#close-btn').click(function() {
+    $('#close-btn').on('click', function() {
         $('#acl-rule-id').removeClass('d-none');
         $('#$idForm').addClass('d-none');
     });
 
-    $('#submit-btn').click(function() {
+    $('#submit-btn').on('click', function() {
         $.post($(this).data('url'), $('#$idForm input').serialize(),function( data ) {
             if (data.success) {
                 $('#employee-acl-rule').html(data.body);
