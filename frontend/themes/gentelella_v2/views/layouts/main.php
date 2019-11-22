@@ -204,6 +204,13 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 <?= $this->render('_modals') ?>
 <!-- /modals -->
 
+<div id="preloader" class="overlay d-none">
+    <div class="preloader">
+        <span class="fa fa-spinner fa-pulse fa-3x fa-fw"></span>
+        <div class="preloader__text">Loading...</div>
+    </div>
+</div>
+
 <?= frontend\widgets\CallBox::widget() ?>
 <?= frontend\widgets\WebPhone::widget() ?>
 

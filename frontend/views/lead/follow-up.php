@@ -368,14 +368,15 @@ echo GridView::widget([
 
 <?php
 $js = <<<JS
-    $('.take-processing-btn').click(function (e) {
+    $('.take-processing-btn').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).attr('href');
+        let url = $(this).attr('href');
         if ($.inArray($(this).data('status'), [2, 8]) != -1) {
-            var editBlock = $('#modal-error');
-            editBlock.find('.modal-body').html('');
-            editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-                editBlock.modal('show');
+            let modal = $('#modal-df');
+            $('#modal-df-label').html('Attention!');
+            modal.find('.modal-body').html('');
+            modal.find('.modal-body').load(url, function( response, status, xhr ) {
+                modal.modal('show');
             });
         } else {
             window.location = url;

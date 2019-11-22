@@ -18,17 +18,17 @@ $formID = sprintf('alt-quote-info-form-%d', $quote->id);
 
 $js = <<<JS
     /***  Cancel card  ***/
-    $('#cancel-alt-quote').click(function (e) {
+    $('#cancel-alt-quote').on('click', function (e) {
         e.preventDefault();
-        var editBlock = $('#$formID');
+        let editBlock = $('#$formID');
         editBlock.parent().parent().removeClass('in');
         editBlock.parent().html('');
-        $('#create-quote').modal('hide');
+        $('#modal-lg').modal('hide');
         if ($(this).data('type') == 'search') {
-            $('#quick-search').modal('show');
+            //$('#quick-search').modal('show');
         }
     });
-    $('#cancel-confirm-quote').click(function (e) {
+    $('#cancel-confirm-quote').on('click', function (e) {
         e.preventDefault();
         $('#modal-confirm-alt-itinerary').modal('hide');
     });

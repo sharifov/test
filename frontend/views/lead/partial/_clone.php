@@ -44,11 +44,3 @@ $form = ActiveForm::begin([
 <?php
 
 ActiveForm::end();
-
-$js = <<<JS
-$('#cancel-btn').click(function (e) {
-    e.preventDefault();
-    $('#modal-error').modal('hide');
-});
-JS;
-$this->registerJs($js); ?>

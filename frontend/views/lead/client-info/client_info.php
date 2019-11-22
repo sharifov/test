@@ -116,10 +116,6 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                 </div>
             </div>
 
-                    <?php /*  Html::button('<i class="fa fa-history"></i> Actions', [
-                'id' => 'view-client-actions-btn',
-                'class' => 'btn btn-default'
-            ]) */ ?>
 
                     <?/*= Html::button('<i class="fa fa-user"></i> Client Info', [
                         'class' => 'btn btn-default',

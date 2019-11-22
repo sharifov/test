@@ -12,7 +12,7 @@ Modal::begin([
     'id' => 'modal-clone-quote-by-id',
     'size' => Modal::SIZE_SMALL,
     //'clientOptions' => ['backdrop' => 'static'],
-    'title' => 'Clone Quote',
+    'title' => 'Clone Quote by UID',
 ]);
 
 $cloneQuoteForm = new CloneQuoteByUidForm();
@@ -35,7 +35,9 @@ $cloneQuoteForm = new CloneQuoteByUidForm();
 
     <?= $form->field($cloneQuoteForm, 'uid')->textInput() ?>
 
-    <?= Html::submitButton('Clone', ['class' => 'btn btn-success popover-close-btn']) ?>
+    <div class="text-center">
+        <?= Html::submitButton('<i class="fas fa-clone"></i> Clone quote', ['class' => 'btn btn-success popover-close-btn']) ?>
+    </div>
 
 <?php ActiveForm::end() ?>
 
@@ -45,8 +47,9 @@ Modal::end();
 
 ?>
 
-<?= Html::a('<i class="fa fa-plus-circle success"></i> Clone Quote by UID', null, [
+<?= Html::a('<i class="fa fa-clone success"></i> Clone Quote', null, [
     'class' => 'clone-quote-by-uid',
+    'title' => 'Clone Quote by UID'
 ]) ?>
 
 <?php

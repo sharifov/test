@@ -132,6 +132,24 @@ if (!empty($caseSaleModel)) {
                 <?php endif;?>
             </div>
 
+            <h2>Customer Information</h2>
+            <div style="width: 100%; overflow-x: auto;">
+				<?php if(!empty($data['customerInfo'])): ?>
+                    <table class="table table-bordered table-hover">
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Phone number</th>
+                        </tr>
+                        <tr>
+                            <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
+                            <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
+                            <td><?=Html::encode($data['customerInfo']['phoneNumber'] ?? '')?></td>
+                        </tr>
+                    </table>
+				<?php endif;?>
+            </div>
+
         </div>
 
         <div class="col-md-5">
