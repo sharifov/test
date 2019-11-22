@@ -1,5 +1,6 @@
 <?php
 
+use yii\web\View;
 use yii\grid\ActionColumn;
 
 /**
@@ -310,11 +311,13 @@ JS;
                                 ],
                                 'template' => '{label}: {input}',
                                 'enableClientValidation' => false
-                            ])->widget(MaskedInput::class, [
-                                'clientOptions' => [
-                                    'alias' => 'ip'
-                                ],
-                            ]) ?>
+                            ])->textInput(['maxlength' => true])
+//                                ->widget(MaskedInput::class, [
+//                                'clientOptions' => [
+//                                    'alias' => 'ip',
+//                                ],
+//                            ])
+                            ?>
                             <span>&nbsp;</span>
                             <?= $form->field($aclModel, 'description', [
                                 'options' => [

@@ -36,6 +36,7 @@ class EmployeeAcl extends \yii\db\ActiveRecord
             [['employee_id', 'active'], 'integer'],
             [['mask', 'description'], 'required'],
             [['created', 'updated'], 'safe'],
+			[['mask'], 'string', 'max' => '15', 'min' => '7'],
             ['mask', 'ip', 'ipv6' => false],
             ['mask', 'unique', 'targetAttribute' => ['mask', 'employee_id']],
             [['description'], 'string', 'max' => 255],
