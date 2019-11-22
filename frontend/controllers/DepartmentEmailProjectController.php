@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use common\models\DepartmentEmailProjectUserGroup;
-use common\models\DepartmentPhoneProjectUserGroup;
 use Yii;
 use common\models\DepartmentEmailProject;
 use common\models\search\DepartmentEmailProjectSearch;
@@ -102,7 +101,7 @@ class DepartmentEmailProjectController extends FController
 
 			if ($model->user_group_list) {
 
-				DepartmentPhoneProjectUserGroup::deleteAll(['dug_dep_id' => $model->dep_id]);
+				DepartmentEmailProjectUserGroup::deleteAll(['dug_dep_id' => $model->dep_id]);
 
 				foreach ($model->user_group_list as $userGroupId) {
 					$dug = new DepartmentEmailProjectUserGroup();
