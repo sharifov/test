@@ -223,7 +223,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'label' => 'Page'
         ],
         'toolbar' => [
-            'content' => Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], ['class' => 'btn btn-default', 'title'=>'Reset Grid']),
+            'content' =>'<div class="btn-group">'. Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], ['class' => 'btn btn-outline-secondary', 'title'=>'Reset Grid']) .'</div>',
             '{export}',
             $fullExportMenu,
         ],
