@@ -182,11 +182,11 @@ class DepartmentPhoneProjectController extends FController
             }
 
             return $this->redirect(['view', 'id' => $model->dpp_id]);
-        } else {
-            $model->user_group_list = ArrayHelper::map($model->dugUgs, 'ug_id', 'ug_id');
         }
 
-        return $this->render('update', [
+		$model->user_group_list = ArrayHelper::map($model->dugUgs, 'ug_id', 'ug_id');
+
+		return $this->render('update', [
             'model' => $model,
         ]);
     }
