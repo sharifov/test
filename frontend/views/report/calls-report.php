@@ -48,7 +48,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'format' => 'raw',
             'filter' => $list->getEmployees()
         ],
-        [
+        [   'label' =>'Report Date',
             'attribute' => 'createdDate',
         ],
         [

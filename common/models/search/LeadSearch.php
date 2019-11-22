@@ -2485,7 +2485,7 @@ class LeadSearch extends Lead
         ']);
 
         $query->groupBy(['DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '")), lf.lf_owner_id']);
-        $query->orderBy(['user_id' => SORT_ASC, 'created_date' => SORT_ASC]);
+        //$query->orderBy(['user_id' => SORT_ASC, 'created_date' => SORT_ASC]);
 
         $command = $query->createCommand();
         $sql = $command->sql;
@@ -2493,7 +2493,10 @@ class LeadSearch extends Lead
         $paramsData = [
             'sql' => $sql,
             'sort' => [
-                //'defaultOrder' => ['username' => SORT_ASC],
+                'defaultOrder' => [
+                    'user_id' => SORT_ASC,
+                    'created_date' => SORT_ASC
+                ],
                 'attributes' => [
                     'user_id',
                     'created_date',
