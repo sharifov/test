@@ -658,12 +658,33 @@ $js = <<<JS
         return false;
     });
     
+    
+     $('.btn-reservation-dump').on('click', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-df');
+        let title = $(this).attr('title');
+        $('#modal-df-label').html(title);
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        let content = $(this).data('content');
+        let content2 = '<textarea rows="5" id="text-quote-dump" readonly="readonly" style="width: 100%">' + content + '</textarea><br><br><div><button class="btn btn-primary btn-clipboard" data-clipboard-target="#text-quote-dump"><i class="fas fa-copy"></i> Copy to clipboard</button></div>';
+        
+        modal.find('.modal-body').html(content2);
+        modal.modal('show');
+        //return false;
+    });
+    
+    
+    
+    
+    
 
     //$(document).ready(function() {
     let clipboard = new ClipboardJS('.btn-clipboard');
 
     clipboard.on('success', function(e) {
-        alert('Reservation dump copied successfully to clipboard');
+        $('.btn-clipboard i').attr('class', 'fas fa-check');
+        //alert('Reservation dump copied successfully to clipboard');
         e.clearSelection();
     });
     //});

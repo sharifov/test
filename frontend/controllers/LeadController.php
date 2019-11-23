@@ -940,17 +940,18 @@ class LeadController extends FController
 //            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
 
         $query3 = (new \yii\db\Query())
-            ->addSelect(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
-            ->addSelect([new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
+            ->select(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
+            ->addSelect(['type' => new Expression('"voice"')])
+            ->addSelect(['lead_id' => 'c_lead_id', 'created_dt' => 'c_created_dt'])
             ->from('call')
             ->where(['c_lead_id' => $lead->id])
-            ->addGroupBy(['id']);
+            ->addGroupBy(['id', 'c_lead_id', 'c_created_dt']);
 
         $unionQuery = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)->union($query3)])
             ->orderBy(['created_dt' => SORT_ASC]);
 
-//        echo $query3->createCommand()->getRawSql(); exit;
+        //echo $query3->createCommand()->getRawSql(); exit;
 
         $dataProviderCommunication = new ActiveDataProvider([
             'query' => $unionQuery,

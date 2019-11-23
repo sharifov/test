@@ -2,8 +2,6 @@
 
 namespace sales\services\lead;
 
-use common\models\Client;
-use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
@@ -85,6 +83,31 @@ class LeadManageService
         $this->casesRepository = $casesRepository;
         $this->casesManageService = $casesManageService;
         $this->transaction = $transaction;
+    }
+
+    /**
+     * @param string $clientPhone
+     * @param int $clientId
+     * @param int|null $projectId
+     * @param int|null $sourceId
+     * @param int|null $departmentId
+     * @return Lead
+     */
+    public function createByIncomingSms(
+        string $clientPhone,
+        int $clientId,
+        ?int $projectId,
+        ?int $sourceId,
+        ?int $departmentId
+    ): Lead
+    {
+        $lead = Lead::createByIncomingSms($clientPhone, $clientId, $projectId, $sourceId, $departmentId);
+
+        $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$clientPhone]);
+
+        $this->leadRepository->save($lead);
+
+        return $lead;
     }
 
 	/**

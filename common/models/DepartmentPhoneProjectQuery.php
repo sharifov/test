@@ -47,4 +47,13 @@ class DepartmentPhoneProjectQuery extends \yii\db\ActiveQuery
             ->andWhere(['dpp_redial'=> true])
             ->exists();
     }
+
+    /**
+     * @param string $phone
+     * @return DepartmentPhoneProject|null
+     */
+    public function findByPhone(string $phone):? DepartmentPhoneProject
+    {
+        return $this->where(['dpp_phone_number' => $phone, 'dpp_enable' => true])->limit(1)->one();
+    }
 }
