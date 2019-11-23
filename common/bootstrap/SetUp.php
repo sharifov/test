@@ -14,6 +14,7 @@ use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
+use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
@@ -28,6 +29,8 @@ use sales\events\lead\LeadSnoozeEvent;
 use sales\events\lead\LeadSoldEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
+use sales\events\sms\SmsCreatedByIncomingSalesEvent;
+use sales\events\sms\SmsCreatedByIncomingSupportsEvent;
 use sales\listeners\cases\CasesFollowUpStatusEventLogListener;
 use sales\listeners\cases\CasesPendingStatusEventLogListener;
 use sales\listeners\cases\CasesProcessingStatusEventLogListener;
@@ -38,6 +41,7 @@ use sales\listeners\lead\LeadBookedNotificationsListener;
 use sales\listeners\lead\LeadCallExpertRequestEventListener;
 use sales\listeners\lead\LeadCreatedByApiLogEventListener;
 use sales\listeners\lead\LeadCreatedByIncomingCallLogListener;
+use sales\listeners\lead\LeadCreatedByIncomingSmsLogListener;
 use sales\listeners\lead\LeadCreatedCloneByUserEventListener;
 use sales\listeners\lead\LeadCreatedEventListener;
 use sales\listeners\lead\LeadDuplicateDetectedEventListener;
@@ -56,6 +60,8 @@ use sales\listeners\lead\LeadSoldEventLogListener;
 use sales\listeners\lead\LeadSoldNotificationsListener;
 use sales\listeners\lead\LeadTaskEventListener;
 use sales\listeners\lead\LeadTrashEventLogListener;
+use sales\listeners\sms\SmsCreatedByIncomingSalesNotificationListener;
+use sales\listeners\sms\SmsCreatedByIncomingSupportNotificationListener;
 use sales\services\log\GlobalLogDBService;
 use sales\logger\db\GlobalLogInterface;
 use yii\base\BootstrapInterface;
@@ -111,6 +117,7 @@ class SetUp implements BootstrapInterface
                     LeadCreatedByApiLogEventListener::class,
                     LeadQcallAddListener::class,
                 ],
+                LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
 
                 LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
 
@@ -119,6 +126,9 @@ class SetUp implements BootstrapInterface
                 CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],
                 CasesSolvedStatusEvent::class => [CasesSolvedStatusEventLogListener::class],
                 CasesTrashStatusEvent::class => [CasesTrashStatusEventLogListener::class],
+
+                SmsCreatedByIncomingSalesEvent::class => [SmsCreatedByIncomingSalesNotificationListener::class],
+                SmsCreatedByIncomingSupportsEvent::class => [SmsCreatedByIncomingSupportNotificationListener::class],
             ]));
         });
     }

@@ -58,6 +58,40 @@ class Cases extends ActiveRecord
 
     /**
      * @param int $clientId
+     * @param int $projectId
+     * @return static
+     */
+    public static function createExchangeByIncomingSms(int $clientId, int $projectId): self
+    {
+        $case = new static();
+        $case->cs_client_id = $clientId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_gid = self::generateGid();
+        $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->pending('Created by incoming sms');
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
+     * @param int $projectId
+     * @return static
+     */
+    public static function createSupportByIncomingSms(int $clientId, int $projectId): self
+    {
+        $case = new static();
+        $case->cs_client_id = $clientId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_gid = self::generateGid();
+        $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->pending('Created by incoming sms');
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
      * @param int $callId
      * @param int $projectId
      * @param int|null $depId
@@ -72,7 +106,7 @@ class Cases extends ActiveRecord
         $case->cs_dep_id = $depId;
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
-        $case->pending('created by call');
+        $case->pending('Created by call');
         return $case;
     }
 
@@ -103,7 +137,7 @@ class Cases extends ActiveRecord
         $case->cs_description = $description;
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
-        $case->pending('created by web');
+        $case->pending('Created by web');
         return $case;
     }
 
@@ -443,5 +477,13 @@ class Cases extends ActiveRecord
         }
 
         return $clientTime;
+    }
+
+    /**
+     * @return CasesQuery
+     */
+    public static function find(): CasesQuery
+    {
+        return new CasesQuery(get_called_class());
     }
 }
