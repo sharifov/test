@@ -12,7 +12,6 @@ use Yii;
 use common\models\LeadQcall;
 use common\models\QcallConfig;
 use yii\db\ActiveQuery;
-use yii\helpers\VarDumper;
 
 /**
  * Class QCallService
@@ -48,9 +47,9 @@ class QCallService
                 $lq,
                 new Config($lead->status, $lead->getCountOutCallsLastFlow()),
                 $lead->offset_gmt,
-                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                new FindPhoneParams($lead->project_id, $lead->l_dep_id),
+                new FindWeightParams($lead->project_id)
             );
-
         } else {
             $this->create(
                 $lead->id,
@@ -111,8 +110,15 @@ class QCallService
      * @param Config $config
      * @param string|null $clientGmt
      * @param FindPhoneParams $findPhoneParams
+     * @param FindWeightParams $findWeightParams
      */
-    public function updateInterval(LeadQcall $qCall, Config $config, ?string $clientGmt, FindPhoneParams $findPhoneParams): void
+    public function updateInterval(
+        LeadQcall $qCall,
+        Config $config,
+        ?string $clientGmt,
+        FindPhoneParams $findPhoneParams,
+        FindWeightParams $findWeightParams
+    ): void
     {
         if (!$qConfig = $this->findConfig($config)) {
             Yii::warning('QCallService:updateInterval. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
@@ -128,6 +134,8 @@ class QCallService
         );
 
         $qCall->updateInterval($interval);
+
+        $qCall->updateWeight($this->findWeight($findWeightParams));
 
         $phone = $this->findPhone($qCall->lqc_call_from, $qConfig->qc_phone_switch, $findPhoneParams, $qCall->lqc_lead_id);
 

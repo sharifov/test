@@ -631,7 +631,8 @@ class Call extends \yii\db\ActiveRecord
                         $lead->leadQcall,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
                         $lead->offset_gmt,
-                        new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                        new FindPhoneParams($lead->project_id, $lead->l_dep_id),
+                        new FindWeightParams($lead->project_id)
                     );
                 } catch (\Throwable $e) {
                     Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:QCallService:updateInterval');
