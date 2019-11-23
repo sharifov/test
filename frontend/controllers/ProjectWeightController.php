@@ -5,21 +5,21 @@ namespace frontend\controllers;
 use Yii;
 use common\models\ProjectWeight;
 use common\models\search\ProjectWeightSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * ProjectWeightController implements the CRUD actions for ProjectWeight model.
  */
-class ProjectWeightController extends Controller
+class ProjectWeightController extends FController
 {
     /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -27,6 +27,7 @@ class ProjectWeightController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
