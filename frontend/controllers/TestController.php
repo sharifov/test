@@ -69,6 +69,7 @@ use webapi\models\ApiLead;
 use Yii;
 use yii\base\Event;
 use yii\caching\DbDependency;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -136,6 +137,19 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $projectId = 1;
+        $statusId = 1;
+        $query = LeadQcall::find()->innerJoinWith(['lqcLead' => static function(ActiveQuery $query) use ($projectId, $statusId){
+            $query->andOnCondition([Lead::tableName() . '.status' => $statusId]);
+            $query->andOnCondition([Lead::tableName() . '.project_id' => $projectId]);
+        }])
+
+            ->createCommand()->getRawSql();
+//            ->all();
+
+        VarDumper::dump($query);
+        die;
+        return $this->render('blank');
 
         $items = [
             'si_phone_to' => '+18556979796',

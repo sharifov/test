@@ -7,6 +7,8 @@ use common\models\Lead;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
 use frontend\widgets\multipleUpdate\redial\MultipleUpdateForm;
+use frontend\widgets\multipleUpdate\redialAll\UpdateAllForm;
+use frontend\widgets\multipleUpdate\redialAll\UpdateAllService;
 use sales\access\ListsAccess;
 use sales\guards\lead\TakeGuard;
 use sales\services\lead\LeadRedialService;
@@ -25,6 +27,7 @@ use yii\widgets\ActiveForm;
  * @property LeadRedialService $leadRedialService
  * @property TakeGuard $takeGuard
  * @property MultipleUpdateService $multipleUpdate
+ * @property UpdateAllService $updateAllService
  */
 class LeadRedialController extends FController
 {
@@ -49,6 +52,7 @@ class LeadRedialController extends FController
     private $leadRedialService;
     private $takeGuard;
     private $multipleUpdate;
+    private $updateAllService;
 
     public function __construct(
         $id,
@@ -56,6 +60,7 @@ class LeadRedialController extends FController
         LeadRedialService $leadRedialService,
         TakeGuard $takeGuard,
         MultipleUpdateService $multipleUpdate,
+        UpdateAllService $updateAllService,
         $config = []
     )
     {
@@ -63,6 +68,7 @@ class LeadRedialController extends FController
         $this->leadRedialService = $leadRedialService;
         $this->multipleUpdate = $multipleUpdate;
         $this->takeGuard = $takeGuard;
+        $this->updateAllService = $updateAllService;
     }
 
     public function actionIndex(): string
@@ -387,6 +393,63 @@ class LeadRedialController extends FController
     }
 
     /**
+     * @return string
+     * @throws ForbiddenHttpException
+     */
+    public function actionUpdateAllShow(): string
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if (!$user->isAdmin()) {
+            throw new ForbiddenHttpException('Access is denied.');
+        }
+
+        return $this->renderAjax('_update_all_show');
+    }
+
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
+    public function actionUpdateAll(): Response
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if (!$user->isAdmin()) {
+            throw new ForbiddenHttpException('Access is denied.');
+        }
+        
+        $form = new UpdateAllForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $report = $this->updateAllService->update($form);
+            return $this->asJson(['success' => true, 'text' => count($report) . ' rows updated.']);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
+    public function actionUpdateAllValidation(): array
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if (!$user->isAdmin()) {
+            throw new ForbiddenHttpException('Access is denied.');
+        }
+
+        $form = new UpdateAllForm();
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
      * @param $gid
      * @return Lead
      * @throws NotFoundHttpException
@@ -411,5 +474,4 @@ class LeadRedialController extends FController
         }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-
 }
