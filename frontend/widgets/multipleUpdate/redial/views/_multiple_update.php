@@ -13,9 +13,9 @@ use yii\helpers\Html;
 /** @var string $reportWrapperId */
 
 ?>
-    <p>
+
         <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info multiple-update-btn']) ?>
-    </p>
+
 
 <?php
 
