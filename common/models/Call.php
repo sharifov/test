@@ -621,6 +621,21 @@ class Call extends \yii\db\ActiveRecord
                         }
                     }
 
+                    try {
+                        $attempts = (int)Yii::$app->params['settings']['redial_max_attempts_for_dates_passed'];
+                        if (
+                            $lf->lf_out_calls > $attempts
+                            && ($departure = $lead->getDeparture())
+                            && strtotime($departure) < time()
+                        ) {
+                            $qCallService = Yii::createObject(QCallService::class);
+                            $qCallService->remove($lead->id);
+                            $lead->trash($lead->employee_id, null, 'Travel Dates Passed');
+                            $leadRepository->save($lead);
+                        }
+                    } catch (\Throwable $e) {
+                        Yii::error($e, 'redial_max_attempts_for_dates_passed');
+                    }
                 }
             }
 
