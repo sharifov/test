@@ -8,6 +8,7 @@ use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
@@ -317,6 +318,12 @@ class CasesController extends FController
 
             $comForm->c_case_id = $model->cs_id;
 
+            $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS;
+
+            if ($isTypeSMS && $model->isDepartmentSupport()) {
+            	$comForm->scenario = CaseCommunicationForm::SCENARIO_SMS_DEPARTMENT;
+			}
+
             if ($comForm->validate()) {
 
                 $project = $model->project;
@@ -429,7 +436,7 @@ class CasesController extends FController
                 }
 
 
-                if ((int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS) {
+                if ($isTypeSMS) {
 
                     $comForm->c_preview_sms = 1;
 
@@ -444,7 +451,11 @@ class CasesController extends FController
                     $content_data['project_id'] = $model->cs_project_id;
                     $phoneFrom = '';
 
-                    if ($model->cs_project_id) {
+                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::findOne(['dpp_id' => $comForm->dpp_phone_id])) {
+
+						$phoneFrom = $departmentPhone->dpp_phone_number;
+
+					} elseif ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                         if ($upp) {
                             $phoneFrom = $upp->upp_tw_phone_number;

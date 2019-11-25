@@ -22,6 +22,7 @@ use yii\db\ActiveRecord;
  * @property string $dpp_updated_dt
  * @property bool $dpp_redial
  * @property string $dpp_description
+ * @property int $dpp_default
  *
  * @property array $user_group_list
  *
@@ -36,6 +37,8 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
 {
 
     public $user_group_list = [];
+
+    public const DPP_DEFAULT_TRUE = 1;
 
     /**
      * {@inheritdoc}
@@ -52,7 +55,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     {
         return [
             [['dpp_project_id', 'dpp_phone_number'], 'required'],
-            [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_updated_user_id'], 'integer'],
+            [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_updated_user_id', 'dpp_default'], 'integer'],
             [['dpp_phone_number'], 'unique'],
             [['dpp_ivr_enable', 'dpp_enable'], 'boolean'],
             [['dpp_params', 'dpp_updated_dt', 'user_group_list'], 'safe'],
@@ -86,6 +89,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             'dpp_updated_dt' => 'Updated Date',
             'dpp_redial' => 'Redial phone',
             'dpp_description' => 'Description',
+			'dpp_default' => 'Default'
         ];
     }
 

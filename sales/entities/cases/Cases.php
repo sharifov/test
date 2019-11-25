@@ -5,6 +5,7 @@ namespace sales\entities\cases;
 use common\models\Call;
 use common\models\Client;
 use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
@@ -50,6 +51,7 @@ use Yii;
  * @property Client $client
  * @property Project $project
  * @property CasesStatusLog[] $casesStatusLogs
+ * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  */
 class Cases extends ActiveRecord
 {
@@ -178,6 +180,14 @@ class Cases extends ActiveRecord
     {
         return $this->cs_status === CasesStatus::STATUS_PENDING;
     }
+
+	/**
+	 * @return bool
+	 */
+    public function isDepartmentSupport(): bool
+	{
+		return $this->cs_dep_id === Department::DEPARTMENT_SUPPORT;
+	}
 
     /**
      * @param int $userId
@@ -383,6 +393,14 @@ class Cases extends ActiveRecord
     {
         return $this->hasMany(CasesStatusLog::class, ['csl_case_id' => 'cs_id']);
     }
+
+	/**
+	 * @return ActiveQuery
+	 */
+    public function getDepartmentPhonesByProjectAndDepartment(): ActiveQuery
+	{
+		return $this->hasMany(DepartmentPhoneProject::class, ['dpp_project_id' => 'cs_project_id', 'dpp_dep_id' => 'cs_dep_id']);
+	}
 
     /**
      * @return ActiveQuery
