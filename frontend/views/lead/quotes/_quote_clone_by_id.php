@@ -101,14 +101,14 @@ $('#clone-quote-by-id-form').on('beforeSubmit', function (e) {
         }
     )
     .done(function(data) {
-       $('#modal-clone-quote-by-id').modal('hide');
+        $('#modal-clone-quote-by-id').modal('hide');
        resetCloneForm();
        if(data.success) {
            let text = 'Cloned new quote';
            if (data.message) {
                text = data.message;
            }
-            $.pjax.reload({container: '#quotes_list', async: false});
+            $.pjax.reload({container: '#quotes_list', async: true});
             new PNotify({
                 title: "Clone Quote by UID",
                 type: "success",
@@ -129,7 +129,6 @@ $('#clone-quote-by-id-form').on('beforeSubmit', function (e) {
         }
     })
     .fail(function () {
-       $('#modal-clone-quote-by-id').modal('hide');
        resetCloneForm();
         new PNotify({
             title: "Clone Quote by UID",

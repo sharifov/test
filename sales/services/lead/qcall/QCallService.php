@@ -5,13 +5,13 @@ namespace sales\services\lead\qcall;
 use common\models\Call;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
+use common\models\ProjectWeight;
 use sales\repositories\lead\LeadFlowRepository;
 use sales\repositories\lead\LeadQcallRepository;
 use Yii;
 use common\models\LeadQcall;
 use common\models\QcallConfig;
 use yii\db\ActiveQuery;
-use yii\helpers\VarDumper;
 
 /**
  * Class QCallService
@@ -47,14 +47,14 @@ class QCallService
                 $lq,
                 new Config($lead->status, $lead->getCountOutCallsLastFlow()),
                 $lead->offset_gmt,
-                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                new FindPhoneParams($lead->project_id, $lead->l_dep_id),
+                new FindWeightParams($lead->project_id)
             );
-
         } else {
             $this->create(
                 $lead->id,
                 new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                ($lead->project_id * 10),
+                new FindWeightParams($lead->project_id),
                 $lead->offset_gmt,
                 new FindPhoneParams($lead->project_id, $lead->l_dep_id)
             );
@@ -64,7 +64,7 @@ class QCallService
     /**
      * @param int $leadId
      * @param Config $config
-     * @param int $weight
+     * @param FindWeightParams $findWeightParams
      * @param string|null $clientGmt
      * @param FindPhoneParams $findPhoneParams
      * @param string|null $phoneFrom
@@ -72,7 +72,7 @@ class QCallService
     public function create(
         int $leadId,
         Config $config,
-        int $weight,
+        FindWeightParams $findWeightParams,
         ?string $clientGmt,
         FindPhoneParams $findPhoneParams,
         ?string $phoneFrom = null
@@ -87,6 +87,8 @@ class QCallService
             Yii::error('QCallService:create. LeadId: ' . $leadId . ' is exists');
             return;
         }
+
+        $weight = $this->findWeight($findWeightParams);
 
         $interval = (new CalculateDateService())->calculate(
             $qConfig->qc_time_from,
@@ -108,8 +110,15 @@ class QCallService
      * @param Config $config
      * @param string|null $clientGmt
      * @param FindPhoneParams $findPhoneParams
+     * @param FindWeightParams $findWeightParams
      */
-    public function updateInterval(LeadQcall $qCall, Config $config, ?string $clientGmt, FindPhoneParams $findPhoneParams): void
+    public function updateInterval(
+        LeadQcall $qCall,
+        Config $config,
+        ?string $clientGmt,
+        FindPhoneParams $findPhoneParams,
+        FindWeightParams $findWeightParams
+    ): void
     {
         if (!$qConfig = $this->findConfig($config)) {
             Yii::warning('QCallService:updateInterval. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
@@ -125,6 +134,8 @@ class QCallService
         );
 
         $qCall->updateInterval($interval);
+
+        $qCall->updateWeight($this->findWeight($findWeightParams));
 
         $phone = $this->findPhone($qCall->lqc_call_from, $qConfig->qc_phone_switch, $findPhoneParams, $qCall->lqc_lead_id);
 
@@ -331,5 +342,17 @@ class QCallService
     private function isExists(int $leadId): bool
     {
         return LeadQcall::find()->andWhere(['lqc_lead_id' => $leadId])->exists();
+    }
+
+    /**
+     * @param FindWeightParams $params
+     * @return int
+     */
+    private function findWeight(FindWeightParams $params): int
+    {
+        if ($weight = ProjectWeight::find()->andWhere(['pw_project_id' => $params->projectId])->one()) {
+            return (int)$weight->pw_weight;
+        }
+        return 0;
     }
 }

@@ -11,6 +11,7 @@ use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
+use sales\services\lead\qcall\FindWeightParams;
 use sales\services\lead\qcall\QCallService;
 use Yii;
 use DateTime;
@@ -630,7 +631,8 @@ class Call extends \yii\db\ActiveRecord
                         $lead->leadQcall,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
                         $lead->offset_gmt,
-                        new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                        new FindPhoneParams($lead->project_id, $lead->l_dep_id),
+                        new FindWeightParams($lead->project_id)
                     );
                 } catch (\Throwable $e) {
                     Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:QCallService:updateInterval');
@@ -826,7 +828,7 @@ class Call extends \yii\db\ActiveRecord
                     $qCallService->create(
                         $lead->id,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                        ($lead->project_id * 10),
+                        new FindWeightParams($lead->project_id),
                         $lead->offset_gmt,
                         new FindPhoneParams($lead->project_id, $lead->l_dep_id)
                     );
@@ -840,7 +842,7 @@ class Call extends \yii\db\ActiveRecord
                     $qCallService->create(
                         $lead->id,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                        ($lead->project_id * 10),
+                        new FindWeightParams($lead->project_id),
                         $lead->offset_gmt,
                         new FindPhoneParams($lead->project_id, $lead->l_dep_id)
                     );
