@@ -88,6 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'dpp_params',
             'dpp_ivr_enable:boolean',
             'dpp_enable:boolean',
+            'dpp_default:boolean',
 
             [
                 'attribute' => 'dpp_updated_user_id',

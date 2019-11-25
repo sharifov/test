@@ -9,6 +9,8 @@ use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadLog;
 use common\models\LeadQcall;
+use common\models\Project;
+use common\models\ProjectWeight;
 use common\models\Quote;
 use common\models\UserProjectParams;
 use frontend\models\UserSiteActivity;
@@ -43,6 +45,16 @@ class DbController extends Controller
 	 * @var GlobalLogFormatAttrService
 	 */
 	private $globalLogFormatAttrService;
+
+    public function actionInitProjectWeight()
+    {
+        if (((int)ProjectWeight::find()->count()) > 0) {
+            return 'Table not empty';
+        }
+        $projects = Project::find()->select(['id'])->indexBy('id')->asArray()->all();
+
+        Yii::$app->db->createCommand()->batchInsert('{{%project_weight}}', ['pw_project_id'],$projects)->execute();
+	}
 
 	/**
 	 * DbController constructor.

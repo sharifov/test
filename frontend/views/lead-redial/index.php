@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\redial\MultipleUpdateWidget;
+use frontend\widgets\multipleUpdate\redialAll\UpdateAllWidget;
 use frontend\widgets\UserInfoProgress;
 use sales\access\ListsAccess;
 use yii\helpers\Html;
@@ -32,7 +33,7 @@ $list = new ListsAccess($user->id);
             <?= UserInfoProgress::widget(['user' => $user])?>
         </div>
 
-        <?= Html::button('<i class="fa fa-phone"></i> New Call', [
+        <?= Html::button('<i class="fa fa-phone"></i> Call Next', [
             'class' => 'btn btn-success btn-lg lead-next-btn'
         ])?>
 
@@ -77,6 +78,7 @@ $list = new ListsAccess($user->id);
         <div style="font-size: 30px">Redial Queue</div>
 
         <?php if ($user->isAdmin()) : ?>
+
             <?= MultipleUpdateWidget::widget([
                     'gridId' => 'redialGrid',
                     'script' => '$.pjax.reload({container: "#lead-redial-pjax", async: false});',
@@ -84,6 +86,12 @@ $list = new ListsAccess($user->id);
                     'validationUrl' => Url::to(['lead-redial/multiple-update-validate']),
                     'reportWrapperId' => 'redial-call-box-wrapper'
             ]) ?>
+
+            <?= UpdateAllWidget::widget([
+                    'modalId' => 'modal-df',
+                    'showUrl' => Url::to(['/lead-redial/update-all-show']),
+            ]) ?>
+
         <?php endif; ?>
 
         <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>

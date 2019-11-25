@@ -5,6 +5,7 @@ namespace sales\entities\cases;
 use common\models\Call;
 use common\models\Client;
 use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
@@ -50,11 +51,46 @@ use Yii;
  * @property Client $client
  * @property Project $project
  * @property CasesStatusLog[] $casesStatusLogs
+ * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  */
 class Cases extends ActiveRecord
 {
 
     use EventTrait;
+
+    /**
+     * @param int $clientId
+     * @param int $projectId
+     * @return static
+     */
+    public static function createExchangeByIncomingSms(int $clientId, int $projectId): self
+    {
+        $case = new static();
+        $case->cs_client_id = $clientId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_gid = self::generateGid();
+        $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->pending('Created by incoming sms');
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
+     * @param int $projectId
+     * @return static
+     */
+    public static function createSupportByIncomingSms(int $clientId, int $projectId): self
+    {
+        $case = new static();
+        $case->cs_client_id = $clientId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_gid = self::generateGid();
+        $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->pending('Created by incoming sms');
+        return $case;
+    }
 
     /**
      * @param int $clientId
@@ -72,7 +108,7 @@ class Cases extends ActiveRecord
         $case->cs_dep_id = $depId;
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
-        $case->pending('created by call');
+        $case->pending('Created by call');
         return $case;
     }
 
@@ -103,7 +139,7 @@ class Cases extends ActiveRecord
         $case->cs_description = $description;
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
-        $case->pending('created by web');
+        $case->pending('Created by web');
         return $case;
     }
 
@@ -144,6 +180,14 @@ class Cases extends ActiveRecord
     {
         return $this->cs_status === CasesStatus::STATUS_PENDING;
     }
+
+	/**
+	 * @return bool
+	 */
+    public function isDepartmentSupport(): bool
+	{
+		return $this->cs_dep_id === Department::DEPARTMENT_SUPPORT;
+	}
 
     /**
      * @param int $userId
@@ -350,6 +394,14 @@ class Cases extends ActiveRecord
         return $this->hasMany(CasesStatusLog::class, ['csl_case_id' => 'cs_id']);
     }
 
+	/**
+	 * @return ActiveQuery
+	 */
+    public function getDepartmentPhonesByProjectAndDepartment(): ActiveQuery
+	{
+		return $this->hasMany(DepartmentPhoneProject::class, ['dpp_project_id' => 'cs_project_id', 'dpp_dep_id' => 'cs_dep_id']);
+	}
+
     /**
      * @return ActiveQuery
      */
@@ -443,5 +495,13 @@ class Cases extends ActiveRecord
         }
 
         return $clientTime;
+    }
+
+    /**
+     * @return CasesQuery
+     */
+    public static function find(): CasesQuery
+    {
+        return new CasesQuery(get_called_class());
     }
 }

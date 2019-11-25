@@ -48,6 +48,14 @@ class LeadQcall extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param int $weight
+     */
+    public function updateWeight(int $weight): void
+    {
+        $this->lqc_weight = $weight;
+    }
+
+    /**
      * @param Interval $interval
      */
     public function updateInterval(Interval $interval): void

@@ -194,7 +194,7 @@ class LeadQcallSearch extends LeadQcall
 		}
 
         $redialSame = (int)Yii::$app->params['settings']['redial_same_deadline_priority'];
-        $samePriority = "TIMESTAMPDIFF(MINUTE, lqc_dt_to, '" . date('Y-m-d H:i:s') . "')";
+        $samePriority = "TIMESTAMPDIFF(MINUTE, '" . date('Y-m-d H:i:s') . "', lqc_dt_to)";
         $query->addSelect([
             'same_priority' =>
                 new Expression('if (' . $samePriority . ' <= ' . $redialSame . ', 1, 0) ')

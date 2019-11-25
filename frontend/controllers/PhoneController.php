@@ -12,6 +12,7 @@ use common\models\Notifications;
 use common\models\Project;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\entities\cases\Cases;
 use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -73,10 +74,15 @@ class PhoneController extends FController
         $project = Project::findOne($project_id);
 
         $userId = \Yii::$app->user->id; //identity;
-        $userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->all();
+		$case = Cases::findOne(['cs_id' => $case_id]);
 
         $fromPhoneNumbers = [];
-        if($userParams) {
+        if ($case && $case->isDepartmentSupport()) {
+			$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $project_id, 'dpp_dep_id' => $case->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->all();
+			foreach ($departmentPhones as $departmentPhone) {
+				$fromPhoneNumbers[$departmentPhone->dpp_phone_number] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->dpp_phone_number . ')';
+			}
+		} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->all()) {
             foreach ($userParams as $param) {
                 if(!$param->upp_tw_phone_number) {
                     continue;

@@ -48,4 +48,21 @@ class UserProjectParamsRepository
 
     }
 
+    /**
+     * @param string|null $phone
+     * @return array ex.[1,34,54]
+     */
+    public function findUsersIdByPhone(?string $phone): array
+    {
+        if (!$phone) {
+            return [];
+        }
+        $users = [];
+        $params = UserProjectParams::find()->where(['upp_tw_phone_number' => $phone])->all();
+        foreach ($params as $param) {
+            $users[] = $param->upp_user_id;
+        }
+        return $users;
+    }
+
 }

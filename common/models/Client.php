@@ -225,4 +225,11 @@ class Client extends ActiveRecord
         return ArrayHelper::map($this->clientEmails, 'email', 'email');
     }
 
+    /**
+     * @return ClientQuery
+     */
+    public static function find(): ClientQuery
+    {
+        return new ClientQuery(get_called_class());
+    }
 }

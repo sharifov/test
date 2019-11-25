@@ -49,6 +49,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'dpp_ivr_enable')->checkbox() ?>
 
+        <?= $form->field($model, 'dpp_default')->checkbox() ?>
+
 
 
         <?//= $form->field($model, 'dpp_updated_user_id')->textInput() ?>

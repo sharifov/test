@@ -509,6 +509,9 @@ pre {
 .has-error .errorMessage {
   color: #d83c49;
 }
+.has-error .help-block {
+  color: #d83c49;
+}
 
 .error-block {
   padding: 2px 6px;
@@ -1947,7 +1950,8 @@ input[disabled] + .radio-tab__text {
 }
 
 .modal {
-  overflow: auto;
+    overflow: auto;
+    color: #596b7d;
 }
 
 /*End Fix*/

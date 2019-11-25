@@ -36,6 +36,30 @@ class Department extends \yii\db\ActiveRecord
     ];
 
     /**
+     * @return bool
+     */
+    public function isSales(): bool
+    {
+        return $this->dep_id === self::DEPARTMENT_SALES;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isExchange(): bool
+    {
+        return $this->dep_id === self::DEPARTMENT_EXCHANGE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSupport(): bool
+    {
+        return $this->dep_id === self::DEPARTMENT_SUPPORT;
+    }
+
+    /**
      * @param int $depId
      * @return string
      */

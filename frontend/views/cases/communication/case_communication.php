@@ -319,7 +319,9 @@ $c_type_id = $comForm->c_type_id;
 
                                             if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
 
-                                                if ($agentParams->upp_tw_phone_number) {
+                                                if ($model->isDepartmentSupport()) {
+                                                    $typeList[$tk] = $itemName;
+                                                } else if ($agentParams->upp_tw_phone_number) {
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
                                                 }
                                             }
@@ -375,6 +377,15 @@ $c_type_id = $comForm->c_type_id;
                             <div class="col-sm-3 form-group message-field-phone message-field-sms" id="phone-numbers-group" style="display: block;">
                                 <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_phone_number']) ?>
                             </div>
+
+                            <?php if ($model->isDepartmentSupport()): ?>
+                                <div class="col-md-3 form-group message-field-sms" id="sms-phone-numbers">
+                                    <?php
+                                        $departmentPhones = \yii\helpers\ArrayHelper::toArray($model->getDepartmentPhonesByProjectAndDepartment()->where(['dpp_default' => \common\models\DepartmentPhoneProject::DPP_DEFAULT_TRUE])->all());
+                                    ?>
+                                    <?= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), ['prompt' => '---', 'class' => 'form-control']) ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <div id="sms-input-box" class="message-field-sms">
                             <div class="form-group" id="sms-textarea-div">

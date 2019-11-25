@@ -12,6 +12,7 @@ use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
+use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
@@ -33,6 +34,7 @@ use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
+use sales\services\lead\qcall\FindWeightParams;
 use sales\services\lead\qcall\QCallService;
 use Yii;
 use yii\base\InvalidArgumentException;
@@ -489,6 +491,35 @@ class Lead extends ActiveRecord
         $clone->employee_id = null;
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
+    }
+
+    /**
+     * @param string $clientPhone
+     * @param int $clientId
+     * @param int|null $projectId
+     * @param int|null $sourceId
+     * @param int|null $departmentId
+     * @return Lead
+     */
+    public static function createByIncomingSms(
+        string $clientPhone,
+        int $clientId,
+        ?int $projectId,
+        ?int $sourceId,
+        ?int $departmentId
+    ): self
+    {
+        $lead = new static();
+        $lead->l_client_phone = $clientPhone;
+        $lead->client_id = $clientId;
+        $lead->project_id = $projectId;
+        $lead->source_id = $sourceId;
+        $lead->l_dep_id = $departmentId;
+        $lead->uid = self::generateUid();
+        $lead->gid = self::generateGid();
+        $lead->status = self::STATUS_PENDING;
+        $lead->recordEvent(new LeadCreatedByIncomingSmsEvent($lead));
+        return $lead;
     }
 
 	/**
@@ -2597,7 +2628,7 @@ Reason: {reason}
                                 $this->status,
                                 $this->getCountOutCallsLastFlow()
                             ),
-                            ($this->project_id * 10),
+                            new FindWeightParams($this->project_id),
                             $this->offset_gmt,
                             new FindPhoneParams($this->project_id, $this->l_dep_id)
                         );

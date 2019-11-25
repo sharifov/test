@@ -19,6 +19,8 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
 use sales\repositories\lead\LeadRepository;
+use sales\services\sms\incoming\SmsIncomingForm;
+use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -1791,91 +1793,101 @@ class CommunicationController extends ApiBaseController
         }
 
         try {
-
-                    $sms = new Sms();
-                    $sms->s_type_id = Sms::TYPE_INBOX;
-                    $sms->s_status_id = Sms::STATUS_DONE;
-                    $sms->s_is_new = true;
-
-                    $sms->s_status_done_dt = isset($smsItem['si_sent_dt']) ? date('Y-m-d H:i:s', strtotime($smsItem['si_sent_dt'])) : null;
-
-                    //$sms->s_communication_id = $smsItem['si_id'] ?? null;
-
-                    $sms->s_phone_to = $smsItem['si_phone_to'];
-                    $sms->s_phone_from = $smsItem['si_phone_from'];
-                    $sms->s_project_id = $smsItem['si_project_id'] ?? null;
-                    $sms->s_sms_text = $smsItem['si_sms_text'];
-                    $sms->s_created_dt = $smsItem['si_created_dt'];
-
-                    $sms->s_tw_message_sid = $smsItem['si_message_sid'] ?? null;
-                    $sms->s_tw_num_segments = $smsItem['si_num_segments'] ?? null;
-
-                    $sms->s_tw_to_country = $smsItem['si_to_country'] ?? null;
-                    $sms->s_tw_to_state = $smsItem['si_to_state'] ?? null;
-                    $sms->s_tw_to_city = $smsItem['si_to_city'] ?? null;
-                    $sms->s_tw_to_zip = $smsItem['si_to_zip'] ?? null;
-
-                    $sms->s_tw_from_country = $smsItem['si_from_country'] ?? null;
-                    $sms->s_tw_from_city = $smsItem['si_from_city'] ?? null;
-                    $sms->s_tw_from_state = $smsItem['si_from_state'] ?? null;
-                    $sms->s_tw_from_zip = $smsItem['si_from_zip'] ?? null;
-
-
-                    $lead_id = $sms->detectLeadId();
-
-
-                    if($lead_id) {
-                        $lead = Lead::findOne($lead_id);
-                        if($lead) {
-                            $sms->s_project_id = $lead->project_id;
-                        }
-                        // Yii::info('SMS Detected LeadId '.$lead_id.' from '.$sms->s_phone_from, 'info\API:Communication:newSmsMessagesReceived:Sms');
-                    }
-
-
-                    if(!$sms->save()) {
-                        Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newSmsMessagesReceived:Sms:save');
-                        $response['error_code'] = 12;
-                        throw new \Exception('Error save SMS data ' . VarDumper::dumpAsString($sms->errors));
-                    }
-
-
-                    //Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
-
-
-                    $users = $sms->getUsersIdByPhone();
-
-                    $clientPhone = ClientPhone::find()->where(['phone' => $sms->s_phone_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                    if($clientPhone) {
-                        $clientName = $clientPhone->client ? $clientPhone->client->full_name : '-';
+                    $form = new SmsIncomingForm();
+                    $data['SmsIncomingForm'] = $smsItem;
+                    $form->load($data);
+                    if ($form->validate()) {
+                        $response = (Yii::createObject(SmsIncomingService::class))->create($form)->attributes;
                     } else {
-                        $clientName = '-';
+                        Yii::error(VarDumper::dumpAsString($form->errors), 'API:Communication:newSmsMessagesReceived:Sms:validate');
+                        $response['error_code'] = 12;
+                        throw new \Exception('Error save SMS data ' . VarDumper::dumpAsString($form->errors));
                     }
 
-                    $user_id = 0;
-
-                    if($users) {
-                        foreach ($users as $user_id) {
-
-                            Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
-                            . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);
-                            //Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
-
-                            Notifications::sendSocket('getNewNotification', ['user_id' => $user_id], ['sms_id' => $sms->s_id]);
-                        }
-                    }
-
-                    if($user_id > 0) {
-                        $sms->s_created_user_id = $user_id;
-                        $sms->save();
-                    }
-
-                    if($lead_id) {
-                        // Notifications::socket(null, $lead_id, 'updateCommunication', ['sms_id' => $sms->s_id], true);
-                        Notifications::sendSocket('getNewNotification', ['lead_id' => $lead_id], ['sms_id' => $sms->s_id]);
-                    }
-
-                    $response = $sms->attributes;
+//                    $sms = new Sms();
+//                    $sms->s_type_id = Sms::TYPE_INBOX;
+//                    $sms->s_status_id = Sms::STATUS_DONE;
+//                    $sms->s_is_new = true;
+//
+//                    $sms->s_status_done_dt = isset($smsItem['si_sent_dt']) ? date('Y-m-d H:i:s', strtotime($smsItem['si_sent_dt'])) : null;
+//
+//                    //$sms->s_communication_id = $smsItem['si_id'] ?? null;
+//
+//                    $sms->s_phone_to = $smsItem['si_phone_to'];
+//                    $sms->s_phone_from = $smsItem['si_phone_from'];
+//                    $sms->s_project_id = $smsItem['si_project_id'] ?? null;
+//                    $sms->s_sms_text = $smsItem['si_sms_text'];
+//                    $sms->s_created_dt = $smsItem['si_created_dt'];
+//
+//                    $sms->s_tw_message_sid = $smsItem['si_message_sid'] ?? null;
+//                    $sms->s_tw_num_segments = $smsItem['si_num_segments'] ?? null;
+//
+//                    $sms->s_tw_to_country = $smsItem['si_to_country'] ?? null;
+//                    $sms->s_tw_to_state = $smsItem['si_to_state'] ?? null;
+//                    $sms->s_tw_to_city = $smsItem['si_to_city'] ?? null;
+//                    $sms->s_tw_to_zip = $smsItem['si_to_zip'] ?? null;
+//
+//                    $sms->s_tw_from_country = $smsItem['si_from_country'] ?? null;
+//                    $sms->s_tw_from_city = $smsItem['si_from_city'] ?? null;
+//                    $sms->s_tw_from_state = $smsItem['si_from_state'] ?? null;
+//                    $sms->s_tw_from_zip = $smsItem['si_from_zip'] ?? null;
+//
+//
+//                    $lead_id = $sms->detectLeadId();
+//
+//
+//                    if($lead_id) {
+//                        $lead = Lead::findOne($lead_id);
+//                        if($lead) {
+//                            $sms->s_project_id = $lead->project_id;
+//                        }
+//                        // Yii::info('SMS Detected LeadId '.$lead_id.' from '.$sms->s_phone_from, 'info\API:Communication:newSmsMessagesReceived:Sms');
+//                    }
+//
+//
+//                    if(!$sms->save()) {
+//                        Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newSmsMessagesReceived:Sms:save');
+//                        $response['error_code'] = 12;
+//                        throw new \Exception('Error save SMS data ' . VarDumper::dumpAsString($sms->errors));
+//                    }
+//
+//
+//                    //Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
+//
+//
+//                    $users = $sms->getUsersIdByPhone();
+//
+//                    $clientPhone = ClientPhone::find()->where(['phone' => $sms->s_phone_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+//                    if($clientPhone) {
+//                        $clientName = $clientPhone->client ? $clientPhone->client->full_name : '-';
+//                    } else {
+//                        $clientName = '-';
+//                    }
+//
+//                    $user_id = 0;
+//
+//                    if($users) {
+//                        foreach ($users as $user_id) {
+//
+//                            Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
+//                            . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);
+//                            //Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
+//
+//                            Notifications::sendSocket('getNewNotification', ['user_id' => $user_id], ['sms_id' => $sms->s_id]);
+//                        }
+//                    }
+//
+//                    if($user_id > 0) {
+//                        $sms->s_created_user_id = $user_id;
+//                        $sms->save();
+//                    }
+//
+//                    if($lead_id) {
+//                        // Notifications::socket(null, $lead_id, 'updateCommunication', ['sms_id' => $sms->s_id], true);
+//                        Notifications::sendSocket('getNewNotification', ['lead_id' => $lead_id], ['sms_id' => $sms->s_id]);
+//                    }
+//
+//                    $response = $sms->attributes;
 
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:newSmsMessagesReceived:Sms:try');

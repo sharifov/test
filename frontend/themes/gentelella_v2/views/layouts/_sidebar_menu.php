@@ -108,6 +108,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list'], 'icon' => 'list'],
                 ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index'], 'icon' => 'list'],
                 ['label' => 'QCall Config', 'url' => ['/qcall-config/index'], 'icon' => 'list'],
+                ['label' => 'Project Weight', 'url' => ['/project-weight/index'], 'icon' => 'list'],
             ]
         ];
 
