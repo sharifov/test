@@ -235,6 +235,15 @@ $isSuperAdmin = $user->canRole('superadmin');
             ]
         ];
 
+        if (class_exists('\modules\hotel\HotelModule')) {
+            $menuItems[] = [
+                'label' => 'Hotel module',
+                'url' => 'javascript:',
+                'icon' => 'hotel',
+                'items' => \modules\hotel\HotelModule::getListMenu()
+            ];
+        }
+
         $menuItems[] = [
             'label' => 'New Data',
             'url' => 'javascript:',
