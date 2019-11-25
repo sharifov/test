@@ -17,6 +17,7 @@ use yii\db\ActiveRecord;
  * @property int $dep_source_id
  * @property int $dep_enable
  * @property string $dep_description
+ * @property int $dep_default
  * @property int $dep_updated_user_id
  * @property string $dep_updated_dt
  *
@@ -48,9 +49,9 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
     {
         return [
             [['dep_email', 'dep_project_id'], 'required'],
-            [['dep_project_id', 'dep_dep_id', 'dep_source_id', 'dep_enable', 'dep_updated_user_id'], 'integer'],
+            [['dep_project_id', 'dep_dep_id', 'dep_source_id', 'dep_enable', 'dep_updated_user_id', 'dep_default'], 'integer'],
             [['dep_updated_dt'], 'safe'],
-            [['dep_email'], 'string', 'max' => 18],
+            [['dep_email'], 'string', 'max' => 50],
             [['dep_description'], 'string', 'max' => 255],
             [['dep_email'], 'unique'],
 			[['user_group_list'], 'safe'],
@@ -74,6 +75,7 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
             'dep_source_id' => 'Source',
             'dep_enable' => 'Enable',
             'dep_description' => 'Description',
+            'dep_default' => 'Default',
             'dep_updated_user_id' => 'Updated User',
             'dep_updated_dt' => 'When Updated',
         ];

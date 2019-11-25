@@ -8,6 +8,7 @@ use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
@@ -320,15 +321,21 @@ class CasesController extends FController
 
             $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS;
 
+            $isTypeEmail = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL;
+
             if ($isTypeSMS && $model->isDepartmentSupport()) {
             	$comForm->scenario = CaseCommunicationForm::SCENARIO_SMS_DEPARTMENT;
+			}
+
+            if ($isTypeEmail && $model->isDepartmentSupport()) {
+				$comForm->scenario = CaseCommunicationForm::SCENARIO_EMAIL_DEPARTMENT;
 			}
 
             if ($comForm->validate()) {
 
                 $project = $model->project;
 
-                if ((int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL) {
+                if ($isTypeEmail) {
 
 
                     //VarDumper::dump($comForm->quoteList, 10, true); exit;
@@ -355,7 +362,9 @@ class CasesController extends FController
 
 
                     $upp = null;
-                    if ($model->cs_project_id) {
+					if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::findOne(['dep_id' => $comForm->dep_email_id])) {
+						$mailFrom = $departmentEmail->dep_email;
+					} else if ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                         if ($upp) {
                             $mailFrom = $upp->upp_email;

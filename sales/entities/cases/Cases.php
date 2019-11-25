@@ -5,6 +5,7 @@ namespace sales\entities\cases;
 use common\models\Call;
 use common\models\Client;
 use common\models\Department;
+use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
@@ -400,6 +401,14 @@ class Cases extends ActiveRecord
     public function getDepartmentPhonesByProjectAndDepartment(): ActiveQuery
 	{
 		return $this->hasMany(DepartmentPhoneProject::class, ['dpp_project_id' => 'cs_project_id', 'dpp_dep_id' => 'cs_dep_id']);
+	}
+
+	/**
+	 * @return ActiveQuery
+	 */
+    public function getDepartmentEmailsByProjectAndDepartment(): ActiveQuery
+	{
+		return $this->hasMany(DepartmentEmailProject::class, ['dep_project_id' => 'cs_project_id', 'dep_dep_id' => 'cs_dep_id']);
 	}
 
     /**

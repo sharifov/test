@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				'filter' => \common\models\Sources::getList(true)
 			],
             'dep_enable:boolean',
+            'dep_default:boolean',
 			[
 				'attribute' => 'dep_updated_user_id',
 				'value' => static function (\common\models\DepartmentEmailProject $model) {
