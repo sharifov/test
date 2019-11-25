@@ -36,7 +36,7 @@ use yii\helpers\VarDumper;
                         'size'=>'sm',
                         'inputType' => Editable::INPUT_TEXT,
                         'buttonsTemplate' => '{submit}',
-                        'pluginEvents' => ["editableSuccess" => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-quote_prices-{$quote->id}', async: false}); $('#quote_profit_{$quote->id}').popover('hide').popover('destroy');$.pjax.reload({container: '#pjax-quote_estimation_profit-{$quote->id}', async: false});$('#quote_profit_{$quote->id}').popover();}",],
+                        'pluginEvents' => ["editableSuccess" => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-quote_prices-{$quote->id}', async: false}); $('#quote_profit_{$quote->id}').popover('hide').popover('dispose');$.pjax.reload({container: '#pjax-quote_estimation_profit-{$quote->id}', async: false});$('#quote_profit_{$quote->id}').popover();}",],
                         'inlineSettings' => [
                             'templateBefore' => '<div class="editable-pannel">{loading}',
                             'templateAfter' => '{buttons}{close}</div>'],
