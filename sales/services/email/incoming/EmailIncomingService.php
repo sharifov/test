@@ -5,20 +5,28 @@ namespace sales\services\email\incoming;
 use common\models\Client;
 use common\models\ClientEmail;
 use sales\entities\cases\Cases;
+use sales\forms\lead\EmailCreateForm;
 use sales\services\cases\CasesCreateService;
+use sales\services\client\ClientManageService;
 
 /**
  * Class EmailIncomingService
  *
  * @property CasesCreateService $casesCreateService
+ * @property ClientManageService $clientManageService
  */
 class EmailIncomingService
 {
     private $casesCreateService;
+    private $clientManageService;
 
-    public function __construct(CasesCreateService $casesCreateService)
+    public function __construct(
+        CasesCreateService $casesCreateService,
+        ClientManageService $clientManageService
+    )
     {
         $this->casesCreateService = $casesCreateService;
+        $this->clientManageService = $clientManageService;
     }
 
     /**
@@ -28,9 +36,7 @@ class EmailIncomingService
      */
     public function getOrCreateCaseBySupport(string $clientEmail, ?int $projectId): ?int
     {
-        if (!$client = $this->findClientByEmail($clientEmail)) {
-            return null;
-        }
+        $client = $this->clientManageService->getOrCreateByEmails([new EmailCreateForm(['email' => $clientEmail])]);
 
         if ($case = Cases::find()->findLastActiveSupportCaseByClient($client->id)->one()) {
             return $case->cs_id;
@@ -43,19 +49,5 @@ class EmailIncomingService
             \Yii::error($e, 'EmailIncomingService:getOrCreateCaseBySupport');
             return null;
         }
-    }
-
-    /**
-     * @param $email
-     * @return Client|null
-     */
-    private function findClientByEmail($email): ?Client
-    {
-        $email = ClientEmail::find()->andWhere(['email' => $email])->orderBy(['created' => SORT_DESC])->limit(1)->one();
-        if ($client = $email->client) {
-            return $client;
-        }
-        \Yii::error('ClientEmail found but Client with email: ' . $email . ' not found.');
-        return null;
     }
 }

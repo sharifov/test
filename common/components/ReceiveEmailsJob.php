@@ -147,8 +147,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             && ($department = $depEmail->depDep)
                             && $department->isSupport()
                         ) {
-                            $email->e_case_id = (Yii::createObject(EmailIncomingService::class))
-                                ->getOrCreateCaseBySupport($email->e_email_from, $email->e_project_id);
+                            try {
+                                $email->e_case_id = (Yii::createObject(EmailIncomingService::class))
+                                    ->getOrCreateCaseBySupport($email->e_email_from, $email->e_project_id);
+                            } catch (\Throwable $e) {
+                                Yii::error($e, 'ReceiveEmailsJob:EmailIncomingService:getOrCreateCaseBySupport');
+                            }
                         }
 
                         $users = $email->getUsersIdByEmail();
