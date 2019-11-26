@@ -5714,6 +5714,16 @@ input[disabled] + .radio-tab__text {
     display: block;
     overflow: auto;
 }
+#create-lead-phone table.multiple-input-list tr > th,
+#create-lead-email table.multiple-input-list tr > th {
+    border: none;
+    padding: 0;
+}
+#create-lead-phone table.multiple-input-list.table-renderer tr > td,
+#create-lead-email table.multiple-input-list.table-renderer tr > td {
+    padding-top: 0.5rem;
+    padding-bottom: 0;
+}
 /****** END OTHER ******/
 
 
@@ -5721,6 +5731,11 @@ input[disabled] + .radio-tab__text {
 @media only screen and (min-width: 1299px) {
     .modal-lg, .modal-xl {
         max-width: 70%;
+    }
+}
+@media only screen and (max-width: 1299px) {
+    .create-lead-main-sidebars {
+        flex-direction: column;
     }
 }
 @media only screen and (max-width: 580px) {
