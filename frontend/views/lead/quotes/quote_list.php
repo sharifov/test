@@ -207,7 +207,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
         });
     });
     
-    $('#btn-declined-quotes').on('click', function() {
+    $(document).on('click', '#btn-declined-quotes', function() {
         var quotes = Array();
         $('.quotes-uid:checked').each(function(idx, elm){
             quotes.push($(elm).val());

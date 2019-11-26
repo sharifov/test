@@ -60,7 +60,7 @@ class SiteController extends FController
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
-                'view' => '@frontend/themes/gentelella/views/site/error',
+                'view' => '@frontend/themes/gentelella_v2/views/site/error',
                 'layout' => '@frontend/themes/gentelella_v2/views/layouts/error'
             ],
         ];
