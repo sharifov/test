@@ -53,7 +53,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
             </div>
             <div class="col-md-3"></div>
 
-            <div class="col-md-12">
+            <div class="col-md-12 group-redial-lead-phone-to">
                 <div class="col-md-2">
 
                     <?php
