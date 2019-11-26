@@ -52,6 +52,7 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
+use sales\services\email\incoming\EmailIncomingService;
 use sales\services\lead\LeadCreateApiService;
 use sales\services\lead\LeadManageService;
 use sales\services\lead\LeadRedialService;
@@ -137,17 +138,9 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $projectId = 1;
-        $statusId = 1;
-        $query = LeadQcall::find()->innerJoinWith(['lqcLead' => static function(ActiveQuery $query) use ($projectId, $statusId){
-            $query->andOnCondition([Lead::tableName() . '.status' => $statusId]);
-            $query->andOnCondition([Lead::tableName() . '.project_id' => $projectId]);
-        }])
 
-            ->createCommand()->getRawSql();
-//            ->all();
-
-        VarDumper::dump($query);
+        $service = Yii::createObject(EmailIncomingService::class);
+        VarDumper::dump($service->getOrCreate('bbabiak@outlook.com', null));
         die;
         return $this->render('blank');
 

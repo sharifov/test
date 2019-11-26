@@ -46,6 +46,18 @@ class CasesCreateService
      * @param int|null $projectId
      * @return Cases
      */
+    public function createSupportByIncomingEmail(int $clientId, ?int $projectId): Cases
+    {
+        $case = Cases::createSupportByIncomingEmail($clientId, $projectId);
+        $this->casesRepository->save($case);
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
+     * @param int|null $projectId
+     * @return Cases
+     */
     public function createExchangeByIncomingSms(int $clientId, ?int $projectId): Cases
     {
         $case = Cases::createExchangeByIncomingSms($clientId, $projectId);

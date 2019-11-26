@@ -657,7 +657,7 @@ class CasesController extends FController
             ->addSelect([new Expression('"voice" AS type'), 'c_case_id AS case_id', 'c_created_dt AS created_dt'])
             ->from('call')
             ->where(['c_case_id' => $model->cs_id])
-            ->addGroupBy(['id']);
+            ->addGroupBy(['id', 'case_id', 'created_dt']);
 
         $unionQuery = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)->union($query3)])
