@@ -34,7 +34,7 @@ $list = new ListsAccess($user->id);
         </div>
 
         <?= Html::button('<i class="fa fa-phone"></i> Call Next', [
-            'class' => 'btn btn-success btn-lg lead-next-btn'
+            'class' => 'btn btn-success btn-lg lead-next-btn', 'style' => 'font-size: 18px'
         ])?>
 
         <div class="row">

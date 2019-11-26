@@ -37,7 +37,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
             <div class="col-md-12">
                 <div id="redial-lead-call-status-block" style="display: none">
 
-                    <div class="text-center badge badge-warning" style="font-size: 12px;">
+                    <div class="text-center badge badge-warning" style="font-size: 18px;">
                         <span id="redial-lead-call-status-block-text"></span>
                     </div>
 

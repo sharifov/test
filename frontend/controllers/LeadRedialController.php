@@ -337,7 +337,7 @@ class LeadRedialController extends FController
                 'message' => $e->getMessage()
             ]);
         }
-        
+
         return $this->asJson([
             'success' => true,
             'data' => $this->renderAjax('redial_from_last_calls', ['lead' => $lead])
