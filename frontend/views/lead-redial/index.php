@@ -85,7 +85,7 @@ $list = new ListsAccess($user->id);
 
                 <?= MultipleUpdateWidget::widget([
                         'gridId' => 'redialGrid',
-                        'script' => '$.pjax.reload({container: "#lead-redial-pjax", async: false});',
+                        'script' => "let pjax = $('#lead-redial-pjax'); if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }",
                         'actionUrl' => Url::to(['lead-redial/multiple-update']),
                         'validationUrl' => Url::to(['lead-redial/multiple-update-validate']),
                         'reportWrapperId' => 'redial-call-box-wrapper'
@@ -165,7 +165,8 @@ $lastCallsUrl = Url::to(['lead-redial/show-last-calls']);
 $js = <<<JS
 
 function reloadCallFunction() {
-    $.pjax.reload({container: '#lead-redial-pjax', async: false});
+    let pjax = $('#lead-redial-pjax');
+    if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }
     leadRedialLastCallsReload();
 }
 
