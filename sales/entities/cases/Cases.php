@@ -95,6 +95,23 @@ class Cases extends ActiveRecord
 
     /**
      * @param int $clientId
+     * @param int|null $projectId
+     * @return static
+     */
+    public static function createSupportByIncomingEmail(int $clientId, ?int $projectId): self
+    {
+        $case = new static();
+        $case->cs_client_id = $clientId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_gid = self::generateGid();
+        $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->pending('Created by incoming email');
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
      * @param int $callId
      * @param int $projectId
      * @param int|null $depId
