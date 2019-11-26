@@ -945,7 +945,8 @@ class LeadController extends FController
             ->addSelect(['lead_id' => 'c_lead_id', 'created_dt' => 'c_created_dt'])
             ->from('call')
             ->where(['c_lead_id' => $lead->id])
-            ->addGroupBy(['id', 'c_lead_id', 'c_created_dt']);
+//            ->addGroupBy(['id', 'c_lead_id', 'c_created_dt']);
+            ->addGroupBy(['id']);
 
         $unionQuery = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)->union($query3)])
