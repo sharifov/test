@@ -26,13 +26,13 @@ class EmailIncomingService
      * @param int|null $projectId
      * @return int
      */
-    public function getOrCreate(string $clientEmail, ?int $projectId): ?int
+    public function getOrCreateCaseBySupport(string $clientEmail, ?int $projectId): ?int
     {
         if (!$client = $this->findClientByEmail($clientEmail)) {
             return null;
         }
 
-        if ($case = Cases::find()->findLastActiveCaseByClient($client->id)->one()) {
+        if ($case = Cases::find()->findLastActiveSupportCaseByClient($client->id)->one()) {
             return $case->cs_id;
         }
 
@@ -40,7 +40,7 @@ class EmailIncomingService
             $case = $this->casesCreateService->createSupportByIncomingEmail($client->id, $projectId);
             return $case->cs_id;
         } catch (\Throwable $e) {
-            \Yii::error($e, 'EmailIncomingService:getOrCreate');
+            \Yii::error($e, 'EmailIncomingService:getOrCreateCaseBySupport');
             return null;
         }
     }
