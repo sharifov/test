@@ -654,10 +654,11 @@ class CasesController extends FController
 
         $query3 = (new \yii\db\Query())
             ->addSelect(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
-            ->addSelect([new Expression('"voice" AS type'), 'c_case_id AS case_id', 'c_created_dt AS created_dt'])
+            ->addSelect([new Expression('"voice" AS type'), 'c_case_id AS case_id', 'MAX(c_created_dt) AS created_dt'])
             ->from('call')
             ->where(['c_case_id' => $model->cs_id])
-            ->addGroupBy(['id', 'case_id', 'created_dt']);
+//            ->addGroupBy(['id', 'case_id', 'created_dt']);
+            ->addGroupBy(['id']);
 
         $unionQuery = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)->union($query3)])
