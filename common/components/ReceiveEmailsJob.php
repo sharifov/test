@@ -143,6 +143,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                         if (
                             $lead_id === null && $case_id === null
+                            && (bool)Yii::$app->params['settings']['create_new_support_case_email']
                             && ($depEmail = DepartmentEmailProject::find()->andWhere(['dep_email' => $mail['ei_email_to']])->one())
                             && ($department = $depEmail->depDep)
                             && $department->isSupport()
