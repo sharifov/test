@@ -17,6 +17,7 @@ use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
+use common\models\Sms;
 use common\models\Sources;
 use common\models\UserConnection;
 use common\models\UserDepartment;

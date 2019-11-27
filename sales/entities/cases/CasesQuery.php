@@ -38,7 +38,7 @@ class CasesQuery extends ActiveQuery
             ->andWhere(['NOT IN', 'cs_status', [
                 CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH
             ]])
-            ->orderBy(['cs_updated_dt' => SORT_DESC])
+            ->orderBy(['cs_last_action_dt' => SORT_DESC])
             ->limit(1);
     }
 }

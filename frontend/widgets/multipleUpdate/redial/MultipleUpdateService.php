@@ -49,7 +49,7 @@ class MultipleUpdateService
             return $this->formatReport($this->remove($form->ids));
         }
 
-        if ($form->attempts) {
+        if ($form->isAttempts()) {
             $report = array_merge($report, $this->changeAttempts($form->attempts, $form->ids));
         }
 

@@ -42,6 +42,7 @@ use Yii;
  * @property string $cs_created_dt
  * @property string $cs_updated_dt
  * @property string $cs_gid
+ * @property string $cs_last_action_dt
  *
  * @property CasesCategory $category
  * @property Department $department
@@ -60,18 +61,27 @@ class Cases extends ActiveRecord
     use EventTrait;
 
     /**
+     * @return static
+     */
+    private static function createDefault(): self
+    {
+        $case = new static();
+        $case->cs_gid = self::generateGid();
+        $case->cs_created_dt = date('Y-m-d H:i:s');
+        return $case;
+    }
+
+    /**
      * @param int $clientId
      * @param int $projectId
      * @return static
      */
     public static function createExchangeByIncomingSms(int $clientId, int $projectId): self
     {
-        $case = new static();
+        $case = self::createDefault();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
-        $case->cs_gid = self::generateGid();
-        $case->cs_created_dt = date('Y-m-d H:i:s');
         $case->pending('Created by incoming sms');
         return $case;
     }
@@ -83,12 +93,10 @@ class Cases extends ActiveRecord
      */
     public static function createSupportByIncomingSms(int $clientId, int $projectId): self
     {
-        $case = new static();
+        $case = self::createDefault();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
-        $case->cs_gid = self::generateGid();
-        $case->cs_created_dt = date('Y-m-d H:i:s');
         $case->pending('Created by incoming sms');
         return $case;
     }
@@ -100,12 +108,10 @@ class Cases extends ActiveRecord
      */
     public static function createSupportByIncomingEmail(int $clientId, ?int $projectId): self
     {
-        $case = new static();
+        $case = self::createDefault();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
-        $case->cs_gid = self::generateGid();
-        $case->cs_created_dt = date('Y-m-d H:i:s');
         $case->pending('Created by incoming email');
         return $case;
     }
@@ -119,13 +125,11 @@ class Cases extends ActiveRecord
      */
     public static function createByCall(int $clientId, int $callId, int $projectId, ?int $depId): self
     {
-        $case = new static();
+        $case = self::createDefault();
         $case->cs_client_id = $clientId;
         $case->cs_call_id = $callId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = $depId;
-        $case->cs_gid = self::generateGid();
-        $case->cs_created_dt = date('Y-m-d H:i:s');
         $case->pending('Created by call');
         return $case;
     }
@@ -148,15 +152,13 @@ class Cases extends ActiveRecord
         ?string $description
     ): self
     {
-        $case = new static();
+        $case = self::createDefault();
         $case->cs_project_id = $projectId;
         $case->cs_category = $category;
         $case->cs_client_id = $clientId;
         $case->cs_dep_id = $depId;
         $case->cs_subject = $subject;
         $case->cs_description = $description;
-        $case->cs_gid = self::generateGid();
-        $case->cs_created_dt = date('Y-m-d H:i:s');
         $case->pending('Created by web');
         return $case;
     }
@@ -480,6 +482,7 @@ class Cases extends ActiveRecord
             'cs_client_id' => 'Client',
             'cs_created_dt' => 'Created',
             'cs_updated_dt' => 'Updated',
+            'cs_last_action_dt' => 'Last Action',
         ];
     }
 
@@ -529,5 +532,13 @@ class Cases extends ActiveRecord
     public static function find(): CasesQuery
     {
         return new CasesQuery(get_called_class());
+    }
+
+    /**
+     * @return int
+     */
+    public function updateLastAction(): int
+    {
+        return self::updateAll(['cs_last_action_dt' => date('Y-m-d H:i:s')], ['cs_id' => $this->cs_id]);
     }
 }

@@ -141,7 +141,7 @@ class LeadQcall extends \yii\db\ActiveRecord
      */
     public function multipleUpdate($weight, $from, $to, $created): void
     {
-        if ($weight) {
+        if ($weight || $weight === 0) {
             $this->lqc_weight = $weight;
         }
         if ($from) {

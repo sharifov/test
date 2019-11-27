@@ -11,6 +11,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
+use sales\services\ServiceFinder;
 
 /**
  * Class ClientManageService
@@ -19,6 +20,7 @@ use sales\repositories\client\ClientRepository;
  * @property ClientPhoneRepository $clientPhoneRepository
  * @property ClientEmailRepository $clientEmailRepository
  * @property InternalPhoneGuard $internalPhoneGuard
+ * @property ServiceFinder $finder
  */
 class ClientManageService
 {
@@ -27,6 +29,7 @@ class ClientManageService
     private $clientPhoneRepository;
     private $clientEmailRepository;
     private $internalPhoneGuard;
+    private $finder;
 
     /**
      * ClientManageService constructor.
@@ -34,18 +37,21 @@ class ClientManageService
      * @param ClientPhoneRepository $clientPhoneRepository
      * @param ClientEmailRepository $clientEmailRepository
      * @param InternalPhoneGuard $internalPhoneGuard
+     * @param ServiceFinder $finder
      */
     public function __construct(
         ClientRepository $clientRepository,
         ClientPhoneRepository $clientPhoneRepository,
         ClientEmailRepository $clientEmailRepository,
-        InternalPhoneGuard $internalPhoneGuard
+        InternalPhoneGuard $internalPhoneGuard,
+        ServiceFinder $finder
     )
     {
         $this->clientRepository = $clientRepository;
         $this->clientPhoneRepository = $clientPhoneRepository;
         $this->clientEmailRepository = $clientEmailRepository;
         $this->internalPhoneGuard = $internalPhoneGuard;
+        $this->finder = $finder;
     }
 
     /**
@@ -163,15 +169,14 @@ class ClientManageService
 	}
 
 	/**
+     * @param int|Client $client
 	 * @param ClientCreateForm $form
-	 * @return Client
 	 */
-	public function updateClient(ClientCreateForm $form): Client
+	public function updateClient(Client $client, ClientCreateForm $form): void
 	{
-		$client = $this->clientRepository->find($form->id);
+		$client = $this->finder->clientFind($client);
 		$client->edit($form->firstName, $form->lastName, $form->middleName);
 		$this->clientRepository->save($client);
-		return $client;
 	}
 
     /**

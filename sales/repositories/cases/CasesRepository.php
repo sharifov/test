@@ -126,7 +126,9 @@ class CasesRepository extends Repository
      */
     public function save(Cases $case): int
     {
-        $case->cs_updated_dt = date('Y-m-d H:i:s');
+        $now = date('Y-m-d H:i:s');
+        $case->cs_updated_dt = $now;
+        $case->cs_last_action_dt = $now;
         if (!$case->save(false)) {
             throw new \RuntimeException('Saving error');
         }

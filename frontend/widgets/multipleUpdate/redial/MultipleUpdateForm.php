@@ -3,6 +3,7 @@
 namespace frontend\widgets\multipleUpdate\redial;
 
 use yii\base\Model;
+use yii\helpers\VarDumper;
 
 /**
  * Class MultipleUpdateForm
@@ -46,10 +47,20 @@ class MultipleUpdateForm extends Model
             }],
 
             ['attempts', 'integer', 'max' => 100],
-            ['attempts', 'filter', 'filter' => 'intval'],
+            ['attempts', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['attempts', function () {
+                if (!$this->isAttempts()) {
+                    $this->attempts = null;
+                }
+            }, 'skipOnEmpty' => false],
 
             ['weight', 'integer', 'max' => 10000],
-            ['weight', 'filter', 'filter' => 'intval'],
+            ['weight', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['weight', function () {
+                if (!$this->isWeight()) {
+                    $this->weight = null;
+                }
+            } ,'skipOnEmpty' => false],
 
             ['created', 'string'],
             ['created', 'datetime', 'format' => 'php:Y-m-d H:i'],
@@ -93,15 +104,31 @@ class MultipleUpdateForm extends Model
     public function validateEmpty(): void
     {
         if (
-            !$this->attempts
-            && !$this->weight
-            && !$this->from
+            !$this->from
             && !$this->to
             && !$this->created
             && !$this->remove
+            && !$this->isAttempts()
+            && !$this->isWeight()
         ) {
             $this->addError('ids', 'Not selected action');
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAttempts(): bool
+    {
+        return $this->attempts !== '' && $this->attempts !== null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isWeight(): bool
+    {
+        return $this->weight !== '' && $this->weight !== null;
     }
 
     /**
@@ -130,6 +157,6 @@ class MultipleUpdateForm extends Model
      */
     public function isAnyFieldForMultipleUpdate(): bool
     {
-        return $this->weight || $this->from || $this->to || $this->created;
+        return $this->isWeight() || $this->from || $this->to || $this->created;
     }
 }

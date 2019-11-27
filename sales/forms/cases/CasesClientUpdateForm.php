@@ -30,6 +30,11 @@ class CasesClientUpdateForm extends Model
     {
         parent::__construct($config);
         $this->caseGid = $case->cs_gid;
+        if ($client = $case->client) {
+            $this->first_name = $client->first_name;
+            $this->last_name = $client->last_name;
+            $this->middle_name = $client->middle_name;
+        }
     }
 
     /**

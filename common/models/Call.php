@@ -884,6 +884,10 @@ class Call extends \yii\db\ActiveRecord
             }
         }
 
+        if ($this->cCase) {
+            $this->cCase->updateLastAction();
+        }
+
         if ($this->c_created_user_id && ($insert || $isChangedStatus))  {
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 

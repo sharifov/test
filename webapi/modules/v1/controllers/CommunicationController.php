@@ -1746,7 +1746,7 @@ class CommunicationController extends ApiBaseController
             $job->last_email_id = $filter['last_id'];
             $data = [
                 'last_email_id' => $filter['last_id'],
-                'mail_list' => $filter['mail_list'],
+                'email_list' => $filter['mail_list'],
                 'limit' => $filter['limit'],
             ];
 
