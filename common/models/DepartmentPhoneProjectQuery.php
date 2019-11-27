@@ -24,13 +24,10 @@ class DepartmentPhoneProjectQuery extends \yii\db\ActiveQuery
             ->andWhere(['IS NOT', 'dpp_phone_number', null]);
 
         if ($departmentId === null) {
-            $query->andWhere(['or',
-                ['dpp_dep_id' => Department::DEPARTMENT_SALES],
-                ['IS', 'dpp_dep_id', NULL]
-            ]);
-        } else {
-            $query->andWhere(['dpp_dep_id' => $departmentId]);
+            $departmentId = Department::DEPARTMENT_SALES;
         }
+
+        $query->andWhere(['dpp_dep_id' => $departmentId]);
 
         return $query;
     }
