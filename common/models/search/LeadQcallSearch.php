@@ -49,7 +49,7 @@ class LeadQcallSearch extends LeadQcall
             [['lqc_lead_id', 'lqc_weight', 'l_is_test', 'deadline'], 'integer'],
 
             [['current_dt', 'l_is_test', 'deadline'], 'safe'],
-            [['lqc_dt_from', 'lqc_dt_to'], 'string'],
+            [['lqc_dt_from', 'lqc_dt_to', 'lqc_created_dt'], 'string'],
 
             ['projectId', 'integer'],
             ['leadStatus', 'integer'],
@@ -297,6 +297,7 @@ class LeadQcallSearch extends LeadQcall
                     'attempts',
                     'lqc_dt_from',
                     'lqc_dt_to',
+                    'lqc_created_dt',
                     'lqc_lead_id',
 				]
             ],
@@ -357,6 +358,11 @@ class LeadQcallSearch extends LeadQcall
             if ($this->lqc_dt_to) {
                 $query->andFilterWhere(['>=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to))])
                     ->andFilterWhere(['<=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to) + 3600 * 24)]);
+            }
+
+            if ($this->lqc_created_dt) {
+                $query->andFilterWhere(['>=', 'lqc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_created_dt))])
+                    ->andFilterWhere(['<=', 'lqc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_created_dt) + 3600 * 24)]);
             }
 
             if ($this->lqc_weight === '0') {

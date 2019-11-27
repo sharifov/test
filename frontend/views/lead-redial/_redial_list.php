@@ -220,6 +220,26 @@ use yii\helpers\Url;
             'visible' => $user->isAdmin()
         ],
         [
+            'attribute' => 'lqc_created_dt',
+            'value' => static function (LeadQcall $model) {
+                return $model->lqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_created_dt)) : '-';
+            },
+            'format' => 'raw',
+            'visible' => $user->isAdmin(),
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'lqc_created_dt',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
+        ],
+        [
             'attribute' => 'lqc_dt_from',
             'value' => static function (LeadQcall $model) {
                 return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
