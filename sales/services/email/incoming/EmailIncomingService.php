@@ -38,7 +38,7 @@ class EmailIncomingService
     {
         $client = $this->clientManageService->getOrCreateByEmails([new EmailCreateForm(['email' => $clientEmail])]);
 
-        if ($case = Cases::find()->findLastActiveSupportCaseByClient($client->id)->one()) {
+        if ($case = Cases::find()->findLastActiveSupportCaseByClient($client->id, $projectId)->one()) {
             return $case->cs_id;
         }
 
