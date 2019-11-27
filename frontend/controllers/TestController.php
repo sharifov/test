@@ -7,6 +7,7 @@ use common\models\Call;
 use common\models\Client;
 use common\models\ClientPhone;
 use common\models\Department;
+use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
@@ -21,6 +22,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use common\models\UserProjectParams;
 use modules\hotel\HotelModule;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
@@ -138,44 +140,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-
-        $service = Yii::createObject(EmailIncomingService::class);
-        VarDumper::dump($service->getOrCreate('bbabiak@outlook.com', null));
-        die;
-        return $this->render('blank');
-
-        $items = [
-            'si_phone_to' => '+18556979796',
-            'si_phone_from' => '+23123',
-            'si_sms_text' => 'ryhfh fdjgj1',
-            'si_project_id' => '6',
-            'si_sent_dt' => '2019-11-19 23:21:28',
-            'si_created_dt' => '2019-11-19 23:21:28',
-            'si_message_sid' => 'SM85368414cd6b5aaa5288bce1223f68ac',
-            'si_num_segments' => '1',
-            'si_to_country' => 'US',
-            'si_to_state' => 'CA',
-            'si_to_city' => '',
-            'si_to_zip' => '',
-            'si_from_country' => 'RO',
-            'si_from_city' => '',
-            'si_from_state' => '',
-            'si_from_zip' => '',
-        ];
-
-        $form = new SmsIncomingForm();
-        $data['SmsIncomingForm'] = $items;
-        if ($form->load($data)) {
-            if ($form->validate()) {
-                $sms = (Yii::createObject(SmsIncomingService::class))->create($form);
-                VarDumper::dump($sms);
-            } else {
-                VarDumper::dump($form->errors);
-            }
-
-        } else {
-            echo '1';
-        }
 
         die;
         return $this->render('blank');

@@ -10,6 +10,7 @@ use common\models\Conference;
 use common\models\ConferenceParticipant;
 use common\models\ConferenceRoom;
 use common\models\Department;
+use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\Employee;
@@ -1694,6 +1695,16 @@ class CommunicationController extends ApiBaseController
         return $response;
     }
 
+    /**
+     * @return array
+     */
+    private function getEmailsForReceivedMessages(): array
+    {
+        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
+        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+        $list = array_merge($mailsUpp, $mailsDep);
+        return $list;
+    }
 
     /**
      * @param null $last_id
@@ -1728,13 +1739,7 @@ class CommunicationController extends ApiBaseController
             }
 
             $filter['limit'] = 20;
-
-            $mailList = [];
-            $mails = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
-            if($mails) {
-                $mailList = ArrayHelper::getColumn($mails,'upp_email');
-            }
-            $filter['mail_list'] = $mailList;
+            $filter['mail_list'] = $this->getEmailsForReceivedMessages();
 
             // push job
             $job = new ReceiveEmailsJob();
