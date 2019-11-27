@@ -82,9 +82,9 @@ class LeadQcall extends \yii\db\ActiveRecord
 
     /**
      * @param \DateTime $dt
-     * @param int $userId
+     * @param int|null $userId
      */
-    public function reservation(\DateTime $dt, int $userId): void
+    public function reservation(\DateTime $dt, ?int $userId): void
     {
         $this->lqc_reservation_time = $dt->format('Y-m-d H:i:s');
         $this->lqc_reservation_user_id = $userId;
