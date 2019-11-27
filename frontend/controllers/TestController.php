@@ -141,30 +141,8 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $call = DepartmentPhoneProject::find()
-            ->select(['dpp_phone_number'])
-            ->addSelect(['count_calls' =>
-                (new Query())
-                    ->from(Call::tableName())
-                    ->select(['c_from', 'c_count_calls' => 'count(*)'])
-                    ->andWhere('c_from = dpp_phone_number')
-                    ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
-                    ->andWhere(['c_lead_id' => 270241])
-                    ->groupBy(['c_from'])
-                    ->orderBy(['c_count_calls' => SORT_ASC])
-            ])
-            ->andWhere(['dpp_enable' => true])
-            ->andWhere(['dpp_project_id' => 6])
-            ->andWhere(['dpp_redial' => true])
-            ->andWhere(['IS NOT', 'dpp_phone_number', null])
-            ->andWhere(['dpp_dep_id' => 1])
-            ->orderBy(['count_calls' => SORT_ASC])
-            ->asArray()
-            ->limit(1)
 
-        ->createCommand()->getRawSql();
-
-        VarDumper::dump($call);
+       
         die;
         return $this->render('blank');
 
