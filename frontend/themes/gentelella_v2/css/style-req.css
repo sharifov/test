@@ -872,6 +872,12 @@ a.desc:after {
   margin-left: 2px;
 }
 
+.form-group.required label:after {
+  color: #d00;
+  content: "*";
+  margin-left: 2px;
+}
+
 .krajee-default .file-caption-info, .krajee-default .file-size-info {
   height: auto !important;
 }

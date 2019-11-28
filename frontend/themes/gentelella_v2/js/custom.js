@@ -152,7 +152,7 @@ $MENU_TOGGLE.on('click', function() {
 
 // Panel toolbox
 $(document).ready(function() {
-    $('.collapse-link').on('click', function() {
+    $('body').on('click', '.collapse-link', function() {
         var $BOX_PANEL = $(this).closest('.x_panel'),
             $ICON = $(this).find('i'),
             $BOX_CONTENT = $BOX_PANEL.find('.x_content');
@@ -170,7 +170,7 @@ $(document).ready(function() {
         $ICON.toggleClass('fa-chevron-up fa-chevron-down');
     });
 
-    $('.close-link').click(function () {
+    $('body').on('click', '.close-link', function () {
         var $BOX_PANEL = $(this).closest('.x_panel');
 
         $BOX_PANEL.remove();

@@ -11,7 +11,6 @@ use \common\widgets\Alert;
  * @var $this yii\web\View
  * @var $form ActiveForm
  * @var $itineraryForm sales\forms\lead\ItineraryEditForm
- * @var $leadForm frontend\models\LeadForm
  */
 
 

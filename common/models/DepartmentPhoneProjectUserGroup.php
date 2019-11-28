@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\DepartmentPhoneProjectUserGroupQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\CaseNoteQuery;
 use sales\entities\cases\Cases;
 use Yii;
 use yii\behaviors\BlameableBehavior;

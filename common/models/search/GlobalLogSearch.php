@@ -6,7 +6,6 @@ use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
-use common\models\Lead2;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
 use common\models\Quote;
@@ -108,7 +107,7 @@ class GlobalLogSearch extends GlobalLog
 
 		$queryLead = GlobalLog::find()->alias('gl')
 			->where(['gl_obj_id' => $this->leadId])
-			->andWhere(['or', ['gl_model' => Lead::class], ['gl_model' => Lead2::class]]);
+			->andWhere(['gl_model' => Lead::class]);
 
 		$queryQuote = GlobalLog::find()->alias('gl')
 			->innerJoin('quotes AS q', 'gl.gl_obj_id = q.id')

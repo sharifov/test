@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ClientQuery;
 use sales\entities\EventTrait;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;

@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ApiLogQuery;
 use Yii;
 use yii\db\Query;
 use yii\helpers\VarDumper;

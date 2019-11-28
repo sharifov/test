@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\ChartTools;
 use common\components\CommunicationService;
+use common\models\query\SmsQuery;
 use DateTime;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;

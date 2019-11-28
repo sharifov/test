@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\QuoteStatusLogQuery;
 use Yii;
 
 /**

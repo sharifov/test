@@ -2,13 +2,18 @@
 
 namespace frontend\controllers;
 
+use common\models\Lead;
+use frontend\models\form\ProductForm;
 use Yii;
 use common\models\Product;
 use common\models\search\ProductSearch;
 use frontend\controllers\FController;
+use yii\base\Exception;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -25,6 +30,7 @@ class ProductController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                    'delete-ajax' => ['POST'],
                 ],
             ],
         ];
@@ -77,6 +83,82 @@ class ProductController extends FController
         ]);
     }
 
+
+    /**
+     * Creates a new Product model.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     * @return mixed
+     */
+    public function actionCreateAjax()
+    {
+        $model = new ProductForm(); //new Product();
+
+
+        if ($model->load(Yii::$app->request->post())) {
+
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            if ($model->validate()) {
+                $modelProduct = new Product();
+                $modelProduct->attributes = $model->attributes;
+
+                if ($modelProduct->save()) {
+                    return ['message' => 'Successfully added a new product'];
+                }
+
+                return ['errors' => \yii\widgets\ActiveForm::validate($modelProduct)];
+            }
+            return ['errors' => \yii\widgets\ActiveForm::validate($model)];
+        } else {
+
+            $leadId = (int) Yii::$app->request->get('id');
+
+            if (!$leadId) {
+                throw new BadRequestHttpException('Not found lead identity.');
+            }
+
+            $lead = Lead::findOne($leadId);
+            if (!$lead) {
+                throw new BadRequestHttpException('Not found this lead');
+            }
+
+            $model->pr_lead_id = $leadId;
+        }
+
+        return $this->renderAjax('_ajax_form', [
+            'model' => $model,
+        ]);
+    }
+
+
+//    public function actionCreateAjax()
+//    {
+//        //$this->layout = false;
+//        $model = new ProductForm(); //new Product();
+//
+//        if ($model->load(Yii::$app->request->post())) {
+//
+//            //\Yii::$app->response->format = Response::FORMAT_JSON;
+//
+//            if ($model->validate()) {
+//                $modelProduct = new Product();
+//                $modelProduct->attributes = $model->attributes;
+//
+//                if ($modelProduct->save()) {
+//                    return ['message' => 'Successfully added a new product'];
+//                }
+//
+//                //return ['errors' => \yii\widgets\ActiveForm::validate($modelProduct)];
+//            }
+//            //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
+//        }
+//
+//        return $this->renderAjax('_ajax_form', [
+//            'model' => $model,
+//        ]);
+//    }
+
+
     /**
      * Updates an existing Product model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -112,6 +194,26 @@ class ProductController extends FController
     }
 
     /**
+     * @return array
+     */
+    public function actionDeleteAjax(): array
+    {
+        $id = Yii::$app->request->post('id');
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+            $model = $this->findModel($id);
+            if (!$model->delete()) {
+                throw new Exception('Product ('.$id.') not deleted', 2);
+            }
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        return ['message' => 'Successfully removed product (' . $model->pr_id . ')'];
+    }
+
+    /**
      * Finds the Product model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
@@ -124,6 +226,6 @@ class ProductController extends FController
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('The requested product does not exist.', 1);
     }
 }

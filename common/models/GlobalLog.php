@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\GlobalLogQuery;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -32,7 +33,6 @@ class GlobalLog extends ActiveRecord
 	public const MODEL_CLIENT 			= 'common\models\Client';
 	public const MODEL_CLIENT_PHONE 	= 'common\models\ClientPhone';
 	public const MODEL_CLIENT_EMAIL 	= 'common\models\ClientEmail';
-	public const MODEL_CLIENT_LEAD2 	= 'common\models\Lead2';
 	public const MODEL_CLIENT_LEAD 		= 'common\models\Lead';
 	public const MODEL_CLIENT_LEAD_PREFERENCES 		= 'common\models\LeadPreferences';
 	public const MODEL_LEAD_FLIGHT_SEGMENTS	= 'common\models\LeadFlightSegment';
@@ -44,7 +44,6 @@ class GlobalLog extends ActiveRecord
 		self::MODEL_CLIENT_EMAIL	=> 'Client Email',
 		self::MODEL_CLIENT_LEAD		=> 'Lead',
 		self::MODEL_CLIENT_LEAD_PREFERENCES	=> 'Lead Preferences',
-		self::MODEL_CLIENT_LEAD2		=> 'Lead2',
 		self::MODEL_LEAD_FLIGHT_SEGMENTS => 'LeadFlightSegment',
 		self::MODEL_QUOTE => 'Quote',
 	];

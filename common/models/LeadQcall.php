@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\LeadQcallQuery;
 use Faker\Provider\DateTime;
 use sales\services\lead\qcall\Interval;
 use Yii;

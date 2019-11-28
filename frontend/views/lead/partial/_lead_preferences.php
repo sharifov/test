@@ -9,6 +9,7 @@ use \yii\helpers\Html;
 /**
  * @var $this View
  * @var $lead Lead
+ * @var $leadForm \frontend\models\LeadForm
  */
 
 $leadPreferences = $lead->leadPreferences;
@@ -16,10 +17,34 @@ $leadPreferences = $lead->leadPreferences;
 $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPreference($lead, Yii::$app->user->id);
 ?>
 
+
+
 <div class="x_panel">
 	<div class="x_title">
 		<h2><i class="fa fa-cog"></i> Lead Preferences</h2>
 		<ul class="nav navbar-right panel_toolbox" style="min-width: initial;">
+            <li>
+                <?php if(!$leadForm->getLead()->l_answered): ?>
+
+                    <?php if($leadForm->getLead()->isProcessing()):?>
+                        <?= Html::a(($leadForm->getLead()->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $leadForm->getLead()->id, 'act' => 'answer'], [
+                            'class' => ''.($leadForm->getLead()->l_answered ? 'text-success' : 'text-info'),
+                            'data-pjax' => false,
+                            'data' => [
+                                'confirm' => 'Are you sure?',
+                                'method' => 'post',
+                                'pjax' => 0
+                            ],
+                        ]) ?>
+                    <?php else: ?>
+                        <a href="#" class="text-warning disabled"><i class="fa fa-commenting-o"></i> ANSWERED: false</a>
+                    <?php endif;?>
+
+                <?php else: ?>
+                    <a href="#" class="text-success disabled"><i class="fa fa-commenting-o"></i> ANSWERED: true</a>
+                <?php endif; ?>
+            </li>
+
             <?php if($manageLeadPreferencesAccess): ?>
             <li>
                 <?=

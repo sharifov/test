@@ -28,9 +28,28 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
 
             'pr_id',
-            'pr_type_id',
+            //'pr_type_id',
+            [
+                'attribute' => 'pr_type_id',
+                'value' => static function (\common\models\Product $model) {
+                    return $model->prType ? $model->prType->pt_name : $model->pr_type_id;
+                },
+                'filter' => \common\models\ProductType::getList(false)
+            ],
             'pr_name',
-            'pr_lead_id',
+            //'pr_lead_id',
+
+            [
+                'attribute' => 'pr_lead_id',
+                'value' => static function (\common\models\Product $model) {
+                    return Html::a($model->pr_lead_id, ['lead/view', 'gid' => $model->prLead->gid], [
+                        'data-pjax' => 0,
+                        'target' => '_blank'
+                    ]);
+                },
+                'format' => 'raw'
+            ],
+
             'pr_description:ntext',
             'pr_status_id',
             'pr_service_fee_percent',

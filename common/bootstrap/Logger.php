@@ -7,7 +7,6 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\GlobalLog;
 use common\models\Lead;
-use common\models\Lead2;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
 use common\models\Quote;
@@ -25,7 +24,6 @@ class Logger implements BootstrapInterface
 		ClientPhone::class,
 		ClientEmail::class,
 		Lead::class,
-		Lead2::class,
 		LeadPreferences::class,
 		LeadFlightSegment::class,
 		Quote::class,

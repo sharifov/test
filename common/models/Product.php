@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ProductQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -12,18 +13,19 @@ use yii\db\ActiveRecord;
  *
  * @property int $pr_id
  * @property int $pr_type_id
- * @property string $pr_name
+ * @property string|null $pr_name
  * @property int $pr_lead_id
- * @property string $pr_description
- * @property int $pr_status_id
- * @property string $pr_service_fee_percent
- * @property int $pr_created_user_id
- * @property int $pr_updated_user_id
- * @property string $pr_created_dt
- * @property string $pr_updated_dt
+ * @property string|null $pr_description
+ * @property int|null $pr_status_id
+ * @property float|null $pr_service_fee_percent
+ * @property int|null $pr_created_user_id
+ * @property int|null $pr_updated_user_id
+ * @property string|null $pr_created_dt
+ * @property string|null $pr_updated_dt
  *
  * @property Employee $prCreatedUser
  * @property Lead $prLead
+ * @property ProductType $prType
  * @property Employee $prUpdatedUser
  * @property ProductQuote[] $productQuotes
  */
@@ -51,7 +53,9 @@ class Product extends \yii\db\ActiveRecord
             [['pr_name'], 'string', 'max' => 40],
             [['pr_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pr_created_user_id' => 'id']],
             [['pr_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['pr_lead_id' => 'id']],
+            [['pr_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductType::class, 'targetAttribute' => ['pr_type_id' => 'pt_id']],
             [['pr_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pr_updated_user_id' => 'id']],
+
         ];
     }
 
@@ -111,6 +115,14 @@ class Product extends \yii\db\ActiveRecord
     public function getPrLead()
     {
         return $this->hasOne(Lead::class, ['id' => 'pr_lead_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPrType()
+    {
+        return $this->hasOne(ProductType::class, ['pt_id' => 'pr_type_id']);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\query\UserProjectParamsQuery;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
