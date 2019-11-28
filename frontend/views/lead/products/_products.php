@@ -96,7 +96,13 @@ use yii\helpers\Html;
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: none">
-
+            <?php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
+                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
+                <?= $this->render('@modules/hotel/views/hotel/partial/_view_search', [
+                    'model' => $product->hotel,
+                ]) ?>
+                <?php \yii\widgets\Pjax::end();?>
+            <?php endif; ?>
         </div>
     </div>
 <?php endforeach; ?>

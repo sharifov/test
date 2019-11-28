@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\ProductQuery;
+use modules\hotel\models\Hotel;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -23,6 +24,8 @@ use yii\db\ActiveRecord;
  * @property string|null $pr_created_dt
  * @property string|null $pr_updated_dt
  *
+ * @property Hotel[] $hotels
+ * @property Hotel $hotel
  * @property Employee $prCreatedUser
  * @property Lead $prLead
  * @property ProductType $prType
@@ -99,6 +102,22 @@ class Product extends \yii\db\ActiveRecord
                 'updatedByAttribute' => 'pr_updated_user_id',
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getHotels()
+    {
+        return $this->hasMany(Hotel::class, ['ph_product_id' => 'pr_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getHotel()
+    {
+        return $this->hasOne(Hotel::class, ['ph_product_id' => 'pr_id'])->orderBy(['ph_id' => SORT_DESC])->limit(1);
     }
 
     /**

@@ -3,13 +3,16 @@
 namespace frontend\controllers;
 
 use common\models\Lead;
+use common\models\ProductType;
 use frontend\models\form\ProductForm;
+use modules\hotel\models\Hotel;
 use Yii;
 use common\models\Product;
 use common\models\search\ProductSearch;
 use frontend\controllers\FController;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -85,9 +88,8 @@ class ProductController extends FController
 
 
     /**
-     * Creates a new Product model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return array|string
+     * @throws BadRequestHttpException
      */
     public function actionCreateAjax()
     {
@@ -103,6 +105,20 @@ class ProductController extends FController
                 $modelProduct->attributes = $model->attributes;
 
                 if ($modelProduct->save()) {
+
+                    if ((int) $model->pr_type_id === ProductType::PRODUCT_HOTEL) {
+                        if (class_exists('\modules\hotel\HotelModule')) {
+                            $modelHotel = new Hotel();
+                            $modelHotel->ph_product_id = $modelProduct->pr_id;
+                            if (!$modelHotel->save()) {
+                                Yii::error(VarDumper::dumpAsString($modelHotel->errors),
+                                    'ProductController:actionCreateAjax:Hotel:save');
+                            }
+                        } else {
+                            Yii::error('Not exists class "\modules\hotel\HotelModule"',
+                                'ProductController:actionCreateAjax:Hotel');
+                        }
+                    }
                     return ['message' => 'Successfully added a new product'];
                 }
 
@@ -206,6 +222,16 @@ class ProductController extends FController
             if (!$model->delete()) {
                 throw new Exception('Product ('.$id.') not deleted', 2);
             }
+
+            if ((int) $model->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
+                $modelHotel = Hotel::findOne(['ph_product_id' => $model->pr_id]);
+                if ($modelHotel) {
+                    if (!$modelHotel->delete()) {
+                        throw new Exception('Hotel (' . $modelHotel->ph_id . ') not deleted', 3);
+                    }
+                }
+            }
+
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
