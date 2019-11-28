@@ -752,6 +752,8 @@ class CasesController extends FController
                 $model->cs_lead_id = $lead->id;
                 if(!$model->update()) {
                     Yii::error(VarDumper::dumpAsString($model->errors), 'CasesController:actionAssignLead:Case:save');
+                } else {
+                    $model->updateLastAction();
                 }
             }
 
