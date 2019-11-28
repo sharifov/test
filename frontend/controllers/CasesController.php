@@ -598,6 +598,7 @@ class CasesController extends FController
                 Yii::error('Case id: ' . $model->cs_id . ', ' . VarDumper::dumpAsString($modelNote->errors), 'CaseController:view:CaseNote:save');
             } else {
                 $modelNote->cn_text = '';
+                $model->updateLastAction();
             }
         }
 

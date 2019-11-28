@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Last Action',
                 'format' => 'raw',
                 'value' => static function (Cases $model) {
-                    $createdTS = strtotime($model->cs_updated_dt);
+                    $createdTS = strtotime($model->cs_last_action_dt);
     
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
