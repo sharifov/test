@@ -195,6 +195,18 @@ class QCallService
     }
 
     /**
+     * @param int $userId
+     */
+    public function resetOldReservationByUser(int $userId): void
+    {
+        $qCalls = LeadQcall::find()->andWhere(['lqc_reservation_user_id' => $userId])->all();
+        foreach ($qCalls as $qCall) {
+            $qCall->resetReservation();
+            $this->leadQcallRepository->save($qCall);
+        }
+    }
+
+    /**
      * @param int $leadId
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException

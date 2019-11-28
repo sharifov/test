@@ -99,6 +99,12 @@ class LeadQcall extends \yii\db\ActiveRecord
         $this->lqc_reservation_time = $dt->format('Y-m-d H:i:s');
     }
 
+    public function resetReservation(): void
+    {
+        $this->lqc_reservation_time = null;
+        $this->lqc_reservation_user_id = null;
+    }
+
     /**
      * @param int $userId
      * @return bool

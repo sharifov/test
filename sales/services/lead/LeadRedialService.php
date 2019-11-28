@@ -55,11 +55,11 @@ class LeadRedialService
     }
 
     /**
-     * @param int|Lead $lead
-     * @param int|Employee $user
-     * @throws \yii\web\ForbiddenHttpException
+     * @param $lead
+     * @param $user
+     * @throws \Throwable
      */
-    public function reservation($lead, $user): void
+    public function reservationBeforeCall($lead, $user): void
     {
         $lead = $this->serviceFinder->leadFind($lead);
         $user = $this->serviceFinder->userFind($user);
@@ -69,18 +69,22 @@ class LeadRedialService
         $this->guardUserFree($user);
         $this->guardLeadForCall($lead, $user);
 
-        $lead->callPrepare();
-        $this->leadRepository->save($lead);
+        $this->transactionManager->wrap(function () use ($lead) {
 
-        if ($qCall = $lead->leadQcall) {
-            $this->qCallService->resetReservation($qCall);
-        }
+            $lead->callPrepare();
+            $this->leadRepository->save($lead);
+
+            if ($qCall = $lead->leadQcall) {
+                $this->qCallService->resetReservation($qCall);
+            }
+
+        });
     }
 
     /**
-     * @param int|Lead $lead
-     * @param int|Employee $user
-     * @throws \yii\web\ForbiddenHttpException
+     * @param $lead
+     * @param $user
+     * @throws \Throwable
      */
     public function redial($lead, $user): void
     {
@@ -93,7 +97,10 @@ class LeadRedialService
         $this->guardLeadForCall($lead, $user);
 
         if ($qCall = $lead->leadQcall) {
-            $this->qCallService->reservation($qCall, $user->id);
+            $this->transactionManager->wrap(function () use ($qCall, $user) {
+                $this->qCallService->resetOldReservationByUser($user->id);
+                $this->qCallService->reservation($qCall, $user->id);
+            });
         }
     }
 
@@ -216,9 +223,9 @@ class LeadRedialService
             throw new \DomainException('Cant call before Date Time From');
         }
 
-        if (LeadQcall::find()->isUserReservedOtherLead($user->id, $lead->id)) {
-            throw new \DomainException('You already reserved one Lead. Try again later.');
-        }
+//        if (LeadQcall::find()->isUserReservedOtherLead($user->id, $lead->id)) {
+//            throw new \DomainException('You already reserved one Lead. Try again later.');
+//        }
 
         if ($leadQCall->isReserved() && !$leadQCall->isReservationUser($user->id)) {
             throw new \DomainException('Lead reserved. Try again later.');

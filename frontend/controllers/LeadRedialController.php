@@ -310,7 +310,7 @@ class LeadRedialController extends FController
         $user = Yii::$app->user->identity;
 
         try {
-            $this->leadRedialService->reservation($lead, $user);
+            $this->leadRedialService->reservationBeforeCall($lead, $user);
             return $this->asJson(['success' => true]);
         } catch (\DomainException $e) {
             return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
