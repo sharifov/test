@@ -3,9 +3,8 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use Faker\Provider\DateTime;
 use sales\services\lead\qcall\Interval;
-use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "lead_qcall".
@@ -195,6 +194,14 @@ class LeadQcall extends \yii\db\ActiveRecord
             ['lqc_reservation_user_id', 'integer'],
             ['lqc_reservation_user_id', 'exist', 'targetClass' => Employee::class, 'targetAttribute' => ['lqc_reservation_user_id' => 'id']],
         ];
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getReservationUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class,['id' => 'lqc_reservation_user_id']);
     }
 
     /**

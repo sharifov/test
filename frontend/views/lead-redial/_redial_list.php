@@ -300,6 +300,19 @@ use yii\helpers\Url;
             },
             'visible' => !$user->isAgent(),
         ],
+        [
+            'label' => 'Reserved for',
+            'value' => static function(LeadQcall $model) {
+                if ($model->lqc_reservation_time && (strtotime($model->lqc_reservation_time) > time())) {
+                    return date('H:i:s', (strtotime($model->lqc_reservation_time) - time()));
+                }
+                return '';
+            },
+        ],
+        [
+            'label' => 'Reserved by',
+            'value' => 'reservationUser.username'
+        ],
 		[
 			'label' => 'Is Test',
 			'attribute' => 'l_is_test',
