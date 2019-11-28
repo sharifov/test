@@ -177,7 +177,7 @@ class LeadQcallSearch extends LeadQcall
         ]);
 
         $query->addSelect([
-            'is_reserved' => new Expression('if (lqc_reservation_time > \'' . $nowDt . '\' AND lqc_reservation_user_id != ' . $user->id . ', 1, 0)')
+            'is_reserved' => new Expression('if (lqc_reservation_time > \'' . $nowDt . '\' AND (lqc_reservation_user_id != ' . $user->id . ' OR lqc_reservation_user_id IS NULL) , 1, 0)')
         ]);
 
         $defaultOrder = [
