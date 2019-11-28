@@ -67,8 +67,11 @@ class SmsIncomingService
 
             $department = $this->findDepartment($form->si_phone_to, $dpp, $upp);
 
-            $project = $this->findProject($form->si_phone_to, $form->si_project_id, $dpp, $upp);
-            $this->replaceOriginProject($form, $project);
+            if (!$project = $this->findProject($form->si_phone_to, $form->si_project_id, $dpp, $upp)) {
+                $form->si_project_id = null;
+            } else {
+                $this->checkProjects($form, $project->id);
+            }
 
             $ownerId = $upp ? $upp->upp_user_id : null;
 
@@ -119,7 +122,6 @@ class SmsIncomingService
                 $form->si_project_id
             );
         }
-        $form->replaceProjectIfNotEqual($case->cs_project_id);
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $case->cs_id);
         $this->smsRepository->save($sms);
         return $sms;
@@ -139,7 +141,6 @@ class SmsIncomingService
                 $form->si_project_id
             );
         }
-        $form->replaceProjectIfNotEqual($case->cs_project_id);
         $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $case->cs_id);
         $this->smsRepository->save($sms);
         return $sms;
@@ -162,7 +163,6 @@ class SmsIncomingService
                 Department::DEPARTMENT_SALES
             );
         }
-        $form->replaceProjectIfNotEqual($lead->project_id);
         $sms = Sms::createByIncomingSales($form, $clientId, $ownerId, $lead->id);
         $this->smsRepository->save($sms);
         return $sms;
@@ -170,20 +170,13 @@ class SmsIncomingService
 
     /**
      * @param SmsIncomingForm $form
-     * @param Project|null $project
+     * @param int $projectId
      */
-    private function replaceOriginProject(SmsIncomingForm $form, ?Project $project): void
+    private function checkProjects(SmsIncomingForm $form, int $projectId): void
     {
-        if (!$project) {
-            return;
-        }
-        if (!$form->si_project_id) {
-            $form->si_project_id = $project->id;
-            return;
-        }
-        if ($project->id !== $form->si_project_id) {
-            $form->si_project_id = $project->id;
-            Yii::error('Project incoming and project found not equal. Incoming: ' . $form->si_project_id . '. Found: ' . $project->id, 'SmsIncomingService');
+        if ($form->si_project_id !== $projectId) {
+            $form->si_project_id = $projectId;
+            Yii::error('Project incoming and project found not equal. Incoming: ' . $form->si_project_id . '. Found: ' . $projectId, 'SmsIncomingService');
         }
     }
 
@@ -191,7 +184,7 @@ class SmsIncomingService
      * @param int|null $projectId
      * @return int|null
      */
-    private function findSource(?int $projectId):? int
+    private function findSource(?int $projectId): ?int
     {
         if ($source = Sources::find()->select('id')->where(['project_id' => $projectId, 'default' => true])->one()) {
             return $source->id;
@@ -205,7 +198,7 @@ class SmsIncomingService
      * @param UserProjectParams|null $upp
      * @return Department|null
      */
-    private function findDepartment(string $phone, ?DepartmentPhoneProject $dpp, ?UserProjectParams $upp):? Department
+    private function findDepartment(string $phone, ?DepartmentPhoneProject $dpp, ?UserProjectParams $upp): ?Department
     {
         if ($dpp) {
             if ($department = $dpp->dppDep) {
@@ -236,14 +229,8 @@ class SmsIncomingService
      * @param UserProjectParams|null $upp
      * @return Project|null
      */
-    private function findProject(string $phone, ?int $projectId, ?DepartmentPhoneProject $dpp, ?UserProjectParams $upp):? Project
+    private function findProject(string $phone, ?int $projectId, ?DepartmentPhoneProject $dpp, ?UserProjectParams $upp): ?Project
     {
-        if ($projectId) {
-            if ($project = Project::findOne($projectId)) {
-                return $project;
-            }
-            Yii::error('Not found project for Id: ' . $projectId, 'SmsIncomingService');
-        }
         if ($dpp) {
             if ($project = $dpp->dppProject) {
                 return $project;
@@ -255,6 +242,12 @@ class SmsIncomingService
                 return $project;
             }
             Yii::error('Not found project for userProjectParams tw_phone_number: ' . $upp->upp_tw_phone_number, 'SmsIncomingService');
+        }
+        if ($projectId) {
+            if ($project = Project::findOne($projectId)) {
+                return $project;
+            }
+            Yii::error('Not found project for Id: ' . $projectId, 'SmsIncomingService');
         }
         Yii::error('Not found project for phone: ' . $phone, 'SmsIncomingService');
         return null;
