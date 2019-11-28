@@ -311,7 +311,15 @@ use yii\helpers\Url;
         ],
         [
             'label' => 'Reserved by',
-            'value' => 'reservationUser.username'
+            'value' => static function(LeadQcall $model) {
+                if (
+                    $model->lqc_reservation_time && (strtotime($model->lqc_reservation_time) > time())
+                    && ($user = $model->reservationUser)
+                ) {
+                    return $user->username;
+                }
+                return '';
+            },
         ],
 		[
 			'label' => 'Is Test',

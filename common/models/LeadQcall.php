@@ -19,6 +19,7 @@ use yii\db\ActiveQuery;
  * @property int $lqc_reservation_user_id
  *
  * @property Lead $lqcLead
+ * @property Employee $reservationUser
  */
 class LeadQcall extends \yii\db\ActiveRecord
 {
