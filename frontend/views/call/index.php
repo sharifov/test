@@ -305,15 +305,23 @@ Modal::begin([
 <?php
 
 $js = <<<JS
-$(document).on('click', '.btn-recording_url', function() {
-     var source_src = $(this).data('source_src');
-     $('#audio_recording').html('<audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
-     $('#modalCallRecording').modal('show');
+$("document").ready(function(){
+    $(document).on('click', '.btn-recording_url', function() {
+         let source_src = $(this).data('source_src');
+         let rateStr = '<div class="col-md-1"><div class="form-group"><label class="control-label" for="rate_audio_controls">Playback Rate</label> <input type="number" min="0.8" max="4" step="0.1" class="form-control" id="rate_audio_controls" name="rate_audio_controls" value="1"></div></div>';
+         $('#audio_recording').html( rateStr + '<div class="col-md-12"><audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio></div>');
+         $('#modalCallRecording').modal('show');
+    });
+    
+    $(document).on('change', '#rate_audio_controls', function() {
+        let myaudio = document.getElementById("audio_controls"); 
+        myaudio.playbackRate = $(this).val();;
+    });
+    
+    $('#modalCallRecording').on('hidden.bs.modal', function () {
+        $('#audio_recording').html('');
+    });
 });
-
-$('#modalCallRecording').on('hidden.bs.modal', function () {
-    $('#audio_recording').html('');
-})
 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
