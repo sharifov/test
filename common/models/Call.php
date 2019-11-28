@@ -42,7 +42,7 @@ use Locale;
  * @property int $c_recording_duration
  * @property int $c_sequence_number
  * @property int $c_lead_id
- * @property int $c_created_user_id
+ * @property int $c_created_user_id$c_created_user_id
  * @property string $c_created_dt
  * @property int $c_com_call_id
  * @property string $c_updated_dt
@@ -622,6 +622,21 @@ class Call extends \yii\db\ActiveRecord
                         }
                     }
 
+                    try {
+                        $attempts = (int)Yii::$app->params['settings']['redial_max_attempts_for_dates_passed'];
+                        if (
+                            $lf->lf_out_calls > $attempts
+                            && ($departure = $lead->getDeparture())
+                            && strtotime($departure) < time()
+                        ) {
+                            $qCallService = Yii::createObject(QCallService::class);
+                            $qCallService->remove($lead->id);
+                            $lead->trash($lead->employee_id, null, 'Travel Dates Passed');
+                            $leadRepository->save($lead);
+                        }
+                    } catch (\Throwable $e) {
+                        Yii::error($e, 'redial_max_attempts_for_dates_passed');
+                    }
                 }
             }
 
@@ -773,7 +788,7 @@ class Call extends \yii\db\ActiveRecord
             }
         }
 
-        if (($insert || $isChangedStatus) && $this->isIn() && ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy())) {
+        if (($insert || $isChangedStatus) && $this->isIn() && ($this->isStatusNoAnswer() || $this->isStatusBusy())) {
 
 //                    $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
 //                    if (!$callAcceptExist) {
@@ -868,6 +883,10 @@ class Call extends \yii\db\ActiveRecord
             if ($this->isOut()) {
                 $this->cLead->updateLastAction();
             }
+        }
+
+        if ($this->cCase) {
+            $this->cCase->updateLastAction();
         }
 
         if ($this->c_created_user_id && ($insert || $isChangedStatus))  {
@@ -1493,6 +1512,10 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_status_id = self::STATUS_DELAY;
     }
 
+    public function cancel(): void
+    {
+        $this->c_status_id = self::STATUS_CANCELED;
+    }
 
     /**
      * @return bool
@@ -1502,6 +1525,12 @@ class Call extends \yii\db\ActiveRecord
         return $this->isStatusCompleted() || $this->isStatusBusy() || $this->isStatusNoAnswer() || $this->isStatusCanceled() || $this->isStatusFailed();
     }
 
-
-
+    /**
+     * @param int $userId
+     * @return bool
+     */
+    public function isOwner(int $userId): bool
+    {
+        return $this->c_created_user_id === $userId;
+    }
 }

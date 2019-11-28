@@ -38,6 +38,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'dep_enable')->checkbox() ?>
 
+    <?= $form->field($model, 'dep_default')->checkbox() ?>
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

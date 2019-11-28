@@ -321,7 +321,7 @@ class LeadRedialController extends FController
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionRedialFromLastCalls(): string
+    public function actionRedialFromLastCalls(): Response
     {
         $gid = Yii::$app->request->post('gid');
         $lead = $this->findLeadByGid($gid);
@@ -331,10 +331,17 @@ class LeadRedialController extends FController
         try {
             $this->leadRedialService->redialFromLastCalls($lead, $user);
         } catch (\DomainException $e) {
-            return $this->renderAjax('error', ['message' => $e->getMessage()]);
+            return $this->asJson([
+                'success' => false,
+                'data' => $this->renderAjax('error', ['message' => $e->getMessage()]),
+                'message' => $e->getMessage()
+            ]);
         }
 
-        return $this->renderAjax('redial_from_last_calls', ['lead' => $lead]);
+        return $this->asJson([
+            'success' => true,
+            'data' => $this->renderAjax('redial_from_last_calls', ['lead' => $lead])
+        ]);
     }
 
     /**

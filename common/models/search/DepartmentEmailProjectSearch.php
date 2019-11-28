@@ -17,7 +17,7 @@ class DepartmentEmailProjectSearch extends DepartmentEmailProject
     public function rules()
     {
         return [
-            [['dep_id', 'dep_project_id', 'dep_dep_id', 'dep_source_id', 'dep_enable', 'dep_updated_user_id'], 'integer'],
+            [['dep_id', 'dep_project_id', 'dep_dep_id', 'dep_source_id', 'dep_enable', 'dep_updated_user_id', 'dep_default'], 'integer'],
             [['dep_email', 'dep_updated_dt'], 'safe'],
         ];
     }
@@ -63,6 +63,7 @@ class DepartmentEmailProjectSearch extends DepartmentEmailProject
             'dep_dep_id' => $this->dep_dep_id,
             'dep_source_id' => $this->dep_source_id,
             'dep_enable' => $this->dep_enable,
+            'dep_default' => $this->dep_default,
             'dep_updated_user_id' => $this->dep_updated_user_id,
             'dep_updated_dt' => $this->dep_updated_dt,
         ]);

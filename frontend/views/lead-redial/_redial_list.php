@@ -220,6 +220,26 @@ use yii\helpers\Url;
             'visible' => $user->isAdmin()
         ],
         [
+            'attribute' => 'lqc_created_dt',
+            'value' => static function (LeadQcall $model) {
+                return $model->lqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_created_dt)) : '-';
+            },
+            'format' => 'raw',
+            'visible' => $user->isAdmin(),
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'lqc_created_dt',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
+        ],
+        [
             'attribute' => 'lqc_dt_from',
             'value' => static function (LeadQcall $model) {
                 return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
@@ -279,6 +299,19 @@ use yii\helpers\Url;
                 return floor((strtotime($model->lqc_dt_to) - time()) / 60);
             },
             'visible' => !$user->isAgent(),
+        ],
+        [
+            'label' => 'Reserved for',
+            'value' => static function(LeadQcall $model) {
+                if ($model->lqc_reservation_time && (strtotime($model->lqc_reservation_time) > time())) {
+                    return date('H:i:s', (strtotime($model->lqc_reservation_time) - time()));
+                }
+                return '';
+            },
+        ],
+        [
+            'label' => 'Reserved by',
+            'value' => 'reservationUser.username'
         ],
 		[
 			'label' => 'Is Test',

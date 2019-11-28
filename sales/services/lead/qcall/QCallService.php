@@ -4,6 +4,7 @@ namespace sales\services\lead\qcall;
 
 use common\models\Call;
 use common\models\DepartmentPhoneProject;
+use common\models\DepartmentPhoneProjectQuery;
 use common\models\Lead;
 use common\models\ProjectWeight;
 use sales\repositories\lead\LeadFlowRepository;
@@ -12,6 +13,7 @@ use Yii;
 use common\models\LeadQcall;
 use common\models\QcallConfig;
 use yii\db\ActiveQuery;
+use yii\db\Query;
 
 /**
  * Class QCallService
@@ -184,11 +186,11 @@ class QCallService
     public function resetReservation(LeadQcall $qCall): void
     {
         $minutes = (int)Yii::$app->params['settings']['redial_failed_time_difference'];
-        $qCall->updateReservationTime(new \DateTime('now', new \DateTimeZone('UTC')));
-        $qCall->updateInterval(new Interval(
-            (new \DateTimeImmutable($qCall->lqc_dt_from))->add(new \DateInterval('PT' . $minutes . 'M')),
-            new \DateTimeImmutable($qCall->lqc_dt_to)
-        ));
+        $qCall->reservation((new \DateTime('now', new \DateTimeZone('UTC')))->add(new \DateInterval('PT' . $minutes . 'M')), null);
+//        $qCall->updateInterval(new Interval(
+//            (new \DateTimeImmutable($qCall->lqc_dt_from))->add(new \DateInterval('PT' . $minutes . 'M')),
+//            new \DateTimeImmutable($qCall->lqc_dt_to)
+//        ));
         $this->leadQcallRepository->save($qCall);
     }
 
@@ -247,68 +249,74 @@ class QCallService
     }
 
     /**
-     * @param ActiveQuery $phonesQuery
+     * @param DepartmentPhoneProjectQuery $phonesQuery
      * @param int|null $leadId
      * @return string|null
      */
-    private function findPhoneWithMinimumAttemptsByLead(ActiveQuery $phonesQuery, ?int $leadId): ?string
+    private function findPhoneWithMinimumAttemptsByLead(DepartmentPhoneProjectQuery $phonesQuery, ?int $leadId): ?string
     {
         if ($leadId === null) {
             return null;
         }
 
-        $call = Call::find()
-            ->select(['c_from', 'count_calls' => 'count(*)'])
-            ->andWhere(['c_from' => $phonesQuery])
-            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
-            ->andWhere(['c_lead_id' => $leadId])
-            ->groupBy(['c_from'])
+        $firstPhoneClone = clone $phonesQuery;
+
+        $call = $phonesQuery
+            ->addSelect(['count_calls' =>
+                (new Query())
+                    ->from(Call::tableName())
+                    ->select(['count(*)'])
+                    ->andWhere('c_from = dpp_phone_number')
+                    ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
+                    ->andWhere(['c_lead_id' => $leadId])
+            ])
             ->orderBy(['count_calls' => SORT_ASC])
             ->asArray()
             ->limit(1)
             ->one();
 
         if ($call) {
-            return $call['c_from'];
+            return $call['dpp_phone_number'];
         }
 
-        return $this->getFirstPhone($phonesQuery);
+        return $this->getFirstPhone($firstPhoneClone);
     }
 
-    /**
-     * @param ActiveQuery $phonesQuery
-     * @return string|null
-     */
-    private function findPhoneWithMinimumAttemptsByDate(ActiveQuery $phonesQuery): ?string
+    private function findPhoneWithMinimumAttemptsByDate(DepartmentPhoneProjectQuery $phonesQuery): ?string
     {
         $hours = (int)Yii::$app->params['settings']['redial_default_phone_history_hours'];
         $interval = new \DateInterval('PT' . $hours . 'H');
         $interval->invert = 1;
         $dt = (new \DateTime('now', new \DateTimeZone('UTC')))->add($interval);
 
-        $call = Call::find()
-            ->select(['c_from', 'count_calls' => 'count(*)'])
-            ->andWhere(['c_from' => $phonesQuery])
-            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
-            ->andWhere(['>', 'c_created_dt', $dt->format('Y-m-d H:i:s')])
-            ->groupBy(['c_from'])
+        $firstPhoneClone = clone $phonesQuery;
+
+        $call = $phonesQuery
+            ->addSelect(['count_calls' =>
+                (new Query())
+                    ->from(Call::tableName())
+                    ->select(['count(*)'])
+                    ->andWhere('c_from = dpp_phone_number')
+                    ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
+                    ->andWhere(['>', 'c_created_dt', $dt->format('Y-m-d H:i:s')])
+            ])
             ->orderBy(['count_calls' => SORT_ASC])
             ->asArray()
             ->limit(1)
             ->one();
 
         if ($call) {
-            return $call['c_from'];
+            return $call['dpp_phone_number'];
         }
 
-        return $this->getFirstPhone($phonesQuery);
+        return $this->getFirstPhone($firstPhoneClone);
     }
 
     /**
-     * @param ActiveQuery $phonesQuery
+     * @param DepartmentPhoneProjectQuery $phonesQuery
      * @return string|null
      */
-    private function getFirstPhone(ActiveQuery $phonesQuery): ?string
+    private function getFirstPhone(DepartmentPhoneProjectQuery $phonesQuery): ?string
     {
         /** @var DepartmentPhoneProject $phone */
         if ($phone = $phonesQuery->limit(1)->one()) {

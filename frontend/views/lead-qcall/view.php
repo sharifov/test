@@ -30,9 +30,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'lqc_lead_id',
+            'lqc_created_dt',
             'lqc_dt_from',
             'lqc_dt_to',
             'lqc_weight',
+            'lqc_call_from',
+            'lqc_reservation_time',
+            'lqc_reservation_user_id',
         ],
     ]) ?>
 

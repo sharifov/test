@@ -10,6 +10,11 @@ use yii\base\Model;
 use sales\entities\cases\Cases;
 use borales\extensions\phoneInput\PhoneInputValidator;
 
+/**
+ * Class CasesAddPhoneForm
+ *
+ * @property string $phone
+ */
 class CasesAddPhoneForm extends Model
 {
     public $phone;

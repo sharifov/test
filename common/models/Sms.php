@@ -699,6 +699,8 @@ class Sms extends \yii\db\ActiveRecord
         if ($this->s_lead_id && $this->sLead) {
             $this->sLead->updateLastAction();
         }
-
+        if ($this->s_case_id && $this->sCase) {
+            $this->sCase->updateLastAction();
+        }
     }
 }

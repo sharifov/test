@@ -312,7 +312,9 @@ $c_type_id = $comForm->c_type_id;
 
                                             if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
 
-                                                if ($agentParams->upp_email) {
+                                                if ($model->isDepartmentSupport()) {
+													$typeList[$tk] = $itemName;
+												} else if ($agentParams->upp_email) {
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
                                                 }
                                             }
@@ -369,6 +371,14 @@ $c_type_id = $comForm->c_type_id;
                                 <?= $form->field($comForm, 'c_email_to')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control', 'id' => 'email']) ?>
                             </div>
 
+							<?php if ($model->isDepartmentSupport()): ?>
+                                <div class="col-md-3 form-group message-field-email" id="department-emails">
+									<?php
+									$departmentEmails = \yii\helpers\ArrayHelper::toArray($model->getDepartmentEmailsByProjectAndDepartment()->where(['dep_default' => \common\models\DepartmentPhoneProject::DEP_DEFAULT_TRUE])->all());
+									?>
+									<?= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), ['prompt' => '---', 'class' => 'form-control']) ?>
+                                </div>
+							<?php endif; ?>
 
                             <div class="col-sm-12 form-group message-field-email" id="email-subtitle-group" style="display: none;">
                                 <?= $form->field($comForm, 'c_email_subject')->textInput(['class' => 'form-control', 'id' => 'email-subtitle', 'maxlength' => true]) ?>
@@ -386,6 +396,7 @@ $c_type_id = $comForm->c_type_id;
                                     <?= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), ['prompt' => '---', 'class' => 'form-control']) ?>
                                 </div>
                             <?php endif; ?>
+
                         </div>
                         <div id="sms-input-box" class="message-field-sms">
                             <div class="form-group" id="sms-textarea-div">

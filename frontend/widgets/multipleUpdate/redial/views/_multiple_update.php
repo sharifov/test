@@ -121,9 +121,16 @@ $('body').on('click', '.multiple-update-btn', function(e) {
             new PNotify({title: "Multiple update", type: "error", text: 'Not selected rows', hide: true});
             return;
         }
+        resetMultipleUpdateForm();
         $('#multipleupdateform-ids').val(ids);
         $('#multiple-update-modal').modal();        
 });
+
+function resetMultipleUpdateForm()
+{
+    $('#multiple-update-form')[0].reset();
+    $(".remove-wrapper").show();
+}
 
 $('body').on('click', '.close-icon' ,function() {
   $(this).closest('.card').fadeOut();

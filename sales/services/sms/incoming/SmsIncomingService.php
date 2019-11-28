@@ -113,7 +113,7 @@ class SmsIncomingService
      */
     private function createSmsBySupport(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
     {
-        if (!$case = Cases::find()->findLastActiveSupportCaseByClient($clientId)) {
+        if (!$case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $form->si_project_id)->one()) {
             $case = $this->casesCreate->createSupportByIncomingSms(
                 $clientId,
                 $form->si_project_id
@@ -133,7 +133,7 @@ class SmsIncomingService
      */
     private function createSmsByExchange(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
     {
-        if (!$case = Cases::find()->findLastActiveExchangeCaseByClient($clientId)) {
+        if (!$case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
             $case = $this->casesCreate->createExchangeByIncomingSms(
                 $clientId,
                 $form->si_project_id
@@ -153,7 +153,7 @@ class SmsIncomingService
      */
     private function createSmsBySales(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
     {
-        if (!$lead = Lead::find()->findLastActiveLeadByClient($clientId)) {
+        if (!$lead = Lead::find()->findLastActiveLeadByClient($clientId, $form->si_project_id)) {
             $lead = $this->leadManageService->createByIncomingSms(
                 $form->si_phone_from,
                 $clientId,

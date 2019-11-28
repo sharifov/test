@@ -13,20 +13,33 @@ use common\models\Sources;
 use common\models\UserProjectParams;
 use frontend\widgets\CallBox;
 use frontend\widgets\IncomingCallWidget;
+use http\Exception\InvalidArgumentException;
+use sales\services\call\CallService;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * CallController implements the CRUD actions for Call model.
+ *
+ * @property CallService $callService
  */
 class CallController extends FController
 {
+    private $callService;
+
+    public function __construct($id, $module, CallService $callService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->callService = $callService;
+    }
 
     public function behaviors()
     {
@@ -775,9 +788,27 @@ class CallController extends FController
             $model->update();
         }
 
-        return $this->renderPartial('ajax_call_info', [
+        return $this->renderAjax('ajax_call_info', [
             'model' => $model,
         ]);
+    }
+
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionCancelManual(): Response
+    {
+        if (!$callId = (int)Yii::$app->request->post('id')) {
+            throw new BadRequestHttpException();
+        }
+
+        try {
+            $this->callService->cancelByCrash($callId, Yii::$app->user->id);
+            return $this->asJson(['success' => true]);
+        } catch (\DomainException $e) {
+            return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 
     /**

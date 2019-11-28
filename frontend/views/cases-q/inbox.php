@@ -107,10 +107,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
 			[
-				'attribute' => 'cs_updated_dt',
+				'attribute' => 'cs_last_action_dt',
 				'label' => 'Last Action',
 				'value' => static function (CasesQSearch $model) {
-					$createdTS = strtotime($model->cs_updated_dt);
+					$createdTS = strtotime($model->cs_last_action_dt);
 
 					$diffTime = time() - $createdTS;
 					$diffHours = (int) ($diffTime / (60 * 60));

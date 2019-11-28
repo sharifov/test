@@ -10,6 +10,7 @@ use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
+use sales\services\ServiceFinder;
 
 /**
  * Class CasesManageService
@@ -17,6 +18,7 @@ use sales\repositories\user\UserRepository;
  * @property UserRepository $userRepository
  * @property LeadRepository $leadRepository
  * @property CasesCategoryRepository $casesCategoryRepository
+ * @property ServiceFinder $finder
  */
 class CasesManageService
 {
@@ -25,6 +27,7 @@ class CasesManageService
     private $userRepository;
     private $leadRepository;
     private $casesCategoryRepository;
+    private $finder;
 
     /**
      * CasesManageService constructor.
@@ -32,18 +35,21 @@ class CasesManageService
      * @param UserRepository $userRepository
      * @param LeadRepository $leadRepository
      * @param CasesCategoryRepository $casesCategoryRepository
+     * @param ServiceFinder $finder
      */
     public function __construct(
         CasesRepository $casesRepository,
         UserRepository $userRepository,
         LeadRepository $leadRepository,
-        CasesCategoryRepository $casesCategoryRepository
+        CasesCategoryRepository $casesCategoryRepository,
+        ServiceFinder $finder
     )
     {
         $this->casesRepository = $casesRepository;
         $this->userRepository = $userRepository;
         $this->leadRepository = $leadRepository;
         $this->casesCategoryRepository = $casesCategoryRepository;
+        $this->finder = $finder;
     }
 
     /**

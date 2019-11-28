@@ -3,6 +3,7 @@ namespace frontend\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\Call;
+use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\EmailTemplateType;
 use common\models\Employee;
@@ -34,6 +35,7 @@ use yii\base\Model;
  *
  * @property array $quoteList;
  * @property string $dpp_phone_id
+ * @property string $dep_email_id
  *
  * @property integer $c_preview_email
  * @property integer $c_preview_sms
@@ -59,6 +61,8 @@ class CaseCommunicationForm extends Model
     public const TPL_TYPE_EMAIL_BLANK       = 8;
 
     public const SCENARIO_SMS_DEPARTMENT = 'sms_department';
+
+    public const SCENARIO_EMAIL_DEPARTMENT = 'email_department';
 
 
     public const TPL_TYPE_EMAIL_OFFER_KEY       = 'cl_offer';
@@ -99,6 +103,7 @@ class CaseCommunicationForm extends Model
 
     public $quoteList;
     public $dpp_phone_id;
+    public $dep_email_id;
 
 
 
@@ -194,9 +199,12 @@ class CaseCommunicationForm extends Model
             [['c_sms_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => SmsTemplateType::class, 'targetAttribute' => ['c_sms_tpl_id' => 'stp_id']],
             [['c_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['c_call_id' => 'c_id']],
 
-			['dpp_phone_id', 'safe'],
+			[['dpp_phone_id', 'dep_email_id'], 'safe'],
 			['dpp_phone_id', 'required', 'on' => self::SCENARIO_SMS_DEPARTMENT],
-			[['dpp_phone_id'], 'exist', 'on' => self::SCENARIO_SMS_DEPARTMENT, 'targetClass' => DepartmentPhoneProject::class, 'targetAttribute' => ['dpp_phone_id' => 'dpp_id'], 'message' => 'Not found Department phone']
+			[['dpp_phone_id'], 'exist', 'on' => self::SCENARIO_SMS_DEPARTMENT, 'targetClass' => DepartmentPhoneProject::class, 'targetAttribute' => ['dpp_phone_id' => 'dpp_id'], 'message' => 'Not found Department phone'],
+
+			['dep_email_id', 'required', 'on' => self::SCENARIO_EMAIL_DEPARTMENT],
+			[['dep_email_id'], 'exist', 'on' => self::SCENARIO_EMAIL_DEPARTMENT, 'targetClass' => DepartmentEmailProject::class, 'targetAttribute' => ['dep_email_id' => 'dep_id'], 'message' => 'Not found Department email'],
 
 
         ];
@@ -265,7 +273,8 @@ class CaseCommunicationForm extends Model
             'c_email_message'   => 'Email Message',
             'c_email_subject'   => 'Subject',
             'c_phone_number'    => 'Phone number',
-			'dpp_phone_id'			=> 'Department Phone',
+			'dpp_phone_id'		=> 'Department Phone',
+			'dep_email_id'		=> 'Department Email',
             'c_language_id'     => 'Language',
             'c_user_id'         => 'Agent ID',
             'c_quotes'          => 'Checked Quotes'

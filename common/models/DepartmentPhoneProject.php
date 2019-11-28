@@ -41,6 +41,8 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
 
     public const DPP_DEFAULT_TRUE = 1;
 
+    public const DEP_DEFAULT_TRUE = 1;
+
     /**
      * {@inheritdoc}
      */

@@ -206,6 +206,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'items' => [
                 ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
                 ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
+                ['label' => 'Clients emails', 'url' => ['/client-email/index'], 'icon' => 'envelope '],
             ]
         ];
 

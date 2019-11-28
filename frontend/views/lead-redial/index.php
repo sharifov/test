@@ -34,7 +34,7 @@ $list = new ListsAccess($user->id);
         </div>
 
         <?= Html::button('<i class="fa fa-phone"></i> Call Next', [
-            'class' => 'btn btn-success btn-lg lead-next-btn'
+            'class' => 'btn btn-success btn-lg lead-next-btn', 'style' => 'font-size: 18px'
         ])?>
 
         <div class="row">
@@ -73,39 +73,45 @@ $list = new ListsAccess($user->id);
 
         </div>
 
-        <p></p>
+        <?php $showQueue = (bool)Yii::$app->params['settings']['agent_show_redial_queue']; ?>
 
-        <div style="font-size: 30px">Redial Queue</div>
+        <?php if ($showQueue || (!$showQueue && !$user->isAgent())): ?>
 
-        <?php if ($user->isAdmin()) : ?>
+            <p></p>
 
-            <?= MultipleUpdateWidget::widget([
-                    'gridId' => 'redialGrid',
-                    'script' => '$.pjax.reload({container: "#lead-redial-pjax", async: false});',
-                    'actionUrl' => Url::to(['lead-redial/multiple-update']),
-                    'validationUrl' => Url::to(['lead-redial/multiple-update-validate']),
-                    'reportWrapperId' => 'redial-call-box-wrapper'
-            ]) ?>
+            <div style="font-size: 30px">Redial Queue</div>
 
-            <?= UpdateAllWidget::widget([
-                    'modalId' => 'modal-df',
-                    'showUrl' => Url::to(['/lead-redial/update-all-show']),
-            ]) ?>
+            <?php if ($user->isAdmin()) : ?>
+
+                <?= MultipleUpdateWidget::widget([
+                        'gridId' => 'redialGrid',
+                        'script' => "let pjax = $('#lead-redial-pjax'); if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }",
+                        'actionUrl' => Url::to(['lead-redial/multiple-update']),
+                        'validationUrl' => Url::to(['lead-redial/multiple-update-validate']),
+                        'reportWrapperId' => 'redial-call-box-wrapper'
+                ]) ?>
+
+                <?= UpdateAllWidget::widget([
+                        'modalId' => 'modal-df',
+                        'showUrl' => Url::to(['/lead-redial/update-all-show']),
+                ]) ?>
+
+            <?php endif; ?>
+
+            <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>
+
+                <?= $this->render('_redial_list', [
+                    'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'list' => $list,
+                    'userIsFreeForCall' => $userIsFreeForCall,
+                    'user' => $user,
+                    'guard' => $guard
+                ]) ?>
+
+            <?php Pjax::end(); ?>
 
         <?php endif; ?>
-
-        <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>
-
-            <?= $this->render('_redial_list', [
-                'dataProvider' => $dataProvider,
-                'searchModel' => $searchModel,
-                'list' => $list,
-                'userIsFreeForCall' => $userIsFreeForCall,
-                'user' => $user,
-                'guard' => $guard
-            ]) ?>
-
-        <?php Pjax::end(); ?>
 
     </div>
 
@@ -159,7 +165,8 @@ $lastCallsUrl = Url::to(['lead-redial/show-last-calls']);
 $js = <<<JS
 
 function reloadCallFunction() {
-    $.pjax.reload({container: '#lead-redial-pjax', async: false});
+    let pjax = $('#lead-redial-pjax');
+    if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }
     leadRedialLastCallsReload();
 }
 

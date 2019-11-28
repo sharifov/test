@@ -3,7 +3,10 @@
 namespace common\components;
 
 
+use common\models\DepartmentEmailProject;
+use common\models\DepartmentPhoneProject;
 use sales\services\email\EmailService;
+use sales\services\email\incoming\EmailIncomingService;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use Yii;
@@ -137,6 +140,22 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                         $lead_id = $this->emailService->detectLeadId($email);
                         $case_id = $this->emailService->detectCaseId($email);
+
+                        if (
+                            $lead_id === null && $case_id === null
+                            && (bool)Yii::$app->params['settings']['create_new_support_case_email']
+                            && ($depEmail = DepartmentEmailProject::find()->andWhere(['dep_email' => $mail['ei_email_to']])->one())
+                            && ($department = $depEmail->depDep)
+                            && $department->isSupport()
+                        ) {
+                            try {
+                                $email->e_case_id = (Yii::createObject(EmailIncomingService::class))
+                                    ->getOrCreateCaseBySupport($email->e_email_from, $email->e_project_id);
+                            } catch (\Throwable $e) {
+                                Yii::error($e, 'ReceiveEmailsJob:EmailIncomingService:getOrCreateCaseBySupport');
+                            }
+                        }
+
                         $users = $email->getUsersIdByEmail();
 
                         $user_id = 0;

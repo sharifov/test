@@ -2,10 +2,14 @@
 
 namespace common\models;
 
+<<<<<<< HEAD
 use common\models\query\LeadQcallQuery;
 use Faker\Provider\DateTime;
+=======
+use borales\extensions\phoneInput\PhoneInputValidator;
+>>>>>>> develop
 use sales\services\lead\qcall\Interval;
-use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "lead_qcall".
@@ -83,9 +87,9 @@ class LeadQcall extends \yii\db\ActiveRecord
 
     /**
      * @param \DateTime $dt
-     * @param int $userId
+     * @param int|null $userId
      */
-    public function reservation(\DateTime $dt, int $userId): void
+    public function reservation(\DateTime $dt, ?int $userId): void
     {
         $this->lqc_reservation_time = $dt->format('Y-m-d H:i:s');
         $this->lqc_reservation_user_id = $userId;
@@ -142,7 +146,7 @@ class LeadQcall extends \yii\db\ActiveRecord
      */
     public function multipleUpdate($weight, $from, $to, $created): void
     {
-        if ($weight) {
+        if ($weight || $weight === 0) {
             $this->lqc_weight = $weight;
         }
         if ($from) {
@@ -170,16 +174,39 @@ class LeadQcall extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['lqc_lead_id', 'lqc_dt_from', 'lqc_dt_to'], 'required'],
-            [['lqc_lead_id', 'lqc_weight'], 'integer'],
-            [['lqc_dt_from', 'lqc_dt_to'], 'safe'],
-            [['lqc_lead_id'], 'unique'],
-            [['lqc_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lqc_lead_id' => 'id']],
-            ['lqc_created_dt', 'string'],
+            ['lqc_lead_id', 'required'],
+            ['lqc_lead_id', 'integer'],
+            ['lqc_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lqc_lead_id' => 'id']],
+            ['lqc_lead_id', 'unique'],
+
+            ['lqc_created_dt', 'required'],
+            ['lqc_created_dt',  'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['lqc_dt_from',  'required'],
+            ['lqc_dt_from',  'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['lqc_dt_to', 'required'],
+            ['lqc_dt_to',  'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['lqc_weight', 'integer'],
+
             ['lqc_call_from', 'string'],
+            ['lqc_call_from', PhoneInputValidator::class],
+
             ['lqc_reservation_time', 'string'],
+            ['lqc_reservation_time',  'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
             ['lqc_reservation_user_id', 'integer'],
+            ['lqc_reservation_user_id', 'exist', 'targetClass' => Employee::class, 'targetAttribute' => ['lqc_reservation_user_id' => 'id']],
         ];
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getReservationUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class,['id' => 'lqc_reservation_user_id']);
     }
 
     /**
@@ -195,6 +222,7 @@ class LeadQcall extends \yii\db\ActiveRecord
             'lqc_created_dt' => 'Created',
             'lqc_call_from' => 'Call from',
             'lqc_reservation_time' => 'Reservation time',
+            'lqc_reservation_user_id' => 'Reservation user Id',
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\LeadPreferences;
@@ -648,7 +649,11 @@ class LeadViewController extends FController
 
 		if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-			$client = $this->clientManageService->updateClient($form);
+		    if (!$client = Client::findOne($form->id)) {
+                throw new NotFoundHttpException('The requested client does not exist.');
+            }
+
+			$this->clientManageService->updateClient($client, $form);
 
 			$response['error'] = false;
 			$response['message'] = 'User name was successfully updated';

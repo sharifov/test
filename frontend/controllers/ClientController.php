@@ -170,7 +170,7 @@ class ClientController extends FController
 
         $dataProvider = (new CasesSearchByClient())->search($params, $userId);
 
-        $dataProvider->query->orderBy(['cs_updated_dt' => SORT_DESC]);
+        $dataProvider->query->orderBy(['cs_last_action_dt' => SORT_DESC]);
 
         $dataProvider->sort = false;
 
