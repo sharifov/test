@@ -1,4 +1,4 @@
-/* v.2.0.1 */
+/* v.2.0.2 */
 
 .btn, .buttons, .modal-footer .btn + .btn, button {
   margin-right: 0;
@@ -867,6 +867,12 @@ a.desc:after {
 }
 
 .form-group.required .control-label:after {
+  color: #d00;
+  content: "*";
+  margin-left: 2px;
+}
+
+.form-group.required label:after {
   color: #d00;
   content: "*";
   margin-left: 2px;
