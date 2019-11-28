@@ -163,6 +163,7 @@ class LeadQcallSearch extends LeadQcall
      */
     public function searchByRedial($params, Employee $user): ActiveDataProvider
     {
+        $nowDt = date('Y-m-d H:i:s');
         $query = self::find()->select('*');
 
         $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
@@ -171,12 +172,27 @@ class LeadQcallSearch extends LeadQcall
 
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
 
+        $query->addSelect([
+            'is_ready' => new Expression('if (lqc_dt_from <= \'' . $nowDt . '\', 1, 0)')
+        ]);
+
+        $query->addSelect([
+            'is_reserved' => new Expression('if (lqc_reservation_time > \'' . $nowDt . '\' AND lqc_reservation_user_id != ' . $user->id . ', 1, 0)')
+        ]);
+
+        $defaultOrder = [
+            'is_ready' => SORT_DESC,
+            'is_reserved' => SORT_ASC,
+        ];
+
         if (!$user->isAdmin()) {
-            $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
-            $query->andWhere(['or',
-                ['<=', 'lqc_reservation_time', date('Y-m-d H:i:s')],
-                ['IS', 'lqc_reservation_time', null]
-            ]);
+            $query->andHaving(['<>', 'is_ready', 0]);
+            $query->andHaving(['<>', 'is_reserved', 1]);
+//            $query->andWhere(['<=', 'lqc_dt_from', $nowDt]);
+//            $query->andWhere(['or',
+//                ['<=', 'lqc_reservation_time', $nowDt],
+//                ['IS', 'lqc_reservation_time', null]
+//            ]);
         }
 
         if ($user->isAgent() || $user->isSupervision()) {
@@ -194,7 +210,7 @@ class LeadQcallSearch extends LeadQcall
 		}
 
         $redialSame = (int)Yii::$app->params['settings']['redial_same_deadline_priority'];
-        $samePriority = "TIMESTAMPDIFF(MINUTE, '" . date('Y-m-d H:i:s') . "', lqc_dt_to)";
+        $samePriority = "TIMESTAMPDIFF(MINUTE, '" . $nowDt . "', lqc_dt_to)";
         $query->addSelect([
             'same_priority' =>
                 new Expression('if (' . $samePriority . ' <= ' . $redialSame . ', 1, 0) ')
@@ -217,7 +233,7 @@ class LeadQcallSearch extends LeadQcall
                 ->limit(1)
         ]);
 
-        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date('Y-m-d H:i:s') . "', lqc_dt_to )/60))";
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . $nowDt . "', lqc_dt_to )/60))";
         $query->addSelect(['deadline' =>
             new Expression('if (' . $deadlineExpr . ' > 0, ' . $deadlineExpr . ' , 0) ')
         ]);
@@ -226,10 +242,8 @@ class LeadQcallSearch extends LeadQcall
 //            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
 //        ]);
 
-		$customDefaultOrder = [];
-
         if (($freshTime = (int)Yii::$app->params['settings']['redial_fresh_time']) > 0) {
-            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date('Y-m-d H:i:s') . "')";
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
             $query->addSelect(['isFresh' =>
                 new Expression('if (' . $expression . ' <= ' . $freshTime . ', 1, 0) ')
             ]);
@@ -246,10 +260,11 @@ class LeadQcallSearch extends LeadQcall
 //            $query->addOrderBy([
 //                'is_in_day_time_hours' => SORT_DESC
 //            ]);
-			$customDefaultOrder = [
+
+            $defaultOrder = array_merge($defaultOrder, [
 				'isFresh' => SORT_DESC,
 				'is_in_day_time_hours' => SORT_DESC
-			];
+			]);
 
         } else {
             $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
@@ -261,7 +276,10 @@ class LeadQcallSearch extends LeadQcall
 //            $query->addOrderBy([
 //                'is_in_day_time_hours' => SORT_DESC
 //            ]);
-			$customDefaultOrder = ['is_in_day_time_hours' => SORT_DESC];
+
+            $defaultOrder = array_merge($defaultOrder, [
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
         }
 
 //        $query->addOrderBy([
@@ -271,24 +289,22 @@ class LeadQcallSearch extends LeadQcall
 //            'lqc_dt_from' => SORT_ASC
 //        ]);
 
-		$defaultOrder = [
-		    'same_priority' => SORT_DESC,
+        $defaultOrder = array_merge($defaultOrder, [
+            'same_priority' => SORT_DESC,
             'lqc_weight' => SORT_ASC,
-			'deadline' => SORT_ASC,
-			'attempts' => SORT_ASC,
-			'lqc_dt_from' => SORT_ASC,
+            'deadline' => SORT_ASC,
+            'attempts' => SORT_ASC,
+            'lqc_dt_from' => SORT_ASC,
             'lqc_lead_id' => SORT_ASC,
-		];
-
-        $defaultOrder = array_merge($customDefaultOrder, $defaultOrder);
-
-        // add conditions that should always apply here
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> [
                 'defaultOrder' => $defaultOrder,
 				'attributes' => [
+				    'is_ready',
+                    'is_reserved',
                     'isFresh',
                     'is_in_day_time_hours',
                     'same_priority',
