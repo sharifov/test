@@ -49,8 +49,8 @@ $pjaxId = 'add-product-pjax'; // . uniqid();
 //$this->registerJs($js);
 
 $js = <<<JS
-  $("#product-form").unbind('submit');
-  $('#product-form').on('submit', function(e) {
+  //$("#product-form").unbind('submit');
+  $('#product-form').off().on('submit', function(e) {
       e.preventDefault();
       let btnSubmit = $(this).find(':submit');
       btnSubmit.prop('disabled', true);
