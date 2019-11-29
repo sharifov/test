@@ -95,14 +95,4 @@ class SmsIncomingForm extends Model
             ['si_from_zip', 'string', 'max' => 10],
         ];
     }
-
-    /**
-     * @param int|null $projectId
-     */
-    public function replaceProjectIfNotEqual(?int $projectId): void
-    {
-        if ($projectId && $this->si_project_id !== $projectId) {
-            $this->si_project_id = $projectId;
-        }
-    }
 }

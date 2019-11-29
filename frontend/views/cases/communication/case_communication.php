@@ -644,23 +644,6 @@ JS;
 </script>
 
 <?php
-Modal::begin([
-    'title' => 'Call Recording',
-    // 'toggleButton' => ['label' => 'click me'],
-    'id' => 'modalCallRecording',
-    'size' => Modal::SIZE_LARGE,
-]);
-?>
-    <div class="row">
-        <div class="col-md-12" id="audio_recording">
-
-        </div>
-    </div>
-<?php Modal::end(); ?>
-
-<?php
-
-
 $tpl_email_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
 $tpl_sms_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
@@ -787,16 +770,8 @@ $js = <<<JS
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
     });*/
-    
-    $(document).on('click', '.btn-recording_url', function() {
-         var source_src = $(this).data('source_src');
-         $('#audio_recording').html('<audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
-         $('#modalCallRecording').modal('show');
-    });
-    
-    $('#modalCallRecording').on('hidden.bs.modal', function () {
-        $('#audio_recording').html('');
-    });
+   
+
 
 JS;
 

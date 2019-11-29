@@ -24,6 +24,7 @@ use yii\db\ActiveQuery;
  * @property int $lqc_reservation_user_id
  *
  * @property Lead $lqcLead
+ * @property Employee $reservationUser
  */
 class LeadQcall extends \yii\db\ActiveRecord
 {
@@ -101,6 +102,12 @@ class LeadQcall extends \yii\db\ActiveRecord
     public function updateReservationTime(\DateTime $dt): void
     {
         $this->lqc_reservation_time = $dt->format('Y-m-d H:i:s');
+    }
+
+    public function resetReservation(): void
+    {
+        $this->lqc_reservation_time = null;
+        $this->lqc_reservation_user_id = null;
     }
 
     /**

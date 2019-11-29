@@ -532,20 +532,20 @@ JS;
     ?>
 </div>
 
-<?php \yii\bootstrap4\Modal::begin([
-    'id' => 'activity-modal',
-]); ?>
-<?php \yii\bootstrap4\Modal::end(); ?>
-
 
 <?php
 $js = <<<JS
 
-    $('#activity-modal').on('d-none.bs.modal', function () {
-        // $('#modal-dialog').find('.modal-content').html('');
+    $('#modal-df').on('hidden.bs.modal', function () {
         $.pjax.reload({container:'#pjax-grid-upp'});
+        
+        /*new PNotify({
+            title: 'Params successfully updated',
+            text: 'User project Parameters have been saved successfully.',
+            type: 'success'
+        });*/
     });
-
+      
 
     /*$("#update-app-pjax").on("pjax:end", function() {
         $.pjax.reload({container:'#pjax-grid-upp'});
@@ -556,14 +556,24 @@ $js = <<<JS
     $(document).on('click', '.act-update-upp', function(e) {
         e.preventDefault();
         //alert(123);
-        $.get(
-            '/user-project-params/update-ajax',
+        
+        let modal = $('#modal-df');
+        
+        $.get('/user-project-params/update-ajax',
             {
                 data: $(this).closest('tr').data('key')
             },
             function (data) {
-                $('#activity-modal .modal-content').html(data);
-                $('#activity-modal').modal();
+                
+                modal.find('.modal-title').html('Update Project params');
+                modal.find('.modal-body').html(data);
+                modal.modal();
+                
+                //$('#activity-modal .modal-content').html(data);
+                //$('#activity-modal').modal();
+                
+                
+
             }
         );
     });
@@ -571,10 +581,16 @@ $js = <<<JS
 
     $(document).on('click', '.act-create-upp', function(e) {
         e.preventDefault();
+        let modal = $('#modal-df');
         $.get('/user-project-params/create-ajax', {user_id: $(this).data('user_id')},
             function (data) {
-                $('#activity-modal .modal-content').html(data);
-                $('#activity-modal').modal();
+            
+                modal.find('.modal-title').html('Create Project params');
+                modal.find('.modal-body').html(data);
+                modal.modal();
+            
+                //$('#activity-modal .modal-content').html(data);
+                //$('#activity-modal').modal();
             }
         );
     });
