@@ -37,7 +37,7 @@ $form = ActiveForm::begin([
 </div>
 
 <div class="btn-wrapper">
-    <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', ['id' => 'cancel-btn', 'class' => 'btn btn-danger']) ?>
+    <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', ['id' => 'cancel-btn', 'class' => 'btn btn-danger', 'data-dismiss' => 'modal']) ?>
     <?= Html::submitButton('<i class="fa fa-save"></i> Confirm', ['id' => 'save-btn', 'class' => 'btn btn-primary']) ?>
 </div>
 
