@@ -23,6 +23,7 @@ class Asset extends \yii\web\AssetBundle
 
     public $depends = [
 		ThemeAsset::class,
+		CommonAsset::class
 //        'yiister\gentelella\assets\ExtensionAsset',
     ];
 

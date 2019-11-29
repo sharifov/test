@@ -376,7 +376,13 @@ $c_type_id = $comForm->c_type_id;
 									<?php
 									$departmentEmails = \yii\helpers\ArrayHelper::toArray($model->getDepartmentEmailsByProjectAndDepartment()->where(['dep_default' => \common\models\DepartmentPhoneProject::DEP_DEFAULT_TRUE])->all());
 									?>
-									<?= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), ['prompt' => '---', 'class' => 'form-control']) ?>
+                                    <?php
+                                        $optionsEmail = ['class' => 'form-control'];
+                                        if (count($departmentEmails) > 1) {
+											$optionsEmail['prompt'] = '---';
+                                        }
+                                    ?>
+									<?= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), $optionsEmail) ?>
                                 </div>
 							<?php endif; ?>
 
@@ -393,7 +399,13 @@ $c_type_id = $comForm->c_type_id;
                                     <?php
                                         $departmentPhones = \yii\helpers\ArrayHelper::toArray($model->getDepartmentPhonesByProjectAndDepartment()->where(['dpp_default' => \common\models\DepartmentPhoneProject::DPP_DEFAULT_TRUE])->all());
                                     ?>
-                                    <?= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), ['prompt' => '---', 'class' => 'form-control']) ?>
+									<?php
+									$optionsPhone = ['class' => 'form-control'];
+									if (count($departmentPhones) > 1) {
+										$optionsPhone['prompt'] = '---';
+									}
+									?>
+                                    <?= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), $optionsPhone) ?>
                                 </div>
                             <?php endif; ?>
 
