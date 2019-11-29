@@ -19,7 +19,17 @@ use Yii;
  */
 class HotelRoomPax extends \yii\db\ActiveRecord
 {
-    /**
+
+    public const PAX_TYPE_ADL = 1;
+    public const PAX_TYPE_CHD = 2;
+
+    public const PAX_TYPE_LIST = [
+        self::PAX_TYPE_ADL => 'Adult',
+        self::PAX_TYPE_CHD => 'Child',
+    ];
+
+
+        /**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -72,5 +82,13 @@ class HotelRoomPax extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \modules\hotel\models\query\HotelRoomPaxQuery(get_called_class());
+    }
+
+    /**
+     * @return array
+     */
+    public static function getPaxTypeList(): array
+    {
+        return self::PAX_TYPE_LIST;
     }
 }

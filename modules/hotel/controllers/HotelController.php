@@ -10,6 +10,7 @@ use modules\hotel\models\search\HotelSearch;
 use frontend\controllers\FController;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -112,20 +113,33 @@ class HotelController extends FController
         try {
             $modelHotel = $this->findModel($id);
         } catch (\Throwable $throwable) {
-            return ['error' => 'Error: ' . $throwable->getMessage()];
+            //Yii::$app->response->format = Response::FORMAT_JSON;
+            //return ['error' => 'Error: ' . $throwable->getMessage()];
+            return '<script>alert("'.$throwable->getMessage().'")</script>'; //['message' => 'Successfully updated Hotel request'];
         }
 
         $model = new HotelForm();
+        $model->ph_id = $modelHotel->ph_id;
 
         if ($model->load(Yii::$app->request->post())) {
 
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
             if ($model->validate()) {
 
-                $modelHotel->attributes = $model->attributes;
+                //$modelHotel->attributes = $model->attributes;
+
+                $modelHotel->ph_destination_code = $model->ph_destination_code;
+                $modelHotel->ph_check_in_date = $model->ph_check_in_date;
+                $modelHotel->ph_check_out_date = $model->ph_check_out_date;
+
+                $modelHotel->ph_max_price_rate = $model->ph_max_price_rate;
+                $modelHotel->ph_min_price_rate = $model->ph_min_price_rate;
+
+                $modelHotel->ph_max_star_rate = $model->ph_max_star_rate;
+                $modelHotel->ph_min_star_rate = $model->ph_min_star_rate;
+
+                //VarDumper::dump($modelHotel->attributes); exit;
                 if ($modelHotel->save()) {
-                    return ['message' => 'Successfully updated Hotel request'];
+                    return '<script>$("#modal-sm").modal("hide"); $.pjax.reload({container: "#pjax-product-search-' . $modelHotel->ph_product_id . '"});</script>';
                 }
 
                 Yii::error($modelHotel->errors, 'Module:HotelController:actionUpdateAjax:Hotel:save');
@@ -133,7 +147,7 @@ class HotelController extends FController
 
               //  return ['errors' => \yii\widgets\ActiveForm::validate($modelProduct)];
             }
-            return ['errors' => $model->errors];
+            //return ['errors' => $model->errors];
         } else {
             $model->attributes = $modelHotel->attributes;
         }

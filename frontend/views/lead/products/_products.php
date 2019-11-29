@@ -66,6 +66,7 @@ use yii\helpers\Html;
     </div>
 
 <?php foreach ($products as $product):?>
+    <?//php \yii\widgets\Pjax::begin(['id' => 'pjax-product-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
@@ -102,7 +103,7 @@ use yii\helpers\Html;
         </div>
         <div class="x_content" style="display: none">
             <?php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
-                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
+                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
                 <?= $this->render('@modules/hotel/views/hotel/partial/_view_search', [
                     'model' => $product->hotel,
                     //'dataProviderRooms'
@@ -111,6 +112,7 @@ use yii\helpers\Html;
             <?php endif; ?>
         </div>
     </div>
+    <?//php \yii\widgets\Pjax::end()?>
 <?php endforeach; ?>
 
 <?php \yii\widgets\Pjax::end()?>
