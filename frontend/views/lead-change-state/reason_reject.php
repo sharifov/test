@@ -26,14 +26,14 @@ $form = ActiveForm::begin([
                 'onchange' => "
                 var val = $(this).val();
                 if (val == '" . RejectReasonForm::REASON_OTHER . "') {
-                    $('#" . $form->id . "-other-wrapper').addClass('in');
-                    $('#" . $form->id . "-duplicate-wrapper').removeClass('in');
+                    $('#" . $form->id . "-other-wrapper').addClass('show');
+                    $('#" . $form->id . "-duplicate-wrapper').removeClass('show');
                 } else if (val == '" . RejectReasonForm::REASON_DUPLICATE . "') {
-                    $('#" . $form->id . "-duplicate-wrapper').addClass('in');
-                    $('#" . $form->id . "-other-wrapper').removeClass('in');
+                    $('#" . $form->id . "-duplicate-wrapper').addClass('show');
+                    $('#" . $form->id . "-other-wrapper').removeClass('show');
                 } else {
-                    $('#" . $form->id . "-other-wrapper').removeClass('in');
-                    $('#" . $form->id . "-duplicate-wrapper').removeClass('in');
+                    $('#" . $form->id . "-other-wrapper').removeClass('show');
+                    $('#" . $form->id . "-duplicate-wrapper').removeClass('show');
                 }
             "]) ?>
         </div>

@@ -24,9 +24,9 @@ $form = ActiveForm::begin([
             'onchange' => "
                 var val = $(this).val();
                 if (val == '" . CloneReasonForm::REASON_OTHER . "') {
-                    $('#" . $form->id . "-other-wrapper').addClass('in');
+                    $('#" . $form->id . "-other-wrapper').addClass('show');
                 } else {
-                    $('#" . $form->id . "-other-wrapper').removeClass('in');
+                    $('#" . $form->id . "-other-wrapper').removeClass('show');
                 }
             "]) ?>
     </div>

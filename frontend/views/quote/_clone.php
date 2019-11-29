@@ -21,7 +21,7 @@ $js = <<<JS
     $('#cancel-alt-quote').on('click', function (e) {
         e.preventDefault();
         let editBlock = $('#$formID');
-        editBlock.parent().parent().removeClass('in');
+        editBlock.parent().parent().removeClass('show');
         editBlock.parent().html('');
         $('#modal-lg').modal('hide');
         if ($(this).data('type') == 'search') {

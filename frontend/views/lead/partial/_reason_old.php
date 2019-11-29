@@ -72,14 +72,14 @@ $reasonForm = \yii\widgets\ActiveForm::begin([
                 'onchange' => "
                 var val = $(this).val();
                 if (val == 'Other') {
-                    $('#unassign-other-wrapper').addClass('in');
-                    $('#unassign-duplicate-wrapper').removeClass('in');
+                    $('#unassign-other-wrapper').addClass('show');
+                    $('#unassign-duplicate-wrapper').removeClass('show');
                 } else if (val == 'Duplicate') {
-                    $('#unassign-duplicate-wrapper').addClass('in');
-                    $('#unassign-other-wrapper').removeClass('in');
+                    $('#unassign-duplicate-wrapper').addClass('show');
+                    $('#unassign-other-wrapper').removeClass('show');
                 } else {
-                    $('#unassign-other-wrapper').removeClass('in');
-                    $('#unassign-duplicate-wrapper').removeClass('in');
+                    $('#unassign-other-wrapper').removeClass('show');
+                    $('#unassign-duplicate-wrapper').removeClass('show');
                 }
             "]) ?>
         </div>
@@ -91,9 +91,9 @@ $reasonForm = \yii\widgets\ActiveForm::begin([
                     'onchange' => "
                 var val = $(this).val();
                 if (val == 'processing') {
-                    $('#assign-agent-wrapper').addClass('in');
+                    $('#assign-agent-wrapper').addClass('show');
                 } else {
-                    $('#assign-agent-wrapper').removeClass('in');
+                    $('#assign-agent-wrapper').removeClass('show');
                 }
             "])->label('Return lead in') ?>
             </div>
