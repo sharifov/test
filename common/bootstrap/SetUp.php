@@ -17,6 +17,7 @@ use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
+use sales\events\lead\LeadCreatedManuallyEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
@@ -80,6 +81,17 @@ class SetUp implements BootstrapInterface
         $container->setSingleton(DeferredEventDispatcher::class, function (Container $container) {
             return new DeferredEventDispatcher(new SimpleEventDispatcher($container, [
                 LeadCreatedEvent::class => [LeadCreatedEventListener::class],
+                LeadCreatedManuallyEvent::class => [],
+                LeadCreatedByIncomingCallEvent::class => [
+                    LeadCreatedByIncomingCallLogListener::class,
+                    LeadQcallAddListener::class,
+                ],
+                LeadCreatedByApiEvent::class => [
+                    LeadCreatedByApiLogEventListener::class,
+                    LeadQcallAddListener::class,
+                ],
+                LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
+
                 LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
                 LeadOwnerChangedEvent::class => [LeadOwnerChangedNotificationsListener::class],
                 LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
@@ -109,15 +121,6 @@ class SetUp implements BootstrapInterface
                     LeadSnoozeEventLogListener::class,
                     LeadSnoozeNotificationsListener::class,
                 ],
-                LeadCreatedByIncomingCallEvent::class => [
-                    LeadCreatedByIncomingCallLogListener::class,
-                    LeadQcallAddListener::class,
-                ],
-                LeadCreatedByApiEvent::class => [
-                    LeadCreatedByApiLogEventListener::class,
-                    LeadQcallAddListener::class,
-                ],
-                LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
 
                 LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
 
