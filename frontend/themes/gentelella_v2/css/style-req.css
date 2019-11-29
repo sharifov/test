@@ -5736,6 +5736,9 @@ input[disabled] + .radio-tab__text {
 #menu_toggle {
     color: #53a265;
 }
+.notifications-list table tr.warning {
+    background-color: #fff3cd;
+}
 /****** END OTHER ******/
 
 
