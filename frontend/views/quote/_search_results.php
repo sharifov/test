@@ -189,7 +189,7 @@ JS;
                             <div class="search-filters__airlines-all">
                                 All Airlines
                                 <label class="switch search-filters__switch">
-                                    <input type="checkbox" class="switch__input js-all-airlines">
+                                    <input type="checkbox" class="switch__input js-all-airlines" checked>
                                     <span class="switch__slider"></span>
                                 </label>
                             </div>
