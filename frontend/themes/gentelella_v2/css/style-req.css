@@ -5575,7 +5575,16 @@ input[disabled] + .radio-tab__text {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-
+.nav.side-menu>li {
+    z-index: 10;
+}
+.nav.child_menu {
+    position: relative;
+    z-index: 11;
+}
+.sidebar-footer {
+    z-index: 12;
+}
 /****** END NAV BAR TOP *******/
 
 /****** LABELS ******/
