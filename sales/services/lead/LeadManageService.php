@@ -90,18 +90,16 @@ class LeadManageService
      * @param int $clientId
      * @param int|null $projectId
      * @param int|null $sourceId
-     * @param int|null $departmentId
      * @return Lead
      */
     public function createByIncomingSms(
         string $clientPhone,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId,
-        ?int $departmentId
+        ?int $sourceId
     ): Lead
     {
-        $lead = Lead::createByIncomingSms($clientPhone, $clientId, $projectId, $sourceId, $departmentId);
+        $lead = Lead::createByIncomingSms($clientPhone, $clientId, $projectId, $sourceId);
 
         $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$clientPhone]);
 

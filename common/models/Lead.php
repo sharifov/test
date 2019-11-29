@@ -537,15 +537,13 @@ class Lead extends ActiveRecord
      * @param int $clientId
      * @param int|null $projectId
      * @param int|null $sourceId
-     * @param int|null $departmentId
      * @return Lead
      */
     public static function createByIncomingSms(
         string $clientPhone,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId,
-        ?int $departmentId
+        ?int $sourceId
     ): self
     {
         $lead = self::create();
@@ -553,7 +551,7 @@ class Lead extends ActiveRecord
         $lead->client_id = $clientId;
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
-        $lead->l_dep_id = $departmentId;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_SMS;
         $lead->recordEvent(new LeadCreatedByIncomingSmsEvent($lead));

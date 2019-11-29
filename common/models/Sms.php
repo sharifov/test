@@ -126,9 +126,17 @@ class Sms extends \yii\db\ActiveRecord
         self::FILTER_TYPE_TRASH     => 'TRASH',
     ];
 
-    public static function createByIncomingDefault(SmsIncomingForm $form, int $clientId, ?int $ownerId): self
+    public static function createByIncomingDefault(
+        SmsIncomingForm $form,
+        int $clientId,
+        ?int $ownerId,
+        ?int $leadId,
+        ?int $caseId
+    ): self
     {
         $sms = new static();
+        $sms->s_lead_id = $leadId;
+        $sms->s_case_id = $caseId;
         $sms->loadByIncoming($form, $clientId, $ownerId);
         return $sms;
     }
@@ -137,14 +145,14 @@ class Sms extends \yii\db\ActiveRecord
      * @param SmsIncomingForm $form
      * @param int $clientId
      * @param int|null $ownerId
-     * @param int $caseId
+     * @param int|null $caseId
      * @return static
      */
     public static function createByIncomingExchange(
         SmsIncomingForm $form,
         int $clientId,
         ?int $ownerId,
-        int $caseId
+        ?int $caseId
     ): self
     {
         $sms = new static();
@@ -158,14 +166,14 @@ class Sms extends \yii\db\ActiveRecord
      * @param SmsIncomingForm $form
      * @param int $clientId
      * @param int|null $ownerId
-     * @param int $caseId
+     * @param int|null $caseId
      * @return static
      */
     public static function createByIncomingSupport(
         SmsIncomingForm $form,
         int $clientId,
         ?int $ownerId,
-        int $caseId
+        ?int $caseId
     ): self
     {
         $sms = new static();
@@ -179,14 +187,14 @@ class Sms extends \yii\db\ActiveRecord
      * @param SmsIncomingForm $form
      * @param int $clientId
      * @param int|null $ownerId
-     * @param int $leadId
+     * @param int|null $leadId
      * @return static
      */
     public static function createByIncomingSales(
         SmsIncomingForm $form,
         int $clientId,
         ?int $ownerId,
-        int $leadId
+        ?int $leadId
     ): self
     {
         $sms = new static();

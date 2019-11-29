@@ -95,4 +95,12 @@ class SmsIncomingForm extends Model
             ['si_from_zip', 'string', 'max' => 10],
         ];
     }
+
+    /**
+     * @param int|null $projectId
+     */
+    public function replaceProject(?int $projectId): void
+    {
+        $this->si_project_id = $projectId;
+    }
 }
