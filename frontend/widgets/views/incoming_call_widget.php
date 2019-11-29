@@ -263,7 +263,9 @@ $js = <<<JS
     });*/
     
    
-    document.addEventListener("visibilitychange", getVisible);
+     document.addEventListener("visibilitychange", getVisible);
+    
+    $(document).ready(getVisible);
     
     function startTimers() {
     

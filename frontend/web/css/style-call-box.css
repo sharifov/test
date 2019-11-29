@@ -45,11 +45,11 @@
 
 
 .call-status-occupied {
-  background: #e4beb2;
+  background: #e4beb2 !important;
 }
 
 .call-status-occupied:hover {
-  background: #e4cec0;
+  background: #e4cec0 !important;
 }
 
 

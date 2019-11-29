@@ -16,6 +16,10 @@ use borales\extensions\phoneInput\PhoneInput;
         $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
     ?>
 
+<script>
+    pjaxOffFormSubmit('#create-app-pjax');
+</script>
+
 <?php \yii\widgets\Pjax::begin(['id' => 'create-app-pjax', 'timeout' => 2000, 'enablePushState' => false]); ?>
 <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true], 'action' => ['user-project-params/create-ajax'], 'method' => 'post']); ?>
 
