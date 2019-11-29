@@ -644,23 +644,6 @@ JS;
 </script>
 
 <?php
-Modal::begin([
-    'title' => 'Call Recording',
-    // 'toggleButton' => ['label' => 'click me'],
-    'id' => 'modalCallRecording',
-    'size' => Modal::SIZE_LARGE,
-]);
-?>
-    <div class="row">
-        <div class="col-md-12" id="audio_recording">
-
-        </div>
-    </div>
-<?php Modal::end(); ?>
-
-<?php
-
-
 $tpl_email_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
 $tpl_sms_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
@@ -787,24 +770,8 @@ $js = <<<JS
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
     });*/
-    
-$("document").ready(function(){
-    $(document).on('click', '.btn-recording_url', function() {
-         let source_src = $(this).data('source_src');
-         let rateStr = '<div class="col-md-1"><div class="form-group"><label class="control-label" for="rate_audio_controls">Playback Rate</label> <input type="number" min="0.8" max="4" step="0.1" class="form-control" id="rate_audio_controls" name="rate_audio_controls" value="1"></div></div>';
-         $('#audio_recording').html( rateStr + '<div class="col-md-12"><audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio></div>');
-         $('#modalCallRecording').modal('show');
-    });
-    
-    $(document).on('change', '#rate_audio_controls', function() {
-        let myaudio = document.getElementById("audio_controls"); 
-        myaudio.playbackRate = $(this).val();;
-    });
-    
-    $('#modalCallRecording').on('hidden.bs.modal', function () {
-        $('#audio_recording').html('');
-    });
-});
+   
+
 
 JS;
 
