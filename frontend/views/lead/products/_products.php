@@ -82,6 +82,11 @@ use yii\helpers\Html;
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                         <div class="dropdown-menu" role="menu">
+                            <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+                                'class' => 'dropdown-item text-danger btn-update-product',
+                                'data-product-id' => $product->pr_id
+                            ])*/ ?>
+
                             <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete product', null, [
                                 'class' => 'dropdown-item text-danger btn-delete-product',
                                 'data-product-id' => $product->pr_id
@@ -100,6 +105,7 @@ use yii\helpers\Html;
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
                 <?= $this->render('@modules/hotel/views/hotel/partial/_view_search', [
                     'model' => $product->hotel,
+                    //'dataProviderRooms'
                 ]) ?>
                 <?php \yii\widgets\Pjax::end();?>
             <?php endif; ?>

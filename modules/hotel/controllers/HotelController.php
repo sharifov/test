@@ -2,13 +2,18 @@
 
 namespace modules\hotel\controllers;
 
+use common\models\ProductType;
+use modules\hotel\models\forms\HotelForm;
 use Yii;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\search\HotelSearch;
 use frontend\controllers\FController;
+use yii\base\Exception;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * HotelController implements the CRUD actions for Hotel model.
@@ -96,6 +101,79 @@ class HotelController extends FController
             'model' => $model,
         ]);
     }
+
+
+
+    public function actionUpdateAjax()
+    {
+
+        $id = Yii::$app->request->get('id');
+
+        try {
+            $modelHotel = $this->findModel($id);
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        $model = new HotelForm();
+
+        if ($model->load(Yii::$app->request->post())) {
+
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            if ($model->validate()) {
+
+                $modelHotel->attributes = $model->attributes;
+                if ($modelHotel->save()) {
+                    return ['message' => 'Successfully updated Hotel request'];
+                }
+
+                Yii::error($modelHotel->errors, 'Module:HotelController:actionUpdateAjax:Hotel:save');
+
+
+              //  return ['errors' => \yii\widgets\ActiveForm::validate($modelProduct)];
+            }
+            return ['errors' => $model->errors];
+        } else {
+            $model->attributes = $modelHotel->attributes;
+        }
+
+        return $this->renderAjax('update_ajax', [
+            'model' => $model,
+        ]);
+    }
+
+
+    /**
+     * @return array
+     */
+    public function actionDeleteAjax(): array
+    {
+        $id = Yii::$app->request->post('id');
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+            $model = $this->findModel($id);
+            if (!$model->delete()) {
+                throw new Exception('Product ('.$id.') not deleted', 2);
+            }
+
+            if ((int) $model->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
+                $modelHotel = Hotel::findOne(['ph_product_id' => $model->pr_id]);
+                if ($modelHotel) {
+                    if (!$modelHotel->delete()) {
+                        throw new Exception('Hotel (' . $modelHotel->ph_id . ') not deleted', 3);
+                    }
+                }
+            }
+
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        return ['message' => 'Successfully removed product (' . $model->pr_id . ')'];
+    }
+
 
     /**
      * Deletes an existing Hotel model.

@@ -7,7 +7,7 @@ use Yii;
 use yii\base\Model;
 
 /**
- * This is the model class for table "hotel".
+ * This is the form model class for table "hotel".
  *
  * @property int $ph_id
  * @property int|null $ph_product_id
@@ -22,6 +22,15 @@ use yii\base\Model;
  */
 class HotelForm extends Model
 {
+    public $ph_id;
+    public $ph_product_id;
+    public $ph_check_in_date;
+    public $ph_check_out_date;
+    public $ph_destination_code;
+    public $ph_min_star_rate;
+    public $ph_max_star_rate;
+    public $ph_max_price_rate;
+    public $ph_min_price_rate;
 
     /**
      * {@inheritdoc}
@@ -29,6 +38,7 @@ class HotelForm extends Model
     public function rules()
     {
         return [
+            [['ph_check_in_date', 'ph_check_out_date', 'ph_destination_code'], 'required'],
             [['ph_product_id', 'ph_min_star_rate', 'ph_max_star_rate', 'ph_max_price_rate', 'ph_min_price_rate'], 'integer'],
             [['ph_check_in_date', 'ph_check_out_date'], 'safe'],
             [['ph_destination_code'], 'string', 'max' => 10],
@@ -42,13 +52,12 @@ class HotelForm extends Model
     public function attributeLabels()
     {
         return [
-            'ph_id' => 'ID',
             'ph_product_id' => 'Product ID',
-            'ph_check_in_date' => 'Check In Date',
-            'ph_check_out_date' => 'Check Out Date',
-            'ph_destination_code' => 'Destination Code',
-            'ph_min_star_rate' => 'Min Star Rate',
-            'ph_max_star_rate' => 'Max Star Rate',
+            'ph_check_in_date' => 'Check In',
+            'ph_check_out_date' => 'Check Out',
+            'ph_destination_code' => 'Destination',
+            'ph_min_star_rate' => 'Min. Rate',
+            'ph_max_star_rate' => 'Max. Rate',
             'ph_max_price_rate' => 'Max Price Rate',
             'ph_min_price_rate' => 'Min Price Rate',
         ];
