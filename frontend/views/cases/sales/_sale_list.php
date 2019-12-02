@@ -96,7 +96,7 @@ use yii\widgets\Pjax;
                     $itemColls[] = [
                         'label' => $label,
                         'content' => $content,
-                        'contentOptions' => ['class' => $itemKey ? '' : 'in']
+                        'contentOptions' => ['class' => $itemKey ? '' : 'show']
                         //'options' => [...],
                         //'footer' => 'Footer' // the footer label in list-group
                     ];

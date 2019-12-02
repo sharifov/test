@@ -286,34 +286,3 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
-
-<?php
-Modal::begin([
-    'title' => 'Call Recording',
-    'id' => 'modalCallRecording',
-    'size' => Modal::SIZE_LARGE,
-]);
-?>
-    <div class="row">
-        <div class="col-md-12" id="audio_recording">
-
-        </div>
-    </div>
-<?php Modal::end(); ?>
-
-
-<?php
-
-$js = <<<JS
-$(document).on('click', '.btn-recording_url', function() {
-     var source_src = $(this).data('source_src');
-     $('#audio_recording').html('<audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
-     $('#modalCallRecording').modal('show');
-});
-
-$('#modalCallRecording').on('hidden.bs.modal', function () {
-    $('#audio_recording').html('');
-})
-
-JS;
-$this->registerJs($js, \yii\web\View::POS_READY);

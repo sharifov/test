@@ -141,7 +141,7 @@ return [
         ],
 
 		'assetManager' => [
-			'forceCopy' => true,
+			'forceCopy' => false,
 			'appendTimestamp' => false,
 			'bundles' => [
 				BootstrapAsset::class => [

@@ -376,7 +376,13 @@ $c_type_id = $comForm->c_type_id;
 									<?php
 									$departmentEmails = \yii\helpers\ArrayHelper::toArray($model->getDepartmentEmailsByProjectAndDepartment()->where(['dep_default' => \common\models\DepartmentPhoneProject::DEP_DEFAULT_TRUE])->all());
 									?>
-									<?= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), ['prompt' => '---', 'class' => 'form-control']) ?>
+                                    <?php
+                                        $optionsEmail = ['class' => 'form-control'];
+                                        if (count($departmentEmails) > 1) {
+											$optionsEmail['prompt'] = '---';
+                                        }
+                                    ?>
+									<?= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), $optionsEmail) ?>
                                 </div>
 							<?php endif; ?>
 
@@ -393,7 +399,13 @@ $c_type_id = $comForm->c_type_id;
                                     <?php
                                         $departmentPhones = \yii\helpers\ArrayHelper::toArray($model->getDepartmentPhonesByProjectAndDepartment()->where(['dpp_default' => \common\models\DepartmentPhoneProject::DPP_DEFAULT_TRUE])->all());
                                     ?>
-                                    <?= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), ['prompt' => '---', 'class' => 'form-control']) ?>
+									<?php
+									$optionsPhone = ['class' => 'form-control'];
+									if (count($departmentPhones) > 1) {
+										$optionsPhone['prompt'] = '---';
+									}
+									?>
+                                    <?= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), $optionsPhone) ?>
                                 </div>
                             <?php endif; ?>
 
@@ -644,23 +656,6 @@ JS;
 </script>
 
 <?php
-Modal::begin([
-    'title' => 'Call Recording',
-    // 'toggleButton' => ['label' => 'click me'],
-    'id' => 'modalCallRecording',
-    'size' => Modal::SIZE_LARGE,
-]);
-?>
-    <div class="row">
-        <div class="col-md-12" id="audio_recording">
-
-        </div>
-    </div>
-<?php Modal::end(); ?>
-
-<?php
-
-
 $tpl_email_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
 $tpl_sms_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
@@ -787,16 +782,8 @@ $js = <<<JS
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
     });*/
-    
-    $(document).on('click', '.btn-recording_url', function() {
-         var source_src = $(this).data('source_src');
-         $('#audio_recording').html('<audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
-         $('#modalCallRecording').modal('show');
-    });
-    
-    $('#modalCallRecording').on('hidden.bs.modal', function () {
-        $('#audio_recording').html('');
-    });
+   
+
 
 JS;
 

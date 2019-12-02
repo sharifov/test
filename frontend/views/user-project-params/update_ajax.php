@@ -11,6 +11,9 @@ use borales\extensions\phoneInput\PhoneInput;
 
 ?>
 
+<script>
+    pjaxOffFormSubmit('#update-app-pjax');
+</script>
 
 <?php \yii\widgets\Pjax::begin(['id' => 'update-app-pjax', 'timeout' => 2000, 'enablePushState' => false]); ?>
 <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true], 'action' => ['user-project-params/update-ajax', 'data[upp_user_id]' => $model->upp_user_id, 'data[upp_project_id]' => $model->upp_project_id], 'method' => 'post']); ?>

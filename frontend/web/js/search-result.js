@@ -4,7 +4,6 @@
 /* globals JSON */
 /* globals noUiSlider */
 /* globals console */
-
 SearchResult = function(props) {
     if (typeof props === "undefined") props = {};
     var scope = this,
@@ -67,7 +66,7 @@ SearchResult = function(props) {
         // init listeners
         $('.js-filter .dropdown-menu').on('click', function(e) {
             if (!$(e.target).hasClass("js-dropdown-close")) {
-                e.preventDefault();
+                // e.preventDefault();
                 e.stopPropagation();
             }
         });
@@ -125,7 +124,7 @@ SearchResult = function(props) {
                     case 'price':
                         $(selector).each(function(idx){
                             if(+$(this)[0].getAttribute('data-price') <= filterList[filter] * 1){
-                                $(this).removeClass('hide');
+                                $(this).removeClass('d-none');
                                 $(this).addClass('filtered');
                                 filterApplied = true;
                             }
@@ -490,18 +489,21 @@ SearchResult = function(props) {
     };
 
     this.filterAirline = function() {
-        $('.js-all-airlines').parent().click(function () {
-            $('.js-all-airlines').attr("checked", !$('.js-all-airlines').attr("checked"));
+        $('.js-all-airlines').off().on('click', function () {
+            //
+            var inputChecked = $(this).prop("checked");
+
             var val = [];
-            if ($('.js-all-airlines').prop('checked') === true) {
-                $('#filter-airlines').find('.js-filter-airl-item input[type="checkbox"]').each(function () {
-                    $(this).prop('checked', true);
-                    val.push($(this).attr("id"));
+            if (inputChecked == true) {
+                $('#filter-airlines').find('.js-filter-airl-item input[type="checkbox"]').each(function (i, elem) {
+                    $(elem).prop('checked', true);
+                    val.push($(elem).attr("id"));
                 });
             }
             else {
-                $('#filter-airlines').find('.js-filter-airl-item input[type="checkbox"]').each(function () {
-                    $(this).prop('checked', false);
+                $('#filter-airlines').find('.js-filter-airl-item input[type="checkbox"]').each(function (i, elem) {
+                    $(elem).prop('checked', false);
+                    val = [];
                 });
             }
             scope.addFilterParams({
