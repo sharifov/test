@@ -56,7 +56,7 @@ $js = <<<JS
     $('#cancel-alt-quote').click(function (e) {
         e.preventDefault();
         var editBlock = $('#$formID');
-        editBlock.parent().parent().removeClass('in');
+        editBlock.parent().parent().removeClass('show');
         editBlock.parent().html('');
         $('#modal-lg').modal('hide');
         if ($(this).data('type') == 'search') {

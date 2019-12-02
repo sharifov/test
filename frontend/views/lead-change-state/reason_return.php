@@ -27,9 +27,9 @@ $form = ActiveForm::begin([
                 'onchange' => "
                 var val = $(this).val();
                 if (val == '" . ReturnReasonForm::REASON_OTHER . "') {
-                    $('#" . $form->id . "-other-wrapper').addClass('in');
+                    $('#" . $form->id . "-other-wrapper').addClass('show');
                 } else {
-                    $('#" . $form->id . "-other-wrapper').removeClass('in');
+                    $('#" . $form->id . "-other-wrapper').removeClass('show');
                 }
             "]) ?>
         </div>
@@ -40,9 +40,9 @@ $form = ActiveForm::begin([
                 'onchange' => "
                 var val = $(this).val();
                 if (val == '" . ReturnReasonForm::RETURN_PROCESSING . "') {
-                    $('#" . $form->id . "-user-wrapper').addClass('in');
+                    $('#" . $form->id . "-user-wrapper').addClass('show');
                 } else {
-                    $('#" . $form->id . "-user-wrapper').removeClass('in');
+                    $('#" . $form->id . "-user-wrapper').removeClass('show');
                 }
             "]) ?>
         </div>

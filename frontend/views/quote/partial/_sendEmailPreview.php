@@ -21,7 +21,7 @@ $js = <<<JS
     $('#cancel-sent-email').click(function (e) {
         e.preventDefault();
         var editBlock = $('#$formId');
-        editBlock.parent().parent().removeClass('in');
+        editBlock.parent().parent().removeClass('show');
         editBlock.parent().html('');
         $('#preview-send-quotes').modal('hide');
     });
