@@ -15,10 +15,11 @@ class LeadQuery extends ActiveQuery
      * @param int|null $projectId
      * @return $this
      */
-    public function findLastActiveLeadByClient(int $clientId, ?int $projectId): self
+    public function findLastActiveSalesLeadByClient(int $clientId, ?int $projectId): self
     {
         return $this
             ->andWhere(['client_id' => $clientId])
+            ->andWhere(['l_dep_id' => Department::DEPARTMENT_SALES])
             ->andWhere(['NOT IN', 'status', [
                 Lead::STATUS_SOLD, Lead::STATUS_TRASH, Lead::STATUS_REJECT
             ]])

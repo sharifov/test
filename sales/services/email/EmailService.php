@@ -51,7 +51,7 @@ class EmailService
 			$lead = $this->getLeadFromSubjectByIdOrHash($subject);
 
 			if(!$lead && !$lead = $this->getLeadFromSubjectByKivTag($email->e_ref_message_id)) {
-				$lead = $this->getLeadByLastEmail($email->e_email_from);
+//				$lead = $this->getLeadByLastEmail($email->e_email_from);
 			}
 		} catch (NotFoundException $exception) {
 			Yii::error('('.$exception->getCode().') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')', 'SalesEmailService:detectLeadId:NotFoundException');
@@ -74,7 +74,7 @@ class EmailService
 			$case = $this->getCaseFromSubjectByIdOrHash($subject);
 
 			if(!$case && !$case = $this->getCaseFromSubjectByKivTag($email->e_ref_message_id)) {
-				$case = $this->getCaseByLastEmail($email->e_email_from);
+//				$case = $this->getCaseByLastEmail($email->e_email_from);
 			}
 		} catch (NotFoundException $exception) {
 			Yii::error('('.$exception->getCode().') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')', 'SalesEmailService:detectCaseId:NotFoundException');

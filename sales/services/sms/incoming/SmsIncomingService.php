@@ -67,6 +67,10 @@ class SmsIncomingService
 
             $form->replaceProject($contact->projectId);
 
+            if (!$form->si_project_id) {
+                throw new \DomainException('Incoming sms. Internal Phone: ' . $form->si_phone_to . ' Project Id not found');
+            }
+
             if ($department = $contact->department) {
                 if ($department->isSales()) {
                     $sms = $this->createSmsBySales($form, $client->id, $contact->userId);
@@ -103,7 +107,7 @@ class SmsIncomingService
     private function createSmsBySales(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
     {
         $leadId = null;
-        if (!$lead = Lead::find()->findLastActiveLeadByClient($clientId, $form->si_project_id)->one()) {
+        if (!$lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $form->si_project_id)->one()) {
             if ((bool)Yii::$app->params['settings']['create_new_lead_sms']) {
                 $lead = $this->leadManageService->createByIncomingSms(
                     $form->si_phone_from,
@@ -190,7 +194,7 @@ class SmsIncomingService
     {
         $leadId = null;
         $caseId = null;
-        if ($lead = Lead::find()->findLastActiveLeadByClient($clientId, $form->si_project_id)->one()) {
+        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $form->si_project_id)->one()) {
             $leadId = $lead->id;
         } elseif ($case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $form->si_project_id)->one()) {
             $caseId = $case->cs_id;

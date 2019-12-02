@@ -5,8 +5,13 @@ namespace common\components;
 
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
+use common\models\Lead;
+use sales\entities\cases\Cases;
+use sales\forms\lead\EmailCreateForm;
+use sales\services\client\ClientManageService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
+use sales\services\internalContact\InternalContactService;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use Yii;
@@ -141,18 +146,46 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $lead_id = $this->emailService->detectLeadId($email);
                         $case_id = $this->emailService->detectCaseId($email);
 
-                        if (
-                            $lead_id === null && $case_id === null
-                            && (bool)Yii::$app->params['settings']['create_new_support_case_email']
-                            && ($depEmail = DepartmentEmailProject::find()->andWhere(['dep_email' => $mail['ei_email_to']])->one())
-                            && ($department = $depEmail->depDep)
-                            && $department->isSupport()
-                        ) {
+                        if ($lead_id === null && $case_id === null) {
                             try {
-                                $email->e_case_id = (Yii::createObject(EmailIncomingService::class))
-                                    ->getOrCreateCaseBySupport($email->e_email_from, $email->e_project_id);
+                                $clientService = Yii::createObject(ClientManageService::class);
+                                $client = $clientService->getOrCreateByEmails([new EmailCreateForm(['email' => $email->e_email_from])]);
+                                $internalContactService = Yii::createObject(InternalContactService::class);
+                                $contact = $internalContactService->findByEmail($mail['ei_email_to'], $email->e_project_id);
+                                if (!$contact->projectId) {
+                                    throw new \DomainException('Not found Project Id for email: ' . $mail['ei_email_to']);
+                                }
+                                if ($department = $contact->department) {
+                                    if ($department->isSales()) {
+                                        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($client->id, $contact->projectId)->one()) {
+                                            $email->e_lead_id = $lead->id;
+                                        } else {
+
+                                        }
+                                    } elseif ($department->isExchange()) {
+                                        if ($case = Cases::find()->findLastActiveExchangeCaseByClient($client->id, $contact->projectId)->one()) {
+                                            $email->e_case_id = $case->cs_id;
+                                        } else {
+
+                                        }
+                                    } elseif ($department->isSupport()) {
+                                        if ($case = Cases::find()->findLastActiveSupportCaseByClient($client->id, $contact->projectId)->one()) {
+                                            $email->e_case_id = $case->cs_id;
+                                        } else {
+                                            if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
+                                                $email->e_case_id = (Yii::createObject(EmailIncomingService::class))
+                                                    ->getOrCreateCaseBySupport($email->e_email_from, $contact->projectId);
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
+                                        $email->e_case_id = (Yii::createObject(EmailIncomingService::class))
+                                            ->getOrCreateCaseBySupport($email->e_email_from, $contact->projectId);
+                                    }
+                                }
                             } catch (\Throwable $e) {
-                                Yii::error($e, 'ReceiveEmailsJob:EmailIncomingService:getOrCreateCaseBySupport');
+                                Yii::error($e, 'ReceiveEmailsJob');
                             }
                         }
 
