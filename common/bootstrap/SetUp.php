@@ -15,6 +15,7 @@ use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
+use sales\events\lead\LeadCreatedByIncomingEmailEvent;
 use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
@@ -44,6 +45,7 @@ use sales\listeners\lead\LeadBookedNotificationsListener;
 use sales\listeners\lead\LeadCallExpertRequestEventListener;
 use sales\listeners\lead\LeadCreatedByApiLogEventListener;
 use sales\listeners\lead\LeadCreatedByIncomingCallLogListener;
+use sales\listeners\lead\LeadCreatedByIncomingEmailLogListener;
 use sales\listeners\lead\LeadCreatedByIncomingSmsLogListener;
 use sales\listeners\lead\LeadCreatedCloneByUserEventListener;
 use sales\listeners\lead\LeadCreatedEventListener;
@@ -93,6 +95,7 @@ class SetUp implements BootstrapInterface
                     LeadQcallAddListener::class,
                 ],
                 LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
+                LeadCreatedByIncomingEmailEvent::class => [LeadCreatedByIncomingEmailLogListener::class],
 
                 LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
                 LeadOwnerChangedEvent::class => [LeadOwnerChangedNotificationsListener::class],

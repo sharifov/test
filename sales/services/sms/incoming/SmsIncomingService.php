@@ -68,7 +68,7 @@ class SmsIncomingService
             $form->replaceProject($contact->projectId);
 
             if (!$form->si_project_id) {
-                throw new \DomainException('Incoming sms. Internal Phone: ' . $form->si_phone_to . ' Project Id not found');
+                throw new \DomainException('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Project Id not found');
             }
 
             if ($department = $contact->department) {
@@ -90,6 +90,7 @@ class SmsIncomingService
             }
 
             $sms = $this->createSmsByDefault($form, $client->id, $contact->userId);
+            $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
             Yii::error('Incoming sms. Sms Id: ' . $sms->s_id . ' | Not found Department for phone: ' . $form->si_phone_to, 'SmsIncomingService');
             return $sms;
 
@@ -239,6 +240,9 @@ class SmsIncomingService
      */
     private function findSource(?int $projectId): ?int
     {
+        if ($projectId === null) {
+            return null;
+        }
         if ($source = Sources::find()->select('id')->where(['project_id' => $projectId, 'default' => true])->one()) {
             return $source->id;
         }
