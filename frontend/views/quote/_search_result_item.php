@@ -9,6 +9,8 @@ use yii\bootstrap\Html;
  * @var $locations []
  */
 
+$user = Yii::$app->user->identity;
+$showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 ?>
 <?php $totalDuration = []; $stops = []; $totalDurationSum = 0; $time = []; $price = $result['prices']['totalPrice'];
 if(isset($result['passengers']['ADT'])){
@@ -94,6 +96,11 @@ if (!empty($baggagePerSegment)) {
             <div class="quote__seats">
                 Seats left: <strong class="text-danger"><i class="fa fa-fire"></i> <?= $result['maxSeats']?></strong>
             </div>
+            <?php if($showGdsOfferId && !empty($result['gdsOfferId'])): ?>
+                <div class="quote__seats">
+                    <strong class="text-success" data-toggle="tooltip" title="GDS Offer ID <?= \yii\helpers\Html::encode($result['gdsOfferId']) ?>"><i class="fas fa-passport"></i></strong>
+                </div>
+            <?php endif; ?>
 
             <?php if(isset($result['tickets']) && $result['tickets']):?>
                 <div class="quote__seats">

@@ -12,6 +12,9 @@ use common\models\Airline;
 use common\components\SearchService;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
+
+$user = Yii::$app->user->identity;
+$showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 ?>
 <div class="quote quote--highlight" id="quote-<?=$model->uid?>">
 
@@ -53,8 +56,12 @@ use yii\helpers\Url;
                 ?> &nbsp;[<strong><?= $model->main_airline_code?></strong>]
             </span>
 
-			<div class="quote__gds" title="GDS / PCC">
-				<strong><?= SearchService::getGDSName($model->gds)?></strong> / <i><?= $model->pcc?></i>
+			<div class="quote__gds" title="GDS / <?php if ($showGdsOfferId && !empty($model->gds_offer_id)): echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($model->gds_offer_id) . ' /'; endif; ?> PCC">
+				<strong><?= SearchService::getGDSName($model->gds)?></strong>
+                <?php if ($showGdsOfferId && !empty($model->gds_offer_id)): ?>
+                    <i class="fas fa-passport success"></i>
+                <?php endif; ?>
+                / <i><?= $model->pcc?></i>
 			</div>
 			<span title="<?= $model->created_by_seller ? 'Agent' : 'Expert'?>: <?= \yii\helpers\Html::encode($model->employee_name)?>">
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
