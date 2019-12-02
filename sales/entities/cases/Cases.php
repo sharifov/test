@@ -11,6 +11,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\events\CasesAssignLeadEvent;
+use sales\entities\cases\events\CasesCreatedEvent;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
 use sales\entities\cases\events\CasesOwnerChangeEvent;
 use sales\entities\cases\events\CasesOwnerFreedEvent;
@@ -63,22 +64,23 @@ class Cases extends ActiveRecord
     /**
      * @return static
      */
-    private static function createDefault(): self
+    private static function create(): self
     {
         $case = new static();
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->recordEvent(new CasesCreatedEvent($case));
         return $case;
     }
 
     /**
      * @param int $clientId
-     * @param int $projectId
+     * @param int|null $projectId
      * @return static
      */
-    public static function createExchangeByIncomingSms(int $clientId, int $projectId): self
+    public static function createExchangeByIncomingSms(int $clientId, ?int $projectId): self
     {
-        $case = self::createDefault();
+        $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
@@ -88,12 +90,12 @@ class Cases extends ActiveRecord
 
     /**
      * @param int $clientId
-     * @param int $projectId
+     * @param int|null $projectId
      * @return static
      */
-    public static function createSupportByIncomingSms(int $clientId, int $projectId): self
+    public static function createSupportByIncomingSms(int $clientId, ?int $projectId): self
     {
-        $case = self::createDefault();
+        $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
@@ -108,7 +110,7 @@ class Cases extends ActiveRecord
      */
     public static function createSupportByIncomingEmail(int $clientId, ?int $projectId): self
     {
-        $case = self::createDefault();
+        $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
@@ -119,13 +121,13 @@ class Cases extends ActiveRecord
     /**
      * @param int $clientId
      * @param int $callId
-     * @param int $projectId
+     * @param int|null $projectId
      * @param int|null $depId
      * @return Cases
      */
-    public static function createByCall(int $clientId, int $callId, int $projectId, ?int $depId): self
+    public static function createByCall(int $clientId, int $callId, ?int $projectId, ?int $depId): self
     {
-        $case = self::createDefault();
+        $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_call_id = $callId;
         $case->cs_project_id = $projectId;
@@ -135,7 +137,7 @@ class Cases extends ActiveRecord
     }
 
     /**
-     * @param int $projectId
+     * @param int|null $projectId
      * @param string $category
      * @param string $clientId
      * @param int $depId
@@ -144,7 +146,7 @@ class Cases extends ActiveRecord
      * @return Cases
      */
     public static function createByWeb(
-        int $projectId,
+        ?int $projectId,
         string $category,
         string $clientId,
         int $depId,
@@ -152,7 +154,7 @@ class Cases extends ActiveRecord
         ?string $description
     ): self
     {
-        $case = self::createDefault();
+        $case = self::create();
         $case->cs_project_id = $projectId;
         $case->cs_category = $category;
         $case->cs_client_id = $clientId;

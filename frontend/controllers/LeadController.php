@@ -1785,7 +1785,7 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                $lead = $this->leadManageService->create($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+                $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {
@@ -1815,7 +1815,7 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_EXCHANGE);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                $lead = $this->leadManageService->createWithCase($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create form Case');
+                $lead = $this->leadManageService->createManuallyFromCase($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create form Case');
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {

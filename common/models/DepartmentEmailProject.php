@@ -151,4 +151,12 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
     {
         return $this->hasMany(UserGroup::class, ['ug_id' => 'dug_ug_id'])->viaTable('department_email_project_user_group', ['dug_dep_id' => 'dep_id']);
     }
+
+    /**
+     * @return DepartmentEmailProjectQuery
+     */
+    public static function find(): DepartmentEmailProjectQuery
+    {
+        return new DepartmentEmailProjectQuery(get_called_class());
+    }
 }

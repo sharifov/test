@@ -9,6 +9,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Sms;
+use yii\helpers\VarDumper;
 
 /**
  * SmsSearch represents the model behind the search form of `common\models\Sms`.
@@ -28,7 +29,7 @@ class SmsSearch extends Sms
         return [
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['s_id', 's_reply_id', 's_lead_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_is_deleted', 's_is_new', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id', 'supervision_id'], 'integer'],
+            [['s_id', 's_reply_id', 's_lead_id', 's_case_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_is_deleted', 's_is_new', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id', 'supervision_id'], 'integer'],
             [['s_phone_from', 's_phone_to', 's_sms_text', 's_sms_data', 's_language_id', 's_status_done_dt', 's_read_dt', 's_error_message', 's_tw_sent_dt', 's_tw_account_sid', 's_tw_message_sid', 's_tw_to_country', 's_tw_to_state', 's_tw_to_city', 's_tw_to_zip', 's_tw_from_country', 's_tw_from_state', 's_tw_from_city', 's_tw_from_zip', 's_created_dt', 's_updated_dt'], 'safe'],
             [['s_tw_price'], 'number'],
         ];
@@ -77,7 +78,7 @@ class SmsSearch extends Sms
         if(empty($this->s_created_dt) && isset($params['SmsSearch']['date_range'])){
             $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
-        } elseif (isset($params['SmsSearch']['s_created_dt'])) {
+        } elseif (isset($params['SmsSearch']['s_created_dt']) && !empty($params['SmsSearch']['s_created_dt'])) {
             $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->s_created_dt))])
                 ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->s_created_dt) + 3600 * 24)]);
         }
@@ -93,6 +94,7 @@ class SmsSearch extends Sms
             's_id' => $this->s_id,
             's_reply_id' => $this->s_reply_id,
             's_lead_id' => $this->s_lead_id,
+            's_case_id' => $this->s_case_id,
             's_project_id' => $this->s_project_id,
             's_type_id' => $this->s_type_id,
             's_template_type_id' => $this->s_template_type_id,
@@ -128,6 +130,9 @@ class SmsSearch extends Sms
             ->andFilterWhere(['like', 's_tw_from_state', $this->s_tw_from_state])
             ->andFilterWhere(['like', 's_tw_from_city', $this->s_tw_from_city])
             ->andFilterWhere(['like', 's_tw_from_zip', $this->s_tw_from_zip]);
+
+//        VarDumper::dump($params);
+//        VarDumper::dump($query->createCommand()->getRawSql());die;
 
         return $dataProvider;
     }
@@ -171,6 +176,7 @@ class SmsSearch extends Sms
             's_id' => $this->s_id,
             's_reply_id' => $this->s_reply_id,
             's_lead_id' => $this->s_lead_id,
+//            's_case_id' => $this->s_case_id,
             's_project_id' => $this->s_project_id,
             's_type_id' => $this->s_type_id,
             's_template_type_id' => $this->s_template_type_id,

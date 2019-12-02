@@ -12,10 +12,19 @@ class UserProjectParamsQuery extends \yii\db\ActiveQuery
 
     /**
      * @param string $phone
-     * @return UserProjectParams|null
+     * @return $this
      */
-    public function findByPhone(string $phone):? UserProjectParams
+    public function findByPhone(string $phone): self
     {
-        return $this->where(['upp_tw_phone_number' => $phone])->orderBy(['upp_created_dt' => SORT_DESC])->one();
+        return $this->where(['upp_tw_phone_number' => $phone])->orderBy(['upp_created_dt' => SORT_DESC]);
+    }
+
+    /**
+     * @param string $email
+     * @return $this
+     */
+    public function findByEmail(string $email): self
+    {
+        return $this->where(['upp_email' => $email])->orderBy(['upp_created_dt' => SORT_DESC]);
     }
 }

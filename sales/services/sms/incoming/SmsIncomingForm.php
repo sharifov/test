@@ -68,6 +68,11 @@ class SmsIncomingForm extends Model
             ['si_project_id', 'integer'],
             ['si_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['si_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['si_project_id' => 'id']],
+            ['si_project_id', function () {
+                if (!$this->si_project_id && $this->si_project_id !== 0) {
+                    $this->si_project_id = null;
+                }
+            }],
 
             ['si_sms_text', 'string'],
 
@@ -94,5 +99,13 @@ class SmsIncomingForm extends Model
 
             ['si_from_zip', 'string', 'max' => 10],
         ];
+    }
+
+    /**
+     * @param int|null $projectId
+     */
+    public function replaceProject(?int $projectId): void
+    {
+        $this->si_project_id = $projectId;
     }
 }

@@ -142,7 +142,14 @@ class TestController extends FController
     public function actionTest()
     {
 
-       
+        $form = new SmsIncomingForm([
+            'si_phone_to' => '+16692011854',
+            'si_phone_from' => '+774461222162131341',
+            'si_project_id' => 2
+        ]);
+        $service = Yii::createObject(SmsIncomingService::class);
+        $sms = $service->create($form);
+        VarDumper::dump($sms);
         die;
         return $this->render('blank');
 
