@@ -11,6 +11,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\events\CasesAssignLeadEvent;
+use sales\entities\cases\events\CasesCreatedEvent;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
 use sales\entities\cases\events\CasesOwnerChangeEvent;
 use sales\entities\cases\events\CasesOwnerFreedEvent;
@@ -68,6 +69,7 @@ class Cases extends ActiveRecord
         $case = new static();
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->recordEvent(new CasesCreatedEvent($case));
         return $case;
     }
 

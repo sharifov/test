@@ -9,6 +9,7 @@ use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\events\sms\SmsCreatedByIncomingSalesEvent;
 use sales\events\sms\SmsCreatedByIncomingSupportsEvent;
+use sales\events\sms\SmsCreatedEvent;
 use sales\services\sms\incoming\SmsIncomingForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -126,6 +127,16 @@ class Sms extends \yii\db\ActiveRecord
         self::FILTER_TYPE_TRASH     => 'TRASH',
     ];
 
+    /**
+     * @return static
+     */
+    private static function create(): self
+    {
+        $sms = new static();
+        $sms->recordEvent(new SmsCreatedEvent($sms));
+        return $sms;
+    }
+
     public static function createByIncomingDefault(
         SmsIncomingForm $form,
         int $clientId,
@@ -134,7 +145,7 @@ class Sms extends \yii\db\ActiveRecord
         ?int $caseId
     ): self
     {
-        $sms = new static();
+        $sms = self::create();
         $sms->s_lead_id = $leadId;
         $sms->s_case_id = $caseId;
         $sms->loadByIncoming($form, $clientId, $ownerId);
@@ -155,7 +166,7 @@ class Sms extends \yii\db\ActiveRecord
         ?int $caseId
     ): self
     {
-        $sms = new static();
+        $sms = self::create();
         $sms->loadByIncoming($form, $clientId, $ownerId);
         $sms->s_case_id = $caseId;
         $sms->recordEvent(new SmsCreatedByIncomingSupportsEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
@@ -176,7 +187,7 @@ class Sms extends \yii\db\ActiveRecord
         ?int $caseId
     ): self
     {
-        $sms = new static();
+        $sms = self::create();
         $sms->loadByIncoming($form, $clientId, $ownerId);
         $sms->s_case_id = $caseId;
         $sms->recordEvent(new SmsCreatedByIncomingSupportsEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
@@ -197,7 +208,7 @@ class Sms extends \yii\db\ActiveRecord
         ?int $leadId
     ): self
     {
-        $sms = new static();
+        $sms = self::create();
         $sms->loadByIncoming($form, $clientId, $ownerId);
         $sms->s_lead_id = $leadId;
         $sms->recordEvent(new SmsCreatedByIncomingSalesEvent($sms, $leadId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));

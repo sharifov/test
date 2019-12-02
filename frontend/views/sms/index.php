@@ -163,6 +163,15 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 'options' => ['style' => 'width: 100px']
             ],
 
+            [
+                'attribute' => 's_case_id',
+                'value' => static function (\common\models\Sms $model) {
+                    return $model->s_case_id ? Html::a($model->s_case_id, ['cases/view', 'gid' => $model->sCase->cs_gid], ['target' => '_blank']) : '-';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width: 100px']
+            ],
+
             //'s_reply_id',
             //'s_lead_id',
             //'s_project_id',

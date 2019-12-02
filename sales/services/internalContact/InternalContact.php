@@ -1,18 +1,18 @@
 <?php
 
-namespace sales\services\contact;
+namespace sales\services\internalContact;
 
 use common\models\Department;
 
 /**
- * Class Contact
+ * Class InternalContact
  *
  * @property Department|null $department
  * @property int|null $projectId
  * @property int|null $userId
- * @property array $log
+ * @property Log $log
  */
-class Contact
+class InternalContact
 {
     public $department;
     public $projectId;
@@ -23,9 +23,9 @@ class Contact
      * @param Department|null $department
      * @param int|null $projectId
      * @param int|null $userId
-     * @param array $log
+     * @param Log $log
      */
-    public function __construct(?Department $department, ?int $projectId, ?int $userId, array $log)
+    public function __construct(?Department $department, ?int $projectId, ?int $userId, Log $log)
     {
         $this->department = $department;
         $this->projectId = $projectId;
@@ -46,18 +46,15 @@ class Contact
      */
     public function addLog(string $message): void
     {
-        $this->log[] = $message;
+        $this->log->add($message);
     }
 
     /**
      * @param string $prefix
      * @param string $category
      */
-    public function releaseLog(string $prefix, string $category): void
+    public function releaseLog(?string $prefix, ?string $category): void
     {
-        foreach ($this->log as $log) {
-            \Yii::error($prefix . ' | ' . $log, $category);
-        }
-        $this->log = [];
+      $this->log->release($prefix, $category);
     }
 }

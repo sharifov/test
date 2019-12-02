@@ -5,6 +5,7 @@ namespace common\bootstrap;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\dispatchers\SimpleEventDispatcher;
+use sales\entities\cases\events\CasesCreatedEvent;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
 use sales\entities\cases\events\CasesPendingStatusEvent;
 use sales\entities\cases\events\CasesProcessingStatusEvent;
@@ -32,6 +33,7 @@ use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\events\sms\SmsCreatedByIncomingSalesEvent;
 use sales\events\sms\SmsCreatedByIncomingSupportsEvent;
+use sales\events\sms\SmsCreatedEvent;
 use sales\listeners\cases\CasesFollowUpStatusEventLogListener;
 use sales\listeners\cases\CasesPendingStatusEventLogListener;
 use sales\listeners\cases\CasesProcessingStatusEventLogListener;
@@ -124,12 +126,14 @@ class SetUp implements BootstrapInterface
 
                 LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
 
+                CasesCreatedEvent::class => [],
                 CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],
                 CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class],
                 CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],
                 CasesSolvedStatusEvent::class => [CasesSolvedStatusEventLogListener::class],
                 CasesTrashStatusEvent::class => [CasesTrashStatusEventLogListener::class],
 
+                SmsCreatedEvent::class => [],
                 SmsCreatedByIncomingSalesEvent::class => [SmsCreatedByIncomingSalesNotificationListener::class],
                 SmsCreatedByIncomingSupportsEvent::class => [SmsCreatedByIncomingSupportNotificationListener::class],
             ]));
