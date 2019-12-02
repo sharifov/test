@@ -12,6 +12,7 @@ use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
+use sales\events\lead\LeadCreatedByIncomingEmailEvent;
 use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
@@ -530,6 +531,32 @@ class Lead extends ActiveRecord
         $clone->l_type_create = self::TYPE_CREATE_CLONE;
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
+    }
+
+    /**
+     * @param string $clientEmail
+     * @param int $clientId
+     * @param int|null $projectId
+     * @param int|null $sourceId
+     * @return Lead
+     */
+    public static function createByIncomingEmail(
+        string $clientEmail,
+        int $clientId,
+        ?int $projectId,
+        ?int $sourceId
+    ): self
+    {
+        $lead = self::create();
+        $lead->l_client_email = $clientEmail;
+        $lead->client_id = $clientId;
+        $lead->project_id = $projectId;
+        $lead->source_id = $sourceId;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->status = self::STATUS_PENDING;
+        $lead->l_type_create = self::TYPE_CREATE_INCOMING_EMAIL;
+        $lead->recordEvent(new LeadCreatedByIncomingEmailEvent($lead));
+        return $lead;
     }
 
     /**

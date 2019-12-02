@@ -86,6 +86,27 @@ class LeadManageService
     }
 
     /**
+     * @param string $clientEmail
+     * @param int $clientId
+     * @param int|null $projectId
+     * @param int|null $sourceId
+     * @return Lead
+     */
+    public function createByIncomingEmail(
+        string $clientEmail,
+        int $clientId,
+        ?int $projectId,
+        ?int $sourceId
+    ): Lead
+    {
+        $lead = Lead::createByIncomingEmail($clientEmail, $clientId, $projectId, $sourceId);
+
+        $this->leadRepository->save($lead);
+
+        return $lead;
+    }
+
+    /**
      * @param string $clientPhone
      * @param int $clientId
      * @param int|null $projectId

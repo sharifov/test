@@ -120,6 +120,21 @@ class Cases extends ActiveRecord
 
     /**
      * @param int $clientId
+     * @param int|null $projectId
+     * @return static
+     */
+    public static function createExchangeByIncomingEmail(int $clientId, ?int $projectId): self
+    {
+        $case = self::create();
+        $case->cs_client_id = $clientId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->pending('Created by incoming email');
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
      * @param int $callId
      * @param int|null $projectId
      * @param int|null $depId
