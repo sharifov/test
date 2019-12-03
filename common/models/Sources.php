@@ -41,6 +41,22 @@ class Sources extends \yii\db\ActiveRecord
         self::RULE_EMAIL_AND_PHONE_REQUIRED => 'Email and Phone required',
     ];
 
+    public function default(): void
+    {
+        if ($this->isDefault()) {
+            throw new \DomainException('This Source already default.');
+        }
+        $this->default = 1;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDefault(): bool
+    {
+        return $this->default === 1;
+    }
+
     /**
      * {@inheritdoc}
      */
