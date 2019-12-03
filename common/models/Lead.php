@@ -607,6 +607,7 @@ class Lead extends ActiveRecord
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
         $lead->offset_gmt = $gmt;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
         $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
@@ -614,9 +615,13 @@ class Lead extends ActiveRecord
         return $lead;
     }
 
+    /**
+     * @return static
+     */
     public static function createByApi(): self
     {
         $lead = self::create();
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
         $lead->scenario = self::SCENARIO_API;
         $lead->l_type_create = self::TYPE_CREATE_API;
         return $lead;

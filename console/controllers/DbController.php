@@ -3,6 +3,7 @@ namespace console\controllers;
 
 use common\models\Airline;
 use common\models\ClientPhone;
+use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\GlobalLog;
 use common\models\Lead;
@@ -54,6 +55,12 @@ class DbController extends Controller
         $projects = Project::find()->select(['id'])->indexBy('id')->asArray()->all();
 
         Yii::$app->db->createCommand()->batchInsert('{{%project_weight}}', ['pw_project_id'],$projects)->execute();
+	}
+
+    public function actionSendEmptyDepartmentLeadToSales()
+    {
+        $leads = Lead::updateAll(['l_dep_id' => Department::DEPARTMENT_SALES], ['IS', 'l_dep_id', null]);
+        printf("\n --- Sent %s Leads ---\n", $this->ansiFormat($leads, Console::FG_YELLOW));
 	}
 
 	/**
