@@ -67,9 +67,9 @@ class EmailIncomingService
 
             $contact = $this->internalContactService->findByEmail($internalEmail, $incomingProject);
 
-            if (!$contact->projectId) {
+//            if (!$contact->projectId) {
                 throw new \DomainException('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | Project Id not found');
-            }
+//            }
 
             if ($department = $contact->department) {
                 if ($department->isSales()) {

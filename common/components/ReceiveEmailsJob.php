@@ -107,6 +107,9 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                 } elseif (isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
 
                     foreach ($res['data']['emails'] as $mail) {
+
+                        Yii::error($mail['ei_email_subject'] . $mail['ei_email_to']);
+
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
                         $find = Email::find()->where([
