@@ -1725,7 +1725,7 @@ class CommunicationController extends ApiBaseController
                     //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
                     $filter['last_id'] = $lastEmail->e_inbox_email_id;
                 } else {
-                    $filter['last_id'] = 18100;
+                    $filter['last_id'] = 1;
                 }
             } else {
                 $filter['last_id'] = (int)$last_id;

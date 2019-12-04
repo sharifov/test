@@ -24,7 +24,8 @@ class LeadQuery extends ActiveQuery
                 Lead::STATUS_SOLD, Lead::STATUS_TRASH, Lead::STATUS_REJECT
             ]])
             ->andFilterWhere(['project_id' => $projectId])
-            ->orderBy(['l_last_action_dt' => SORT_DESC]);
+            ->orderBy(['l_last_action_dt' => SORT_DESC])
+            ->limit(1);
     }
 
     /**
