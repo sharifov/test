@@ -12,6 +12,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\services\cases\CasesCreateService;
 use sales\services\client\ClientManageService;
 use sales\services\internalContact\InternalContactService;
+use yii\helpers\VarDumper;
 
 /**
  * Class EmailIncomingService
@@ -115,10 +116,9 @@ class EmailIncomingService
      */
     private function getOrCreateLead(int $clientId, string $clientEmail, ?int $projectId, string $internalEmail, int $emailId): ?int
     {
-        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $projectId)->one()) {
-            $str = 'LeadId: ' . $lead->id . ' Last Action: ' . $lead->l_last_action_dt;
-            Yii::error($str);
-            return $lead->id;
+        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $projectId)->asArray()->limit(10)->all()) {
+            Yii::error(VarDumper::dumpAsString($lead));
+            return $lead[0]['id'];
         }
         if ((bool)Yii::$app->params['settings']['create_new_lead_email']) {
             $lead = $this->leadManageService->createByIncomingEmail(
