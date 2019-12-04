@@ -99,6 +99,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                 $res = $communication->mailGetMessages($filter);
 
+                Yii::error(VarDumper::dumpAsString($res));
+
                 if (isset($res['error']) && $res['error']) {
                     $response['error'] = 'Error mailGetMessages';
                     $response['error_code'] = 13;
@@ -191,6 +193,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                 }
                             }
                         }
+                        Yii::error($email->e_id);
                         $countTotal++;
                     }
 
