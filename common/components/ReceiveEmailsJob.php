@@ -99,8 +99,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                 $res = $communication->mailGetMessages($filter);
 
-                Yii::error(VarDumper::dumpAsString($res));
-
                 if (isset($res['error']) && $res['error']) {
                     $response['error'] = 'Error mailGetMessages';
                     $response['error_code'] = 13;
@@ -189,11 +187,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                     $email->e_case_id = $process->caseId;
                                     $email->save(false);
                                 } catch (\Throwable $e) {
-                                    Yii::error($e, 'ReceiveEmailsJob:EmailIncomingService:create');
+                                    Yii::error($e->getMessage(), 'ReceiveEmailsJob:EmailIncomingService:create');
                                 }
                             }
                         }
-                        Yii::error($email->e_id);
                         $countTotal++;
                     }
 
