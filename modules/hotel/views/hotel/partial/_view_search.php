@@ -1,6 +1,5 @@
 <?php
 
-use modules\hotel\models\search\HotelRoomSearch;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\widgets\Pjax;
@@ -23,7 +22,7 @@ use yii\widgets\Pjax;
 
 
     <div class="row">
-    <div class="col-md-5">
+        <div class="col-md-5">
         <p>
             <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel/update-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-warning btn-update-hotel-request']) ?>
         </p>
@@ -32,8 +31,8 @@ use yii\widgets\Pjax;
             'attributes' => [
                 //'ph_id',
                 //'ph_product_id',
-                'ph_check_in_date',
-                'ph_check_out_date',
+                'ph_check_in_date:date',
+                'ph_check_out_date:date',
                 'ph_destination_code',
                 'ph_min_star_rate',
                 'ph_max_star_rate',
@@ -42,7 +41,7 @@ use yii\widgets\Pjax;
             ],
         ]) ?>
     </div>
-    <div class="col-md-7">
+        <div class="col-md-7">
         <p>
             <?= Html::a('<i class="fa fa-plus"></i> Add Room', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel-room/create-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-success btn-add-hotel-room']) ?>
         </p>
@@ -71,22 +70,22 @@ use yii\widgets\Pjax;
                     <?php if ($room->hotelRoomPaxes):?>
                         <table class="table table-bordered">
                             <thead>
-                            <tr>
-                                <th>Pax Id</th>
+                            <tr class=" bg-info">
+                                <th>Nr.</th>
                                 <th>Type</th>
                                 <th>Age</th>
-                                <th>First name</th>
-                                <th>Last name</th>
+                                <th>Name</th>
+                                <th>Date of Birth</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($room->hotelRoomPaxes as $pax): ?>
+                            <?php foreach ($room->hotelRoomPaxes as $nr => $pax): ?>
                             <tr>
-                                <td>Pax <?=Html::encode($pax->hrp_id)?></td>
-                                <td><?=Html::encode($pax->hrp_type_id)?></td>
-                                <td><?=Html::encode($pax->hrp_age)?></td>
-                                <td><?=Html::encode($pax->hrp_first_name)?></td>
-                                <td><?=Html::encode($pax->hrp_last_name)?></td>
+                                <td title="Pax Id: <?=Html::encode($pax->hrp_id)?>"><?=($nr + 1)?>. Pax</td>
+                                <td><b><?=Html::encode($pax->getPaxTypeName())?></b></td>
+                                <td><?=$pax->hrp_age ?: '-'?></td>
+                                <td><?=Html::encode($pax->hrp_first_name)?> <?=Html::encode($pax->hrp_last_name)?></td>
+                                <td><?=$pax->hrp_dob ? date('Y-M-d', strtotime($pax->hrp_dob)) : '-'?></td>
                             </tr>
                             <?php endforeach; ?>
                             </tbody>
@@ -99,6 +98,14 @@ use yii\widgets\Pjax;
 
         <?php Pjax::end(); ?>
     </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote/search-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-warning btn-search-hotel-quotes']) ?>
+            </p>
+        </div>
     </div>
 </div>
 
@@ -162,6 +169,29 @@ $js = <<<JS
         });
         return false;
     });
+    
+    
+     $('body').off('click', '.btn-search-hotel-quotes').on('click', '.btn-search-hotel-quotes', function (e) {
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');          
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Search Hotel Quotes');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            $('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+        return false;
+    });
+    
+    
+    
+    
+    
     
     $('body').off('click', '.btn-delete-hotel-room').on('click', '.btn-delete-hotel-room', function(e) {
         

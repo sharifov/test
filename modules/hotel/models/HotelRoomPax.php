@@ -45,7 +45,11 @@ class HotelRoomPax extends \yii\db\ActiveRecord
         return [
             [['hrp_hotel_room_id', 'hrp_type_id'], 'required'],
             [['hrp_hotel_room_id', 'hrp_type_id', 'hrp_age'], 'integer'],
-            [['hrp_dob'], 'safe'],
+            [['hrp_dob'], 'filter', 'filter' => static function ($value) {
+                $result = date('Y-m-d', strtotime($value));
+                return $result;
+            }, 'skipOnEmpty' => true],
+            //[['hrp_dob'], 'safe'],
             [['hrp_first_name', 'hrp_last_name'], 'string', 'max' => 40],
             [['hrp_hotel_room_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelRoom::class, 'targetAttribute' => ['hrp_hotel_room_id' => 'hr_id']],
         ];
@@ -90,5 +94,29 @@ class HotelRoomPax extends \yii\db\ActiveRecord
     public static function getPaxTypeList(): array
     {
         return self::PAX_TYPE_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaxTypeName(): string
+    {
+        return self::PAX_TYPE_LIST[$this->hrp_type_id] ?? '';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAdult(): bool
+    {
+        return (int) $this->hrp_type_id === self::PAX_TYPE_ADL;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChild(): bool
+    {
+        return (int) $this->hrp_type_id === self::PAX_TYPE_CHD;
     }
 }

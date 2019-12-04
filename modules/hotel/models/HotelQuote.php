@@ -4,6 +4,7 @@ namespace modules\hotel\models;
 
 use common\models\ProductQuote;
 use Yii;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "hotel_quote".
@@ -107,5 +108,80 @@ class HotelQuote extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \modules\hotel\models\query\HotelQuoteQuery(get_called_class());
+    }
+
+    public static function getHashKey(string $roomKey): string
+    {
+        return md5($roomKey);
+    }
+
+    /**
+     * @param array $quoteData
+     * @param HotelList $hotelModel
+     * @param Hotel $hotelRequest
+     * @param string $currency
+     * @return array|HotelQuote|null
+     */
+    public static function findOrCreateByData(array $quoteData, HotelList $hotelModel, Hotel $hotelRequest, string $currency = 'USD')
+    {
+        $quote = null;
+
+        if (isset($quoteData['rates']) && $rooms = $quoteData['rates']) {
+            if (isset($quoteData['groupKey'])) {
+                $hashKey = self::getHashKey($quoteData['groupKey']);
+
+                $quote = HotelQuote::find()->where([
+                    'hq_hotel_list_id' => $hotelModel->hl_id,
+                    'hq_hotel_id' => $hotelRequest->ph_id,
+                    'hq_hash_key' => $hashKey
+                ])->one();
+
+                if (!$quote) {
+                    $quote = new self();
+                    $quote->hq_hash_key = $hashKey;
+                    $quote->hq_hotel_id = $hotelRequest->ph_id;
+                    $quote->hq_hotel_list_id = $hotelModel->hl_id;
+                    $quote->hq_json_response = json_encode($quoteData);
+                    //$quote->hq_product_quote_id =
+                    $quote->hq_hotel_name = $hotelModel->hl_name;
+                    $quote->hq_destination_name = $hotelModel->hl_destination_name;
+
+                    if (!$quote->save()) {
+                        Yii::error(VarDumper::dumpAsString($quote->errors),
+                            'Model:HotelQuote:findOrCreateByData:HotelQuote:save');
+                    }
+                }
+            }
+
+            if ($quote) {
+                foreach ($rooms as $room) {
+                    $qRoom = new HotelQuoteRoom();
+                    $qRoom->hqr_hotel_quote_id = $quote->hq_id;
+                    $qRoom->hqr_adults = $room['adults'] ?? null;
+                    $qRoom->hqr_children = $room['children'] ?? null;
+                    //childrenAges
+
+                    $qRoom->hqr_rooms = $room['rooms'] ?? null;
+                    $qRoom->hqr_code = $room['code'] ?? null;
+                    $qRoom->hqr_room_name = $room['name'] ?? null;
+                    $qRoom->hqr_key = $room['key'] ?? null;
+                    $qRoom->hqr_class = $room['class'] ?? null;
+                    $qRoom->hqr_payment_type = $room['paymentType'] ?? null;
+                    $qRoom->hqr_board_code = $room['boardCode'] ?? null;
+                    $qRoom->hqr_board_name = $room['boardName'] ?? null;
+                    $qRoom->hqr_amount = $room['amount'] ?? null;
+                    $qRoom->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
+                    $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
+                    $qRoom->hqr_currency = $currency;
+                    if (!$qRoom->save()) {
+                        Yii::error(VarDumper::dumpAsString($qRoom->errors),
+                            'Model:HotelQuote:findOrCreateByData:HotelQuoteRoom:save');
+                    }
+
+                }
+            }
+        }
+
+        return $quote;
     }
 }

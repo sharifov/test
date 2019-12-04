@@ -73,4 +73,48 @@ class HotelRoom extends \yii\db\ActiveRecord
     {
         return new \modules\hotel\models\query\HotelRoomQuery(get_called_class());
     }
+
+    /**
+     * @return array
+     */
+    public function getDataSearch(): array
+    {
+        $data = [];
+
+        $adults = 0;
+        $children = 0;
+        $paxes = [];
+
+        $data['rooms'] = 1;
+
+        if ($this->hotelRoomPaxes) {
+            foreach ($this->hotelRoomPaxes as $pax) {
+                if ($pax->isAdult()) {
+                    $adults ++;
+                } elseif ($pax->isChild()) {
+                    $children ++;
+                    $paxes[] = ['paxType' => 1, 'age' => $pax->hrp_age];
+                }
+            }
+        }
+
+
+        if ($adults) {
+            $data['adults'] = $adults;
+        }
+
+        if ($children) {
+            $data['children'] = $children;
+        }
+
+        if ($paxes) {
+            $data['paxes'] = $paxes;
+        }
+
+//        ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
+//            ['paxType' => 1, 'age' => 6],
+//            ['paxType' => 1, 'age' => 14],
+//        ]];
+        return $data;
+    }
 }

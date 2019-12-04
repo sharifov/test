@@ -5,6 +5,7 @@ namespace modules\hotel\models;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "hotel_list".
@@ -147,5 +148,118 @@ class HotelList extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \modules\hotel\models\query\HotelListQuery(get_called_class());
+    }
+
+    /**
+     * @param string $code
+     * @return string
+     */
+    public static function getHashKey(string $code): string
+    {
+        return md5($code);
+    }
+
+    /**
+     * @param array $data
+     * @return static
+     */
+    public static function findOrCreateByData(array $data): self
+    {
+
+        /*
+             'categoryName' => '3 STARS'
+            'destinationName' => 'Cadiz / Jerez'
+            'zoneName' => 'Cádiz'
+            'minRate' => 123.12
+            'maxRate' => 154.62
+            'currency' => 'USD'
+            'code' => 147358
+            'name' => 'Patagonia Sur'
+            'description' => 'Opened in 2009 and offering an unbeatable location in the old town of Cadiz, this beautiful property is just a few minutes\' walk from the most important tourist sites in this vibrant city, including the magnificent Cathedral, located just a few steps away, Plaza Candelaria square and only 100 metres from the Town Hall. Those eager to discover all the hidden treasures of this beautiful region will find the central railway station and the bus terminal 400 metres from this stylish establishment. Simplicity and comfort are the main features of the different rooms, decorated in soothing tones to create a relaxing atmosphere in which guests may feel right at home. They all come with wooden floors and oak furniture. Those most demanding customers may prefer the luxurious penthouse with a large private sun terrace. A delicious breakfast buffet is served daily where travellers may find a choice of delicious fresh products.'
+            'countryCode' => 'ES'
+            'stateCode' => '11'
+            'destinationCode' => 'CAD'
+            'zoneCode' => 99
+            'latitude' => 36.53034
+            'longitude' => -6.294385
+            'categoryCode' => '3EST'
+            'categoryGroupCode' => 'GRUPO3'
+            'boardCodes' => [
+                0 => 'BB'
+                1 => 'RO'
+            ]
+            'segmentCodes' => []
+            'address' => 'Calle Cobos,11  '
+            'postalCode' => '11005'
+            'city' => 'CADIZ'
+            'email' => 'reservas@hotelpatagoniasur.com'
+            'license' => 'H/CA/01216'
+            'phones' => [
+                0 => [
+                    'type' => 'PHONEBOOKING'
+                    'number' => '0034956134261'
+                ]
+                1 => [
+                    'type' => 'PHONEHOTEL'
+                    'number' => '856174647'
+                ]
+                2 => [
+                    'type' => 'FAXNUMBER'
+                    'number' => '856174320'
+                ]
+                ]
+                'images' => [
+                    0 => [
+                        'url' => '14/147358/147358a_hb_l_001.jpg'
+                        'type' => 'COM'
+                    ]
+                    ],
+                    ]
+                'lastUpdate' => '2019-12-02'
+                's2C' => '2*'
+                'ranking' => 1
+                'serviceType' => 'HOTELBEDS'
+         */
+
+        $hotel = self::findOne(['hl_code' => $data['code']]);
+
+        if (!$hotel) {
+            $hotel = new self();
+            $hotel->hl_name = $data['name'];
+            $hotel->hl_code = $data['code'];
+            $hotel->hl_hash_key = self::getHashKey($data['code']);
+            $hotel->hl_address = $data['address'] ?? null;
+            $hotel->hl_category_name = $data['categoryName'] ?? null;
+            $hotel->hl_destination_name = $data['destinationName'] ?? null;
+            $hotel->hl_destination_code = $data['destinationCode'] ?? null;
+
+            $hotel->hl_country_code = $data['countryCode'] ?? null;
+            $hotel->hl_state_code = $data['stateCode'] ?? null;
+            $hotel->hl_postal_code = $data['postalCode'] ?? null;
+            $hotel->hl_zone_code = $data['zoneCode'] ?? null;
+            $hotel->hl_zone_name = $data['zoneName'] ?? null;
+
+            $hotel->hl_city = $data['city'] ?? null;
+            $hotel->hl_email = $data['email'] ?? null;
+
+            $hotel->hl_phone_list       = isset($data['phones']) && $data['phones'] ? json_encode($data['phones']) : null;
+            $hotel->hl_image_list       = isset($data['images']) && $data['images'] ? json_encode($data['images']) : null;
+            $hotel->hl_segment_codes    = isset($data['segmentCodes']) && $data['segmentCodes'] ? json_encode($data['segmentCodes']) : null;
+            $hotel->hl_board_codes      = isset($data['boardCodes']) && $data['boardCodes'] ? json_encode($data['boardCodes']) : null;
+
+            $hotel->hl_description = $data['description'] ?? null;
+            $hotel->hl_latitude = $data['latitude'] ?? null;
+            $hotel->hl_longitude = $data['longitude'] ?? null;
+
+            $hotel->hl_last_update = isset($data['lastUpdate']) && $data['lastUpdate'] ? date('Y-m-d', strtotime($data['lastUpdate'])) : null;
+            $hotel->hl_star = $data['s2C'] ?? null;
+            $hotel->hl_ranking = $data['ranking'] ?? null;
+            $hotel->hl_service_type = $data['serviceType'] ?? null;
+
+            if (!$hotel->save()) {
+                Yii::error(VarDumper::dumpAsString($hotel->errors), 'Model:HotelList:findOrCreateByData:HotelList:save');
+            }
+        }
+        return $hotel;
     }
 }

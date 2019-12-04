@@ -138,7 +138,7 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
             'hqr_hotel_quote_id'        => $this->integer()->notNull(),
             'hqr_room_name'             => $this->string(150),
             'hqr_key'                   => $this->string(255),
-            'hqr_code'                  => $this->integer(),
+            'hqr_code'                  => $this->string(10),
             'hqr_class'                 => $this->string(5),
             'hqr_amount'                => $this->decimal(10, 2),
             'hqr_currency'              => $this->string(3),

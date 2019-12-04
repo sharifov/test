@@ -12,7 +12,7 @@ use Yii;
  * @property int $hqr_hotel_quote_id
  * @property string|null $hqr_room_name
  * @property string|null $hqr_key
- * @property int|null $hqr_code
+ * @property string|null $hqr_code
  * @property string|null $hqr_class
  * @property float|null $hqr_amount
  * @property string|null $hqr_currency
@@ -45,14 +45,14 @@ class HotelQuoteRoom extends \yii\db\ActiveRecord
     {
         return [
             [['hqr_hotel_quote_id'], 'required'],
-            [['hqr_hotel_quote_id', 'hqr_code', 'hqr_rooms', 'hqr_adults', 'hqr_children'], 'integer'],
+            [['hqr_hotel_quote_id', 'hqr_rooms', 'hqr_adults', 'hqr_children'], 'integer'],
             [['hqr_amount', 'hqr_cancel_amount'], 'number'],
             [['hqr_cancel_from_dt'], 'safe'],
             [['hqr_room_name'], 'string', 'max' => 150],
             [['hqr_key'], 'string', 'max' => 255],
             [['hqr_class'], 'string', 'max' => 5],
             [['hqr_currency'], 'string', 'max' => 3],
-            [['hqr_payment_type'], 'string', 'max' => 10],
+            [['hqr_payment_type', 'hqr_code'], 'string', 'max' => 10],
             [['hqr_board_code'], 'string', 'max' => 2],
             [['hqr_board_name'], 'string', 'max' => 100],
             [['hqr_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['hqr_currency' => 'cur_code']],
