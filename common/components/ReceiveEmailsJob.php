@@ -78,10 +78,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                 $filter['limit'] = 20;
             }
 
-            if (isset($this->request_data['mail_list'])) {
-                $filter['mail_list'] = $this->request_data['mail_list'];
+            if (isset($this->request_data['email_list'])) {
+                $filter['email_list'] = $this->request_data['email_list'];
             } else {
-                $filter['mail_list'] = [];
+                $filter['email_list'] = [];
             }
 
             /** @var CommunicationService $communication */
