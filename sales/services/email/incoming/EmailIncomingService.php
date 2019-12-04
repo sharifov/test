@@ -97,8 +97,8 @@ class EmailIncomingService
 
             $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
             Yii::error('Incoming email. Created Email Id: ' . $emailId . ' | Not found Department for email: ' . $internalEmail, 'EmailIncomingService');
-            $caseId = $this->createSupportCaseByDefault($client->id, $contact->projectId, $internalEmail, $emailId);
-            return new Process(null, $caseId);
+            $process = $this->getOrCreateByDefault($client->id, $contact->projectId, $internalEmail, $emailId);
+            return $process;
 
         });
 
@@ -176,16 +176,28 @@ class EmailIncomingService
      * @param int|null $projectId
      * @param string $internalEmail
      * @param int $emailId
-     * @return int|null
+     * @return Process
      */
-    private function createSupportCaseByDefault(int $clientId, ?int $projectId, string $internalEmail, int $emailId): ?int
+    private function getOrCreateByDefault(int $clientId, ?int $projectId, string $internalEmail, int $emailId): Process
     {
-        if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
-            $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
-            return $case->cs_id;
+        $leadId = null;
+        $caseId = null;
+        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $projectId)->one()) {
+            $leadId = $lead->id;
+        } elseif ($case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $projectId)->one()) {
+            $caseId = $case->cs_id;
+        } elseif ($case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $projectId)->one()) {
+            $caseId = $case->cs_id;
+        } else {
+            if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
+                $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
+                return new Process(null, $case->cs_id);
+            } else {
+                Yii::error('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'EmailIncomingService');
+            }
         }
-        Yii::error('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'EmailIncomingService');
-        return null;
+
+        return new Process($leadId, $caseId);
     }
 
     /**
