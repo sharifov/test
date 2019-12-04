@@ -24,6 +24,7 @@ use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
@@ -142,16 +143,8 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $form = new SmsIncomingForm([
-            'si_phone_to' => '+16692011854',
-            'si_phone_from' => '+774461222162131341',
-            'si_project_id' => 2
-        ]);
-        $service = Yii::createObject(SmsIncomingService::class);
-        $sms = $service->create($form);
-        VarDumper::dump($sms);
-        die;
-        return $this->render('blank');
+
+    die;
 
     }
 
