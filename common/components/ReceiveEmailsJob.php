@@ -104,11 +104,17 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     $response['error_code'] = 13;
                     \Yii::error(VarDumper::dumpAsString($res['error']), 'ReceiveEmailsJob:execute');
                     $cicleCount--;
-                } elseif (isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
+                } elseif (
+                    isset($res['data']['emails']) &&
+                    $res['data']['emails']
+                    && \is_array($res['data']['emails'])
+                    && isset($res['data']['emails'][0])
+                    && $res['data']['emails'][0]
+                ) {
 
                     foreach ($res['data']['emails'] as $mail) {
 
-                        $filter['last_id'] = $mail['ei_id'] + 1;
+                        $filter['last_id'] = $mail['ei_id'];
 
                         $find = Email::find()->where([
                                 "e_message_id" => $mail['ei_message_id'],
