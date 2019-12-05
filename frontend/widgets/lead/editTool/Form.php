@@ -19,7 +19,6 @@ use yii\base\Model;
  * @property int $discount_id
  * @property $final_profit
  * @property $tips
- * @property $agents_processing_fee
  * @property int $l_call_status_id
  * @property int $l_duplicate_lead_id
  * @property int $l_dep_id
@@ -34,7 +33,6 @@ class Form extends Model
     public $discount_id;
     public $final_profit;
     public $tips;
-    public $agents_processing_fee;
     public $l_call_status_id;
     public $l_duplicate_lead_id;
     public $l_dep_id;
@@ -50,7 +48,6 @@ class Form extends Model
         $this->discount_id = $lead->discount_id;
         $this->final_profit = $lead->final_profit;
         $this->tips = $lead->tips;
-        $this->agents_processing_fee = $lead->agents_processing_fee;
         $this->l_call_status_id = $lead->l_call_status_id;
         $this->l_duplicate_lead_id = $lead->l_duplicate_lead_id;
         $this->l_dep_id = $lead->l_dep_id;
@@ -82,8 +79,6 @@ class Form extends Model
             ['final_profit', 'number'],
 
             ['tips', 'number'],
-
-            ['agents_processing_fee', 'number'],
 
             ['l_call_status_id', 'required'],
             ['l_call_status_id', 'integer'],

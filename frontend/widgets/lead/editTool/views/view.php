@@ -38,7 +38,6 @@ unset($departments[Department::DEPARTMENT_SUPPORT]);
 <?= $form->field($editForm, 'discount_id')->textInput() ?>
 <?= $form->field($editForm, 'final_profit')->textInput() ?>
 <?= $form->field($editForm, 'tips')->textInput() ?>
-<?= $form->field($editForm, 'agents_processing_fee')->textInput() ?>
 <?= $form->field($editForm, 'l_call_status_id')->dropDownList(Lead::CALL_STATUS_LIST) ?>
 <?= $form->field($editForm, 'l_duplicate_lead_id')->textInput() ?>
 <?= $form->field($editForm, 'l_dep_id')->dropDownList($departments) ?>
