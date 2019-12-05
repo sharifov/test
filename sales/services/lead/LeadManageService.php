@@ -330,6 +330,8 @@ class LeadManageService
 
             $this->leadRepository->save($lead);
 
+            $lead->updateLastAction();
+
         });
     }
 
