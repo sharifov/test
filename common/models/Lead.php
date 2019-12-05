@@ -1774,6 +1774,7 @@ class Lead extends ActiveRecord
      */
     public function updateLastAction() : int
     {
+        Yii::info('Lead Id: ' . $this->id . ' Date: '  . date('Y-m-d H:i:s'), 'info\debug:4: update last action');
         return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
     }
 

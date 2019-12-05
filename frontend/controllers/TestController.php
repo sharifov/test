@@ -9,6 +9,7 @@ use common\models\ClientPhone;
 use common\models\Department;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
+use common\models\Email;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
@@ -141,15 +142,17 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $email = new Email();
+        $email->e_email_from = 'qqqqqqq@wwwwww.rt';
+        $email->e_email_to = 'qw@2.w';
+        $email->save();
 
-        $form = new SmsIncomingForm([
-            'si_phone_to' => '+16692011854',
-            'si_phone_from' => '+774461222162131341',
-            'si_project_id' => 2
-        ]);
-        $service = Yii::createObject(SmsIncomingService::class);
-        $sms = $service->create($form);
-        VarDumper::dump($sms);
+        $service = Yii::createObject(EmailIncomingService::class);
+        $process = $service->create($email->e_id, $email->e_email_from, $email->e_email_to, 6);
+        $email->e_lead_id = $process->leadId;
+        $email->e_case_id = $process->caseId;
+        $email->save();
+
         die;
         return $this->render('blank');
 

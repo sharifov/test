@@ -99,6 +99,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                 $res = $communication->mailGetMessages($filter);
 
+                Yii::info(VarDumper::dumpAsString($res, 10, true), 'info\debug:1: all response');
+
                 if (isset($res['error']) && $res['error']) {
                     $response['error'] = 'Error mailGetMessages';
                     $response['error_code'] = 13;
@@ -113,6 +115,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                 ) {
 
                     foreach ($res['data']['emails'] as $mail) {
+                        Yii::info(VarDumper::dumpAsString($mail, 10, true), 'info\debug:2: mail');
 
                         $filter['last_id'] = $mail['ei_id'];
 

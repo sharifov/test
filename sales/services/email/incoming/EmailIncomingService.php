@@ -116,8 +116,9 @@ class EmailIncomingService
      */
     private function getOrCreateLead(int $clientId, string $clientEmail, ?int $projectId, string $internalEmail, int $emailId): ?int
     {
-        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $projectId)->one()) {
-            return $lead->id;
+        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $projectId)->asArray()->all()) {
+            Yii::info(VarDumper::dumpAsString($lead), 'info\debug:3: all leads sort by last action. ClientId: ' . $clientId . ' ProjectId: ' . $projectId . ' Date: ' . date('Y-m-d H:i:s'));
+            return $lead[0]['id'];
         }
         if ((bool)Yii::$app->params['settings']['create_new_lead_email']) {
             $lead = $this->leadManageService->createByIncomingEmail(
