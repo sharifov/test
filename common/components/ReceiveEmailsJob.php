@@ -99,8 +99,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                 $res = $communication->mailGetMessages($filter);
 
-                Yii::info(VarDumper::dumpAsString($res, 10, true), 'info\debug:1: all response');
-
                 if (isset($res['error']) && $res['error']) {
                     $response['error'] = 'Error mailGetMessages';
                     $response['error_code'] = 13;
@@ -116,8 +114,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                     foreach ($res['data']['emails'] as $mail) {
 
-                        Yii::info(VarDumper::dumpAsString($mail, 10, true), 'info\debug:2: mail');
-
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
                         $find = Email::find()->where([
@@ -130,8 +126,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             $find->save();
                             continue;
                         }
-
-                        Yii::info('debug', 'info\debug:3: mail');
 
                         $email = new Email();
                         $email->e_type_id = Email::TYPE_INBOX;
@@ -184,9 +178,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         if (!$email->save()) {
                             \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
                         } else {
-                            Yii::info('debug', 'info\debug:4: mail');
                             if ($lead_id === null && $case_id === null) {
-                                Yii::info('debug', 'info\debug:5: mail');
                                 try {
                                     $emailIncomingService = Yii::createObject(EmailIncomingService::class);
                                     $process = $emailIncomingService->create(
@@ -197,9 +189,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                     );
                                     $email->e_lead_id = $process->leadId;
                                     $email->e_case_id = $process->caseId;
-                                    Yii::info('debug', 'info\debug:9: mail');
                                     $email->save(false);
-                                    Yii::info('debug', 'info\debug:12: mail');
                                 } catch (\Throwable $e) {
                                     Yii::error($e->getMessage(), 'ReceiveEmailsJob:EmailIncomingService:create');
                                 }
