@@ -751,7 +751,7 @@ class Email extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-
+        Yii::info('debug', 'info\debug:10: mail');
         if ($this->e_lead_id && $this->eLead) {
             $this->eLead->updateLastAction();
         }

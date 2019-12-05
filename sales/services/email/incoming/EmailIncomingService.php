@@ -63,7 +63,7 @@ class EmailIncomingService
     {
         /** @var Process $process */
         $process = $this->transactionManager->wrap(function () use ($clientEmail, $internalEmail, $incomingProject, $emailId) {
-
+            Yii::info('debug', 'info\debug:6: mail');
             $client = $this->clientManageService->getOrCreateByEmails([new EmailCreateForm(['email' => $clientEmail])]);
 
             $contact = $this->internalContactService->findByEmail($internalEmail, $incomingProject);
@@ -116,8 +116,9 @@ class EmailIncomingService
      */
     private function getOrCreateLead(int $clientId, string $clientEmail, ?int $projectId, string $internalEmail, int $emailId): ?int
     {
+        Yii::info('debug', 'info\debug:7: mail');
         if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $projectId)->asArray()->all()) {
-            Yii::info(VarDumper::dumpAsString($lead), 'info\debug:3: all leads sort by last action. ClientId: ' . $clientId . ' ProjectId: ' . $projectId . ' Date: ' . date('Y-m-d H:i:s'));
+            Yii::info(VarDumper::dumpAsString($lead), 'info\debug:8: all leads sort by last action. ClientId: ' . $clientId . ' ProjectId: ' . $projectId . ' Date: ' . date('Y-m-d H:i:s'));
             return $lead[0]['id'];
         }
         if ((bool)Yii::$app->params['settings']['create_new_lead_email']) {
