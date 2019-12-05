@@ -117,7 +117,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     foreach ($res['data']['emails'] as $mail) {
                         Yii::info(VarDumper::dumpAsString($mail, 10, true), 'info\debug:2: mail');
 
-                        $filter['last_id'] = $mail['ei_id'];
+                        $filter['last_id'] = $mail['ei_id'] + 1;
 
                         $find = Email::find()->where([
                                 "e_message_id" => $mail['ei_message_id'],
