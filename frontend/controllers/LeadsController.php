@@ -15,7 +15,6 @@ use common\models\Lead;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -26,7 +25,7 @@ use yii\widgets\ActiveForm;
  *
  * @property widgets\lead\editTool\Service $toolService
  */
-class LeadsController extends Controller
+class LeadsController extends FController
 {
     private $toolService;
 

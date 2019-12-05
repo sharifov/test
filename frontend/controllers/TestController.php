@@ -144,11 +144,7 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $query = Lead::find();
-        $time = '2019-12-17';
-        $tz = '+06:00';
-        $d = QueryHelper::dateFilterEqualByUserTZ($query,  'created', $time, $tz);
-        VarDumper::dump($d);
+
 
     die;
 

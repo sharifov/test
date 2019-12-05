@@ -30,6 +30,7 @@ class Service
     public function edit($lead, Form $form): void
     {
         $lead = $this->finder->leadFind($lead);
+        $lead->detachBehavior('timestamp');
         $lead->attributes = $form->attributes;
         $this->leadRepository->save($lead);
     }
