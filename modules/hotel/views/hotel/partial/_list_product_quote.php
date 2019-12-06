@@ -18,7 +18,9 @@ use yii\helpers\Html;
 <div class="x_panel">
     <div class="x_title">
         <h2>
-            Q<?=($key + 1)?>.  <?=\yii\helpers\Html::encode($model->hqProductQuote->pq_name)?>, <?=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
+            <span class="badge badge-primary">Q<?=($model->hq_product_quote_id)?></span> "<?=\yii\helpers\Html::encode($model->hqHotelList->hl_name)?>"  (<?=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>),
+            <?//=\yii\helpers\Html::encode($model->hqProductQuote->pq_name)?>
+            <?=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
              <?//=\yii\helpers\Html::encode($model->hqProductQuote->pq_gid)?>
         </h2>
         <ul class="nav navbar-right panel_toolbox">

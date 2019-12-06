@@ -66,54 +66,14 @@ use yii\helpers\Html;
     </div>
 
 <?php foreach ($products as $product):?>
-    <?//php \yii\widgets\Pjax::begin(['id' => 'pjax-product-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
-    <div class="x_panel">
-        <div class="x_title">
-            <h2>
-                <i class="fa fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                <?php if ($product->pr_description):?>
-                    <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
-                <?php endif;?>
-            </h2>
-            <ul class="nav navbar-right panel_toolbox">
-                <?php if ($is_manager) : ?>
-                    <!--                    <li>-->
-                    <!--                        --><?//=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
-                    <!--                    </li>-->
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
-                        <div class="dropdown-menu" role="menu">
-                            <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
-                                'class' => 'dropdown-item text-danger btn-update-product',
-                                'data-product-id' => $product->pr_id
-                            ])*/ ?>
 
-                            <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete product', null, [
-                                'class' => 'dropdown-item text-danger btn-delete-product',
-                                'data-product-id' => $product->pr_id
-                            ]) ?>
-                        </div>
-                    </li>
-                <?php endif; ?>
-                <li>
-                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content" style="display: none">
-            <?php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
-                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
-                <?= $this->render('@modules/hotel/views/hotel/partial/_view_search', [
-                    'model' => $product->hotel,
-                    //'dataProviderQuotes' => $dataProviderQuotes
-                    //'dataProviderRooms'
-                ]) ?>
-                <?php \yii\widgets\Pjax::end();?>
-            <?php endif; ?>
-        </div>
-    </div>
-    <?//php \yii\widgets\Pjax::end()?>
+
+    <?php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
+        <?= $this->render('@modules/hotel/views/hotel/partial/_product_hotel', [
+            'product' => $product,
+        ]) ?>
+    <?php endif; ?>
+
 <?php endforeach; ?>
 
 <?php \yii\widgets\Pjax::end()?>
@@ -188,14 +148,16 @@ $js = <<<JS
 
     $('body').on('click', '.btn-delete-product-quote', function(e) {
         
-        if(!confirm('Are you sure you want to delete this quote?')) {
-            return '';
-        }
+        let productQuoteId = $(this).data('product-quote-id');
+        let productId = $(this).data('product-id');
+        
+      if(!confirm('Are you sure you want to delete quote ('+ productQuoteId +') ?')) {
+        return '';
+      }
         
       e.preventDefault();
       $('#preloader').removeClass('d-none');
-      let productQuoteId = $(this).data('product-quote-id');
-      let productId = $(this).data('product-id');
+      
       
       /*alert(productId);
       
