@@ -2,6 +2,8 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
+use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use common\models\PhoneBlacklist;
 
@@ -20,7 +22,7 @@ class PhoneBlacklistSearch extends PhoneBlacklist
 
             ['pbl_enabled', 'boolean'],
 
-            [['pbl_phone', 'pbl_description'], 'safe'],
+            [['pbl_phone', 'pbl_description'], 'string'],
 
             [['pbl_created_dt', 'pbl_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -28,9 +30,10 @@ class PhoneBlacklistSearch extends PhoneBlacklist
 
     /**
      * @param $params
+     * @param Employee $user
      * @return ActiveDataProvider
      */
-    public function search($params): ActiveDataProvider
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = PhoneBlacklist::find();
 
@@ -44,6 +47,14 @@ class PhoneBlacklistSearch extends PhoneBlacklist
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->pbl_created_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'pbl_created_dt', $this->pbl_created_dt, $user->timezone);
+        }
+
+        if ($this->pbl_updated_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'pbl_updated_dt', $this->pbl_updated_dt, $user->timezone);
         }
 
         $query->andFilterWhere([

@@ -2,22 +2,22 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use Yii;
 use common\models\PhoneBlacklist;
 use common\models\search\PhoneBlacklistSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * PhoneBlacklistController implements the CRUD actions for PhoneBlacklist model.
  */
-class PhoneBlacklistController extends Controller
+class PhoneBlacklistController extends FController
 {
-
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -25,6 +25,7 @@ class PhoneBlacklistController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -34,7 +35,9 @@ class PhoneBlacklistController extends Controller
     public function actionIndex()
     {
         $searchModel = new PhoneBlacklistSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
