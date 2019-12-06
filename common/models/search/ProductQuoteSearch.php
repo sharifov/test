@@ -18,7 +18,7 @@ class ProductQuoteSearch extends ProductQuote
     {
         return [
             [['pq_id', 'pq_product_id', 'pq_order_id', 'pq_status_id', 'pq_owner_user_id', 'pq_created_user_id', 'pq_updated_user_id'], 'integer'],
-            [['pq_gid', 'pr_name', 'pq_description', 'pq_origin_currency', 'pq_client_currency', 'pq_created_dt', 'pq_updated_dt'], 'safe'],
+            [['pq_gid', 'pq_name', 'pq_description', 'pq_origin_currency', 'pq_client_currency', 'pq_created_dt', 'pq_updated_dt'], 'safe'],
             [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate'], 'number'],
         ];
     }
@@ -77,7 +77,7 @@ class ProductQuoteSearch extends ProductQuote
         ]);
 
         $query->andFilterWhere(['like', 'pq_gid', $this->pq_gid])
-            ->andFilterWhere(['like', 'pr_name', $this->pr_name])
+            ->andFilterWhere(['like', 'pq_name', $this->pq_name])
             ->andFilterWhere(['like', 'pq_description', $this->pq_description])
             ->andFilterWhere(['like', 'pq_origin_currency', $this->pq_origin_currency])
             ->andFilterWhere(['like', 'pq_client_currency', $this->pq_client_currency]);

@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $pq_id
  * @property string $pq_gid
- * @property string $pr_name
+ * @property string $pq_name
  * @property int $pq_product_id
  * @property int $pq_order_id
  * @property string $pq_description
@@ -81,7 +81,7 @@ class ProductQuote extends \yii\db\ActiveRecord
             [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate'], 'number'],
             [['pq_created_dt', 'pq_updated_dt'], 'safe'],
             [['pq_gid'], 'string', 'max' => 32],
-            [['pr_name'], 'string', 'max' => 40],
+            [['pq_name'], 'string', 'max' => 40],
             [['pq_origin_currency', 'pq_client_currency'], 'string', 'max' => 3],
             [['pq_gid'], 'unique'],
             [['pq_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pq_client_currency' => 'cur_code']],
@@ -102,7 +102,7 @@ class ProductQuote extends \yii\db\ActiveRecord
         return [
             'pq_id' => 'ID',
             'pq_gid' => 'GID',
-            'pr_name' => 'Name',
+            'pq_name' => 'Name',
             'pq_product_id' => 'Product ID',
             'pq_order_id' => 'Order ID',
             'pq_description' => 'Description',
@@ -139,7 +139,7 @@ class ProductQuote extends \yii\db\ActiveRecord
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pq_created_user_id',
+                'createdByAttribute' => 'pq_created_user_id', //'pq_owner_user_id',
                 'updatedByAttribute' => 'pq_updated_user_id',
             ],
         ];

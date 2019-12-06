@@ -106,6 +106,7 @@ use yii\helpers\Html;
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
                 <?= $this->render('@modules/hotel/views/hotel/partial/_view_search', [
                     'model' => $product->hotel,
+                    //'dataProviderQuotes' => $dataProviderQuotes
                     //'dataProviderRooms'
                 ]) ?>
                 <?php \yii\widgets\Pjax::end();?>
@@ -120,6 +121,8 @@ use yii\helpers\Html;
 <?php
 
 $ajaxDeleteProductUrl = \yii\helpers\Url::to(['product/delete-ajax']);
+$ajaxDeleteProductQuoteUrl = \yii\helpers\Url::to(['product-quote/delete-ajax']);
+
 
 $js = <<<JS
 
@@ -165,6 +168,67 @@ $js = <<<JS
                   });
                   new PNotify({
                         title: 'The product was successfully removed',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            //btnSubmit.prop('disabled', false);
+            //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+            //alert( "complete" );
+            $('#preloader').addClass('d-none');
+        });
+      // return false;
+    });
+
+
+    $('body').on('click', '.btn-delete-product-quote', function(e) {
+        
+        if(!confirm('Are you sure you want to delete this quote?')) {
+            return '';
+        }
+        
+      e.preventDefault();
+      $('#preloader').removeClass('d-none');
+      let productQuoteId = $(this).data('product-quote-id');
+      let productId = $(this).data('product-id');
+      
+      /*alert(productId);
+      
+      let btnSubmit = $(this).find(':submit');
+      btnSubmit.prop('disabled', true);
+      btnSubmit.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');*/
+
+     // $('#preloader').removeClass('d-none');
+
+      $.ajax({
+          url: '$ajaxDeleteProductQuoteUrl',
+          type: 'post',
+          data: {'id': productQuoteId},
+  //        contentType: false,
+  //        cache: false,
+//          processData: false,
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  alert(data.error);
+                  new PNotify({
+                        title: 'Error: delete product quote',
+                        type: 'error',
+                        text: data.error,
+                        hide: true
+                    });
+              } else {
+                  $.pjax.reload({
+                      container: '#pjax-product-quote-list-' + productId
+                  });
+                  new PNotify({
+                        title: 'The product quote was successfully removed',
                         type: 'success',
                         text: data.message,
                         hide: true

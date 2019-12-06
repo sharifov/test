@@ -124,39 +124,66 @@ class HotelQuote extends \yii\db\ActiveRecord
      */
     public static function findOrCreateByData(array $quoteData, HotelList $hotelModel, Hotel $hotelRequest, string $currency = 'USD')
     {
-        $quote = null;
+        $hQuote = null;
 
         if (isset($quoteData['rates']) && $rooms = $quoteData['rates']) {
             if (isset($quoteData['groupKey'])) {
                 $hashKey = self::getHashKey($quoteData['groupKey']);
 
-                $quote = HotelQuote::find()->where([
+                $hQuote = HotelQuote::find()->where([
                     'hq_hotel_list_id' => $hotelModel->hl_id,
                     'hq_hotel_id' => $hotelRequest->ph_id,
                     'hq_hash_key' => $hashKey
                 ])->one();
 
-                if (!$quote) {
-                    $quote = new self();
-                    $quote->hq_hash_key = $hashKey;
-                    $quote->hq_hotel_id = $hotelRequest->ph_id;
-                    $quote->hq_hotel_list_id = $hotelModel->hl_id;
-                    $quote->hq_json_response = json_encode($quoteData);
-                    //$quote->hq_product_quote_id =
-                    $quote->hq_hotel_name = $hotelModel->hl_name;
-                    $quote->hq_destination_name = $hotelModel->hl_destination_name;
+                if (!$hQuote) {
 
-                    if (!$quote->save()) {
-                        Yii::error(VarDumper::dumpAsString($quote->errors),
-                            'Model:HotelQuote:findOrCreateByData:HotelQuote:save');
+                    $totalAmount = 0;
+                    $nameArray = [];
+                    foreach ($rooms as $room) {
+                        $totalAmount += $room['amount'];
+                        $nameArray[] = $room['code'] ?? '';
+                    }
+
+                    $prQuote = new ProductQuote();
+                    $prQuote->pq_product_id = $hotelRequest->ph_product_id;
+                    $prQuote->pq_origin_currency = $currency;
+                    $prQuote->pq_client_currency = $currency;
+
+                    $prQuote->pq_owner_user_id = Yii::$app->user->id;
+                    $prQuote->pq_price = floatval($totalAmount);
+                    $prQuote->pq_origin_price = floatval($totalAmount);
+                    $prQuote->pq_client_price = floatval($totalAmount);
+                    $prQuote->pq_status_id = ProductQuote::STATUS_PENDING;
+                    $prQuote->pq_gid = self::generateGid();
+                    $prQuote->pq_service_fee_sum = 0;
+                    $prQuote->pq_client_currency_rate = 1;
+                    $prQuote->pq_origin_currency_rate = 1;
+                    $prQuote->pq_name = mb_substr(implode(' & ', $nameArray), 0, 40);
+
+                    if ($prQuote->save()) {
+
+                        $hQuote = new self();
+                        $hQuote->hq_hash_key = $hashKey;
+                        $hQuote->hq_hotel_id = $hotelRequest->ph_id;
+                        $hQuote->hq_hotel_list_id = $hotelModel->hl_id;
+                        $hQuote->hq_json_response = json_encode($quoteData);
+                        $hQuote->hq_product_quote_id = $prQuote->pq_id;
+                        $hQuote->hq_hotel_name = $hotelModel->hl_name;
+                        $hQuote->hq_destination_name = $hotelModel->hl_destination_name;
+
+                        if (!$hQuote->save()) {
+                            Yii::error(VarDumper::dumpAsString($hQuote->errors),
+                                'Model:HotelQuote:findOrCreateByData:HotelQuote:save');
+                        }
                     }
                 }
             }
 
-            if ($quote) {
+            if ($hQuote && !$hQuote->hotelQuoteRooms) {
                 foreach ($rooms as $room) {
                     $qRoom = new HotelQuoteRoom();
-                    $qRoom->hqr_hotel_quote_id = $quote->hq_id;
+                    $qRoom->hqr_hotel_quote_id = $hQuote->hq_id;
                     $qRoom->hqr_adults = $room['adults'] ?? null;
                     $qRoom->hqr_children = $room['children'] ?? null;
                     //childrenAges
@@ -182,6 +209,14 @@ class HotelQuote extends \yii\db\ActiveRecord
             }
         }
 
-        return $quote;
+        return $hQuote;
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateGid(): string
+    {
+        return md5(uniqid('hq', true));
     }
 }

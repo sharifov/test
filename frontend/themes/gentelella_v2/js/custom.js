@@ -153,9 +153,9 @@ $MENU_TOGGLE.on('click', function() {
 // Panel toolbox
 $(document).ready(function() {
     $('body').on('click', '.collapse-link', function() {
-        var $BOX_PANEL = $(this).closest('.x_panel'),
+        let $BOX_PANEL = $(this).closest('.x_panel'),
             $ICON = $(this).find('i'),
-            $BOX_CONTENT = $BOX_PANEL.find('.x_content');
+            $BOX_CONTENT = $BOX_PANEL.find('.x_content').first();
         
         // fix for some div with hardcoded fix class
         if ($BOX_PANEL.attr('style')) {

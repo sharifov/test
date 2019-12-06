@@ -1,12 +1,13 @@
 <?php
 
+use modules\hotel\models\search\HotelQuoteSearch;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model modules\hotel\models\Hotel */
-/* @var $dataProviderRooms \yii\data\ActiveDataProvider */
+///* @var $dataProviderQuotes \yii\data\ActiveDataProvider */
 
 
 \yii\web\YiiAsset::register($this);
@@ -14,6 +15,13 @@ use yii\widgets\Pjax;
 //$searchModel = new HotelRoomSearch();
 //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+//$dataProviderQuotes =
+//
+
+$searchModel = new HotelQuoteSearch();
+$params = Yii::$app->request->queryParams;
+$params['HotelQuoteSearch']['hq_hotel_id'] = $model->ph_id;
+$dataProviderQuotes = $searchModel->searchProduct($params);
 
 ?>
 <div class="hotel-view-search">
@@ -107,6 +115,18 @@ use yii\widgets\Pjax;
             </p>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <?= $this->render('_view_product_quote_list', [
+                'hotelProduct' => $model,
+                'dataProviderQuotes' => $dataProviderQuotes
+            ]) ?>
+        </div>
+    </div>
+
+
+
 </div>
 
 <?php

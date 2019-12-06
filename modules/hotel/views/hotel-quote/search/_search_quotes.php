@@ -166,6 +166,7 @@ $js = <<<JS
       let quoteKey = $(this).data('quote-key');
       let hotelCode = $(this).data('hotel-code');
       let url = $(this).data('url');
+      //let productId = $(this).data('product-id');
      
       /*alert(productId);*/
       
@@ -194,9 +195,11 @@ $js = <<<JS
                   btnAdd.removeClass('disabled').prop('disabled', false);
                   $('#tr-hotel-quote-' + quoteKey).addClass('bg-warning');
               } else {
-                  /*$.pjax.reload({
-                      container: '#pjax-hotel-rooms-' + hotelId
-                  });*/
+                  
+                  $.pjax.reload({
+                      container: '#pjax-product-quote-list-' + data.product_id
+                  });
+                  
                   new PNotify({
                         title: 'Quote was successfully added',
                         type: 'success',

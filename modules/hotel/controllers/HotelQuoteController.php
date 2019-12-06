@@ -83,7 +83,7 @@ class HotelQuoteController extends FController
 
         // VarDumper::dump($models, 2, true); exit;
 
-        return $this->renderAjax('_search_quotes', [
+        return $this->renderAjax('search/_search_quotes', [
             //'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'hotelSearch'   => $hotelSearch
@@ -96,7 +96,7 @@ class HotelQuoteController extends FController
         $hotelId = (int) Yii::$app->request->get('ph_id');
         $hotelCode = (int) Yii::$app->request->post('hotel_code');
         $quoteKey = (int) Yii::$app->request->post('quote_key');
-
+        $productId = 0;
 
         Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -118,6 +118,8 @@ class HotelQuoteController extends FController
             if (!$modelHotel) {
                 throw new Exception('Hotel Request ('.$hotelId.') not found in DB', 5);
             }
+
+            $productId = $modelHotel->ph_product_id;
 
 
             $result = $modelHotel->getSearchData();
@@ -153,7 +155,10 @@ class HotelQuoteController extends FController
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
-        return ['message' => 'Successfully added quote. Hotel "'.Html::encode($hotelData['name']).'", Hotel Quote Id: (' . $hotelQuote->hq_id . ')'];
+        return [
+            'product_id' => $productId,
+            'message' => 'Successfully added quote. Hotel "'.Html::encode($hotelData['name']).'", Hotel Quote Id: (' . $hotelQuote->hq_id . ')'
+        ];
     }
 
     /**
