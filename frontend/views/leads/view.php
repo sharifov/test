@@ -1,8 +1,12 @@
 <?php
 
+use common\models\Department;
 use common\models\Lead;
+use frontend\widgets\lead\editTool\ButtonWidget;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Lead */
@@ -29,8 +33,10 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
         <?= Html::a('<i class="fa fa-search"></i> View Lead', ['/lead/view', 'gid' => $model->gid], ['class' => 'btn btn-primary']) ?>
 
-
-
+        <?= ButtonWidget::widget([
+            'modalId' => 'modal-df',
+            'url' => new \frontend\widgets\lead\editTool\Url(Url::to(['leads/edit']), ['id' => $model->id])])
+        ?>
 
         <?/*= Html::a('Delete', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
@@ -41,6 +47,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
         ])*/ ?>
     </p>
 
+    <?php Pjax::begin(['id' => 'pjax-leads-view']) ?>
     <div class="row">
 
         <div class="col-md-3">
@@ -171,6 +178,14 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                         ],
 
                         [
+                            'attribute' => 'l_call_status_id',
+                            'value' => function(\common\models\Lead $model) {
+                                return Lead::CALL_STATUS_LIST[$model->l_call_status_id]?? 'undefined';
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
                             'attribute' => 'l_duplicate_lead_id',
                             'label' => 'Duplicate from',
                             'value' => static function (\common\models\Lead $model) {
@@ -181,7 +196,14 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                         ],
 
                         [
-                            'attribute' => 'project_id',
+                            'label' => 'Department',
+                            'value' => function(\common\models\Lead $model) {
+                                return Department::DEPARTMENT_LIST[$model->l_dep_id] ?? 'undefined';
+                            },
+                        ],
+
+                        [
+                            'attribute' => 'l_dep_id',
                             'value' => function(\common\models\Lead $model) {
                                 return $model->project ? $model->project->name : '-';
                             },
@@ -265,6 +287,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                             },
                             'format' => 'raw',
                         ],
+                        'additional_information'
 
 
                     ],
@@ -295,6 +318,9 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                     'called_expert',
                     'discount_id',
                     'bo_flight_id',
+                    'final_profit',
+                    'tips',
+                    'agents_processing_fee',
                 ],
             ]) ?>
 
@@ -309,6 +335,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
         </div>
 
     </div>
+    <?php Pjax::end() ?>
 
     <div class="row">
         <div class="col-md-12">
