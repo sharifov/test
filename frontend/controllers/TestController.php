@@ -25,6 +25,7 @@ use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
@@ -45,6 +46,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
+use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
@@ -142,17 +144,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $email = new Email();
-        $email->e_email_from = 'qqqqqqq@wwwwww.rt';
-        $email->e_email_to = 'qw@2.w';
-        $email->save();
-
-        $service = Yii::createObject(EmailIncomingService::class);
-        $process = $service->create($email->e_id, $email->e_email_from, $email->e_email_to, 6);
-        $email->e_lead_id = $process->leadId;
-        $email->e_case_id = $process->caseId;
-        $email->save();
-
         die;
         return $this->render('blank');
 
