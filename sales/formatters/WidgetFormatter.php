@@ -7,14 +7,14 @@ use yii\bootstrap4\Html;
 use yii\i18n\Formatter;
 use Yii;
 
-class DetailViewFormatter extends Formatter
+class WidgetFormatter extends Formatter
 {
     /**
      * @param $dateTime
      * @return string
      * @throws \yii\base\InvalidConfigException
      */
-    public function asDateByUserDt($dateTime): string
+    public function asDateTimeByUserDt($dateTime): string
     {
         $this->datetimeFormat = 'php:d-M-Y [H:i]';
         return $dateTime ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($dateTime)) : '-';
