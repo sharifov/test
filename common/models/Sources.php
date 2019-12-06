@@ -71,8 +71,8 @@ class Sources extends \yii\db\ActiveRecord
 
             ['rule', 'required', 'except' => self::SCENARIO_SYNCH],
             ['rule', 'integer'],
-            ['rule', 'filter', 'filter' => 'intval'],
-            ['rule', 'in', 'range' => array_keys(self::LIST_RULES)],
+            ['rule', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['rule', 'in', 'range' => array_keys(self::LIST_RULES), 'skipOnEmpty' => true],
         ];
     }
 
