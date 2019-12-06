@@ -112,6 +112,7 @@ class Call extends \yii\db\ActiveRecord
     public const STATUS_FAILED         = 8;
     public const STATUS_CANCELED       = 9;
     public const STATUS_DELAY          = 10;
+    public const STATUS_DECLINED       = 11;
 
     public const STATUS_LIST = [
         self::STATUS_IVR           => 'IVR',
@@ -123,7 +124,8 @@ class Call extends \yii\db\ActiveRecord
         self::STATUS_NO_ANSWER     => 'No answer',
         self::STATUS_FAILED        => 'Failed',
         self::STATUS_CANCELED      => 'Canceled',
-        self::STATUS_DELAY          => 'Delay',
+        self::STATUS_DELAY         => 'Delay',
+        self::STATUS_DECLINED      => 'Declined',
     ];
 
 
@@ -138,6 +140,7 @@ class Call extends \yii\db\ActiveRecord
         self::STATUS_FAILED         => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::STATUS_LIST[self::STATUS_FAILED] . '</span>',
         self::STATUS_CANCELED       => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::STATUS_LIST[self::STATUS_CANCELED] . '</span>',
         self::STATUS_DELAY          => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DELAY] . '</span>',
+        self::STATUS_DECLINED       => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DECLINED] . '</span>',
     ];
 
 
@@ -1514,6 +1517,19 @@ class Call extends \yii\db\ActiveRecord
     public function cancel(): void
     {
         $this->c_status_id = self::STATUS_CANCELED;
+    }
+
+    public function declined(): void
+    {
+        $this->c_status_id = self::STATUS_DECLINED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeclined(): bool
+    {
+        return $this->c_status_id === self::STATUS_DECLINED;
     }
 
     /**
