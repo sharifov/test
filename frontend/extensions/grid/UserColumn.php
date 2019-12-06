@@ -10,9 +10,14 @@ class UserColumn extends DataColumn
 {
     public $format = 'userName';
 
+    public $userId;
+
     public function init(): void
     {
         parent::init();
-        $this->filter = (new ListsAccess(Yii::$app->user->id))->getEmployees();
+        if (!$this->userId) {
+            $this->userId = Yii::$app->user->id ?? null;
+        }
+        $this->filter = (new ListsAccess($this->userId))->getEmployees();
     }
 }
