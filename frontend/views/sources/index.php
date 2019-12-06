@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Sources;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -85,9 +86,31 @@ $this->params['breadcrumbs'][] = $this->title;
             'default:boolean',
             'hidden:boolean',
 
-            ['class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update}'
-            ],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {default}',
+                'buttons' => [
+                    'default' => function ($url, Sources $model) {
+                        if ($model->isDefault()) {
+                            return '';
+                        }
+                        return Html::a('Set Default', [
+                            'sources/set-default'
+                        ], [
+                             'data-method' => 'POST',
+                             'data-params' => [
+                                     'id' => $model->id
+                             ],
+                             'class' => 'btn btn-info btn-xs',
+                             'data-pjax' => 0,
+                             'data' => [
+                                'confirm' => 'Are you sure you want to set default this item?',
+                                'method' => 'post',
+                            ],
+                        ]);
+                    },
+                ],
+            ]
         ],
     ]); ?>
     <?php Pjax::end(); ?>
