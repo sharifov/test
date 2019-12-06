@@ -41,6 +41,8 @@ class Sources extends \yii\db\ActiveRecord
         self::RULE_EMAIL_AND_PHONE_REQUIRED => 'Email and Phone required',
     ];
 
+    public const SCENARIO_SYNCH = 'synch';
+
     /**
      * {@inheritdoc}
      */
@@ -67,7 +69,7 @@ class Sources extends \yii\db\ActiveRecord
 
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
 
-            ['rule', 'required'],
+            ['rule', 'required', 'except' => self::SCENARIO_SYNCH],
             ['rule', 'integer'],
             ['rule', 'filter', 'filter' => 'intval'],
             ['rule', 'in', 'range' => array_keys(self::LIST_RULES)],
