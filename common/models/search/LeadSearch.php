@@ -2242,7 +2242,46 @@ class LeadSearch extends Lead
 
         if ($category == 'finalProfit'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT SUM(CASE WHEN final_profit > 0 THEN final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX .' END) * (adults + children))  ELSE 0 END) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    final_profit - agents_processing_fee
+                    WHEN
+                        employee_id = e.id AND lead_origin = 0
+                    THEN                  
+                    -((final_profit - agents_processing_fee) * (lead_ps / 100)) 
+                    WHEN 
+                    user_id = e.id AND lead_origin = 0
+                    THEN
+                    (final_profit - agents_processing_fee) * (lead_ps / 100)
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ps_user_id AS user_id,
+                    ps_lead_id AS lead_id,
+                    ps_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                profit_split
+            WHERE
+                ps_lead_id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' AND status='.Lead::STATUS_SOLD.')) AS '.$category.' ']);
         }
 
         if ($category == 'soldLeads'){
@@ -2252,12 +2291,82 @@ class LeadSearch extends Lead
 
         if ($category == 'profitPerPax'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT AVG(CASE WHEN final_profit > 0 THEN (final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX. ' END) * (adults + children))) / (adults + children) ELSE 0 END) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    (final_profit - agents_processing_fee) / (adults + children)                    
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ps_user_id AS user_id,
+                    ps_lead_id AS lead_id,
+                    ps_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                profit_split
+            WHERE
+                ps_lead_id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' AND status=10)) / (SELECT COUNT(*) FROM leads WHERE employee_id = e.id AND updated '.$between_condition.' AND status='.Lead::STATUS_SOLD.' ) AS '.$category.' ']);
         }
 
         if ($category == 'tips'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT SUM(tips / 2) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    tips / 2
+                    WHEN
+                        employee_id = e.id AND lead_origin = 0
+                    THEN                  
+                    -((tips / 2) * (lead_ps / 100)) 
+                    WHEN 
+                    user_id = e.id AND lead_origin = 0
+                    THEN
+                    (tips / 2) * (lead_ps / 100)
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ts_user_id AS user_id,
+                    ts_lead_id AS lead_id,
+                    ts_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                tips_split
+            WHERE
+                ts_lead_id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' AND status='.Lead::STATUS_SOLD.')) AS '.$category.' ']);
         }
 
         if ($category == 'leadConversion'){
