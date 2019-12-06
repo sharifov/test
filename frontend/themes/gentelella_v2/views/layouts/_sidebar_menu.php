@@ -220,6 +220,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
                 ['label' => 'Department Emails', 'url' => ['/department-email-project/index'], 'icon' => 'envelope'],
                 ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
+                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
                 ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
