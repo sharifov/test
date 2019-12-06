@@ -6,7 +6,7 @@ use Yii;
 use sales\access\ListsAccess;
 use yii\grid\DataColumn;
 
-class UsersColumn extends DataColumn
+class UserColumn extends DataColumn
 {
     public $format = 'userName';
 
