@@ -12,6 +12,7 @@ use common\models\Employee;
 use common\models\Sms;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use common\models\UserProfile;
 use Faker\Provider\DateTime;
 use sales\access\EmployeeProjectAccess;
 use sales\repositories\lead\LeadBadgesRepository;
@@ -2242,7 +2243,46 @@ class LeadSearch extends Lead
 
         if ($category == 'finalProfit'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT SUM(CASE WHEN final_profit > 0 THEN final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX .' END) * (adults + children))  ELSE 0 END) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    final_profit - agents_processing_fee
+                    WHEN
+                        employee_id = e.id AND lead_origin = 0
+                    THEN                  
+                    -((final_profit - agents_processing_fee) * (lead_ps / 100)) 
+                    WHEN 
+                    user_id = e.id AND lead_origin = 0
+                    THEN
+                    (final_profit - agents_processing_fee) * (lead_ps / 100)
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ps_user_id AS user_id,
+                    ps_lead_id AS lead_id,
+                    ps_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                profit_split
+            WHERE
+                ps_lead_id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' AND status='.Lead::STATUS_SOLD.')) AS '.$category.' ']);
         }
 
         if ($category == 'soldLeads'){
@@ -2252,12 +2292,82 @@ class LeadSearch extends Lead
 
         if ($category == 'profitPerPax'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT AVG(CASE WHEN final_profit > 0 THEN (final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX. ' END) * (adults + children))) / (adults + children) ELSE 0 END) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    (final_profit - agents_processing_fee) / (adults + children)                    
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ps_user_id AS user_id,
+                    ps_lead_id AS lead_id,
+                    ps_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                profit_split
+            WHERE
+                ps_lead_id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' AND status=10)) / (SELECT COUNT(*) FROM leads WHERE employee_id = e.id AND updated '.$between_condition.' AND status='.Lead::STATUS_SOLD.' ) AS '.$category.' ']);
         }
 
         if ($category == 'tips'){
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT SUM(tips / 2) FROM leads WHERE (updated '.$between_condition.') AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS '.$category.' ']);
+            $query->addSelect(['(SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    tips / 2
+                    WHEN
+                        employee_id = e.id AND lead_origin = 0
+                    THEN                  
+                    -((tips / 2) * (lead_ps / 100)) 
+                    WHEN 
+                    user_id = e.id AND lead_origin = 0
+                    THEN
+                    (tips / 2) * (lead_ps / 100)
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ts_user_id AS user_id,
+                    ts_lead_id AS lead_id,
+                    ts_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                tips_split
+            WHERE
+                ts_lead_id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' AND status='.Lead::STATUS_SOLD.')) AS '.$category.' ']);
         }
 
         if ($category == 'leadConversion'){
@@ -2289,10 +2399,6 @@ class LeadSearch extends Lead
                 'defaultOrder' => [$category => SORT_DESC],
                 'attributes' => [
                     $category
-                    /*'finalProfit' => [
-                        'asc' => ['finalProfit' => SORT_ASC],
-                        'desc' => ['finalProfit' => SORT_DESC],
-                    ],*/
                 ]
             ],
             /*'pagination' => [
@@ -2307,9 +2413,10 @@ class LeadSearch extends Lead
     /**
      * @param string $category
      * @param string $period
+     * @param array $skills
      * @return SqlDataProvider
      */
-    public function searchTopTeams(string $category, string $period):SqlDataProvider
+    public function searchTopTeams(string $category, string $period, array $skills):SqlDataProvider
     {
         switch ($period) {
             case 'currentWeek':
@@ -2323,6 +2430,18 @@ class LeadSearch extends Lead
                 break;
         }
 
+        $skillsSettings = '';
+        foreach ($skills as $skill => $value){
+            foreach (UserProfile::SKILL_TYPE_LIST as $id => $item){
+                if ($skill == strtolower($item) && $value == false){
+                    $skillsSettings .= "' ', ";
+                } else if ($skill == strtolower($item) && $value == true){
+                    $skillsSettings .= "'".$id."', ";
+                }
+            }
+        }
+        $skillsSettings = substr($skillsSettings, 0, -2);
+
         /**
          * @var $interval array
          */
@@ -2333,27 +2452,166 @@ class LeadSearch extends Lead
         $query = new Query();
 
         if ($category == 'teamsProfit'){
-            $query->addSelect(['ug_name', 'SUM(CASE WHEN final_profit > 0 THEN final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX .' END) * (adults + children))  ELSE 0 END) as teamsProfit']);
-            $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
-            $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
+            $query->addSelect(['ug_name', 'SUM((SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    final_profit - agents_processing_fee
+                    WHEN
+                        employee_id = e.id AND lead_origin = 0
+                    THEN                  
+                    -((final_profit - agents_processing_fee) * (lead_ps / 100)) 
+                    WHEN 
+                    user_id = e.id AND lead_origin = 0
+                    THEN
+                    (final_profit - agents_processing_fee) * (lead_ps / 100)
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (select id from leads where (updated '.$between_condition.') and status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ps_user_id AS user_id,
+                    ps_lead_id AS lead_id,
+                    ps_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                profit_split
+            WHERE
+                ps_lead_id IN (select id from leads where (updated '.$between_condition.') and status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' and status='.Lead::STATUS_SOLD.'))) as teamsProfit']);
+
+            $query->from('employees e' );
+            $query->leftJoin('user_group_assign uga', 'ugs_user_id = e.id');
+            $query->leftJoin('user_group ug', 'ug.ug_id = uga.ugs_group_id');
+            $query->leftJoin('user_params', 'user_params.up_user_id = e.id');
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_params.up_user_id');
+            $query->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id');
+            $query->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
+            $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
+            $query->andWhere('ug_name IS NOT NULL');
+            $query->groupBy('ug_name');
         }
 
         if ($category == 'teamsSoldLeads'){
-            $query->addSelect(['ug_name', 'count(leads.status='.Lead::STATUS_SOLD.') / COUNT(DISTINCT(user_group_assign.ugs_user_id)) as teamsSoldLeads']);
+            $query->addSelect(['ug_name', 'COUNT(leads.status='.Lead::STATUS_SOLD.') / COUNT(DISTINCT(user_group_assign.ugs_user_id)) as teamsSoldLeads']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
+            $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
+                ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_group_assign.ugs_user_id');
+            $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
+                ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
+            $query->from('user_group' );
+            $query->groupBy('ug_name');
         }
 
         if ($category == 'teamsProfitPerPax'){
-            $query->addSelect(['ug_name', 'AVG(CASE WHEN final_profit > 0 THEN (final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX. ' END) * (adults + children))) / (adults + children) ELSE 0 END) as teamsProfitPerPax']);
-            $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
-            $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
+            $query->addSelect(['ug_name', 'AVG((SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    (final_profit - agents_processing_fee) / (adults + children)                    
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ps_user_id AS user_id,
+                    ps_lead_id AS lead_id,
+                    ps_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                profit_split
+            WHERE
+                ps_lead_id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' AND status='.Lead::STATUS_SOLD.')) / (SELECT COUNT(*) FROM leads WHERE employee_id = e.id AND (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.' )) AS teamsProfitPerPax']);
+
+            $query->from('employees e' );
+            $query->leftJoin('user_group_assign uga', 'ugs_user_id = e.id');
+            $query->leftJoin('user_group ug', 'ug.ug_id = uga.ugs_group_id');
+            $query->leftJoin('user_params', 'user_params.up_user_id = e.id');
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_params.up_user_id');
+            $query->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id');
+            $query->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
+            $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
+            $query->andWhere('ug_name IS NOT NULL');
+            $query->groupBy('ug_name');
         }
 
         if ($category == 'teamsProfitPerAgent'){
-            $query->addSelect(['ug_name', 'SUM(final_profit - ((CASE WHEN agents_processing_fee IS NOT NULL THEN agents_processing_fee ELSE '. Lead::AGENT_PROCESSING_FEE_PER_PAX. ' END) * (adults + children))) / COUNT(DISTINCT(user_group_assign.ugs_user_id)) as teamsProfitPerAgent']);
-            $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
-            $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
+            $query->addSelect(['ug_name', 'AVG((SELECT 
+            SUM(CASE
+                    WHEN
+                        employee_id = e.id AND lead_origin = 1
+                    THEN
+                    (final_profit - agents_processing_fee)                 
+                    ELSE 0
+                END)
+        FROM
+            leads
+                LEFT JOIN
+            (SELECT 
+                employee_id AS user_id,
+                    id AS lead_id,
+                    100 AS lead_ps,
+                    TRUE AS lead_origin
+            FROM
+                leads
+            WHERE               
+                leads.id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')
+                UNION ALL                 
+            SELECT 
+                ps_user_id AS user_id,
+                    ps_lead_id AS lead_id,
+                    ps_percent AS lead_ps,
+                    FALSE AS lead_origin
+            FROM
+                profit_split
+            WHERE
+                ps_lead_id IN (SELECT id FROM leads WHERE (updated '.$between_condition.') AND status='.Lead::STATUS_SOLD.')) AS unionleads ON id = lead_id
+        WHERE
+            (updated '.$between_condition.' AND status='.Lead::STATUS_SOLD.'))) AS teamsProfitPerAgent']);
+
+            $query->from('employees e' );
+            $query->leftJoin('user_group_assign uga', 'ugs_user_id = e.id');
+            $query->leftJoin('user_group ug', 'ug.ug_id = uga.ugs_group_id');
+            $query->leftJoin('user_params', 'user_params.up_user_id = e.id');
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_params.up_user_id');
+            $query->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id');
+            $query->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
+            $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
+            $query->andWhere('ug_name IS NOT NULL');
+            $query->groupBy('ug_name');
         }
 
         if ($category == 'teamsConversion'){
@@ -2365,30 +2623,25 @@ class LeadSearch extends Lead
             ']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND (updated '.$between_condition.')');
+            $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
+                ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_group_assign.ugs_user_id');
+            $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
+                ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
+            $query->from('user_group' );
+            $query->groupBy('ug_name');
         }
-
-        $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
-            ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
-
-        $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
-            ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
-        $query->from('user_group' );
-        $query->groupBy('ug_name');
-
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
-
+        //var_dump($sql); die();
         $paramsData = [
             'sql' => $sql,
             'sort' =>[
                 'defaultOrder' => [$category => SORT_DESC],
                 'attributes' => [
                     $category
-                    /*'finalProfit' => [
-                        'asc' => ['finalProfit' => SORT_ASC],
-                        'desc' => ['finalProfit' => SORT_DESC],
-                    ],*/
                 ]
             ],
             /*'pagination' => [
