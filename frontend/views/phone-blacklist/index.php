@@ -1,9 +1,10 @@
 <?php
 
-use frontend\extensions\grid\BooleanColumn;
-use frontend\extensions\grid\DateTimeColumn;
-use frontend\extensions\grid\UserColumn;
-use sales\formatters\WidgetFormatter;
+use common\models\PhoneBlacklist;
+use sales\yii\grid\BooleanColumn;
+use sales\yii\grid\DateTimeColumn;
+use sales\yii\grid\UserColumn;
+use sales\yii\i18n\Formatter;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -28,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'formatter' => ['class' => WidgetFormatter::class],
+        'formatter' => ['class' => Formatter::class],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
@@ -52,6 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => UserColumn::class,
                 'attribute' => 'pbl_updated_user_id',
+                'value' => static function(PhoneBlacklist $model) {return $model->updatedUser;},
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

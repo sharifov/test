@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\extensions\grid;
+namespace sales\yii\grid;
 
 use Yii;
 use sales\access\ListsAccess;
@@ -15,9 +15,11 @@ class UserColumn extends DataColumn
     public function init(): void
     {
         parent::init();
-        if (!$this->userId) {
-            $this->userId = Yii::$app->user->id ?? null;
+        if (!$this->filter) {
+            if (!$this->userId) {
+                $this->userId = Yii::$app->user->id ?? null;
+            }
+            $this->filter = (new ListsAccess($this->userId))->getEmployees();
         }
-        $this->filter = (new ListsAccess($this->userId))->getEmployees();
     }
 }

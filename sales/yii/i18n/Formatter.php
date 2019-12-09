@@ -1,13 +1,12 @@
 <?php
 
-namespace sales\formatters;
+namespace sales\yii\i18n;
 
 use common\models\Employee;
 use yii\bootstrap4\Html;
-use yii\i18n\Formatter;
 use Yii;
 
-class WidgetFormatter extends Formatter
+class Formatter extends \yii\i18n\Formatter
 {
     /**
      * @param $dateTime
@@ -21,18 +20,28 @@ class WidgetFormatter extends Formatter
     }
 
     /**
-     * @param $userId
+     * @param Employee|int|string|null $user
      * @return string
      */
-    public function asUserName($userId): string
+    public function asUserName($user): string
     {
-        if (!$userId) {
+        if (!$user) {
             return '';
         }
-        if ($user = Employee::findOne($userId)) {
-            return '<i class="fa fa-user"></i> ' . Html::encode($user->username);
+        if ($user instanceof Employee) {
+            $userName = $user->username;
+        } elseif (is_int($user)) {
+            if ($findUser = Employee::findOne($user)) {
+                $userName = $findUser->username;
+            } else {
+                return 'not found';
+            }
+        } elseif (is_string($user)) {
+            $userName = $user;
+        } else {
+            throw new \InvalidArgumentException('user must be Employee|int|string|null');
         }
-        return 'User not found';
+        return '<i class="fa fa-user"></i> ' . Html::encode($userName);
     }
 
     /**

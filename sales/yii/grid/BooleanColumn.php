@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\extensions\grid;
+namespace sales\yii\grid;
 
 use yii\grid\DataColumn;
 

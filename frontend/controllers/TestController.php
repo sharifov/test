@@ -15,6 +15,7 @@ use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Notifications;
+use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
@@ -144,6 +145,9 @@ class TestController extends FController
 
     public function actionTest()
     {
+
+        $b = PhoneBlacklist::find()->isExists('+37369369654');
+        VarDumper::dump($b);
         die;
         return $this->render('blank');
 
@@ -151,8 +155,6 @@ class TestController extends FController
 
     public function actionT()
     {
-
-
 die;
 
 //        $case->processing(294);

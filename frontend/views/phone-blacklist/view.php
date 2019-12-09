@@ -1,6 +1,6 @@
 <?php
 
-use sales\formatters\WidgetFormatter;
+use sales\yii\i18n\Formatter;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= DetailView::widget([
         'model' => $model,
-        'formatter' => ['class' => WidgetFormatter::class],
+        'formatter' => ['class' => Formatter::class],
         'attributes' => [
             'pbl_id',
             'pbl_phone',
@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pbl_enabled:booleanByLabel',
             'pbl_created_dt:dateTimeByUserDt',
             'pbl_updated_dt:dateTimeByUserDt',
-            'pbl_updated_user_id:userName',
+            'updatedUser:userName',
         ],
     ]) ?>
 

@@ -35,7 +35,7 @@ class PhoneBlacklistSearch extends PhoneBlacklist
      */
     public function search($params, Employee $user): ActiveDataProvider
     {
-        $query = PhoneBlacklist::find();
+        $query = PhoneBlacklist::find()->with('updatedUser');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
