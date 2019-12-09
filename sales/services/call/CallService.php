@@ -85,7 +85,7 @@ class CallService
             && ($user = $upp->uppUser)
         ) {
             Notifications::create($user->id, 'Declined Call',
-                'Declined Call Id: ' . $call->c_id . "\r\n Reason: Blacklisted",
+                'Declined Call Id: ' . $call->c_id . ' Reason: Blacklisted',
                 Notifications::TYPE_WARNING, true);
             Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
         }
