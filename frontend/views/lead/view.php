@@ -65,6 +65,14 @@ $lead = $leadForm->getLead();
                 'is_manager' => $is_manager,
             ]) ?>
 
+
+            <?= $this->render('offers/lead_offers', [
+                'lead' => $lead,
+                'leadForm' => $leadForm,
+                'is_manager' => $is_manager,
+            ]) ?>
+
+
         </div>
         <div class="col-md-6">
             <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner(Yii::$app->user->id)):?>
