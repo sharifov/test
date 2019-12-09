@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\validators;
+namespace sales\yii\validators;
 
 use common\models\Airport;
 use yii\validators\ExistValidator;
