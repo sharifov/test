@@ -4,19 +4,23 @@ namespace sales\services\call;
 
 use common\models\Call;
 use sales\repositories\call\CallRepository;
+use sales\services\ServiceFinder;
 
 /**
  * Class CallService
  *
  * @property  CallRepository $callRepository
+ * @property  ServiceFinder $finder
  */
 class CallService
 {
     private $callRepository;
+    private $finder;
 
-    public function __construct(CallRepository $callRepository)
+    public function __construct(CallRepository $callRepository, ServiceFinder $finder)
     {
         $this->callRepository = $callRepository;
+        $this->finder = $finder;
     }
 
     /**
@@ -38,6 +42,16 @@ class CallService
         }
 
         $call->cancel();
+        $this->callRepository->save($call);
+    }
+
+    /**
+     * @param int|Call $call
+     */
+    public function declined($call): void
+    {
+        $call = $this->finder->callFind($call);
+        $call->declined();
         $this->callRepository->save($call);
     }
 }

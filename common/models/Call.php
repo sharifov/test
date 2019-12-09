@@ -6,6 +6,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
+use sales\events\call\CallCreatedEvent;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -58,7 +59,10 @@ use Locale;
  * @property int $c_parent_id
  * @property string $c_recording_sid
  * @property int $c_source_id
- *
+ * @property string $c_offset_gmt
+ * @property string $c_from_country
+ * @property string $c_from_state
+ * @property string $c_from_city
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
@@ -269,6 +273,15 @@ class Call extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return static
+     */
+    private static function create(): self
+    {
+        $call = new static();
+        $call->recordEvent(new CallCreatedEvent($call));
+        return $call;
+    }
 
     /**
      * @param $callSid
@@ -276,35 +289,36 @@ class Call extends \yii\db\ActiveRecord
      * @param $from
      * @param $to
      * @param $createdDt
-     * @param $recordingUrl
-     * @param $recordingDuration
-     * @param $callerName
-     * @param $projectId
      * @return Call
      */
-    public static function create(
+    public static function createDeclinedIn(
         $callSid,
         $callTypeId,
         $from,
         $to,
         $createdDt,
-        $recordingUrl,
-        $recordingDuration,
-        $callerName,
-        $projectId
+        $comCallId,
+        $offsetGmt,
+        $fromCountry,
+        $fromState,
+        $fromCity
     ): self
     {
-        $call = new static();
+        $call = self::create();
         $call->c_call_sid = $callSid;
         $call->c_call_type_id = $callTypeId;
         $call->c_from = $from;
         $call->c_to = $to;
         $call->c_created_dt = $createdDt;
+        $call->c_com_call_id = $comCallId;
+        $call->c_offset_gmt = $offsetGmt;
+        $call->c_from_country = $fromCountry;
+        $call->c_from_state = $fromState;
+        $call->c_from_city = $fromCity;
+        $call->c_is_new = true;
+
         $call->c_updated_dt = date('Y-m-d H:i:s');
-        $call->c_recording_url = $recordingUrl;
-        $call->c_recording_duration = $recordingDuration;
-        $call->c_caller_name = $callerName;
-        $call->c_project_id = $projectId;
+        $call->declined();
         return $call;
     }
 
