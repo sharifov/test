@@ -29,5 +29,9 @@ echo LeadRedialWidget::widget([
         'post',
         ['gid' => $lead->gid]
     ),
+    'checkBlackPhoneUrl' => new RedialUrl(
+        Url::to(['lead-redial/check-black-phone']),
+        'post'
+    ),
     'script' => 'reloadCallFunction();',
 ]);

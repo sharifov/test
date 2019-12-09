@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
+use common\models\PhoneBlacklist;
 use common\models\search\LeadQcallSearch;
 use frontend\widgets\multipleUpdate\redial\MultipleUpdateForm;
 use frontend\widgets\multipleUpdate\redialAll\UpdateAllForm;
@@ -381,6 +382,20 @@ class LeadRedialController extends FController
         } catch (\DomainException $e) {
             return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * @return Response
+     */
+    public function actionCheckBlackPhone(): Response
+    {
+        if (!$phone = (string)Yii::$app->request->post('phone')) {
+            return $this->asJson(['success' => false, 'message' => 'Phone number not found']);
+        }
+        if (PhoneBlacklist::find()->isExists($phone)) {
+            return $this->asJson(['success' => false, 'message' => 'Declined Call. Reason: Blacklisted']);
+        }
+        return $this->asJson(['success' => true]);
     }
 
     /**
