@@ -2398,10 +2398,6 @@ class LeadSearch extends Lead
                 'defaultOrder' => [$category => SORT_DESC],
                 'attributes' => [
                     $category
-                    /*'finalProfit' => [
-                        'asc' => ['finalProfit' => SORT_ASC],
-                        'desc' => ['finalProfit' => SORT_DESC],
-                    ],*/
                 ]
             ],
             /*'pagination' => [
@@ -2498,19 +2494,15 @@ class LeadSearch extends Lead
             $query->addSelect(['ug_name', 'COUNT(leads.status='.Lead::STATUS_SOLD.') / COUNT(DISTINCT(user_group_assign.ugs_user_id)) as teamsSoldLeads']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
-            /*common code*/
             $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
-
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
             $query->from('user_group' );
             $query->groupBy('ug_name');
-            /*common code*/
         }
 
         if ($category == 'teamsProfitPerPax'){
-
             $query->addSelect(['ug_name', 'AVG((SELECT 
             SUM(CASE
                     WHEN
@@ -2609,34 +2601,22 @@ class LeadSearch extends Lead
             ']);
             $query->leftJoin('user_group_assign', 'user_group_assign.ugs_group_id = user_group.ug_id');
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND (updated '.$between_condition.')');
-
-            /*common code*/
             $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
-
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
             $query->from('user_group' );
             $query->groupBy('ug_name');
-            /*common code*/
         }
-
-
-
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
-//var_dump($sql); die();
         $paramsData = [
             'sql' => $sql,
             'sort' =>[
                 'defaultOrder' => [$category => SORT_DESC],
                 'attributes' => [
                     $category
-                    /*'finalProfit' => [
-                        'asc' => ['finalProfit' => SORT_ASC],
-                        'desc' => ['finalProfit' => SORT_DESC],
-                    ],*/
                 ]
             ],
             /*'pagination' => [
