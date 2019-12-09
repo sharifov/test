@@ -704,7 +704,7 @@ class Call extends \yii\db\ActiveRecord
                             'cua_call_id' => $this->c_id
                         ])->exists();
 
-                        if (!$isCallUserAccepted) {
+                        if (!$isCallUserAccepted && !$this->isDeclined()) {
                             $this->c_status_id = self::STATUS_NO_ANSWER;
                             self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
                         }
