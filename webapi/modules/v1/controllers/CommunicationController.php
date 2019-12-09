@@ -20,6 +20,8 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
 use sales\repositories\lead\LeadRepository;
+use sales\services\call\CallDeclinedException;
+use sales\services\call\CallService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
@@ -36,6 +38,7 @@ use yii\queue\Queue;
 /**
  * Class CommunicationController
  *
+ * @property CallService $callService
  */
 class CommunicationController extends ApiBaseController
 {
@@ -56,6 +59,22 @@ class CommunicationController extends ApiBaseController
     public const TYPE_NEW_SMS_MESSAGES_RECEIVED = 'new_sms_messages_received';
 
     public const TYPE_SMS_FINISH        = 'sms_finish';
+    /**
+     * @var CallService
+     */
+    private $callService;
+
+    /**
+     * @param $id
+     * @param $module
+     * @param CallService $callService
+     * @param array $config
+     */
+    public function __construct($id, $module, CallService $callService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->callService = $callService;
+    }
 
     /**
      * @api {post} /v1/communication/email Communication Email
@@ -275,6 +294,14 @@ class CommunicationController extends ApiBaseController
             if (!$incoming_phone_number) {
                 $response['error'] = 'Not found Call Called (Agent phone number)';
                 $response['error_code'] = 11;
+            }
+
+            try {
+                $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
+            } catch (CallDeclinedException $e) {
+                $vr = new VoiceResponse();
+                $vr->reject(['reason' => 'busy']);
+                return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: '. $e->getMessage());
             }
 
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();

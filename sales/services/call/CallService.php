@@ -3,8 +3,12 @@
 namespace sales\services\call;
 
 use common\models\Call;
+use common\models\Notifications;
+use common\models\PhoneBlacklist;
+use common\models\UserProjectParams;
 use sales\repositories\call\CallRepository;
 use sales\services\ServiceFinder;
+use yii\helpers\VarDumper;
 
 /**
  * Class CallService
@@ -45,13 +49,47 @@ class CallService
         $this->callRepository->save($call);
     }
 
-    /**
-     * @param int|Call $call
-     */
-    public function declined($call): void
+    public function guardDeclined(?string $clientPhoneNumber, array $data, int $typeId): void
     {
-        $call = $this->finder->callFind($call);
-        $call->declined();
-        $this->callRepository->save($call);
+        if (!$clientPhoneNumber) {
+            return;
+        }
+
+        $internalPhoneNumber = $data['To'] ?? null;
+
+        if (!$blackPhone = PhoneBlacklist::find()->isExists($clientPhoneNumber)) {
+            return;
+        }
+
+        $call = Call::createDeclined(
+            $data['CallSid'] ?? null,
+            $typeId,
+            $clientPhoneNumber,
+            $internalPhoneNumber,
+            date('Y-m-d H:i:s'),
+            $data['c_com_call_id'] ?? null,
+            Call::getClientTime($data),
+            Call::getDisplayRegion($data['FromCountry'] ?? ''),
+            $data['FromState'] ?? null,
+            $data['FromCity'] ?? null,
+            null
+        );
+
+        if (!$call->save()) {
+            \Yii::error(VarDumper::dumpAsString($call->errors), 'CallService:guardDeclined:Call:save');
+            throw new \Exception('CallService:guardDeclined: Can not save call in db', 1);
+        }
+
+        if (
+            ($upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $internalPhoneNumber])->limit(1)->one())
+            && ($user = $upp->uppUser)
+        ) {
+            Notifications::create($user->id, 'Declined Call',
+                'Declined Call Id: ' . $call->c_id . "\r\n Reason: Blacklisted",
+                Notifications::TYPE_WARNING, true);
+            Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+        }
+
+        throw new CallDeclinedException('Declined Call Id: ' . $call->c_id . '. Reason: Blacklisted');
     }
 }

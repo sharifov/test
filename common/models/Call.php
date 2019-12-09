@@ -289,9 +289,15 @@ class Call extends \yii\db\ActiveRecord
      * @param $from
      * @param $to
      * @param $createdDt
-     * @return Call
+     * @param $comCallId
+     * @param $offsetGmt
+     * @param $fromCountry
+     * @param $fromState
+     * @param $fromCity
+     * @param $createdUserId
+     * @return static
      */
-    public static function createDeclinedIn(
+    public static function createDeclined(
         $callSid,
         $callTypeId,
         $from,
@@ -301,7 +307,8 @@ class Call extends \yii\db\ActiveRecord
         $offsetGmt,
         $fromCountry,
         $fromState,
-        $fromCity
+        $fromCity,
+        $createdUserId
     ): self
     {
         $call = self::create();
@@ -309,14 +316,14 @@ class Call extends \yii\db\ActiveRecord
         $call->c_call_type_id = $callTypeId;
         $call->c_from = $from;
         $call->c_to = $to;
-        $call->c_created_dt = $createdDt;
         $call->c_com_call_id = $comCallId;
         $call->c_offset_gmt = $offsetGmt;
         $call->c_from_country = $fromCountry;
         $call->c_from_state = $fromState;
         $call->c_from_city = $fromCity;
+        $call->c_created_user_id = $createdUserId;
         $call->c_is_new = true;
-
+        $call->c_created_dt = $createdDt;
         $call->c_updated_dt = date('Y-m-d H:i:s');
         $call->declined();
         return $call;
