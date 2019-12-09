@@ -12,6 +12,7 @@ use common\models\Employee;
 use common\models\Sms;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use common\models\UserProfile;
 use Faker\Provider\DateTime;
 use sales\access\EmployeeProjectAccess;
 use sales\repositories\lead\LeadBadgesRepository;
@@ -2412,9 +2413,10 @@ class LeadSearch extends Lead
     /**
      * @param string $category
      * @param string $period
+     * @param array $skills
      * @return SqlDataProvider
      */
-    public function searchTopTeams(string $category, string $period):SqlDataProvider
+    public function searchTopTeams(string $category, string $period, array $skills):SqlDataProvider
     {
         switch ($period) {
             case 'currentWeek':
@@ -2427,6 +2429,18 @@ class LeadSearch extends Lead
                 $interval = ChartTools::getCurrentMonth();
                 break;
         }
+
+        $skillsSettings = '';
+        foreach ($skills as $skill => $value){
+            foreach (UserProfile::SKILL_TYPE_LIST as $id => $item){
+                if ($skill == strtolower($item) && $value == false){
+                    $skillsSettings .= "' ', ";
+                } else if ($skill == strtolower($item) && $value == true){
+                    $skillsSettings .= "'".$id."', ";
+                }
+            }
+        }
+        $skillsSettings = substr($skillsSettings, 0, -2);
 
         /**
          * @var $interval array
@@ -2483,9 +2497,11 @@ class LeadSearch extends Lead
             $query->leftJoin('user_group_assign uga', 'ugs_user_id = e.id');
             $query->leftJoin('user_group ug', 'ug.ug_id = uga.ugs_group_id');
             $query->leftJoin('user_params', 'user_params.up_user_id = e.id');
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_params.up_user_id');
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id');
             $query->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
             $query->andWhere('ug_name IS NOT NULL');
             $query->groupBy('ug_name');
         }
@@ -2496,8 +2512,10 @@ class LeadSearch extends Lead
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND leads.status='.Lead::STATUS_SOLD.' AND (updated '.$between_condition.')');
             $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_group_assign.ugs_user_id');
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
             $query->from('user_group' );
             $query->groupBy('ug_name');
         }
@@ -2540,9 +2558,11 @@ class LeadSearch extends Lead
             $query->leftJoin('user_group_assign uga', 'ugs_user_id = e.id');
             $query->leftJoin('user_group ug', 'ug.ug_id = uga.ugs_group_id');
             $query->leftJoin('user_params', 'user_params.up_user_id = e.id');
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_params.up_user_id');
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id');
             $query->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
             $query->andWhere('ug_name IS NOT NULL');
             $query->groupBy('ug_name');
         }
@@ -2585,9 +2605,11 @@ class LeadSearch extends Lead
             $query->leftJoin('user_group_assign uga', 'ugs_user_id = e.id');
             $query->leftJoin('user_group ug', 'ug.ug_id = uga.ugs_group_id');
             $query->leftJoin('user_params', 'user_params.up_user_id = e.id');
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_params.up_user_id');
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = e.id');
             $query->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
             $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
             $query->andWhere('ug_name IS NOT NULL');
             $query->groupBy('ug_name');
         }
@@ -2603,14 +2625,17 @@ class LeadSearch extends Lead
             $query->leftJoin('leads', 'leads.employee_id = user_group_assign.ugs_user_id AND (updated '.$between_condition.')');
             $query->rightJoin('user_params', 'user_params.up_user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['=', 'user_params.up_leaderboard_enabled', true]);
+            $query->leftJoin('user_profile', 'user_profile.up_user_id = user_group_assign.ugs_user_id');
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
+            $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
             $query->from('user_group' );
             $query->groupBy('ug_name');
         }
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
+        //var_dump($sql); die();
         $paramsData = [
             'sql' => $sql,
             'sort' =>[

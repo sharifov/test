@@ -281,8 +281,11 @@ class StatsController extends FController
 
         $agentsSettings = Setting::find()->where(['s_key' => 'agents_ratings'])->asArray()->one();
         $teamsSettings = Setting::find()->where(['s_key' => 'teams_ratings'])->asArray()->one();
+        $teamsSettingsSkill = Setting::find()->where(['s_key' => 'exclude_agent_skill'])->asArray()->one();
+
         $agentsBoardsSettings = json_decode($agentsSettings['s_value'], true);
         $teamsBoardsSettings = json_decode($teamsSettings['s_value'], true);
+        $teamsSkill = json_decode($teamsSettingsSkill['s_value'], true);
 
         if(Yii::$app->request->isPost){
            $period = Yii::$app->request->post('period');
@@ -296,11 +299,11 @@ class StatsController extends FController
         $tipsDataProvider = $searchLeader->searchTopAgents('tips', $period);
         $conversionDataProvider = $searchLeader->searchTopAgents('leadConversion', $period);
 
-        $teamsProfitDataProvider = $searchLeader->searchTopTeams('teamsProfit', $period);
-        $avgSoldLeadsDataProvider = $searchLeader->searchTopTeams('teamsSoldLeads', $period);
-        $avgProfitPerPax = $searchLeader->searchTopTeams('teamsProfitPerPax', $period);
-        $avgProfitPerAgent = $searchLeader->searchTopTeams('teamsProfitPerAgent', $period);
-        $teamConversion = $searchLeader->searchTopTeams('teamsConversion', $period);
+        $teamsProfitDataProvider = $searchLeader->searchTopTeams('teamsProfit', $period, $teamsSkill);
+        $avgSoldLeadsDataProvider = $searchLeader->searchTopTeams('teamsSoldLeads', $period, $teamsSkill);
+        $avgProfitPerPax = $searchLeader->searchTopTeams('teamsProfitPerPax', $period, $teamsSkill);
+        $avgProfitPerAgent = $searchLeader->searchTopTeams('teamsProfitPerAgent', $period, $teamsSkill);
+        $teamConversion = $searchLeader->searchTopTeams('teamsConversion', $period, $teamsSkill);
 
         $params = [
             'profitDataProvider' => $profitDataProvider,
