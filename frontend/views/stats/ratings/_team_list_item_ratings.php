@@ -22,7 +22,7 @@ $class = 'text-success';
             <?php if (isset($model['teamsProfit']) && $model['teamsProfit'] > 0) : ?>
                 <?= '$ ' . number_format($model['teamsProfit']) ?>
             <?php elseif (isset($model['teamsSoldLeads']) && $model['teamsSoldLeads'] > 0) :?>
-                <?= number_format($model['teamsSoldLeads']) ?>
+                <?= number_format($model['teamsSoldLeads'], 1) ?>
             <?php elseif (isset($model['teamsProfitPerPax']) && $model['teamsProfitPerPax'] > 0) :?>
                 <?= '$ ' . number_format($model['teamsProfitPerPax']) ?>
             <?php elseif (isset($model['teamsProfitPerAgent']) && $model['teamsProfitPerAgent'] > 0) : ?>
