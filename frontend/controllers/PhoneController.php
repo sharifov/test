@@ -556,14 +556,17 @@ class PhoneController extends FController
                 $result = $communication->redirectCall($callSid, $data, $callbackUrl);
             } else {
 
-                $childCall = Call::find()->where(['c_parent_id' => $originCall->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+                $result = $communication->redirectCall($originCall->c_call_sid, $data, $callbackUrl);
 
-                if ($childCall) {
-                    $callSid = $childCall->c_call_sid;
-                    $result = $communication->redirectCall($callSid, $data, $callbackUrl);
-                } else {
-                    $result['error'] = 'Not found originCall->cParent, Origin CallSid: ' . $originCall->c_call_sid;
-                }
+
+//                $childCall = Call::find()->where(['c_parent_id' => $originCall->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+//
+//                if ($childCall) {
+//                    $callSid = $childCall->c_call_sid;
+//                    $result = $communication->redirectCall($callSid, $data, $callbackUrl);
+//                } else {
+//                    $result['error'] = 'Not found originCall->cParent, Origin CallSid: ' . $originCall->c_call_sid;
+//                }
             }
 
 
