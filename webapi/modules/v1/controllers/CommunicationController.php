@@ -895,10 +895,10 @@ class CommunicationController extends ApiBaseController
 
         if ($callSid) {
             $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
-            if ($call && $call->isDeclined()) {
-                $call->c_call_status = $callData['CallStatus'];
-                return $call;
-            }
+//            if ($call && $call->isDeclined()) {
+//                $call->c_call_status = $callData['CallStatus'];
+//                return $call;
+//            }
         }
 
         if ($parentCallSid) {
