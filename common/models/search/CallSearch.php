@@ -370,7 +370,7 @@ class CallSearch extends Call
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($dates[0]));
-            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]));
+            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]) - ($hourSub * 3600));
             $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]));
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
         } else {
