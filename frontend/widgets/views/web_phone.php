@@ -805,14 +805,15 @@ $js = <<<JS
             let modal = $('#web-phone-redirect-agents-modal');
             modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             // connection.accept();
-            //console.error(connection.parameters);
+            console.error(connection.parameters);
             
             $.ajax({
                 type: 'post',
                 data: {
                     'sid': connection.parameters.CallSid,
                     'type': objType,
-                    'from': connection.parameters.To,
+                    //'from': connection.parameters.To,
+                    'from': connection.parameters.From,
                     'to': objValue,
                 },
                 url: ajaxCallRedirectUrl,
