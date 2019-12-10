@@ -435,6 +435,7 @@ class CallSearch extends Call
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND c_source_type_id <> ' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingGeneralLine,
             
+            SUM(CASE WHEN c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL AND c_status_id='. self::STATUS_COMPLETED .' THEN c_call_duration ELSE 0 END) AS redialCallsDuration,
             SUM(CASE WHEN c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS totalAttempts,
             SUM(CASE WHEN c_status_id=' . self::STATUS_COMPLETED . ' AND c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL '. $queryByDuration .' THEN 1 ELSE 0 END) AS redialCompleted,
             
@@ -442,7 +443,9 @@ class CallSearch extends Call
             FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
         ']);
 
-        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '"))']);
+        $query->groupBy(['c_created_user_id', 'createdDate']);
+
+        //$query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '"))']);
         //$query->orderBy(['c_created_user_id' => SORT_ASC]);
 
         $command = $query->createCommand();
@@ -464,6 +467,7 @@ class CallSearch extends Call
                     'incomingCompletedCalls',
                     'incomingDirectLine',
                     'incomingGeneralLine',
+                    'redialCallsDuration',
                     'totalAttempts',
                     'redialCompleted'
                 ],
@@ -473,8 +477,7 @@ class CallSearch extends Call
             ],
         ];
 
-        $dataProvider = new SqlDataProvider($paramsData);
-        return $dataProvider;
+        return $dataProvider = new SqlDataProvider($paramsData);;
     }
 
     /**

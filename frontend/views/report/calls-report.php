@@ -166,14 +166,26 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
 
         [
+            'label' =>'Duration',
+            'attribute' => 'redialCallsDuration',
+            'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'format' => 'raw',
+            'value' => function($data) {
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsDuration']).'">' . gmdate('H:i:s', $data['redialCallsDuration']) . '</span>';
+            }
+        ],
+
+        [
             'label' =>'Total Attempts',
             'attribute' => 'totalAttempts',
             'value' => function($data) {
                 return $data['totalAttempts'] ?: '-';
             },
-            'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
-            'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
-            'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
+            'contentOptions' => ['style' => 'background-color:#fcf8e3;'],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3;'],
         ],
 
         [
