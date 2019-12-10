@@ -443,9 +443,7 @@ class CallSearch extends Call
             FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
         ']);
 
-        $query->groupBy(['c_created_user_id', 'createdDate']);
-
-        //$query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '"))']);
+        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '"))']);
         //$query->orderBy(['c_created_user_id' => SORT_ASC]);
 
         $command = $query->createCommand();
