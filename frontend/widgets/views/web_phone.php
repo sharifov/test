@@ -813,7 +813,7 @@ $js = <<<JS
                     'sid': connection.parameters.CallSid,
                     'type': objType,
                     //'from': connection.parameters.To,
-                    'from': connection.parameters.From,
+                    'from': '+37379330863',
                     'to': objValue,
                 },
                 url: ajaxCallRedirectUrl,
