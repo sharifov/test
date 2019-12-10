@@ -86,11 +86,15 @@ class EmailService
 	}
 
 	/**
-	 * @param string $subject
+	 * @param string|null $subject
 	 * @return Cases
 	 */
-	private function getCaseFromSubjectByIdOrHash(string $subject): ?Cases
+	private function getCaseFromSubjectByIdOrHash(?string $subject): ?Cases
 	{
+	    if (!$subject) {
+	        return null;
+        }
+
 		preg_match('~\[cid:(\d+)\]~si', $subject, $matches);
 
 		if(!empty($matches[1])) {
@@ -110,11 +114,15 @@ class EmailService
 	}
 
 	/**
-	 * @param string $refMessageId
+	 * @param string|null $refMessageId
 	 * @return Cases|null
 	 */
-	private function getCaseFromSubjectByKivTag(string $refMessageId): ?Cases
+	private function getCaseFromSubjectByKivTag(?string $refMessageId): ?Cases
 	{
+	    if (!$refMessageId) {
+	        return null;
+        }
+
 		$matches = [];
 		preg_match_all('~<kiv\.(.+)>~iU', $refMessageId, $matches);
 		if (!empty($matches[1])) {
@@ -151,11 +159,15 @@ class EmailService
 	}
 
 	/**
-	 * @param string $subject
+	 * @param string|null $subject
 	 * @return Lead|null
 	 */
-	private function getLeadFromSubjectByIdOrHash(string $subject): ?Lead
+	private function getLeadFromSubjectByIdOrHash(?string $subject): ?Lead
 	{
+	    if (!$subject) {
+	        return null;
+        }
+
 		preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
 
 		if(!empty($matches[1])) {
@@ -175,11 +187,15 @@ class EmailService
 	}
 
 	/**
-	 * @param string $refMessageId
+	 * @param string|null $refMessageId
 	 * @return Lead|null
 	 */
-	private function getLeadFromSubjectByKivTag(string $refMessageId): ?Lead
+	private function getLeadFromSubjectByKivTag(?string $refMessageId): ?Lead
 	{
+	    if (!$refMessageId) {
+	        return null;
+        }
+
 		$matches = [];
 		preg_match_all('~<kiv\.(.+)>~iU', $refMessageId, $matches);
 		if (!empty($matches[1])) {
