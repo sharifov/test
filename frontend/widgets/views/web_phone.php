@@ -813,7 +813,7 @@ $js = <<<JS
                 data: {
                     'sid': connection.parameters.CallSid,
                     'type': objType,
-                    //'from': connection.parameters.To,
+                    'from': connection.parameters.To,
                     'to': objValue,
                 },
                 url: ajaxCallRedirectUrl,
