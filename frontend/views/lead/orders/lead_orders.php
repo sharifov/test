@@ -11,16 +11,20 @@ use yii\helpers\Html;
 use yii\web\View;
 
 ?>
+<style>
+    .x_panel_orders {background-color: #cad7e4;}
+</style>
+
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-orders', 'enablePushState' => false, 'timeout' => 10000]) ?>
-    <div class="x_panel">
+    <div class="x_panel x_panel_orders">
         <div class="x_title">
 
-            <h2 class="success"><i class="fas fa-money-check-alt"></i> Orders (<?=$dataProviderOrders->totalCount?>)</h2>
+            <h2><i class="fas fa-money-check-alt"></i> Orders (<?=$dataProviderOrders->totalCount?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <?= Html::a('<i class="fa fa-plus-circle success"></i> Add order', null, [
+                    <?= Html::a('<i class="fa fa-plus-circle success"></i> add Order', null, [
                         'data-url' => \yii\helpers\Url::to(['/order/create-ajax', 'id' => $lead->id]),
-                        'class' => 'btn-create-order'
+                        'class' => 'btn btn-light btn-create-order'
                     ])?>
                 </li>
                 <li>

@@ -31,8 +31,12 @@ $pjaxId = 'pjax-order-form';
 
     <?= $form->field($model, 'or_name')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'or_status_id')->dropDownList(\common\models\Order::getStatusList(), ['prompt' => '---']) ?>
+
+    <?= $form->field($model, 'or_pay_status_id')->dropDownList(\common\models\Order::getPayStatusList(), ['prompt' => '---']) ?>
+
     <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('<i class="fa fa-save"></i> Save order', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

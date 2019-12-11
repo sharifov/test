@@ -179,13 +179,14 @@ class OfferController extends FController
         }
 
         $model = new OfferForm();
-        $model->of_lead_id = $modelOffer->of_lead_id;
-        $model->of_id = $modelOffer->of_id;
+        $model->of_lead_id  = $modelOffer->of_lead_id;
+        $model->of_id       = $modelOffer->of_id;
 
         if ($model->load(Yii::$app->request->post())) {
 
             if ($model->validate()) {
                 $modelOffer->of_name = $model->of_name;
+                $modelOffer->of_status_id = $model->of_status_id;
 
                 if ($modelOffer->save()) {
                     return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-offers", timout: 8000});</script>';

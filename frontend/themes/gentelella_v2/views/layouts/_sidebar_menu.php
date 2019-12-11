@@ -258,6 +258,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Orders', 'url' => ['/order/index']],
                 ['label' => 'Offers', 'url' => ['/offer/index']],
                 ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
+                ['label' => 'Order Products', 'url' => ['/order-product/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/index']],
             ]
         ];

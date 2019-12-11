@@ -232,7 +232,7 @@ $js = <<<JS
     
     $(function() {
   
-        $('body').on('show.bs.dropdown', '.dropdown-offer-menu', function () {
+        $('body').off('show.bs.dropdown', '.dropdown-offer-menu').on('show.bs.dropdown', '.dropdown-offer-menu', function () {
             let menu = $(this);
             let productQuoteId = menu.data('product-quote-id');
             let leadId = menu.data('lead-id');
@@ -247,9 +247,40 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          alert(data.error);
+                          //alert(data.error);
                           new PNotify({
-                                title: 'Error: offer transfer',
+                                title: 'Error: offer menu',
+                                type: 'error',
+                                text: data.error,
+                                hide: true
+                            });
+                      } else {
+                          menu.find('.dropdown-menu').html(data.html);
+                      }
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                });
+        });
+        
+        $('body').off('show.bs.dropdown', '.dropdown-order-menu').on('show.bs.dropdown', '.dropdown-order-menu', function () {
+            let menu = $(this);
+            let productQuoteId = menu.data('product-quote-id');
+            let leadId = menu.data('lead-id');
+            let url = menu.data('url');
+            menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
+            
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {'product_quote_id': productQuoteId, 'lead_id': leadId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          //alert(data.error);
+                          new PNotify({
+                                title: 'Error: order menu',
                                 type: 'error',
                                 text: data.error,
                                 hide: true
@@ -264,7 +295,7 @@ $js = <<<JS
         });
         
         
-        $('body').on('click', '.btn-add-quote-to-offer', function (e) {
+        $('body').off('click', '.btn-add-quote-to-offer').on('click', '.btn-add-quote-to-offer', function (e) {
             e.preventDefault();
             let menu = $(this);
             let productQuoteId = menu.data('product-quote-id');
@@ -316,7 +347,59 @@ $js = <<<JS
         });
         
         
-        $('body').on('click', '.btn-delete-quote-from-offer', function (e) {
+        $('body').off('click', '.btn-add-quote-to-order').on('click', '.btn-add-quote-to-order', function (e) {
+            e.preventDefault();
+            let menu = $(this);
+            let productQuoteId = menu.data('product-quote-id');
+            let orderId = menu.data('order-id');
+            let url = menu.data('url');
+            
+            //alert(quoteId);
+            //menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
+            $('#preloader').removeClass('d-none');
+            
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {'product_quote_id': productQuoteId, 'order_id': orderId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          //alert(data.error);
+                          new PNotify({
+                                title: 'Error: order',
+                                type: 'error',
+                                text: data.error,
+                                hide: true
+                            });
+                      } else {
+                          
+                          $.pjax.reload({container: '#pjax-lead-orders', timout: 8000});
+                          new PNotify({
+                                title: 'Quote was successfully added',
+                                type: 'success',
+                                text: data.message,
+                                hide: true
+                            });
+                      }
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    //btnSubmit.prop('disabled', false);
+                    //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+                    //alert( "complete" );
+                    $('#preloader').addClass('d-none');
+                });
+              // return false;
+            //});
+            
+            //alert(123);
+        });
+        
+        
+        $('body').off('click', '.btn-delete-quote-from-offer').on('click', '.btn-delete-quote-from-offer', function (e) {
             
             if(!confirm('Are you sure you want to delete this quote from offer?')) {
                 return '';
@@ -373,23 +456,63 @@ $js = <<<JS
         });
         
         
+        $('body').off('click', '.btn-delete-quote-from-order').on('click', '.btn-delete-quote-from-order', function (e) {
+            
+            if(!confirm('Are you sure you want to delete this quote from order?')) {
+                return '';
+            }
+            
+            e.preventDefault();
+            let menu = $(this);
+            let productQuoteId = menu.data('product-quote-id');
+            let orderId = menu.data('order-id');
+            let url = menu.data('url');
+            
+            //alert(quoteId);
+            //menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
+            $('#preloader').removeClass('d-none');
+            
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {'product_quote_id': productQuoteId, 'order_id': orderId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          //alert(data.error);
+                          new PNotify({
+                                title: 'Error: delete quote from order',
+                                type: 'error',
+                                text: data.error,
+                                hide: true
+                            });
+                      } else {
+                          
+                          $.pjax.reload({container: '#pjax-lead-orders', timout: 8000});
+                          new PNotify({
+                                title: 'Quote was successfully deleted',
+                                type: 'success',
+                                text: data.message,
+                                hide: true
+                            });
+                      }
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    //btnSubmit.prop('disabled', false);
+                    //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+                    //alert( "complete" );
+                    $('#preloader').addClass('d-none');
+                });
+              // return false;
+            //});
+            
+            //alert(123);
+        });
         
-          // Multi Level dropdowns
-          // ------------------------------------------------------ //
-          // $("div.dropdown-menu [data-toggle='dropdown']").on("click", function(event) {
-          //   event.preventDefault();
-          //   event.stopPropagation();
-          //
-          //   $(this).siblings().toggleClass("show");
-          //
-          //
-          //   if (!$(this).next().hasClass('show')) {
-          //     $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
-          //   }
-          //   $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
-          //     $('.dropdown-submenu .show').removeClass("show");
-          //   });
-          //});
+        
     });
     
 JS;

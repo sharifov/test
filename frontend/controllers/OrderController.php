@@ -3,11 +3,13 @@
 namespace frontend\controllers;
 
 use common\models\Lead;
+use common\models\OrderProduct;
 use frontend\models\form\OrderForm;
 use Yii;
 use common\models\Order;
 use common\models\search\OrderSearch;
 use frontend\controllers\FController;
+use yii\bootstrap4\Html;
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -99,10 +101,15 @@ class OrderController extends FController
 
             if ($model->validate()) {
                 $order = new Order();
-                $order->attributes = $model->attributes;
-                $order->or_gid = Order::generateGid();
-                $order->or_uid = Order::generateUid();
-                $order->or_status_id = Order::STATUS_PENDING;
+                //$order->attributes = $model->attributes;
+                $order->initCreate();
+
+                $order->or_lead_id = $model->or_lead_id;
+                $order->or_name = $model->or_name;
+
+                if (!$order->or_name && $order->or_lead_id) {
+                    $order->or_name = $order->generateName();
+                }
 
                 if ($order->save()) {
                     return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
@@ -175,6 +182,8 @@ class OrderController extends FController
 
             if ($model->validate()) {
                 $modelOrder->or_name = $model->or_name;
+                $modelOrder->or_status_id = $model->or_status_id;
+                $modelOrder->or_pay_status_id = $model->or_pay_status_id;
 
                 if ($modelOrder->save()) {
                     return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
@@ -224,6 +233,64 @@ class OrderController extends FController
         }
 
         return ['message' => 'Successfully removed order (' . $model->or_id . ')'];
+    }
+
+    /**
+     * @return array
+     */
+    public function actionListMenuAjax(): array
+    {
+        $leadId = (int) Yii::$app->request->post('lead_id');
+        $productQuoteId = (int) Yii::$app->request->post('product_quote_id');
+        $offerList = [];
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+
+            if (!$leadId) {
+                throw new Exception('Not found Lead ID params', 2);
+            }
+
+            if (!$productQuoteId) {
+                throw new Exception('Not found Product Quote ID params', 3);
+            }
+
+            $lead = Lead::findOne($leadId);
+            if (!$lead) {
+                throw new Exception('Lead ('.$leadId.') not found', 4);
+            }
+
+            $orders = Order::find()->where(['or_lead_id' => $lead->id])->orderBy(['or_id' => SORT_DESC])->all();
+
+            if ($orders) {
+                foreach ($orders as $order) {
+
+                    $exist = OrderProduct::find()->where(['orp_order_id' => $order->or_id, 'orp_product_quote_id' => $productQuoteId])->exists();
+
+                    $offerList[] = Html::a(($exist ? '<i class="fa fa-check-square-o success"></i> ' : '<i class="fa fa-square-o"></i> ') . $order->or_name, null, [
+                        'class' => 'dropdown-item btn-add-quote-to-order ', // . ($exist ? 'disabled' : ''),
+                        'title' => 'ID: ' . $order->or_id . ', UID: ' . \yii\helpers\Html::encode($order->or_uid),
+                        'data-product-quote-id' => $productQuoteId,
+                        'data-order-id' => $order->or_id,
+                        'data-url' => \yii\helpers\Url::to(['order-product/create-ajax'])
+                    ]);
+                }
+            }
+
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        $offerList[] = '<div class="dropdown-divider"></div>';
+        $offerList[] = Html::a('<i class="fa fa-plus-circle"></i> new order', null, [
+            'class' => 'dropdown-item btn-add-quote-to-order',
+            'data-product-quote-id' => $productQuoteId,
+            'data-order-id' => 0,
+            'data-url' => \yii\helpers\Url::to(['order-product/create-ajax'])
+        ]);
+
+        return ['html' => implode('', $offerList)];
     }
 
     /**

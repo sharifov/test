@@ -7,9 +7,10 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
- * This is the model class ftable "order".
+ * This is the model class for table "order".
  *
  * @property int $or_id
  * @property string $or_gid
@@ -36,6 +37,8 @@ use yii\db\ActiveRecord;
  * @property Employee $orCreatedUser
  * @property Employee $orOwnerUser
  * @property Employee $orUpdatedUser
+ * @property OrderProduct[] $orderProducts
+ * @property ProductQuote[] $orpProductQuotes
  * @property ProductQuote[] $productQuotes
  */
 class Order extends \yii\db\ActiveRecord
@@ -57,6 +60,15 @@ class Order extends \yii\db\ActiveRecord
         self::STATUS_CANCELED       => 'Canceled',
     ];
 
+    public const STATUS_CLASS_LIST        = [
+        self::STATUS_PENDING        => 'warning',
+        self::STATUS_IN_PROGRESS    => 'info',
+        self::STATUS_DONE           => 'success',
+        self::STATUS_MODIFIED       => 'warning',
+        self::STATUS_DECLINED       => 'danger',
+        self::STATUS_CANCELED       => 'danger',
+    ];
+
     public const PAY_STATUS_NOT_PAID        = 1;
     public const PAY_STATUS_PAID            = 2;
     public const PAY_STATUS_PARTIAL_PAID    = 3;
@@ -65,6 +77,12 @@ class Order extends \yii\db\ActiveRecord
         self::PAY_STATUS_NOT_PAID           => 'Not paid',
         self::PAY_STATUS_PAID               => 'Paid',
         self::PAY_STATUS_PARTIAL_PAID       => 'Partial paid',
+    ];
+
+    public const PAY_STATUS_CLASS_LIST        = [
+        self::PAY_STATUS_NOT_PAID           => 'warning',
+        self::PAY_STATUS_PAID               => 'success',
+        self::PAY_STATUS_PARTIAL_PAID       => 'info',
     ];
 
 
@@ -152,6 +170,16 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
+     * Order init create
+     */
+    public function initCreate(): void
+    {
+        $this->or_gid = self::generateGid();
+        $this->or_uid = self::generateUid();
+        $this->or_status_id = self::STATUS_PENDING;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getInvoices()
@@ -194,6 +222,24 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getOrderProducts()
+    {
+        return $this->hasMany(OrderProduct::class, ['orp_order_id' => 'or_id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getOrpProductQuotes()
+    {
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])->viaTable('order_product', ['orp_order_id' => 'or_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getProductQuotes()
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id']);
@@ -205,7 +251,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new OrderQuery(get_called_class());
+        return new OrderQuery(static::class);
     }
 
     /**
@@ -237,7 +283,39 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getPayStatusName(): string
     {
-        return self::STATUS_LIST[$this->or_pay_status_id] ?? '';
+        return self::PAY_STATUS_LIST[$this->or_pay_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName(): string
+    {
+        return self::STATUS_CLASS_LIST[$this->or_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getPayClassName(): string
+    {
+        return self::PAY_STATUS_CLASS_LIST[$this->or_pay_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return Html::tag('span', $this->getStatusName(), ['class' => 'badge badge-' . $this->getClassName()]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPayStatusLabel(): string
+    {
+        return Html::tag('span', $this->getPayStatusName(), ['class' => 'badge badge-' . $this->getPayClassName()]);
     }
 
     /**
@@ -254,5 +332,14 @@ class Order extends \yii\db\ActiveRecord
     public static function generateUid(): string
     {
         return uniqid('or');
+    }
+
+    /**
+     * @return string
+     */
+    public function generateName(): string
+    {
+        $count = self::find()->where(['or_lead_id' => $this->or_lead_id])->count();
+        return 'Order ' . ($count + 1);
     }
 }

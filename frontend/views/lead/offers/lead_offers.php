@@ -10,16 +10,20 @@ use yii\web\View;
 use yii\bootstrap4\Html;
 
 ?>
+<style>
+    .x_panel_offers {background-color: #d0e6ca;}
+</style>
+
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-offers', 'enablePushState' => false, 'timeout' => 10000]) ?>
-<div class="x_panel">
+<div class="x_panel x_panel_offers">
     <div class="x_title">
 
         <h2><i class="far fa-handshake"></i> Offers (<?=$dataProviderOffers->totalCount?>)</h2>
         <ul class="nav navbar-right panel_toolbox">
             <li>
-                <?= Html::a('<i class="fa fa-plus-circle success"></i> Add offer', null, [
+                <?= Html::a('<i class="fa fa-plus-circle success"></i> add Offer', null, [
                     'data-url' => \yii\helpers\Url::to(['/offer/create-ajax', 'id' => $lead->id]),
-                    'class' => 'btn-create-offer'
+                    'class' => 'btn btn-light btn-create-offer'
                 ])?>
             </li>
             <li>

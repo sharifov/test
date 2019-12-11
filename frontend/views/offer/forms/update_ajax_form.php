@@ -31,8 +31,10 @@ $pjaxId = 'pjax-offer-form';
 
     <?= $form->field($model, 'of_name')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'of_status_id')->dropDownList(\common\models\Offer::getStatusList(), ['prompt' => '---']) ?>
+
     <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('<i class="fa fa-save"></i> Save offer', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
