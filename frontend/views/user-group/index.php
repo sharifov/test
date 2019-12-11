@@ -33,6 +33,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'ug_description',
             'ug_processing_fee',
             'ug_disable:boolean',
+            //'ug_on_leaderboard:boolean',
+            [
+                'attribute' => 'ug_on_leaderboard',
+                'format' => 'raw',
+                'value' => function(\common\models\UserGroup $model) {
+                    return $model->ug_on_leaderboard ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                },
+                'contentOptions' => ['class' => 'text-left'],
+            ],
             [
                 'attribute' => 'ug_updated_dt',
                 'value' => function(\common\models\UserGroup $model) {

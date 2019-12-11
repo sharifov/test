@@ -17,6 +17,7 @@ use yii\helpers\ArrayHelper;
  * @property int $ug_disable
  * @property string $ug_updated_dt
  * @property int $ug_processing_fee
+ * @property boolean $ug_on_leaderboard
  *
  * @property UserGroupAssign[] $userGroupAssigns
  * @property Employee[] $ugsUsers
@@ -43,6 +44,7 @@ class UserGroup extends \yii\db\ActiveRecord
             [['ug_key', 'ug_name'], 'string', 'max' => 100],
             [['ug_description'], 'string', 'max' => 255],
             [['ug_key'], 'unique'],
+            [['ug_on_leaderboard'], 'boolean'],
         ];
     }
 
@@ -59,6 +61,7 @@ class UserGroup extends \yii\db\ActiveRecord
             'ug_disable' => 'Disable',
             'ug_updated_dt' => 'Updated Dt',
             'ug_processing_fee' => 'Processing Fee',
+            'ug_on_leaderboard' => 'Show on Leaderboard',
         ];
     }
 

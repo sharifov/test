@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ug_description',
             'ug_processing_fee',
             'ug_disable:boolean',
+            'ug_on_leaderboard:boolean',
             //'ug_updated_dt',
             [
                 'attribute' => 'ug_updated_dt',

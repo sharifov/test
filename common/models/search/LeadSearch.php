@@ -2503,6 +2503,7 @@ class LeadSearch extends Lead
             $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
             $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
             $query->andWhere('ug_name IS NOT NULL');
+            $query->andWhere(['=', 'ug.ug_on_leaderboard', true]);
             $query->groupBy('ug_name');
         }
 
@@ -2516,6 +2517,7 @@ class LeadSearch extends Lead
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
             $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
+            $query->andWhere(['=', 'ug_on_leaderboard', true]);
             $query->from('user_group' );
             $query->groupBy('ug_name');
         }
@@ -2564,6 +2566,7 @@ class LeadSearch extends Lead
             $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
             $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
             $query->andWhere('ug_name IS NOT NULL');
+            $query->andWhere(['=', 'ug.ug_on_leaderboard', true]);
             $query->groupBy('ug_name');
         }
 
@@ -2611,6 +2614,7 @@ class LeadSearch extends Lead
             $query->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
             $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
             $query->andWhere('ug_name IS NOT NULL');
+            $query->andWhere(['=', 'ug.ug_on_leaderboard', true]);
             $query->groupBy('ug_name');
         }
 
@@ -2629,13 +2633,14 @@ class LeadSearch extends Lead
             $query->leftJoin('auth_assignment', 'auth_assignment.user_id = user_group_assign.ugs_user_id')
                 ->andWhere(['in','auth_assignment.item_name', [Employee::ROLE_AGENT, Employee::ROLE_SUPERVISION]]);
             $query->andWhere("user_profile.up_skill NOT IN($skillsSettings) OR user_profile.up_skill <=> NULL");
+            $query->andWhere(['=', 'ug_on_leaderboard', true]);
             $query->from('user_group' );
             $query->groupBy('ug_name');
         }
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
-        //var_dump($sql); die();
+
         $paramsData = [
             'sql' => $sql,
             'sort' =>[

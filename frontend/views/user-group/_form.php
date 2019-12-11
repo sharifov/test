@@ -23,6 +23,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ug_disable')->checkbox() ?>
 
+        <?= $form->field($model, 'ug_on_leaderboard')->checkbox() ?>
+
         <?//= $form->field($model, 'ug_updated_dt')->textInput() ?>
 
         <div class="form-group">
