@@ -324,6 +324,12 @@ class PhoneController extends FController
 //            $case_id = (int)Yii::$app->request->post('case_id');
             //$call = null;
 
+            $call = Call::find()->andWhere(['c_call_sid' => $sid])->one();
+            if ($call->isParent()) {
+                if ($call = Call::find()->andWhere(['c_parent_id' => $call->c_id])->orderBy(['c_id' => SORT_DESC])->one()) {
+                    $sid = $call->c_call_sid;
+                }
+            }
 
             $communication = \Yii::$app->communication;
             $resultApi = $communication->callRedirect($sid, $type, $from, $to);

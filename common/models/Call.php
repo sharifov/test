@@ -330,6 +330,22 @@ class Call extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return bool
+     */
+    public function isChild(): bool
+    {
+        return $this->c_parent_id !== null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isParent(): bool
+    {
+        return $this->c_parent_id === null;
+    }
+
+    /**
      * @param string $recordingUrl
      * @param string $recordingSid
      * @param int $recordingDuration
