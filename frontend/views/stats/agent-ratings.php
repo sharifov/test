@@ -30,7 +30,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $profitDataProvider,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -54,7 +54,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $soldDataProvider,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -78,7 +78,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $profitPerPaxDataProvider,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -102,7 +102,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $tipsDataProvider,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -126,7 +126,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $conversionDataProvider,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -152,7 +152,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $teamsProfitDataProvider,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -176,7 +176,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $avgSoldLeadsDataProvider,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -200,7 +200,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $avgProfitPerPax,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -224,7 +224,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $avgProfitPerAgent,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
@@ -248,7 +248,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'hre
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $teamConversion,
-                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'emptyText' => '<div class="text-center">No data</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
                                 if ($index <= 14) {
