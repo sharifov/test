@@ -330,6 +330,8 @@ class PhoneController extends FController
                     $sid = $call->c_call_sid;
                 }
             }
+            
+            Yii::info($sid, 'info\Debug sid');
 
             $communication = \Yii::$app->communication;
             $resultApi = $communication->callRedirect($sid, $type, $from, $to);
