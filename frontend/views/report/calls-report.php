@@ -166,14 +166,26 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
 
         [
+            'label' =>'Duration',
+            'attribute' => 'redialCallsDuration',
+            'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'format' => 'raw',
+            'value' => function($data) {
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsDuration']).'">' . gmdate('H:i:s', $data['redialCallsDuration']) . '</span>';
+            }
+        ],
+
+        [
             'label' =>'Total Attempts',
             'attribute' => 'totalAttempts',
             'value' => function($data) {
                 return $data['totalAttempts'] ?: '-';
             },
-            'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
-            'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
-            'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
+            'contentOptions' => ['style' => 'background-color:#fcf8e3;'],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3;'],
         ],
 
         [
@@ -233,7 +245,7 @@ $list = new ListsAccess(Yii::$app->user->id);
                     ['content' => '', 'options' => ['colspan' => 2]],
                     ['content' => 'Outgoing Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                     ['content' => 'Incoming Calls', 'options' => ['colspan' => 4, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
-                    ['content' => 'Redial Calls', 'options' => ['colspan' => 2, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
+                    ['content' => 'Redial Calls', 'options' => ['colspan' => 3, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                 ],
             ]
         ],
