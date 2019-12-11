@@ -1,0 +1,171 @@
+<?php
+/**
+ * @var $this View
+ * @var $lead Lead
+ * @var $dataProviderOrders \yii\data\ActiveDataProvider
+ */
+
+
+use common\models\Lead;
+use yii\helpers\Html;
+use yii\web\View;
+
+?>
+<?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-orders', 'enablePushState' => false, 'timeout' => 10000]) ?>
+    <div class="x_panel">
+        <div class="x_title">
+
+            <h2 class="success"><i class="fas fa-money-check-alt"></i> Orders (<?=$dataProviderOrders->totalCount?>)</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    <?= Html::a('<i class="fa fa-plus-circle success"></i> Add order', null, [
+                        'data-url' => \yii\helpers\Url::to(['/order/create-ajax', 'id' => $lead->id]),
+                        'class' => 'btn-create-order'
+                    ])?>
+                </li>
+                <li>
+                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content" style="display: block">
+
+            <?= \yii\widgets\ListView::widget([
+                'dataProvider' => $dataProviderOrders,
+
+                /*'options' => [
+                    'tag' => 'table',
+                    'class' => 'table table-bordered',
+                ],*/
+                'emptyText' => '<div class="text-center">Not found orders</div>',
+                //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
+                'itemView' => function ($model, $key, $index, $widget) {
+                    return $this->render('_list_item', ['model' => $model, 'index' => $index]);
+                },
+
+                'itemOptions' => [
+                    //'class' => 'item',
+                    //'tag' => false,
+                ],
+            ]) ?>
+
+        </div>
+    </div>
+<?php yii\widgets\Pjax::end() ?>
+
+
+<?php
+
+$js = <<<JS
+
+    $('body').off('click', '.btn-create-order').on('click', '.btn-create-order', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Add order');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+    
+    $('body').off('click', '.btn-update-order').on('click', '.btn-update-order', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+                
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Update order');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+    
+    
+    
+    $('body').off('click', '.btn-delete-order').on('click', '.btn-delete-order', function(e) {
+        
+        if(!confirm('Are you sure you want to delete this order?')) {
+            return '';
+        }
+        
+      e.preventDefault();
+      $('#preloader').removeClass('d-none');
+      let orderId = $(this).data('order-id');
+      let url = $(this).data('url');
+           
+      /*alert(productId);
+      
+      let btnSubmit = $(this).find(':submit');
+      btnSubmit.prop('disabled', true);
+      btnSubmit.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');*/
+
+     // $('#preloader').removeClass('d-none');
+
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': orderId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  alert(data.error);
+                  new PNotify({
+                        title: 'Error: delete order',
+                        type: 'error',
+                        text: data.error,
+                        hide: true
+                    });
+              } else {
+                  $.pjax.reload({container: '#pjax-lead-orders'});
+                  new PNotify({
+                        title: 'The order was successfully removed',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            //btnSubmit.prop('disabled', false);
+            //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+            //alert( "complete" );
+            $('#preloader').addClass('d-none');
+        });
+      // return false;
+    });
+    
+JS;
+
+$this->registerJs($js, View::POS_READY, 'lead-order-js');
+
+
+//$this->registerJs(
+//
+//        $("#pjax-lead-checklist").on("pjax:start", function () {
+//            //$("#pjax-container").fadeOut("fast");
+//            $("#btn-submit-checklist").attr("disabled", true).prop("disabled", true).addClass("disabled");
+//            $("#btn-submit-checklist i").attr("class", "fa fa-spinner fa-pulse fa-fw")
+//        });
+//
+//        $("#pjax-lead-checklist").on("pjax:end", function () {
+//            //$("#pjax-container").fadeIn("fast");
+//            $("#btn-submit-checklist").attr("disabled", false).prop("disabled", false).removeClass("disabled");
+//            $("#btn-submit-checklist i").attr("class", "fa fa-plus");
+//        });
+//    '
+//);

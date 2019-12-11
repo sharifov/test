@@ -17,24 +17,55 @@ use yii\helpers\Html;
 
 <div class="x_panel">
     <div class="x_title">
-        <h2>
-            <span class="badge badge-primary">Q<?=($model->hq_product_quote_id)?></span> "<?=\yii\helpers\Html::encode($model->hqHotelList->hl_name)?>"  (<?=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>),
+
+        <span class="badge badge-white">Q<?=($model->hq_product_quote_id)?></span> Hotel "<b><?=\yii\helpers\Html::encode($model->hqHotelList->hl_name)?></b>"
+            (<?=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>),
             <?//=\yii\helpers\Html::encode($model->hqProductQuote->pq_name)?>
             <?=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
              <?//=\yii\helpers\Html::encode($model->hqProductQuote->pq_gid)?>
-        </h2>
+
+        | <?=$model->hqProductQuote->getStatusLabel()?>
+
         <ul class="nav navbar-right panel_toolbox">
 <!--            <li>-->
 <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
 <!--            </li>-->
+            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['offer/list-menu-ajax'])?>">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-money"></i> Offers</a>
+                <div class="dropdown-menu" role="menu">
+                    <?php // ajax loaded content ?>
+                </div>
+            </li>
+
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                 <div class="dropdown-menu" role="menu">
+                    <h6 class="dropdown-header">Quote Q<?=($model->hq_product_quote_id)?></h6>
                     <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
+                   <?/* <div class="dropdown-divider"></div>
 
+                    <!-- Level three dropdown-->
+                    <div class="dropdown-submenu">
+                        <a id="dropdownMenu<?=($model->hq_product_quote_id)?>" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Add to Offer</a>
+                        <div aria-labelledby="dropdownMenu<?=($model->hq_product_quote_id)?>" class="dropdown-menu">
+                            <a href="#" class="dropdown-item">3rd level</a>
+                            <a href="#" class="dropdown-item">3rd level</a>
+                        </div>
+                    </div>*/ ?>
+                    <!-- End Level three -->
+
+<!--                    <ul>-->
+<!--                        <li class="dropdown">-->
+<!--                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown</a>-->
+<!--                            <div class="dropdown-menu" role="menu">-->
+<!--                                <a href="#" class="dropdown-item"><i class="fa fa-cog"></i> aaa</a>-->
+<!--                            </div>-->
+<!--                        </li>-->
+<!--                    </ul>-->
+                    <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                         'class' => 'dropdown-item text-danger btn-delete-product-quote',
                         'data-product-quote-id' => $model->hq_product_quote_id,
@@ -128,6 +159,9 @@ use yii\helpers\Html;
                 </tr>
             </table>
         <?php endif; ?>
+
+        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->hqProductQuote->pq_created_dt)) ?>
+        <i class="fa fa-user"></i> <?=$model->hqProductQuote->pqCreatedUser ? Html::encode($model->hqProductQuote->pqCreatedUser->username) : '-'?>
 
     </div>
 </div>

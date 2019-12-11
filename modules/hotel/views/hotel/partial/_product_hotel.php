@@ -24,10 +24,11 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
     <div class="x_panel">
         <div class="x_title">
             <h2>
-                <i class="fa fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
+                <i class="fas fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
                 <?php if ($product->pr_description):?>
                     <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
                 <?php endif;?>
+                (<?=count($product->productQuotes)?>)
             </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?//php if ($is_manager) : ?>
@@ -103,9 +104,6 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
 
 
 <?php
-//$updateHotelRequestUrl = \yii\helpers\Url::to();
-
-//$deleteRoomUrl = \yii\helpers\Url::to(['/hotel/hotel-room/delete-ajax']);
 
 $js = <<<JS
 
@@ -227,12 +225,171 @@ $js = <<<JS
         .fail(function( jqXHR, textStatus ) {
             alert( "Request failed: " + textStatus );
         }).always(function() {
-            //btnSubmit.prop('disabled', false);
-            //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
-            //alert( "complete" );
             $('#preloader').addClass('d-none');
         });
       // return false;
+    });
+    
+    $(function() {
+  
+        $('body').on('show.bs.dropdown', '.dropdown-offer-menu', function () {
+            let menu = $(this);
+            let productQuoteId = menu.data('product-quote-id');
+            let leadId = menu.data('lead-id');
+            let url = menu.data('url');
+            menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
+            
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {'product_quote_id': productQuoteId, 'lead_id': leadId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          alert(data.error);
+                          new PNotify({
+                                title: 'Error: offer transfer',
+                                type: 'error',
+                                text: data.error,
+                                hide: true
+                            });
+                      } else {
+                          menu.find('.dropdown-menu').html(data.html);
+                      }
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                });
+        });
+        
+        
+        $('body').on('click', '.btn-add-quote-to-offer', function (e) {
+            e.preventDefault();
+            let menu = $(this);
+            let productQuoteId = menu.data('product-quote-id');
+            let offerId = menu.data('offer-id');
+            let url = menu.data('url');
+            
+            //alert(quoteId);
+            //menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
+            $('#preloader').removeClass('d-none');
+            
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {'product_quote_id': productQuoteId, 'offer_id': offerId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          //alert(data.error);
+                          new PNotify({
+                                title: 'Error: offer transfer',
+                                type: 'error',
+                                text: data.error,
+                                hide: true
+                            });
+                      } else {
+                          
+                          $.pjax.reload({container: '#pjax-lead-offers', timout: 8000});
+                          new PNotify({
+                                title: 'Quote was successfully added',
+                                type: 'success',
+                                text: data.message,
+                                hide: true
+                            });
+                      }
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    //btnSubmit.prop('disabled', false);
+                    //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+                    //alert( "complete" );
+                    $('#preloader').addClass('d-none');
+                });
+              // return false;
+            //});
+            
+            //alert(123);
+        });
+        
+        
+        $('body').on('click', '.btn-delete-quote-from-offer', function (e) {
+            
+            if(!confirm('Are you sure you want to delete this quote from offer?')) {
+                return '';
+            }
+            
+            e.preventDefault();
+            let menu = $(this);
+            let productQuoteId = menu.data('product-quote-id');
+            let offerId = menu.data('offer-id');
+            let url = menu.data('url');
+            
+            //alert(quoteId);
+            //menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
+            $('#preloader').removeClass('d-none');
+            
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {'product_quote_id': productQuoteId, 'offer_id': offerId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          //alert(data.error);
+                          new PNotify({
+                                title: 'Error: delete quote from offer',
+                                type: 'error',
+                                text: data.error,
+                                hide: true
+                            });
+                      } else {
+                          
+                          $.pjax.reload({container: '#pjax-lead-offers', timout: 8000});
+                          new PNotify({
+                                title: 'Quote was successfully deleted',
+                                type: 'success',
+                                text: data.message,
+                                hide: true
+                            });
+                      }
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    //btnSubmit.prop('disabled', false);
+                    //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+                    //alert( "complete" );
+                    $('#preloader').addClass('d-none');
+                });
+              // return false;
+            //});
+            
+            //alert(123);
+        });
+        
+        
+        
+          // Multi Level dropdowns
+          // ------------------------------------------------------ //
+          // $("div.dropdown-menu [data-toggle='dropdown']").on("click", function(event) {
+          //   event.preventDefault();
+          //   event.stopPropagation();
+          //
+          //   $(this).siblings().toggleClass("show");
+          //
+          //
+          //   if (!$(this).next().hasClass('show')) {
+          //     $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
+          //   }
+          //   $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
+          //     $('.dropdown-submenu .show').removeClass("show");
+          //   });
+          //});
     });
     
 JS;

@@ -7,6 +7,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "offer".
@@ -32,6 +33,23 @@ use yii\db\ActiveRecord;
  */
 class Offer extends \yii\db\ActiveRecord
 {
+
+    public const STATUS_NEW         = 1;
+    public const STATUS_SENT        = 2;
+    public const STATUS_APPLY       = 3;
+
+    public const STATUS_LIST = [
+        self::STATUS_NEW            => 'New',
+        self::STATUS_SENT           => 'Sent',
+        self::STATUS_APPLY          => 'Apply',
+    ];
+
+    public const STATUS_CLASS_LIST        = [
+        self::STATUS_NEW            => 'info',
+        self::STATUS_SENT           => 'pending',
+        self::STATUS_APPLY          => 'success',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -104,6 +122,16 @@ class Offer extends \yii\db\ActiveRecord
     }
 
     /**
+     * Offer init create
+     */
+    public function initCreate(): void
+    {
+        $this->of_gid = self::generateGid();
+        $this->of_uid = self::generateUid();
+        $this->of_status_id = self::STATUS_NEW;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getOfCreatedUser()
@@ -158,5 +186,62 @@ class Offer extends \yii\db\ActiveRecord
     public static function find()
     {
         return new OfferQuery(get_called_class());
+    }
+
+    /**
+     * @return array
+     */
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return self::STATUS_LIST[$this->of_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName(): string
+    {
+        return self::STATUS_CLASS_LIST[$this->of_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return Html::tag('span', $this->getStatusName(), ['class' => 'badge badge-' . $this->getClassName()]);
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateGid(): string
+    {
+        return md5(uniqid('of', true));
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateUid(): string
+    {
+        return uniqid('of');
+    }
+
+    /**
+     * @return string
+     */
+    public function generateName(): string
+    {
+        $count = self::find()->where(['of_lead_id' => $this->of_lead_id])->count();
+        return 'Offer ' . ($count + 1);
     }
 }

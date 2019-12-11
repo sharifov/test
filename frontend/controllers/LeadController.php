@@ -21,6 +21,8 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
+use common\models\search\OfferSearch;
+use common\models\search\OrderSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\UserProjectParams;
@@ -1024,6 +1026,17 @@ class LeadController extends FController
         $dataProviderCallExpert = $searchModelCallExpert->searchByLead($params);
 
 
+        $searchModelOffer = new OfferSearch();
+        $params = Yii::$app->request->queryParams;
+        $params['OfferSearch']['of_lead_id'] = $lead->id;
+        $dataProviderOffers = $searchModelOffer->searchByLead($params);
+
+
+        $searchModelOrder = new OrderSearch();
+        $params = Yii::$app->request->queryParams;
+        $params['OrderSearch']['or_lead_id'] = $lead->id;
+        $dataProviderOrders = $searchModelOrder->searchByLead($params);
+
 
         $modelLeadChecklist = new LeadChecklist();
 
@@ -1089,7 +1102,10 @@ class LeadController extends FController
             'modelLeadChecklist' => $modelLeadChecklist,
             'itineraryForm' => $itineraryForm,
             'dataProviderNotes' => $dataProviderNotes,
-            'modelNote' => $modelNote
+            'modelNote' => $modelNote,
+
+            'dataProviderOffers'    => $dataProviderOffers,
+            'dataProviderOrders'    => $dataProviderOrders,
         ]);
 
     }

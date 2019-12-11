@@ -239,4 +239,20 @@ class Order extends \yii\db\ActiveRecord
     {
         return self::STATUS_LIST[$this->or_pay_status_id] ?? '';
     }
+
+    /**
+     * @return string
+     */
+    public static function generateGid(): string
+    {
+        return md5(uniqid('or', true));
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateUid(): string
+    {
+        return uniqid('or');
+    }
 }

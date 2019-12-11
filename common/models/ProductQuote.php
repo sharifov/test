@@ -7,6 +7,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "product_quote".
@@ -59,6 +60,15 @@ class ProductQuote extends \yii\db\ActiveRecord
         self::STATUS_MODIFIED       => 'Modified',
         self::STATUS_DECLINED       => 'Declined',
         self::STATUS_CANCELED       => 'Canceled',
+    ];
+
+    public const STATUS_CLASS_LIST        = [
+        self::STATUS_PENDING        => 'warning',
+        self::STATUS_IN_PROGRESS    => 'info',
+        self::STATUS_DONE           => 'success',
+        self::STATUS_MODIFIED       => 'warning',
+        self::STATUS_DECLINED       => 'danger',
+        self::STATUS_CANCELED       => 'danger',
     ];
 
     /**
@@ -240,5 +250,21 @@ class ProductQuote extends \yii\db\ActiveRecord
     public function getStatusName(): string
     {
         return self::STATUS_LIST[$this->pq_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName(): string
+    {
+        return self::STATUS_CLASS_LIST[$this->pq_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return Html::tag('span', $this->getStatusName(), ['class' => 'badge badge-' . $this->getClassName()]);
     }
 }

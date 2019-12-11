@@ -1,24 +1,27 @@
 <?php
 /**
- * @var $this \yii\web\View
- * @var $lead \common\models\Lead
- * @var $dataProvider \yii\data\ActiveDataProvider
- * @var $modelOffer \common\models\Offer
+ * @var $this View
+ * @var $lead Lead
+ * @var $dataProviderOffers \yii\data\ActiveDataProvider
  */
 
-
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
-
-//$offer =
+use common\models\Lead;
+use yii\web\View;
+use yii\bootstrap4\Html;
 
 ?>
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-offers', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">
 
-        <h2><i class="fa fa-check-circle-o"></i> Offers</h2>
+        <h2><i class="far fa-handshake"></i> Offers (<?=$dataProviderOffers->totalCount?>)</h2>
         <ul class="nav navbar-right panel_toolbox">
+            <li>
+                <?= Html::a('<i class="fa fa-plus-circle success"></i> Add offer', null, [
+                    'data-url' => \yii\helpers\Url::to(['/offer/create-ajax', 'id' => $lead->id]),
+                    'class' => 'btn-create-offer'
+                ])?>
+            </li>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
@@ -27,61 +30,125 @@ use yii\widgets\ActiveForm;
     </div>
     <div class="x_content" style="display: block">
 
-<!--                --><?//= \yii\widgets\ListView::widget([
-//                    'dataProvider' => $dataProvider,
-//
-//                    'options' => [
-//                        'tag' => 'table',
-//                        'class' => 'table table-bordered',
-//                    ],
-//                    'emptyText' => '<div class="text-center">Not found checklist tasks</div><br>',
-//                    'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
-//                    'itemView' => function ($model, $key, $index, $widget) {
-//                        return $this->render('_list_item', ['model' => $model, 'index' => $index]);
-//                    },
-//
-//                    'itemOptions' => [
-//                        //'class' => 'item',
-//                        'tag' => false,
-//                    ],
-//
-//                    /*'pager' => [
-//                        'firstPageLabel' => 'first',
-//                        'lastPageLabel' => 'last',
-//                        'nextPageLabel' => 'next',
-//                        'prevPageLabel' => 'previous',
-//                        'maxButtonCount' => 3,
-//                    ],*/
-//
-//                ]) ?>
+                <?= \yii\widgets\ListView::widget([
+                    'dataProvider' => $dataProviderOffers,
+
+                    /*'options' => [
+                        'tag' => 'table',
+                        'class' => 'table table-bordered',
+                    ],*/
+                    'emptyText' => '<div class="text-center">Not found offers</div>',
+                    //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
+                    'itemView' => function ($model, $key, $index, $widget) {
+                        return $this->render('_list_item', ['model' => $model, 'index' => $index]);
+                    },
+
+                    'itemOptions' => [
+                        //'class' => 'item',
+                        //'tag' => false,
+                    ],
+                ]) ?>
 
     </div>
 </div>
 <?php yii\widgets\Pjax::end() ?>
 
+
+
 <?php
-//$this->registerJs(
-//    '
-//
-//        $(document).on("click","#btn-checklist-form", function() {
-//            $("#div-checklist-form").show();
-//            $("#pjax-lead-checklist .x_content").show();
-//            return false;
-//        });
-//
-//
-//        $("#pjax-lead-checklist").on("pjax:start", function () {
-//            //$("#pjax-container").fadeOut("fast");
-//            $("#btn-submit-checklist").attr("disabled", true).prop("disabled", true).addClass("disabled");
-//            $("#btn-submit-checklist i").attr("class", "fa fa-spinner fa-pulse fa-fw")
-//
-//        });
-//
-//        $("#pjax-lead-checklist").on("pjax:end", function () {
-//            //$("#pjax-container").fadeIn("fast");
-//            $("#btn-submit-checklist").attr("disabled", false).prop("disabled", false).removeClass("disabled");
-//            $("#btn-submit-checklist i").attr("class", "fa fa-plus");
-//
-//        });
-//    '
-//);
+
+$js = <<<JS
+
+    $('body').off('click', '.btn-create-offer').on('click', '.btn-create-offer', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Add offer');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+    
+    $('body').off('click', '.btn-update-offer').on('click', '.btn-update-offer', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+                
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Update offer');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+    
+    
+    
+    $('body').off('click', '.btn-delete-offer').on('click', '.btn-delete-offer', function(e) {
+        
+        if(!confirm('Are you sure you want to delete this offer?')) {
+            return '';
+        }
+        
+      e.preventDefault();
+      $('#preloader').removeClass('d-none');
+      let offerId = $(this).data('offer-id');
+      let url = $(this).data('url');
+           
+      /*alert(productId);
+      
+      let btnSubmit = $(this).find(':submit');
+      btnSubmit.prop('disabled', true);
+      btnSubmit.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');*/
+
+     // $('#preloader').removeClass('d-none');
+
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': offerId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  alert(data.error);
+                  new PNotify({
+                        title: 'Error: delete offer',
+                        type: 'error',
+                        text: data.error,
+                        hide: true
+                    });
+              } else {
+                  $.pjax.reload({container: '#pjax-lead-offers', timout: 8000});
+                  new PNotify({
+                        title: 'The offer was successfully removed',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            //btnSubmit.prop('disabled', false);
+            //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+            //alert( "complete" );
+            $('#preloader').addClass('d-none');
+        });
+      // return false;
+    });
+    
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY, 'lead-offer-js');

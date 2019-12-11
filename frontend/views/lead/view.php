@@ -1,22 +1,31 @@
 <?php
 /**
  * @var $leadForm LeadForm
- * @var $comForm \frontend\models\CommunicationForm
- * @var $previewEmailForm \frontend\models\LeadPreviewEmailForm
- * @var $previewSmsForm \frontend\models\LeadPreviewSmsForm
- * @var $quotesProvider \yii\data\ActiveDataProvider
- * @var $dataProviderCommunication \yii\data\ActiveDataProvider
- * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
- * @var $dataProviderNotes \yii\data\ActiveDataProvider
+ * @var $comForm CommunicationForm
+ * @var $previewEmailForm LeadPreviewEmailForm
+ * @var $previewSmsForm LeadPreviewSmsForm
+ * @var $quotesProvider ActiveDataProvider
+ * @var $dataProviderCommunication ActiveDataProvider
+ * @var $dataProviderCallExpert ActiveDataProvider
+ * @var $dataProviderNotes ActiveDataProvider
  * @var $enableCommunication boolean
- * @var $modelLeadCallExpert \common\models\LeadCallExpert
- * @var  $modelNote \common\models\Note
- * @var $modelLeadChecklist \common\models\LeadChecklist
- * @var $dataProviderChecklist \yii\data\ActiveDataProvider
+ * @var $modelLeadCallExpert LeadCallExpert
+ * @var $modelNote Note
+ * @var $modelLeadChecklist LeadChecklist
+ * @var $dataProviderChecklist ActiveDataProvider
  * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
+ * @var $dataProviderOffers ActiveDataProvider
+ * @var $dataProviderOrders ActiveDataProvider
  */
 
+use common\models\LeadCallExpert;
+use common\models\LeadChecklist;
+use common\models\Note;
+use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
+use frontend\models\LeadPreviewEmailForm;
+use frontend\models\LeadPreviewSmsForm;
+use yii\data\ActiveDataProvider;
 
 \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
@@ -69,6 +78,14 @@ $lead = $leadForm->getLead();
             <?= $this->render('offers/lead_offers', [
                 'lead' => $lead,
                 'leadForm' => $leadForm,
+                'dataProviderOffers' => $dataProviderOffers,
+                'is_manager' => $is_manager,
+            ]) ?>
+
+            <?= $this->render('orders/lead_orders', [
+                'lead' => $lead,
+                'leadForm' => $leadForm,
+                'dataProviderOrders' => $dataProviderOrders,
                 'is_manager' => $is_manager,
             ]) ?>
 
