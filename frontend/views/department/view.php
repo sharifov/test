@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'dep_updated_dt',
             [
                 'attribute' => 'dep_updated_user_id',
-                'value' => function (\common\models\Department $model) {
+                'value' => static function (\common\models\Department $model) {
                     return $model->dep_updated_user_id ? '<i class="fa fa-user"></i> ' .Html::encode($model->depUpdatedUser->username) : $model->dep_updated_user_id;
                 },
                 'format' => 'raw',
@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'dep_updated_dt',
-                'value' => function (\common\models\Department $model) {
+                'value' => static function (\common\models\Department $model) {
                     return $model->dep_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dep_updated_dt)) : '-';
                 },
                 'format' => 'raw'

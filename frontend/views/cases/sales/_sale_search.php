@@ -41,7 +41,7 @@ use yii\widgets\Pjax;
 
             <?php
             //if(Yii::$app->request->isAjax) {
-            echo \yiister\gentelella\widgets\FlashAlert::widget();
+            echo \frontend\themes\gentelella_v2\widgets\FlashAlert::widget();
             //}
 
             echo $this->render('_sale_search_form', [
@@ -66,7 +66,7 @@ use yii\widgets\Pjax;
                     // ['class' => 'yii\grid\SerialColumn'],
                     [
                         'attribute' => 'sale_id',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['saleId'] ?? '-';
                         },
                         'format' => 'raw',
@@ -81,7 +81,7 @@ use yii\widgets\Pjax;
 
                     [
                         'label' => 'Project',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['project'] ? '<span class="badge badge-info">'.Html::encode($model['project']).'</span>': '-';
                         },
                         'format' => 'raw'
@@ -89,20 +89,20 @@ use yii\widgets\Pjax;
 
                     /*[
                         'label' => 'Air Routing Id',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['airRoutingId'] ?: '-';
                         },
                     ],*/
                     [
                         'label' => 'Confirmation Number',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['confirmationNumber'] ?: '-';
                         },
                     ],
 
                     [
                         'label' => 'Status',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['saleStatus'] ?: '-';
                         },
                     ],
@@ -111,7 +111,7 @@ use yii\widgets\Pjax;
 
                     [
                         'label' => 'Trips',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             $tripArr = [];
                             if(isset($model['requestDetail']['trips'])) {
                                 foreach ($model['requestDetail']['trips'] as $trip) {
@@ -125,21 +125,21 @@ use yii\widgets\Pjax;
 
                     [
                         'label' => 'PNR Number',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['pnr'] ?: '-';
                         },
                     ],
 
                     [
                         'label' => 'Pax',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return isset($model['requestDetail']['passengersCnt']) ? $model['requestDetail']['passengersCnt']: '-';
                         },
                     ],
 
                     [
                         'label' => 'created',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return $model['created'] ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created'])) : '-';
                         },
                         'format' => 'raw'
@@ -211,35 +211,17 @@ use yii\widgets\Pjax;
     </div>
 </div>
 
-<style type="text/css">
-    @media screen and (min-width: 768px) {
-        .modal-dialog {
-            width: 700px; /* New width for default modal */
-        }
-        .modal-sm {
-            width: 350px; /* New width for small modal */
-        }
-    }
-    @media screen and (min-width: 992px) {
-        .modal-lg {
-            width: 80%; /* New width for large modal */
-        }
-    }
-    .grid-view pre {
-        max-width: 1000px;
-    }
-</style>
 
 
 <?php
-yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modalHeader'],
+yii\bootstrap4\Modal::begin([
+    'title' => 'Case Info',
     'id' => 'modalCaseInfo',
-    'size' => 'modal-lg',
+    'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 echo "<div id='modalCaseInfoContent'></div>";
-yii\bootstrap\Modal::end();
+yii\bootstrap4\Modal::end();
 
 $jsCode = <<<JS
     $(document).on('click', '.showModalCaseInfo', function(){
@@ -248,7 +230,7 @@ $jsCode = <<<JS
         //$('#modal').modal('show');
         
         //alert($(this).attr('title'));
-        $('#modalHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modalCaseInfo-label').html($(this).attr('title'));
         $.get($(this).attr('href'), function(data) {
             $('#modalCaseInfo').find('#modalCaseInfoContent').html(data);
         });

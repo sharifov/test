@@ -4,6 +4,8 @@ namespace sales\listeners\lead;
 
 use sales\events\lead\LeadableEventInterface;
 use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
+use sales\services\lead\qcall\FindWeightParams;
 use sales\services\lead\qcall\QCallService;
 
 /**
@@ -36,8 +38,9 @@ class LeadQcallAddListener
                     $lead->status,
                     $lead->getCountOutCallsLastFlow()
                 ),
-                ($lead->project_id * 10),
-                $lead->offset_gmt
+                new FindWeightParams($lead->project_id),
+                $lead->offset_gmt,
+                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
             );
         } catch (\Throwable $e) {
             \Yii::error($e, 'LeadQcallAddListener');

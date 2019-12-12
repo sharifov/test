@@ -96,7 +96,7 @@ use yii\widgets\Pjax;
                     $itemColls[] = [
                         'label' => $label,
                         'content' => $content,
-                        'contentOptions' => ['class' => $itemKey ? '' : 'in']
+                        'contentOptions' => ['class' => $itemKey ? '' : 'show']
                         //'options' => [...],
                         //'footer' => 'Footer' // the footer label in list-group
                     ];
@@ -142,7 +142,7 @@ use yii\widgets\Pjax;
 
 
 <?php
-/*yii\bootstrap\Modal::begin([
+/*yii\bootstrap4\Modal::begin([
     'headerOptions' => ['id' => 'modalSaleSearchHeader'],
     'id' => 'modalSaleSearch',
     'size' => 'modal-lg',
@@ -157,7 +157,7 @@ use yii\widgets\Pjax;
     ])
     ?>
 <?php
-yii\bootstrap\Modal::end();
+yii\bootstrap4\Modal::end();
 */
 $jsCode = <<<JS
     $(document).on('click', '#search-sale-btn', function(){

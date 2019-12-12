@@ -1,7 +1,8 @@
 <?php
 
-use kartik\grid\GridView;use yii\helpers\Html;
-use yii\helpers\Url;use yii\widgets\Pjax;
+use yii\helpers\Html;
+use yii\widgets\Pjax;
+use yii\bootstrap4\Modal;
 
 /* @var $this yii\web\View */
 /* @var $leadModel \common\models\Lead */
@@ -64,7 +65,7 @@ $isAgent = false;
                         [
                             'label' => 'Client Name',
                             'format' => 'raw',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
 
                                 if ($model->client) {
                                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -84,7 +85,7 @@ $isAgent = false;
                         [
                             'label' => 'Client Emails / Phones',
                             'format' => 'raw',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 $str = $model->client && $model->client->clientEmails ? ' <i class="fa fa-envelope"></i> ' . implode(' <i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                                 $str .= $model->client && $model->client->clientPhones ? ' <i class="fa fa-phone"></i> ' . implode(' <i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
                                 return $str ?? '-';
@@ -93,7 +94,7 @@ $isAgent = false;
 
                         [
                             'attribute' => 'status',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 $statusValue = $model->getStatusName(true);
                                 return $statusValue;
                             },
@@ -104,7 +105,7 @@ $isAgent = false;
 
                         [
                             'attribute' => 'status',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 $statusValue = '';
 
                                 $statusLog = \common\models\LeadFlow::find()->where([
@@ -130,7 +131,7 @@ $isAgent = false;
                         [
                             //'attribute' => 'created',
                             'label' => 'Pending Time',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
                             },
                             //'format' => 'raw'
@@ -159,14 +160,14 @@ $isAgent = false;
                     'attributes' => [
                         [
                             'attribute' => 'project_id',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 return $model->project ? $model->project->name : '-';
                             },
                         ],
 
                         [
                             'attribute' => 'cabin',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 return $model->getCabinClassName();
                             },
                         ],
@@ -175,7 +176,7 @@ $isAgent = false;
 
                         [
                             'label' => 'Pax',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 //$str = '';
                                 $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
                                 return $str;
@@ -185,7 +186,7 @@ $isAgent = false;
 
                         [
                             'label' => 'Communication',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
                                 return $model->getCommunicationInfo();
                             },
                             'format' => 'raw',
@@ -193,7 +194,7 @@ $isAgent = false;
 
                         [
                             'label' => 'Quotes',
-                            'value' => function (\common\models\Lead $model) use ($isAgent) {
+                            'value' => static function (\common\models\Lead $model) use ($isAgent) {
                                 return $model->quotesCount;
                             },
                             'format' => 'raw',
@@ -201,7 +202,7 @@ $isAgent = false;
 
                         [
                             'label' => 'Segments',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
 
                                 $segments = $model->leadFlightSegments;
                                 $segmentData = [];
@@ -219,7 +220,7 @@ $isAgent = false;
 
                         [
                             'label' => 'Depart',
-                            'value' => function (\common\models\Lead $model) {
+                            'value' => static function (\common\models\Lead $model) {
 
                                 $segments = $model->leadFlightSegments;
 
@@ -265,10 +266,9 @@ $isAgent = false;
 
 
 <?php
-yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modalLeadSearchHeader'],
+Modal::begin([
     'id' => 'modalLeadSearch',
-    'size' => 'modal-lg',
+    'size' => Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 ?>
@@ -287,7 +287,7 @@ echo $this->render('_search_lead_form', [
 
             [
             'attribute' => 'id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->id; /*Html::a('<i class="fa fa-file-o"></i> ' . $model->id, [
                     'lead/view', 'gid' => $model->gid
                 ], [
@@ -316,7 +316,7 @@ echo $this->render('_search_lead_form', [
 
         /*[
             'attribute' => 'client_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->client_id ? Html::a($model->client_id, ['client/index', 'ClientSearch[id]' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',
@@ -331,7 +331,7 @@ echo $this->render('_search_lead_form', [
         [
             'header' => 'Client / Emails / Phones',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -362,7 +362,7 @@ echo $this->render('_search_lead_form', [
 
             [
             'attribute' => 'status',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $statusValue = $model->getStatusName(true);
 
                 if ($model->isTrash() && ($lastLeadFlow = $model->lastLeadFlow)) {
@@ -401,7 +401,7 @@ echo $this->render('_search_lead_form', [
         [
             'attribute' => 'created',
             'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
             },
             'visible' => !$isAgent,
@@ -409,7 +409,7 @@ echo $this->render('_search_lead_form', [
         ],
         [
             'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->project ? $model->project->name : '-';
             },
             'filter' => \common\models\Project::getList()
@@ -417,7 +417,7 @@ echo $this->render('_search_lead_form', [
 
         [
             'attribute' => 'cabin',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST
@@ -427,7 +427,7 @@ echo $this->render('_search_lead_form', [
 
         [
             'label' => 'Pax / Communication',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 //$str = '';
                 $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span><br>';
                 $str .= $model->getCommunicationInfo();
@@ -441,7 +441,7 @@ echo $this->render('_search_lead_form', [
 
         [
             'header' => 'Quotes',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
+            'value' => static function (\common\models\Lead $model) use ($isAgent) {
                 return $model->quotesCount;
             },
             'format' => 'raw',
@@ -452,7 +452,7 @@ echo $this->render('_search_lead_form', [
 
         [
             'header' => 'Segments',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $segmentData = [];
@@ -476,7 +476,7 @@ echo $this->render('_search_lead_form', [
 
         [
             'header' => 'Depart',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
 
@@ -500,14 +500,14 @@ echo $this->render('_search_lead_form', [
         [
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
             //'filter' => $userList
         ],
         [
             'attribute' => 'created',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
             },
             'format' => 'raw'
@@ -577,12 +577,12 @@ echo $this->render('_search_lead_form', [
 
 
 <?php
-yii\bootstrap\Modal::end();
+Modal::end();
 
 $jsCode = <<<JS
     $(document).on('click', '#search-lead-btn', function(){
         $('#modalLeadSearch').modal('show').find('#modalLeadSearchContent').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        $('#modalLeadSearchHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modalLeadSearch-label').html($(this).attr('title'));
        return false;
     });
 

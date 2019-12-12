@@ -271,8 +271,8 @@ class CommunicationService extends Component
             $data['limit'] = (int) $filter['limit'];
         }
 
-        if(isset($filter['mail_list'])) {
-            $data['mail_list'] = $filter['mail_list'];
+        if(isset($filter['email_list'])) {
+            $data['email_list'] = $filter['email_list'];
         }
 
         if(isset($filter['project_list'])) {

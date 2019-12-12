@@ -1,6 +1,4 @@
 <?php
-use yii\bootstrap\Modal;
-use yii\helpers\Url;
 use common\models\Lead;
 
 /**
@@ -15,11 +13,13 @@ if($result && (isset($result['count']) && $result['count'] > 0)):
     $js = <<<JS
     $(document).on('click','.search_details__btn', function (e) {
         e.preventDefault();
-        var modal = $('#flight-details__modal');
-        modal.find('.modal-header h2').html($(this).data('title'));
-        var target = $($(this).data('target')).html();
+        let modal = $('#flight-details__modal');
+        $('#flight-details__modal-label').html($(this).data('title'));
+        let target = $($(this).data('target')).html();
         modal.find('.modal-body').html(target);
+        modal.css('z-index', '1052');
         modal.modal('show');
+        $('.modal-backdrop.show').last().css('z-index', '1051');
     });
 
     $(document).on('change', '#sort_search', function(e) {
@@ -189,7 +189,7 @@ JS;
                             <div class="search-filters__airlines-all">
                                 All Airlines
                                 <label class="switch search-filters__switch">
-                                    <input type="checkbox" class="switch__input js-all-airlines">
+                                    <input type="checkbox" class="switch__input js-all-airlines" checked>
                                     <span class="switch__slider"></span>
                                 </label>
                             </div>
@@ -364,6 +364,12 @@ JS;
             }
             ?>
         <?php endforeach;?>
+		<?php
+		$js = <<<JS
+    $('.quote__heading [data-toggle="tooltip"]').tooltip();
+JS;
+		$this->registerJs($js);
+		?>
     </div>
 <?php else:?>
     <div class="search-results__wrapper">

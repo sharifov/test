@@ -25,9 +25,9 @@ $template = <<<HTML
 HTML;
 ?>
 
-<div class="panel panel-default">
-    <div class="panel-heading">Logging</div>
-    <div class="panel-body">
+<div class="card card-default">
+    <div class="card-header">Logging</div>
+    <div class="card-body">
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
@@ -54,7 +54,7 @@ HTML;
                 ],
                 [
                     'attribute' => 'message',
-                    'value' => function ($model) {
+                    'value' => static function ($model) {
                         return \yii\helpers\StringHelper::truncate($model->message, 100, '...', null, true);
                     },
                     'format' => 'ntext',

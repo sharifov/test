@@ -68,10 +68,7 @@ class LeadSoldNotificationsListener
 
         $subject = Yii::t('email', 'Lead-{id} to SOLD', ['id' => $lead->id]);
 
-        $body = Yii::t('email', "Booked quote with UID : {quote_uid},
-Source: {name},
-Lead ID: {lead_id} ({url})
-{name} made \${profit} on {airline} to {destination}",
+        $body = Yii::t('email', "Booked quote with UID : {quote_uid}, Source: {name}, Lead ID: {lead_id} ({url}) {name} made \${profit} on {airline} to {destination}",
             [
                 'name' => $owner->username,
                 'url' => $host . '/lead/view/' . $lead->gid,

@@ -1,4 +1,4 @@
-<?php
+<?php use yii\grid\ActionColumn;
 /**
  * @var $this \yii\web\View
  * @var $dataProvider ActiveDataProvider
@@ -10,7 +10,7 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use common\models\Project;
 use yii\helpers\Url;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 
 $template = <<<HTML
 <div class="pagination-container row" style="margin-bottom: 10px;">
@@ -44,9 +44,9 @@ JS;
 $this->registerJs($js);
 ?>
 
-<div class="panel panel-default">
-    <div class="panel-heading">Projects</div>
-    <div class="panel-body">
+<div class="card card-default">
+    <div class="card-header">Projects</div>
+    <div class="card-body">
         <?php if (Yii::$app->user->identity->canRole('admin')) : ?>
             <div class="mb-20">
 
@@ -73,10 +73,7 @@ $this->registerJs($js);
                 'name',
                 [
                     'attribute' => 'link',
-                    'value' => function ($model) {
-                        /**
-                         * @var $model Project
-                         */
+                    'value' => static function (\common\models\Project $model) {
                         return Html::a($model->link, $model->link, ['target' => '_blank']);
                     },
                     'format' => 'raw'
@@ -84,7 +81,7 @@ $this->registerJs($js);
 
                 [
                     'attribute' => 'last_update',
-                    'value' => function (\common\models\Project $model) {
+                    'value' => static function (\common\models\Project $model) {
                         return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
                     },
                     'format' => 'raw'
@@ -92,7 +89,7 @@ $this->registerJs($js);
                 //'api_key',
                 'closed:boolean',
                 [
-                    'class' => 'yii\grid\ActionColumn',
+                    'class' => ActionColumn::class,
                     'template' => '{update} {list} {emails}',
                     'buttons' => [
                         'update' => function ($url, $model, $key) {
@@ -118,23 +115,16 @@ $this->registerJs($js);
         ?>
     </div>
 </div>
-<div class="modal fade" id="modal-email-templates" style="display: none;">
-    <div class="modal-dialog" role="document" style="width: 1024px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <?= Html::button('<span>×</span>', [
-                    'class' => 'close',
-                    'data-dismiss' => 'modal'
-                ]) ?>
-                <h4 class="modal-title"></h4>
-            </div>
-            <div class="modal-body"></div>
-        </div>
-    </div>
-</div>
+
+<?php Modal::begin(['id' => 'modal-email-templates',
+    'title' => 'Email template',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+
 
 <?php Modal::begin(['id' => 'project-data-modal',
-    'header' => '<h2>Project Custom Params</h2>',
+    'title' => 'Project Custom Params',
     'size' => Modal::SIZE_LARGE,
 ])?>
 <?php Modal::end()?>

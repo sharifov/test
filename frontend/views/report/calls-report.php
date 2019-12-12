@@ -41,14 +41,14 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Username',
             'attribute' => 'c_created_user_id',
-            'value' => function ($searchModel) {
+            'value' => static function ($searchModel) {
                 $employee = \common\models\Employee::findone($searchModel['c_created_user_id']);
                 return $employee->username;
             },
             'format' => 'raw',
             'filter' => $list->getEmployees()
         ],
-        [
+        [   'label' =>'Report Date',
             'attribute' => 'createdDate',
         ],
         [
@@ -125,13 +125,6 @@ $list = new ListsAccess(Yii::$app->user->id);
                 return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['incomingCallsDuration']).'">' . gmdate('H:i:s', $data['incomingCallsDuration']) . '</span>';
             }
         ],
-        /*[
-            'label' =>'Total',
-            'attribute' => 'incomingCalls',
-            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
-            'contentOptions' => ['style' => 'background-color:#fcf8e3'],
-            'filterOptions' => ['style' => 'background-color:#fcf8e3']
-        ],*/
         [
             'label' =>'Completed',
             'attribute' => 'incomingCompletedCalls',
@@ -163,6 +156,31 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'incomingGeneralLine',
             'value' => function($data) {
                 return $data['incomingGeneralLine'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
+        ],
+
+        [
+            'label' =>'Total Attempts',
+            'attribute' => 'totalAttempts',
+            'value' => function($data) {
+                return $data['totalAttempts'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+        ],
+
+        [
+            'label' =>'Completed',
+            'attribute' => 'redialCompleted',
+            'value' => function($data) {
+                return $data['redialCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -205,7 +223,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'label' => 'Page'
         ],
         'toolbar' => [
-            'content' => Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], ['class' => 'btn btn-default', 'title'=>'Reset Grid']),
+            'content' =>'<div class="btn-group">'. Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], ['class' => 'btn btn-outline-secondary', 'title'=>'Reset Grid']) .'</div>',
             '{export}',
             $fullExportMenu,
         ],
@@ -214,7 +232,8 @@ $list = new ListsAccess(Yii::$app->user->id);
                 'columns' => [
                     ['content' => '', 'options' => ['colspan' => 2]],
                     ['content' => 'Outgoing Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
-                    ['content' => 'Incoming Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
+                    ['content' => 'Incoming Calls', 'options' => ['colspan' => 4, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
+                    ['content' => 'Redial Calls', 'options' => ['colspan' => 2, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                 ],
             ]
         ],

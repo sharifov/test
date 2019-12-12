@@ -2,52 +2,23 @@
 /**
  * @var $this yii\web\View
  * @var $dataProvider yii\data\ActiveDataProvider
- * @var $comForm \frontend\models\CommunicationForm
- * @var $leadForm \frontend\models\LeadForm
- * @var $previewEmailForm \frontend\models\LeadPreviewEmailForm
- * @var $previewSmsForm \frontend\models\LeadPreviewSmsForm
+ * @var $comForm CommunicationForm
+ * @var $leadForm LeadForm
+ * @var $previewEmailForm LeadPreviewEmailForm
+ * @var $previewSmsForm LeadPreviewSmsForm
  * @var $isAdmin bool
  *
  */
 
+use frontend\models\CommunicationForm;
+use frontend\models\LeadForm;
+use frontend\models\LeadPreviewEmailForm;
+use frontend\models\LeadPreviewSmsForm;
 use yii\helpers\Html;
-
+use yii\bootstrap4\Modal;
 
 $c_type_id = $comForm->c_type_id;
 ?>
-
-
-
-
-
-<?/*php $form = Form::begin([
-                        'action' => ['index'],
-                        'method' => 'get',
-                        'options' => [
-                            'data-pjax' => 1
-                        ],
-                    ]);*/ ?>
-
-  <?php /*  <div class="row">
-    <div class="col-sm-3 mail_list_column">
-
-<?= Html::beginForm(\yii\helpers\Url::current(['email_type_id' => null, 'email_project_id' => null, 'action' => null]), 'GET', ['data-pjax' => 1]) ?>
-    <div class="col-md-3">
-        <?=Html::a('<i class="fa fa-envelope"></i> Create NEW', \yii\helpers\Url::current(['id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']), ['class' => 'btn btn-sm btn-success'])?>
-    </div>
-    <div class="col-md-4">
-        <?=Html::dropDownList('email_type_id', Yii::$app->request->get('email_type_id'), \common\models\Email::FILTER_TYPE_LIST, ['class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
-        <?= Html::submitButton('Ok', ['id' => 'btn-submit-email', 'class' => 'btn btn-primary hidden']) ?>
-    </div>
-    <div class="col-md-5">
-        <?=Html::dropDownList('email_project_id', Yii::$app->request->get('email_project_id'), \common\models\Project::getList(), ['prompt' => 'ALL', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
-    </div>
-<?= Html::endForm() */ ?>
-
-
-
-
-
 
 <div class="x_panel">
     <div class="x_title">
@@ -109,9 +80,9 @@ $c_type_id = $comForm->c_type_id;
 
 
 
-                    <?php \yii\bootstrap\Modal::begin(['id' => 'modal-email-preview',
-                        'header' => '<h2>Email preview</h2>',
-                        'size' => \yii\bootstrap\Modal::SIZE_LARGE
+                    <?php Modal::begin(['id' => 'modal-email-preview',
+                        'title' => 'Email preview',
+                        'size' => Modal::SIZE_LARGE
                     ])?>
 
                     <?php $form2 = \yii\bootstrap\ActiveForm::begin([
@@ -127,14 +98,6 @@ $c_type_id = $comForm->c_type_id;
                         echo $form2->errorSummary($previewEmailForm);
                     ?>
 
-                    <?php /*<div class="modal fade" id="modal-email-preview" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                        <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">Email preview</h4>
-                        </div>
-                        <div class="modal-body">*/ ?>
 
                     <div class="row">
                         <div class="col-sm-4 form-group">
@@ -206,12 +169,12 @@ $c_type_id = $comForm->c_type_id;
                     </div>
                     <?php \yii\bootstrap\ActiveForm::end(); ?>
 
-                    <?php \yii\bootstrap\Modal::end()?>
+                    <?php Modal::end()?>
 
 
-                    <?php \yii\bootstrap\Modal::begin(['id' => 'modal-sms-preview',
-                        'header' => '<h2>SMS preview</h2>',
-                        'size' => \yii\bootstrap\Modal::SIZE_DEFAULT
+                    <?php Modal::begin(['id' => 'modal-sms-preview',
+                        'title' => 'SMS preview',
+                        'size' => Modal::SIZE_DEFAULT
                     ])?>
 
                         <?php $form3 = \yii\bootstrap\ActiveForm::begin([
@@ -265,7 +228,7 @@ $c_type_id = $comForm->c_type_id;
 
                         <?php \yii\bootstrap\ActiveForm::end(); ?>
 
-                    <?php \yii\bootstrap\Modal::end()?>
+                    <?php Modal::end()?>
 
 
 
@@ -290,18 +253,21 @@ $c_type_id = $comForm->c_type_id;
                             echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                             echo Yii::$app->session->getFlash('send-success');
                             echo '</div>';
+                            $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
                         }
 
                         if(Yii::$app->session->hasFlash('sms-send-success')) {
                             echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                             echo Yii::$app->session->getFlash('sms-send-success');
                             echo '</div>';
+                            $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
                         }
 
                         if(Yii::$app->session->hasFlash('send-error')) {
                             echo '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                             echo Yii::$app->session->getFlash('send-error');
                             echo '</div>';
+                            $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
                         }
 
                         echo $form->errorSummary($comForm);
@@ -333,16 +299,16 @@ $c_type_id = $comForm->c_type_id;
                                     //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
 
                                     if($agentParams) {
-                                        foreach (\frontend\models\CommunicationForm::TYPE_LIST as $tk => $itemName) {
+                                        foreach (CommunicationForm::TYPE_LIST as $tk => $itemName) {
 
-                                            if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
+                                            if ($tk == CommunicationForm::TYPE_EMAIL) {
 
                                                 if ($agentParams->upp_email) {
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
                                                 }
                                             }
 
-                                            if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
+                                            if ($tk == CommunicationForm::TYPE_SMS) {
 
                                                 if ($agentParams->upp_tw_phone_number) {
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
@@ -358,7 +324,7 @@ $c_type_id = $comForm->c_type_id;
                                                     $callTypeName .= ' [empty account]';
                                                 }
 
-                                                if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
+                                                if ($tk == CommunicationForm::TYPE_VOICE) {
                                                     //if ($userModel->userProfile->up_sip) {
                                                         $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
                                                     //}
@@ -504,49 +470,16 @@ $c_type_id = $comForm->c_type_id;
                         <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
 
 
+                         <?php
+                             if ($comForm->c_preview_email) {
+                                 $this->registerJs("$('#modal-email-preview').modal('show');");
+                             }
 
-                    <?/*php if($comForm->c_voice_status === 1):?>
-                        <?php
-                        $js = "
-                            var previewPopup = $('#modal-email-preview');
-                            //previewPopup.find('.modal-body').html(data);
-                            previewPopup.modal('show');";
-
-                        $this->registerJs($js);
-
-                        ?>
-                    <?php endif; */?>
-
-
-                    <?php if($comForm->c_preview_email):?>
-                        <?php
-                            $js = "
-                            var previewPopup = $('#modal-email-preview');
-                            //previewPopup.find('.modal-body').html(data);
-                            previewPopup.modal('show');";
-
-                            $this->registerJs($js);
-
-                        ?>
-                    <?php endif; ?>
-
-
-
-                    <?php if($comForm->c_preview_sms):?>
-                        <?php
-                        $js = "
-                            var previewPopup = $('#modal-sms-preview');
-                            //previewPopup.find('.modal-body').html(data);
-                            previewPopup.modal('show');";
-
-                        $this->registerJs($js);
-                        ?>
-                    <?php endif; ?>
-
-
-
-
-                    <?php
+                             if ($comForm->c_preview_sms) {
+                                 $this->registerJs("$('#modal-sms-preview').modal('show');");
+                             }
+                         ?>
+                         <?php
     $js = <<<JS
     
         function initializeMessageType(messageType) {
@@ -605,30 +538,14 @@ JS;
 </div>
 
 
-<?php \yii\bootstrap\Modal::begin(['id' => 'modal-email-view',
-    'header' => '<h2>Email view</h2>',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE
+<?php Modal::begin(['id' => 'modal-email-view',
+    'title' => 'Email view',
+    'size' => Modal::SIZE_LARGE
 ])?>
     <div class="view-mail">
         <object id="object-email-view" width="100%" height="800" data=""></object>
     </div>
-<?php \yii\bootstrap\Modal::end()?>
-
-
-<?php
-\yii\bootstrap\Modal::begin([
-    'header' => '<b>Call Recording</b>',
-    // 'toggleButton' => ['label' => 'click me'],
-    'id' => 'modalCallRecording',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE,
-]);
-?>
-    <div class="row">
-        <div class="col-md-12" id="audio_recording">
-
-        </div>
-    </div>
-<?php \yii\bootstrap\Modal::end(); ?>
+<?php Modal::end()?>
 
 
 <?php
@@ -700,12 +617,12 @@ JS;
 
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>-->
 
 <?php
 
-$tpl_email_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
-$tpl_sms_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
+$tpl_email_blank_key = CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
+$tpl_sms_blank_key = CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
 $js = <<<JS
 
@@ -775,9 +692,9 @@ $js = <<<JS
 
 
     $('body').on('click', '.chat__details', function () {
-        var id = $(this).data('id');
+        let id = $(this).data('id');
         $('#object-email-view').attr('data', '/email/view?id='+id+'&preview=1');
-        var popup = $('#modal-email-view');
+        let popup = $('#modal-email-view');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
@@ -787,8 +704,8 @@ $js = <<<JS
     
     $('body').on('change', '.quotes-uid', function() {
         
-        var quoteList = [];
-        var jsonQuotes = '';
+        let quoteList = [];
+        let jsonQuotes = '';
         
         $('input[type=checkbox].quotes-uid:checked').each(function() {
             quoteList.push($(this).data('id'));
@@ -832,16 +749,6 @@ $js = <<<JS
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
     });*/
-
-     $(document).on('click', '.btn-recording_url', function() {
-         var source_src = $(this).data('source_src');
-         $('#audio_recording').html('<audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
-         $('#modalCallRecording').modal('show');
-    });
-    
-    $('#modalCallRecording').on('hidden.bs.modal', function () {
-        $('#audio_recording').html('');
-    });
     
 JS;
 

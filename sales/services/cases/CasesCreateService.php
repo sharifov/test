@@ -9,7 +9,6 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
-use yii\helpers\VarDumper;
 
 /**
  * Class CasesCreateService
@@ -40,6 +39,54 @@ class CasesCreateService
         $this->casesRepository = $casesRepository;
         $this->clientManageService = $clientManageService;
         $this->transaction = $transaction;
+    }
+
+    /**
+     * @param int $clientId
+     * @param int|null $projectId
+     * @return Cases
+     */
+    public function createSupportByIncomingEmail(int $clientId, ?int $projectId): Cases
+    {
+        $case = Cases::createSupportByIncomingEmail($clientId, $projectId);
+        $this->casesRepository->save($case);
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
+     * @param int|null $projectId
+     * @return Cases
+     */
+    public function createExchangeByIncomingEmail(int $clientId, ?int $projectId): Cases
+    {
+        $case = Cases::createExchangeByIncomingEmail($clientId, $projectId);
+        $this->casesRepository->save($case);
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
+     * @param int|null $projectId
+     * @return Cases
+     */
+    public function createExchangeByIncomingSms(int $clientId, ?int $projectId): Cases
+    {
+        $case = Cases::createExchangeByIncomingSms($clientId, $projectId);
+        $this->casesRepository->save($case);
+        return $case;
+    }
+
+    /**
+     * @param int $clientId
+     * @param int|null $projectId
+     * @return Cases
+     */
+    public function createSupportByIncomingSms(int $clientId, ?int $projectId): Cases
+    {
+        $case = Cases::createSupportByIncomingSms($clientId, $projectId);
+        $this->casesRepository->save($case);
+        return $case;
     }
 
     /**

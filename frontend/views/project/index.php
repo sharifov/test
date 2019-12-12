@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'link',
-                'value' => function (\common\models\Project $model) {
+                'value' => static function (\common\models\Project $model) {
                     return Html::a($model->link, $model->link, ['target' => '_blank']);
                 },
                 'format' => 'raw'
@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'last_update',
-                'value' => function (\common\models\Project $model) {
+                'value' => static function (\common\models\Project $model) {
                     return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
                 },
                 'format' => 'raw',

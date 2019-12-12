@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cc_dep_id',
                 'format' => 'raw',
-                'value' => function (CasesCategory $model) {
+                'value' => static function (CasesCategory $model) {
                     return $model->dep ? $model->dep->dep_name : '';
                 }
             ],

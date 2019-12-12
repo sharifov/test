@@ -2,11 +2,13 @@
 
 namespace sales\services;
 
+use common\models\Client;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadPreferences;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
+use sales\repositories\client\ClientRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
@@ -17,6 +19,8 @@ use sales\repositories\user\UserRepository;
  * @property LeadRepository $leadRepository
  * @property UserRepository $userRepository
  * @property CasesRepository $casesRepository
+ * @property ClientRepository $clientRepository
+ * @property LeadPreferencesRepository $leadPreferencesRepository
  */
 class ServiceFinder
 {
@@ -24,26 +28,27 @@ class ServiceFinder
     private $leadRepository;
     private $userRepository;
     private $casesRepository;
-	/**
-	 * @var LeadPreferencesRepository
-	 */
+    private $clientRepository;
 	private $leadPreferencesRepository;
 
 	/**
 	 * @param LeadRepository $leadRepository
 	 * @param UserRepository $userRepository
 	 * @param CasesRepository $casesRepository
+	 * @param ClientRepository $clientRepository
 	 * @param LeadPreferencesRepository $leadPreferencesRepository
 	 */
     public function __construct(
     	LeadRepository $leadRepository,
 		UserRepository $userRepository,
 		CasesRepository $casesRepository,
-		LeadPreferencesRepository $leadPreferencesRepository)
-    {
+		ClientRepository $clientRepository,
+		LeadPreferencesRepository $leadPreferencesRepository
+    ) {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
         $this->casesRepository = $casesRepository;
+        $this->clientRepository = $clientRepository;
 		$this->leadPreferencesRepository = $leadPreferencesRepository;
 	}
 
@@ -90,6 +95,21 @@ class ServiceFinder
             return $case;
         }
         throw new \InvalidArgumentException('$case must be integer or Cases');
+    }
+
+    /**
+     * @param int|Client $client
+     * @return Client
+     */
+    public function clientFind($client): Client
+    {
+        if (is_int($client)) {
+            return $this->clientRepository->find($client);
+        }
+        if ($client instanceof Client) {
+            return $client;
+        }
+        throw new \InvalidArgumentException('$client must be integer or Client');
     }
 
     /**

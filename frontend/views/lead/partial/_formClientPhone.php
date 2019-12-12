@@ -12,6 +12,7 @@ use common\models\ClientPhone;
 use yii\helpers\Html;
 use frontend\models\LeadForm;
 use borales\extensions\phoneInput\PhoneInput;
+use yii\bootstrap4\Modal;
 //use frontend\extensions\PhoneInput;
 
 ?>
@@ -48,7 +49,7 @@ use borales\extensions\phoneInput\PhoneInput;
                     [
                         'header' => 'Phones',
                         'attribute' => 'client_phone',
-                        'value' => function (\common\models\Client $model) {
+                        'value' => static function (\common\models\Client $model) {
 
                         $phones = $model->clientPhones;
                         $data = [];
@@ -68,7 +69,7 @@ use borales\extensions\phoneInput\PhoneInput;
                     [
                         'header' => 'Emails',
                         'attribute' => 'client_email',
-                        'value' => function (\common\models\Client $model) {
+                        'value' => static function (\common\models\Client $model) {
 
                         $emails = $model->clientEmails;
                         $data = [];
@@ -87,7 +88,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
                     [
                         'header' => 'Leads',
-                        'value' => function (\common\models\Client $model) {
+                        'value' => static function (\common\models\Client $model) {
 
                         $leads = $model->leads;
                         $data = [];
@@ -110,7 +111,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
                     [
                         'attribute' => 'created',
-                        'value' => function (\common\models\Client $model) {
+                        'value' => static function (\common\models\Client $model) {
                         return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                     },
                     'format' => 'html',
@@ -121,14 +122,14 @@ use borales\extensions\phoneInput\PhoneInput;
                     ]);
 
 
-            yii\bootstrap\Modal::begin([
-                'headerOptions' => ['id' => 'modal-header-' . $key],
+            Modal::begin([
+                'title' => '',
                 'id' => 'modal-phone-cnt-' . $key,
-                'size' => 'modal-lg',
+                'size' => Modal::SIZE_LARGE,
                 'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
             ]);
             echo $phoneContent; //"<div id='modalContent'></div>";
-            yii\bootstrap\Modal::end();
+            Modal::end();
 
 
             $template .= '<span class="input-group-btn">'.Html::button('<i class="fa fa-user"></i> '.$phoneCount, [

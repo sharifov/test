@@ -11,9 +11,6 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 ?>
-    <style>
-        .x_title span{color: white;}
-    </style>
 <?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
     <div class="x_panel">
         <div class="x_title" >
@@ -87,16 +84,16 @@ use yii\widgets\Pjax;
 <?php
 $this->registerJs(
     '
-        $(document).on("click","#btn-notes-form", function() {
-            $("#div-notes-form").show();
-            $("#pjax-notes .x_content").show();
-            
-             $([document.documentElement, document.body]).animate({
-                scrollTop: $("#div-notes-form").offset().top
-            }, 1000);
-                        
-            return false;
-        });
+//        $(document).on("click","#btn-notes-form", function() {
+//            $("#div-notes-form").show();
+//            $("#pjax-notes .x_content").show();
+//            
+//             $([document.documentElement, document.body]).animate({
+//                scrollTop: $("#div-notes-form").offset().top
+//            }, 1000);
+//                        
+//            return false;
+//        });
 
         $("#pjax-notes").on("pjax:start", function () {            
             $("#btn-submit-note").attr("disabled", true).prop("disabled", true).addClass("disabled");

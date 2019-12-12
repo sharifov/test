@@ -13,7 +13,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="log-view">
 
     <p>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?= Html::a('<i class="fas fa-remove"></i> Delete', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'message',
                 'format' => 'raw',
-                'value' => function(\frontend\models\Log $model) {
+                'value' => static function(\frontend\models\Log $model) {
                     return $model->message ? '<pre>'.$model->message.'</pre>' : '-';
                 },
             ],

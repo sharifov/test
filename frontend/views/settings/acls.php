@@ -31,13 +31,13 @@ HTML;
 
 $js = <<<JS
     $('#acl-rule-id').click(function() {
-        $(this).addClass('hidden');
-        $('#$idForm').parent().removeClass('hidden');
+        $(this).addClass('d-none');
+        $('#$idForm').parent().removeClass('d-none');
     });
 
     $('#close-btn').click(function() {
-        $('#acl-rule-id').removeClass('hidden');
-        $('#$idForm').parent().addClass('hidden');
+        $('#acl-rule-id').removeClass('d-none');
+        $('#$idForm').parent().addClass('d-none');
     });
     
     $('#submit-btn').click(function() {
@@ -58,14 +58,14 @@ JS;
 $this->registerJs($js);
 ?>
 
-<div class="panel panel-default">
-    <div class="panel-heading">Global ACL Rules</div>
-    <div class="panel-body">
+<div class="card card-default">
+    <div class="card-header">Global ACL Rules</div>
+    <div class="card-body">
         <?= Html::a('Add Rule', null, [
             'class' => 'btn btn-success',
             'id' => 'acl-rule-id',
         ]) ?>
-        <div class="well hidden">
+        <div class="well d-none">
             <?= $this->render('item/acl', [
                 'model' => $model
             ]) ?>
@@ -94,7 +94,7 @@ $this->registerJs($js);
                 [
                     'header' => 'Active',
                     'format' => 'raw',
-                    'value' => function ($model) {
+                    'value' => static function ($model) {
                         /**
                          * @var $model GlobalAcl
                          */

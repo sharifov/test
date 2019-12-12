@@ -31,7 +31,8 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             'action' => ['index'],
             'method' => 'get',
             'options' => [
-                'data-pjax' => 1
+                'data-pjax' => 1,
+                'style' => 'width: 100%'
             ],
         ]); ?>
 
@@ -95,7 +96,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             //'e_project_id',
             [
                 'attribute' => 'e_project_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return $model->eProject ? $model->eProject->name : '-';
                 },
                 'filter' => $projectList
@@ -112,7 +113,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             //'e_type_id',
             [
                 'attribute' => 'e_type_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return $model->getTypeName();
                 },
                 'filter' => \common\models\Email::TYPE_LIST
@@ -120,7 +121,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             //'e_template_type_id',
             [
                 'attribute' => 'e_template_type_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return $model->eTemplateType ? $model->eTemplateType->etp_name : '-';
                 },
                 //'filter' =>
@@ -128,7 +129,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             //'e_language_id',
             [
                 'attribute' => 'e_language_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return $model->e_language_id;
                 },
                 'filter' => \lajax\translatemanager\models\Language::getLanguageNames()
@@ -141,7 +142,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             //'e_status_id',
             [
                 'attribute' => 'e_status_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return $model->getStatusName();
                 },
                 'filter' => \common\models\Email::STATUS_LIST
@@ -151,7 +152,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             //'e_error_message',
             /*[
                 'attribute' => 'e_updated_user_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return ($model->eUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eUpdatedUser->username) : $model->e_updated_user_id);
                 },
                 'filter' => $userList,
@@ -160,7 +161,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             [
                 'attribute' => 'e_created_user_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
                 },
                 'filter' => $userList,
@@ -168,7 +169,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
             /*[
                 'attribute' => 'e_updated_dt',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->e_updated_dt));
                 },
                 'format' => 'raw'
@@ -176,14 +177,14 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             /*[
                 'attribute' => 'e_created_user_id',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return  ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
                 },
                 'format' => 'raw'
             ],*/
             [
                 'attribute' => 'e_created_dt',
-                'value' => function (\common\models\Email $model) {
+                'value' => static function (\common\models\Email $model) {
                     return $model->e_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
                 },
                 'format' => 'raw',

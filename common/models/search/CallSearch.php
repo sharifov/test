@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\Department;
 use common\models\Employee;
+use Faker\Provider\DateTime;
 use kartik\daterange\DateRangeBehavior;
 use sales\repositories\call\CallSearchRepository;
 use yii\base\Model;
@@ -364,7 +365,7 @@ class CallSearch extends Call
         $this->load($params);
 
         $timezone = $user->timezone;
-        $userTZ = Employee::timezoneList(false)[$timezone];
+        $userTZ = Employee::timezoneList(false)[$timezone] ?? date('P');
 
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
@@ -423,18 +424,22 @@ class CallSearch extends Call
         $query = new Query();
 
         $query->select(['
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS outgoingCalls, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_NO_ANSWER . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_BUSY . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS outgoingCallsBusy, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN 1 ELSE 0 END) AS incomingCalls,
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS incomingCompletedCalls,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) THEN 1 ELSE 0 END) AS outgoingCalls, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) '. $queryByDuration .' THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_NO_ANSWER . '" AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_BUSY . '" AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) THEN 1 ELSE 0 END) AS outgoingCallsBusy,
+             
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,            
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL '. $queryByDuration .' THEN 1 ELSE 0 END) AS incomingCompletedCalls,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND c_source_type_id <> ' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingGeneralLine,
+            
+            SUM(CASE WHEN c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS totalAttempts,
+            SUM(CASE WHEN c_status_id=' . self::STATUS_COMPLETED . ' AND c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL '. $queryByDuration .' THEN 1 ELSE 0 END) AS redialCompleted,
+            
             c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '")) AS createdDate 
-            FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByDuration . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
+            FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
         ']);
 
         $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '"))']);
@@ -448,54 +453,19 @@ class CallSearch extends Call
             'sort' => [
                 //'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
-                    'c_created_user_id' => [
-                        'asc' => ['c_created_user_id' => SORT_ASC],
-                        'desc' => ['c_created_user_id' => SORT_DESC],
-                    ],
-                    'createdDate' => [
-                        'asc' => ['createdDate' => SORT_ASC],
-                        'desc' => ['createdDate' => SORT_DESC],
-                    ],
-                    'outgoingCallsDuration' => [
-                        'asc' => ['outgoingCallsDuration' => SORT_ASC],
-                        'desc' => ['outgoingCallsDuration' => SORT_DESC],
-                    ],
-                    'outgoingCalls' => [
-                        'asc' => ['outgoingCalls' => SORT_ASC],
-                        'desc' => ['outgoingCalls' => SORT_DESC],
-                    ],
-                    'outgoingCallsCompleted' => [
-                        'asc' => ['outgoingCallsCompleted' => SORT_ASC],
-                        'desc' => ['outgoingCallsCompleted' => SORT_DESC],
-                    ],
-                    'outgoingCallsNoAnswer' => [
-                        'asc' => ['outgoingCallsNoAnswer' => SORT_ASC],
-                        'desc' => ['outgoingCallsNoAnswer' => SORT_DESC],
-                    ],
-                    'outgoingCallsBusy' => [
-                        'asc' => ['outgoingCallsBusy' => SORT_ASC],
-                        'desc' => ['outgoingCallsBusy' => SORT_DESC],
-                    ],
-                    'incomingCallsDuration' => [
-                        'asc' => ['incomingCallsDuration' => SORT_ASC],
-                        'desc' => ['incomingCallsDuration' => SORT_DESC],
-                    ],
-                    /*'incomingCalls' => [
-                        'asc' => ['incomingCalls' => SORT_ASC],
-                        'desc' => ['incomingCalls' => SORT_DESC],
-                    ],*/
-                    'incomingCompletedCalls' => [
-                        'asc' => ['incomingCompletedCalls' => SORT_ASC],
-                        'desc' => ['incomingCompletedCalls' => SORT_DESC],
-                    ],
-                    'incomingDirectLine' => [
-                        'asc' => ['incomingDirectLine' => SORT_ASC],
-                        'desc' => ['incomingDirectLine' => SORT_DESC],
-                    ],
-                    'incomingGeneralLine' => [
-                        'asc' => ['incomingGeneralLine' => SORT_ASC],
-                        'desc' => ['incomingGeneralLine' => SORT_DESC],
-                    ],
+                    'c_created_user_id',
+                    'createdDate',
+                    'outgoingCallsDuration',
+                    'outgoingCalls',
+                    'outgoingCallsCompleted',
+                    'outgoingCallsNoAnswer',
+                    'outgoingCallsBusy',
+                    'incomingCallsDuration',
+                    'incomingCompletedCalls',
+                    'incomingDirectLine',
+                    'incomingGeneralLine',
+                    'totalAttempts',
+                    'redialCompleted'
                 ],
             ],
             'pagination' => [

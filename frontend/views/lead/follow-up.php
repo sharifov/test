@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'attribute' => 'clientTime',
             'label' => 'Client Time',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
@@ -182,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'attribute' => 'last_activity',
             'label' => 'Last Activity',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return Lead::getLastActivity($model->getLastActivityByNote());
             },
             'format' => 'raw'
@@ -191,7 +191,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'attribute' => 'updated',
             'label' => 'Last Activity',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<span title="'.Yii::$app->formatter->asDatetime(strtotime($model->updated)).'">'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</span>';
             },
             'format' => 'raw'
@@ -368,14 +368,15 @@ echo GridView::widget([
 
 <?php
 $js = <<<JS
-    $('.take-processing-btn').click(function (e) {
+    $('.take-processing-btn').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).attr('href');
+        let url = $(this).attr('href');
         if ($.inArray($(this).data('status'), [2, 8]) != -1) {
-            var editBlock = $('#modal-error');
-            editBlock.find('.modal-body').html('');
-            editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-                editBlock.modal('show');
+            let modal = $('#modal-df');
+            $('#modal-df-label').html('Attention!');
+            modal.find('.modal-body').html('');
+            modal.find('.modal-body').load(url, function( response, status, xhr ) {
+                modal.modal('show');
             });
         } else {
             window.location = url;

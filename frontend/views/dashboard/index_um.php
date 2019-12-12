@@ -20,35 +20,37 @@ $userId = Yii::$app->user->id;
     <h1><?=$this->title?></h1>
     <div class="row">
         <div class="col-md-3">
-            <table class="table table-bordered">
-                <tr>
-                    <th>Server Date Time (UTC)</th>
-                    <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
-                </tr>
-                <tr>
-                    <th>Current Time Zone</th>
-                    <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
-                </tr>
-                <tr>
-                    <th>Formatted Local Date Time</th>
-                    <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
-                </tr>
-            </table>
-
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Server Date Time (UTC)</th>
+                        <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
+                    </tr>
+                    <tr>
+                        <th>Current Time Zone</th>
+                        <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
+                    </tr>
+                    <tr>
+                        <th>Formatted Local Date Time</th>
+                        <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-3">
-            <table class="table table-bordered">
-                <tr>
-                    <th>My Username:</th>
-                    <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
-                </tr>
-                <tr>
-                    <th>My Role:</th>
-                    <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
-                </tr>
-            </table>
-
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>My Username:</th>
+                        <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
+                    </tr>
+                    <tr>
+                        <th>My Role:</th>
+                        <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
 

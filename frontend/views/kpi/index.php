@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'kh_user_id',
                 'label' => 'Employee',
-                'value' => function (\common\models\KpiHistory $model) {
+                'value' => static function (\common\models\KpiHistory $model) {
                     return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->khUser->username);
                 },
                 'format' => 'raw',
@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'kh_date_dt',
                 'label' => 'Month-Year',
-                'value' => function (\common\models\KpiHistory $model) {
+                'value' => static function (\common\models\KpiHistory $model) {
                     return (new DateTime($model->kh_date_dt))->format('M-Y');
                 },
                 'format' => 'raw',
@@ -104,7 +104,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'kh_bonus_active',
                 'label' => 'Bonus active',
-                'value' => function (\common\models\KpiHistory $model) {
+                'value' => static function (\common\models\KpiHistory $model) {
                     return ($model->kh_bonus_active)?"Yes":"No";
                 },
                 'format' => 'raw',
@@ -119,7 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'label' => 'Salary',
-                'value' => function (\common\models\KpiHistory $model) {
+                'value' => static function (\common\models\KpiHistory $model) {
                     return $model->getSalary();
                 },
                 'format' => 'raw',
@@ -127,7 +127,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Agent approved',
                 'attribute' => 'kh_agent_approved_dt',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model->kh_agent_approved_dt ? Yii::$app->formatter->asDatetime(strtotime($model->kh_agent_approved_dt)) : '-';
                 },
                 'filter' => DatePicker::widget([
@@ -149,7 +149,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Super approved',
                 'attribute' => 'kh_super_approved_dt',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model->kh_super_approved_dt ? Yii::$app->formatter->asDatetime(strtotime($model->kh_super_approved_dt)) : '-';
                 },
                 'filter' => DatePicker::widget([

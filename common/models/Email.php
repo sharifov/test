@@ -752,8 +752,11 @@ class Email extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if($this->e_type_id === self::TYPE_OUTBOX && $this->e_lead_id && $this->eLead) {
+        if ($this->e_lead_id && $this->eLead) {
             $this->eLead->updateLastAction();
+        }
+        if ($this->e_case_id && $this->eCase) {
+            $this->eCase->updateLastAction();
         }
 
     }

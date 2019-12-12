@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use common\models\Employee;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 use common\models\Call;
 use common\models\Sms;
 use common\models\Email;
@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $this->registerJs("$(function() {
    $('.popupModal').click(function(e) {
      e.preventDefault();
-    $('#details__modal h2').html($(this).data('title'));
+    $('#details__modal-label').html($(this).data('title'));
      $('#details__modal').modal('show')
          .find('.modal-body')
          .load($(this).attr('href'));
@@ -56,7 +56,7 @@ $this->registerJs("$(function() {
                     [
                         'label' => 'Agent',
                         'attribute' => 'username',
-                        'value' => function($data) {
+                        'value' => static function ($data) {
                             return '<b>'.Html::encode($data['username']).'</b>';
                         },
                         'format' => 'raw',
@@ -448,6 +448,7 @@ $this->registerJs("$(function() {
     </div>
 </div>
 <?php Modal::begin(['id' => 'details__modal',
+    'title' => '',
     'size' => Modal::SIZE_LARGE,
 ])?>
 <?php Modal::end()?>

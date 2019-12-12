@@ -69,7 +69,7 @@ class QuoteTrip extends \yii\db\ActiveRecord
         return [
             [['qt_duration', 'qt_quote_id'], 'integer'],
             [['qt_key'], 'string', 'max' => 255],
-            [['qt_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::className(), 'targetAttribute' => ['qt_quote_id' => 'id']],
+            [['qt_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['qt_quote_id' => 'id']],
         ];
     }
 
@@ -91,7 +91,7 @@ class QuoteTrip extends \yii\db\ActiveRecord
      */
     public function getQuoteSegments()
     {
-        return $this->hasMany(QuoteSegment::className(), ['qs_trip_id' => 'qt_id']);
+        return $this->hasMany(QuoteSegment::class, ['qs_trip_id' => 'qt_id']);
     }
 
     /**
@@ -99,6 +99,6 @@ class QuoteTrip extends \yii\db\ActiveRecord
      */
     public function getQuote()
     {
-        return $this->hasOne(Quote::className(), ['id' => 'qt_quote_id']);
+        return $this->hasOne(Quote::class, ['id' => 'qt_quote_id']);
     }
 }

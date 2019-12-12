@@ -27,12 +27,8 @@ use yii\widgets\Pjax;
         <h2><i class="fa fa-folder-o"></i> Quotes</h2>
         <ul class="nav navbar-right panel_toolbox">
             <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) : ?>
-            <li>
-                <?= $this->render('_quote_clone_by_id', ['lead' => $leadForm->getLead()])?>
-            </li>
-            <li>
-                <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
-            </li>
+
+
             <li>
                 <?php if($lead->leadFlightSegmentsCount):?>
                     <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
@@ -40,15 +36,20 @@ use yii\widgets\Pjax;
                     <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
                 <?php endif; ?>
             </li>
+                <li>
+                    <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
+                </li>
+                <li>
+                    <?= $this->render('_quote_clone_by_id', ['lead' => $leadForm->getLead()])?>
+                </li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                <ul class="dropdown-menu" role="menu">
-                    <li> <?= Html::a('<i class="fa fa-remove"></i> Decline Quotes', null, [
-                            //'class' => 'btn btn-primary btn-sm',
+                <div class="dropdown-menu" role="menu">
+                    <?= Html::a('<i class="fa fa-remove text-danger"></i> Decline Quotes', null, [
+                            'class' => 'dropdown-item text-danger',
                             'id' => 'btn-declined-quotes',
                         ]) ?>
-                    </li>
-                </ul>
+                </div>
             </li>
             <?php endif; ?>
 
@@ -98,9 +99,11 @@ $leadId = $leadForm->getLead()->id;?>
 $js = <<<JS
 $(document).on('click','.btn-quote-details', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var modal = $('#modal-info-d');
-        modal.find('.modal-header h2').text($(this).data('title'));
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+        //var modal = $('#modal-info-d');
+        $('#modal-lg-label').html($(this).data('title'));
+        //modal.find('.modal-header h2').text($(this).data('title'));
         modal.find('.modal-body').html('');
         $('#preloader').removeClass('hidden');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
@@ -117,12 +120,13 @@ $js = <<<JS
  $(document).on('click', '.view-status-log', function(e){
         e.preventDefault();
         $('#preloader').removeClass('hidden');
-        var editBlock = $('#get-quote-status-log');
-        editBlock.find('.modal-body').html('');
-        var id = $(this).attr('data-id');
-        editBlock.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
+        let modal = $('#modal-df');
+        $('#modal-df-label').html('Quote Status Log');
+        modal.find('.modal-body').html('');
+        let id = $(this).attr('data-id');
+        modal.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
             $('#preloader').addClass('hidden');
-            editBlock.modal('show');
+            modal.modal('show');
         });
     });
 JS;
@@ -131,7 +135,7 @@ $this->registerJs($js);
 //Menu esc for Reservation dump
 
 $js = <<<JS
- $(document).keyup(function (event) {
+ $(document).on('keyup', function (event) {
         if (event.which === 27) {
             $('.popover-class').popover('hide');
         }
@@ -145,19 +149,19 @@ if ($leadForm->getLead()->isProcessing()) {
         $js = <<<JS
  $(document).on('click','.add-clone-alt-quote', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var uid = $(this).data('uid');
-        var editBlock = $('#create-quote');
+        let url = $(this).data('url');
+        let uid = $(this).data('uid');
+        let modal = $('#modal-lg');
         if (uid != 0) {
-            editBlock.find('.modal-title').html('Clone quote #' + uid);
+            $('#modal-lg-label').html('Clone quote #' + uid);
         } else {
-             editBlock.find('.modal-title').html('Add quote');
+            $('#modal-lg-label').html('Add quote');
         }
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
             $('#cancel-alt-quote').attr('data-type', 'direct');
-            editBlock.modal({
-              backdrop: 'static',
+            modal.modal({
+              // backdrop: 'static',
               show: true
             });
         });
@@ -171,7 +175,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
     $js = <<<JS
 
     $(document).on('keyup','.ext-mark-up', function (event) {
-        var key = event.keyCode ? event.keyCode : event.which;
+        let key = event.keyCode ? event.keyCode : event.which;
         validatePriceField($(this), key);
     });
 
@@ -203,7 +207,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
         });
     });
     
-    $('#btn-declined-quotes').on('click', function() {
+    $(document).on('click', '#btn-declined-quotes', function() {
         var quotes = Array();
         $('.quotes-uid:checked').each(function(idx, elm){
             quotes.push($(elm).val());
@@ -231,9 +235,9 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
     
     $(document).on('click','.quote_details__btn', function (e) {
         e.preventDefault();
-        var modal = $('#flight-details__modal');
-        modal.find('.modal-header h2').html($(this).data('title'));
-        var target = $($(this).data('target')).html();
+        let modal = $('#flight-details__modal');
+        $('#flight-details__modal-label').html($(this).data('title'));
+        let target = $($(this).data('target')).html();
         modal.find('.modal-body').html(target);
         modal.modal('show');
     });

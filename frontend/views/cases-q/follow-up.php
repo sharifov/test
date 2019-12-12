@@ -49,14 +49,14 @@ $lists = new ListsAccess(Yii::$app->user->id);
             'cs_subject',
             [
                 'attribute' => 'cs_category',
-                'value' => function (CasesQSearch $model) {
+                'value' => static function (CasesQSearch $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
                 'filter' => CasesCategory::getList()
             ],
             [
                 'attribute' => 'cs_lead_id',
-                'value' => function (CasesQSearch $model) {
+                'value' => static function (CasesQSearch $model) {
                     return $model->lead ? $model->lead->uid : '';
                 },
             ],
@@ -86,7 +86,7 @@ $lists = new ListsAccess(Yii::$app->user->id);
 			],
             [
                 'label' => 'Pending Time',
-                'value' => function (CasesQSearch $model) {
+                'value' => static function (CasesQSearch $model) {
                     $createdTS = strtotime($model->cs_created_dt);
     
                     $diffTime = time() - $createdTS;
@@ -117,10 +117,10 @@ $lists = new ListsAccess(Yii::$app->user->id);
 				'visible' => Yii::$app->user->identity->isSupSuper() || Yii::$app->user->identity->isExSuper() || Yii::$app->user->identity->isAdmin()
 			],
 			[
-				'attribute' => 'cs_updated_dt',
+				'attribute' => 'cs_last_action_dt',
 				'label' => 'Last Action',
 				'value' => static function (CasesQSearch $model) {
-					$createdTS = strtotime($model->cs_updated_dt);
+					$createdTS = strtotime($model->cs_last_action_dt);
 
 					$diffTime = time() - $createdTS;
 					$diffHours = (int) ($diffTime / (60 * 60));

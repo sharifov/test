@@ -43,14 +43,6 @@ $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
     <div class="row">
 
-
-        <div id="preloader" class="overlay" style="display: none">
-            <div class="preloader">
-                <span class="fa fa-spinner fa-pulse fa-3x fa-fw"></span>
-                <div class="preloader__text">Loading...</div>
-            </div>
-        </div>
-
         <div class="col-md-12">
             <div class="x_panel">
                 <div class="x_title">
@@ -90,7 +82,7 @@ $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                         <div class="col-md-3 mail_list_column">
 
                             <?= Html::beginForm(\yii\helpers\Url::current(['email_type_id' => null, 'email_project_id' => null, 'email_email' => null ,'action' => null]), 'GET', ['data-pjax' => 1]) ?>
-                                <div class="col-md-3">
+                                <div class="col-md-12" style="margin-bottom: 10px;">
 
                                     <!-- Split button -->
                                     <div class="btn-group">
@@ -111,16 +103,19 @@ $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
 
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <?=Html::dropDownList('email_type_id', Yii::$app->request->get('email_type_id'), \common\models\Email::FILTER_TYPE_LIST, ['class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
-                                    <?= Html::submitButton('Ok', ['id' => 'btn-submit-email', 'class' => 'btn btn-primary hidden']) ?>
                                 </div>
-                                <div class="col-md-5">
+                                <div class="col-md-6">
                                     <?php if($is_admin):?>
                                         <?=Html::dropDownList('email_project_id', Yii::$app->request->get('email_project_id'), $projectList, ['prompt' => 'All projects', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                     <?php endif; ?>
-
-                                    <?=Html::dropDownList('email_email', Yii::$app->request->get('email_email'), $mailList, ['prompt' => 'All emails', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
+                                </div>
+                                <div class="col-md-6" style="margin-top: 10px;">
+									<?=Html::dropDownList('email_email', Yii::$app->request->get('email_email'), $mailList, ['prompt' => 'All emails', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
+                                </div>
+                                <div class="col-md-6" style="margin-top: 10px;">
+									<?= Html::submitButton('Ok', ['id' => 'btn-submit-email', 'class' => 'btn btn-primary hidden']) ?>
                                 </div>
                             <?= Html::endForm() ?>
 

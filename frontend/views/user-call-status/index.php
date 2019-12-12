@@ -71,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'us_type_id',
             [
                 'attribute' => 'us_type_id',
-                'value' => function (\common\models\UserCallStatus $model) {
+                'value' => static function (\common\models\UserCallStatus $model) {
                     return $model->getStatusTypeName();
                 },
                 'format' => 'raw',
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'us_user_id',
             [
                 'attribute' => 'us_user_id',
-                'value' => function (\common\models\UserCallStatus $model) {
+                'value' => static function (\common\models\UserCallStatus $model) {
                     return ($model->usUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->usUser->username) : $model->us_user_id);
                 },
                 'format' => 'raw',
@@ -89,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'us_created_dt',
-                'value' => function (\common\models\UserCallStatus $model) {
+                'value' => static function (\common\models\UserCallStatus $model) {
                     return $model->us_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->us_created_dt)) : $model->us_created_dt;
                 },
                 'format' => 'raw',

@@ -17,8 +17,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <div class="panel panel-default">
-        <div class="panel-body panel-collapse collapse in">
+    <div class="card card-default">
+        <div class="card-body">
 
             <p>
                 <?= Html::a('Create Api User', ['create'], ['class' => 'btn btn-success']) ?>
@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'au_enabled:boolean',
                     [
                         'attribute' => 'au_updated_dt',
-                        'value' => function (\common\models\ApiUser $model) {
+                        'value' => static function (\common\models\ApiUser $model) {
                             return $model->au_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->au_updated_dt)) : '-';
                         },
                         'format' => 'raw',

@@ -55,7 +55,7 @@ use yii\helpers\Html;
                                 'last_name',
                                 [
                                     'attribute' => 'Client Time',
-                                    'value' => function () use ($caseModel) {
+                                    'value' => static function () use ($caseModel) {
                                         return $caseModel->getClientTime();
                                     },
                                     'format' => 'html'

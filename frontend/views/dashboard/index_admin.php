@@ -38,108 +38,114 @@ $userId = Yii::$app->user->id;
     <h1><?=$this->title?></h1>
     <div class="row">
         <div class="col-md-3">
-            <table class="table table-bordered">
-                <tr>
-                    <th>Server Date Time (UTC)</th>
-                    <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
-                </tr>
-                <tr>
-                    <th>Current Time Zone</th>
-                    <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
-                </tr>
-                <tr>
-                    <th>Formatted Local Date Time</th>
-                    <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
-                </tr>
-            </table>
-
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Server Date Time (UTC)</th>
+                        <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
+                    </tr>
+                    <tr>
+                        <th>Current Time Zone</th>
+                        <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
+                    </tr>
+                    <tr>
+                        <th>Formatted Local Date Time</th>
+                        <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-3">
-            <table class="table table-bordered">
-                <tr>
-                    <th>My Username:</th>
-                    <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
-                </tr>
-                <tr>
-                    <th>My Role:</th>
-                    <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
-                </tr>
-                <tr>
-                    <th>My User Groups:</th>
-                    <td><i class="fa fa-users"></i>
-                        <?php
-                        $groupsValue = '';
-                        if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
-                            $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>My Username:</th>
+                        <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
+                    </tr>
+                    <tr>
+                        <th>My Role:</th>
+                        <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
+                    </tr>
+                    <tr>
+                        <th>My User Groups:</th>
+                        <td><i class="fa fa-users"></i>
+                            <?php
+                            $groupsValue = '';
+                            if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                                $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
-                            $groupsValueArr = [];
-                            foreach ($groups as $group) {
-                                $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                $groupsValueArr = [];
+                                foreach ($groups as $group) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                }
+                                $groupsValue = implode(' ', $groupsValueArr);
                             }
-                            $groupsValue = implode(' ', $groupsValueArr);
-                        }
-                        echo $groupsValue;
-                        ?>
-                    </td>
-                </tr>
-                <tr>
-                    <th>My Project Access:</th>
-                    <td><i class="fa fa-list"></i>
-                        <?php
-                        $projectsValue = '';
+                            echo $groupsValue;
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>My Project Access:</th>
+                        <td><i class="fa fa-list"></i>
+                            <?php
+                            $projectsValue = '';
 
-                        if($projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id)) {
+                            if($projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id)) {
 
-                            $groupsValueArr = [];
-                            foreach ($projectList as $project) {
-                                $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
+                                $groupsValueArr = [];
+                                foreach ($projectList as $project) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
+                                }
+                                $projectsValue = implode(' ', $groupsValueArr);
                             }
-                            $projectsValue = implode(' ', $groupsValueArr);
-                        }
-                        echo $projectsValue;
-                        ?>
-                    </td>
-                </tr>
-            </table>
-
+                            echo $projectsValue;
+                            ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-3">
             <h4>System processes and cron jobs running:</h4>
-            <table class="table table-bordered table-condensed">
-                <tr>
-                    <th>PID</th>
-                    <th>Started</th>
-                    <th>Time</th>
-                    <th>Command</th>
-                </tr>
-                <?php if($processList): ?>
-                    <?php foreach($processList AS $proc): ?>
-                        <tr>
-                            <td><?php echo $proc['pid']; ?></td>
-                            <td><?php echo $proc['stime']; ?></td>
-                            <td><?php echo $proc['time']; ?></td>
-                            <td><?php echo $proc['command']; ?></td>
-                        </tr>
-                    <?php endforeach;?>
-                <?php endif;?>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-condensed">
+                    <tr>
+                        <th>PID</th>
+                        <th>Started</th>
+                        <th>Time</th>
+                        <th>Command</th>
+                    </tr>
+                    <?php if($processList): ?>
+                        <?php foreach($processList AS $proc): ?>
+                            <tr>
+                                <td><?php echo $proc['pid']; ?></td>
+                                <td><?php echo $proc['stime']; ?></td>
+                                <td><?php echo $proc['time']; ?></td>
+                                <td><?php echo $proc['command']; ?></td>
+                            </tr>
+                        <?php endforeach;?>
+                    <?php endif;?>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-3">
             <?php if($crontabJobList): ?>
                 <h4>Cron jobs (/etc/crontab)</h4>
-                <table class="table table-bordered table-condensed">
-                    <tr>
-                        <th>Cron jobs</th>
-                    </tr>
-                    <?php foreach($crontabJobList AS $cronJob): ?>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
                         <tr>
-                            <td><?php echo $cronJob; ?></td>
+                            <th>Cron jobs</th>
                         </tr>
-                    <?php endforeach;?>
-                </table>
+                        <?php foreach($crontabJobList AS $cronJob): ?>
+                            <tr>
+                                <td><?php echo $cronJob; ?></td>
+                            </tr>
+                        <?php endforeach;?>
+                    </table>
+                </div>
             <?php endif;?>
         </div>
 
@@ -412,15 +418,16 @@ $userId = Yii::$app->user->id;
     <br>
 
     <?php Pjax::begin(); ?>
-    <div class="panel panel-default">
-        <div class="panel-heading">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
-        <div class="panel-body">
+    <div class="card card-default">
+        <div class="card-header">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
+        <div class="card-body">
             <div class="row">
                 <?php $form = ActiveForm::begin([
                     'action' => ['index'],
                     'method' => 'get',
                     'options' => [
-                        'data-pjax' => 1
+                        'data-pjax' => 1,
+                        'style' => 'width: 100%;margin-top: 5px;'
                     ],
                 ]); ?>
 
@@ -472,7 +479,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'attribute' => 'username',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
                         },
                         'format' => 'raw',
@@ -483,7 +490,7 @@ $userId = Yii::$app->user->id;
                     [
                         //'attribute' => 'username',
                         'label' => 'Role',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             $roles = $model->getRoles();
                             return $roles ? implode(', ', $roles) : '-';
                         },
@@ -495,7 +502,7 @@ $userId = Yii::$app->user->id;
                     [
                         'attribute' => 'status',
                         'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
                         },
                         'format' => 'html'
@@ -504,7 +511,7 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'User Groups',
                         'attribute' => 'user_group_id',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
 
                             $groups = $model->getUserGroupList();
                             $groupsValueArr = [];
@@ -552,7 +559,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Processing',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -565,7 +572,7 @@ $userId = Yii::$app->user->id;
                     ],
                     /*[
                         'label' => 'Hold On',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_ON_HOLD], $searchModel->datetime_start, $searchModel->datetime_end);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[employee_id]' => $model->id,
@@ -578,7 +585,7 @@ $userId = Yii::$app->user->id;
                     ],*/
                     [
                         'label' => 'Booked',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_BOOKED], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -591,7 +598,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Sold',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_SOLD], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -604,7 +611,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Follow Up',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatusAndEmployee([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[employee_id]' => $model->id,
@@ -617,7 +624,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Trash',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_TRASH], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,

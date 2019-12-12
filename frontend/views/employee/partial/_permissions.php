@@ -19,7 +19,7 @@ if ($isProfile || $model->id == Yii::$app->user->id) {
 
 <?php if ($model->canRoles(['agent', 'coach']) && $model->id == Yii::$app->user->id) : ?>
 <?php else : ?>
-    <div class="panel panel-default">
+    <div class="card card-default">
         <div class="panel-heading collapsing-heading">
             <?= Html::a('Access to projects <i class="collapsing-heading__arrow"></i>', '#permissions-info', [
                 'data-toggle' => 'collapse',

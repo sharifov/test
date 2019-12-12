@@ -12,6 +12,9 @@ use common\models\Airline;
 use common\components\SearchService;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
+
+$user = Yii::$app->user->identity;
+$showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 ?>
 <div class="quote quote--highlight" id="quote-<?=$model->uid?>">
 
@@ -53,8 +56,12 @@ use yii\helpers\Url;
                 ?> &nbsp;[<strong><?= $model->main_airline_code?></strong>]
             </span>
 
-			<div class="quote__gds" title="GDS / PCC">
-				<strong><?= SearchService::getGDSName($model->gds)?></strong> / <i><?= $model->pcc?></i>
+			<div class="quote__gds" title="GDS / <?php if ($showGdsOfferId && !empty($model->gds_offer_id)): echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($model->gds_offer_id) . ' /'; endif; ?> PCC">
+				<strong><?= SearchService::getGDSName($model->gds)?></strong>
+                <?php if ($showGdsOfferId && !empty($model->gds_offer_id)): ?>
+                    <i class="fas fa-passport success"></i>
+                <?php endif; ?>
+                / <i><?= $model->pcc?></i>
 			</div>
 			<span title="<?= $model->created_by_seller ? 'Agent' : 'Expert'?>: <?= \yii\helpers\Html::encode($model->employee_name)?>">
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
@@ -71,7 +78,7 @@ use yii\helpers\Url;
 			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                 <?php $priceData = $model->getPricesData();	?>
 
-                <?php if($model->status == $model::STATUS_APPLIED && $model->lead->final_profit !== null):?>
+                <?php if($model->isApplied() && $model->lead->final_profit !== null):?>
                     <button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
                      data-content='<?= $model->getEstimationProfitText();?>'>
                         <?= '$'.$model->getFinalProfit();?>
@@ -91,126 +98,60 @@ use yii\helpers\Url;
 		</div>
 		<div class="quote__heading-right">
 
-
-            <div class="btn-group" role="group" aria-label="...">
-
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="fa fa-list-ul"></span>
+            <div class="dropdown">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <span class="fas fa-list-ul"></span>
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu">
-                        <?/*<li>
-                            <?= Html::a('<i class="fa fa-eye"></i> Details', null, [
-                                'class' => 'quote_details__btn',
-                                'data-title' => implode(', ',$tripsInfo),
-                                'data-target' => '#quote_detail_'.$model->uid,
-                                'title' => 'Details'
-                            ]) ?>
-                        </li>*/?>
+                    <div class="dropdown-menu">
 
-                        <li>
                             <?= Html::a('<i class="fa fa-search"></i> Details', null, [
-                                'class' => 'btn-quote-details',
+                                'class' => 'btn-quote-details dropdown-item',
                                 'data-id' => $model->id,
                                 'data-title' => implode(', ',$tripsInfo),
                                 'data-url' => Url::to(['quotes/ajax-details', 'id' => $model->id]),
                                 //'data-target' => '#quote_detail_'.$model->uid,
                                 'title' => 'Details'
                             ]) ?>
-                        </li>
 
-
-                        <li>
                             <?= Html::a('<i class="fa fa-list"></i> Status logs', null, [
-                                'class' => 'view-status-log sl-quote__status-log',
+                                'class' => 'view-status-log sl-quote__status-log dropdown-item',
                                 'data-id' => $model->id,
                                 'title' => 'View status log'
                             ]) ?>
-                        </li>
-                        <li>
-                            <?= Html::a('<i title="" class="fa fa-list-alt"></i> Reserv. dump', null, [
-                                'class' => 'popover-class',
-                                'title' => 'Reservation Dump',
-                                'data-toggle' => 'popover',
-                                'data-html' => 'true',
-                                'data-title' => 'Reservation Dump',
-                                'data-trigger' => 'click',
-                                'data-placement' => 'left',
-                                'data-container' => 'body',
-                                'data-content' => '<div class="popover-dump">
-                                    <button class="btn btn-primary btn-clipboard popover-dump-copy" data-clipboard-text="'.$model->reservation_dump.'"><i class="fa fa-copy"></i></button>
-                                    '.str_replace("\n", '<br/>', $model->reservation_dump).'
-                                    </div>',
-                            ]);?>
-                        </li>
 
-                        <?php if ($appliedQuote === null): ?>
-                            <li>
+                            <?= Html::a('<i class="fa fa-list-alt"></i> Reserv. dump', null, [
+                                'class' => 'btn-reservation-dump dropdown-item',
+                                'title' => 'Reservation Dump quote: ' . $model->uid,
+                                'data-content' => \yii\helpers\Html::encode($model->reservation_dump)
+                            ]) ?>
+
+
+                        <?php if (!$appliedQuote): ?>
+
                                 <?php  echo Html::a('<i class="fa fa-copy"></i> Clone', null, [
-                                    'class' => 'clone-quote-by-uid-self',
+                                    'class' => 'clone-quote-by-uid-self dropdown-item',
                                     'data-uid' => $model->uid,
                                    // 'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
                                     'title' => 'Clone'
                                 ]);
                                 ?>
-                            </li>
+
                         <?php endif; ?>
 
-                        <?php if($model->status != Quote::STATUS_DECLINED):?>
-                        <li>
+                        <?php if(!$model->isDeclined()):?>
+
                             <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
+                                    'class' => 'dropdown-item',
                                 'target'    => '_blank',
                                 'title'     => 'View checkout',
                                 'data-pjax' => 0
                             ]);
                             ?>
-                        </li>
+
                         <?php endif; ?>
-                    </ul>
+                    </div>
                 </div>
-            </div>
-
-            <?/*
-
-			<div class="btn-group">
-				<?php if ($appliedQuote === null) {
-                    echo Html::button('<i class="fa fa-copy"></i>', [
-                        'class' => 'btn btn-primary add-clone-alt-quote',
-                        'data-uid' => $model->uid,
-                        'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
-                        'title' => 'Clone'
-                    ]);
-                } ?>
-				<?= Html::button('<i class="fa fa-list"></i>',[
-                    'style' => 'color: #ffffff;',
-                    'class' => 'view-status-log sl-quote__status-log btn btn-primary',
-                    'data-id' => $model->id,
-                    'title' => 'View status log'
-                ]) ?>
-                <?= Html::button('<i class="fa fa-eye"></i>', [
-                    'class' => 'btn btn-primary quote_details__btn',
-			        'data-title' => implode(', ',$tripsInfo),
-                    'data-target' => '#quote_detail_'.$model->uid,
-                    'title' => 'Details'
-                ]) ?>
-                <?= Html::button('<i title="" class="fa fa-terminal"></i>', [
-                    'class' => 'btn btn-primary popover-class',
-                    'title' => 'Reservation Dump',
-                    'data-toggle' => 'popover',
-                    'data-html' => 'true',
-                    'data-title' => 'Reservation Dump',
-                    'data-trigger' => 'click',
-                    'data-placement' => 'left',
-                    'data-container' => 'body',
-                    'data-content' => '<div class="popover-dump">
-                                    <button class="btn btn-primary btn-clipboard popover-dump-copy" data-clipboard-text="'.$model->reservation_dump.'"><i class="fa fa-copy"></i></button>
-                                    '.str_replace("\n", '<br/>', $model->reservation_dump).'
-                                    </div>',
-                ]);?>
-			</div>
-            */?>
-
 		</div>
 	</div>
 	<div class="quote__wrapper">

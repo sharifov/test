@@ -68,15 +68,15 @@ $this->registerJs($js);
 ?>
 
 <div class="panel panel-main">
-    <div class="panel-body">
-        <div class="panel panel-default">
+    <div class="card-body">
+        <div class="card card-default">
             <?php
             $form = ActiveForm::begin([
                 'id' => $formId,
                 'successCssClass' => '',
             ])
             ?>
-            <div class="panel-body">
+            <div class="card-body">
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="table-responsive">
@@ -168,10 +168,10 @@ $this->registerJs($js);
             <div class="panel-footer">
                 <div class="actions-btn-group">
                     <?php
-                    $searchButton = '<span class="btn-icon"><i class="fa fa-search"></i></span><span>Report</span>';
+                    $searchButton = '<i class="fa fa-search"></i> Report';
                     ?>
                     <?= Html::button($searchButton, [
-                        'class' => 'btn btn-with-icon btn-primary'
+                        'class' => 'btn btn-primary'
 
                     ]) ?>
                 </div>

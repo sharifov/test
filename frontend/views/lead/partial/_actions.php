@@ -9,7 +9,7 @@ use frontend\models\LeadForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 
 $leadModel = $leadForm->getLead();
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadModel->id]);
@@ -47,16 +47,19 @@ $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
 $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
     'class' => 'add-reason btn btn-primary',
     'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadModel->gid]),
+    'title' => 'Follow Up'
 ]);
 
 $buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
     'class' => 'add-reason btn btn-danger',
     'data-url' => Url::to(['lead-change-state/trash', 'gid' => $leadModel->gid]),
+    'title' => 'Trash'
 ]);
 
 $buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
     'class' => 'add-reason btn btn-primary',
     'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadModel->gid]),
+    'title' => 'Snooze'
 ]);
 
 
@@ -69,11 +72,13 @@ $buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
 $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
     'class' => 'add-reason btn btn-primary',
     'data-url' => \yii\helpers\Url::to(['lead-change-state/return', 'gid' => $leadModel->gid]),
+    'title' => 'Return Lead'
 ]);
 
 $buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
     'class' => 'add-reason btn btn-primary',
     'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadModel->gid]),
+    'title' => 'Reject'
 ]);
 
 $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadModel->l_answered ? 'UnAnswered' : 'Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadModel->id], [
@@ -180,8 +185,8 @@ if($project){
 
 <!--    	--><?php //if(count($buttonsSubAction) > 1):?>
 <!--    	<div class="dropdown inline-block">-->
-<!--            --><?//= Html::a('<span class="btn-icon"><i class="fa fa-ellipsis-v"></i></span><span class="btn-text">Action</span>', null, [
-//                'class' => 'btn btn-default btn-with-icon',
+<!--            --><?//= Html::a('<i class="fa fa-ellipsis-v"></i> Action', null, [
+//                'class' => 'btn btn-default',
 //                'data-toggle' => 'dropdown'
 //            ]) ?>
 <!--            <ul class="dropdown-menu" aria-labelledby="dLabel">-->
@@ -252,7 +257,7 @@ if($project){
                 ])?>
 
             <?php Modal::begin(['id' => 'split-profit-modal',
-                'header' => '<h2>Split profit</h2>',
+                'title' => 'Split profit',
                 'size' => Modal::SIZE_LARGE
             ])?>
             <?php Modal::end()?>
@@ -265,7 +270,7 @@ if($project){
                     ])?>
 
                 <?php Modal::begin(['id' => 'split-tips-modal',
-                    'header' => '<h2>Split tips</h2>',
+                    'title' => 'Split tips',
                     'size' => Modal::SIZE_LARGE
                 ])?>
                 <?php Modal::end()?>
@@ -279,7 +284,7 @@ if($project){
 
 
 <!----Popover for adding notes START---->
-<div id="popover-content-add-note" class="hidden popover-form">
+<div id="popover-content-add-note" class="d-none popover-form">
     <?php
     $note = new \common\models\Note();
     $addNoteUrl = Url::to([
@@ -310,37 +315,25 @@ if($project){
 </style>
 
 <?php Modal::begin(['id' => 'search-results__modal',
-    'header' => '<h2>Search results</h2>',
+    'title' => 'Search results',
     'size' => Modal::SIZE_LARGE
 ])?>
 <?php Modal::end()?>
 
 <?php Modal::begin(['id' => 'flight-details__modal',
-    'header' => '<h2></h2>',
+    'title' => 'Flight details',
     'size' => Modal::SIZE_DEFAULT,
 ])?>
 <?php Modal::end()?>
 
 <?php Modal::begin(['id' => 'search-result-quote__modal',
-    'header' => '<h2>Add quote</h2>',
+    'title' => 'Add quote',
     'size' => Modal::SIZE_LARGE,
 ])?>
 <?php Modal::end()?>
 <?php Modal::begin(['id' => 'preview-send-quotes',
-    'header' => '<h2>Preview email</h2>',
+    'title' => 'Preview email',
     'size' => Modal::SIZE_LARGE,
-])?>
-<?php Modal::end()?>
-
-<?php Modal::begin(['id' => 'modal-info',
-    'header' => '<h2>Info</h2>',
-    'size' => Modal::SIZE_LARGE,
-])?>
-<?php Modal::end()?>
-
-<?php Modal::begin(['id' => 'modal-info-d',
-    'header' => '<h2>Info</h2>',
-    'size' => Modal::SIZE_DEFAULT,
 ])?>
 <?php Modal::end()?>
 
@@ -450,13 +443,14 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
     });
 
     /***  Quick search quotes ***/
-    $('#quick-search-quotes').click(function (e) {
+    $('#quick-search-quotes').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#quick-search');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal({
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+        $('#modal-lg-label').html('Quick search quotes');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            modal.modal({
               backdrop: 'static',
               show: true
             });
@@ -467,8 +461,8 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
     $(document).on('click','#quick-search-quotes-btn', function (e) {
         //$('#popover-quick-search').popover('hide');
         e.preventDefault();
-        var url = $('#quick-search-quotes-btn').data('url');
-        $('#preloader').removeClass('hidden');
+        let url = $('#quick-search-quotes-btn').data('url');
+        $('#preloader').removeClass('d-none');
         var modal = $('#search-results__modal');
         
         
@@ -478,13 +472,13 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
             data: {'gds': $('#gds-selector').val()},
             url: url,
             success: function (data) {
-                $('#preloader').addClass('hidden');
+                $('#preloader').addClass('d-none');
                 modal.find('.modal-body').html(data);
                 modal.modal('show');
             },
             error: function (error) {
                // var obj = JSON.parse(error.data); // $.parseJSON( e.data );
-                $('#preloader').addClass('hidden');
+                $('#preloader').addClass('d-none');
                 console.error(error.responseText);
                 
                 alert('Server Error: ' + error.statusText);
@@ -513,17 +507,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
             //$('#lead-notes_for_experts').parent().addClass('has-error');
         }
     });
-
-    /*** Send email ***/
-    $('#send-email-action').click(function (e) {
-        e.preventDefault();
-        var editBlock = $('#create-quote');
-        editBlock.find('.modal-title').html('Send Email');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load($(this).data('url'), function( response, status, xhr ) {
-            editBlock.modal('show');
-        });
-    });
+    
 JS;
     $this->registerJs($js);
 }
@@ -606,66 +590,65 @@ $js = <<<JS
     });
 
     /*** Change Lead Status ***/
-    $('.add-reason').click(function (e) {
+    $('.add-reason').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#modal-error');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal('show');
+        let url = $(this).data('url');
+        let modal = $('#modal-df');
+        let title = $(this).attr('title');
+        $('#modal-df-label').html(title);
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            modal.modal('show');
         });
     });
 
-    $('.take-processing-btn').click(function (e) {
+    $('.take-processing-btn').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).attr('href');
+        let url = $(this).attr('href');
         if ($.inArray($(this).data('status'), [2, 8]) != -1) {
-            var editBlock = $('#modal-error');
-            editBlock.find('.modal-body').html('');
-            editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-                editBlock.modal('show');
+            let modal = $('#modal-sm');
+            $('#modal-sm-label').html('Take processing');
+            modal.find('.modal-body').html('');
+            modal.find('.modal-body').load(url, function( response, status, xhr ) {
+                modal.modal('show');
             });
         } else {
             window.location = url;
         }
     });
 
-    $('#view-client-actions-btn').click(function() {
-        var editBlock = $('#log-events');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load('$urlUserActions', function( response, status, xhr ) {
-            editBlock.modal('show');
-        });
-    });
+    
+       
 
     /***  Add PNR  ***/
-    $('#create-pnr').click(function (e) {
+    $('#create-pnr').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#create-quote');
-        editBlock.find('.modal-title').html('PAX INFO');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal('show');
+        let url = $(this).data('url');
+        let modal = $('#modal-df');
+        $('#modal-df-label').html('Create PNR');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            modal.modal('show');
         });
     });
 
-    $('#clone-lead').click(function (e) {
+    $('#clone-lead').on('click', function (e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#modal-error');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal('show');
+        let url = $(this).data('url');
+        let modal = $('#modal-sm');
+        $('#modal-sm-label').html('Clone Lead');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            modal.modal('show');
         });
     });
     
     
     $('#btn-lead-logs').on('click', function(e) {
         e.preventDefault();
-        var url = $(this).data('url');
-        var modal = $('#modal-info');
-        modal.find('.modal-header h2').text('Lead Activity Logs');
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+        $('#modal-lg-label').html('Old Lead Activity Logs');
         modal.find('.modal-body').html('');
         $('#preloader').removeClass('hidden');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
@@ -675,12 +658,33 @@ $js = <<<JS
         return false;
     });
     
+    
+     $('.btn-reservation-dump').on('click', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-df');
+        let title = $(this).attr('title');
+        $('#modal-df-label').html(title);
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        let content = $(this).data('content');
+        let content2 = '<textarea rows="5" id="text-quote-dump" readonly="readonly" style="width: 100%">' + content + '</textarea><br><br><div><button class="btn btn-primary btn-clipboard" data-clipboard-target="#text-quote-dump"><i class="fas fa-copy"></i> Copy to clipboard</button></div>';
+        
+        modal.find('.modal-body').html(content2);
+        modal.modal('show');
+        //return false;
+    });
+    
+    
+    
+    
+    
 
     //$(document).ready(function() {
-    var clipboard = new ClipboardJS('.btn-clipboard');
+    let clipboard = new ClipboardJS('.btn-clipboard');
 
     clipboard.on('success', function(e) {
-        alert('Reservation dump copied successfully to clipboard');
+        $('.btn-clipboard i').attr('class', 'fas fa-check');
+        //alert('Reservation dump copied successfully to clipboard');
         e.clearSelection();
     });
     //});
@@ -693,11 +697,11 @@ $this->registerJs($js);
 <?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css',[
     'depends' => [\yii\bootstrap\BootstrapAsset::class],
 ]);?>
-<?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal.css',[
-    'depends' => [\yii\bootstrap\BootstrapAsset::class],
-]);?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
+<?php //$this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal.css',[
+//    'depends' => [\yii\bootstrap4\BootstrapAsset::class],
+//]);?>
+<?php //$this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
+<?php //$this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js', ['depends' => [yii\web\JqueryAsset::class]])?>
 <?php $this->registerJsFile('/js/search-result.js', ['depends' => [yii\web\JqueryAsset::class]])?>

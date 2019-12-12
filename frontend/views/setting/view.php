@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             's_value',
             [
                 'attribute' => 's_updated_user_id',
-                'value' => function (\common\models\Setting $model) {
+                'value' => static function (\common\models\Setting $model) {
                     return ($model->sUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sUpdatedUser->username) : $model->s_updated_user_id);
                 },
                 'format' => 'raw',
@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 's_updated_dt',
-                'value' => function (\common\models\Setting $model) {
+                'value' => static function (\common\models\Setting $model) {
                     return $model->s_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_updated_dt)) : $model->s_updated_dt;
                 },
                 'format' => 'raw'

@@ -18,17 +18,17 @@ $formID = sprintf('alt-quote-info-form-%d', $quote->id);
 
 $js = <<<JS
     /***  Cancel card  ***/
-    $('#cancel-alt-quote').click(function (e) {
+    $('#cancel-alt-quote').on('click', function (e) {
         e.preventDefault();
-        var editBlock = $('#$formID');
-        editBlock.parent().parent().removeClass('in');
+        let editBlock = $('#$formID');
+        editBlock.parent().parent().removeClass('show');
         editBlock.parent().html('');
-        $('#create-quote').modal('hide');
+        $('#modal-lg').modal('hide');
         if ($(this).data('type') == 'search') {
-            $('#quick-search').modal('show');
+            //$('#quick-search').modal('show');
         }
     });
-    $('#cancel-confirm-quote').click(function (e) {
+    $('#cancel-confirm-quote').on('click', function (e) {
         e.preventDefault();
         $('#modal-confirm-alt-itinerary').modal('hide');
     });
@@ -45,13 +45,13 @@ $this->registerJs($js);
 ]) ?>
 <div class="alternatives__item">
     <div class="btn-wrapper">
-        <?= Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', [
+        <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
             'id' => 'cancel-alt-quote',
-            'class' => 'btn btn-danger btn-with-icon'
+            'class' => 'btn btn-danger'
         ]) ?>
-        <?= Html::submitButton('<span class="btn-icon"><i class="fa fa-save"></i></span><span>Confirm</span>', [
+        <?= Html::submitButton('<i class="fa fa-save"></i> Confirm', [
                 'id' => 'save-alt-quote',
-                'class' => 'btn btn-primary btn-with-icon'
+                'class' => 'btn btn-primary'
             ]) ?>
     </div>
 </div>

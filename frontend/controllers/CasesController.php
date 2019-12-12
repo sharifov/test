@@ -8,6 +8,8 @@ use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\DepartmentEmailProject;
+use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
@@ -36,11 +38,13 @@ use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
+use sales\repositories\client\ClientEmailRepository;
 use sales\services\cases\CasesSaleService;
 use sales\services\cases\CasesCommunicationService;
 use sales\repositories\user\UserRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesManageService;
+use sales\services\client\ClientUpdateFromEntityService;
 use Yii;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
@@ -69,6 +73,7 @@ use yii\widgets\ActiveForm;
  * @property UserRepository $userRepository,
  * @property CasesSaleRepository $casesSaleRepository
  * @property CasesSaleService $casesSaleService
+ * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
  */
 class CasesController extends FController
 {
@@ -81,6 +86,7 @@ class CasesController extends FController
     private $userRepository;
     private $casesSaleRepository;
     private $casesSaleService;
+    private $clientUpdateFromEntityService;
 
 	/**
 	 * CasesController constructor.
@@ -94,6 +100,7 @@ class CasesController extends FController
 	 * @param UserRepository $userRepository ,
 	 * @param CasesSaleRepository $casesSaleRepository
 	 * @param CasesSaleService $casesSaleService
+	 * @param ClientUpdateFromEntityService $clientUpdateFromEntityService
 	 * @param array $config
 	 */
     public function __construct(
@@ -107,6 +114,7 @@ class CasesController extends FController
 		UserRepository $userRepository,
 		CasesSaleRepository $casesSaleRepository,
 		CasesSaleService $casesSaleService,
+        ClientUpdateFromEntityService $clientUpdateFromEntityService,
 		$config = []
     )
     {
@@ -119,6 +127,7 @@ class CasesController extends FController
         $this->userRepository = $userRepository;
         $this->casesSaleRepository = $casesSaleRepository;
         $this->casesSaleService = $casesSaleService;
+        $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
     }
 
     /**
@@ -317,11 +326,23 @@ class CasesController extends FController
 
             $comForm->c_case_id = $model->cs_id;
 
+            $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS;
+
+            $isTypeEmail = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL;
+
+            if ($isTypeSMS && $model->isDepartmentSupport()) {
+            	$comForm->scenario = CaseCommunicationForm::SCENARIO_SMS_DEPARTMENT;
+			}
+
+            if ($isTypeEmail && $model->isDepartmentSupport()) {
+				$comForm->scenario = CaseCommunicationForm::SCENARIO_EMAIL_DEPARTMENT;
+			}
+
             if ($comForm->validate()) {
 
                 $project = $model->project;
 
-                if ((int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL) {
+                if ($isTypeEmail) {
 
 
                     //VarDumper::dump($comForm->quoteList, 10, true); exit;
@@ -348,7 +369,9 @@ class CasesController extends FController
 
 
                     $upp = null;
-                    if ($model->cs_project_id) {
+					if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::findOne(['dep_id' => $comForm->dep_email_id])) {
+						$mailFrom = $departmentEmail->dep_email;
+					} else if ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                         if ($upp) {
                             $mailFrom = $upp->upp_email;
@@ -429,7 +452,7 @@ class CasesController extends FController
                 }
 
 
-                if ((int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS) {
+                if ($isTypeSMS) {
 
                     $comForm->c_preview_sms = 1;
 
@@ -444,7 +467,11 @@ class CasesController extends FController
                     $content_data['project_id'] = $model->cs_project_id;
                     $phoneFrom = '';
 
-                    if ($model->cs_project_id) {
+                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::findOne(['dpp_id' => $comForm->dpp_phone_id])) {
+
+						$phoneFrom = $departmentPhone->dpp_phone_number;
+
+					} elseif ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                         if ($upp) {
                             $phoneFrom = $upp->upp_tw_phone_number;
@@ -571,6 +598,7 @@ class CasesController extends FController
                 Yii::error('Case id: ' . $model->cs_id . ', ' . VarDumper::dumpAsString($modelNote->errors), 'CaseController:view:CaseNote:save');
             } else {
                 $modelNote->cn_text = '';
+                $model->updateLastAction();
             }
         }
 
@@ -634,9 +662,10 @@ class CasesController extends FController
 
         $query3 = (new \yii\db\Query())
             ->addSelect(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
-            ->addSelect([new Expression('"voice" AS type'), 'c_case_id AS case_id', 'c_created_dt AS created_dt'])
+            ->addSelect([new Expression('"voice" AS type'), 'c_case_id AS case_id', 'MAX(c_created_dt) AS created_dt'])
             ->from('call')
             ->where(['c_case_id' => $model->cs_id])
+//            ->addGroupBy(['id', 'case_id', 'created_dt']);
             ->addGroupBy(['id']);
 
         $unionQuery = (new \yii\db\Query())
@@ -689,6 +718,8 @@ class CasesController extends FController
 
                 if(!$cs->save()) {
                     Yii::error(VarDumper::dumpAsString($cs->errors), 'CasesController:actionAddSale:CaseSale:save');
+                } else {
+                    $model->updateLastAction();
                 }
             }
 
@@ -721,6 +752,8 @@ class CasesController extends FController
                 $model->cs_lead_id = $lead->id;
                 if(!$model->update()) {
                     Yii::error(VarDumper::dumpAsString($model->errors), 'CasesController:actionAssignLead:Case:save');
+                } else {
+                    $model->updateLastAction();
                 }
             }
 
@@ -987,37 +1020,27 @@ class CasesController extends FController
         ]);
     }
 
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     */
     public function actionAddPhone()
     {
         $gid = (string)Yii::$app->request->get('gid');
         $case = $this->findModelByGid($gid);
+
         $form = new CasesAddPhoneForm($case);
 
-        try {
-            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-                if($case->client) {
-                    $existClientPhone = ClientPhone::find()->where(['client_id' => $case->client->id, 'phone' => $form->phone])->exists();
-                    if($existClientPhone) {
-                        Yii::$app->session->setFlash('warning', 'This phone already exists ("' . $form->phone . '"), Client Id: '.$case->client->id);
-                    } else {
-                        $clientPhone = new ClientPhone();
-                        $clientPhone->client_id = $case->client->id;
-                        $clientPhone->phone = $form->phone;
-                        if($clientPhone->save()) {
-                            Yii::$app->session->setFlash('success', 'Added new Phone ("' . $form->phone . '")');
-                        } else {
-                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($clientPhone->errors));
-                        }
-                    }
-                } else {
-                    Yii::$app->session->setFlash('warning', 'Client not found (Client Id: '.$case->cs_client_id.')');
-                }
+            try {
+                $this->clientUpdateFromEntityService->addPhoneFromCase($case, $form);
+                Yii::$app->session->setFlash('success', 'Added new Phone ("' . $form->phone . '")');
                 return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+            } catch (\DomainException $e) {
+                $form->addError('phone', $e->getMessage());
             }
-
-        } catch (\Throwable $exception) {
-            $form->addError('phone', $exception->getMessage());
         }
 
         return $this->renderAjax('partial/_add_phone', [
@@ -1025,9 +1048,48 @@ class CasesController extends FController
         ]);
     }
 
+//    public function actionAddPhone()
+//    {
+//        $gid = (string)Yii::$app->request->get('gid');
+//        $case = $this->findModelByGid($gid);
+//        $form = new CasesAddPhoneForm($case);
+//
+//        try {
+//            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+//
+//                if($case->client) {
+//                    $existClientPhone = ClientPhone::find()->where(['client_id' => $case->client->id, 'phone' => $form->phone])->exists();
+//                    if($existClientPhone) {
+//                        Yii::$app->session->setFlash('warning', 'This phone already exists ("' . $form->phone . '"), Client Id: '.$case->client->id);
+//                    } else {
+//                        $clientPhone = new ClientPhone();
+//                        $clientPhone->client_id = $case->client->id;
+//                        $clientPhone->phone = $form->phone;
+//                        if($clientPhone->save()) {
+//                            Yii::$app->session->setFlash('success', 'Added new Phone ("' . $form->phone . '")');
+//                        } else {
+//                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($clientPhone->errors));
+//                        }
+//                    }
+//                } else {
+//                    Yii::$app->session->setFlash('warning', 'Client not found (Client Id: '.$case->cs_client_id.')');
+//                }
+//                return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+//            }
+//
+//        } catch (\Throwable $exception) {
+//            $form->addError('phone', $exception->getMessage());
+//        }
+//
+//        return $this->renderAjax('partial/_add_phone', [
+//            'model' => $form,
+//        ]);
+//    }
+
     /**
      * @return string|Response
      * @throws NotFoundHttpException
+     * @throws \Throwable
      */
     public function actionAddEmail()
     {
@@ -1036,31 +1098,14 @@ class CasesController extends FController
 
         $form = new CasesAddEmailForm($case);
 
-        try {
-            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-
-                if($case->client) {
-                    $existClientEmail = ClientEmail::find()->where(['client_id' => $case->client->id, 'email' => $form->email])->exists();
-                    if($existClientEmail) {
-                        Yii::$app->session->setFlash('warning', 'This email already exists ("' . $form->email . '"), Client Id: '.$case->client->id);
-                    } else {
-                        $clientEmail = new ClientEmail();
-                        $clientEmail->client_id = $case->client->id;
-                        $clientEmail->email = $form->email;
-                        if($clientEmail->save()) {
-                            Yii::$app->session->setFlash('success', 'Added new Email ("' . $form->email . '")');
-                        } else {
-                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($clientEmail->errors));
-                        }
-                    }
-                } else {
-                    Yii::$app->session->setFlash('warning', 'Client not found (Client Id: '.$case->cs_client_id.')');
-                }
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->clientUpdateFromEntityService->addEmailFromCase($case, $form);
+                Yii::$app->session->setFlash('success', 'Added new Email ("' . $form->email . '")');
                 return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+            } catch (\DomainException $e) {
+                $form->addError('email', $e->getMessage());
             }
-
-        } catch (\Throwable $exception) {
-            $form->addError('email', $exception->getMessage());
         }
 
         return $this->renderAjax('partial/_add_email', [
@@ -1068,47 +1113,106 @@ class CasesController extends FController
         ]);
     }
 
+//    /**
+//     * @return string|Response
+//     * @throws NotFoundHttpException
+//     */
+//    public function actionAddEmail()
+//    {
+//        $gid = (string)Yii::$app->request->get('gid');
+//        $case = $this->findModelByGid($gid);
+//
+//        $form = new CasesAddEmailForm($case);
+//
+//        try {
+//            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+//
+//                if($case->client) {
+//                    $existClientEmail = ClientEmail::find()->where(['client_id' => $case->client->id, 'email' => $form->email])->exists();
+//                    if($existClientEmail) {
+//                        Yii::$app->session->setFlash('warning', 'This email already exists ("' . $form->email . '"), Client Id: '.$case->client->id);
+//                    } else {
+//                        $clientEmail = new ClientEmail();
+//                        $clientEmail->client_id = $case->client->id;
+//                        $clientEmail->email = $form->email;
+//                        if($clientEmail->save()) {
+//                            Yii::$app->session->setFlash('success', 'Added new Email ("' . $form->email . '")');
+//                        } else {
+//                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($clientEmail->errors));
+//                        }
+//                    }
+//                } else {
+//                    Yii::$app->session->setFlash('warning', 'Client not found (Client Id: '.$case->cs_client_id.')');
+//                }
+//                return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+//            }
+//
+//        } catch (\Throwable $exception) {
+//            $form->addError('email', $exception->getMessage());
+//        }
+//
+//        return $this->renderAjax('partial/_add_email', [
+//            'model' => $form,
+//        ]);
+//    }
+
     /**
      * @return string|Response
      * @throws NotFoundHttpException
+     * @throws \Throwable
      */
     public function actionClientUpdate()
     {
         $gid = (string)Yii::$app->request->get('gid');
         $case = $this->findModelByGid($gid);
 
+        if (!$client = $case->client) {
+            throw new NotFoundHttpException('The requested client does not exist.');
+        }
+
         $form = new CasesClientUpdateForm($case);
 
-        try {
-            if ($form->load(Yii::$app->request->post())) {
-                if($form->validate()) {
-                    if ($client = $case->client) {
-                        $client->first_name = $form->first_name;
-                        $client->last_name = $form->last_name;
-                        $client->middle_name = $form->middle_name;
-
-                        if ($client->save()) {
-                            Yii::$app->session->setFlash('success', 'Client information has been updated successfully.');
-                        } else {
-                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($client->errors));
-                        }
-
-                    } else {
-                        Yii::$app->session->setFlash('warning', 'Client not found (Client Id: ' . $case->cs_client_id . ')');
-                    }
-                    return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
-                }
-            } else {
-                if($client = $case->client) {
-                    $form->first_name = $client->first_name;
-                    $form->last_name = $client->last_name;
-                    $form->middle_name = $client->middle_name;
-                }
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->clientUpdateFromEntityService->updateClientFromCase($case, $form);
+                Yii::$app->session->setFlash('success', 'Client information has been updated successfully.');
+            } catch (\DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
             }
-
-        } catch (\Throwable $exception) {
-            $form->addError('first_name', $exception->getMessage());
+            return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
         }
+
+
+//        try {
+//            if ($form->load(Yii::$app->request->post())) {
+//                if($form->validate()) {
+//                    if ($client = $case->client) {
+//                        $client->first_name = $form->first_name;
+//                        $client->last_name = $form->last_name;
+//                        $client->middle_name = $form->middle_name;
+//
+//                        if ($client->save()) {
+//                            Yii::$app->session->setFlash('success', 'Client information has been updated successfully.');
+//                        } else {
+//                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($client->errors));
+//                        }
+//
+//                    } else {
+//                        Yii::$app->session->setFlash('warning', 'Client not found (Client Id: ' . $case->cs_client_id . ')');
+//                    }
+//                    return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+//                }
+//            } else {
+//                if($client = $case->client) {
+//                    $form->first_name = $client->first_name;
+//                    $form->last_name = $client->last_name;
+//                    $form->middle_name = $client->middle_name;
+//                }
+//            }
+//
+//        } catch (\Throwable $exception) {
+//            $form->addError('first_name', $exception->getMessage());
+//        }
 
         return $this->renderAjax('partial/_client_update', [
             'model' => $form,
@@ -1269,7 +1373,7 @@ class CasesController extends FController
 				}
 
 				if (!empty($error)) {
-					$out['errorHtml'] =  \yii\bootstrap\Alert::widget([
+					$out['errorHtml'] =  \yii\bootstrap4\Alert::widget([
 						'options' => [
 							'class' => 'alert-danger'
 						],

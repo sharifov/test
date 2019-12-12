@@ -52,7 +52,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'id',
             'label' => 'Lead Id',
             'visible' => $is_manager,
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return $model['id'];
             },
         ],
@@ -61,7 +61,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'bo_flight_id',
             'label' => 'Sale ID (BO)',
             'visible' => in_array($queueType, ['booked', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return $model['bo_flight_id'];
             },
         ],
@@ -70,7 +70,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'visible' => !in_array($queueType, ['sold', 'booked']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model['created'])); //Lead::getPendingAfterCreate($model['created']);
             },
             'format' => 'raw'
@@ -79,7 +79,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'pending_last_status',
             'label' => 'Pending Time',
             'visible' => in_array($queueType, ['sold', 'booked']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getPendingInLastStatus($model['updated']);
             },
             'format' => 'raw'
@@ -89,7 +89,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'created',
             //'label' => 'Created Date',
             'visible' => !in_array($queueType, ['booked', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created']));
             },
             'format' => 'html',
@@ -99,7 +99,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'PNR',
             'visible' => in_array($queueType, ['booked', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 if (!empty($model['additional_information'])) {
                     $additionally = new \common\models\local\LeadAdditionalInformation();
                     $additionally->setAttributes(@json_decode($model['additional_information'], true));
@@ -112,7 +112,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Passengers',
             'visible' => in_array($queueType, ['booked', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 $content = [];
                 if (!empty($model['additional_information'])) {
                     $additionally = new \common\models\local\LeadAdditionalInformation();
@@ -127,7 +127,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'attribute' => 'Client',
             'visible' => !in_array($queueType, ['booked']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
 
                 if(isset($model['first_name'])) {
                     $clientName = $model['first_name'] . ' ' . $model['last_name'];
@@ -147,7 +147,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Client Email',
             'visible' => in_array($queueType, ['sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return !empty($model['emails'])
                     ? $model['emails'] : '---';
             },
@@ -156,7 +156,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Client Phone',
             'visible' => in_array($queueType, ['trash', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 /**
                  * @var $model Lead
                  */
@@ -169,7 +169,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'clientTime',
             'label' => 'Client Time',
             'visible' => !in_array($queueType, ['booked', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
@@ -177,7 +177,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Destination',
             'visible' => in_array($queueType, ['booked', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return empty($model['destination'])
                     ? null : sprintf('%s (%s)', $model['city'], $model['destination']);
             },
@@ -204,7 +204,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'attribute' => 'Quotes ',
             'visible' => !in_array($queueType, ['booked', 'inbox', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 /**
                  * @var $model Lead
                  */
@@ -219,7 +219,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'pending_in_trash',
             'label' => 'Pending in Trash',
             'visible' => in_array($queueType, ['trash']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getPendingInLastStatus($model['updated']);
             },
             'format' => 'raw'
@@ -234,7 +234,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
                 ])
                 : null,
             'visible' => !in_array($queueType, ['inbox', 'follow-up']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return !empty($model['username']) ? '<i class="fa fa-user"></i> ' . Html::encode($model['username']) : '-';
             },
             'format' => 'html'
@@ -242,7 +242,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Profit',
             'visible' => in_array($queueType, ['booked', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 $profit = Quote::getProfit($model['mark_up'], $model['selling'], $model['fare_type'], boolval($model['check_payment']));
                 return sprintf('<strong>$%s</strong>', number_format($profit, 2));
                 /*$profit = 0;
@@ -257,7 +257,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Date of Issue',
             'visible' => in_array($queueType, ['sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return $model['updated'];
             },
             'format' => 'raw'
@@ -265,7 +265,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Date of Departure',
             'visible' => in_array($queueType, ['sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 if (isset($model['reservation_dump']) && !empty($model['reservation_dump'])) {
                     $data = [];
                     $segments = Quote::parseDump($model['reservation_dump'], false, $data, true);
@@ -278,7 +278,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Processing Status',
             'visible' => in_array($queueType, ['booked']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 $additionally = new \common\models\local\LeadAdditionalInformation();
                 if (!empty($model['additional_information'])) {
                     $additionally->setAttributes(@json_decode($model['additional_information'], true));
@@ -302,7 +302,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         [
             'label' => 'Status',
             'visible' => !in_array($queueType, ['sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getStatusLabel($model['status']);
             },
             'format' => 'raw'
@@ -311,7 +311,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'last_activity',
             'label' => 'Last Activity',
             'visible' => !in_array($queueType, ['inbox', 'sold']),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 if (empty($model['last_activity'])) {
                     return '-';
                 }
@@ -324,7 +324,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'label' => 'Reason',
             'visible' => !in_array($queueType, ['inbox', 'sold', 'booked']),
             'contentOptions' => ['style' => 'max-width: 250px;'],
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return !empty($model['reason']) ? $model['reason'] : '-';
             },
             'format' => 'raw'
@@ -356,7 +356,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'label' => 'Countdown',
             'visible' => ($div == Lead::DIV_GRID_IN_SNOOZE),
             'contentOptions' => ['style' => 'width: 115px;'],
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getSnoozeCountdown($model['id'], $model['snooze_for']);
             },
             'format' => 'raw'
@@ -366,7 +366,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'visible' => !in_array($queueType, ['inbox']),
             'contentOptions' => ['style' => 'width: 90px;', 'class' => 'text-center'],
             'options' => ['class' => 'text-right'],
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getRating2($model['rating']);
             },
             'format' => 'raw'
@@ -375,7 +375,7 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             'attribute' => 'source_id',
             'label' => 'Market Info',
             'visible' => in_array($queueType, ['sold']) && !Yii::$app->user->identity->canRole('agent'),
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return $model['name'];
             },
             'format' => 'raw'

@@ -83,13 +83,13 @@ $this->registerJs($js);
         'rows' => 20
     ]) ?>
     <div class="btn-wrapper modal-footer">
-        <?= Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', [
+        <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
             'data-dismiss' => 'modal',
-            'class' => 'btn btn-danger btn-with-icon'
+            'class' => 'btn btn-danger'
         ]) ?>
-        <?= Html::button('<span class="btn-icon"><i class="fa fa-save"></i></span><span>Save</span>', [
+        <?= Html::button('<i class="fa fa-save"></i> Save', [
             'id' => 'save-template',
-            'class' => 'btn btn-primary btn-with-icon'
+            'class' => 'btn btn-primary'
         ]) ?>
     </div>
     <?php ActiveForm::end() ?>

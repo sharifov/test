@@ -6,9 +6,8 @@ use frontend\widgets\redial\ClientPhonesDTO;
 use frontend\widgets\redial\LeadRedialViewWidget;
 use frontend\widgets\redial\RedialUrl;
 use kartik\select2\Select2;
-use yii\helpers\Html;
+use yii\bootstrap\Html;
 use yii\helpers\Url;
-use yii\helpers\VarDumper;
 use yii\web\View;
 use yii\web\JqueryAsset;
 
@@ -17,9 +16,9 @@ use yii\web\JqueryAsset;
 /** @var RedialUrl $viewUrl */
 /** @var RedialUrl $takeUrl */
 /** @var RedialUrl $reservationUrl */
+/** @var RedialUrl $phoneNumberFromUrl */
 /** @var string $script */
 
-/** @var string $phoneFrom */
 /** @var ClientPhonesDTO[] $phonesTo */
 /** @var int $projectId */
 /** @var int $redialAutoTakeSeconds */
@@ -38,7 +37,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
             <div class="col-md-12">
                 <div id="redial-lead-call-status-block" style="display: none">
 
-                    <div class="text-center badge badge-warning" style="font-size: 35px;">
+                    <div class="text-center badge badge-warning" style="font-size: 18px;">
                         <span id="redial-lead-call-status-block-text"></span>
                     </div>
 
@@ -54,8 +53,8 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
             </div>
             <div class="col-md-3"></div>
 
-            <div class="col-md-12">
-                <div class="col-sm-2">
+            <div class="col-md-12 group-redial-lead-phone-to">
+                <div class="col-md-2">
 
                     <?php
                     $phones = [];
@@ -67,26 +66,25 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
                     <?= Select2::widget([
                         'id' => 'redial-lead-phone-to',
                         'name' => 'redial-lead-phone-to',
-                        'theme' => Select2::THEME_KRAJEE,
+                        'theme' => Select2::THEME_BOOTSTRAP,
                         'data' => $phones,
                         'options' => [
                             'multiple' => false
                         ],
-                        'addon' => [
-                            'append' => [
-                                'content' => Html::button('Call', [
-                                    'class' => 'btn btn-success',
-                                    'title' => 'Call',
-                                    'data-toggle' => 'tooltip',
-                                    'id' => 'redial-lead-actions-block-call',
-                                ]),
-                                'asButton' => true
-                            ]
-                        ]
                     ]) ?>
 
                 </div>
+                <div class="col-md-1">
+                    <?= Html::button('<i class="fas fa-phone"></i> Call', [
+                                    'class' => 'btn btn-success',
+                                    'data-toggle' => 'tooltip',
+                                    'id' => 'redial-lead-actions-block-call',
+                                ])
+                    ?>
+                </div>
+            </div>
 
+            <div class="col-lg-12">
                 <div id="redial-lead-actions-block">
 
                     <div id="redial-lead-actions-block-timer-countdown" style="display: none ">
@@ -132,7 +130,7 @@ $("#redial-lead-actions-block-call").on('click', function (e) {
         return ;
     }
     $('.group-redial-lead-phone-to').hide();
-    leadRedialReservationAndCall(phoneTo);
+    getPhoneNumberFromAndNext(phoneTo);
 });
 
 $("#redial-lead-actions-take").on('click', function (e) {
@@ -152,10 +150,10 @@ function hideActionBlock() {
     $('#redial-lead-actions-block *').hide();
 }
 
-function leadRedialCall(phoneTo) {
+function leadRedialCall(phoneFrom, phoneTo) {
     $("#redial-lead-call-status-block-text").html('Processing ...');
     $('#redial-lead-call-status-block').show();
-    webCallLeadRedial('{$phoneFrom}', phoneTo, {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
+    webCallLeadRedial(phoneFrom, phoneTo, {$projectId}, {$lead->id}, 'web-call', {$callSourceType});  
 }
 
 function callInProgress() {
@@ -163,6 +161,30 @@ function callInProgress() {
     $("#redial-lead-call-status-block-text").html('In progress ...');
     showActionBlock();
     startTimer({$redialAutoTakeSeconds});
+}
+
+function getPhoneNumberFromAndNext(phoneTo) {
+    // new PNotify({title: "Take Lead", type: "info", text: 'Get "from phone number"', hide: true});
+    $.ajax({
+        type: '{$phoneNumberFromUrl->method}',
+        url: '{$phoneNumberFromUrl->url}',
+        data: {$phoneNumberFromUrl->getData()}
+    })
+    .done(function(data) {
+        if (data.success) {
+            // new PNotify({title: "Take Lead", type: "success", text: 'Phone number found', hide: true});
+            leadRedialReservationAndNext(data.phoneFrom, phoneTo);
+        } else {
+           let text = 'Error. Try again later';
+           if (data.message) {
+               text = data.message;
+           }
+           new PNotify({title: "Lead Redial", type: "error", text: text, hide: true});
+        }
+    })
+    .fail(function() {
+        new PNotify({title: "Lead Redial", type: "error", text: 'Try again later.', hide: true});
+    })
 }
 
 function leadRedialTake() {
@@ -199,7 +221,7 @@ function leadRedialTake() {
     })
 }
 
-function leadRedialReservationAndCall(phoneTo) {
+function leadRedialReservationAndNext(phoneFrom, phoneTo) {
     new PNotify({title: "Take Lead", type: "info", text: 'Reservation for call', hide: true});
     $.ajax({
         type: '{$reservationUrl->method}',
@@ -208,8 +230,8 @@ function leadRedialReservationAndCall(phoneTo) {
     })
     .done(function(data) {
         if (data.success) {
-            new PNotify({title: "Take Lead: Reservation", type: "success", text: 'Lead reserved', hide: true});
-            leadRedialCall(phoneTo);
+            new PNotify({title: "Take Lead: Reservation", type: "success", text: 'Success', hide: true});
+            leadRedialCall(phoneFrom, phoneTo);
         } else {
            let text = 'Error. Try again later';
            if (data.message) {

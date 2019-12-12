@@ -134,138 +134,142 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             ]) ?>
         </div>
         <div class="col-md-3">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'id',
-                    'uid',
-                    'gid',
-                    'l_request_hash',
+            <div class="table-responsive">
+                <?= DetailView::widget([
+                    'model' => $model,
+                    'attributes' => [
+                        'id',
+                        'uid',
+                        'gid',
+                        'l_request_hash',
 
-                    [
-                        'attribute' => 'employee_id',
-                        'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
-                        },
-                    ],
-
-                    //'employee_id',
-
-                    [
-                        'attribute' => 'l_init_price',
-                        //'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
-                        },
-                    ],
-
-                    [
-                        'attribute' => 'status',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getStatusName(true);
-                        },
-                        'format' => 'raw',
-
-                    ],
-
-                    [
-                        'attribute' => 'l_duplicate_lead_id',
-                        'label' => 'Duplicate from',
-                        'value' => function (\common\models\Lead $model) {
-                            return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-
-                    ],
-
-                    [
-                        'attribute' => 'project_id',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->project ? $model->project->name : '-';
-                        },
-
-                    ],
-
-                    [
-                        'attribute' => 'source_id',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->source ? $model->source->name : '-';
-                        },
-                        'visible' => !$isAgent
-                    ],
-
-                    [
-                            'label' => 'Type create',
-                            'attribute' => 'l_type_create',
-                            'value' => static function (Lead $lead) {
-                                if ($lead->l_type_create === null) {
-                                    return '';
-                                }
-                                return Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? 'Undefined';
+                        [
+                            'attribute' => 'employee_id',
+                            'format' => 'raw',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
                             },
-                    ],
+                        ],
 
-                ],
-            ]) ?>
+                        //'employee_id',
+
+                        [
+                            'attribute' => 'l_init_price',
+                            //'format' => 'raw',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
+                            },
+                        ],
+
+                        [
+                            'attribute' => 'status',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->getStatusName(true);
+                            },
+                            'format' => 'raw',
+
+                        ],
+
+                        [
+                            'attribute' => 'l_duplicate_lead_id',
+                            'label' => 'Duplicate from',
+                            'value' => static function (\common\models\Lead $model) {
+                                return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+                            },
+                            'format' => 'raw',
+
+                        ],
+
+                        [
+                            'attribute' => 'project_id',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->project ? $model->project->name : '-';
+                            },
+
+                        ],
+
+                        [
+                            'attribute' => 'source_id',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->source ? $model->source->name : '-';
+                            },
+                            'visible' => !$isAgent
+                        ],
+
+                        [
+                                'label' => 'Type create',
+                                'attribute' => 'l_type_create',
+                                'value' => static function (Lead $lead) {
+                                    if ($lead->l_type_create === null) {
+                                        return '';
+                                    }
+                                    return Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? 'Undefined';
+                                },
+                        ],
+
+                    ],
+                ]) ?>
+            </div>
         </div>
         <div class="col-md-3">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'attribute' => 'trip_type',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getFlightTypeName();
-                        },
+            <div class="table-responsive">
+                <?= DetailView::widget([
+                    'model' => $model,
+                    'attributes' => [
+                        [
+                            'attribute' => 'trip_type',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->getFlightTypeName();
+                            },
+
+                        ],
+
+                        [
+                            'attribute' => 'cabin',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->getCabinClassName();
+                            },
+
+                        ],
+
+                        /*'project_id',
+                        'source_id',
+                        'trip_type',
+                        'cabin',*/
+                        'adults',
+                        'children',
+                        'infants',
+                        'notes_for_experts:ntext',
+
+
+                        [
+                            'attribute' => 'created',
+                            'value' => function(\common\models\Lead $model) {
+                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
+                            'attribute' => 'updated',
+                            'value' => function(\common\models\Lead $model) {
+                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
+                            'attribute' => 'l_last_action_dt',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->l_last_action_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
+                            },
+                            'format' => 'raw',
+                        ],
+
 
                     ],
-
-                    [
-                        'attribute' => 'cabin',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getCabinClassName();
-                        },
-
-                    ],
-
-                    /*'project_id',
-                    'source_id',
-                    'trip_type',
-                    'cabin',*/
-                    'adults',
-                    'children',
-                    'infants',
-                    'notes_for_experts:ntext',
-
-
-                    [
-                        'attribute' => 'created',
-                        'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                        },
-                        'format' => 'raw',
-                    ],
-
-                    [
-                        'attribute' => 'updated',
-                        'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-                        },
-                        'format' => 'raw',
-                    ],
-
-                    [
-                        'attribute' => 'l_last_action_dt',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->l_last_action_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
-                        },
-                        'format' => 'raw',
-                    ],
-
-
-                ],
-            ]) ?>
+                ]) ?>
+            </div>
         </div>
 
         <div class="col-md-3">
@@ -498,10 +502,10 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
 
 <?php
-yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modal-ip-Header'],
+yii\bootstrap4\Modal::begin([
     'id' => 'modal-ip',
     'size' => 'modal-lg',
+    'title' => '',
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 
@@ -514,12 +518,12 @@ if($model->request_ip_detail){
         echo '</pre>';
     }
 }
-yii\bootstrap\Modal::end();
+yii\bootstrap4\Modal::end();
 
 
 $jsCode = <<<JS
     $(document).on('click', '#btn_show_modal', function(){
-        $('#modal-ip-Header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modal-ip-label').html($(this).attr('title'));
         $('#modal-ip').modal('show');
         return false;
     });

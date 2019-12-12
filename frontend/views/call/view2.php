@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'c_call_type_id',
                 [
                     'attribute' => 'c_call_type_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return $model->getCallTypeName();
                     },
                 ],
@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_call_status',
                 [
                     'attribute' => 'c_client_id',
-                    'value' => function (\common\models\Call $model) {
+                    'value' => static function (\common\models\Call $model) {
                         return  $model->c_client_id ?: '-';
                     },
                 ],
@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_created_user_id',
             [
                 'attribute' => 'c_created_user_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
                 },
                 'format' => 'raw'
@@ -84,14 +84,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_created_dt',
             [
                 'attribute' => 'c_created_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'c_updated_dt',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
                 },
                 'format' => 'raw'
@@ -101,7 +101,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_project_id',
             [
                 'attribute' => 'c_project_id',
-                'value' => function (\common\models\Call $model) {
+                'value' => static function (\common\models\Call $model) {
                     return $model->cProject ? $model->cProject->name : '-';
                 },
                 'filter' => \common\models\Project::getList()

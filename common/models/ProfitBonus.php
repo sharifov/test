@@ -39,8 +39,8 @@ class ProfitBonus extends \yii\db\ActiveRecord
             [['pb_user_id', 'pb_min_profit', 'pb_bonus', 'pb_updated_user_id'], 'integer'],
             [['pb_updated_dt'], 'safe'],
             [['pb_user_id', 'pb_min_profit'], 'unique', 'targetAttribute' => ['pb_user_id', 'pb_min_profit']],
-            [['pb_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['pb_updated_user_id' => 'id']],
-            [['pb_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['pb_user_id' => 'id']],
+            [['pb_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pb_updated_user_id' => 'id']],
+            [['pb_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pb_user_id' => 'id']],
         ];
     }
 
@@ -78,7 +78,7 @@ class ProfitBonus extends \yii\db\ActiveRecord
      */
     public function getPbUpdatedUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'pb_updated_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'pb_updated_user_id']);
     }
 
     /**
@@ -86,7 +86,7 @@ class ProfitBonus extends \yii\db\ActiveRecord
      */
     public function getPbUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'pb_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'pb_user_id']);
     }
 
     /**

@@ -31,7 +31,7 @@ use yii\helpers\Html; ?>
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: none;">
-        <div class="panel-body">
+        <div class="card-body">
     <div class="table-responsive mb-20">
         <table class="table table-striped table-bordered">
             <thead>

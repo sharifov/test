@@ -21,7 +21,7 @@ $js = <<<JS
     $('#cancel-sent-email').click(function (e) {
         e.preventDefault();
         var editBlock = $('#$formId');
-        editBlock.parent().parent().removeClass('in');
+        editBlock.parent().parent().removeClass('show');
         editBlock.parent().html('');
         $('#preview-send-quotes').modal('hide');
     });
@@ -65,12 +65,12 @@ if (empty($errors)) :
     <?= $form->field($previewEmailModel,'email', ['template' => '{input}'])->hiddenInput()?>
     <?= $form->field($previewEmailModel,'quotes', ['template' => '{input}'])->hiddenInput()?>
     <div class="btn-wrapper">
-        <?= Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', [
+        <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
             'id' => 'cancel-sent-email',
-            'class' => 'btn btn-danger btn-with-icon'
+            'class' => 'btn btn-danger'
         ]) ?>
-        <?= Html::submitButton('<span class="btn-icon"><i class="fa fa-envelope"></i></span><span>Send</span>', [
-            'class' => 'btn btn-primary btn-with-icon'
+        <?= Html::submitButton('<i class="fa fa-envelope"></i> Send', [
+            'class' => 'btn btn-primary'
         ]) ?>
     </div>
     <?php \yii\widgets\ActiveForm::end();

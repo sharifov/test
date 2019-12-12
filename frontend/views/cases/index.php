@@ -69,7 +69,7 @@ if ($user->isAdmin()) {
             'cs_gid',
             [
                 'attribute' => 'cs_project_id',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
                 },
                 'format' => 'raw',
@@ -77,21 +77,21 @@ if ($user->isAdmin()) {
             ],
             [
                 'attribute' => 'cs_dep_id',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->department ? $model->department->dep_name : '';
                 },
                 'filter' => EmployeeDepartmentAccess::getDepartments()
             ],
             [
                 'attribute' => 'cs_category',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
                 'filter' => CasesCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
             ],
             [
                 'attribute' => 'cs_status',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     $value = CasesStatus::getName($model->cs_status);
                     $str = '<span class="label ' . CasesStatus::getClass($model->cs_status) . '">' . $value . '</span>';
                     if ($model->lastLogRecord) {
@@ -110,7 +110,7 @@ if ($user->isAdmin()) {
             'cs_subject',
             [
                 'attribute' => 'cs_user_id',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->owner ? '<i class="fa fa-user"></i> ' .Html::encode($model->owner->username) : '-';
                 },
                 'format' => 'raw',
@@ -118,15 +118,22 @@ if ($user->isAdmin()) {
             ],
             [
                 'attribute' => 'cs_lead_id',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->lead ? $model->lead->uid : '-';
                 },
                 'filter' => false
             ],
             [
                 'attribute' => 'cs_created_dt',
-                'value' => function (Cases $model) {
+                'value' => static function (Cases $model) {
                     return $model->cs_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'cs_last_action_dt',
+                'value' => static function (Cases $model) {
+                    return $model->cs_last_action_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_last_action_dt)) : '-';
                 },
                 'format' => 'raw'
             ],

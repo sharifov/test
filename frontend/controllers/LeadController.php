@@ -109,7 +109,7 @@ class LeadController extends FController
 //            if (in_array($action->id, ['create'])) {
 //                //Yii::$app->setLayoutPath('@frontend/views/layouts');
 //                //$this->layout = 'sale';
-//                $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
+//                $this->layout = '@app/themes/gentelella_v2/views/layouts/main_lead';
 //            }
 //            return true;
 //        }
@@ -519,7 +519,7 @@ class LeadController extends FController
                     $data['origin'] = '';
 
 
-                    //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $data, 'ru-RU');
+                    //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $data, 'ru-RU');
                     //$mailTypes = $communication->mailTypes(7);
 
                     $content_data['email_body_html'] = $comForm->c_email_message;
@@ -560,7 +560,7 @@ class LeadController extends FController
                         $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
 
                         $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
-                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
 
                         //VarDumper::dump($content_data, 10 , true); exit;
@@ -940,17 +940,21 @@ class LeadController extends FController
 //            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
 
         $query3 = (new \yii\db\Query())
-            ->addSelect(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
-            ->addSelect([new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
+            ->select(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
+            ->addSelect(['type' => new Expression('"voice"')])
+            ->addSelect(['lead_id' => 'c_lead_id', 'created_dt' => 'MAX(c_created_dt)'])
             ->from('call')
             ->where(['c_lead_id' => $lead->id])
+//            ->addGroupBy(['id', 'c_lead_id', 'c_created_dt']);
             ->addGroupBy(['id']);
+
+//        VarDumper::dump($query3->createCommand()->getRawSql());die;
 
         $unionQuery = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)->union($query3)])
             ->orderBy(['created_dt' => SORT_ASC]);
 
-//        echo $query3->createCommand()->getRawSql(); exit;
+        //echo $query3->createCommand()->getRawSql(); exit;
 
         $dataProviderCommunication = new ActiveDataProvider([
             'query' => $unionQuery,
@@ -1155,153 +1159,6 @@ class LeadController extends FController
         return null;
     }
 
-    /*public function actionCheckUpdates($leadId, $lastUpdate)
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $response = [
-            'needRefresh' => false
-        ];
-        $model = Lead::findOne([
-            'id' => $leadId
-        ]);
-        if ($model !== null) {
-            $query = LeadLog::find()
-                ->where(['lead_id' => $leadId])
-                ->andWhere('created > :lastUpdate', [':lastUpdate' => $lastUpdate]);
-
-            $logs = $query->all();
-            if (count($logs)) {
-                $response['logs'] = $this->renderAjax('partial/_leadLog', [
-                    'logs' => $model->leadLogs
-                ]);
-                $response['checkUpdatesUrl'] = Url::to([
-                    'lead/check-updates',
-                    'leadId' => $leadId,
-                    'lastUpdate' => date('Y-m-d H:i:s'),
-                ]);
-                $response['content'] = $this->renderAjax('partial/_updateModal');
-            } else {
-                $response['logs'] = '';
-                $response['checkUpdatesUrl'] = Url::to([
-                    'lead/check-updates',
-                    'leadId' => $leadId,
-                    'lastUpdate' => $lastUpdate,
-                ]);
-            }
-            $needRefresh = $query->andWhere('employee_id <> :employee_id OR employee_id IS NULL', [
-                ':employee_id' => Yii::$app->user->identity->getId()
-            ])->all();
-
-            $response['needRefresh'] = count($needRefresh);
-        }
-
-        return $response;
-    }*/
-
-    /*public function actionGetBadges()
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $response = Lead::getBadgesSingleQuery();
-        return $response;
-    }*/
-
-    public function actionSendEmail($id)
-    {
-        /**
-         * @var $lead Lead
-         */
-
-        $lead = Lead::findOne(['id' => $id]);
-        if ($lead !== null) {
-            $preview = false;
-            $sendEmailModel = new SendEmailForm();
-            $sendEmailModel->employee = $lead->employee;
-            $sendEmailModel->project = $lead->project;
-
-            $userProjectParams = UserProjectParams::findOne([
-                'upp_user_id' => $sendEmailModel->employee->id,
-                'upp_project_id' => $sendEmailModel->project->id
-            ]);
-
-
-            if (!$userProjectParams) {
-                throw new BadRequestHttpException('Not found UserProjectParams (user_id: ' . $sendEmailModel->employee->id . ', project_id: ' . $sendEmailModel->project->id . ' )');
-            }
-
-            $templates = ProjectEmailTemplate::getTypesForSellers();
-            if (Yii::$app->request->isAjax) {
-                $sendEmailModel->type = Yii::$app->request->get('type');
-                $template = $sendEmailModel->getTemplate();
-                if (Yii::$app->request->isGet) {
-                    if ($template !== null) {
-                        $sendEmailModel->populate($template, $lead->client, $userProjectParams);
-                    }
-                } else {
-                    $attr = Yii::$app->request->post();
-                    if (isset($attr['extra_body']) && isset($attr['subject'])) {
-                        $sendEmailModel->extraBody = $attr['extra_body'];
-                        $sendEmailModel->subject = $attr['subject'];
-                        $preview = true;
-                    }
-                    if ($template !== null) {
-                        $sendEmailModel->populate($template, $lead->client, $userProjectParams);
-                    }
-                }
-                return $this->renderAjax('partial/_sendEmail', [
-                    'templates' => $templates,
-                    'sendEmailModel' => $sendEmailModel,
-                    'lead' => $lead,
-                    'preview' => $preview
-                ]);
-            }
-            if (Yii::$app->request->isPost) {
-                $attr = Yii::$app->request->post($sendEmailModel->formName());
-                $sendEmailModel->attributes = $attr;
-                $template = $sendEmailModel->getTemplate();
-                if ($template !== null) {
-                    $sendEmailModel->populate($template, $lead->client, $userProjectParams);
-                }
-                $isSent = $sendEmailModel->sentEmail($lead);
-                if ($isSent) {
-                    Yii::$app->getSession()->setFlash('success', sprintf('Sent email \'%s\' succeed.', $sendEmailModel->subject));
-                } else {
-                    Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $sendEmailModel->subject));
-                }
-
-                return $this->redirect(['lead/view', 'gid' => $lead->gid]);
-
-            } else {
-                return $this->renderAjax('partial/_sendEmail', [
-                    'templates' => $templates,
-                    'sendEmailModel' => $sendEmailModel,
-                    'lead' => $lead,
-                    'preview' => $preview
-                ]);
-            }
-        }
-        throw new BadRequestHttpException();
-    }
-
-    /*public function actionCallExpert($id)
-    {
-        $lead = Lead::findOne(['id' => $id]);
-        if ($lead !== null && !$lead->called_expert) {
-            $data = $lead->getLeadInformationForExpert();
-            $data['call_expert'] = true;
-            $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
-
-            $lead->notes_for_experts = Yii::$app->request->post('notes');
-
-            if ($result['status'] == 'Success' && empty($result['errors'])) {
-                $lead->called_expert = true;
-                Yii::$app->getSession()->setFlash('success', 'Call expert request succeeded');
-            } else {
-                Yii::$app->getSession()->setFlash('warning', print_r($result['errors'], true));
-            }
-            $lead->save();
-        }
-        return $this->redirect(Yii::$app->request->referrer);
-    }*/
 
     public function actionUnprocessed($show)
     {
@@ -1317,20 +1174,7 @@ class LeadController extends FController
         return $this->redirect(['follow-up']);
     }
 
-    /*public function actionAddNote()
-    {
-        $lead = Lead::findOne(['id' => Yii::$app->request->get('id', 0)]);
 
-        if ($lead !== null && Yii::$app->request->isPost) {
-            $model = new Note();
-            $attr = Yii::$app->request->post($model->formName());
-            $model->attributes = $attr;
-            $model->employee_id = Yii::$app->user->identity->getId();
-            $model->lead_id = $lead->id;
-            $model->save();
-        }
-        return $this->redirect(Yii::$app->request->referrer);
-    }*/
 
     public function actionSetRating($id)
     {
@@ -1349,181 +1193,6 @@ class LeadController extends FController
         }
         return false;
     }
-
-//    public function actionUnassign($id)
-//    {
-//        $id = (int)$id;
-//
-//        try {
-//            $lead = $this->leadRepository->find($id);
-//            if ($lead->isCompleted()) {
-//                Yii::$app->session->setFlash('warning', 'Lead: ' . $id . ' is completed!');
-//                return $this->redirect(['processing']);
-//            }
-//        } catch (NotFoundException $e) {
-//            Yii::$app->errorHandler->logException($e);
-//            Yii::$app->session->setFlash('warning', 'Lead: ' . $id . ' not found!');
-//            return $this->redirect(['processing']);
-//        }
-//
-//        $reason = new Reason();
-//        $url = [];
-//        if ($reason->load(Yii::$app->request->post()) && $reason->validate()) {
-//            try {
-//                $leadForm = Yii::$app->request->post('Lead');
-//                $snoozeFor = $leadForm['snooze_for'] ?? null;
-//                $agent = Yii::$app->request->post('agent', null);
-//                $url = $this->leadUnassignService->unassign($lead, $reason, Yii::$app->user->id, $snoozeFor, $agent);
-//            } catch (\Exception $e) {
-//                Yii::$app->errorHandler->logException($e);
-//                Yii::$app->session->setFlash('warning', $e->getMessage());
-//            }
-//        }
-//        return $this->redirect($url ?: ['processing']);
-//
-//
-////        $model = Lead::find()->where([
-////            'id' => $id
-////        ])->andWhere([
-////            'NOT IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
-////        ])->one();
-////
-////        $type = 'inbox';
-////
-////        if ($model !== null) {
-////            $reason = new Reason();
-////            $attr = Yii::$app->request->post($reason->formName());
-////            if (empty($attr)) {
-////                if ($attr['queue'] == 'processing') {
-////                    $model->status = $model::STATUS_PROCESSING;
-////                    $model->snooze_for = '';
-////                    $model->save();
-////
-////                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
-////
-////                } elseif ($attr['queue'] == 'reject') {
-////                    $model->status = $model::STATUS_REJECT;
-////                    $model->save();
-////                    return $this->redirect(['trash']);
-////                }
-////            } else {
-////                $reason->attributes = $attr;
-////                $reason->employee_id = Yii::$app->user->identity->getId();
-////                $reason->lead_id = $model->id;
-////                $reason->save();
-////                if ($reason->queue == 'follow-up') {
-////                    $model->status = $model::STATUS_FOLLOW_UP;
-////                    $model->employee_id = null;
-////                    $model->save();
-////                    return $this->redirect(['follow-up']);
-////
-////                } elseif ($reason->queue == 'trash') {
-////                    $model->status = $model::STATUS_TRASH;
-////
-////                    if ($reason->duplicateLeadId) {
-////                        $model->l_duplicate_lead_id = $reason->duplicateLeadId;
-////                    }
-////
-////                    //$type = 'trash';
-////                } elseif ($reason->queue == 'snooze') {
-////                    $modelAttr = Yii::$app->request->post($model->formName());
-////                    $model->snooze_for = $modelAttr['snooze_for'];
-////                    $model->status = $model::STATUS_SNOOZE;
-////                } elseif ($reason->queue == 'return') {
-////                    $attrAgent = Yii::$app->request->post('agent', null);
-////                    if ($reason->returnToQueue == 'follow-up') {
-////                        $model->status = $model::STATUS_FOLLOW_UP;
-////                    } elseif ($attrAgent !== null) {
-////                        $model->employee_id = $attrAgent;
-////                        $model->status = $model::STATUS_PROCESSING;
-////                    }
-////                } elseif ($reason->queue == 'processing-over') {
-////                    $model->status = $model::STATUS_PROCESSING;
-////                    $lastAgent = $model->employee->username;
-////                    $model->employee_id = $reason->employee_id;
-////                    $model->save();
-////
-////                    $note = new Note();
-////                    $note->employee_id = Yii::$app->user->identity->getId();
-////                    $note->lead_id = $model->id;
-////                    $note->message = sprintf('Take Over in PROCESSING status.<br>Reason: %s<br>Last Agent: %s',
-////                        $reason->reason,
-////                        $lastAgent
-////                    );
-////                    $note->save();
-////
-////                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
-////
-////                } elseif ($reason->queue == 'reject') {
-////                    $model->status = $model::STATUS_REJECT;
-////                    $model->save();
-////                    return $this->redirect(['trash']);
-////                } else {
-////                    $model->status = $model::STATUS_PROCESSING;
-////                }
-////
-////                $model->save();
-////            }
-////        }
-////
-////        return $this->redirect(['processing']);
-//    }
-
-//    public function actionChangeState($id, $queue)
-//    {
-//
-//        $id = (int)$id;
-//
-//        try {
-//            $lead = $this->leadRepository->find($id);
-//        } catch (NotFoundException $e) {
-//            Yii::$app->errorHandler->logException($e);
-//            return null;
-//        }
-//        if ($activeLeads = $this->leadRepository->getActiveAll($lead->id)) {
-//            $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
-//        } else {
-//            $activeLeadIds = [];
-//        }
-//
-//        $reason = new Reason();
-//        $reason->queue = $queue;
-//        return $this->renderAjax('partial/_reason', [
-//            'reason' => $reason,
-//            'lead' => $lead,
-//            'activeLeadIds' => $activeLeadIds
-//        ]);
-//
-//
-////        $lead = Lead::findOne(['id' => $id]);
-////        if ($lead !== null) {
-////
-////            $activeLeads = Lead::find()
-////                ->select(['id'])
-////                ->where([
-////                    'status' => [
-////                        Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING,
-////                        Lead::STATUS_SNOOZE, Lead::STATUS_FOLLOW_UP
-////                    ]
-////                ])->andWhere(['<>', 'id', $id])->asArray()->all();
-////
-////
-////            if ($activeLeads) {
-////                $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
-////            } else {
-////                $activeLeadIds = [];
-////            }
-////
-////            $reason = new Reason();
-////            $reason->queue = $queue;
-////            return $this->renderAjax('partial/_reason', [
-////                'reason' => $reason,
-////                'lead' => $lead,
-////                'activeLeadIds' => $activeLeadIds
-////            ]);
-////        }
-////        return null;
-//    }
 
 
     public function actionTake(string $gid)
@@ -2116,7 +1785,7 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                $lead = $this->leadManageService->create($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+                $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {
@@ -2146,7 +1815,7 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_EXCHANGE);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                $lead = $this->leadManageService->createWithCase($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create form Case');
+                $lead = $this->leadManageService->createManuallyFromCase($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create form Case');
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {
@@ -2236,54 +1905,6 @@ class LeadController extends FController
 //        ]);
 //    }
 
-    public function actionGetUserActions($id)
-    {
-        $lead = Lead::findOne([
-            'id' => $id
-        ]);
-
-        $activity = [];
-        $quoteId = '';
-
-        if ($lead !== null) {
-            if (Yii::$app->request->isPost) {
-                $quoteId = Yii::$app->request->post('discountId', $lead->discount_id);
-            } else {
-                $quoteId = $lead->discount_id;
-            }
-        }
-
-        if (!empty($quoteId)) {
-
-            $result = null;
-            if ($lead->project) {
-                $projectLink = $lead->project->link;
-                $projectLink = str_replace('www.', '', $projectLink);
-
-                $url = $projectLink . '/api/user-action-list/' . intval($quoteId);
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_VERBOSE, true);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['apiKey' => $lead->project->api_key]));
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-                $result = curl_exec($ch);
-            }
-
-            $activity = json_decode($result);
-        }
-
-        if (Yii::$app->request->isPost) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return $activity;
-        }
-        return $this->renderAjax('partial/_requestLog', [
-            'activity' => $activity,
-            'discountId' => $quoteId,
-            'lead' => $lead
-        ]);
-    }
 
     public function actionClone($id)
     {

@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-//            'value' => function (\common\models\Lead $model) {
+//            'value' => static function (\common\models\Lead $model) {
 //                return $model->id;
 //            },
             'options' => [
@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'uid',
-//            'value' => function (\common\models\Lead $model) {
+//            'value' => static function (\common\models\Lead $model) {
 //                return $model->uid;
 //            },
             'options' => [
@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'bo_flight_id',
             'label' => 'BO ID',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $ids = [];
@@ -92,7 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
             },
             'format' => 'raw',
@@ -104,7 +104,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $date = $model->getStatusDate(Lead::STATUS_BOOKED);
                 if(!$date)
                     $date = $model->updated;
@@ -124,7 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'PNR',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $pnrs = [];
@@ -151,7 +151,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'Passengers',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 $content = [];
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
@@ -177,7 +177,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'Destination',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $segments = $model->leadFlightSegments;
                 if ($segments) {
                     foreach ($segments as $sk => $segment) {
@@ -196,7 +196,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Agent',
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $lists->getEmployees(),
@@ -204,7 +204,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'label' => 'Profit',
-                'value' => function (\common\models\Lead $model) {
+                'value' => static function (\common\models\Lead $model) {
                 $totalProfitTxt = '';
                 if ($model->getFinalProfit()) {
                     $model->totalProfit = $model->getFinalProfit();
@@ -244,7 +244,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'label' => 'Tips',
-                        'value' => function (\common\models\Lead $model) {
+                        'value' => static function (\common\models\Lead $model) {
                         if($model->getTotalTips() == 0) {
                             return '-';
                         }
@@ -275,14 +275,14 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'update',
             'label' => 'Last Update',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<span title="' . Yii::$app->formatter->asDatetime(strtotime($model->updated)) . '">' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</span>';
             },
             'format' => 'raw'
         ],
         [
             'label' => 'VTF',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $labelVTF = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
@@ -315,7 +315,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'TKT',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $labelTKT = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
@@ -347,7 +347,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'EXP',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $labelEXP = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
@@ -386,7 +386,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'class' => 'text-right'
             ],
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return Lead::getRating2($model->rating);
             },
             'format' => 'raw'
@@ -394,7 +394,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'created',
             //'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $createdTS = strtotime($model->created);
 

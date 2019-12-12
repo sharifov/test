@@ -4,7 +4,6 @@
 /* globals JSON */
 /* globals noUiSlider */
 /* globals console */
-
 SearchResult = function(props) {
     if (typeof props === "undefined") props = {};
     var scope = this,
@@ -67,7 +66,7 @@ SearchResult = function(props) {
         // init listeners
         $('.js-filter .dropdown-menu').on('click', function(e) {
             if (!$(e.target).hasClass("js-dropdown-close")) {
-                e.preventDefault();
+                // e.preventDefault();
                 e.stopPropagation();
             }
         });
@@ -119,13 +118,13 @@ SearchResult = function(props) {
                     selector = '.search-result__quote.filtered';
                 }
 
-                $(selector).addClass('hide');
+                $(selector).addClass('d-none');
                 let cnt = 0;
                 switch (filter) {
                     case 'price':
                         $(selector).each(function(idx){
                             if(+$(this)[0].getAttribute('data-price') <= filterList[filter] * 1){
-                                $(this).removeClass('hide');
+                                $(this).removeClass('d-none');
                                 $(this).addClass('filtered');
                                 filterApplied = true;
                             }
@@ -158,7 +157,7 @@ SearchResult = function(props) {
                             });
 
                             if(stopsData.length == cnt){
-                                $(obj).removeClass('hide');
+                                $(obj).removeClass('d-none');
                                 $(obj).addClass('filtered');
                                 filterApplied = true;
                             }
@@ -171,7 +170,7 @@ SearchResult = function(props) {
                             let obj = $(selector+'[data-changeairport="'+hasAirportchange+'"]');
                             if (hasAirportchange != 1){
                                 cnt++;
-                                $(obj).removeClass('hide');
+                                $(obj).removeClass('d-none');
                                 $(obj).addClass('filtered');
                                 filterApplied = true;
                             }
@@ -186,10 +185,10 @@ SearchResult = function(props) {
                                 $(selector).each(function(idx){
                                     cnt++;
                                     let obj = $(selector+'[data-baggage="1"]');
-                                    $(obj).removeClass('hide');
+                                    $(obj).removeClass('d-none');
                                     $(obj).addClass('filtered');
                                     let obj2 = $(selector+'[data-baggage="2"]');
-                                    $(obj2).removeClass('hide');
+                                    $(obj2).removeClass('d-none');
                                     $(obj2).addClass('filtered');
                                     filterApplied = true;
                                 });
@@ -200,7 +199,7 @@ SearchResult = function(props) {
                                 $(selector).each(function(idx){
                                     let obj = $(selector+'[data-baggage="'+baggage+'"]');
                                     cnt++;
-                                    $(obj).removeClass('hide');
+                                    $(obj).removeClass('d-none');
                                     $(obj).addClass('filtered');
                                     filterApplied = true;
                                 });
@@ -210,7 +209,7 @@ SearchResult = function(props) {
                     case 'fareType':
                         filterList[filter].forEach(function(fareType) {
                             var obj = $(selector+'[data-fareType="'+fareType+'"]');
-                            $(obj).removeClass('hide');
+                            $(obj).removeClass('d-none');
                             $(obj).addClass('filtered');
                             filterApplied = true;
                         });
@@ -218,7 +217,7 @@ SearchResult = function(props) {
                     case 'airline':
                         filterList[filter].forEach(function(airline) {
                             var obj = $(selector+'[data-airline="'+airline+'"]');
-                            $(obj).removeClass('hide');
+                            $(obj).removeClass('d-none');
                             $(obj).addClass('filtered');
                             filterApplied = true;
                         });
@@ -247,7 +246,7 @@ SearchResult = function(props) {
                                 }
                             }
                             if(cnt == cntTrue){
-                                $(obj).removeClass('hide');
+                                $(obj).removeClass('d-none');
                                 $(obj).addClass('filtered');
                                 filterApplied = true;
                                 return;
@@ -259,7 +258,7 @@ SearchResult = function(props) {
                             var obj = $(this);
                             /*var duration = $(this).data('totalduration');
                             if(duration <= filterList[filter]){
-                                 $(obj).removeClass('hide');
+                                 $(obj).removeClass('d-none');
                                  $(obj).addClass('filtered');
                                  filterApplied = true;
                              }*/
@@ -274,7 +273,7 @@ SearchResult = function(props) {
                             });
 
                             if(durations.length == cnt){
-                                $(obj).removeClass('hide');
+                                $(obj).removeClass('d-none');
                                 $(obj).addClass('filtered');
                                 filterApplied = true;
                                 return;
@@ -285,9 +284,9 @@ SearchResult = function(props) {
                 }
             }
         }else{
-            $('.search-result__quote').removeClass('hide');
+            $('.search-result__quote').removeClass('d-none');
         }
-        $('#search-results__cnt').html($('.search-result__quote:not(.hide)').length);
+        $('#search-results__cnt').html($('.search-result__quote:not(.d-none)').length);
     };
 
     this.filterStops = function() {
@@ -490,18 +489,21 @@ SearchResult = function(props) {
     };
 
     this.filterAirline = function() {
-        $('.js-all-airlines').parent().click(function () {
-            $('.js-all-airlines').attr("checked", !$('.js-all-airlines').attr("checked"));
+        $('.js-all-airlines').off().on('click', function () {
+            //
+            var inputChecked = $(this).prop("checked");
+
             var val = [];
-            if ($('.js-all-airlines').prop('checked') === true) {
-                $('#filter-airlines').find('.js-filter-airl-item input[type="checkbox"]').each(function () {
-                    $(this).prop('checked', true);
-                    val.push($(this).attr("id"));
+            if (inputChecked == true) {
+                $('#filter-airlines').find('.js-filter-airl-item input[type="checkbox"]').each(function (i, elem) {
+                    $(elem).prop('checked', true);
+                    val.push($(elem).attr("id"));
                 });
             }
             else {
-                $('#filter-airlines').find('.js-filter-airl-item input[type="checkbox"]').each(function () {
-                    $(this).prop('checked', false);
+                $('#filter-airlines').find('.js-filter-airl-item input[type="checkbox"]').each(function (i, elem) {
+                    $(elem).prop('checked', false);
+                    val = [];
                 });
             }
             scope.addFilterParams({

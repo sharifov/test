@@ -6,7 +6,7 @@ use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
 use dosamigos\datepicker\DatePicker;
 use sales\formatters\client\ClientTimeFormatter;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -14,21 +14,27 @@ use yii\helpers\Url;
 /* @var $searchModel common\models\search\LeadQcallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $guard array */
+/** @var Employee $user */
 
 ?>
 
 <?= GridView::widget([
+    'id' => 'redialGrid',
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'rowOptions' => static function (LeadQcallSearch $model, $index, $widget, $grid) {
-        if (!$model->deadline) {
-            return ['class' => 'danger'];
-        }
+//        if (!$model->deadline) {
+//            return ['class' => 'danger'];
+//        }
         if ($model->l_is_test) {
         	return ['class' => 'info'];
 		}
     },
     'columns' => [
+        [
+            'class' => '\kartik\grid\CheckboxColumn',
+            'visible' => $user->isAdmin(),
+        ],
         ['class' => 'yii\grid\SerialColumn'],
         [
             'label' => 'Status',
@@ -100,6 +106,10 @@ use yii\helpers\Url;
             },
             'options' => ['style' => 'width:90px'],
             'visible' => !$user->isAgent(),
+        ],
+        [
+            'attribute' => 'lqc_call_from',
+            'visible' => $user->isAdmin(),
         ],
         [
             'label' => 'Client / Phones',
@@ -210,6 +220,26 @@ use yii\helpers\Url;
             'visible' => $user->isAdmin()
         ],
         [
+            'attribute' => 'lqc_created_dt',
+            'value' => static function (LeadQcall $model) {
+                return $model->lqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_created_dt)) : '-';
+            },
+            'format' => 'raw',
+            'visible' => $user->isAdmin(),
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'lqc_created_dt',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
+        ],
+        [
             'attribute' => 'lqc_dt_from',
             'value' => static function (LeadQcall $model) {
                 return $model->lqc_dt_from ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqc_dt_from)) : '-';
@@ -267,6 +297,28 @@ use yii\helpers\Url;
                     return Yii::$app->formatter->asDuration(strtotime($model->lqc_dt_to) - time());
                 }
                 return floor((strtotime($model->lqc_dt_to) - time()) / 60);
+            },
+            'visible' => !$user->isAgent(),
+        ],
+        [
+            'label' => 'Reserved for',
+            'value' => static function(LeadQcall $model) {
+                if ($model->lqc_reservation_time && (strtotime($model->lqc_reservation_time) > time())) {
+                    return date('H:i:s', (strtotime($model->lqc_reservation_time) - time()));
+                }
+                return '';
+            },
+        ],
+        [
+            'label' => 'Reserved by',
+            'value' => static function(LeadQcall $model) {
+                if (
+                    $model->lqc_reservation_time && (strtotime($model->lqc_reservation_time) > time())
+                    && ($user = $model->reservationUser)
+                ) {
+                    return $user->username;
+                }
+                return '';
             },
         ],
 		[

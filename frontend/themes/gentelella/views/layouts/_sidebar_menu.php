@@ -88,6 +88,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Agents report', 'url' => ['/agent-report/index'], 'icon' => 'users'],
                 ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
                 ['label' => 'Calls report', 'url' => ['/report/calls-report'], 'icon' => 'table'],
+                ['label' => 'Leads report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
                 ['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
@@ -230,6 +231,22 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
                 ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'],
                 ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'New Data',
+            'url' => 'javascript:',
+            'icon' => 'list',
+            'items' => [
+                ['label' => 'Currency List', 'url' => ['/currency/index']],
+                ['label' => 'Product Types', 'url' => ['/product-type/index']],
+                ['label' => 'Products', 'url' => ['/product/index']],
+                ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],
+                ['label' => 'Orders', 'url' => ['/order/index']],
+                ['label' => 'Offers', 'url' => ['/offer/index']],
+                ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
+                ['label' => 'Invoices', 'url' => ['/invoice/index']],
             ]
         ];
 

@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Employee;
+use frontend\widgets\multipleUpdate\redial\MultipleUpdateWidget;
+use frontend\widgets\multipleUpdate\redialAll\UpdateAllWidget;
 use frontend\widgets\UserInfoProgress;
 use sales\access\ListsAccess;
 use yii\helpers\Html;
@@ -31,6 +33,10 @@ $list = new ListsAccess($user->id);
             <?= UserInfoProgress::widget(['user' => $user])?>
         </div>
 
+        <?= Html::button('<i class="fa fa-phone"></i> Call Next', [
+            'class' => 'btn btn-success btn-lg lead-next-btn', 'style' => 'font-size: 18px'
+        ])?>
+
         <div class="row">
             <div class="col-md-12">
                 <div id="loading" style="text-align:center;font-size: 60px;display: none">
@@ -39,9 +45,9 @@ $list = new ListsAccess($user->id);
 
                 <div id="redial-call-box-wrapper">
                     <div id="redial-call-box">
-                        <div class="text-center badge badge-warning call-status" style="font-size: 35px">
+                       <?php /* <div class="text-center badge badge-warning call-status" style="font-size: 35px">
                             <span id="text-status-call">Ready</span>
-                        </div>
+                        </div> */ ?>
                     </div>
                 </div>
 
@@ -67,27 +73,51 @@ $list = new ListsAccess($user->id);
 
         </div>
 
-        <p></p>
+        <?php $showQueue = (bool)Yii::$app->params['settings']['agent_show_redial_queue']; ?>
 
-        <div style="font-size: 30px">Redial Queue</div>
+        <?php if ($showQueue || (!$showQueue && !$user->isAgent())): ?>
 
-        <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>
+            <p></p>
 
-            <?= $this->render('_redial_list', [
-                'dataProvider' => $dataProvider,
-                'searchModel' => $searchModel,
-                'list' => $list,
-                'userIsFreeForCall' => $userIsFreeForCall,
-                'user' => $user,
-                'guard' => $guard
-            ]) ?>
+            <div style="font-size: 30px">Redial Queue</div>
 
-        <?php Pjax::end(); ?>
+            <?php if ($user->isAdmin()) : ?>
+
+                <?= MultipleUpdateWidget::widget([
+                        'gridId' => 'redialGrid',
+                        'script' => "let pjax = $('#lead-redial-pjax'); if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }",
+                        'actionUrl' => Url::to(['lead-redial/multiple-update']),
+                        'validationUrl' => Url::to(['lead-redial/multiple-update-validate']),
+                        'reportWrapperId' => 'redial-call-box-wrapper'
+                ]) ?>
+
+                <?= UpdateAllWidget::widget([
+                        'modalId' => 'modal-df',
+                        'showUrl' => Url::to(['/lead-redial/update-all-show']),
+                ]) ?>
+
+            <?php endif; ?>
+
+            <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>
+
+                <?= $this->render('_redial_list', [
+                    'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'list' => $list,
+                    'userIsFreeForCall' => $userIsFreeForCall,
+                    'user' => $user,
+                    'guard' => $guard
+                ]) ?>
+
+            <?php Pjax::end(); ?>
+
+        <?php endif; ?>
 
     </div>
 
 <?php
 
+$nextUrl = Url::to(['lead-redial/next']);
 
 $js = <<<JS
 
@@ -101,7 +131,16 @@ function loadRedialCallBoxBlock(type, url, data) {
     })
     .done(function(data) {
         $("#loading").hide();
-        $("#redial-call-box-wrapper").html(data);
+        if (!data.success) {
+           let text = 'Error. Try again later';
+           if (data.message) {
+               text = data.message;
+           }
+            new PNotify({title: "Lead redial", type: "error", text: text, hide: true});
+        } 
+        if (data.data) {
+            $("#redial-call-box-wrapper").html(data.data);
+        }
     })
     .fail(function() {
         $("#loading").hide();
@@ -113,6 +152,10 @@ $("body").on("click", ".lead-redial-btn", function(e) {
     loadRedialCallBoxBlock('post', $(this).data('url'), {gid: $(this).data('gid')});
 });
 
+$("body").on("click", ".lead-next-btn", function(e) {
+    loadRedialCallBoxBlock('post', '{$nextUrl}');
+});
+
 JS;
 
 $this->registerJs($js);
@@ -122,7 +165,8 @@ $lastCallsUrl = Url::to(['lead-redial/show-last-calls']);
 $js = <<<JS
 
 function reloadCallFunction() {
-    $.pjax.reload({container: '#lead-redial-pjax', async: false});
+    let pjax = $('#lead-redial-pjax');
+    if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }
     leadRedialLastCallsReload();
 }
 

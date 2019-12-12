@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cua_user_id',
             [
                 'attribute' => 'cua_user_id',
-                'value' => function (\common\models\CallUserAccess $model) {
+                'value' => static function (\common\models\CallUserAccess $model) {
                     return $model->cuaUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cuaUser->username) : '-';
                 },
                 'format' => 'raw',
@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cua_status_id',
             [
                 'attribute' => 'cua_status_id',
-                'value' => function (\common\models\CallUserAccess $model) {
+                'value' => static function (\common\models\CallUserAccess $model) {
                     return Html::encode($model->getStatusTypeName());
                 },
                 'format' => 'raw',
@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'cua_created_dt',
-                'value' => function (\common\models\CallUserAccess $model) {
+                'value' => static function (\common\models\CallUserAccess $model) {
                     return $model->cua_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cua_created_dt)) : '-';
                 },
                 'format' => 'raw',
@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'cua_updated_dt',
-                'value' => function (\common\models\CallUserAccess $model) {
+                'value' => static function (\common\models\CallUserAccess $model) {
                     return $model->cua_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cua_updated_dt)) : '-';
                 },
                 'format' => 'raw',

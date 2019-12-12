@@ -51,14 +51,14 @@ use yii\widgets\DetailView;
                         //'cs_id',
                         [
                             'attribute' => 'cs_status',
-                            'value' => function (Cases $model) {
+                            'value' => static function (Cases $model) {
                                 return CasesStatus::getLabel($model->cs_status);
                             },
                             'format' => 'raw'
                         ],
                         [
                             'attribute' => 'cs_project_id',
-                            'value' => function (Cases $model) {
+                            'value' => static function (Cases $model) {
                                 return $model->project ? '<span class="badge badge-info">' . $model->project->name .'</span>' : '';
                             },
                             'format' => 'raw'
@@ -66,7 +66,7 @@ use yii\widgets\DetailView;
                         [
                                 'label' => 'Agent',
                             'attribute' => 'cs_user_id',
-                            'value' => function (Cases $model) {
+                            'value' => static function (Cases $model) {
                                 return $model->owner ? '<i class="fa fa-user"></i> ' . Html::encode($model->owner->username) : '-';
                             },
                             'format' => 'raw'
@@ -86,7 +86,7 @@ use yii\widgets\DetailView;
                         //'cs_dep_id',
                         [
                             'attribute' => 'cs_dep_id',
-                            'value' => function (Cases $model) {
+                            'value' => static function (Cases $model) {
                                 return $model->department ? $model->department->dep_name : '';
                             },
                         ],
@@ -94,14 +94,14 @@ use yii\widgets\DetailView;
                         //'cs_created_dt',
                         [
                             'attribute' => 'cs_created_dt',
-                            'value' => function (Cases $model) {
+                            'value' => static function (Cases $model) {
                                 return $model->cs_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
                             },
                             'format' => 'raw'
                         ],
                         [
                             'attribute' => 'cs_updated_dt',
-                            'value' => function (Cases $model) {
+                            'value' => static function (Cases $model) {
                                 return $model->cs_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_updated_dt)) : '-';
                             },
                             'format' => 'raw'

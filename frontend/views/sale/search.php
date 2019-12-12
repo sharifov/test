@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php
     //if(Yii::$app->request->isAjax) {
-    echo \yiister\gentelella\widgets\FlashAlert::widget();
+    echo \frontend\themes\gentelella_v2\widgets\FlashAlert::widget();
     //}
 
     echo $this->render('_search', [
@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // ['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'sale_id',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model['saleId'];
                 },
                 'format' => 'raw',
@@ -57,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'label' => 'Project',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model['project'] ? '<span class="badge badge-info">'.Html::encode($model['project']).'</span>': '-';
                 },
                 'format' => 'raw'
@@ -65,26 +65,26 @@ $this->params['breadcrumbs'][] = $this->title;
 
             /*[
                 'label' => 'Air Routing Id',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model['airRoutingId'] ?: '-';
                 },
             ],*/
             [
                 'label' => 'Confirmation Number (Booking ID)',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model['confirmationNumber'] ?: '-';
                 },
             ],
             [
                 'label' => 'Airline Confirmation Number',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return reset($model['airlineConfirmationNumber']) ?: '---';
                 },
             ],
 
             [
                 'label' => 'Status',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model['saleStatus'] ?: '-';
                 },
             ],
@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => 'Trips',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     $tripArr = [];
                     if(isset($model['requestDetail']['trips'])) {
                         foreach ($model['requestDetail']['trips'] as $trip) {
@@ -107,21 +107,21 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => 'PNR Number',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model['pnr'] ?: '-';
                 },
             ],
 
             [
                 'label' => 'Passengers',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return isset($model['requestDetail']['passengersCnt']) ? $model['requestDetail']['passengersCnt']: '-';
                 },
             ],
 
             [
                 'label' => 'created',
-                'value' => function ($model) {
+                'value' => static function ($model) {
                     return $model['created'] ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created'])) : '-';
                 },
                 'format' => 'raw'

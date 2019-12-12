@@ -690,7 +690,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getUserParams()
     {
-        return $this->hasOne(UserParams::className(), ['up_user_id' => 'id']);
+        return $this->hasOne(UserParams::class, ['up_user_id' => 'id']);
     }
 
     /**

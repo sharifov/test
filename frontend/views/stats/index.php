@@ -94,9 +94,9 @@ $userId = Yii::$app->user->id;
     </div>
 
     <?php Pjax::begin(); ?>
-    <div class="panel panel-default">
-        <div class="panel-heading"><i class="fa fa-bar-chart"></i> Employees Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
-        <div class="panel-body">
+    <div class="card card-default">
+        <div class="card-header"><i class="fa fa-bar-chart"></i> Employees Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
+        <div class="card-body">
             <div class="row">
                 <?php $form = ActiveForm::begin([
                     'action' => ['index'],
@@ -152,7 +152,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'attribute' => 'username',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
                         },
                         'format' => 'raw',
@@ -163,7 +163,7 @@ $userId = Yii::$app->user->id;
                     [
                         //'attribute' => 'username',
                         'label' => 'Role',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             $roles = $model->getRoles();
                             return $roles ? implode(', ', $roles) : '-';
                         },
@@ -175,7 +175,7 @@ $userId = Yii::$app->user->id;
                     [
                         'attribute' => 'status',
                         'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
                         },
                         'format' => 'html'
@@ -184,7 +184,7 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'User Groups',
                         'attribute' => 'user_group_id',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
 
                             $groups = $model->getUserGroupList();
                             $groupsValueArr = [];
@@ -232,7 +232,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Processing',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_PROCESSING], null, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -245,7 +245,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Processing -> Hold On',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_ON_HOLD], \common\models\Lead::STATUS_PROCESSING, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -259,7 +259,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Booked',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_BOOKED], null, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -272,7 +272,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Sold',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_SOLD], null, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -285,7 +285,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Processing -> Follow Up',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_FOLLOW_UP], \common\models\Lead::STATUS_PROCESSING, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -299,7 +299,7 @@ $userId = Yii::$app->user->id;
                     ],
                     [
                         'label' => 'Processing -> Trash',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_TRASH], \common\models\Lead::STATUS_PROCESSING, $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,

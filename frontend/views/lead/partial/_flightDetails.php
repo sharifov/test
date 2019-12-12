@@ -146,7 +146,7 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                 <?php if ($itineraryForm->isEditMode()) : ?>
 
                     <div class="clearfix"></div>
-                    <div class="request-form collapse in" id="request" aria-expanded="true">
+                    <div class="request-form collapse in show" id="request" aria-expanded="true">
                         <div class="separator"></div>
 
                         <div id="modeFlightSegments" data-value="edit" style="display: none"></div>

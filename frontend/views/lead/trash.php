@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->id;
             },
             'options' => [
@@ -87,7 +87,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
             },
             'format' => 'raw',
@@ -99,7 +99,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'created',
             'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $str = Yii::$app->formatter->asRelativeTime(strtotime($model->created));
                 $str .= $model->created ? '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created), 'php: Y-m-d [H:i:s]')  : '-';
                 return $str;
@@ -124,7 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'updated',
             'label' => 'Trash Date',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $str = Yii::$app->formatter->asRelativeTime(strtotime($model->updated));
                 $str .= $model->updated ? '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated), 'php: Y-m-d [H:i:s]')  : '-';
                 return $str;
@@ -148,7 +148,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         /*[
             'attribute' => 'created',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
             },
             'format' => 'raw',
@@ -160,7 +160,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Client',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -188,7 +188,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'clientTime',
             'label' => 'Client Time',
-            'value' => function ($model) {
+            'value' => static function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
@@ -197,7 +197,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             'options' => [
@@ -222,7 +222,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 //        [
 //            'attribute' => 'Quotes ',
-//            'value' => function (\common\models\Lead $model) {
+//            'value' => static function (\common\models\Lead $model) {
 //                $quotes = $model->getQuoteSendInfo();
 //                return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>', ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
 //            },
@@ -231,7 +231,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'Quotes',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->quotesCount;
                 return $cnt ?: '-';
             },
@@ -247,7 +247,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             //'attribute' => 'Quotes',
             'label' => 'Calls',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->getCountCalls();
                 return $cnt ?: '-';
             },
@@ -262,7 +262,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'SMS',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->getCountSms();
                 return $cnt ?: '-';
             },
@@ -277,7 +277,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Emails',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->getCountEmails();
                 return $cnt ?: '-';
             },
@@ -294,7 +294,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'header' => 'Agent',
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $lists->getEmployees(),
@@ -302,7 +302,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*[
             'attribute' => 'update',
             'label' => 'Last Update',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<span title="' . Yii::$app->formatter->asDatetime(strtotime($model->updated)) . '">' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</span>';
             },
             'format' => 'raw'
@@ -312,7 +312,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'style' => 'max-width: 250px;'
             ],
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<pre>'. $model->getLastReasonFromLeadFlow()  . '</pre>';
             },
             'format' => 'raw'
@@ -326,7 +326,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'class' => 'text-right'
             ],
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return Lead::getRating2($model->rating);
             },
             'format' => 'raw'

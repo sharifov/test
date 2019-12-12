@@ -4,6 +4,8 @@ namespace common\models;
 
 use sales\entities\EventTrait;
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\db\Query;
 
 /**
@@ -62,6 +64,23 @@ class ClientEmail extends \yii\db\ActiveRecord
         return 'client_email';
     }
 
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
+
 	/**
 	 * @param string $email
 	 * @param int $clientId
@@ -93,13 +112,21 @@ class ClientEmail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['email'], 'required'],
-            [['email'], 'email'],
+            ['email', 'required'],
+            ['email', 'email'],
+            ['email', 'string', 'max' => 100],
+
             [['client_id', 'type'], 'integer'],
+
             [['created', 'updated', 'comments'], 'safe'],
-            [['email'], 'string', 'max' => 100],
+
+            ['client_id', 'required'],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
-            [['email', 'client_id'], 'unique', 'targetAttribute' => ['email', 'client_id']]
+
+            [['email', 'client_id'], 'unique', 'targetAttribute' => ['email', 'client_id']],
+
+            ['type', 'required'],
+            ['type', 'in', 'range' => array_keys(self::EMAIL_TYPE)],
         ];
     }
 
@@ -126,16 +153,16 @@ class ClientEmail extends \yii\db\ActiveRecord
         return $this->hasOne(Client::class, ['id' => 'client_id']);
     }
 
-    public function beforeValidate()
-    {
-        $this->updated = date('Y-m-d H:i:s');
-
-        if (strpos($this->email, 'wowfare') !== false) {
-            $this->addError('email', 'Email is invalid!');
-        }
-
-        return parent::beforeValidate();
-    }
+//    public function beforeValidate()
+//    {
+//        $this->updated = date('Y-m-d H:i:s');
+//
+//        if (strpos($this->email, 'wowfare') !== false) {
+//            $this->addError('email', 'Email is invalid!');
+//        }
+//
+//        return parent::beforeValidate();
+//    }
 
 	/**
 	 * @return int

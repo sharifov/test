@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-12">
 
             <p>
-                <?=Html::a('Clear all records',['log/clear'],['class' => 'btn btn-danger', 'data' => ['confirm' => 'Delete all records from logs?']]) ?>
+                <?=Html::a('<i class="fas fa-remove"></i> Clear all Logs',['log/clear'],['class' => 'btn btn-danger', 'data' => ['confirm' => 'Delete all records from logs?']]) ?>
             </p>
 
             <?= GridView::widget([
@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     //'level',
                     [
                         'attribute'=>'level',
-                        'value'=>function ($model) {
+                        'value'=> static function (\frontend\models\Log $model) {
                             return \yii\log\Logger::getLevelName($model->level).' ('.$model->level.')';
                         },
                         'filter'=>[
@@ -60,9 +60,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'message',
                         'format' => 'raw',
-                        'value' => function (\frontend\models\Log $model) {
+                        'value' => static function (\frontend\models\Log $model) {
                             $str = '<pre><small>'.(\yii\helpers\StringHelper::truncate($model->message, 400, '...', null, true)).'</small></pre> 
-                            <a href="'.\yii\helpers\Url::to(['log/view', 'id' => $model->id]).'" title="Log '.$model->id.'" class="btn btn-sm btn-success showModalButton" data-pjax="0">show log</a>';
+                            <a href="'.\yii\helpers\Url::to(['log/view', 'id' => $model->id]).'" title="Log '.$model->id.'" class="btn btn-sm btn-success showModalButton" data-pjax="0"><i class="fas fa-eye"></i> details</a>';
                             return ($str);
                         },
                         //'contentOptions'=>['style'=>'width: 100px;text-align:left;']
@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     /*[
                         'attribute' => 'log_time',
                         'format' => 'html',
-                        'value' => function ($model) {
+                        'value' => static function ($model) {
                             return '<small>'.date('Y-m-d H:i:s', $model->log_time).'</small>';
                         },
 
@@ -94,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'prefix',
                         'format' => 'html',
-                        'value' => function ($model) {
+                        'value' => static function (\frontend\models\Log $model) {
                             return '<small>'.($model->prefix).'</small>';
                         },
                         'contentOptions'=>['style'=>'width: 100px;text-align:left;']
@@ -115,45 +115,21 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php \yii\widgets\Pjax::end(); ?>
 </div>
 
-<style type="text/css">
-    @media screen and (min-width: 768px) {
-        .modal-dialog {
-            width: 700px; /* New width for default modal */
-        }
-        .modal-sm {
-            width: 350px; /* New width for small modal */
-        }
-    }
-    @media screen and (min-width: 992px) {
-        .modal-lg {
-            width: 80%; /* New width for large modal */
-        }
-    }
-    .grid-view pre {
-        max-width: 1000px;
-    }
-</style>
 
 <?php
-    yii\bootstrap\Modal::begin([
-        'headerOptions' => ['id' => 'modalHeader'],
+yii\bootstrap4\Modal::begin([
+        'title' => 'Log detail',
         'id' => 'modal',
-        'size' => 'modal-lg',
-        'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
+        'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
     ]);
-    echo "<div id='modalContent'></div>";
-    yii\bootstrap\Modal::end();
+yii\bootstrap4\Modal::end();
 
 $jsCode = <<<JS
     $(document).on('click', '.showModalButton', function(){
-        
-        $('#modal').modal('show').find('#modalContent').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        //$('#modal').modal('show');
-        
-        //alert($(this).attr('title'));
-        $('#modalHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modal').modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#modal-title').html($(this).attr('title'));
         $.get($(this).attr('href'), function(data) {
-          $('#modal').find('#modalContent').html(data);
+          $('#modal .modal-body').html(data);
         });
        return false;
     });

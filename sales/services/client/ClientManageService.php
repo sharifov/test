@@ -11,6 +11,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
+use sales\services\ServiceFinder;
 
 /**
  * Class ClientManageService
@@ -18,6 +19,8 @@ use sales\repositories\client\ClientRepository;
  * @property ClientRepository $clientRepository
  * @property ClientPhoneRepository $clientPhoneRepository
  * @property ClientEmailRepository $clientEmailRepository
+ * @property InternalPhoneGuard $internalPhoneGuard
+ * @property ServiceFinder $finder
  */
 class ClientManageService
 {
@@ -25,18 +28,30 @@ class ClientManageService
     private $clientRepository;
     private $clientPhoneRepository;
     private $clientEmailRepository;
+    private $internalPhoneGuard;
+    private $finder;
 
     /**
      * ClientManageService constructor.
      * @param ClientRepository $clientRepository
      * @param ClientPhoneRepository $clientPhoneRepository
      * @param ClientEmailRepository $clientEmailRepository
+     * @param InternalPhoneGuard $internalPhoneGuard
+     * @param ServiceFinder $finder
      */
-    public function __construct(ClientRepository $clientRepository, ClientPhoneRepository $clientPhoneRepository, ClientEmailRepository $clientEmailRepository)
+    public function __construct(
+        ClientRepository $clientRepository,
+        ClientPhoneRepository $clientPhoneRepository,
+        ClientEmailRepository $clientEmailRepository,
+        InternalPhoneGuard $internalPhoneGuard,
+        ServiceFinder $finder
+    )
     {
         $this->clientRepository = $clientRepository;
         $this->clientPhoneRepository = $clientPhoneRepository;
         $this->clientEmailRepository = $clientEmailRepository;
+        $this->internalPhoneGuard = $internalPhoneGuard;
+        $this->finder = $finder;
     }
 
     /**
@@ -74,6 +89,9 @@ class ClientManageService
         if (!$phoneForm->phone) {
             return;
         }
+
+        $this->internalPhoneGuard->guard($phoneForm->phone);
+
         if (!$this->clientPhoneRepository->exists($client->id, $phoneForm->phone)) {
             $phone = ClientPhone::create(
                 $phoneForm->phone,
@@ -151,15 +169,14 @@ class ClientManageService
 	}
 
 	/**
+     * @param int|Client $client
 	 * @param ClientCreateForm $form
-	 * @return Client
 	 */
-	public function updateClient(ClientCreateForm $form): Client
+	public function updateClient(Client $client, ClientCreateForm $form): void
 	{
-		$client = $this->clientRepository->find($form->id);
+		$client = $this->finder->clientFind($client);
 		$client->edit($form->firstName, $form->lastName, $form->middleName);
 		$this->clientRepository->save($client);
-		return $client;
 	}
 
     /**
@@ -235,6 +252,8 @@ class ClientManageService
     {
         try {
             $client = $this->getOrCreateByPhones($phones, $clientForm);
+        } catch (InternalPhoneException $e) {
+            throw $e;
         } catch (\DomainException $e) {
             $client = $this->getOrCreateByEmails($emails, $clientForm);
         }

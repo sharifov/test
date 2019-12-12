@@ -1,23 +1,21 @@
 <?php
 /**
- * @var $this \yii\web\View
- * @var $lead \common\models\Lead
+ * @var $this View
+ * @var $lead Lead
  * @var $leadForm LeadForm
  */
 
-
+use common\models\Lead;
 use yii\helpers\Html;
 use frontend\models\LeadForm;
-use yii\widgets\ActiveForm;
+use yii\web\View;
 use \yii\helpers\Url;
+use yii\bootstrap4\Modal;
 
 $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id);
 
 ?>
-    <style>
-        .x_title span{color: white;}
-    </style>
 
     <div class="x_panel">
         <div class="x_title" >
@@ -25,14 +23,14 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
             <ul class="nav navbar-right panel_toolbox">
                 <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess): ?>
                     <li>
-                        <?=Html::a('<i class="fa fa-info-circle"></i> Details', '#',  [
+                        <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#',  [
                             'id' => 'btn-client-details',
                             'data-client-id' => $leadForm->getClient()->id,
                             'title' => 'Client Info',
                         ])?>
                     </li>
                     <li>
-                        <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Phone', '#', [
+                        <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Phone', '#', [
                             'id' => 'client-new-phone-button',
                             'data-modal_id' => 'client-manage-info',
                             'title' => 'Add Phone',
@@ -41,7 +39,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         ])?>
                     </li>
                     <li>
-                        <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Email', '#',  [
+                        <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Email', '#',  [
                             'id' => 'client-new-email-button',
                             'data-modal_id' => 'client-manage-info',
                             'title' => 'Add Email',
@@ -50,7 +48,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         ])?>
                     </li>
                     <li>
-                        <?=Html::a('<i class="fa fa-edit warning"></i> Update Client', '#',  [
+                        <?=Html::a('<i class="fas fa-edit warning"></i> Update Client', '#',  [
                             'id' => 'client-edit-user-name-button',
                             'data-modal_id' => 'client-manage-info',
                             'title' => 'Update user name',
@@ -118,10 +116,6 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                 </div>
             </div>
 
-                    <?php /*  Html::button('<i class="fa fa-history"></i> Actions', [
-                'id' => 'view-client-actions-btn',
-                'class' => 'btn btn-default'
-            ]) */ ?>
 
                     <?/*= Html::button('<i class="fa fa-user"></i> Client Info', [
                         'class' => 'btn btn-default',
@@ -156,38 +150,19 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
     </script>
 
 
-<?= \yii\bootstrap\Modal::widget([
+<?= Modal::widget([
+    'title' => '',
     'id' => 'modal-client-manage-info',
-    'bodyOptions' => [
-        'class' => 'modal-body'
-    ],
-    'size' => 'modal-sm',
+    'size' => Modal::SIZE_SMALL,
 ]) ?>
 
-<?= \yii\bootstrap\Modal::widget([
+<?= Modal::widget([
+    'title' => '',
     'id' => 'modal-client-large',
-    'bodyOptions' => [
-        'class' => 'modal-body'
-    ],
-    'size' => 'modal-lg',
-]);
+    'size' => Modal::SIZE_LARGE,
+])
 ?>
 
-<style type="text/css">
-    @media screen and (min-width: 768px) {
-        .modal-dialog {
-            width: 700px; /* New width for default modal */
-        }
-        .modal-sm {
-            width: 350px; /* New width for small modal */
-        }
-    }
-    @media screen and (min-width: 992px) {
-        .modal-lg {
-            width: 70%; /* New width for large modal */
-        }
-    }
-</style>
 
 <?php /*
 $this->registerJs(

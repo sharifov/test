@@ -23,9 +23,9 @@ JS;
 $this->registerJs($js);
 
 ?>
-<div class="panel panel-default">
-    <div class="panel-heading">Project [<?= $model->name ?>]</div>
-    <div class="panel-body">
+<div class="card card-default">
+    <div class="card-header">Project [<?= $model->name ?>]</div>
+    <div class="card-body">
         <div class="row mb-20">
 
             <div class="col-md-6">

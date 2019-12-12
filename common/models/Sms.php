@@ -6,10 +6,14 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use DateTime;
 use sales\entities\cases\Cases;
+use sales\entities\EventTrait;
+use sales\events\sms\SmsCreatedByIncomingSalesEvent;
+use sales\events\sms\SmsCreatedByIncomingSupportsEvent;
+use sales\events\sms\SmsCreatedEvent;
+use sales\services\sms\incoming\SmsIncomingForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\db\Query;
 use yii\helpers\VarDumper;
 
 /**
@@ -53,6 +57,7 @@ use yii\helpers\VarDumper;
  * @property string $s_created_dt
  * @property string $s_updated_dt
  * @property int $s_case_id
+ * @property int $s_client_id
  *
  * @property Employee $sCreatedUser
  * @property Cases $sCase
@@ -64,6 +69,8 @@ use yii\helpers\VarDumper;
  */
 class Sms extends \yii\db\ActiveRecord
 {
+
+    use EventTrait;
 
     public const TYPE_DRAFT     = 0;
     public const TYPE_OUTBOX    = 1;
@@ -121,6 +128,125 @@ class Sms extends \yii\db\ActiveRecord
     ];
 
     /**
+     * @return static
+     */
+    private static function create(): self
+    {
+        $sms = new static();
+        $sms->recordEvent(new SmsCreatedEvent($sms));
+        return $sms;
+    }
+
+    public static function createByIncomingDefault(
+        SmsIncomingForm $form,
+        int $clientId,
+        ?int $ownerId,
+        ?int $leadId,
+        ?int $caseId
+    ): self
+    {
+        $sms = self::create();
+        $sms->s_lead_id = $leadId;
+        $sms->s_case_id = $caseId;
+        $sms->loadByIncoming($form, $clientId, $ownerId);
+        return $sms;
+    }
+
+    /**
+     * @param SmsIncomingForm $form
+     * @param int $clientId
+     * @param int|null $ownerId
+     * @param int|null $caseId
+     * @return static
+     */
+    public static function createByIncomingExchange(
+        SmsIncomingForm $form,
+        int $clientId,
+        ?int $ownerId,
+        ?int $caseId
+    ): self
+    {
+        $sms = self::create();
+        $sms->loadByIncoming($form, $clientId, $ownerId);
+        $sms->s_case_id = $caseId;
+        $sms->recordEvent(new SmsCreatedByIncomingSupportsEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
+        return $sms;
+    }
+
+    /**
+     * @param SmsIncomingForm $form
+     * @param int $clientId
+     * @param int|null $ownerId
+     * @param int|null $caseId
+     * @return static
+     */
+    public static function createByIncomingSupport(
+        SmsIncomingForm $form,
+        int $clientId,
+        ?int $ownerId,
+        ?int $caseId
+    ): self
+    {
+        $sms = self::create();
+        $sms->loadByIncoming($form, $clientId, $ownerId);
+        $sms->s_case_id = $caseId;
+        $sms->recordEvent(new SmsCreatedByIncomingSupportsEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
+        return $sms;
+    }
+
+    /**
+     * @param SmsIncomingForm $form
+     * @param int $clientId
+     * @param int|null $ownerId
+     * @param int|null $leadId
+     * @return static
+     */
+    public static function createByIncomingSales(
+        SmsIncomingForm $form,
+        int $clientId,
+        ?int $ownerId,
+        ?int $leadId
+    ): self
+    {
+        $sms = self::create();
+        $sms->loadByIncoming($form, $clientId, $ownerId);
+        $sms->s_lead_id = $leadId;
+        $sms->recordEvent(new SmsCreatedByIncomingSalesEvent($sms, $leadId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
+        return $sms;
+    }
+
+    /**
+     * @param SmsIncomingForm $form
+     * @param int $clientId
+     * @param int|null $ownerId
+     */
+    private function loadByIncoming(SmsIncomingForm $form, int $clientId, ?int $ownerId): void
+    {
+//        $this->s_communication_id = $form->si_id;
+        $this->s_type_id = self::TYPE_INBOX;
+        $this->s_status_id = self::STATUS_DONE;
+        $this->s_is_new = true;
+        $this->s_status_done_dt = $form->si_sent_dt;
+        $this->s_phone_to = $form->si_phone_to;
+        $this->s_phone_from = $form->si_phone_from;
+        $this->s_project_id = $form->si_project_id;
+        $this->s_sms_text = $form->si_sms_text;
+        $this->s_created_dt = $form->si_created_dt;
+        $this->s_tw_message_sid = $form->si_message_sid;
+        $this->s_tw_num_segments = $form->si_num_segments;
+        $this->s_tw_to_country = $form->si_to_country;
+        $this->s_tw_to_state = $form->si_to_state;
+        $this->s_tw_to_city = $form->si_to_city;
+        $this->s_tw_to_zip = $form->si_to_zip;
+        $this->s_tw_from_country = $form->si_from_country;
+        $this->s_tw_from_city = $form->si_from_city;
+        $this->s_tw_from_state = $form->si_from_state;
+        $this->s_tw_from_zip = $form->si_from_zip;
+        $this->s_client_id = $clientId;
+        $this->s_created_user_id = $ownerId;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -153,6 +279,7 @@ class Sms extends \yii\db\ActiveRecord
             [['s_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['s_project_id' => 'id']],
             [['s_template_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => SmsTemplateType::class, 'targetAttribute' => ['s_template_type_id' => 'stp_id']],
             [['s_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['s_updated_user_id' => 'id']],
+            [['s_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['s_client_id' => 'id']],
         ];
     }
 
@@ -587,9 +714,11 @@ class Sms extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if($this->s_type_id === self::TYPE_OUTBOX && $this->s_lead_id && $this->sLead) {
+        if ($this->s_lead_id && $this->sLead) {
             $this->sLead->updateLastAction();
         }
-
+        if ($this->s_case_id && $this->sCase) {
+            $this->sCase->updateLastAction();
+        }
     }
 }

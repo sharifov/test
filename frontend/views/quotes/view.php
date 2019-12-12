@@ -11,6 +11,9 @@ use yii\widgets\DetailView;
 $this->title = 'Quote: '.$model->id.', UID: ' . $model->uid;
 $this->params['breadcrumbs'][] = ['label' => 'Quotes', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+
+$user = Yii::$app->user->identity;
+$showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 ?>
 <div class="quote-view">
 
@@ -223,5 +226,16 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php \yii\widgets\Pjax::end(); ?>
         </div>
     </div>
+
+    <?php if ($showGdsOfferId): ?>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Origin Search Data:</h3>
+            <div>
+                <pre><small><?php \yii\helpers\VarDumper::dump(@json_decode($model->origin_search_data, true), 10, true); ?></small></pre>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
 </div>

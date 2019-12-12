@@ -14,117 +14,122 @@ $this->title = 'Create Lead';
 
 ?>
 
-    <div class="page-header">
-        <div class="container-fluid">
-            <div class="page-header__wrapper">
-                <h2 class="page-header__title">
-                    <?= Html::encode($this->title) ?>
-                    <span class="label status-label label-info">New</span> Department: <?= Department::getName($leadForm->depId) ?>
-                </h2>
-            </div>
-        </div>
-    </div>
-
-<?php $form = ActiveForm::begin([
-    'id' => $leadForm->formName() . '-form',
-    'enableClientValidation' => false,
-    'enableAjaxValidation' => true,
-    'validationUrl' =>
-        $leadForm->caseGid
-            ? ['/lead/validate-lead-create', 'depId' => $leadForm->depId, 'case_gid' => $leadForm->caseGid]
-            : ['/lead/validate-lead-create', 'depId' => $leadForm->depId],
-    'action' =>
-        $leadForm->caseGid
-            ? ['/lead/create-case', 'case_gid' => $leadForm->caseGid]
-            : ['/lead/create'],
-]) ?>
-
-    <div class="main-sidebars">
-        <div class="panel panel-main">
-
-
-            <div class="col-md-12">
-                <?= Alert::widget() ?>
-                <br>
-            </div>
-
-            <div class="col-md-1">
-            </div>
-
-            <div class="col-md-10">
-                <div class="request">
-                    <div class="request-overview">
-                        <div style="letter-spacing: 0.8px; padding-bottom: 13px;" class="row-flex row-flex-justify">
-                            <span style="font-weight: 600; font-size: 18px;">Flight Request</span>
-                        </div>
-                        <div class="separator"></div>
-                        <div class="request-form collapse in" id="request" aria-expanded="true">
-                            <div class="panel panel-primary sl-request-wrap">
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <?php $form = ActiveForm::begin([
+            'id' => $leadForm->formName() . '-form',
+            'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'validationUrl' =>
+                $leadForm->caseGid
+                    ? ['/lead/validate-lead-create', 'depId' => $leadForm->depId, 'case_gid' => $leadForm->caseGid]
+                    : ['/lead/validate-lead-create', 'depId' => $leadForm->depId],
+            'action' =>
+                $leadForm->caseGid
+                    ? ['/lead/create-case', 'case_gid' => $leadForm->caseGid]
+                    : ['/lead/create'],
+        ]) ?>
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Flight Request</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="offset-xl-1 col-xl-9 col-lg-12 col-md-12 col-sm-12 col-xs-12">
 
 
-
-                                <div class="sl-itinerary-form">
-                                    <div class="sl-request-summary__block">
-                                        <?= $this->render('partial/_formLeadSegment', [
-                                            'model' => $leadForm,
-                                            'form' => $form]) ?>
-                                    </div>
-
-                                    <div class="row sl-itinerary-form__pax">
-
-                                        <div class="col-sm-3">
-                                            <?= $form->field($leadForm, 'cabin', [
-                                            ])->dropDownList(LeadHelper::cabinList(), [
-                                                'prompt' => '---'
-                                            ]) ?>
-                                        </div>
-
-                                        <div class="col-sm-2">
-                                        </div>
-
-                                        <div class="col-sm-1">
-                                            <?= $form->field($leadForm, 'adults', [
-                                            ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
-                                        </div>
-                                        <div class="col-sm-1">
-                                            <?= $form->field($leadForm, 'children', [
-                                            ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
-                                        </div>
-                                        <div class="col-sm-1">
-                                            <?= $form->field($leadForm, 'infants', [
-                                            ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
-                                        </div>
-
-                                    </div>
-
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <?= Alert::widget() ?>
+                                    <br>
                                 </div>
-
                             </div>
-                            <div class="text-right">
-                                <?=Html::submitButton('<i class="fa fa-check"></i> Create Lead', ['class' => 'btn btn-success']) ?>
+
+                            <div class="row">
+                                <div class="col-md-12 col-sm-12">
+                                    <?= $this->render('partial/_formLeadSegmentCreate', [
+                                        'model' => $leadForm,
+                                        'form' => $form]) ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-12">
+                                    <?= $form->field($leadForm, 'cabin', [
+                                    ])->dropDownList(LeadHelper::cabinList(), [
+                                        'prompt' => '---'
+                                    ]) ?>
+                                </div>
+                                <div class="col-md-2 col-sm-12">
+                                    <?= $form->field($leadForm, 'adults', [
+                                    ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
+                                </div>
+                                <div class="col-md-2 col-sm-12">
+                                    <?= $form->field($leadForm, 'children', [
+                                    ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
+                                </div>
+                                <div class="col-md-2 col-sm-12">
+                                    <?= $form->field($leadForm, 'infants', [
+                                    ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="col-md-12 col-sm-12">
+                <div class="x_panel">
 
-            <div class="col-md-1"></div>
+                    <div class="x_title">
+                        <h2>Client Info</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="offset-xl-1 col-xl-9 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <?= $this->render('partial/_client_create', [
+                                'form' => $form,
+                                'leadForm' => $leadForm,
+                            ])
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Lead info and preferences</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="offset-xl-1 col-xl-9 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <?= $this->render('partial/_preferences_create', [
+                                'form' => $form,
+                                'leadForm' => $leadForm
+                            ])
+                            ?>
+                        </div>
+                        <div class="offset-xl-1 col-xl-9 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+							        <?=Html::submitButton('<i class="fa fa-save"></i> Create Lead', ['class' => 'btn btn-success']) ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <aside class="sidebar right-sidebar sl-right-sidebar">
-            <?= $this->render('partial/_client_create', [
-                'form' => $form,
-                'leadForm' => $leadForm,
-            ]);
-            ?>
-
-            <?= $this->render('partial/_preferences_create', [
-                'form' => $form,
-                'leadForm' => $leadForm
-            ]);
-            ?>
-        </aside>
-
+		<?php ActiveForm::end() ?>
     </div>
-
-<?php ActiveForm::end() ?>
+</div>

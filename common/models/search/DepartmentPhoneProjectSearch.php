@@ -19,6 +19,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
         return [
             [['dpp_id', 'dpp_project_id', 'dpp_dep_id', 'dpp_source_id', 'dpp_ivr_enable', 'dpp_enable', 'dpp_updated_user_id'], 'integer'],
             [['dpp_phone_number', 'dpp_params', 'dpp_updated_dt'], 'safe'],
+            [['dpp_redial', 'dpp_default'], 'boolean']
         ];
     }
 
@@ -66,6 +67,8 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
             'dpp_enable' => $this->dpp_enable,
             'dpp_updated_user_id' => $this->dpp_updated_user_id,
             'dpp_updated_dt' => $this->dpp_updated_dt,
+            'dpp_redial' => $this->dpp_redial,
+            'dpp_default' => $this->dpp_default,
         ]);
 
         $query->andFilterWhere(['like', 'dpp_phone_number', $this->dpp_phone_number])

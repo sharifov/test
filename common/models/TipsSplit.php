@@ -18,7 +18,7 @@ use yii\db\ActiveRecord;
  * @property int $ts_updated_user_id
  *
  * @property Employee $tsUpdatedUser
- * @property Leads $tsLead
+ * @property Lead $tsLead
  * @property Employee $tsUser
  */
 class TipsSplit extends \yii\db\ActiveRecord
@@ -41,9 +41,9 @@ class TipsSplit extends \yii\db\ActiveRecord
             [['ts_lead_id', 'ts_user_id', 'ts_percent', 'ts_amount', 'ts_updated_user_id'], 'integer'],
             [['ts_updated_dt'], 'safe'],
             [['ts_user_id', 'ts_lead_id'], 'unique', 'targetAttribute' => ['ts_user_id', 'ts_lead_id']],
-            [['ts_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['ts_updated_user_id' => 'id']],
-            [['ts_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::className(), 'targetAttribute' => ['ts_lead_id' => 'id']],
-            [['ts_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['ts_user_id' => 'id']],
+            [['ts_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ts_updated_user_id' => 'id']],
+            [['ts_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['ts_lead_id' => 'id']],
+            [['ts_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ts_user_id' => 'id']],
         ];
     }
 
@@ -83,7 +83,7 @@ class TipsSplit extends \yii\db\ActiveRecord
      */
     public function getTsUpdatedUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'ts_updated_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'ts_updated_user_id']);
     }
 
     /**
@@ -91,7 +91,7 @@ class TipsSplit extends \yii\db\ActiveRecord
      */
     public function getTsLead()
     {
-        return $this->hasOne(Lead::className(), ['id' => 'ts_lead_id']);
+        return $this->hasOne(Lead::class, ['id' => 'ts_lead_id']);
     }
 
     /**
@@ -99,7 +99,7 @@ class TipsSplit extends \yii\db\ActiveRecord
      */
     public function getTsUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'ts_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'ts_user_id']);
     }
 
 

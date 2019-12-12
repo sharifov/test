@@ -115,7 +115,7 @@ class UserProjectParamsController extends FController
             //\Yii::$app->response->format = Response::FORMAT_JSON;
 
             if($model->save()) {
-                return 'Success <script>$("#activity-modal").modal("hide")</script>';
+                return 'Success <script>$("#modal-df").modal("hide")</script>';
                 //Yii::$app->session->setFlash('success', 'Created new project params!');
                 //return $this->redirect(Yii::$app->request->referrer); //'/'.Yii::$app->request->post('redirect'));
             }
@@ -184,7 +184,7 @@ class UserProjectParamsController extends FController
             if($model->save()) {
 
                 //$this->view->registerJs('$("#activity-modal").modal("hide");');
-                return 'Success <script>$("#activity-modal").modal("hide")</script>';
+                return 'Success <script>$("#modal-df").modal("hide")</script>';
 
                 //return 'OK'; //$this->redirect(Yii::$app->request->referrer);
             }

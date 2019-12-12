@@ -133,7 +133,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
             [
                 'attribute' => 'leadFlowChecklist',
-                'value' => function (\common\models\LeadFlow $model) {
+                'value' => static function (\common\models\LeadFlow $model) {
                     $data = [];
                     foreach ($model->leadFlowChecklist as $item) {
                         $data[] = $item->checklistType ? Html::tag('span', Html::encode($item->checklistType->lct_name), ['class' => 'badge']) : $item->lfc_lc_type_id;
@@ -145,7 +145,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             [
                 //'attribute' => 'employee_id',
                 'label' => 'CheckList Owner',
-                'value' => function (\common\models\LeadFlow $model) {
+                'value' => static function (\common\models\LeadFlow $model) {
                     $userName = '-';
                     if ($model->leadFlowChecklist) {
                         foreach ($model->leadFlowChecklist as $item) {
@@ -174,7 +174,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 //            [
 //                //'attribute' => 'username',
 //                'label' => 'User Role',
-//                'value' => function (\common\models\LeadFlow $model) {
+//                'value' => static function (\common\models\LeadFlow $model) {
 //                    if($model->employee) {
 //                        $roles = $model->employee->getRoles();
 //                    } else {
@@ -188,7 +188,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 //            [
 //                'label' => 'User Groups',
 //                //'attribute' => 'user_group_id',
-//                'value' => function (\common\models\LeadFlow $model) {
+//                'value' => static function (\common\models\LeadFlow $model) {
 //
 //                    $groupsValueArr = [];
 //                    if($model->employee) {

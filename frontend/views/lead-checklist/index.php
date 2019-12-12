@@ -28,7 +28,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'action' => ['index'],
             'method' => 'get',
             'options' => [
-                'data-pjax' => 1
+                'data-pjax' => 1,
+                'style' => 'width: 100%;'
             ],
         ]); ?>
 
@@ -71,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'lc_type_id',
             [
                 'attribute' => 'lc_type_id',
-                'value' => function (\common\models\LeadChecklist $model) {
+                'value' => static function (\common\models\LeadChecklist $model) {
                     return  $model->lcType ? $model->lcType->lct_name : $model->lc_type_id;
                 },
                 'filter' => \common\models\LeadChecklistType::getList()
@@ -90,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'lc_user_id',
-                'value' => function (\common\models\LeadChecklist $model) {
+                'value' => static function (\common\models\LeadChecklist $model) {
                     return  $model->lcUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->lcUser->username) : $model->lc_user_id;
                 },
                 'filter' => \common\models\Employee::getList(),

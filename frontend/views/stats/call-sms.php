@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
+use yii\bootstrap4\Modal;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
@@ -36,9 +37,9 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
     <div class="stats-call-sms">
         <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
         <?php Pjax::begin(); ?>
-        <div class="panel panel-default">
-            <div class="panel-heading"><i class="fa fa-bar-chart"></i> Call & SMS Stats</div>
-            <div class="panel-body">
+        <div class="card card-default">
+            <div class="card-header"><i class="fa fa-bar-chart"></i> Call & SMS Stats</div>
+            <div class="card-body">
                 <div class="row">
                     <?php $form = ActiveForm::begin([
                         'action' => ['call-sms'],
@@ -97,7 +98,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         [
                             'label' => 'Obj Id',
                             'attribute' => 'id',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
                                 return $model['id'];
                             },
                             'options' => ['style' => 'width:100px'],
@@ -111,7 +112,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         ],
                         [
                             'attribute' => 'username',
-                            'value' => function (\common\models\Employee $model) {
+                            'value' => static function (\common\models\Employee $model) {
                                 return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
                             },
                             'format' => 'raw',
@@ -122,7 +123,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         [
                             //'attribute' => 'username',
                             'label' => 'Role',
-                            'value' => function (\common\models\Employee $model) {
+                            'value' => static function (\common\models\Employee $model) {
                                 $roles = $model->getRoles();
                                 return $roles ? implode(', ', $roles) : '-';
                             },
@@ -135,7 +136,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         [
                             'label' => 'Communication Type',
                             'attribute' => 'communication_type_id',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
                                 return \common\models\search\CommunicationSearch::COMM_TYPE_LIST[$model['communication_type_id']] ?? '-';
                             },
                             //'format' => 'raw',
@@ -144,7 +145,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
                         [
                             'label' => 'Type / Status',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
 
                                 $type = '';
                                 $statusTitle = '';
@@ -186,7 +187,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         [
                             'label' => 'Created Date',
                             'attribute' => 'created_dt',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
                                 return $model['created_dt'] ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created_dt']), 'php: Y-m-d [H:i:s]')  : '-';
                             },
                             'format' => 'raw',
@@ -202,7 +203,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
                         [
                             'label' => 'Agent Phone',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
                                 $phone = '-';
                                 if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
 
@@ -235,7 +236,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         [
                             'label' => 'Agent Name',
                             'attribute' => 'created_user_id',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
 
                                 $agent = '-';
 
@@ -268,7 +269,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         [
                             'label' => 'Agent Group',
                             'attribute' => 'user_group_id',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
                                 $user = null;
 
                                 if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
@@ -313,7 +314,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
                         [
                             'label' => 'Client Phone',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
                                 $phone = '-';
 
 
@@ -350,7 +351,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         [
                             //'label' => 'Lead Id',
                             'attribute' => 'lead_id',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
                                 $lead = \common\models\Lead::findOne($model['lead_id']);
                                 return $lead ? Html::a($model['lead_id'], ['lead/view', 'gid' => $lead->gid], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                             },
@@ -360,7 +361,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         [
                             'label' => 'Project',
                             'attribute' => 'project_id',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
                                 $project = null;
 
                                 if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
@@ -396,7 +397,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
                         [
                             'label' => 'Length',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
 
                                 $duration = '-';
 
@@ -424,7 +425,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
                         [
                             'label' => 'View',
-                            'value' => function ($model) {
+                            'value' => static function ($model) {
 
                                 $view = '-';
 
@@ -461,7 +462,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         /*
                          [
                              'label' => 'Booked',
-                             'value' => function (\common\models\Employee $model) use ($searchModel) {
+                             'value' => static function (\common\models\Employee $model) use ($searchModel) {
                                  $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_BOOKED], null, $searchModel->datetime_start, $searchModel->datetime_end);
                                  return $cnt ? Html::a($cnt, ['lead-flow/index',
                                      'LeadFlowSearch[employee_id]' => $model->id,
@@ -496,24 +497,21 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
     </div>
 
-<?php \yii\bootstrap\Modal::begin(['id' => 'modal-sms-preview',
-    'header' => '<h2>SMS preview</h2>',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE
+<?php Modal::begin([
+        'id' => 'modal-sms-preview',
+        'title' => 'SMS preview',
+        'size' => Modal::SIZE_LARGE
 ])?>
-<?php \yii\bootstrap\Modal::end()?>
-
+<?php Modal::end()?>
 
 <?php
 $js = <<<JS
-
     $('body').on('click', '.view_sms', function() {
-        var data = $(this).data('content');
-        var previewPopup = $('#modal-sms-preview');
+        let data = $(this).data('content');
+        let previewPopup = $('#modal-sms-preview');
         previewPopup.find('.modal-body').html(data);
         previewPopup.modal('show');
     });
-
-    // $('[data-toggle="popover"]').popover({ 'sanitize': false, 'html': true});
 JS;
 
 $this->registerJs($js);

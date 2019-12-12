@@ -4,7 +4,7 @@ return [
     'supportEmail' => 'support@example.com',
     'user.passwordResetTokenExpire' => 3600,*/
 
-    'serviceName' => 'communication',
+    'serviceName' => 'crm',
     'serviceVersion' => '1.0.0',
 
 

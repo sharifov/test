@@ -56,10 +56,7 @@ class LeadSnoozeNotificationsListener
 
         $subject = Yii::t('email', "Lead-{id} to SNOOZE", ['id' => $lead->id]);
 
-        $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to SNOOZE!
-Snooze for: {datetime}.
-Reason: {reason}
-{url}",
+        $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to SNOOZE! Snooze for: {datetime}. Reason: {reason} {url}",
             [
                 'lead_id' => $lead->id,
                 'datetime' => Yii::$app->formatter->asDatetime(strtotime($event->snoozeFor)),

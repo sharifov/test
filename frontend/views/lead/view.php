@@ -304,11 +304,12 @@ if (!$leadForm->getLead()->isNewRecord) {
 
     $('#view-flow-transition').on('click', function() {
         $('#preloader').removeClass('hidden');
-        var editBlock = $('#get-request-flow-transition');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load('$flowTransitionUrl', function( response, status, xhr ) {
+        let modal = $('#modal-lg');
+        $('#modal-lg-label').html('Lead status logs');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load('$flowTransitionUrl', function( response, status, xhr ) {
             $('#preloader').addClass('hidden');
-            editBlock.modal('show');
+            modal.modal('show');
         });
     });
     
@@ -343,12 +344,11 @@ JS;
 $jsCode = <<<JS
 
     $(document).on('click', '.showModalButton', function(){
-        var id = $(this).data('modal_id');
-        var url = $(this).data('content-url');
+        let id = $(this).data('modal_id');
+        let url = $(this).data('content-url');
 
-        $('#modal-' + id).find('.modal-header').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
-        
-        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#modal-' + id + '-label').html($(this).attr('title'));
+        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
 
         $.post(url, function(data) {
             $('#modal-' + id).find('.modal-body').html(data);

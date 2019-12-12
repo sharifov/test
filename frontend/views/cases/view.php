@@ -2,6 +2,7 @@
 
 use sales\helpers\cases\CasesViewRenderHelper;
 use yii\helpers\Html;
+use yii\bootstrap4\Modal;
 
 /**
  * @var $this yii\web\View
@@ -148,46 +149,31 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 
 </div>
 
-<style type="text/css">
-    @media screen and (min-width: 768px) {
-        .modal-dialog {
-            width: 800px; /* New width for default modal */
-        }
-        .modal-sm {
-            width: 350px; /* New width for small modal */
-        }
-    }
-    @media screen and (min-width: 992px) {
-        .modal-lg {
-            width: 80%; /* New width for large modal */
-        }
-    }
-</style>
 
 <?php
-yii\bootstrap\Modal::begin([
+Modal::begin([
     'id' => 'modalCaseSm',
-    //'headerOptions' => ['id' => 'modalCaseSmHeader'],
-    'size' => \yii\bootstrap\Modal::SIZE_SMALL,
+    'title' => '',
+    'size' => Modal::SIZE_SMALL,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 ?>
 
 <?php
-yii\bootstrap\Modal::end();
+Modal::end();
 ?>
 
 <?php
-yii\bootstrap\Modal::begin([
+Modal::begin([
     'id' => 'modalCase',
-    //'headerOptions' => ['id' => 'modalCaseHeader'],
-    'size' => \yii\bootstrap\Modal::SIZE_DEFAULT,
+    'title' => '',
+    'size' => Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 ?>
 
 <?php
-yii\bootstrap\Modal::end();
+Modal::end();
 ?>
 
 
@@ -197,10 +183,10 @@ yii\bootstrap\Modal::end();
 
     $js = <<<JS
      $(document).on('click', '#btn-change-status', function(){
-            var modal = $('#modalCaseSm');
+            let modal = $('#modalCaseSm');
             //$('#search-sale-panel').toggle();
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+            $('#modalCaseSm-label').html($(this).attr('title'));
             
             $.get('$ajaxUrl', function(data) {
                 modal.find('.modal-body').html(data);
@@ -210,10 +196,10 @@ yii\bootstrap\Modal::end();
      });
 
     $(document).on('click', '#btn-status-history', function(){
-            var modal = $('#modalCase');
+            let modal = $('#modalCase');
             //$('#search-sale-panel').toggle();
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            $('#modalCase-label').html($(this).attr('title'));
             
             $.get('$statusHistoryajaxUrl', function(data) {
                 modal.find('.modal-body').html(data);

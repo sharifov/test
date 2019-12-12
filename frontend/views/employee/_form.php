@@ -1,4 +1,8 @@
 <?php
+
+use yii\web\View;
+use yii\grid\ActionColumn;
+
 /**
  * @var $this \yii\web\View
  * @var $modelUserParams \common\models\UserParams
@@ -253,7 +257,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
             </div>
             <?php
             if (!$model->isNewRecord) : ?>
-                <div class="well form-inline">
+                <div class="well">
                     <div class="form-group">
                         <?= $form->field($model, 'acl_rules_activated', [
                             'template' => '{input}'
@@ -270,17 +274,17 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                         $idMaskIP = Html::getInputId($aclModel, 'mask');
 
                         $js = <<<JS
-    $('#acl-rule-id').click(function() {
-        $(this).addClass('hidden');
-        $('#$idForm').removeClass('hidden');
+    $('#acl-rule-id').on('click', function() {
+        $(this).addClass('d-none');
+        $('#$idForm').removeClass('d-none');
     });
 
-    $('#close-btn').click(function() {
-        $('#acl-rule-id').removeClass('hidden');
-        $('#$idForm').addClass('hidden');
+    $('#close-btn').on('click', function() {
+        $('#acl-rule-id').removeClass('d-none');
+        $('#$idForm').addClass('d-none');
     });
 
-    $('#submit-btn').click(function() {
+    $('#submit-btn').on('click', function() {
         $.post($(this).data('url'), $('#$idForm input').serialize(),function( data ) {
             if (data.success) {
                 $('#employee-acl-rule').html(data.body);
@@ -294,7 +298,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 JS;
                         $this->registerJs($js);
                         ?>
-                        <div class="form-group hidden" id="<?= $idForm ?>">
+                        <div class="form-group d-none" id="<?= $idForm ?>">
                             <?= $form->field($aclModel, 'employee_id', [
                                 'options' => [
                                     'tag' => false
@@ -307,11 +311,13 @@ JS;
                                 ],
                                 'template' => '{label}: {input}',
                                 'enableClientValidation' => false
-                            ])->widget(MaskedInput::class, [
-                                'clientOptions' => [
-                                    'alias' => 'ip'
-                                ],
-                            ]) ?>
+                            ])->textInput(['maxlength' => true])
+//                                ->widget(MaskedInput::class, [
+//                                'clientOptions' => [
+//                                    'alias' => 'ip',
+//                                ],
+//                            ])
+                            ?>
                             <span>&nbsp;</span>
                             <?= $form->field($aclModel, 'description', [
                                 'options' => [
@@ -393,17 +399,6 @@ JS;
                 );
                 ?>
 
-
-
-                <?php /*<div class="modal fade" id="modal-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content loader-lg">
-
-                        </div>
-                    </div>
-                </div>*/ ?>
-
-
             </p>
 
 
@@ -480,7 +475,7 @@ JS;
 
 
                     [
-                        'class' => 'yii\grid\ActionColumn',
+                        'class' => ActionColumn::class,
                         'template' => '{update} {delete}',
                         'controller' => 'user-project-params',
                         //'headerOptions' => ['width' => '20%', 'class' => '',],
@@ -506,7 +501,7 @@ JS;
 
 
         <?php /*
-        <div class="panel panel-default">
+        <div class="card card-default">
             <div class="panel-heading collapsing-heading">
                 <?= Html::a('Seller Contact Info <i class="collapsing-heading__arrow"></i>', '#seller-contact-info', [
                     'data-toggle' => 'collapse',
@@ -537,23 +532,20 @@ JS;
     ?>
 </div>
 
-<?php \yii\bootstrap\Modal::begin([
-    'id' => 'activity-modal',
-    //'header' => '<h4 class="modal-title">View Image</h4>',
-    //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
-
-]); ?>
-<?php \yii\bootstrap\Modal::end(); ?>
-
 
 <?php
 $js = <<<JS
 
-    $('#activity-modal').on('hidden.bs.modal', function () {
-        // $('#modal-dialog').find('.modal-content').html('');
+    $('#modal-df').on('hidden.bs.modal', function () {
         $.pjax.reload({container:'#pjax-grid-upp'});
+        
+        /*new PNotify({
+            title: 'Params successfully updated',
+            text: 'User project Parameters have been saved successfully.',
+            type: 'success'
+        });*/
     });
-
+      
 
     /*$("#update-app-pjax").on("pjax:end", function() {
         $.pjax.reload({container:'#pjax-grid-upp'});
@@ -564,14 +556,24 @@ $js = <<<JS
     $(document).on('click', '.act-update-upp', function(e) {
         e.preventDefault();
         //alert(123);
-        $.get(
-            '/user-project-params/update-ajax',
+        
+        let modal = $('#modal-df');
+        
+        $.get('/user-project-params/update-ajax',
             {
                 data: $(this).closest('tr').data('key')
             },
             function (data) {
-                $('#activity-modal .modal-content').html(data);
-                $('#activity-modal').modal();
+                
+                modal.find('.modal-title').html('Update Project params');
+                modal.find('.modal-body').html(data);
+                modal.modal();
+                
+                //$('#activity-modal .modal-content').html(data);
+                //$('#activity-modal').modal();
+                
+                
+
             }
         );
     });
@@ -579,10 +581,16 @@ $js = <<<JS
 
     $(document).on('click', '.act-create-upp', function(e) {
         e.preventDefault();
+        let modal = $('#modal-df');
         $.get('/user-project-params/create-ajax', {user_id: $(this).data('user_id')},
             function (data) {
-                $('#activity-modal .modal-content').html(data);
-                $('#activity-modal').modal();
+            
+                modal.find('.modal-title').html('Create Project params');
+                modal.find('.modal-body').html(data);
+                modal.modal();
+            
+                //$('#activity-modal .modal-content').html(data);
+                //$('#activity-modal').modal();
             }
         );
     });

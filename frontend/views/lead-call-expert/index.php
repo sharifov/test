@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Lead UID',
                 'attribute' => 'lce_lead_id',
-                'value' => function (\common\models\LeadCallExpert $model) {
+                'value' => static function (\common\models\LeadCallExpert $model) {
                     return Html::a($model->lce_lead_id, ['lead/view', 'gid' => $model->lceLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'lce_request_dt',
             [
                 'attribute' => 'lce_request_dt',
-                'value' => function (\common\models\LeadCallExpert $model) {
+                'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->lce_request_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lce_request_dt)) : '-';
                 },
                 'format' => 'raw',
@@ -101,7 +101,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Employee',
                 'attribute' => 'lce_agent_user_id',
-                'value' => function (\common\models\LeadCallExpert $model) {
+                'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->lceAgentUser ? $model->lceAgentUser->username : '-';
                 },
                 'filter' => \common\models\Employee::getList()
@@ -109,7 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'User Role',
                 'attribute' => 'employeeRole',
-                'value' => function (\common\models\LeadCallExpert $model) {
+                'value' => static function (\common\models\LeadCallExpert $model) {
                     $roles = $model->lceAgentUser->getRoles();
                     return $roles ? implode(', ', $roles) : '-';
                 },
@@ -118,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'lce_status_id',
-                'value' => function (\common\models\LeadCallExpert $model) {
+                'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->getStatusLabel();
                 },
                 'filter' => \common\models\LeadCallExpert::STATUS_LIST,
@@ -130,7 +130,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'lce_response_dt',
             [
                 'attribute' => 'lce_response_dt',
-                'value' => function (\common\models\LeadCallExpert $model) {
+                'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->lce_response_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lce_response_dt)) : '-';
                 },
                 'format' => 'raw',
@@ -156,7 +156,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'lce_updated_dt',
             [
                 'attribute' => 'lce_updated_dt',
-                'value' => function (\common\models\LeadCallExpert $model) {
+                'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->lce_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lce_updated_dt)) : '-';
                 },
                 'format' => 'raw',

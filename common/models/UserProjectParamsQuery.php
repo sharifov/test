@@ -9,26 +9,22 @@ namespace common\models;
  */
 class UserProjectParamsQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
 
     /**
-     * {@inheritdoc}
-     * @return UserProjectParams[]|array
+     * @param string $phone
+     * @return $this
      */
-    public function all($db = null)
+    public function findByPhone(string $phone): self
     {
-        return parent::all($db);
+        return $this->where(['upp_tw_phone_number' => $phone])->orderBy(['upp_created_dt' => SORT_DESC]);
     }
 
     /**
-     * {@inheritdoc}
-     * @return UserProjectParams|array|null
+     * @param string $email
+     * @return $this
      */
-    public function one($db = null)
+    public function findByEmail(string $email): self
     {
-        return parent::one($db);
+        return $this->where(['upp_email' => $email])->orderBy(['upp_created_dt' => SORT_DESC]);
     }
 }

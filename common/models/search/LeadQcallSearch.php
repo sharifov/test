@@ -49,7 +49,7 @@ class LeadQcallSearch extends LeadQcall
             [['lqc_lead_id', 'lqc_weight', 'l_is_test', 'deadline'], 'integer'],
 
             [['current_dt', 'l_is_test', 'deadline'], 'safe'],
-            [['lqc_dt_from', 'lqc_dt_to'], 'string'],
+            [['lqc_dt_from', 'lqc_dt_to', 'lqc_created_dt'], 'string'],
 
             ['projectId', 'integer'],
             ['leadStatus', 'integer'],
@@ -163,6 +163,7 @@ class LeadQcallSearch extends LeadQcall
      */
     public function searchByRedial($params, Employee $user): ActiveDataProvider
     {
+        $nowDt = date('Y-m-d H:i:s');
         $query = self::find()->select('*');
 
         $query->with(['lqcLead.project', 'lqcLead.leadFlightSegments', 'lqcLead.source', 'lqcLead.employee', 'lqcLead.client.clientPhones']);
@@ -171,18 +172,49 @@ class LeadQcallSearch extends LeadQcall
 
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
 
+        $query->addSelect([
+            'is_ready' => new Expression('if (lqc_dt_from <= \'' . $nowDt . '\', 1, 0)')
+        ]);
+
+        $query->addSelect([
+            'is_reserved' => new Expression('if (lqc_reservation_time > \'' . $nowDt . '\' AND (lqc_reservation_user_id != ' . $user->id . ' OR lqc_reservation_user_id IS NULL) , 1, 0)')
+        ]);
+
+        $defaultOrder = [
+            'is_ready' => SORT_DESC,
+            'is_reserved' => SORT_ASC,
+        ];
+
         if (!$user->isAdmin()) {
-            $query->andWhere(['<=', 'lqc_dt_from', date('Y-m-d H:i:s')]);
+            $query->andHaving(['<>', 'is_ready', 0]);
+            $query->andHaving(['<>', 'is_reserved', 1]);
+//            $query->andWhere(['<=', 'lqc_dt_from', $nowDt]);
+//            $query->andWhere(['or',
+//                ['<=', 'lqc_reservation_time', $nowDt],
+//                ['IS', 'lqc_reservation_time', null]
+//            ]);
         }
 
         if ($user->isAgent() || $user->isSupervision()) {
-            $query->andWhere(['NOT IN', 'l_call_status_id', [Lead::CALL_STATUS_PROCESS, Lead::CALL_STATUS_PREPARE, Lead::CALL_STATUS_QUEUE]]);
+            $query->andWhere(['NOT IN', 'l_call_status_id', [
+                Lead::CALL_STATUS_PROCESS,
+                Lead::CALL_STATUS_PREPARE,
+                Lead::CALL_STATUS_QUEUE,
+                Lead::CALL_STATUS_BUGGED,
+            ]]);
             $query->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
         }
 
         if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
 			$query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
 		}
+
+        $redialSame = (int)Yii::$app->params['settings']['redial_same_deadline_priority'];
+        $samePriority = "TIMESTAMPDIFF(MINUTE, '" . $nowDt . "', lqc_dt_to)";
+        $query->addSelect([
+            'same_priority' =>
+                new Expression('if (' . $samePriority . ' <= ' . $redialSame . ', 1, 0) ')
+        ]);
 
         $query->addSelect([
             'countClientPhones' => (new Query())
@@ -201,7 +233,7 @@ class LeadQcallSearch extends LeadQcall
                 ->limit(1)
         ]);
 
-        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . date('Y-m-d H:i:s') . "', lqc_dt_to )/60))";
+        $deadlineExpr = "(FLOOR(TIMESTAMPDIFF(SECOND, '" . $nowDt . "', lqc_dt_to )/60))";
         $query->addSelect(['deadline' =>
             new Expression('if (' . $deadlineExpr . ' > 0, ' . $deadlineExpr . ' , 0) ')
         ]);
@@ -210,10 +242,8 @@ class LeadQcallSearch extends LeadQcall
 //            new Expression("if (" . $deadlineExpr . " <= 0, " . $deadlineExpr . " , 1) ")
 //        ]);
 
-		$customDefaultOrder = [];
-
         if (($freshTime = (int)Yii::$app->params['settings']['redial_fresh_time']) > 0) {
-            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . date('Y-m-d H:i:s') . "')";
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
             $query->addSelect(['isFresh' =>
                 new Expression('if (' . $expression . ' <= ' . $freshTime . ', 1, 0) ')
             ]);
@@ -230,10 +260,11 @@ class LeadQcallSearch extends LeadQcall
 //            $query->addOrderBy([
 //                'is_in_day_time_hours' => SORT_DESC
 //            ]);
-			$customDefaultOrder = [
+
+            $defaultOrder = array_merge($defaultOrder, [
 				'isFresh' => SORT_DESC,
 				'is_in_day_time_hours' => SORT_DESC
-			];
+			]);
 
         } else {
             $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
@@ -245,7 +276,10 @@ class LeadQcallSearch extends LeadQcall
 //            $query->addOrderBy([
 //                'is_in_day_time_hours' => SORT_DESC
 //            ]);
-			$customDefaultOrder = ['is_in_day_time_hours' => SORT_DESC];
+
+            $defaultOrder = array_merge($defaultOrder, [
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
         }
 
 //        $query->addOrderBy([
@@ -255,28 +289,32 @@ class LeadQcallSearch extends LeadQcall
 //            'lqc_dt_from' => SORT_ASC
 //        ]);
 
-		$defaultOrder = [
-			'deadline' => SORT_ASC,
-			'attempts' => SORT_ASC,
-			'lqc_dt_from' => SORT_ASC,
-		];
-
-        $defaultOrder = array_merge($customDefaultOrder, $defaultOrder);
-
-        // add conditions that should always apply here
+        $defaultOrder = array_merge($defaultOrder, [
+            'same_priority' => SORT_DESC,
+            'lqc_weight' => SORT_ASC,
+            'deadline' => SORT_ASC,
+            'attempts' => SORT_ASC,
+            'lqc_dt_from' => SORT_ASC,
+            'lqc_lead_id' => SORT_ASC,
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> [
                 'defaultOrder' => $defaultOrder,
 				'attributes' => [
-					'deadline',
-					'attempts',
-					'lqc_dt_from',
-					'lqc_dt_to',
-					'lqc_lead_id',
-					'is_in_day_time_hours',
-					'isFresh'
+				    'is_ready',
+                    'is_reserved',
+                    'isFresh',
+                    'is_in_day_time_hours',
+                    'same_priority',
+                    'lqc_weight',
+                    'deadline',
+                    'attempts',
+                    'lqc_dt_from',
+                    'lqc_dt_to',
+                    'lqc_created_dt',
+                    'lqc_lead_id',
 				]
             ],
             /*'pagination' => [
@@ -336,6 +374,11 @@ class LeadQcallSearch extends LeadQcall
             if ($this->lqc_dt_to) {
                 $query->andFilterWhere(['>=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to))])
                     ->andFilterWhere(['<=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to) + 3600 * 24)]);
+            }
+
+            if ($this->lqc_created_dt) {
+                $query->andFilterWhere(['>=', 'lqc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_created_dt))])
+                    ->andFilterWhere(['<=', 'lqc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_created_dt) + 3600 * 24)]);
             }
 
             if ($this->lqc_weight === '0') {

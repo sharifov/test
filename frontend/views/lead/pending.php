@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->id;
             },
             'options' => [
@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
             },
             'format' => 'raw',
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $createdTS = strtotime($model->created);
 
@@ -103,7 +103,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Request',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
 
@@ -127,7 +127,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Client',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 if ($model->client) {
 
@@ -182,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'client_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->client_id ? Html::a($model->client_id, ['client/view', 'id' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',
@@ -240,7 +240,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             //'attribute' => 'Quotes',
             'label' => 'Calls',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 $cnt = $model->getCountCalls();
                 return $cnt ?: '-';
             },
@@ -256,7 +256,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'header' => 'Depart',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
 
@@ -279,7 +279,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'header' => 'Segments',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $segmentData = [];
@@ -305,7 +305,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Pax',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
             },
             'format' => 'raw',
@@ -321,7 +321,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'cabin',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST
@@ -330,7 +330,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'l_call_status_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return \common\models\Lead::CALL_STATUS_LIST[$model->l_call_status_id] ?? '-';
             },
             'filter' => \common\models\Lead::CALL_STATUS_LIST
@@ -338,21 +338,21 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'request_ip',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->request_ip;
             },
         ],
 
         [
             'attribute' => 'l_pending_delay_dt',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->l_pending_delay_dt ? Yii::$app->formatter->asDatetime(strtotime($model->l_pending_delay_dt)) : '-';
             },
         ],
 
         /*[
             'attribute' => 'l_request_hash',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->l_request_hash ?: '-';
             },
         ],*/
@@ -360,7 +360,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => false //\common\models\Employee::getList()
@@ -369,7 +369,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             //'attribute' => 'l_request_hash',
             'label' => 'Duplicate',
-            'value' => function (\common\models\Lead $model) {
+            'value' => static function (\common\models\Lead $model) {
                 return $model->leads0 ? Html::a(count($model->leads0), ['lead/duplicate', 'LeadSearch[l_request_hash]' => $model->l_request_hash], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',

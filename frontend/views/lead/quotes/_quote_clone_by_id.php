@@ -4,15 +4,15 @@ use common\models\Lead;
 use sales\forms\lead\CloneQuoteByUidForm;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
-use yii\bootstrap\Modal;
+use yii\bootstrap4\Modal;
 
 /** @var Lead $lead */
 
 Modal::begin([
     'id' => 'modal-clone-quote-by-id',
-    'size' => 'modal-xs',
-    'clientOptions' => ['backdrop' => 'static'],
-    'header' => '<h4 class="modal-title">Clone Quote</h4>',
+    'size' => Modal::SIZE_SMALL,
+    //'clientOptions' => ['backdrop' => 'static'],
+    'title' => 'Clone Quote by UID',
 ]);
 
 $cloneQuoteForm = new CloneQuoteByUidForm();
@@ -35,7 +35,9 @@ $cloneQuoteForm = new CloneQuoteByUidForm();
 
     <?= $form->field($cloneQuoteForm, 'uid')->textInput() ?>
 
-    <?= Html::submitButton('Clone', ['class' => 'btn btn-success popover-close-btn']) ?>
+    <div class="text-center">
+        <?= Html::submitButton('<i class="fas fa-clone"></i> Clone quote', ['class' => 'btn btn-success popover-close-btn']) ?>
+    </div>
 
 <?php ActiveForm::end() ?>
 
@@ -45,8 +47,9 @@ Modal::end();
 
 ?>
 
-<?= Html::a('<i class="fa fa-plus-circle success"></i> Clone Quote by UID', null, [
+<?= Html::a('<i class="fa fa-clone success"></i> Clone Quote', null, [
     'class' => 'clone-quote-by-uid',
+    'title' => 'Clone Quote by UID'
 ]) ?>
 
 <?php
@@ -98,14 +101,14 @@ $('#clone-quote-by-id-form').on('beforeSubmit', function (e) {
         }
     )
     .done(function(data) {
-       $('#modal-clone-quote-by-id').modal('hide');
+        $('#modal-clone-quote-by-id').modal('hide');
        resetCloneForm();
        if(data.success) {
            let text = 'Cloned new quote';
            if (data.message) {
                text = data.message;
            }
-            $.pjax.reload({container: '#quotes_list', async: false});
+            $.pjax.reload({container: '#quotes_list', async: true});
             new PNotify({
                 title: "Clone Quote by UID",
                 type: "success",
@@ -126,7 +129,6 @@ $('#clone-quote-by-id-form').on('beforeSubmit', function (e) {
         }
     })
     .fail(function () {
-       $('#modal-clone-quote-by-id').modal('hide');
        resetCloneForm();
         new PNotify({
             title: "Clone Quote by UID",

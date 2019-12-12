@@ -13,7 +13,7 @@ use Yii;
  * @property int $status
  * @property string $created
  *
- * @property Employees $employee
+ * @property Employee $employee
  * @property Quotes $quote
  */
 class QuoteStatusLog extends \yii\db\ActiveRecord

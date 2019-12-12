@@ -24,9 +24,9 @@ $form = ActiveForm::begin([
             'onchange' => "
                 var val = $(this).val();
                 if (val == '" . CloneReasonForm::REASON_OTHER . "') {
-                    $('#" . $form->id . "-other-wrapper').addClass('in');
+                    $('#" . $form->id . "-other-wrapper').addClass('show');
                 } else {
-                    $('#" . $form->id . "-other-wrapper').removeClass('in');
+                    $('#" . $form->id . "-other-wrapper').removeClass('show');
                 }
             "]) ?>
     </div>
@@ -37,18 +37,10 @@ $form = ActiveForm::begin([
 </div>
 
 <div class="btn-wrapper">
-    <?= Html::button('<span class="btn-icon"><i class="glyphicon glyphicon-remove-circle"></i></span><span>Cancel</span>', ['id' => 'cancel-btn', 'class' => 'btn btn-danger btn-with-icon']) ?>
-    <?= Html::submitButton('<span class="btn-icon"><i class="fa fa-save"></i></span><span>Confirm</span>', ['id' => 'save-btn', 'class' => 'btn btn-primary btn-with-icon']) ?>
+    <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', ['id' => 'cancel-btn', 'class' => 'btn btn-danger', 'data-dismiss' => 'modal']) ?>
+    <?= Html::submitButton('<i class="fa fa-save"></i> Confirm', ['id' => 'save-btn', 'class' => 'btn btn-primary']) ?>
 </div>
 
 <?php
 
 ActiveForm::end();
-
-$js = <<<JS
-$('#cancel-btn').click(function (e) {
-    e.preventDefault();
-    $('#modal-error').modal('hide');
-});
-JS;
-$this->registerJs($js); ?>

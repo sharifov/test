@@ -44,6 +44,7 @@ use common\components\SearchService;
  * @property boolean $alternative
  * @property string $tickets
  * @property string $origin_search_data
+ * @property string $gds_offer_id
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -142,7 +143,7 @@ class Quote extends \yii\db\ActiveRecord
             [['lead_id', 'status' ], 'integer'],
             [[ 'check_payment', 'alternative'], 'boolean'],
             [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
-            [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
+            [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
 
             [['reservation_dump'], 'checkReservationDump'],
             [['pricing_info', 'tickets', 'origin_search_data'], 'string'],
@@ -181,7 +182,8 @@ class Quote extends \yii\db\ActiveRecord
             'pricing_info' => 'Pricing info',
             'alternative' => 'Alternative',
             'tickets'   => 'Tickets JSON',
-            'origin_search_data' => 'Original Search JSON'
+            'origin_search_data' => 'Original Search JSON',
+			'gds_offer_id' => 'GDS Offer ID'
         ];
     }
 
@@ -344,7 +346,7 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getQuoteTrips()
     {
-        return $this->hasMany(QuoteTrip::className(), ['qt_quote_id' => 'id']);
+        return $this->hasMany(QuoteTrip::class, ['qt_quote_id' => 'id']);
     }
 
     public function getDataForProfit($quoteId)

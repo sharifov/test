@@ -62,7 +62,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 <?php //\yii\helpers\VarDumper::dump($dateItemShift, 10, true); ?>
 
-<div class="x_panel">
+<div class="x_panel" id="task-list">
     <div class="x_title">
         <h2><i class="fa fa-list-ul"></i> Task List</h2>
         <ul class="nav navbar-right panel_toolbox">
@@ -115,19 +115,19 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                             //$bg = 'lavenderblush';
 
                             $icon = '';
-                            $bg = '';
+//                            $bg = '';
 
                         } elseif(!$active) {
                             $icon = 'fa-calendar-minus-o';
-                            $bg = '';
+//                            $bg = '';
                         } else {
                             $icon = 'fa-calendar';
-                            $bg = '#dff0d8';
+//                            $bg = '#dff0d8';
                         }
 
                     ?>
 
-                    <li class="<?=($active ? 'active' : '')?>">
+                    <li class="<?=($active ? 'active' : '')?> nav-item">
                         <?/*<div class="hidden">
                             Active: <?=($active ? 'true' : 'false')?><br>
                             activeShown: <?=($activeShown ? 'true' : 'false')?><br>
@@ -136,7 +136,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                             currentTS: <?=($currentTS)?><br>
                         </div>*/?>
 
-                        <a data-toggle="tab" href="#tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" style="background-color: <?=$bg?>">
+                        <a data-toggle="tab" href="#tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" class="nav-link <?=($active ? 'active' : '')?>" >
                             <i class="fa <?=$icon?>"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date), 'php: j M'))?>
                         </a>
                     </li>
@@ -160,7 +160,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                         }
 
                     ?>
-                <div id="tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" class="tab-pane fade in <?=($active ? 'active' : '')?>">
+                <div id="tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" class="tab-pane fade in <?=($active ? 'active show' : '')?>">
 
                     <?php \yii\widgets\Pjax::begin(['id' => 'pjax-tl-'.$date, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 

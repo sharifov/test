@@ -26,73 +26,76 @@ $userId = Yii::$app->user->id;
     <h1><?=$this->title?></h1>
     <div class="row">
         <div class="col-md-3">
-            <table class="table table-bordered">
-                <tr>
-                    <th>Server Date Time (UTC)</th>
-                    <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
-                </tr>
-                <tr>
-                    <th>Current Time Zone</th>
-                    <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
-                </tr>
-                <tr>
-                    <th>Formatted Local Date Time</th>
-                    <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
-                </tr>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Server Date Time (UTC)</th>
+                        <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
+                    </tr>
+                    <tr>
+                        <th>Current Time Zone</th>
+                        <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
+                    </tr>
+                    <tr>
+                        <th>Formatted Local Date Time</th>
+                        <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
+                    </tr>
+                </table>
+            </div>
 
         </div>
 
         <div class="col-md-3">
-            <table class="table table-bordered">
-                <tr>
-                    <th>My Username:</th>
-                    <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
-                </tr>
-                <tr>
-                    <th>My Role:</th>
-                    <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
-                </tr>
-                <tr>
-                    <th>My User Groups:</th>
-                    <td><i class="fa fa-users"></i>
-                        <?php
-                        $groupsValue = '';
-                        if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
-                            $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>My Username:</th>
+                        <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
+                    </tr>
+                    <tr>
+                        <th>My Role:</th>
+                        <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
+                    </tr>
+                    <tr>
+                        <th>My User Groups:</th>
+                        <td><i class="fa fa-users"></i>
+                            <?php
+                            $groupsValue = '';
+                            if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                                $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
-                            $groupsValueArr = [];
-                            foreach ($groups as $group) {
-                                $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                $groupsValueArr = [];
+                                foreach ($groups as $group) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                }
+                                $groupsValue = implode(' ', $groupsValueArr);
                             }
-                            $groupsValue = implode(' ', $groupsValueArr);
-                        }
-                        echo $groupsValue;
-                        ?>
-                    </td>
-                </tr>
-                <tr>
-                    <th>My Project Access:</th>
-                    <td><i class="fa fa-list"></i>
-                        <?php
-                        $projectsValue = '';
+                            echo $groupsValue;
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>My Project Access:</th>
+                        <td><i class="fa fa-list"></i>
+                            <?php
+                            $projectsValue = '';
 
-                        $projectList = Yii::$app->user->identity->projects;
+                            $projectList = Yii::$app->user->identity->projects;
 
-                        if($projectList) {
+                            if($projectList) {
 
-                            $groupsValueArr = [];
-                            foreach ($projectList as $project) {
-                                $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
+                                $groupsValueArr = [];
+                                foreach ($projectList as $project) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
+                                }
+                                $projectsValue = implode(' ', $groupsValueArr);
                             }
-                            $projectsValue = implode(' ', $groupsValueArr);
-                        }
-                        echo $projectsValue;
-                        ?>
-                    </td>
-                </tr>
-            </table>
-
+                            echo $projectsValue;
+                            ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-3">
@@ -189,9 +192,9 @@ JS;
     <?php endif; ?>
 
     <?php Pjax::begin(); ?>
-    <div class="panel panel-default">
-        <div class="panel-heading">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
-        <div class="panel-body">
+    <div class="card card-default">
+        <div class="card-header">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
+        <div class="card-body">
 
             <div class="row">
 
@@ -253,7 +256,7 @@ JS;
                     ],
                     [
                         'attribute' => 'username',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
                         },
                         'format' => 'raw',
@@ -264,7 +267,7 @@ JS;
                     [
                         //'attribute' => 'username',
                         'label' => 'Role',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             $roles = $model->getRoles();
                             return $roles ? implode(', ', $roles) : '-';
                         },
@@ -276,7 +279,7 @@ JS;
                     [
                         'attribute' => 'status',
                         'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
                             return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
                         },
                         'format' => 'html'
@@ -285,7 +288,7 @@ JS;
                     [
                         'label' => 'User Groups',
                         'attribute' => 'user_group_id',
-                        'value' => function (\common\models\Employee $model) {
+                        'value' => static function (\common\models\Employee $model) {
 
                             $groups = $model->getUserGroupList();
                             $groupsValueArr = [];
@@ -333,7 +336,7 @@ JS;
                     ],
                     [
                             'label' => 'Processing',
-                            'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            'value' => static function (\common\models\Employee $model) use ($searchModel) {
                                 $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->timeStart, $searchModel->timeEnd);
                                 return $cnt ? Html::a($cnt, ['lead-flow/index',
                                     'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -346,7 +349,7 @@ JS;
                     ],
                     /*[
                         'label' => 'Hold On',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_ON_HOLD], $searchModel->datetime_start, $searchModel->datetime_end);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -359,7 +362,7 @@ JS;
                     ],*/
                     [
                         'label' => 'Booked',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_BOOKED], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -372,7 +375,7 @@ JS;
                     ],
                     [
                         'label' => 'Sold',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_SOLD], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -385,7 +388,7 @@ JS;
                     ],
                     [
                         'label' => 'Follow Up',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,
@@ -398,7 +401,7 @@ JS;
                     ],
                     [
                         'label' => 'Trash',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_TRASH], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[lf_owner_id]' => $model->id,

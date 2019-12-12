@@ -60,8 +60,8 @@ class SiteController extends FController
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
-                'view' => '@frontend/themes/gentelella/views/site/error',
-                'layout' => '@frontend/themes/gentelella/views/layouts/error'
+                'view' => '@frontend/themes/gentelella_v2/views/site/error',
+                'layout' => '@frontend/themes/gentelella_v2/views/layouts/error'
             ],
         ];
     }
@@ -91,7 +91,7 @@ class SiteController extends FController
      */
     public function actionLogin()
     {
-        $this->layout = '@frontend/themes/gentelella/views/layouts/login';
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
 
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();

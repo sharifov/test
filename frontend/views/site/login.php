@@ -66,10 +66,10 @@ use common\models\LoginForm;
 <?php /*
 <div class="login-wrapper">
     <div class="site-login panel panel-primary">
-        <div class="panel-heading">
+        <div class="card-header">
             <h3>Login</h3>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <p class="mb-20">Please fill out the following fields to login:</p>
             <?php foreach (Yii::$app->session->getAllFlashes(true) as $key => $message) : ?>
                 <div id="alerts" class="alert alert-<?= $key ?>">

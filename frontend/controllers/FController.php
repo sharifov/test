@@ -26,7 +26,7 @@ class FController extends Controller
 
     public function beforeAction($action)
     {
-//       $this->layout = '@frontend/themes/gentelella/views/layouts/main.php';
+//       $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main.php';
 
        if(!\Yii::$app->user->isGuest){
            $user = \Yii::$app->user->identity;

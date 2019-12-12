@@ -41,7 +41,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         [
             'attribute' => 's_project_id',
             'label' => 'Project',
-            'value' => function (\common\models\Sms $model) {
+            'value' => static function (\common\models\Sms $model) {
                 return $model->sProject ? $model->sProject->name : '-';
             },
             'filter' => $projectList,

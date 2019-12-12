@@ -161,7 +161,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 //            [
 //                //'attribute' => 'username',
 //                'label' => 'Created by Role',
-//                'value' => function (\common\models\LeadFlow $model) {
+//                'value' => static function (\common\models\LeadFlow $model) {
 //                    if($model->employee) {
 //                        $roles = $model->employee->getRoles();
 //                    } else {
@@ -175,7 +175,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             /*[
                 'label' => 'User Groups',
                 //'attribute' => 'user_group_id',
-                'value' => function (\common\models\LeadFlow $model) {
+                'value' => static function (\common\models\LeadFlow $model) {
 
                     $groupsValueArr = [];
                     if($model->employee) {
@@ -200,7 +200,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
             [
                 'attribute' => 'lf_out_calls',
-                'value' => function (\common\models\LeadFlow $model) {
+                'value' => static function (\common\models\LeadFlow $model) {
                     return $model->lf_out_calls ?: '-';
                 },
                 'options' => ['style' => 'width:80px'],

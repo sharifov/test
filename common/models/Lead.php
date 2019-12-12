@@ -12,8 +12,11 @@ use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
+use sales\events\lead\LeadCreatedByIncomingEmailEvent;
+use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
+use sales\events\lead\LeadCreatedManuallyEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
@@ -32,6 +35,8 @@ use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
+use sales\services\lead\qcall\FindWeightParams;
 use sales\services\lead\qcall\QCallService;
 use Yii;
 use yii\base\InvalidArgumentException;
@@ -234,6 +239,7 @@ class Lead extends ActiveRecord
     public const CALL_STATUS_DONE       = 4;
     public const CALL_STATUS_QUEUE      = 5;
     public const CALL_STATUS_PREPARE    = 6;
+    public const CALL_STATUS_BUGGED    = 7;
 
     public const CALL_STATUS_LIST = [
         self::CALL_STATUS_NONE      => 'None',
@@ -243,16 +249,23 @@ class Lead extends ActiveRecord
         self::CALL_STATUS_DONE      => 'Done',
         self::CALL_STATUS_QUEUE     => 'Queue',
         self::CALL_STATUS_PREPARE   => 'Prepare',
+        self::CALL_STATUS_BUGGED   => 'Bugged',
     ];
 
     public const TYPE_CREATE_MANUALLY = 1;
     public const TYPE_CREATE_INCOMING_CALL = 2;
     public const TYPE_CREATE_API = 3;
+    public const TYPE_CREATE_INCOMING_SMS = 4;
+    public const TYPE_CREATE_INCOMING_EMAIL = 5;
+    public const TYPE_CREATE_CLONE = 6;
 
     public const TYPE_CREATE_LIST = [
         self::TYPE_CREATE_MANUALLY => 'Manually',
         self::TYPE_CREATE_INCOMING_CALL => 'Incoming call',
         self::TYPE_CREATE_API => 'Api',
+        self::TYPE_CREATE_INCOMING_SMS => 'Incoming sms',
+        self::TYPE_CREATE_INCOMING_EMAIL => 'Incoming email',
+        self::TYPE_CREATE_CLONE => 'Clone',
     ];
 
     public const SCENARIO_API = 'scenario_api';
@@ -309,6 +322,30 @@ class Lead extends ActiveRecord
     public function isApiCreated(): bool
     {
         return $this->l_type_create === self::TYPE_CREATE_API;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIncomingSmsCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_INCOMING_SMS;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIncomingEmailCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_INCOMING_EMAIL;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCloneCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_CLONE;
     }
 
 //    public function init()
@@ -398,6 +435,17 @@ class Lead extends ActiveRecord
         ];
     }
 
+    /**
+     * @return static
+     */
+    private static function create(): self
+    {
+        $lead = new static();
+        $lead->uid = self::generateUid();
+        $lead->gid = self::generateGid();
+        $lead->recordEvent(new LeadCreatedEvent($lead));
+        return $lead;
+    }
 
     /**
      * @param $clientId
@@ -415,10 +463,9 @@ class Lead extends ActiveRecord
      * @param $clientEmail
      * @param $depId
      * @param $delayedCharge
-     * @param $typeCreate
      * @return Lead
      */
-    public static function create(
+    public static function createManually(
         $clientId,
         $clientFirstName,
         $clientLastName,
@@ -433,11 +480,10 @@ class Lead extends ActiveRecord
         $clientPhone,
         $clientEmail,
         $depId,
-        $delayedCharge,
-        $typeCreate
+        $delayedCharge
     ): self
     {
-        $lead = new static();
+        $lead = self::create();
         $lead->client_id = $clientId;
         $lead->l_client_first_name = $clientFirstName;
         $lead->l_client_last_name = $clientLastName;
@@ -449,15 +495,13 @@ class Lead extends ActiveRecord
         $lead->source_id = $sourceId;
         $lead->project_id = $projectId;
         $lead->notes_for_experts = $notesForExperts;
-        $lead->uid = self::generateUid();
-        $lead->gid = self::generateGid();
         $lead->l_client_phone = $clientPhone;
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
-        $lead->l_type_create = $typeCreate;
         $lead->status = null;
-        $lead->recordEvent(new LeadCreatedEvent($lead));
+        $lead->l_type_create = self::TYPE_CREATE_MANUALLY;
+        $lead->recordEvent(new LeadCreatedManuallyEvent($lead));
         return $lead;
     }
 
@@ -467,7 +511,7 @@ class Lead extends ActiveRecord
      */
     public function createClone(?string $description): self
     {
-        $clone = new static();
+        $clone = self::create();
         $clone->attributes = $this->attributes;
         $clone->description = $description;
         $clone->notes_for_experts = null;
@@ -484,8 +528,61 @@ class Lead extends ActiveRecord
         $clone->status = null;
         $clone->clone_id = $this->id;
         $clone->employee_id = null;
+        $clone->l_type_create = self::TYPE_CREATE_CLONE;
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
+    }
+
+    /**
+     * @param string $clientEmail
+     * @param int $clientId
+     * @param int|null $projectId
+     * @param int|null $sourceId
+     * @return Lead
+     */
+    public static function createByIncomingEmail(
+        string $clientEmail,
+        int $clientId,
+        ?int $projectId,
+        ?int $sourceId
+    ): self
+    {
+        $lead = self::create();
+        $lead->l_client_email = $clientEmail;
+        $lead->client_id = $clientId;
+        $lead->project_id = $projectId;
+        $lead->source_id = $sourceId;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->status = self::STATUS_PENDING;
+        $lead->l_type_create = self::TYPE_CREATE_INCOMING_EMAIL;
+        $lead->recordEvent(new LeadCreatedByIncomingEmailEvent($lead));
+        return $lead;
+    }
+
+    /**
+     * @param string $clientPhone
+     * @param int $clientId
+     * @param int|null $projectId
+     * @param int|null $sourceId
+     * @return Lead
+     */
+    public static function createByIncomingSms(
+        string $clientPhone,
+        int $clientId,
+        ?int $projectId,
+        ?int $sourceId
+    ): self
+    {
+        $lead = self::create();
+        $lead->l_client_phone = $clientPhone;
+        $lead->client_id = $clientId;
+        $lead->project_id = $projectId;
+        $lead->source_id = $sourceId;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->status = self::STATUS_PENDING;
+        $lead->l_type_create = self::TYPE_CREATE_INCOMING_SMS;
+        $lead->recordEvent(new LeadCreatedByIncomingSmsEvent($lead));
+        return $lead;
     }
 
 	/**
@@ -504,14 +601,13 @@ class Lead extends ActiveRecord
         $gmt
     ): self
     {
-        $lead = new static();
+        $lead = self::create();
         $lead->l_client_phone = $phoneNumber;
         $lead->client_id = $clientId;
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
         $lead->offset_gmt = $gmt;
-        $lead->uid = self::generateUid();
-        $lead->gid = self::generateGid();
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
         $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
@@ -519,10 +615,13 @@ class Lead extends ActiveRecord
         return $lead;
     }
 
+    /**
+     * @return static
+     */
     public static function createByApi(): self
     {
-        $lead = new static();
-        $lead->gid = self::generateGid();
+        $lead = self::create();
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
         $lead->scenario = self::SCENARIO_API;
         $lead->l_type_create = self::TYPE_CREATE_API;
         return $lead;
@@ -1169,14 +1268,24 @@ class Lead extends ActiveRecord
         }
     }
 
-    public function callPrepare()
+    public function callPrepare(): void
     {
         $this->setCallStatus(self::CALL_STATUS_PREPARE);
     }
 
-    public function isCallPrepare()
+    public function isCallPrepare(): bool
     {
         return $this->l_call_status_id === self::CALL_STATUS_PREPARE;
+    }
+
+    public function callBugged(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_BUGGED);
+    }
+
+    public function isCallBugged(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_BUGGED;
     }
 
     public function callProcessing(): void
@@ -2584,8 +2693,9 @@ Reason: {reason}
                                 $this->status,
                                 $this->getCountOutCallsLastFlow()
                             ),
-                            ($this->project_id * 10),
-                            $this->offset_gmt
+                            new FindWeightParams($this->project_id),
+                            $this->offset_gmt,
+                            new FindPhoneParams($this->project_id, $this->l_dep_id)
                         );
                     } catch (\Throwable $e) {
                         Yii::error($e, 'Lead:AfterSave:QCallService:create');
@@ -3432,141 +3542,6 @@ Reason: {reason}
         ]);
         unlink($path);
 
-
-        return $result;
-    }
-
-
-    public function sendEmail($quotes, $email)
-    {
-        $result = [
-            'status' => false,
-            'errors' => []
-        ];
-        $models = [];
-        $i = 1;
-        foreach ($quotes as $quote) {
-            $model = Quote::findOne([
-                'uid' => $quote
-            ]);
-            if ($model !== null) {
-                $models[$i] = $model;
-                $i++;
-            }
-        }
-
-        if (empty($models)) {
-            $result['errors'][] = sprintf('Quotes not found. UID: [%s]', implode(', ', $quotes));
-            return $result;
-        }
-
-        $key = sprintf('%s_%s', uniqid(), $email);
-        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->project->name)), $key);
-        $path = sprintf('%s/tmpEmail/quote/%s', Yii::$app->getViewPath(), $fileName);
-
-        $template = ProjectEmailTemplate::findOne([
-            'type' => ProjectEmailTemplate::TYPE_EMAIL_OFFER,
-            'project_id' => $this->project_id
-        ]);
-
-        if ($template === null) {
-            $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
-                ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_OFFER),
-                $this->project->name
-            );
-            return $result;
-        }
-
-        $view = $template->template;
-        $fp = fopen($path, "w");
-        chmod($path, 0777);
-        fwrite($fp, $view);
-        fclose($fp);
-
-        $view = sprintf('/tmpEmail/quote/%s', $fileName);
-
-        $airport = Airport::findIdentity($this->leadFlightSegments[0]->origin);
-        $origin = ($airport !== null)
-            ? $airport->city :
-            $this->leadFlightSegments[0]->origin;
-
-        $airport = Airport::findIdentity($this->leadFlightSegments[0]->destination);
-        $destination = ($airport !== null)
-            ? $airport->city
-            : $this->leadFlightSegments[0]->destination;
-
-        $tripType = $this->getFlightTypeName();
-
-        $userProjectParams = UserProjectParams::findOne([
-            'upp_user_id' => $this->employee->id,
-            'upp_project_id' => $this->project_id
-        ]);
-
-        $body = Yii::$app->getView()->render($view, [
-            'origin' => $origin,
-            'destination' => $destination,
-            'quotes' => $models,
-            'leadCabin' => $this->getCabinClassName(),
-            'nrPax' => ($this->adults + $this->children + $this->infants),
-            'project' => $this->project,
-            'agentName' => ucfirst($this->employee->username),
-            'employee' => $this->employee,
-            'tripType' => $tripType,
-            'userProjectParams' => $userProjectParams
-        ]);
-
-        if (!empty($template->layout_path)) {
-            $body = \Yii::$app->getView()->renderFile($template->layout_path, [
-                'project' => $this->project,
-                'agentName' => ucfirst($this->employee->username),
-                'employee' => $this->employee,
-                'userProjectParams' => $userProjectParams,
-                'body' => $body,
-                'templateType' => $template->type,
-            ]);
-        }
-
-        $subject = ProjectEmailTemplate::getMessageBody($template->subject, [
-            'origin' => $origin,
-            'destination' => $destination
-        ]);
-
-        $credential = [
-            'email' => trim($userProjectParams->upp_email),
-        ];
-
-        $errors = [];
-        $bcc = [
-            trim($userProjectParams->upp_email),
-            'damian.t@wowfare.com',
-            'andrew.t@wowfare.com'
-        ];
-        $isSend = EmailService::sendByAWS($email, $this->project, $credential, $subject, $body, $errors, $bcc);
-        $message = ($isSend)
-            ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s <br/>Quotes: %s',
-                implode(', ', [$email]),
-                implode(', ', $quotes)
-            )
-            : sprintf('Sending email - \'Offer\' failed! <br/>Emails: %s <br/>Quotes: %s',
-                implode(', ', [$email]),
-                implode(', ', $quotes)
-            );
-
-        //Add logs after changed model attributes
-        $leadLog = new LeadLog((new LeadLogMessage()));
-        $leadLog->logMessage->message = empty($errors)
-            ? $message
-            : sprintf('%s <br/>Errors: %s', $message, print_r($errors, true));
-        $leadLog->logMessage->title = 'Send Quotes by Email';
-        $leadLog->logMessage->model = $this->formName();
-        $leadLog->addLog([
-            'lead_id' => $this->id,
-        ]);
-
-        $result['status'] = $isSend;
-        $result['errors'] = $errors;
-
-        unlink($path);
 
         return $result;
     }
