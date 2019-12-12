@@ -52,6 +52,8 @@ class CallSearch extends Call
     public $userGroupId;
     public $reportTimezone;
     public $defaultUserTz;
+    public $timeFrom;
+    public $timeTo;
 
     public $dep_ids = [];
 
@@ -88,7 +90,7 @@ class CallSearch extends Call
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
-            [['reportTimezone'], 'string']
+            [['reportTimezone', 'timeFrom', 'timeTo'], 'string']
         ];
     }
 
@@ -375,27 +377,34 @@ class CallSearch extends Call
             $this->defaultUserTz = $this->reportTimezone;
         }
 
-        $reportTzOffset = Employee::timezoneList(false)[$this->defaultUserTz] ?? date('P');
+        //$reportTzOffset = Employee::timezoneList(false)[$this->defaultUserTz] ?? date('P');
+        /*var_dump($this->timeFrom);
+        var_dump($this->timeTo);*/
+
 
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
-            $hourSub = date('G', strtotime($dates[0]));
-            $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
-            $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
+            $hourSub = date('G', strtotime($this->timeFrom));
+            $date_from = Employee::convertToUTC(strtotime($dates[0] .' '. $this->timeFrom) - ($hourSub * 3600), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime($dates[1] .' '. $this->timeTo), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
 
-            $userTimezone = new \DateTimeZone($timezone);
-            $gmtTimezone = new \DateTimeZone('GMT');
-            $myDateTime = new \DateTime($date_from);
-            $offset = $userTimezone->getOffset($myDateTime);
-            echo $offset / 3600;
-
+            /*test code*/
+            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+            //printf( "$timezone with DST currently is %s", $utcOffsetDST );
+            /*test code*/
 
         } else {
             $hourSub = date('G', strtotime(date('Y-m-d 00:00')));
             $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00')), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+
+            /*test code*/
+            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+            //printf( "$timezone with DST currently is %s", $utcOffsetDST );
+            /*test code*/
+
         }
         $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->userGroupId])->asArray()->all();
         if (isset($params['CallSearch']['c_created_user_id']) && $params['CallSearch']['c_created_user_id'] != "" && empty($this->userGroupId)) {
@@ -457,11 +466,11 @@ class CallSearch extends Call
             SUM(CASE WHEN c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS totalAttempts,
             SUM(CASE WHEN c_status_id=' . self::STATUS_COMPLETED . ' AND c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL '. $queryByDuration .' THEN 1 ELSE 0 END) AS redialCompleted,
             
-            c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "'. $reportTzOffset .'")) AS createdDate 
+            c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "'. $utcOffsetDST .'")) AS createdDate 
             FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
         ']);
 
-        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "'. $reportTzOffset .'"))']);
+        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "'. $utcOffsetDST .'"))']);
 
 
         /*$query->select(['

@@ -22,17 +22,45 @@ use common\models\Employee;
                         'hideInput' => true,
                         'convertFormat' => true,
                         'pluginOptions' => [
-                            'timePicker' => true,
+                            'timePicker' => false,
                             'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
                             'locale' => [
-                                'format' => 'Y-m-d H:i',
+                                'format' => 'Y-m-d',
                                 'separator' => ' - '
                             ]
                         ]
                     ])->label('Calls Created Date');
                     ?>
                 </div>
+
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?=
+                            $form->field($model, 'timeFrom')->widget(
+                                \kartik\time\TimePicker::class, [
+                                'pluginOptions' => [
+                                    'defaultTime' => '00:00',
+                                    'showSeconds' => false,
+                                    'showMeridian' => false,
+                                ]])->label('Report Hour From');
+                            ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?=
+                            $form->field($model, 'timeTo')->widget(
+                                \kartik\time\TimePicker::class, [
+                                'pluginOptions' => [
+                                    'defaultTime' => '23:59',
+                                    'showSeconds' => false,
+                                    'showMeridian' => false,
+                                ]])->label('Report Hour To');
+                            ?>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-md-12">
                     <?= $form->field($model, 'reportTimezone')->widget(\kartik\select2\Select2::class, [
                         'data' => Employee::timezoneList(true),

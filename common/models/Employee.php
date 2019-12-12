@@ -2010,6 +2010,27 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $dateTime;
     }
 
+    public static function getUtcOffsetDst( $time_zone = 'Europe/Chisinau', $dateToCheck ) {
+        // Set UTC as default time zone.
+        //date_default_timezone_set( 'UTC' );
+        $utc = new \DateTime($dateToCheck);
+
+        // Calculate offset.
+        $current = timezone_open( $time_zone );
+        $offset_s  = timezone_offset_get( $current, $utc ); // seconds
+        //$offset_h  = $offset_s / ( 60 * 60 ); // hours
+        // Prepend “+” when positive
+        //$offset_h  = (string) $offset_h;
+        $offset_s  = (string) $offset_s;
+        if ( strpos( $offset_s, '-' ) === FALSE ) {
+            $offset_h = '+' .  $offset_s  / ( 60 * 60 ); // prepend +
+        } else {
+            $offset_h = $offset_s  / ( 60 * 60 );
+        }
+
+        return $offset_h . ':00';
+    }
+
 	/**
 	 * @return string|null
 	 */
