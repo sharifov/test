@@ -112,6 +112,7 @@ class LeadController extends Controller
                     ->from(Call::tableName())
                     ->andWhere(['c_source_type_id' => Call::SOURCE_REDIAL_CALL])
                     ->andWhere(Call::tableName() . '.c_lead_id = ' . Lead::tableName() . '.id')
+                    ->andWhere(LeadQcall::tableName() . '.lqc_created_dt <= ' . Call::tableName() . '.c_created_dt')
             ])
             ->innerJoin(LeadQcall::tableName(), Lead::tableName() . '.id = ' . LeadQcall::tableName() . '.lqc_lead_id')
             ->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_BUGGED])
