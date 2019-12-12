@@ -6,6 +6,7 @@ use common\models\ApiLog;
 use common\models\Call;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\search\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadSearch;
@@ -145,24 +146,62 @@ class StatsController extends FController
 
     public function actionCallsGraph()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $chartOptions = Yii::$app->request->post();
-            $rangeBy = Yii::$app->request->post('groupBy');
-            $date = explode("/", $chartOptions['dateRange']);
-            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy, (int)$chartOptions['callType']);
+		$params = Yii::$app->request->queryParams;
+		$model = new CallGraphsSearch();
+		$model->load($params);
 
-            return $this->renderAjax('calls-stats', [
-                'callsGraphData' => $callsGraphData
-            ]);
-        } else {
-            $currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $callsGraphData = Call::getCallStats($currentDate, $currentDate, null, 0);
+		return $this->render('calls-stats', [
+			'model' => $model
+		]);
+	}
 
-            return $this->render('calls-stats', [
-                'callsGraphData' => $callsGraphData
-            ]);
-        }
-    }
+	/**
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function actionAjaxGetTotalChart(): \yii\web\Response
+	{
+		$callSearch = new CallGraphsSearch();
+		$callSearch->load(Yii::$app->request->post());
+		if ($callSearch->validate()) {
+
+			$callData = $callSearch->getTotalCalls();
+
+			$data = array_map( static function ($arr) {
+				return [$arr['created'],(int)$arr['incoming'], (int)$arr['outgoing'], (int)$arr['total_calls']];
+			}, $callData);
+			$totalCallsGraphData = ArrayHelper::merge([[
+				'Date',
+				'Incoming',
+				'Outgoing',
+				'Total',
+			]], $data);
+
+			$data = array_map( static function ($arr) {
+				return [$arr['created'],(int)$arr['in_rec_duration'], (int)$arr['out_rec_duration'], (int)$arr['total_rec_duration']];
+			}, $callData);
+			$totalCallsRecDurationData = ArrayHelper::merge([[
+				'Date',
+				'Incoming Call Duration',
+				'Outgoing Call Duration',
+				'Total Call Duration',
+			]], $data);
+
+			$html = $this->renderAjax('partial/_total_calls_chart', [
+				'totalCallsGraphData' => json_encode($totalCallsGraphData),
+				'totalCallsRecDurationData' => json_encode($totalCallsRecDurationData),
+				'totalCallsDbData' => $callData,
+				'model' => $callSearch
+			]);
+		}
+
+		$response = [
+			'html' => $html ?? '',
+			'error' => $callSearch->hasErrors(),
+			'message' => $callSearch->getErrorSummary(true)
+		];
+
+		return $this->asJson($response);
+	}
 
     public function actionSmsGraph()
     {
