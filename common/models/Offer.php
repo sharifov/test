@@ -46,7 +46,7 @@ class Offer extends \yii\db\ActiveRecord
 
     public const STATUS_CLASS_LIST        = [
         self::STATUS_NEW            => 'info',
-        self::STATUS_SENT           => 'pending',
+        self::STATUS_SENT           => 'warning',
         self::STATUS_APPLY          => 'success',
     ];
 
