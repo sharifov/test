@@ -167,6 +167,7 @@ class EmailService
 	    if (!$subject) {
 	        return null;
         }
+
 		preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
 
 		if(!empty($matches[1])) {

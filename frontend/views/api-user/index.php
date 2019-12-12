@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <div class="card card-default">
-        <div class="card-body card-collapse collapse show">
+        <div class="card-body">
 
             <p>
                 <?= Html::a('Create Api User', ['create'], ['class' => 'btn btn-success']) ?>

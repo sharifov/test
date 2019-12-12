@@ -177,7 +177,7 @@ class SmsIncomingService
         } else {
             $caseId = $case->cs_id;
         }
-        $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $case->cs_id);
+        $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
         if ($caseId === null) {
             Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new exchange case creation allowed on SMS.', 'SmsIncomingService');
