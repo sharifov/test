@@ -2,6 +2,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use sales\access\EmployeeDepartmentAccess;
+use common\models\Employee;
 ?>
 
 <div class="calls-search">
@@ -30,6 +31,19 @@ use sales\access\EmployeeDepartmentAccess;
                             ]
                         ]
                     ])->label('Calls Created Date');
+                    ?>
+                </div>
+                <div class="col-md-12">
+                    <?= $form->field($model, 'reportTimezone')->widget(\kartik\select2\Select2::class, [
+                        'data' => Employee::timezoneList(true),
+                        'size' => \kartik\select2\Select2::SMALL,
+                        'options' => [
+                            'placeholder' => 'Select TimeZone',
+                            'multiple' => false,
+                            'value' => $model->defaultUserTz
+                        ],
+                        'pluginOptions' => ['allowClear' => true],
+                    ]);
                     ?>
                 </div>
             </div>

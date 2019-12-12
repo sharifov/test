@@ -1988,6 +1988,28 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $dateTime;
     }
 
+    public static function convertToUTC(int $time, string $timezone): string
+    {
+        $dateTime = '';
+
+        if($time >= 0) {
+
+            $dateTime = date('Y-m-d H:i:s', $time);
+
+            try {
+                if ($timezone) {
+                    $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
+                    $date->setTimezone(new \DateTimeZone('UTC'));
+                    $dateTime = $date->format('Y-m-d H:i:s');
+                }
+            } catch (\Throwable $throwable) {
+                $dateTime = '';
+            }
+        }
+
+        return $dateTime;
+    }
+
 	/**
 	 * @return string|null
 	 */

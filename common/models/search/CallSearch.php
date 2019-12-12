@@ -50,6 +50,8 @@ class CallSearch extends Call
     public $call_duration_to;
     public $callDepId;
     public $userGroupId;
+    public $reportTimezone;
+    public $defaultUserTz;
 
     public $dep_ids = [];
 
@@ -86,6 +88,7 @@ class CallSearch extends Call
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
+            [['reportTimezone'], 'string']
         ];
     }
 
@@ -363,20 +366,35 @@ class CallSearch extends Call
     public function searchCallsReport($params, $user):SqlDataProvider
     {
         $this->load($params);
-
         $timezone = $user->timezone;
-        $userTZ = Employee::timezoneList(false)[$timezone] ?? date('P');
+
+        if($this->reportTimezone == null){
+            $this->defaultUserTz = $timezone;
+        } else {
+            $timezone = $this->reportTimezone;
+            $this->defaultUserTz = $this->reportTimezone;
+        }
+
+        $reportTzOffset = Employee::timezoneList(false)[$this->defaultUserTz] ?? date('P');
 
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($dates[0]));
-            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]) - ($hourSub * 3600));
-            $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]));
+            $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+
+            $userTimezone = new \DateTimeZone($timezone);
+            $gmtTimezone = new \DateTimeZone('GMT');
+            $myDateTime = new \DateTime($date_from);
+            $offset = $userTimezone->getOffset($myDateTime);
+            echo $offset / 3600;
+
+
         } else {
             $hourSub = date('G', strtotime(date('Y-m-d 00:00')));
-            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 00:00')));
-            $date_to = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 23:59')));
+            $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00')), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
         }
         $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->userGroupId])->asArray()->all();
@@ -439,12 +457,35 @@ class CallSearch extends Call
             SUM(CASE WHEN c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS totalAttempts,
             SUM(CASE WHEN c_status_id=' . self::STATUS_COMPLETED . ' AND c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL '. $queryByDuration .' THEN 1 ELSE 0 END) AS redialCompleted,
             
+            c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "'. $reportTzOffset .'")) AS createdDate 
+            FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
+        ']);
+
+        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "'. $reportTzOffset .'"))']);
+
+
+        /*$query->select(['
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) THEN 1 ELSE 0 END) AS outgoingCalls, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) '. $queryByDuration .' THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_NO_ANSWER . '" AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_BUSY . '" AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> 6 OR c_source_type_id IS NULL) THEN 1 ELSE 0 END) AS outgoingCallsBusy,
+             
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,            
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL '. $queryByDuration .' THEN 1 ELSE 0 END) AS incomingCompletedCalls,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_status_id="' . self::STATUS_COMPLETED . '" AND c_parent_call_sid IS NOT NULL AND c_source_type_id <> ' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingGeneralLine,
+            
+            SUM(CASE WHEN c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL AND c_status_id='. self::STATUS_COMPLETED .' THEN c_call_duration ELSE 0 END) AS redialCallsDuration,
+            SUM(CASE WHEN c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL THEN 1 ELSE 0 END) AS totalAttempts,
+            SUM(CASE WHEN c_status_id=' . self::STATUS_COMPLETED . ' AND c_source_type_id=' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL '. $queryByDuration .' THEN 1 ELSE 0 END) AS redialCompleted,
+            
             c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '")) AS createdDate 
             FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
         ']);
 
-        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '"))']);
-        //$query->orderBy(['c_created_user_id' => SORT_ASC]);
+        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '"))']);*/
+
 
         $command = $query->createCommand();
         $sql = $command->sql;
