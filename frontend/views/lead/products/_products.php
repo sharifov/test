@@ -49,7 +49,7 @@ use yii\helpers\Html;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: block">
+        <div class="x_content" style="display: none">
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,

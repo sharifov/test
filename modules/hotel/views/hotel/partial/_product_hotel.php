@@ -513,6 +513,94 @@ $js = <<<JS
         });
         
         
+        
+        $('body').off('click', '.btn-create-invoice').on('click', '.btn-create-invoice', function (e) {
+            e.preventDefault();
+            let url = $(this).data('url');
+            //$('#preloader').removeClass('d-none');
+            
+            let modal = $('#modal-df');
+            modal.find('.modal-body').html('');
+            modal.find('.modal-title').html('Add Invoice');
+            modal.find('.modal-body').load(url, function( response, status, xhr ) {
+                //$('#preloader').addClass('d-none');
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            });
+        });
+        
+        $('body').off('click', '.btn-update-invoice').on('click', '.btn-update-invoice', function (e) {
+            e.preventDefault();
+            let url = $(this).data('url');
+                    
+            let modal = $('#modal-df');
+            modal.find('.modal-body').html('');
+            modal.find('.modal-title').html('Update Invoice');
+            modal.find('.modal-body').load(url, function( response, status, xhr ) {
+                //$('#preloader').addClass('d-none');
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            });
+        });
+        
+        
+        $('body').off('click', '.btn-delete-invoice').on('click', '.btn-delete-invoice', function (e) {
+            
+            if(!confirm('Are you sure you want to delete this Invoice?')) {
+                return '';
+            }
+            
+            e.preventDefault();
+            let menu = $(this);
+            let invoiceId = menu.data('invoice-id');
+            let orderId = menu.data('order-id');
+            
+            let url = menu.data('url');
+
+            //menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
+            $('#preloader').removeClass('d-none');
+            
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {'id': invoiceId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          //alert(data.error);
+                          new PNotify({
+                                title: 'Error: delete Invoice',
+                                type: 'error',
+                                text: data.error,
+                                hide: true
+                            });
+                      } else {
+                          
+                          $.pjax.reload({container: '#pjax-order-invoice-' + orderId, timout: 8000});
+                          new PNotify({
+                                title: 'Invoice was successfully deleted',
+                                type: 'success',
+                                text: data.message,
+                                hide: true
+                            });
+                      }
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    //btnSubmit.prop('disabled', false);
+                    //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+                    //alert( "complete" );
+                    $('#preloader').addClass('d-none');
+                });
+        });
+        
+        
     });
     
 JS;

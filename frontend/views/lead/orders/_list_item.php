@@ -51,8 +51,8 @@ use yii\bootstrap4\Html;
         <table class="table table-bordered">
             <?php if ($model->orderProducts):
 
-                $originTotalPrice = 0;
-                $clientTotalPrice = 0;
+                $ordTotalPrice = 0;
+                $ordClientTotalPrice = 0;
 
                 ?>
                 <tr>
@@ -69,8 +69,8 @@ use yii\bootstrap4\Html;
                 <?php if ($model->orderProducts):?>
                 <?php foreach ($model->orderProducts as $product):
                     $quote = $product->orpProductQuote;
-                    $originTotalPrice += $quote->pq_price;
-                    $clientTotalPrice += $quote->pq_client_price;
+                    $ordTotalPrice += $quote->pq_price;
+                    $ordClientTotalPrice += $quote->pq_client_price;
                     ?>
                     <tr>
                         <td title="Product Quote ID"><?=Html::encode($quote->pq_id)?></td>
@@ -99,11 +99,15 @@ use yii\bootstrap4\Html;
                         </td>
                     </tr>
                 <?php endforeach; ?>
+                <?php
+                    $ordTotalPrice = round($ordTotalPrice, 2);
+                    $ordClientTotalPrice = round($ordClientTotalPrice, 2);
+                ?>
                 <tr>
                     <th class="text-right" colspan="5">Total: </th>
                     <th class="text-right"></th>
-                    <th class="text-right"><?=number_format($originTotalPrice, 2)?></th>
-                    <th class="text-right"><?=number_format($clientTotalPrice, 2)?> <?=Html::encode($quote->pq_client_currency)?></th>
+                    <th class="text-right"><?=number_format($ordTotalPrice, 2)?></th>
+                    <th class="text-right"><?=number_format($ordClientTotalPrice, 2)?> <?=Html::encode($quote->pq_client_currency)?></th>
                     <th></th>
                 </tr>
             <?php endif; ?>
@@ -112,5 +116,97 @@ use yii\bootstrap4\Html;
 
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->or_created_dt)) ?>
         <i class="fa fa-user"></i> <?=$model->orCreatedUser ? Html::encode($model->orCreatedUser->username) : '-'?>
+
+        <hr>
+        <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-invoice-' . $model->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
+            <h4><i class="fas fa-file-invoice-dollar"></i> Invoice List</h4>
+            <?php
+                $invTotalPrice = 0;
+                $invClientTotalPrice = 0;
+            ?>
+            <table class="table table-bordered">
+                <?php if ($model->invoices): ?>
+                    <tr>
+                        <th style="width: 100px">Invoice ID</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                        <th>Created</th>
+                        <th title="Amount, USD">Amount, USD</th>
+                        <th>Client Amount</th>
+                        <th></th>
+                    </tr>
+                    <?php if ($model->invoices):?>
+                    <?php foreach ($model->invoices as $invoice):
+
+                        $invTotalPrice += $invoice->inv_sum;
+                        $invClientTotalPrice += $invoice->inv_client_sum;
+                        ?>
+                        <tr>
+                            <td title="Invoice ID"><?=Html::encode($invoice->inv_id)?></td>
+                            <td><?=$invoice->getStatusLabel()?></td>
+                            <td>
+                                <?=Html::encode($invoice->inv_description)?>
+                            </td>
+                            <td><?=$invoice->inv_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($invoice->inv_created_dt)) : '-'?></td>
+                            <td class="text-right <?=$invoice->inv_sum > 0 ? 'text-success' : 'text-danger' ?>"><?=number_format($invoice->inv_sum, 2)?></td>
+                            <td class="text-right" title="Currency Rate: <?=$invoice->inv_currency_rate?>"><?=number_format($invoice->inv_client_sum, 2)?> <?=Html::encode($invoice->inv_client_currency)?></td>
+                            <td>
+
+                                <?php
+                                echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i>', null, [
+                                    'class' => 'btn-update-invoice',
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/update-ajax', 'id' => $invoice->inv_id])
+                                ]);
+                                ?>
+
+                                <?php
+                                echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
+                                    'data-invoice-id' => $invoice->inv_id,
+                                    'data-order-id' => $invoice->inv_order_id,
+                                    'class' => 'btn-delete-invoice',
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/delete-ajax'])
+                                ]);
+                                ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php
+                        $invTotalPrice = round($invTotalPrice, 2);
+                        $invClientTotalPrice = round($invClientTotalPrice, 2);
+                    ?>
+                    <tr>
+                        <th class="text-right" colspan="4">Total: </th>
+                        <th class="text-right"><?=number_format($invTotalPrice, 2)?></th>
+                        <th class="text-right"><?=number_format($invClientTotalPrice, 2)?> <?=Html::encode($invoice->inv_client_currency)?></th>
+                        <th></th>
+                    </tr>
+                <?php endif; ?>
+                <?php endif; ?>
+            </table>
+
+            <?php if ($invTotalPrice !== $ordTotalPrice):
+                $newInvoiceAmount = round($ordTotalPrice - $invTotalPrice, 2);
+            ?>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th class="text-warning"><i class="fa fa-warning"></i> New Invoice</th>
+                            <th class="text-right <?=$newInvoiceAmount > 0 ? 'text-success' : 'text-danger' ?>"><?=number_format($newInvoiceAmount, 2)?> USD</th>
+                            <th style="width: 120px">
+                                <?php
+                                echo Html::a('<i class="fa fa-plus-circle" title="Add new invoice"></i> create', null, [
+                                    'data-order-id' => $model->or_id,
+                                    'class' => 'btn btn-success btn-create-invoice',
+                                    'data-url' => \yii\helpers\Url::to(['invoice/create-ajax', 'id' => $model->or_id, 'amount' => $newInvoiceAmount])
+                                ]);
+                                ?>
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        <?php \yii\widgets\Pjax::end() ?>
     </div>
+
+
 </div>
