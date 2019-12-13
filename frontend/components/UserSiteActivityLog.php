@@ -6,6 +6,7 @@ use \Yii;
 use yii\base\Behavior;
 use yii\helpers\VarDumper;
 use yii\web\Application;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
 
 class UserSiteActivityLog extends Behavior
@@ -45,7 +46,8 @@ class UserSiteActivityLog extends Behavior
 
                 if($requestCount > $settings['user_site_activity_count']) {
                     // Yii::warning(VarDumper::dumpAsString(['usa_user_id' => Yii::$app->user->id, 'usa_request_url' => $request_url]), 'UserSiteActivityLog:block');
-                    throw new NotAcceptableHttpException('Many requests for this url. With frequent requests, the system may block you. Please wait any time ...', 111);
+//                    throw new NotAcceptableHttpException('Many requests for this url. With frequent requests, the system may block you. Please wait any time ...', 111);
+                    throw new ForbiddenHttpException('Many requests for this url. With frequent requests, the system may block you. Please wait any time ...', 111);
                 }
             }
 
