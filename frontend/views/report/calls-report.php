@@ -51,6 +51,35 @@ $list = new ListsAccess(Yii::$app->user->id);
         [   'label' =>'Report Date',
             'attribute' => 'createdDate',
         ],
+
+        [
+            'label' => 'Duration',
+            'format' => 'raw',
+            'value' => function($data) {
+                $totalDuration =  $data['outgoingCallsDuration'] + $data['incomingCallsDuration'] + $data['redialCallsDuration'];
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalDuration).'">' . gmdate('H:i:s', $totalDuration) . '</span>';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;']
+        ],
+
+        [
+            'label' => 'Completed',
+            'value' => function($data) {
+                return $data['outgoingCallsCompleted'] + $data['incomingCompletedCalls'] + $data['redialCompleted'];
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
+        ],
+
         [
             'label' =>'Duration',
             'attribute' => 'outgoingCallsDuration',
@@ -184,7 +213,10 @@ $list = new ListsAccess(Yii::$app->user->id);
                 return $data['totalAttempts'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
-            'contentOptions' => ['style' => 'background-color:#fcf8e3;'],
+            'contentOptions' => [
+                    'style' => 'background-color:#fcf8e3',
+                    'class' => 'text-center'
+            ],
             'filterOptions' => ['style' => 'background-color:#fcf8e3;'],
         ],
 
@@ -243,6 +275,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             [
                 'columns' => [
                     ['content' => '', 'options' => ['colspan' => 2]],
+                    ['content' => 'Total', 'options' => ['colspan' => 2, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                     ['content' => 'Outgoing Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                     ['content' => 'Incoming Calls', 'options' => ['colspan' => 4, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                     ['content' => 'Redial Calls', 'options' => ['colspan' => 3, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
