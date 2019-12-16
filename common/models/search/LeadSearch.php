@@ -87,6 +87,10 @@ class LeadSearch extends Lead
     public $soldRangeTime;
     public $createTimeRange;
     public $createdType;
+    public $reportTimezone;
+    public $timeFrom;
+    public $timeTo;
+    public $defaultUserTz;
 
     public $last_ticket_date;
 
@@ -148,6 +152,7 @@ class LeadSearch extends Lead
             }, 'skipOnEmpty' => true],
 			['l_is_test', 'in', 'range' => [0,1]],
             ['l_call_status_id', 'integer'],
+            [['defaultUserTz', 'reportTimezone', 'timeFrom', 'timeTo'], 'string']
 
         ];
     }
@@ -2668,19 +2673,38 @@ class LeadSearch extends Lead
     {
         $this->load($params);
         $timezone = $user->timezone;
-        $userTZ = Employee::timezoneList(false)[$timezone] ?? date('P');
+        /*$userTZ = Employee::timezoneList(false)[$timezone] ?? date('P');*/
+
+        if($this->reportTimezone == null){
+            $this->defaultUserTz = $timezone;
+        } else {
+            $timezone = $this->reportTimezone;
+            $this->defaultUserTz = $this->reportTimezone;
+        }
 
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
-            $hourSub = date('G', strtotime($dates[0]));
-            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]));
+            $hourSub = date('G', strtotime($this->timeFrom));
+
+            /*$date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]));
             $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]));
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";*/
+
+            $date_from = Employee::convertToUTC(strtotime($dates[0] .' '. $this->timeFrom) - ($hourSub * 3600), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime($dates[1] .' '. $this->timeTo), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         } else {
-            $hourSub = date('G', strtotime(date('Y-m-d 00:00')));
+            /*$hourSub = date('G', strtotime(date('Y-m-d 00:00')));
             $date_from = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 00:00')));
             $date_to = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 23:59')));
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";*/
+
+            $hourSub = date('G', strtotime(date('Y-m-d 00:00')));
+            $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00')), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         }
 
         if($this->lfOwnerId != null) {
@@ -2723,31 +2747,31 @@ class LeadSearch extends Lead
 
         $query = new Query();
 
-        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '")) as created_date, COUNT(*) as cnt,
+        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt,
                 
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '.Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS newTotal,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Take" '. $queryByProject . $queryByCreatedType .') AS inboxLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Call AutoCreated Lead" '. $queryByProject . $queryByCreatedType .') AS callLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Lead redial" '. $queryByProject . $queryByCreatedType .') AS redialLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = '. Lead::STATUS_PROCESSING .' AND ls.clone_id IS NULL '. $queryByProject . $queryByCreatedType .') AS leadsCreated,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = '. Lead::STATUS_PROCESSING .'  AND lfw.lf_description <> "Manual create" AND ls.clone_id IS NOT NULL '. $queryByProject . $queryByCreatedType .') AS leadsCloned,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_FOLLOW_UP .' AND lfw.status =  '. Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS followUpTotal,              
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_PROCESSING .' AND lfw.status =  '. Lead::STATUS_FOLLOW_UP . $queryByProject . $queryByCreatedType .') AS toFollowUp,                
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_FOLLOW_UP .' AND lfw.status = '. Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS followUpLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '.Lead::STATUS_PROCESSING.' AND lfw.status = '. Lead::STATUS_TRASH . $queryByProject . $queryByCreatedType .') AS trashLeads,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PROCESSING .' AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS soldLeads,    
-            (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND lf_from_status_id = '. Lead::STATUS_PROCESSING .' AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS profit,    
-            (SELECT SUM(CASE WHEN ls.tips IS NOT NULL THEN ls.tips ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND user_id = lf_owner_id AND lf_from_status_id = '. Lead::STATUS_PROCESSING .' AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS tips
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '.Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS newTotal,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Take" '. $queryByProject . $queryByCreatedType .') AS inboxLeadsTaken,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Call AutoCreated Lead" '. $queryByProject . $queryByCreatedType .') AS callLeadsTaken,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Lead redial" '. $queryByProject . $queryByCreatedType .') AS redialLeadsTaken,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = '. Lead::STATUS_PROCESSING .' AND ls.clone_id IS NULL '. $queryByProject . $queryByCreatedType .') AS leadsCreated,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = '. Lead::STATUS_PROCESSING .'  AND lfw.lf_description <> "Manual create" AND ls.clone_id IS NOT NULL '. $queryByProject . $queryByCreatedType .') AS leadsCloned,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_FOLLOW_UP .' AND lfw.status =  '. Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS followUpTotal,              
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_PROCESSING .' AND lfw.status =  '. Lead::STATUS_FOLLOW_UP . $queryByProject . $queryByCreatedType .') AS toFollowUp,                
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_FOLLOW_UP .' AND lfw.status = '. Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS followUpLeadsTaken,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '.Lead::STATUS_PROCESSING.' AND lfw.status = '. Lead::STATUS_TRASH . $queryByProject . $queryByCreatedType .') AS trashLeads,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PROCESSING .' AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS soldLeads,    
+            (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND lf_from_status_id = '. Lead::STATUS_PROCESSING .' AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS profit,    
+            (SELECT SUM(CASE WHEN ls.tips IS NOT NULL THEN ls.tips ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(lfw.created) = created_date AND lfw.created ' .$between_condition. ' AND user_id = lf_owner_id AND lf_from_status_id = '. Lead::STATUS_PROCESSING .' AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS tips
                 
             FROM lead_flow AS lf WHERE lf.created ' .$between_condition. ' AND lf.lf_owner_id IS NOT NULL '. $queryByOwner . $queryByGroup . $queryByDepartment. '        
         ']);
 
-        $query->groupBy(['DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $userTZ . '")), lf.lf_owner_id']);
-        //$query->orderBy(['user_id' => SORT_ASC, 'created_date' => SORT_ASC]);
+        $query->groupBy(['DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $utcOffsetDST . '")), lf.lf_owner_id']);
+
 
         $command = $query->createCommand();
         $sql = $command->sql;
-
+//var_dump($sql); die();
         $paramsData = [
             'sql' => $sql,
             'sort' => [

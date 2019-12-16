@@ -3,6 +3,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use sales\access\EmployeeDepartmentAccess;
 use common\models\Lead;
+use common\models\Employee;
 ?>
 
 <div class="calls-search">
@@ -22,13 +23,13 @@ use common\models\Lead;
                         'hideInput' => true,
                         'convertFormat' => true,
                         'pluginOptions' => [
-                            'minDate' => date("Y-m-d 00:00", strtotime("- 61 days")),
-                            'maxDate' => date("Y-m-d 23:59"),
-                            'timePicker' => true,
+                            'minDate' => date("Y-m-d", strtotime("- 61 days")),
+                            'maxDate' => date("Y-m-d"),
+                            'timePicker' => false,
                             'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
                             'locale' => [
-                                'format' => 'Y-m-d H:i',
+                                'format' => 'Y-m-d',
                                 'separator' => ' - '
                             ]
                         ]
@@ -37,6 +38,46 @@ use common\models\Lead;
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="col-md-6">
+                <?=
+                $form->field($model, 'timeFrom')->widget(
+                    \kartik\time\TimePicker::class, [
+                    'pluginOptions' => [
+                        'defaultTime' => '00:00',
+                        'showSeconds' => false,
+                        'showMeridian' => false,
+                    ]])->label('Report Hour From');
+                ?>
+            </div>
+            <div class="col-md-6">
+                <?=
+                $form->field($model, 'timeTo')->widget(
+                    \kartik\time\TimePicker::class, [
+                    'pluginOptions' => [
+                        'defaultTime' => '23:59',
+                        'showSeconds' => false,
+                        'showMeridian' => false,
+                    ]])->label('Report Hour To');
+                ?>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <?= $form->field($model, 'reportTimezone')->widget(\kartik\select2\Select2::class, [
+                'data' => Employee::timezoneList(true),
+                'size' => \kartik\select2\Select2::SMALL,
+                'options' => [
+                    'placeholder' => 'Select TimeZone',
+                    'multiple' => false,
+                    'value' => $model->defaultUserTz
+                ],
+                'pluginOptions' => ['allowClear' => true],
+            ]);
+            ?>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">

@@ -33,12 +33,6 @@ use common\models\Employee;
                     ])->label('Calls Created Date');
                     ?>
                 </div>
-
-                <!--<div class="col-md-12">
-                    <div class="row">
-
-                </div>-->
-
             </div>
         </div>
         <div class="col-md-3">
