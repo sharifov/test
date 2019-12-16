@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
@@ -12,12 +13,15 @@ use common\models\Email;
 
 /**
  * EmailSearch represents the model behind the search form of `common\models\Email`.
+ *
+ * @property string $e_template_type_name
  */
 class EmailSearch extends Email
 {
 
     public $email_type_id;
     public $supervision_id;
+    public $e_template_type_name;
 
     public $datetime_start;
     public $datetime_end;
@@ -32,6 +36,7 @@ class EmailSearch extends Email
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['e_id', 'e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'email_type_id', 'supervision_id'], 'integer'],
+			[['e_template_type_name'], 'string'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_html', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_created_dt', 'e_updated_dt', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
         ];
     }
@@ -54,7 +59,7 @@ class EmailSearch extends Email
      */
     public function search($params)
     {
-        $query = Email::find()->with('eCreatedUser', 'eProject', 'eTemplateType');
+        $query = self::find()->with('eCreatedUser', 'eProject', 'eTemplateType');
 
         // add conditions that should always apply here
 
@@ -95,7 +100,7 @@ class EmailSearch extends Email
             'e_lead_id' => $this->e_lead_id,
             'e_project_id' => $this->e_project_id,
             'e_type_id' => $this->e_type_id,
-            'e_template_type_id' => $this->e_template_type_id,
+//            'e_template_type_id' => $this->e_template_type_id,
             'e_communication_id' => $this->e_communication_id,
             'e_is_deleted' => $this->e_is_deleted,
             'e_is_new' => $this->e_is_new,
@@ -111,6 +116,13 @@ class EmailSearch extends Email
             'e_inbox_email_id' => $this->e_inbox_email_id,
         ]);
 
+        if ($this->e_template_type_name) {
+        	$templateIds = EmailTemplateType::find()->select(['DISTINCT(etp_id) as e_template_type_id'])->where(['like', 'etp_name', $this->e_template_type_name])->asArray()->all();
+        	if($templateIds) {
+				$query->andFilterWhere(['e_template_type_id' => $templateIds]);
+			}
+		}
+
         $query->andFilterWhere(['like', 'e_email_from', $this->e_email_from])
             ->andFilterWhere(['like', 'e_email_to', $this->e_email_to])
             ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
@@ -124,6 +136,20 @@ class EmailSearch extends Email
             ->andFilterWhere(['like', 'e_error_message', $this->e_error_message])
             ->andFilterWhere(['like', 'e_message_id', $this->e_message_id])
             ->andFilterWhere(['like', 'e_ref_message_id', $this->e_ref_message_id]);
+
+        $dataProvider->setSort([
+        	'attributes' => array_merge(
+        		$dataProvider->getSort()->attributes,
+				[
+					'e_template_type_name' => [
+						'asc' => ['e_template_type_id' => SORT_ASC],
+						'desc' => ['e_template_type_id' => SORT_DESC],
+						'label'   => 'e_template_type_id',
+						'default' => SORT_DESC,
+					]
+				]
+			)
+		]);
 
         return $dataProvider;
     }

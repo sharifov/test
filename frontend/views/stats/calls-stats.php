@@ -1,274 +1,264 @@
 <?php
-use yii\widgets\Pjax;
-/**
- * @var $callsGraphData []
- */
-$js = <<<JS
-    $('#viewMode0').click(function() {
-        $('#chart_div').html(generateChartPreloader());
-        $('#viewMode1, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
-    });
 
-    $('#viewMode1').click(function() {
-        $('#chart_div').html(generateChartPreloader());
-        $('#viewMode0, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
-    });
-    
-    $('#viewMode2').click(function() {
-        $('#chart_div').html(generateChartPreloader());
-        $('#viewMode0, #viewMode1, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
-    });
-    
-    $('#viewMode3').click(function() {
-        $('#chart_div').html(generateChartPreloader());
-        $('#viewMode0, #viewMode1, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
-    });
-    
-    $('#call_type').on('change', function() {
-        $('#chart_div').html(generateChartPreloader());
-        let groupBy = $('input[name^="viewMode"]:checked').val();
-        if( typeof groupBy === 'undefined'){
-            let dates = $('#call-stats-picker').val().split(' / ');
-            if (dates[0] == dates[1]){
-                groupBy = '0';
-            } else {
-                groupBy = '1';
-            }
-        }
-        let groupingOps = ["hours", "days", "weeks", "months"];        
-        
-        switch (this.value) {
-          case '0' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
-          break;
-          case '1' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
-          break;          
-          case '2' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
-          break;
-        }
-    });
-    
-    function generateChartPreloader() {
-              return "<div class='chartPreloader' style='width:100%; height:50%'>" + 
-              "<i class='fa fa-spinner fa-pulse fa-4x' style='color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%);'></i>" +
-              "</div>"
-     }
-JS;
-$this->registerJs($js, \yii\web\View::POS_READY);
+use common\models\Department;
+use common\models\Project;
+use common\models\search\CallGraphsSearch;
+use common\models\UserGroup;
+use yii\bootstrap4\ActiveForm;
+use kartik\select2\Select2;
+
+/**
+ * @var CallGraphsSearch $model
+ */
+
 $this->title = 'Calls Stats';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-<div class="">
-    <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
-    <div class="card card-default">
-        <div class="card-header"><i class="fa fa-bar-chart"></i> Calls Chart</div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-12 col-sm-6 col-xs-12">
-                    <div class="x_panel">
-                        <div class="col-md-3">
-                            <?=\kartik\daterange\DateRangePicker::widget([
-                                'options'=>['id'=>'call-stats-picker'],
-                                'name'=>'callStatsRange',
-                                'convertFormat'=>true,
-                                'presetDropdown'=>true,
-                                'hideInput'=>true,
-                                'useWithAddon'=>true,
-                                'pluginOptions'=>[
-                                    'minDate' => '2019-01-01',
-                                    'maxDate' => date("Y-m-d"),
-                                    'timePicker'=> false,
-                                    'timePickerIncrement'=>15,
-                                    'locale'=>[
-                                        'format'=>'Y-m-d',
-                                        'separator' => ' / '
-                                    ],
-                                ],
-                                'pluginEvents'=>[
-                                    "apply.daterangepicker"=>"function(){
-                                     $('#chart_div').html(generateChartPreloader());                                    
-                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
-                                     let dates = $('#call-stats-picker').val().split(' / ');
-                                     if (dates[0] == dates[1]){
-                                        $('#viewMode0').addClass('active focus');
-                                        $('#viewMode1').removeClass('active focus');
-                                     } else {
-                                        $('#viewMode0').removeClass('active focus');
-                                        $('#viewMode1').addClass('active focus');
-                                     }                     
-                                  }",
-                                ],
-                            ]);?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Search</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                    <?php $form = ActiveForm::begin([
+                        'id' => 'call-chart-search-form',
+                        'options' => ['data-pjax' => '#total-calls-chart'],
+                        'action' => \yii\helpers\Url::to('/stats/ajax-get-total-chart'),
+                        'enableClientValidation' => false,
+                    ]) ?>
+
+                        <div class="row">
+                            <div class="col-md-4">
+								<?= $form->field($model, 'createTimeRange', [
+									'options' => ['class' => 'form-group'],
+								])->widget(\kartik\daterange\DateRangePicker::class, [
+									'presetDropdown' => false,
+									'hideInput' => true,
+									'convertFormat' => true,
+									'pluginOptions' => [
+										'timePicker' => true,
+										'timePickerIncrement' => 1,
+										'timePicker24Hour' => true,
+										'locale' => [
+											'format' => 'd-M-Y H:i',
+											'separator' => ' - '
+										]
+									]
+								])->label('Created From / To'); ?>
+                            </div>
+
+                            <div class="col-md-2">
+                                <?= $form->field($model, 'projectIds', [
+                                        'options' => ['class' => 'form-group']
+                                ])->widget(Select2::class, [
+                                    'data' => Project::getList(),
+									'size' => Select2::SMALL,
+									'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+									'pluginOptions' => ['allowClear' => true],
+                                ])->label('Project') ?>
+                            </div>
+
+                            <div class="col-md-2">
+								<?= $form->field($model, 'dep_ids', [
+									'options' => ['class' => 'form-group']
+								])->widget(Select2::class, [
+									'data' => Department::getList(),
+									'size' => Select2::SMALL,
+									'options' => ['placeholder' => 'Select Department', 'multiple' => true],
+									'pluginOptions' => ['allowClear' => true],
+								])->label('Department') ?>
+                            </div>
+
+                            <div class="col-md-2">
+                                <?= $form->field($model, 'c_created_user_id', [
+                                        'options' => ['class' => 'form-group']
+                                ])->dropDownList(\common\models\Employee::getList(), [
+                                        'prompt' => 'All'
+                                ])->label('Username') ?>
+                            </div>
+
+                            <div class="col-md-2">
+								<?= $form->field($model, 'userGroupIds', [
+									'options' => ['class' => 'form-group']
+								])->widget(Select2::class, [
+									'data' => UserGroup::getList(),
+									'size' => Select2::SMALL,
+									'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
+									'pluginOptions' => ['allowClear' => true],
+								])->label('User Groups') ?>
+                            </div>
+
+                            <div class="col-md-2">
+                                <?= $form->field($model, 'betweenHoursFrom', [
+                                        'options' => ['class' => 'form-group']
+                                ])->input('number', ['class' => 'form-control'])->label('Between Hours From') ?>
+                            </div>
+
+                            <div class="col-md-2">
+                                <?= $form->field($model, 'betweenHoursTo', [
+                                        'options' => ['class' => 'form-group']
+                                ])->input('number', ['class' => 'form-control'])->label('Between Hours To') ?>
+                            </div>
+
+                            <div class="col-md-2">
+                                <?= $form->field($model, 'recordingDurationFrom', [
+                                        'options' => ['class' => 'form-group']
+                                ])->input('number', ['class' => 'form-control'])->label('Recording Duration Seconds From') ?>
+                            </div>
+
+                            <div class="col-md-2">
+								<?= $form->field($model, 'recordingDurationTo', [
+									'options' => ['class' => 'form-group']
+								])->input('number', ['class' => 'form-control'])->label('Recording Duration Seconds To') ?>
+                            </div>
+
+                            <div class="col-md-2">
+								<?= $form->field($model, 'callGraphGroupBy', [
+									'options' => ['class' => 'form-group']
+								])->dropDownList($model::getDateFormatTextList())->label('Group By') ?>
+                            </div>
+
                         </div>
 
-                        <div class="col-md-3 " id="viewMode">
-                            <div class="btn-group btn-group-justified" data-toggle="buttons">
-                                <label class="btn btn-success active focus" id="viewMode0">
-                                    <input type="radio" class="sr-only"  name="viewMode" value="0">
-                                    Hours
-                                </label>
-                                <label class="btn btn-success" id="viewMode1">
-                                    <input type="radio" class="sr-only"  name="viewMode" value="1">
-                                    Days
-                                </label>
-                                <label class="btn btn-success" id="viewMode2">
-                                    <input type="radio" class="sr-only"  name="viewMode" value="2">
-                                    Weeks
-                                </label>
-                                <label class="btn btn-success" id="viewMode3">
-                                    <input type="radio" class="sr-only"  name="viewMode" value="3">
-                                    Month
-                                </label>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-center">
+                                    <?= \yii\helpers\Html::button('<i class="fa fa-search"></i> Search', ['type' => 'submit', 'class' => 'btn btn-default', 'id' => 'call-chart-from-btn']) ?>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-xs-1">
-                            <select id="call_type" class="form-control" required="">
-                                <option value="0">All</option>
-                                <option value="2">INCOMING</option>
-                                <option value="1">OUTGOING</option>
-                            </select>
-                        </div>
+                        <?= \yii\helpers\Html::checkboxList($model->formName().'[totalChartColumns]', $model->totalChartColumns, $model::getChartTotalCallTextList(), [
+                            'itemOptions' => [
+                                'style' => 'display: none',
+                                'label' => false
+                            ],
+                        ]) ?>
 
-                        <?php Pjax::begin(['id' => 'calls-graph-pjax']); ?>
-                        <div class="x_content">
-                            <?php if ($callsGraphData): ?>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div id="chart_div" style="height:550px">
-                                            <div class="chartPreloader" style="width:100%; height:50%">
-                                                <i class="fa fa-spinner fa-pulse fa-4x" style=" color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%); "></i>
-                                            </div>
-                                        </div>
-                                        <?php
-                                        $this->registerJs("google.charts.load('current', {'packages':['corechart']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
-                                        ?>
-                                        <script>
-                                            function drawChart() {
-                                                let data = google.visualization.arrayToDataTable([
-                                                    ['Time Line',
-                                                        'Completed',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'No answer',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'Busy',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'Canceled',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        {role: 'annotation'}
-                                                    ],
-                                                    <?php foreach($callsGraphData as $k => $item):?>
-                                                    ['<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>',
-                                                        <?=$item['completed']?>, createCustomHTMLContent('Completed: ','<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['completed']?>, <?=$item['cc_TotalPrice']?>, <?= $item['cc_Duration']?>),
-                                                        <?=$item['no-answer']?>, createCustomHTMLContent('No Answer: ','<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['no-answer']?>, 0, 0),
-                                                        <?=$item['busy']?>, createCustomHTMLContent('Busy: ','<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['busy']?>, 0, 0),
+                        <?= \yii\helpers\Html::dropDownList($model->formName().'[chartTotalCallsVaxis]', $model->chartTotalCallsVaxis, $model::getChartTotalCallsVaxisTextList(), [
+                            'style' => 'display: none',
+                            'label' => false
+                        ]) ?>
 
-                                                        <?=$item['canceled']?>, createCustomHTMLContent('Canceled: ','<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['canceled']?>, 0, 0),
-                                                        '<?=''?>'],
-                                                    <?php endforeach;?>
-                                                ]);
+                    <?php ActiveForm::end() ?>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                                let options = {
-                                                    theme: 'material',
-                                                    height: 550,
-                                                    vAxis: {
-                                                        textStyle: {
-                                                            fontSize: 12
-                                                        },
-                                                        format:"#",
-                                                        viewWindow: {
-                                                            min: 1,
-                                                        },
-                                                    },
-                                                    hAxis: {
-                                                        textStyle: {
-                                                            fontSize: 12
-                                                        },
-                                                    },
-                                                    seriesType: 'bars',
-                                                    bar: {
-                                                        groupWidth: 55
-                                                    },
-                                                    chartArea:{
-                                                        left:35,
-                                                        top:22,
-                                                        width:'100%',
-                                                        height:'85%'
-                                                    },
-                                                    legend: {
-                                                        position: 'top',
-                                                        textStyle: {
-                                                            fontSize: 12
-                                                        },
-                                                        alignment: 'end'
-                                                    },
-                                                    tooltip: {
-                                                        textStyle: {
-                                                            fontSize: 14
-                                                        },
-                                                        isHtml: true
-                                                    },
-                                                    animation:{
-                                                        duration: 1000,
-                                                        easing: 'linear',
-                                                        startup: true
-                                                    }
-                                                };
-                                                let chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
-
-                                                chart.draw(data, options);
-                                                $(window).resize(function(){
-                                                    chart.draw(data, options); // redraw the graph on window resize
-                                                });
-                                            }
-
-                                            function createCustomHTMLContent(status ,hourRange, statusAmount, totalPrice, totalDuration) {
-                                                return '<div style="padding:5px 5px 5px 5px;">' +
-                                                    '<table class="medals_layout">' +
-                                                    '<tr>' +
-                                                    '<td style="padding-right:5px;">Time: </td>' + '<td><b>' + hourRange + '</b></td>' + '</tr>' +
-                                                    '<tr>' +
-                                                    '<td style="padding-right:5px;">' + status +'</td>' + '<td><b>' + statusAmount + '</b></td>' + '</tr>' +
-                                                    '<tr>' +
-                                                    '<td style="padding-right:5px;">Total Price: </td>' +
-                                                    '<td><b>' + totalPrice + ' $</b></td>' + '</tr>' +
-                                                    '<tr>' +
-                                                    '<td style="padding-right:5px;">Duration: </td>' +
-                                                    '<td><b>' + totalDuration + ' s</b></td>' + '</tr>' +
-                                                    '</table>' +
-                                                    '</div>';
-                                            }
-                                        </script>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        </div>
+<div class="card card-default">
+    <div class="card-header"><i class="fa fa-bar-chart"></i> All Calls Chart</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12 col-sm-6 col-xs-12">
+                <div class="x_panel" id="total-calls-chart">
+                    <div id="loading" style="text-align:center;font-size: 40px;">
+                        <i class="fa fa-spin fa-spinner"></i> Loading ...
                     </div>
-                    <?php Pjax::end(); ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<?php
+$url = \yii\helpers\Url::to(['/stats/ajax-get-total-chart']);
+$js = <<<JS
+$(document).ready( function () {
+    let formLoaded = $('#call-chart-search-form').serializeArray();
+    let submitBtnHtml = $('#call-chart-from-btn').html();
+    let spinner = '<i class="fa fa-spinner fa-spin"></i> Loading...';
+    
+    $.ajax({
+        url: '$url',
+        type: 'post',
+        dataType: 'json',
+        data: formLoaded,
+        beforeSend: function () {
+          $('#call-chart-from-btn').html(spinner).prop('disabled', true).toggleClass('disabled');
+        },
+        success: function (data) {
+            if (!data.error) {
+                $('#total-calls-chart').html(data.html);
+            } else {
+               new PNotify({
+                    title: 'Attention',
+                    text: data.message,
+                    type: 'warning'                
+               }); 
+            }
+        },
+        error: function (error) {
+            new PNotify({
+                title: 'Error',
+                text: 'Internal Server Error. Try again letter.',
+                type: 'error'                
+            });
+        },
+        complete: function () {
+            $('#call-chart-from-btn').html(submitBtnHtml).removeAttr('disabled').toggleClass('disabled');
+        }
+    });
+    
+    let loading = '<div id="loading" style="text-align:center;font-size: 40px;">'+
+                        '<i class="fa fa-spin fa-spinner"></i> Loading ...'+
+                    '</div>';
+    
+    $('#call-chart-search-form').off().on('submit', function (e) {
+        e.preventDefault();
+        
+        var form = $(this).serializeArray();
+        
+        var formData = new FormData(document.getElementById('call-chart-search-form'));
+        $('.total-calls-chart-column:checked').each( function (e, elem) {
+            let name = $(elem).attr('name');
+            let val = $(elem).val();
+            form.push({name: name, value: val});
+            formData.append(name, val);
+        });
+        
+        formData.delete('_csrf-frontend');
+        var params = new URLSearchParams(formData).toString();
+        
+        $.ajax({
+            url: '$url',
+            type: 'post',
+            data: form,
+            dataType: 'json',
+            beforeSend: function () {
+                $('#total-calls-chart').html(loading);
+                $('#call-chart-from-btn').html(spinner).prop('disabled', true).toggleClass('disabled');
+            },
+            success: function (data) {
+                if (!data.error) {
+                    $('#total-calls-chart').html(data.html);
+                    
+                    window.history.replaceState({}, '', location.pathname+'?'+params);
+                } else {
+                   new PNotify({
+                        title: 'Attention',
+                        text: data.message,
+                        type: 'warning'                
+                   }); 
+                }
+            },
+            error: function (error) {
+                new PNotify({
+                    title: 'Error',
+                    text: 'Internal Server Error. Try again letter.',
+                    type: 'error'                
+                });
+            },
+            complete: function () {
+                $('#call-chart-from-btn').html(submitBtnHtml).removeAttr('disabled').toggleClass('disabled');
+                $('#loading').remove();
+            }
+        })
+    });
+});
+JS;
+$this->registerJs($js);
+?>
