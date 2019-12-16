@@ -120,10 +120,11 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
             //'e_template_type_id',
             [
-                'attribute' => 'e_template_type_id',
+                'attribute' => 'e_template_type_name',
                 'value' => static function (\common\models\Email $model) {
                     return $model->eTemplateType ? $model->eTemplateType->etp_name : '-';
                 },
+                'label' => 'Template Name'
                 //'filter' =>
             ],
             //'e_language_id',
