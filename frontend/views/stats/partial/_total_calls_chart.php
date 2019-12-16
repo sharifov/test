@@ -5,7 +5,9 @@ use common\models\search\CallGraphsSearch;
 /**
  * @var $totalCallsDbData array
  * @var $totalCallsGraphData string
+ * @var $totalCallsGraphDataAvg string
  * @var $totalCallsRecDurationData string
+ * @var $totalCallsRecDurationDataAVG string
  * @var $model CallGraphsSearch
  */
 
@@ -29,7 +31,7 @@ use common\models\search\CallGraphsSearch;
     <div class="col-md-2">
         <div class="form-group">
             <label class="control-label">Measure</label>
-            <?= \yii\helpers\Html::dropDownList('chartTotalCallsVaxis', $model->chartTotalCallsVaxis, $model::getChartTotalCallsVaxisText(), [
+            <?= \yii\helpers\Html::dropDownList('chartTotalCallsVaxis', $model->chartTotalCallsVaxis, $model::getChartTotalCallsVaxisTextList(), [
 				'class' => 'form-control chartTotalCallsVaxis',
                 'data-name' => $model->formName().'[chartTotalCallsVaxis]'
             ]) ?>
@@ -46,14 +48,22 @@ use common\models\search\CallGraphsSearch;
 
         var graphData;
         var totalCallsRecDurationData = <?= $totalCallsRecDurationData ?>;
+        var totalCallsRecDurationDataAVG = <?= $totalCallsRecDurationDataAVG ?>;
         var totalCallsData = <?= $totalCallsGraphData ?>;
+        var totalCallsDataAvg = <?= $totalCallsGraphDataAvg ?>;
 
         var selectedMeasure = +$('.chartTotalCallsVaxis').val();
+        var measuresText = <?= json_encode(CallGraphsSearch::getChartTotalCallsVaxisTextList()) ?>;
+        var timeRange = '<?= $model->createTimeRange ?>';
 
         if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>) {
             graphData = totalCallsData;
+        } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>) {
+            graphData = totalCallsDataAvg;
         } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>) {
             graphData = totalCallsRecDurationData;
+        } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>) {
+            graphData = totalCallsRecDurationDataAVG;
         }
 
         google.charts.load('current', {'packages':['corechart','bar']});
@@ -63,7 +73,9 @@ use common\models\search\CallGraphsSearch;
             var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
 
             var options = {
-                title: 'Call Stats - Totals: <?= $model->createTimeRange ?>',
+                title: measuresText[selectedMeasure]+': ' + timeRange,
+                theme: 'material',
+                chartArea:{width:'95%', right: 10},
                 textStyle: {
                     color: '#596b7d'
                 },
@@ -72,11 +84,15 @@ use common\models\search\CallGraphsSearch;
                 color: '#596b7d',
                 colors: colors,
                 enableInteractivity: true,
-                height: 550,
+                height: 650,
                 animation:{
                     duration: 200,
                     easing: 'linear',
                     startup: true
+                },
+                legend: {
+                    position: 'top',
+                    alignment: 'end'
                 },
                 hAxis: {
                     title: 'Date',
@@ -117,12 +133,18 @@ use common\models\search\CallGraphsSearch;
             $('.chartTotalCallsVaxis').on('change', function () {
                 let val = +$(this).val();
 
-                if (val === 1) { // calls
+                if (val === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>) { // calls
                     graphData = totalCallsData;
-                    options.vAxis.title = 'Calls';
-                } else if (val === 2) { // calls recording
+                    options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS) ?>';
+                } else if (val === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>) {
+                    graphData = totalCallsDataAvg;
+                    options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG) ?>';
+                } else if (val === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>) { // calls recording
                     graphData = totalCallsRecDurationData;
-                    options.vAxis.title = 'Calls Duration';
+                    options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION) ?>';
+                } else if (val === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>) {
+                    graphData = totalCallsRecDurationDataAVG;
+                    options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG) ?>';
                 }
 
                 let data = google.visualization.arrayToDataTable(graphData);
@@ -134,9 +156,7 @@ use common\models\search\CallGraphsSearch;
                     c.push(colors[+$(elem).val()-1]);
                 });
                 options.colors = c;
-
-                console.log($('select[name="'+$(this).attr('data-name')+'"]'));
-                console.log($(this).attr('data-name'));
+                options.title = measuresText[val]+': ' + timeRange;
 
                 $('select[name="'+$(this).attr('data-name')+'"]').val($(this).val()).change();
 

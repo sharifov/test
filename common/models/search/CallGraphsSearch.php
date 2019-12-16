@@ -25,6 +25,9 @@ use DateTime;
  * @property int $callGraphGroupBy
  * @property array $totalChartColumns
  * @property int $chartTotalCallsVaxis
+ * @property array $projectIds
+ * @property array $dep_ids
+ * @property array $userGroupIds
  */
 class CallGraphsSearch extends CallSearch
 {
@@ -39,27 +42,30 @@ class CallGraphsSearch extends CallSearch
 	public $callGraphGroupBy;
 	public $totalChartColumns;
 	public $chartTotalCallsVaxis;
+	public $projectIds = [];
+	public $dep_ids = [];
+	public $userGroupIds = [];
 
 	private const DAYS_DIFF_MAX_RANGE = 7;
 	private const MONTH_DIFF_MAX_RANGE = 2;
 	private const Year_DIFF_MAX_RANGE = 1;
 
 	private const DATE_FORMAT_DAYS = 0;
-	private const DATE_FORMAT_HOURS = 1;
+	private const DATE_FORMAT_HOURS = 4;
 	private const DATE_FORMAT_WEEKS = 2;
 	private const DATE_FORMAT_MONTH = 3;
-	private const DATE_FORMAT_HOURS_DAYS = 4;
+	private const DATE_FORMAT_HOURS_DAYS = 1;
 	private const DATE_FORMAT_WEEKDAYS = 5;
 
 	private const CREATE_TIME_START_DEFAULT = '-6 days';
 
 	private const DATE_FORMAT_TEXT = [
-		self::DATE_FORMAT_DAYS => 'Days',
-		self::DATE_FORMAT_HOURS => 'Hours',
-		self::DATE_FORMAT_WEEKS => 'Weeks',
+		self::DATE_FORMAT_DAYS => 'Day',
+		self::DATE_FORMAT_HOURS_DAYS => 'Hour of the Day',
+		self::DATE_FORMAT_WEEKS => 'Week',
 		self::DATE_FORMAT_MONTH => 'Month',
-		self::DATE_FORMAT_HOURS_DAYS => 'Hours Days',
-		self::DATE_FORMAT_WEEKDAYS => 'Weekdays',
+		self::DATE_FORMAT_HOURS => 'Hour',
+		self::DATE_FORMAT_WEEKDAYS => 'Day of the Week',
 
 	];
 
@@ -73,12 +79,20 @@ class CallGraphsSearch extends CallSearch
 	];
 
 	private const DATE_FORMAT_LIST = [
-		self::DATE_FORMAT_HOURS => '%H:00 hour',
-		self::DATE_FORMAT_HOURS_DAYS => '%Y-%m-%d %H:00 hour',
+		self::DATE_FORMAT_HOURS_DAYS => '%H:00',
+		self::DATE_FORMAT_HOURS => '%Y-%m-%d %H:00',
 		self::DATE_FORMAT_DAYS => '%Y-%m-%d',
 		self::DATE_FORMAT_WEEKS => '%v',
 		self::DATE_FORMAT_MONTH => '%Y-%M',
-		self::DATE_FORMAT_WEEKDAYS => '%W'
+		self::DATE_FORMAT_WEEKDAYS => '%W',
+	];
+
+	private const DATE_FORMAT_LIST_COUNT = [
+		self::DATE_FORMAT_HOURS => '%H:00',
+		self::DATE_FORMAT_HOURS_DAYS => '%Y-%m-%d',
+		self::DATE_FORMAT_DAYS => '%Y-%m-%d',
+		self::DATE_FORMAT_MONTH => '%Y-%M',
+		self::DATE_FORMAT_WEEKDAYS => '%Y-%m-%d'
 	];
 
 	public const CHART_TOTAL_CALLS_INCOMING = 1;
@@ -98,16 +112,22 @@ class CallGraphsSearch extends CallSearch
 	];
 
 	public const CHART_TOTAL_CALLS_VAXIS_CALLS = 1;
-	public const CHART_TOTAL_CALLS_VAXIS_REC_DURATION = 2;
+	public const CHART_TOTAL_CALLS_VAXIS_CALLS_AVG = 2;
+	public const CHART_TOTAL_CALLS_VAXIS_REC_DURATION = 3;
+	public const CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG = 4;
 
 	private const CHART_TOTAL_CALLS_VAXIS_TEXT = [
-		self::CHART_TOTAL_CALLS_VAXIS_CALLS => 'Calls',
-		self::CHART_TOTAL_CALLS_VAXIS_REC_DURATION => 'Calls Duration'
+		self::CHART_TOTAL_CALLS_VAXIS_CALLS => 'Number of Calls',
+		self::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG => 'Number of Calls AVG',
+		self::CHART_TOTAL_CALLS_VAXIS_REC_DURATION => 'Call Duration',
+		self::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG => 'Call Duration AVG',
 	];
 
 	private const CHART_TOTAL_CALLS_VAXIS_LIST = [
 		self::CHART_TOTAL_CALLS_VAXIS_CALLS,
-		self::CHART_TOTAL_CALLS_VAXIS_REC_DURATION
+		self::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG,
+		self::CHART_TOTAL_CALLS_VAXIS_REC_DURATION,
+		self::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG,
 	];
 
 	/**
@@ -121,7 +141,7 @@ class CallGraphsSearch extends CallSearch
 			[['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
 				'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
 			[['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-			[['ug_ids', 'status_ids', 'dep_ids', 'totalChartColumns'], 'each', 'rule' => ['integer']],
+			[['ug_ids', 'status_ids', 'dep_ids', 'totalChartColumns', 'projectIds', 'userGroupIds'], 'each', 'rule' => ['integer']],
 			['recordingDurationTo', 'compare', 'compareAttribute' => 'recordingDurationFrom', 'operator' => '>='],
 			['betweenHoursTo', 'compare', 'compareAttribute' => 'betweenHoursFrom', 'operator' => '>='],
 			[['betweenHoursFrom', 'betweenHoursTo'], 'number', 'min' => 0, 'max' => 24],
@@ -208,13 +228,22 @@ class CallGraphsSearch extends CallSearch
 			'sum(incoming + outgoing) as total_calls',
 			'sum(incoming_duration_sum) as in_rec_duration',
 			'sum(outgoing_duration_sum) as out_rec_duration',
-			'sum(tbl.incoming_duration_sum + tbl.outgoing_duration_sum) as total_rec_duration'
+			'sum(tbl.incoming_duration_sum + tbl.outgoing_duration_sum) as total_rec_duration',
+			'coalesce(sum(incoming_duration_sum) / sum(incoming), 0) as incoming_duration_avg',
+			'coalesce(sum(outgoing_duration_sum) / sum(outgoing), 0) as outgoing_duration_avg',
+			'coalesce(sum(tbl.incoming_duration_sum + tbl.outgoing_duration_sum) / sum(incoming + outgoing),0) as total_rec_duration_avg'
 		]);
 
 		if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
-			$query->addSelect(["concat(str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as created"]);
+			$query->addSelect(["concat(str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as created_formatted"]);
+			$query->addSelect(["sum(incoming) / count(distinct str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as 'incoming_avg'"]);
+			$query->addSelect(["sum(outgoing) / count(distinct str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as 'outgoing_avg'"]);
+			$query->addSelect(["sum(incoming + outgoing) / count(distinct date_format(created, '%Y-%m-%d')) as total_calls_avg"]);
 		} else {
-			$query->addSelect(["date_format(`created`, '$dateFormat') as created"]);
+			$query->addSelect(["date_format(`created`, '$dateFormat') as created_formatted"]);
+			$query->addSelect(['sum(incoming) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as incoming_avg']);
+			$query->addSelect(['sum(outgoing) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as outgoing_avg']);
+			$query->addSelect(['sum(incoming + outgoing) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as total_calls_avg']);
 		}
 
 
@@ -239,8 +268,10 @@ class CallGraphsSearch extends CallSearch
 		$query->from(['tbl' => $incomingComplete->union($incomingNotAnswered)
 			->union($outgoingComplete)
 			->union($outgoingNotAnswered)
-		])->groupBy(['date_format(`created`, "'.$dateFormat.'")'])
-			->orderBy(['date_format(created, \''.$dateFormat.'\')' => SORT_ASC]);
+		])->groupBy(['created_formatted'])
+			->orderBy(['created_formatted' => SORT_ASC]);
+
+//		print_r($query->createCommand()->rawSql);die;
 
 		return $query->asArray()->all();
 	}
@@ -355,18 +386,18 @@ class CallGraphsSearch extends CallSearch
 
 		$query->andWhere(['between', 'c_created_dt', $this->createTimeStart, $this->createTimeEnd]);
 
-		if ($this->c_project_id) {
-			$query->andWhere(['c_project_id' => $this->c_project_id]);
+		if ($this->projectIds) {
+			$query->andWhere(['c_project_id' => $this->projectIds]);
 		}
 
-		if ($this->callDepId) {
-			$query->andWhere(['c_dep_id' => $this->callDepId]);
+		if ($this->dep_ids) {
+			$query->andWhere(['c_dep_id' => $this->dep_ids]);
 		}
 
 		if ($this->c_created_user_id) {
 			$query->andWhere(['c_created_user_id' => $this->c_created_user_id]);
-		} else if ($this->userGroupId) {
-			$userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as c_created_user_id'])->where(['ugs_group_id' => $this->userGroupId])->asArray()->all();
+		} else if ($this->userGroupIds) {
+			$userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as c_created_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
 			if ($userIdsByGroup) {
 				$query->andWhere(['in', ['c_created_user_id'], $userIdsByGroup]);
 			}
@@ -418,9 +449,14 @@ class CallGraphsSearch extends CallSearch
 	/**
 	 * @return array
 	 */
-	public static function getChartTotalCallsVaxisText(): array
+	public static function getChartTotalCallsVaxisTextList(): array
 	{
 		return self::CHART_TOTAL_CALLS_VAXIS_TEXT;
+	}
+
+	public static function getChartTotalCallsVaxisText($vaxisId): string
+	{
+		return self::getChartTotalCallsVaxisTextList()[$vaxisId] ?? null;
 	}
 
 	/**

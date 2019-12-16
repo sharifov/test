@@ -1,7 +1,11 @@
 <?php
 
+use common\models\Department;
+use common\models\Project;
 use common\models\search\CallGraphsSearch;
+use common\models\UserGroup;
 use yii\bootstrap4\ActiveForm;
+use kartik\select2\Select2;
 
 /**
  * @var CallGraphsSearch $model
@@ -47,19 +51,25 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
-                                <?= $form->field($model, 'c_project_id', [
+                                <?= $form->field($model, 'projectIds', [
                                         'options' => ['class' => 'form-group']
-                                ])->dropDownList(\common\models\Project::getList(), [
-                                        'prompt' => 'All'
+                                ])->widget(Select2::class, [
+                                    'data' => Project::getList(),
+									'size' => Select2::SMALL,
+									'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+									'pluginOptions' => ['allowClear' => true],
                                 ])->label('Project') ?>
                             </div>
 
                             <div class="col-md-2">
-                                <?= $form->field($model, 'callDepId', [
-                                        'options' => ['class' => 'form-group']
-                                ])->dropDownList(\common\models\Department::getList(), [
-                                        'prompt' => 'All'
-                                ])->label('Department') ?>
+								<?= $form->field($model, 'dep_ids', [
+									'options' => ['class' => 'form-group']
+								])->widget(Select2::class, [
+									'data' => Department::getList(),
+									'size' => Select2::SMALL,
+									'options' => ['placeholder' => 'Select Department', 'multiple' => true],
+									'pluginOptions' => ['allowClear' => true],
+								])->label('Department') ?>
                             </div>
 
                             <div class="col-md-2">
@@ -71,11 +81,14 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
-                                <?= $form->field($model, 'userGroupId', [
-                                        'options' => ['class' => 'form-group']
-                                ])->dropDownList(\common\models\UserGroup::getList(), [
-                                        'prompt' => 'All'
-                                ])->label('User Groups') ?>
+								<?= $form->field($model, 'userGroupIds', [
+									'options' => ['class' => 'form-group']
+								])->widget(Select2::class, [
+									'data' => UserGroup::getList(),
+									'size' => Select2::SMALL,
+									'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
+									'pluginOptions' => ['allowClear' => true],
+								])->label('User Groups') ?>
                             </div>
 
                             <div class="col-md-2">
@@ -113,7 +126,7 @@ $this->title = 'Calls Stats';
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="d-flex justify-content-center">
-                                    <?= \yii\helpers\Html::button('Search', ['type' => 'submit', 'class' => 'btn btn-default', 'id' => 'call-chart-from-btn']) ?>
+                                    <?= \yii\helpers\Html::button('<i class="fa fa-search"></i> Search', ['type' => 'submit', 'class' => 'btn btn-default', 'id' => 'call-chart-from-btn']) ?>
                                 </div>
                             </div>
                         </div>
@@ -125,7 +138,7 @@ $this->title = 'Calls Stats';
                             ],
                         ]) ?>
 
-                        <?= \yii\helpers\Html::dropDownList($model->formName().'[chartTotalCallsVaxis]', $model->chartTotalCallsVaxis, $model::getChartTotalCallsVaxisText(), [
+                        <?= \yii\helpers\Html::dropDownList($model->formName().'[chartTotalCallsVaxis]', $model->chartTotalCallsVaxis, $model::getChartTotalCallsVaxisTextList(), [
                             'style' => 'display: none',
                             'label' => false
                         ]) ?>
@@ -137,7 +150,7 @@ $this->title = 'Calls Stats';
 </div>
 
 <div class="card card-default">
-    <div class="card-header"><i class="fa fa-bar-chart"></i> Total Calls Chart</div>
+    <div class="card-header"><i class="fa fa-bar-chart"></i> All Calls Chart</div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-12 col-sm-6 col-xs-12">
@@ -156,8 +169,8 @@ $url = \yii\helpers\Url::to(['/stats/ajax-get-total-chart']);
 $js = <<<JS
 $(document).ready( function () {
     let formLoaded = $('#call-chart-search-form').serializeArray();
-    
-    let spinner = '<i class="fa fa-spinner fa-spin"></i>';
+    let submitBtnHtml = $('#call-chart-from-btn').html();
+    let spinner = '<i class="fa fa-spinner fa-spin"></i> Loading...';
     
     $.ajax({
         url: '$url',
@@ -165,16 +178,16 @@ $(document).ready( function () {
         dataType: 'json',
         data: formLoaded,
         beforeSend: function () {
-              
+          $('#call-chart-from-btn').html(spinner).prop('disabled', true).toggleClass('disabled');
         },
         success: function (data) {
             if (!data.error) {
                 $('#total-calls-chart').html(data.html);
             } else {
                new PNotify({
-                    title: 'Error',
+                    title: 'Attention',
                     text: data.message,
-                    type: 'error'                
+                    type: 'warning'                
                }); 
             }
         },
@@ -184,6 +197,9 @@ $(document).ready( function () {
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                
             });
+        },
+        complete: function () {
+            $('#call-chart-from-btn').html(submitBtnHtml).removeAttr('disabled').toggleClass('disabled');
         }
     });
     
@@ -207,8 +223,6 @@ $(document).ready( function () {
         formData.delete('_csrf-frontend');
         var params = new URLSearchParams(formData).toString();
         
-        var submitBtnHtml = $('#call-chart-from-btn').html();
-        
         $.ajax({
             url: '$url',
             type: 'post',
@@ -216,7 +230,7 @@ $(document).ready( function () {
             dataType: 'json',
             beforeSend: function () {
                 $('#total-calls-chart').html(loading);
-                $('#call-chart-from-btn').html(spinner);
+                $('#call-chart-from-btn').html(spinner).prop('disabled', true).toggleClass('disabled');
             },
             success: function (data) {
                 if (!data.error) {
@@ -225,9 +239,9 @@ $(document).ready( function () {
                     window.history.replaceState({}, '', location.pathname+'?'+params);
                 } else {
                    new PNotify({
-                        title: 'Error',
+                        title: 'Attention',
                         text: data.message,
-                        type: 'error'                
+                        type: 'warning'                
                    }); 
                 }
             },
@@ -239,7 +253,7 @@ $(document).ready( function () {
                 });
             },
             complete: function () {
-                $('#call-chart-from-btn').html(submitBtnHtml);
+                $('#call-chart-from-btn').html(submitBtnHtml).removeAttr('disabled').toggleClass('disabled');
                 $('#loading').remove();
             }
         })
