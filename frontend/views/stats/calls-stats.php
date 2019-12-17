@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Department;
+use common\models\Employee;
 use common\models\Project;
 use common\models\search\CallGraphsSearch;
 use common\models\UserGroup;
@@ -51,6 +52,19 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
+								<?= $form->field($model, 'timeZone')->widget(\kartik\select2\Select2::class, [
+									'data' => Employee::timezoneList(true),
+									'size' => \kartik\select2\Select2::SMALL,
+									'options' => [
+										'placeholder' => 'Select TimeZone',
+										'multiple' => false,
+										'value' => Yii::$app->user->identity->timezone
+									],
+									'pluginOptions' => ['allowClear' => true],
+								]) ?>
+                            </div>
+
+                            <div class="col-md-2">
                                 <?= $form->field($model, 'projectIds', [
                                         'options' => ['class' => 'form-group']
                                 ])->widget(Select2::class, [
@@ -70,6 +84,12 @@ $this->title = 'Calls Stats';
 									'options' => ['placeholder' => 'Select Department', 'multiple' => true],
 									'pluginOptions' => ['allowClear' => true],
 								])->label('Department') ?>
+                            </div>
+
+                            <div class="col-md-2">
+								<?= $form->field($model, 'callGraphGroupBy', [
+									'options' => ['class' => 'form-group']
+								])->dropDownList($model::getDateFormatTextList())->label('Group By') ?>
                             </div>
 
                             <div class="col-md-2">
@@ -113,12 +133,6 @@ $this->title = 'Calls Stats';
 								<?= $form->field($model, 'recordingDurationTo', [
 									'options' => ['class' => 'form-group']
 								])->input('number', ['class' => 'form-control'])->label('Recording Duration Seconds To') ?>
-                            </div>
-
-                            <div class="col-md-2">
-								<?= $form->field($model, 'callGraphGroupBy', [
-									'options' => ['class' => 'form-group']
-								])->dropDownList($model::getDateFormatTextList())->label('Group By') ?>
                             </div>
 
                         </div>
@@ -220,7 +234,7 @@ $(document).ready( function () {
             formData.append(name, val);
         });
         
-        formData.delete('_csrf-frontend');
+       formData.delete('_csrf-frontend');
         var params = new URLSearchParams(formData).toString();
         
         $.ajax({

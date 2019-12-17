@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\Call;
 use common\models\CallQuery;
+use common\models\Employee;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
 use yii\db\ActiveRecord;
@@ -28,6 +29,7 @@ use DateTime;
  * @property array $projectIds
  * @property array $dep_ids
  * @property array $userGroupIds
+ * @property string $timeZone
  */
 class CallGraphsSearch extends CallSearch
 {
@@ -45,6 +47,7 @@ class CallGraphsSearch extends CallSearch
 	public $projectIds = [];
 	public $dep_ids = [];
 	public $userGroupIds = [];
+	public $timeZone;
 
 	private const DAYS_DIFF_MAX_RANGE = 7;
 	private const MONTH_DIFF_MAX_RANGE = 2;
@@ -146,6 +149,8 @@ class CallGraphsSearch extends CallSearch
 			['betweenHoursTo', 'compare', 'compareAttribute' => 'betweenHoursFrom', 'operator' => '>='],
 			[['betweenHoursFrom', 'betweenHoursTo'], 'number', 'min' => 0, 'max' => 24],
 			['callGraphGroupBy', 'in', 'range' => self::DATE_FORMAT_LIST_ID],
+			['timeZone', 'string'],
+			['timeZone', 'required'],
 		];
 	}
 
@@ -268,8 +273,18 @@ class CallGraphsSearch extends CallSearch
 		$query->from(['tbl' => $incomingComplete->union($incomingNotAnswered)
 			->union($outgoingComplete)
 			->union($outgoingNotAnswered)
-		])->groupBy(['created_formatted'])
-			->orderBy(['created_formatted' => SORT_ASC]);
+		])->groupBy(['created_formatted']);
+
+		if ($this->callGraphGroupBy == self::DATE_FORMAT_HOURS_DAYS) {
+			$order = [
+				'created_formatted' => SORT_ASC,
+			];
+		} else {
+			$order = [
+				'created' => SORT_ASC,
+			];
+		}
+		$query->orderBy($order);
 
 //		print_r($query->createCommand()->rawSql);die;
 
@@ -300,7 +315,7 @@ class CallGraphsSearch extends CallSearch
 			$query->andWhere(['<=', 'c_recording_duration', $this->recordingDurationTo]);
 		}
 
-		return $this->applySearchQuery($query)->groupBy('created');
+		return $this->applySearchQuery($query);
 	}
 
 	/**
@@ -327,7 +342,7 @@ class CallGraphsSearch extends CallSearch
 			$query->andWhere(['<=', 'c_recording_duration', $this->recordingDurationTo]);
 		}
 
-		return $this->applySearchQuery($query)->groupBy('created');
+		return $this->applySearchQuery($query);
 	}
 
 	/**
@@ -354,7 +369,7 @@ class CallGraphsSearch extends CallSearch
 			$query->andWhere(['<=', 'c_recording_duration', $this->recordingDurationTo]);
 		}
 
-		return $this->applySearchQuery($query)->groupBy('created');
+		return $this->applySearchQuery($query);
 	}
 
 	/**
@@ -373,7 +388,7 @@ class CallGraphsSearch extends CallSearch
 			->andWhere(['c_status_id' => [self::STATUS_BUSY, self::STATUS_NO_ANSWER]])
 			->andWhere(['not', ['c_parent_id' => null]]);
 
-		return $this->applySearchQuery($query)->groupBy('created');
+		return $this->applySearchQuery($query);
 	}
 
 	/**
@@ -382,9 +397,11 @@ class CallGraphsSearch extends CallSearch
 	 */
 	private function applySearchQuery(CallQuery $query): CallQuery
 	{
-		$query->addSelect(["date_format(c_created_dt, '%Y-%m-%d %H:00:00') as created"]);
+		$timeZone = Employee::getUtcOffsetDst($this->timeZone, date('Y-m-d'));
 
-		$query->andWhere(['between', 'c_created_dt', $this->createTimeStart, $this->createTimeEnd]);
+		$query->addSelect(["date_format(convert_tz(c_created_dt, '+00:00', '$timeZone'), '%Y-%m-%d %H:00:00') as created"]);
+
+		$query->andWhere(['between', "convert_tz(c_created_dt, '+00:00', '".$timeZone."')", $this->createTimeStart, $this->createTimeEnd]);
 
 		if ($this->projectIds) {
 			$query->andWhere(['c_project_id' => $this->projectIds]);
@@ -410,6 +427,8 @@ class CallGraphsSearch extends CallSearch
 		if ($this->betweenHoursTo) {
 			$query->andWhere(['<=', 'hour(c_created_dt)', $this->betweenHoursTo]);
 		}
+
+		$query->groupBy('created')->orderBy('created');
 
 		return $query;
 	}

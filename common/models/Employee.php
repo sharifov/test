@@ -1550,7 +1550,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $sign = ($tz['offset'] > 0) ? '+' : '-';
             $offset = gmdate('H:i', abs($tz['offset']));
             $timezoneList[$tz['identifier']] = ($formatLong)
-                ? '(UTC ' . $sign . $offset . ') ' . $tz['identifier']
+                ? '(' . $sign . $offset . ') ' . $tz['identifier']
                 : $sign . $offset;
         }
 

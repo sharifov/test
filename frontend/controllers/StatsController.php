@@ -187,23 +187,63 @@ class StatsController extends FController
 			]], $data);
 
 			$data = array_map( static function ($arr) {
-				return [$arr['created_formatted'],(int)$arr['in_rec_duration'], (int)$arr['out_rec_duration'], (int)$arr['total_rec_duration']];
+				return [
+					$arr['created_formatted'],
+					(int)$arr['in_rec_duration'],
+					'Incoming Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['in_rec_duration']),
+					(int)$arr['out_rec_duration'],
+					'Outgoing Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['out_rec_duration']),
+					(int)$arr['total_rec_duration'],
+					'Total Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['total_rec_duration']),
+				];
 			}, $callData);
 			$totalCallsRecDurationData = ArrayHelper::merge([[
 				'Date',
 				'Incoming Call Duration',
+				[
+					'type' => 'string',
+					'role' => 'tooltip'
+				],
 				'Outgoing Call Duration',
+				[
+					'type' => 'string',
+					'role' => 'tooltip'
+				],
 				'Total Call Duration',
+				[
+					'type' => 'string',
+					'role' => 'tooltip'
+				],
 			]], $data);
 
 			$data = array_map( static function ($arr) {
-				return [$arr['created_formatted'],(int)$arr['incoming_duration_avg'], (int)$arr['outgoing_duration_avg'], (int)$arr['total_rec_duration_avg']];
+				return [
+					$arr['created_formatted'],
+					(int)$arr['incoming_duration_avg'],
+					'Incoming Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['incoming_duration_avg']),
+					(int)$arr['outgoing_duration_avg'],
+					'Outgoing Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['outgoing_duration_avg']),
+					(int)$arr['total_rec_duration_avg'],
+					'Total Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['total_rec_duration_avg']),
+				];
 			}, $callData);
 			$totalCallsRecDurationDataAVG = ArrayHelper::merge([[
 				'Date',
 				'Incoming Call Duration AVG',
+				[
+					'type' => 'string',
+					'role' => 'tooltip'
+				],
 				'Outgoing Call Duration AVG',
+				[
+					'type' => 'string',
+					'role' => 'tooltip'
+				],
 				'Total Call Duration AVG',
+				[
+					'type' => 'string',
+					'role' => 'tooltip'
+				],
 			]], $data);
 
 			$html = $this->renderAjax('partial/_total_calls_chart', [
