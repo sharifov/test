@@ -194,6 +194,7 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
+        	'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category' => $this->cs_category,
