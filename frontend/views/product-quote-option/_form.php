@@ -12,32 +12,34 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'pqo_product_quote_id')->textInput() ?>
+    <div class="col-md-4">
+    <?= $form->field($model, 'pqo_product_quote_id')->input('number', ['min' => 0]) ?>
 
-    <?= $form->field($model, 'pqo_product_option_id')->textInput() ?>
+    <?= $form->field($model, 'pqo_product_option_id')->dropDownList(\common\models\ProductOption::getList(), ['prompt' => '---']) ?>
 
     <?= $form->field($model, 'pqo_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'pqo_description')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'pqo_description')->textarea(['rows' => 3]) ?>
 
-    <?= $form->field($model, 'pqo_status_id')->textInput() ?>
+    <?= $form->field($model, 'pqo_status_id')->dropDownList(\common\models\ProductQuoteOption::getStatusList(), ['prompt' => '---']) ?>
 
-    <?= $form->field($model, 'pqo_price')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'pqo_price')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 
-    <?= $form->field($model, 'pqo_client_price')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'pqo_client_price')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 
-    <?= $form->field($model, 'pqo_extra_markup')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'pqo_extra_markup')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 
-    <?= $form->field($model, 'pqo_created_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'pqo_updated_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'pqo_created_dt')->textInput() ?>
-
-    <?= $form->field($model, 'pqo_updated_dt')->textInput() ?>
+<!--    --><?//= $form->field($model, 'pqo_created_user_id')->textInput() ?>
+<!---->
+<!--    --><?//= $form->field($model, 'pqo_updated_user_id')->textInput() ?>
+<!---->
+<!--    --><?//= $form->field($model, 'pqo_created_dt')->textInput() ?>
+<!---->
+<!--    --><?//= $form->field($model, 'pqo_updated_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    </div>
     </div>
 
     <?php ActiveForm::end(); ?>

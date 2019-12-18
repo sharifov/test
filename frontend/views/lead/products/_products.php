@@ -207,6 +207,100 @@ $js = <<<JS
         });
       // return false;
     });
+    
+    
+    $('body').off('click', '.btn-add-product-quote-option').on('click', '.btn-add-product-quote-option', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Add quote option');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+    
+    $('body').off('click', '.btn-update-product-quote-option').on('click', '.btn-update-product-quote-option', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Update quote option');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+    
+    $('body').off('click', '.btn-delete-product-quote-option').on('click', '.btn-delete-product-quote-option', function(e) {
+        
+        if(!confirm('Are you sure you want to delete this option?')) {
+            return '';
+        }
+        
+      e.preventDefault();
+      $('#preloader').removeClass('d-none');
+      let optionId = $(this).data('pqo-id');
+      let productId = $(this).data('product-id');
+      let url = $(this).data('url');
+     
+      /*alert(productId);
+      
+      let btnSubmit = $(this).find(':submit');
+      btnSubmit.prop('disabled', true);
+      btnSubmit.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');*/
+
+     // $('#preloader').removeClass('d-none');
+
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': optionId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  alert(data.error);
+                  new PNotify({
+                        title: 'Error: delete quote option',
+                        type: 'error',
+                        text: data.error,
+                        hide: true
+                    });
+              } else {
+                  
+                  new PNotify({
+                        title: 'The option was successfully removed',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                  });
+                  
+                  $.pjax.reload({
+                      container: '#pjax-product-quote-list-' + productId
+                  });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+      // return false;
+    });
+    
+        
 
 
     $("#product-accordion").on("pjax:start", function () {            

@@ -6,6 +6,7 @@ use common\models\query\ProductQuoteQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 
@@ -14,24 +15,24 @@ use yii\helpers\Html;
  *
  * @property int $pq_id
  * @property string $pq_gid
- * @property string $pq_name
+ * @property string|null $pq_name
  * @property int $pq_product_id
- * @property int $pq_order_id
- * @property string $pq_description
- * @property int $pq_status_id
- * @property string $pq_price
- * @property string $pq_origin_price
- * @property string $pq_client_price
- * @property string $pq_service_fee_sum
- * @property string $pq_origin_currency
- * @property string $pq_client_currency
- * @property string $pq_origin_currency_rate
- * @property string $pq_client_currency_rate
- * @property int $pq_owner_user_id
- * @property int $pq_created_user_id
- * @property int $pq_updated_user_id
- * @property string $pq_created_dt
- * @property string $pq_updated_dt
+ * @property int|null $pq_order_id
+ * @property string|null $pq_description
+ * @property int|null $pq_status_id
+ * @property float|null $pq_price
+ * @property float|null $pq_origin_price
+ * @property float|null $pq_client_price
+ * @property float|null $pq_service_fee_sum
+ * @property string|null $pq_origin_currency
+ * @property string|null $pq_client_currency
+ * @property float|null $pq_origin_currency_rate
+ * @property float|null $pq_client_currency_rate
+ * @property int|null $pq_owner_user_id
+ * @property int|null $pq_created_user_id
+ * @property int|null $pq_updated_user_id
+ * @property string|null $pq_created_dt
+ * @property string|null $pq_updated_dt
  *
  * @property OfferProduct[] $offerProducts
  * @property Offer[] $opOffers
@@ -44,6 +45,7 @@ use yii\helpers\Html;
  * @property Employee $pqOwnerUser
  * @property Product $pqProduct
  * @property Employee $pqUpdatedUser
+ * @property ProductQuoteOption[] $productQuoteOptions
  */
 class ProductQuote extends \yii\db\ActiveRecord
 {
@@ -158,93 +160,102 @@ class ProductQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOfferProducts()
+    public function getOfferProducts(): ActiveQuery
     {
         return $this->hasMany(OfferProduct::class, ['op_product_quote_id' => 'pq_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
-    public function getOpOffers()
+    public function getOpOffers(): ActiveQuery
     {
         return $this->hasMany(Offer::class, ['of_id' => 'op_offer_id'])->viaTable('offer_product', ['op_product_quote_id' => 'pq_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrderProducts()
+    public function getOrderProducts(): ActiveQuery
     {
         return $this->hasMany(OrderProduct::class, ['orp_product_quote_id' => 'pq_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
-    public function getOrpOrders()
+    public function getOrpOrders(): ActiveQuery
     {
         return $this->hasMany(Order::class, ['or_id' => 'orp_order_id'])->viaTable('order_product', ['orp_product_quote_id' => 'pq_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPqClientCurrency()
+    public function getPqClientCurrency(): ActiveQuery
     {
         return $this->hasOne(Currency::class, ['cur_code' => 'pq_client_currency']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPqCreatedUser()
+    public function getPqCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'pq_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPqOrder()
+    public function getPqOrder(): ActiveQuery
     {
         return $this->hasOne(Order::class, ['or_id' => 'pq_order_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPqOriginCurrency()
+    public function getPqOriginCurrency(): ActiveQuery
     {
         return $this->hasOne(Currency::class, ['cur_code' => 'pq_origin_currency']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPqOwnerUser()
+    public function getPqOwnerUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'pq_owner_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPqProduct()
+    public function getPqProduct(): ActiveQuery
     {
         return $this->hasOne(Product::class, ['pr_id' => 'pq_product_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPqUpdatedUser()
+    public function getPqUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'pq_updated_user_id']);
+    }
+
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProductQuoteOptions(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id']);
     }
 
     /**

@@ -72,6 +72,14 @@ use yii\helpers\Html;
 <!--                            </div>-->
 <!--                        </li>-->
 <!--                    </ul>-->
+
+                    <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                        'class' => 'dropdown-item text-success btn-add-product-quote-option',
+                        //'data-product-quote-id' => $model->hq_product_quote_id,
+                        'data-url' => \yii\helpers\Url::to(['product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
+                        //'data-product-id' => $model->hqProductQuote->pq_product_id,
+                    ]) ?>
+
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                         'class' => 'dropdown-item text-danger btn-delete-product-quote',
@@ -92,17 +100,19 @@ use yii\helpers\Html;
             'leadForm' => $leadForm,
             'is_manager' => $is_manager,
         ])*/ ?>
+        <i class="fa fa-user"></i> <?=$model->hqProductQuote->pqCreatedUser ? Html::encode($model->hqProductQuote->pqCreatedUser->username) : '-'?>,
+        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->hqProductQuote->pq_created_dt)) ?>,
         <i title="code: <?=\yii\helpers\Html::encode($model->hq_hash_key)?>">Hash: <?=\yii\helpers\Html::encode($model->hq_hash_key)?></i>
 
         <?php if ($model->hotelQuoteRooms):
-            $totalAmount = 0;
+            $totalAmountRoom = 0;
             $adlTotalCount = 0;
             $chdTotalCount = 0;
             ?>
             <table class="table table-striped table-bordered">
                 <?php foreach ($model->hotelQuoteRooms as $room):
 
-                    $totalAmount += (float) $room->hqr_amount;
+                    $totalAmountRoom += (float) $room->hqr_amount;
                     $adlTotalCount += $room->hqr_adults;
                     $chdTotalCount += $room->hqr_children;
                     ?>
@@ -150,25 +160,107 @@ use yii\helpers\Html;
                 </tr>
                 <?php endforeach; ?>
                 <tr>
-                    <td colspan="3" class="text-right">Total: </td>
+                    <td colspan="3" class="text-right">Room Total: </td>
                     <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> '. $adlTotalCount : '-'?></td>
                     <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> '. $chdTotalCount : '-'?></td>
                     <td class="text-right"></td>
 
                     <?php
                         $originPrice = round((float) $model->hqProductQuote->pq_origin_price, 2);
-                        $totalAmount = round($totalAmount, 2);
+                        $totalAmountRoom = round($totalAmountRoom, 2);
                     ?>
 
-                    <td class="text-right <?=( $totalAmount !== $originPrice) ? 'danger': ''?>">
-                        <b title="<?=$totalAmount?> & <?=$originPrice?>"><?=number_format($originPrice, 2)?> USD</b>
+                    <td class="text-right <?=( $totalAmountRoom !== $originPrice) ? 'danger': ''?>">
+                        <b title="<?=$totalAmountRoom?> & <?=$originPrice?>"><?=number_format($originPrice, 2)?> USD</b>
                     </td>
                 </tr>
             </table>
         <?php endif; ?>
 
-        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->hqProductQuote->pq_created_dt)) ?>
-        <i class="fa fa-user"></i> <?=$model->hqProductQuote->pqCreatedUser ? Html::encode($model->hqProductQuote->pqCreatedUser->username) : '-'?>
+
+        <?php
+            $totalAmountOption = 0;
+            $totalClientAmountOption = 0;
+            $totalExtraMarkupOption = 0;
+        ?>
+
+
+        <?php if ($model->hqProductQuote->productQuoteOptions): ?>
+            <h2>Options</h2>
+            <table class="table table-striped table-bordered">
+                <tr>
+                    <th>ID</th>
+                    <th>Option</th>
+                    <th>Name / Description</th>
+                    <th>Status</th>
+                    <th style="width: 120px">Extra markup</th>
+                    <th style="width: 120px">Price</th>
+                    <th style="width: 52px"></th>
+
+                </tr>
+                <?php foreach ($model->hqProductQuote->productQuoteOptions as $quoteOption):
+                    $totalAmountOption += (float) $quoteOption->pqo_price;
+                    $totalClientAmountOption += (float) $quoteOption->pqo_client_price;
+                    $totalExtraMarkupOption += (float) $quoteOption->pqo_extra_markup;
+                    ?>
+                <tr>
+                    <td style="width: 60px" title="<?=Html::encode($quoteOption->pqo_id)?>"><?=Html::encode($quoteOption->pqo_id)?></td>
+                    <td style="width: 120px"><?=$quoteOption->pqoProductOption ? Html::encode($quoteOption->pqoProductOption->po_name) : '' ?></td>
+                    <td>
+                        <b><?=Html::encode($quoteOption->pqo_name)?></b>
+                        <?=$quoteOption->pqo_description ? '<br>'. Html::encode($quoteOption->pqo_description) . '' : ''?>
+                    </td>
+                    <td class="text-center" style="width: 120px"><?=$quoteOption->statusLabel?></td>
+                    <td class="text-right" title="Extra Markup"><?=number_format($quoteOption->pqo_extra_markup, 2)?> USD</td>
+                    <td class="text-right"><?=number_format($quoteOption->pqo_price, 2)?> USD</td>
+<!--                    <td class="text-right">--><?//=number_format($quoteOption->pqo_client_price, 2)?><!-- --><?//=Html::encode($model->hqProductQuote->pq_client_currency)?><!--</td>-->
+                    <td>
+                        <?php
+                        echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i>', null, [
+                            'class' => 'btn-update-product-quote-option',
+                            'data-url' => \yii\helpers\Url::to(['/product-quote-option/update-ajax', 'id' => $quoteOption->pqo_id])
+                        ]);
+                        ?>
+
+                        <?php
+                        echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
+                            'data-pqo-id' => $quoteOption->pqo_id,
+                            'data-product-id' => $model->hqProductQuote->pq_product_id,
+                            'class' => 'btn-delete-product-quote-option',
+                            'data-url' => \yii\helpers\Url::to(['/product-quote-option/delete-ajax'])
+                        ]);
+                        ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                <tr>
+                    <th colspan="4" class="text-right">Option Total: </th>
+                    <?php
+                        $totalAmountOption = round($totalAmountOption, 2);
+                        $totalClientAmountOption = round($totalClientAmountOption, 2);
+                        $totalExtraMarkupOption = round($totalExtraMarkupOption, 2);
+                    ?>
+
+                    <th class="text-right" title="Extra Markup">
+                        <?=number_format($totalExtraMarkupOption, 2)?> USD
+                    </th>
+                    <th class="text-right">
+                        <?=number_format($totalAmountOption, 2)?> USD
+                    </th>
+<!--                    <td class="text-right">-->
+<!--                        <b>--><?//=number_format($totalClientAmount, 2)?><!-- --><?//=Html::encode($model->hqProductQuote->pq_client_currency)?><!--</b>-->
+<!--                    </td>-->
+                    <th></th>
+                </tr>
+            </table>
+        <?php endif; ?>
+        <hr>
+        <?php
+            $totalAmount = round($totalAmountRoom + $totalAmountOption + $totalExtraMarkupOption, 2);
+        ?>
+        <div class="text-right"><h4>Total: <?=number_format($totalAmount, 2)?> USD</h4></div>
+
+
 
     </div>
 </div>
