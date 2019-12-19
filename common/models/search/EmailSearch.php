@@ -61,6 +61,21 @@ class EmailSearch extends Email
     {
         $query = self::find()->with('eCreatedUser', 'eProject', 'eTemplateType');
 
+        $query->addSelect([
+        	'e_id',
+			'e_lead_id',
+			'e_project_id',
+			'e_email_from',
+			'e_email_to',
+			'e_type_id',
+			'e_template_type_id',
+			'e_language_id',
+			'e_communication_id',
+			'e_status_id',
+			'e_created_user_id',
+			'e_created_dt'
+		]);
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -151,7 +166,9 @@ class EmailSearch extends Email
 			)
 		]);
 
-        return $dataProvider;
+		$dataProvider->totalCount = $query->count('distinct e_id');
+
+		return $dataProvider;
     }
 
     /**
