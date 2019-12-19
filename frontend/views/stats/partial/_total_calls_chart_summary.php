@@ -31,10 +31,15 @@ $totalOutgoingRecDurationAvg = $totalOutgoingRecDuration / $totalRows;
             <tbody>
                 <tr>
                     <td></td>
-                    <td>Number of Calls</td>
-                    <td>Number of Calls AVG</td>
-                    <td>Call Duration</td>
-                    <td>Call Duration AVG</td>
+                    <td colspan="2" align="center" width="50%">Number Of Calls</td>
+                    <td colspan="2" align="center" width="50%">Call Duration</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Total</td>
+                    <td>Average</td>
+                    <td>Total</td>
+                    <td>Average</td>
                 </tr>
                 <tr>
                     <td>Incoming</td>

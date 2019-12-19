@@ -1,19 +1,16 @@
 <?php
 
-use common\models\search\CallGraphsSearch;
+use sales\entities\call\CallGraphsSearch;
+use sales\viewmodel\call\ViewModelTotalCallGraph;
 
 /**
- * @var $totalCallsDbData array
- * @var $totalCallsGraphData string
- * @var $totalCallsGraphDataAvg string
- * @var $totalCallsRecDurationData string
- * @var $totalCallsRecDurationDataAVG string
  * @var $model CallGraphsSearch
+ * @var $viewModel ViewModelTotalCallGraph
  */
 
 ?>
 
-<?php if ($totalCallsDbData): ?>
+<?php if ($viewModel->callData): ?>
 <div id="myChart"></div>
 
 
@@ -40,17 +37,17 @@ use common\models\search\CallGraphsSearch;
 </div>
 
 <?= $this->render('_total_calls_chart_summary', [
-	'totalCallsDbData' => $totalCallsDbData,
+	'totalCallsDbData' => $viewModel->callData,
 ]) ?>
 
 <script type="text/javascript">
     $(document).ready( function () {
 
         var graphData;
-        var totalCallsRecDurationData = <?= $totalCallsRecDurationData ?>;
-        var totalCallsRecDurationDataAVG = <?= $totalCallsRecDurationDataAVG ?>;
-        var totalCallsData = <?= $totalCallsGraphData ?>;
-        var totalCallsDataAvg = <?= $totalCallsGraphDataAvg ?>;
+        var totalCallsRecDurationData = <?= $viewModel->totalCallsRecDurationData ?>;
+        var totalCallsRecDurationDataAVG = <?= $viewModel->totalCallsRecDurationDataAVG ?>;
+        var totalCallsData = <?= $viewModel->totalCallsGraphData ?>;
+        var totalCallsDataAvg = <?= $viewModel->totalCallsGraphDataAvg ?>;
 
         var selectedMeasure = +$('.chartTotalCallsVaxis').val();
         var measuresText = <?= json_encode(CallGraphsSearch::getChartTotalCallsVaxisTextList()) ?>;
@@ -74,7 +71,6 @@ use common\models\search\CallGraphsSearch;
 
             var options = {
                 title: measuresText[selectedMeasure]+': ' + timeRange,
-                theme: 'material',
                 chartArea:{width:'95%', right: 10},
                 textStyle: {
                     color: '#596b7d'
@@ -109,7 +105,8 @@ use common\models\search\CallGraphsSearch;
                     format: 'short',
                     title: 'Calls',
                     titleColor: '#596b7d',
-                }
+                },
+                theme: 'material',
             };
 
             // let newGraphData = [];
@@ -117,15 +114,33 @@ use common\models\search\CallGraphsSearch;
             var view = new google.visualization.DataView(data);
             var arr = [0];
             var c = [];
-            $('.totalChartColumns:checked').each( function(i, elem) {
-                arr.push((+$(elem).val()));
-                c.push(colors[+$(elem).val()-1]);
-            });
-            view.setColumns(arr);
-            options.colors = c;
 
+            var indexes = {
+                1: [1,2],
+                2: [3,4],
+                3: [5,6]
+            };
+
+            $('.totalChartColumns:checked').each( function(i, elem) {
+                if (
+                    selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
+                    || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                ) {
+                    indexes[+$(elem).val()].forEach( function (e) {
+                        arr.push(e);
+                    });
+                    c.push(colors[+$(elem).val()-1]);
+                } else {
+                    arr.push((+$(elem).val()));
+                    c.push(colors[+$(elem).val()-1]);
+                }
+            });
             totalCallsChart.draw(data, options);
-            totalCallsChart.draw(view, options);
+            setTimeout(function () {
+                options.colors = c;
+                view.setColumns(arr);
+                totalCallsChart.draw(view, options);
+            }, 1);
             $(window).resize(function(){
                 totalCallsChart.draw(data, options);
             });
@@ -151,9 +166,20 @@ use common\models\search\CallGraphsSearch;
                 let view = new google.visualization.DataView(data);
                 let arr = [0];
                 let c = [];
+                var selectedMeasure = +$('.chartTotalCallsVaxis').val();
                 $('.totalChartColumns:checked').each( function(i, elem) {
-                    arr.push((+$(elem).val()));
-                    c.push(colors[+$(elem).val()-1]);
+                    if (
+                        selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
+                        || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                    ) {
+                        indexes[+$(elem).val()].forEach( function (e) {
+                            arr.push(e);
+                        });
+                        c.push(colors[+$(elem).val()-1]);
+                    } else {
+                        arr.push((+$(elem).val()));
+                        c.push(colors[+$(elem).val()-1]);
+                    }
                 });
                 options.colors = c;
                 options.title = measuresText[val]+': ' + timeRange;
@@ -170,15 +196,24 @@ use common\models\search\CallGraphsSearch;
                 var view = new google.visualization.DataView(data);
                 var arr = [0];
                 let c = [];
+                var selectedMeasure = +$('.chartTotalCallsVaxis').val();
                 $('.totalChartColumns').each( function(i, elem) {
                     if ($(elem).prop('checked')) {
-                        arr.push(+$(elem).val());
-                        c.push(colors[+$(elem).val()-1]);
+                        if (
+                            selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
+                            || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                        ) {
+                            indexes[+$(elem).val()].forEach( function (e) {
+                                arr.push(e);
+                            });
+                            c.push(colors[+$(elem).val()-1]);
+                        } else {
+                            arr.push((+$(elem).val()));
+                            c.push(colors[+$(elem).val()-1]);
+                        }
                     }
 
-                    if (arr.length > 1) {
-                        $('input[name="'+$(elem).attr('data-name')+'"][value="'+$(elem).val()+'"]').prop('checked', $(elem).prop('checked'));
-                    }
+                    $('input[name="'+$(elem).attr('data-name')+'"][value="'+$(elem).val()+'"]').prop('checked', $(elem).prop('checked'));
                 });
 
                 if (arr.length < 2) {

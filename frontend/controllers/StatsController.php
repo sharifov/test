@@ -3,27 +3,16 @@
 namespace frontend\controllers;
 
 use common\models\ApiLog;
-use common\models\Call;
 use common\models\Employee;
-use common\models\Lead;
-use common\models\search\CallGraphsSearch;
+use sales\entities\call\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadSearch;
-use common\models\search\LeadTaskSearch;
 use common\models\Setting;
 use common\models\Sms;
 use common\models\Email;
-use common\models\UserParams;
+use sales\viewModel\call\ViewModelTotalCallGraph;
 use Yii;
-use yii\data\ActiveDataProvider;
-use yii\db\Expression;
-use yii\helpers\ArrayHelper;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use common\models\LoginForm;
-use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
 
 /**
  * Stats controller
@@ -166,52 +155,8 @@ class StatsController extends FController
 
 			$callData = $callSearch->getTotalCalls();
 
-			$data = array_map( static function ($arr) {
-				return [$arr['created_formatted'],(int)$arr['incoming'], (int)$arr['outgoing'], (int)$arr['total_calls']];
-			}, $callData);
-			$totalCallsGraphData = ArrayHelper::merge([[
-				'Date',
-				'Incoming',
-				'Outgoing',
-				'Total',
-			]], $data);
-
-			$data = array_map( static function ($arr) {
-				return [$arr['created_formatted'],(int)$arr['incoming_avg'], (int)$arr['outgoing_avg'], (int)$arr['total_calls_avg']];
-			}, $callData);
-			$totalCallsGraphDataAvg = ArrayHelper::merge([[
-				'Date',
-				'Incoming Avg',
-				'Outgoing Avg',
-				'Total Avg',
-			]], $data);
-
-			$data = array_map( static function ($arr) {
-				return [$arr['created_formatted'],(int)$arr['in_rec_duration'], (int)$arr['out_rec_duration'], (int)$arr['total_rec_duration']];
-			}, $callData);
-			$totalCallsRecDurationData = ArrayHelper::merge([[
-				'Date',
-				'Incoming Call Duration',
-				'Outgoing Call Duration',
-				'Total Call Duration',
-			]], $data);
-
-			$data = array_map( static function ($arr) {
-				return [$arr['created_formatted'],(int)$arr['incoming_duration_avg'], (int)$arr['outgoing_duration_avg'], (int)$arr['total_rec_duration_avg']];
-			}, $callData);
-			$totalCallsRecDurationDataAVG = ArrayHelper::merge([[
-				'Date',
-				'Incoming Call Duration AVG',
-				'Outgoing Call Duration AVG',
-				'Total Call Duration AVG',
-			]], $data);
-
 			$html = $this->renderAjax('partial/_total_calls_chart', [
-				'totalCallsGraphData' => json_encode($totalCallsGraphData),
-				'totalCallsGraphDataAvg' => json_encode($totalCallsGraphDataAvg),
-				'totalCallsRecDurationData' => json_encode($totalCallsRecDurationData),
-				'totalCallsRecDurationDataAVG' => json_encode($totalCallsRecDurationDataAVG),
-				'totalCallsDbData' => $callData,
+				'viewModel' => new ViewModelTotalCallGraph($callData),
 				'model' => $callSearch
 			]);
 		}
