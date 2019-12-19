@@ -1,19 +1,16 @@
 <?php
 
-use common\models\search\CallGraphsSearch;
+use sales\entities\call\CallGraphsSearch;
+use sales\viewmodel\call\ViewModelTotalCallGraph;
 
 /**
- * @var $totalCallsDbData array
- * @var $totalCallsGraphData string
- * @var $totalCallsGraphDataAvg string
- * @var $totalCallsRecDurationData string
- * @var $totalCallsRecDurationDataAVG string
  * @var $model CallGraphsSearch
+ * @var $viewModel ViewModelTotalCallGraph
  */
 
 ?>
 
-<?php if ($totalCallsDbData): ?>
+<?php if ($viewModel->callData): ?>
 <div id="myChart"></div>
 
 
@@ -40,17 +37,17 @@ use common\models\search\CallGraphsSearch;
 </div>
 
 <?= $this->render('_total_calls_chart_summary', [
-	'totalCallsDbData' => $totalCallsDbData,
+	'totalCallsDbData' => $viewModel->callData,
 ]) ?>
 
 <script type="text/javascript">
     $(document).ready( function () {
 
         var graphData;
-        var totalCallsRecDurationData = <?= $totalCallsRecDurationData ?>;
-        var totalCallsRecDurationDataAVG = <?= $totalCallsRecDurationDataAVG ?>;
-        var totalCallsData = <?= $totalCallsGraphData ?>;
-        var totalCallsDataAvg = <?= $totalCallsGraphDataAvg ?>;
+        var totalCallsRecDurationData = <?= $viewModel->totalCallsRecDurationData ?>;
+        var totalCallsRecDurationDataAVG = <?= $viewModel->totalCallsRecDurationDataAVG ?>;
+        var totalCallsData = <?= $viewModel->totalCallsGraphData ?>;
+        var totalCallsDataAvg = <?= $viewModel->totalCallsGraphDataAvg ?>;
 
         var selectedMeasure = +$('.chartTotalCallsVaxis').val();
         var measuresText = <?= json_encode(CallGraphsSearch::getChartTotalCallsVaxisTextList()) ?>;

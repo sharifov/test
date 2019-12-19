@@ -1,10 +1,11 @@
 <?php
 
-namespace common\models\search;
+namespace sales\entities\call;
 
 use common\models\Call;
 use common\models\CallQuery;
 use common\models\Employee;
+use common\models\search\CallSearch;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
 use yii\db\ActiveRecord;
@@ -151,6 +152,7 @@ class CallGraphsSearch extends CallSearch
 			['callGraphGroupBy', 'in', 'range' => self::DATE_FORMAT_LIST_ID],
 			['timeZone', 'string'],
 			['timeZone', 'required'],
+			['callGraphGroupBy', 'filter', 'filter' => 'intval']
 		];
 	}
 
@@ -275,7 +277,7 @@ class CallGraphsSearch extends CallSearch
 			->union($outgoingNotAnswered)
 		])->groupBy(['created_formatted']);
 
-		if ($this->callGraphGroupBy == self::DATE_FORMAT_HOURS_DAYS) {
+		if ($this->callGraphGroupBy === self::DATE_FORMAT_HOURS_DAYS) {
 			$order = [
 				'created_formatted' => SORT_ASC,
 			];

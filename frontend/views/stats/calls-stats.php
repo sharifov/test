@@ -3,7 +3,7 @@
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
-use common\models\search\CallGraphsSearch;
+use sales\entities\call\CallGraphsSearch;
 use common\models\UserGroup;
 use yii\bootstrap4\ActiveForm;
 use kartik\select2\Select2;
