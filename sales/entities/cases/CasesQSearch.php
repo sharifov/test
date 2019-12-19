@@ -98,7 +98,8 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cs_gid' => $this->cs_gid,
+			'cs_id' => $this->cs_id,
+			'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
@@ -146,7 +147,8 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cs_gid' => $this->cs_gid,
+			'cs_id' => $this->cs_id,
+			'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
@@ -248,7 +250,8 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cs_gid' => $this->cs_gid,
+			'cs_id' => $this->cs_id,
+			'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
@@ -383,7 +386,8 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cs_gid' => $this->cs_gid,
+			'cs_id' => $this->cs_id,
+			'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
