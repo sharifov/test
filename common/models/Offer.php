@@ -29,6 +29,10 @@ use yii\helpers\Html;
  * @property Employee $ofOwnerUser
  * @property Employee $ofUpdatedUser
  * @property OfferProduct[] $offerProducts
+ * @property string $statusLabel
+ * @property string $className
+ * @property string $statusName
+ * @property float $offerTotalCalcSum
  * @property ProductQuote[] $opProductQuotes
  */
 class Offer extends \yii\db\ActiveRecord
@@ -173,6 +177,7 @@ class Offer extends \yii\db\ActiveRecord
 
     /**
      * @return \yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
      */
     public function getOpProductQuotes()
     {
@@ -243,5 +248,23 @@ class Offer extends \yii\db\ActiveRecord
     {
         $count = self::find()->where(['of_lead_id' => $this->of_lead_id])->count();
         return 'Offer ' . ($count + 1);
+    }
+
+    /**
+     * @return float
+     */
+    public function getOfferTotalCalcSum(): float
+    {
+        $sum = 0;
+        $offerProducts = $this->offerProducts;
+        if ($offerProducts) {
+            foreach ($offerProducts as $offerProduct) {
+                if ($quote = $offerProduct->opProductQuote) {
+                    $sum += $quote->totalCalcSum + $quote->pq_service_fee_sum;
+                }
+            }
+            $sum = round($sum, 2);
+        }
+        return $sum;
     }
 }

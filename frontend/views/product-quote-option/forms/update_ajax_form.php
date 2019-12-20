@@ -1,11 +1,14 @@
 <?php
 
+use frontend\models\form\ProductQuoteOptionForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\ProductQuoteOption */
+/* @var $model ProductQuoteOptionForm */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $productTypeId int */
+
 
 $pjaxId = 'pjax-add-product-quote-option'; // . uniqid();
 ?>
@@ -28,7 +31,7 @@ $pjaxId = 'pjax-add-product-quote-option'; // . uniqid();
         <?= $form->errorSummary($model)?>
 
 
-        <?= $form->field($model, 'pqo_product_option_id')->dropDownList(\common\models\ProductOption::getList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'pqo_product_option_id')->dropDownList(\common\models\ProductOption::getList(true, $productTypeId), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'pqo_name')->textInput(['maxlength' => true]) ?>
 

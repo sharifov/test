@@ -45,6 +45,11 @@ use yii\helpers\Html;
  * @property Employee $pqOwnerUser
  * @property Product $pqProduct
  * @property Employee $pqUpdatedUser
+ * @property string $statusName
+ * @property string $statusLabel
+ * @property string $className
+ * @property float $optionAmountSum
+ * @property float $totalCalcSum
  * @property ProductQuoteOption[] $productQuoteOptions
  */
 class ProductQuote extends \yii\db\ActiveRecord
@@ -298,4 +303,30 @@ class ProductQuote extends \yii\db\ActiveRecord
     {
         return Html::tag('span', $this->getStatusName(), ['class' => 'badge badge-' . $this->getClassName()]);
     }
+
+    /**
+     * @return float
+     */
+    public function getOptionAmountSum(): float
+    {
+        $sum = 0;
+        $options = $this->productQuoteOptions;
+        if ($options) {
+            foreach ($options as $option) {
+                $sum += $option->pqo_price;
+            }
+            $sum = round($sum, 2);
+        }
+        return $sum;
+    }
+
+    /**
+     * @return float
+     */
+    public function getTotalCalcSum(): float
+    {
+        return round($this->optionAmountSum + $this->pq_price, 2);
+    }
+
+
 }

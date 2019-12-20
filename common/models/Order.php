@@ -6,6 +6,7 @@ use common\models\query\OrderQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 
@@ -20,10 +21,10 @@ use yii\helpers\Html;
  * @property string $or_description
  * @property int $or_status_id
  * @property int $or_pay_status_id
- * @property string $or_app_total
- * @property string $or_app_markup
- * @property string $or_agent_markup
- * @property string $or_client_total
+ * @property float $or_app_total
+ * @property float $or_app_markup
+ * @property float $or_agent_markup
+ * @property float $or_client_total
  * @property string $or_client_currency
  * @property string $or_client_currency_rate
  * @property int $or_owner_user_id
@@ -39,9 +40,16 @@ use yii\helpers\Html;
  * @property Employee $orUpdatedUser
  * @property OrderProduct[] $orderProducts
  * @property ProductQuote[] $orpProductQuotes
+ * @property float $orderTotalCalcSum
+ * @property string $statusName
+ * @property string $payStatusName
+ * @property string $statusLabel
+ * @property string $className
+ * @property string $payClassName
+ * @property string $payStatusLabel
  * @property ProductQuote[] $productQuotes
  */
-class Order extends \yii\db\ActiveRecord
+class Order extends ActiveRecord
 {
 
     public const STATUS_PENDING         = 1;
@@ -180,67 +188,67 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getInvoices()
+    public function getInvoices(): ActiveQuery
     {
         return $this->hasMany(Invoice::class, ['inv_order_id' => 'or_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrLead()
+    public function getOrLead(): ActiveQuery
     {
         return $this->hasOne(Lead::class, ['id' => 'or_lead_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrCreatedUser()
+    public function getOrCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrOwnerUser()
+    public function getOrOwnerUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_owner_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrUpdatedUser()
+    public function getOrUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_updated_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrderProducts()
+    public function getOrderProducts(): ActiveQuery
     {
         return $this->hasMany(OrderProduct::class, ['orp_order_id' => 'or_id']);
     }
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
-    public function getOrpProductQuotes()
+    public function getOrpProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])->viaTable('order_product', ['orp_order_id' => 'or_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getProductQuotes()
+    public function getProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id']);
     }
@@ -341,5 +349,23 @@ class Order extends \yii\db\ActiveRecord
     {
         $count = self::find()->where(['or_lead_id' => $this->or_lead_id])->count();
         return 'Order ' . ($count + 1);
+    }
+
+    /**
+     * @return float
+     */
+    public function getOrderTotalCalcSum(): float
+    {
+        $sum = 0;
+        $orderProducts = $this->orderProducts;
+        if ($orderProducts) {
+            foreach ($orderProducts as $orderProduct) {
+                if ($quote = $orderProduct->orpProductQuote) {
+                    $sum += $quote->totalCalcSum;
+                }
+            }
+            $sum = round($sum, 2);
+        }
+        return $sum;
     }
 }

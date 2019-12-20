@@ -92,6 +92,8 @@ class ProductQuoteOptionController extends FController
     {
         $form = new ProductQuoteOptionForm();
 
+        $productTypeId = null;
+
         if ($form->load(Yii::$app->request->post())) {
 
             $form->pqo_status_id = ProductQuoteOption::STATUS_PENDING;
@@ -117,10 +119,13 @@ class ProductQuoteOptionController extends FController
             }
 
             $form->pqo_product_quote_id = $productQuoteId;
+
+            $productTypeId = $pQuote->pqProduct ? $pQuote->pqProduct->pr_type_id : 0;
         }
 
         return $this->renderAjax('forms/create_ajax_form', [
             'model' => $form,
+            'productTypeId' => $productTypeId
         ]);
     }
 
@@ -184,6 +189,7 @@ class ProductQuoteOptionController extends FController
 
         return $this->renderAjax('forms/update_ajax_form', [
             'model' => $form,
+            'productTypeId' => $model->pqoProductQuote->pqProduct ? $model->pqoProductQuote->pqProduct->pr_type_id : 0
         ]);
     }
 

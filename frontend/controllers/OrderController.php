@@ -181,9 +181,17 @@ class OrderController extends FController
         if ($model->load(Yii::$app->request->post())) {
 
             if ($model->validate()) {
+                //$modelOrder->attributes = $model->attributes;
+
                 $modelOrder->or_name = $model->or_name;
                 $modelOrder->or_status_id = $model->or_status_id;
                 $modelOrder->or_pay_status_id = $model->or_pay_status_id;
+                $modelOrder->or_client_currency_rate = $model->or_client_currency_rate;
+                $modelOrder->or_client_currency = $model->or_client_currency;
+                $modelOrder->or_client_total = $model->or_client_total;
+                $modelOrder->or_app_total = $model->or_app_total;
+                $modelOrder->or_agent_markup = $model->or_agent_markup;
+                $modelOrder->or_app_markup = $model->or_app_markup;
 
                 if ($modelOrder->save()) {
                     return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';

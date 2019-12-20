@@ -45,7 +45,7 @@ use yii\web\View;
                 'emptyText' => '<div class="text-center">Not found orders</div>',
                 //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
                 'itemView' => function ($model, $key, $index, $widget) {
-                    return $this->render('_list_item', ['model' => $model, 'index' => $index]);
+                    return $this->render('_list_item', ['order' => $model, 'index' => $index]);
                 },
 
                 'itemOptions' => [

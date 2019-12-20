@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
     <div class="col-md-4">
         <?= $form->field($model, 'po_key')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'po_product_type_id')->dropDownList(\common\models\ProductType::getList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'po_product_type_id')->dropDownList(\common\models\ProductType::getList(false), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'po_name')->textInput(['maxlength' => true]) ?>
 

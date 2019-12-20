@@ -204,16 +204,23 @@ class ProductOption extends ActiveRecord
         return Html::tag('span', $this->getPriceTypeName(), ['class' => 'badge badge-' . $this->getPriceTypeClassName()]);
     }
 
+
     /**
      * @param bool $enabled
+     * @param int|null $productTypeId
      * @return array
      */
-    public static function getList(bool $enabled = true) : array
+    public static function getList(bool $enabled = true, ?int $productTypeId = null) : array
     {
         $query = self::find()->orderBy(['po_id' => SORT_ASC]);
-        if($enabled) {
+        if ($enabled) {
             $query->andWhere(['po_enabled' => true]);
         }
+
+        if ($productTypeId !== null) {
+            $query->andWhere(['po_product_type_id' => $productTypeId]);
+        }
+
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'po_id', 'po_name');
     }

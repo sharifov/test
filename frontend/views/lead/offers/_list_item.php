@@ -53,6 +53,8 @@ use yii\bootstrap4\Html;
 
             $originTotalPrice = 0;
             $clientTotalPrice = 0;
+            $optionTotalPrice = 0;
+            $totalFee = 0;
 
             ?>
             <tr>
@@ -61,6 +63,7 @@ use yii\bootstrap4\Html;
                 <th>Name</th>
                 <th>Status</th>
                 <th>Created</th>
+                <th title="Options, USD">Options, USD</th>
                 <th title="Service FEE">FEE</th>
                 <th title="Origin Price, USD">Price, USD</th>
                 <th>Client Price</th>
@@ -71,6 +74,8 @@ use yii\bootstrap4\Html;
                         $quote = $product->opProductQuote;
                         $originTotalPrice += $quote->pq_price;
                         $clientTotalPrice += $quote->pq_client_price;
+                        $optionTotalPrice += $quote->optionAmountSum;
+                        $totalFee += $quote->pq_service_fee_sum;
                     ?>
                     <tr>
                         <td title="Product Quote ID"><?=Html::encode($quote->pq_id)?></td>
@@ -84,6 +89,7 @@ use yii\bootstrap4\Html;
                         <td><?=Html::encode($quote->pq_name)?></td>
                         <td><?=$quote->getStatusLabel()?></td>
                         <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
+                        <td class="text-right"><?=number_format($quote->optionAmountSum, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_service_fee_sum, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
@@ -100,17 +106,29 @@ use yii\bootstrap4\Html;
                     </tr>
                 <?php endforeach; ?>
                 <tr>
-                    <th class="text-right" colspan="5">Total: </th>
-                    <th class="text-right"></th>
+                    <th class="text-right" colspan="5">Sub Total: </th>
+                    <th class="text-right"><?=number_format($optionTotalPrice, 2)?></th>
+                    <th class="text-right"><?=number_format($totalFee, 2)?></th>
                     <th class="text-right"><?=number_format($originTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($clientTotalPrice, 2)?> <?=Html::encode($quote->pq_client_currency)?></th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th class="text-right" colspan="5">Total: </th>
+                    <td class="text-right" colspan="2">(price + opt + fee)</td>
+                    <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice + $totalFee, 2)?></th>
+                    <th class="text-right"><?//=number_format($clientTotalPrice, 2)?> <?=Html::encode($quote->pq_client_currency)?></th>
                     <th></th>
                 </tr>
             <?php endif; ?>
         <?php endif; ?>
         </table>
 
+        <i class="fa fa-user"></i> <?=$model->ofCreatedUser ? Html::encode($model->ofCreatedUser->username) : '-'?>,
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->of_created_dt)) ?>
-        <i class="fa fa-user"></i> <?=$model->ofCreatedUser ? Html::encode($model->ofCreatedUser->username) : '-'?>
+
+        <div class="text-right"><h4>Total: <?=number_format($model->offerTotalCalcSum, 2)?> USD</h4></div>
+
+
     </div>
 </div>
