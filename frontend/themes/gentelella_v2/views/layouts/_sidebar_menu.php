@@ -192,6 +192,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'items' => [
                 ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
                 ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
+                ['label' => 'User Groups Set', 'url' => ['/user-group-set/index'], 'icon' => 'users'],
                 ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
                 ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
                 ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
