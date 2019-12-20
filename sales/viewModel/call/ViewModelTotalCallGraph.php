@@ -7,6 +7,8 @@ use DatePeriod;
 use DateTime;
 use sales\entities\call\CallGraphsSearch;
 use Yii;
+use yii\data\ArrayDataProvider;
+use yii\data\SqlDataProvider;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -19,6 +21,8 @@ use yii\helpers\ArrayHelper;
  * @property string $totalCallsRecDurationDataAVG
  * @property array $callData
  * @property CallGraphsSearch $callGraphsSearch
+ * @property SqlDataProvider $dataProvider
+ * @property array $gridColumns
  */
 class ViewModelTotalCallGraph
 {
@@ -34,20 +38,31 @@ class ViewModelTotalCallGraph
 
 	public $callData;
 
+	public $dataProvider;
+
+	public $gridColumns;
+
 	/**
 	 * ViewModelTotalCallGraph constructor.
-	 * @param array $callData
+	 * @param SqlDataProvider $callData
 	 * @param CallGraphsSearch $callGraphsSearch
+	 * @throws \Exception
 	 */
-	public function __construct(array $callData, CallGraphsSearch $callGraphsSearch)
+	public function __construct(SqlDataProvider $callData,
+								CallGraphsSearch $callGraphsSearch)
 	{
-		$this->callData = $callData;
+		$this->callData = $callData->getModels();
 		$this->callGraphsSearch = $callGraphsSearch;
+
+		$this->calcTotalCallsAverage($this->callData);
 
 		$this->formatTotalCallsGraphData();
 		$this->formatTotalCallsGraphDataAvg();
 		$this->totalCallsRecDurationData();
 		$this->totalCallsRecDurationDataAVG();
+
+		$this->dataProvider = (new ArrayDataProvider(['allModels' => $this->callData]));
+		$this->gridColumns = $this->fetchGridColumns();
 	}
 
 	/**
@@ -71,20 +86,12 @@ class ViewModelTotalCallGraph
 	 */
 	private function formatTotalCallsGraphDataAvg(): void
 	{
-		$data = array_map( function ($arr) {
-
-			$delimiter = 1;
-			if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_HOURS_DAYS) {
-				$delimiter = $this->countHourDayInDateRange($arr['created_formatted'], $this->callGraphsSearch->createTimeStart, $this->callGraphsSearch->createTimeEnd);
-			} else if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
-				$delimiter = $this->countWeekDayInDateRange($arr['created_formatted'], $this->callGraphsSearch->createTimeStart, $this->callGraphsSearch->createTimeEnd);
-			}
-
+		$data = array_map( static function ($arr) {
 			return [
 				$arr['created_formatted'],
-				$arr['incoming_avg'] = $arr['incoming'] / $delimiter,
-				$arr['outgoing_avg'] = $arr['outgoing'] / $delimiter,
-				$arr['total_calls_avg'] = ($arr['incoming'] + $arr['outgoing']) / $delimiter
+				$arr['incoming_avg'],
+				$arr['outgoing_avg'],
+				$arr['total_calls_avg'],
 			];
 		}, $this->callData);
 		$this->totalCallsGraphDataAvg = json_encode(ArrayHelper::merge([[
@@ -168,6 +175,27 @@ class ViewModelTotalCallGraph
 	}
 
 	/**
+	 * @param array $callData
+	 * @return $this
+	 * @throws \Exception
+	 */
+	private function calcTotalCallsAverage(array &$callData): void
+	{
+		foreach ($callData as $key => $item) {
+			$delimiter = 1;
+			if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_HOURS_DAYS) {
+				$delimiter = $this->countHourDayInDateRange($item['created_formatted'], $this->callGraphsSearch->createTimeStart, $this->callGraphsSearch->createTimeEnd);
+			} else if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+				$delimiter = $this->countWeekDayInDateRange($item['created_formatted'], $this->callGraphsSearch->createTimeStart, $this->callGraphsSearch->createTimeEnd);
+			}
+
+			$callData[$key]['incoming_avg'] = $item['incoming'] / $delimiter;
+			$callData[$key]['outgoing_avg'] = $item['outgoing'] / $delimiter;
+			$callData[$key]['total_calls_avg'] = ($item['incoming'] + $item['outgoing']) / $delimiter;
+		}
+	}
+
+	/**
 	 * How many times the hour of the day repeat in the datetime range
 	 *
 	 * @param string $hour
@@ -215,5 +243,81 @@ class ViewModelTotalCallGraph
 		}
 
 		return $week[$dayName];
+	}
+
+	private function fetchGridColumns()
+	{
+		return [
+			[
+				'label' => 'Group By',
+				'attribute' => 'created_formatted'
+			],
+			[
+				'label' => 'Incoming',
+				'attribute' => 'incoming',
+			],
+			[
+				'label' => 'Outgoing',
+				'attribute' => 'outgoing'
+			],
+			[
+				'label' => 'Total Calls',
+				'attribute' => 'total_calls'
+			],
+			[
+				'label' => 'Incoming Average',
+				'attribute' => 'incoming_avg'
+			],
+			[
+				'label' => 'Outgoing Average',
+				'attribute' => 'outgoing_avg'
+			],
+			[
+				'label' => 'Total Average',
+				'attribute' => 'total_calls_avg'
+			],
+			[
+				'label' => 'Incoming Call Duration',
+				'attribute' => 'in_rec_duration',
+				'value' => static function ($val) {
+					return Yii::$app->formatter->asDuration((int)$val['in_rec_duration']);
+				}
+			],
+			[
+				'label' => 'Outgoing Call Duration',
+				'attribute' => 'out_rec_duration',
+				'value' => static function ($val) {
+					return Yii::$app->formatter->asDuration((int)$val['out_rec_duration']);
+				}
+			],
+			[
+				'label' => 'Total Call Duration',
+				'attribute' => 'total_rec_duration',
+				'value' => static function ($val) {
+					return Yii::$app->formatter->asDuration((int)$val['total_rec_duration']);
+				}
+			],
+			[
+				'label' => 'Incoming Call Duration Average',
+				'attribute' => 'incoming_duration_avg',
+				'value' => static function ($val) {
+					return Yii::$app->formatter->asDuration((int)$val['incoming_duration_avg']);
+				}
+			],
+			[
+				'label' => 'Outgoing Call Duration Average',
+				'attribute' => 'outgoing_duration_avg',
+				'value' => static function ($val) {
+					return Yii::$app->formatter->asDuration((int)$val['outgoing_duration_avg']);
+				}
+			],
+			[
+				'label' => 'Total Call Duration Average',
+				'attribute' => 'total_rec_duration_avg',
+				'value' => static function ($val) {
+					return Yii::$app->formatter->asDuration((int)$val['total_rec_duration_avg']);
+				}
+			]
+		];
 	}
 }

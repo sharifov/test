@@ -8,6 +8,8 @@ use common\models\Employee;
 use common\models\search\CallSearch;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
+use yii\data\ActiveDataProvider;
+use yii\data\SqlDataProvider;
 use yii\db\ActiveRecord;
 use DateTime;
 
@@ -134,6 +136,12 @@ class CallGraphsSearch extends CallSearch
 		self::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG,
 	];
 
+	public const GRAPH_ALL_CALLS = 1;
+
+	public const GRAPH_LIST = [
+		self::GRAPH_ALL_CALLS
+	];
+
 	/**
 	 * {@inheritdoc}
 	 */
@@ -223,11 +231,12 @@ class CallGraphsSearch extends CallSearch
 
 
 	/**
-	 * @return array
+	 * @return SqlDataProvider
 	 */
-	public function getTotalCalls(): array
+	public function getTotalCalls(): SqlDataProvider
 	{
 		$dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
+
 
 		$query = self::find()->select([
 			'sum(incoming) as incoming',
@@ -288,9 +297,7 @@ class CallGraphsSearch extends CallSearch
 		}
 		$query->orderBy($order);
 
-//		print_r($query->createCommand()->rawSql);die;
-
-		return $query->asArray()->all();
+		return new SqlDataProvider(['sql' => $query->createCommand()->rawSql, 'pagination' => false]);
 	}
 
 	/**

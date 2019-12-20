@@ -10,6 +10,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 ?>
 
 <?php if ($viewModel->callData): ?>
+<?= $this->render('_call_graph_export', ['viewModel' => $viewModel]) ?>
 <div id="myChart"></div>
 
 
@@ -41,6 +42,8 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
 <script type="text/javascript">
     $(document).ready( function () {
+
+        $('a[class^="export-full"]').off();
 
         var graphData;
         var totalCallsRecDurationData = <?= $viewModel->totalCallsRecDurationData ?>;

@@ -483,7 +483,7 @@ class CallSearch extends Call
             ],
         ];
 
-        return $dataProvider = new SqlDataProvider($paramsData);;
+		return new SqlDataProvider($paramsData);
     }
 
     /**

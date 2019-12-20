@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\ApiLog;
 use common\models\Employee;
+use kartik\export\ExportMenu;
 use sales\entities\call\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
@@ -13,6 +14,8 @@ use common\models\Sms;
 use common\models\Email;
 use sales\viewModel\call\ViewModelTotalCallGraph;
 use Yii;
+use yii\base\Model;
+use yii\widgets\ActiveForm;
 
 /**
  * Stats controller
@@ -139,9 +142,16 @@ class StatsController extends FController
 		$model = new CallGraphsSearch();
 		$model->load($params);
 
-		return $this->render('calls-stats', [
-			'model' => $model
-		]);
+		if (Yii::$app->request->post('export_type') && $model->validate()) {
+			return $this->render('partial/_call_graph_export', [
+				'viewModel' => new ViewModelTotalCallGraph($model->getTotalCalls(), $model),
+			]);
+		} else {
+			return $this->render('calls-stats', [
+				'model' => $model
+			]);
+		}
+
 	}
 
 	/**
@@ -153,10 +163,8 @@ class StatsController extends FController
 		$callSearch->load(Yii::$app->request->post());
 		if ($callSearch->validate()) {
 
-			$callData = $callSearch->getTotalCalls();
-
 			$html = $this->renderAjax('partial/_total_calls_chart', [
-				'viewModel' => new ViewModelTotalCallGraph($callData, $callSearch),
+				'viewModel' => new ViewModelTotalCallGraph($callSearch->getTotalCalls(), $callSearch),
 			]);
 		}
 
