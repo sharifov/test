@@ -4,7 +4,6 @@ namespace sales\yii\i18n;
 
 use common\models\Employee;
 use yii\bootstrap4\Html;
-use Yii;
 
 class Formatter extends \yii\i18n\Formatter
 {
@@ -15,8 +14,7 @@ class Formatter extends \yii\i18n\Formatter
      */
     public function asDateTimeByUserDt($dateTime): string
     {
-        $this->datetimeFormat = 'php:d-M-Y [H:i]';
-        return $dateTime ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($dateTime)) : '-';
+        return $dateTime ? '<i class="fa fa-calendar"></i> ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]') : '-';
     }
 
     /**

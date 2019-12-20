@@ -21,6 +21,7 @@ class UserGroupSearch extends UserGroup
         return [
             [['ug_id', 'ug_disable'], 'integer'],
             [['ug_key', 'ug_name', 'ug_description', 'ug_updated_dt'], 'safe'],
+            ['ug_user_group_id', 'integer'],
         ];
     }
 
@@ -67,6 +68,7 @@ class UserGroupSearch extends UserGroup
         $query->andFilterWhere([
             'ug_id' => $this->ug_id,
             'ug_disable' => $this->ug_disable,
+            'ug_user_group_id' => $this->ug_user_group_id,
         ]);
 
         $query->andFilterWhere(['like', 'ug_key', $this->ug_key])

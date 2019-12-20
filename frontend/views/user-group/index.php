@@ -1,5 +1,6 @@
 <?php
 
+use common\models\UserGroupSet;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -60,6 +61,17 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
+            ],
+            [
+                'attribute' => 'ug_user_group_id',
+                'format' => 'raw',
+                'value' => function(\common\models\UserGroup $model) {
+                    if ($model->ug_user_group_id) {
+                        return $model->userGroupSet->ugs_name;
+                    }
+                    return '';
+                },
+                'filter' => UserGroupSet::getList()
             ],
 
             ['class' => 'yii\grid\ActionColumn'],
