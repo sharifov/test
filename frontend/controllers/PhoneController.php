@@ -9,6 +9,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Notifications;
+use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
@@ -17,6 +18,7 @@ use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
+use yii\web\Response;
 use const Grpc\CALL_ERROR;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -244,6 +246,20 @@ class PhoneController extends FController
         }
 
         return $out;
+    }
+
+    /**
+     * @return Response
+     */
+    public function actionCheckBlackPhone(): Response
+    {
+        if (!$phone = (string)Yii::$app->request->post('phone')) {
+            return $this->asJson(['success' => false, 'message' => 'Phone number not found']);
+        }
+        if (PhoneBlacklist::find()->isExists($phone)) {
+            return $this->asJson(['success' => false, 'message' => 'Declined Call. Reason: Blacklisted']);
+        }
+        return $this->asJson(['success' => true]);
     }
 
     /**
