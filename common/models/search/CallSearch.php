@@ -332,7 +332,10 @@ class CallSearch extends Call
         $query->orWhere(['c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]]);
         $query->orWhere(['c_call_status' => [Call::CALL_STATUS_QUEUE]]);*/
 
-        $query->andWhere(['c_parent_id' => null]);
+        $query->andWhere(['or',
+            ['c_parent_id' => null],
+            ['c_status_id' => [Call::STATUS_DELAY, Call::STATUS_QUEUE]]
+        ]);
 
         if ($this->status_ids) {
             $query->andWhere(['c_status_id' => $this->status_ids]);

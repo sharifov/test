@@ -452,6 +452,10 @@ class CommunicationController extends ApiBaseController
                 $call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
             }
 
+            if ($call->isGeneralParent()) {
+                $call = Call::find()->firstChild($call->c_id)->one();
+            }
+
             if ($call && $callData['RecordingUrl']) {
 
                 $call->c_recording_url = $callData['RecordingUrl'] ?? null;

@@ -324,21 +324,21 @@ class PhoneController extends FController
 //            $case_id = (int)Yii::$app->request->post('case_id');
             //$call = null;
 
+            $firstTransferToNumber = false;
             $call = Call::find()->andWhere(['c_call_sid' => $sid])->one();
-            if ($call->isParent()) {
-                if ($call = Call::find()->andWhere(['c_parent_id' => $call->c_id])->orderBy(['c_id' => SORT_DESC])->one()) {
+            if ($call->isGeneralParent()) {
+                if ($call = Call::find()->lastChild($call->c_id)->one()) {
                     $sid = $call->c_call_sid;
+                    $firstTransferToNumber = true;
                 }
             }
 
-            Yii::info($sid, 'info\Debug sid');
-
             if (!$from) {
-                $from = 'client:seller247';
+                $from = 'client:seller' . Yii::$app->user->id;
             }
 
             $communication = \Yii::$app->communication;
-            $resultApi = $communication->callRedirect($sid, $type, $from, $to);
+            $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
 
             if ($resultApi && isset($resultApi['data']['result']['sid'])) {
 
@@ -562,6 +562,7 @@ class PhoneController extends FController
 
             $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
             $data['type'] = $type;
+            $data['isTransfer'] = true;
 
             if ($originCall->cParent) {
                 $callSid = $originCall->cParent->c_call_sid;

@@ -214,7 +214,20 @@ class TwilioController extends ApiBaseNoAuthController
                 //$callSid = $callData['CallSid'] ?? '';
                 //$parentCallSid = $callData['ParentCallSid'] ?? '';
 
+            $isTransfer = (bool)Yii::$app->request->post('isTransfer', false);
+
             $call = Call::find()->where(['c_call_sid' => $sid])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+            if ($isTransfer && $call->isOut()) {
+                $from = $call->c_from;
+                $call->c_from = $call->c_to;
+                $call->c_to = $from;
+            }
+            if ($isTransfer) {
+                $call->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+                $call->c_call_type_id = Call::CALL_TYPE_IN;
+            }
+
             // Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:RedirectCall:callData');
 
             $responseTwml = new VoiceResponse();

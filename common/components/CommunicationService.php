@@ -631,10 +631,11 @@ class CommunicationService extends Component
      * @param $type
      * @param $from
      * @param $to
+     * @param  bool $firstTransferToNumber
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function callRedirect($cid, $type, $from, $to)
+    public function callRedirect($cid, $type, $from, $to, $firstTransferToNumber = false)
     {
 
         $out = ['error' => false, 'data' => []];
@@ -644,6 +645,7 @@ class CommunicationService extends Component
             'type' => $type,
             'redirect_from' => $from,
             'redirect_to' => $to,
+            'firstTransferToNumber' => $firstTransferToNumber
         ];
 
         $response = $this->sendRequest('twilio-jwt/redirect-call', $data);

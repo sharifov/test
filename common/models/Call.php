@@ -340,7 +340,7 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @return bool
      */
-    public function isParent(): bool
+    public function isGeneralParent(): bool
     {
         return $this->c_parent_id === null;
     }
@@ -508,6 +508,21 @@ class Call extends \yii\db\ActiveRecord
     {
         return $this->hasOne(self::class, ['c_id' => 'c_parent_id']);
     }
+
+    /**
+     * @return $this|null
+     */
+    public function getGrandParent(): ?self
+    {
+        $current = $this;
+        $parent = null;
+        while ($pCall = $current->cParent) {
+            $current = $pCall;
+            $parent = clone $pCall;
+        }
+        return $parent;
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -1584,5 +1599,13 @@ class Call extends \yii\db\ActiveRecord
     public function isOwner(int $userId): bool
     {
         return $this->c_created_user_id === $userId;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTransfer(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
     }
 }
