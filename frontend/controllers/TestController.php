@@ -26,6 +26,9 @@ use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use DateInterval;
+use DatePeriod;
+use DateTime;
 use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
 use Mpdf\Tag\P;
@@ -1592,5 +1595,42 @@ die;
         //VarDumper::dump($response, 10, true);
         echo json_encode($response);
     }
+
+    public function actionGetCountWeekDays()
+	{
+		$week = ['Monday' => 0, 'Tuesday' => 0, 'Wednesday' => 0, 'Thursday' => 0, 'Friday' => 0, 'Saturday' => 0, 'Sunday' => 0];
+
+		$d1 = new DateTime('2019-12-01 01:00:00');
+		$d2 = new DateTime('2019-12-31 15:00:00');
+
+		$interval = DateInterval::createFromDateString('1 day');
+		$period   = new DatePeriod($d1, $interval, $d2);
+
+		foreach ($period as $date) {
+			$week[$date->format('l')]++;
+		}
+
+		print_r($week);
+	}
+
+	public function actionGetCountHourDays()
+	{
+		$hours = [];
+		for($i = 0; $i<=23; $i++) {
+			$hours[$i] = 0;
+		}
+
+		$d1 = new DateTime('2019-12-01 01:00:00');
+		$d2 = new DateTime('2019-12-31 15:00:00');
+
+		$interval = DateInterval::createFromDateString('1 hour');
+		$period   = new DatePeriod($d1, $interval, $d2);
+
+		foreach ($period as $date) {
+			$hours[$date->format('G')]++;
+		}
+
+		print_r($hours);
+	}
 
 }

@@ -4,7 +4,6 @@ use sales\entities\call\CallGraphsSearch;
 use sales\viewmodel\call\ViewModelTotalCallGraph;
 
 /**
- * @var $model CallGraphsSearch
  * @var $viewModel ViewModelTotalCallGraph
  */
 
@@ -17,10 +16,10 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 <div class="row d-flex align-items-center">
     <div class="col-md-2">
         <label class="control-label">View Columns on Graph</label>
-        <?= \yii\helpers\Html::checkboxList('totalChartColumns', $model->totalChartColumns, $model::getChartTotalCallTextList(), [
+        <?= \yii\helpers\Html::checkboxList('totalChartColumns', $viewModel->callGraphsSearch->totalChartColumns, $viewModel->callGraphsSearch::getChartTotalCallTextList(), [
             'itemOptions' => [
                 'class' => 'totalChartColumns',
-                'data-name' => $model->formName().'[totalChartColumns][]'
+                'data-name' => $viewModel->callGraphsSearch->formName().'[totalChartColumns][]'
             ]
         ]) ?>
     </div>
@@ -28,9 +27,9 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
     <div class="col-md-2">
         <div class="form-group">
             <label class="control-label">Measure</label>
-            <?= \yii\helpers\Html::dropDownList('chartTotalCallsVaxis', $model->chartTotalCallsVaxis, $model::getChartTotalCallsVaxisTextList(), [
+            <?= \yii\helpers\Html::dropDownList('chartTotalCallsVaxis', $viewModel->callGraphsSearch->chartTotalCallsVaxis, $viewModel->callGraphsSearch::getChartTotalCallsVaxisTextList(), [
 				'class' => 'form-control chartTotalCallsVaxis',
-                'data-name' => $model->formName().'[chartTotalCallsVaxis]'
+                'data-name' => $viewModel->callGraphsSearch->formName().'[chartTotalCallsVaxis]'
             ]) ?>
         </div>
     </div>
@@ -51,7 +50,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
         var selectedMeasure = +$('.chartTotalCallsVaxis').val();
         var measuresText = <?= json_encode(CallGraphsSearch::getChartTotalCallsVaxisTextList()) ?>;
-        var timeRange = '<?= $model->createTimeRange ?>';
+        var timeRange = '<?= $viewModel->callGraphsSearch->createTimeRange ?>';
 
         if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>) {
             graphData = totalCallsData;

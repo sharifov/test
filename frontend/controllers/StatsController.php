@@ -156,8 +156,7 @@ class StatsController extends FController
 			$callData = $callSearch->getTotalCalls();
 
 			$html = $this->renderAjax('partial/_total_calls_chart', [
-				'viewModel' => new ViewModelTotalCallGraph($callData),
-				'model' => $callSearch
+				'viewModel' => new ViewModelTotalCallGraph($callData, $callSearch),
 			]);
 		}
 

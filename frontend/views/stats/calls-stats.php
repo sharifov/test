@@ -211,6 +211,7 @@ $(document).ready( function () {
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                
             });
+            $('#total-calls-chart').html('Internal Server Error. Try again letter.');
         },
         complete: function () {
             $('#call-chart-from-btn').html(submitBtnHtml).removeAttr('disabled').toggleClass('disabled');
@@ -265,6 +266,8 @@ $(document).ready( function () {
                     text: 'Internal Server Error. Try again letter.',
                     type: 'error'                
                 });
+                
+                $('#total-calls-chart').html('Internal Server Error. Try again letter.');
             },
             complete: function () {
                 $('#call-chart-from-btn').html(submitBtnHtml).removeAttr('disabled').toggleClass('disabled');

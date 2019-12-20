@@ -54,26 +54,26 @@ class CallGraphsSearch extends CallSearch
 	private const MONTH_DIFF_MAX_RANGE = 2;
 	private const Year_DIFF_MAX_RANGE = 1;
 
-	private const DATE_FORMAT_DAYS = 0;
-	private const DATE_FORMAT_HOURS = 4;
-	private const DATE_FORMAT_WEEKS = 2;
-	private const DATE_FORMAT_MONTH = 3;
-	private const DATE_FORMAT_HOURS_DAYS = 1;
-	private const DATE_FORMAT_WEEKDAYS = 5;
+	public const DATE_FORMAT_DAYS = 0;
+	public const DATE_FORMAT_HOURS = 4;
+	public const DATE_FORMAT_WEEKS = 2;
+	public const DATE_FORMAT_MONTH = 3;
+	public const DATE_FORMAT_HOURS_DAYS = 1;
+	public const DATE_FORMAT_WEEKDAYS = 5;
 
-	private const CREATE_TIME_START_DEFAULT = '-6 days';
+	public const CREATE_TIME_START_DEFAULT = '-6 days';
 
-	private const DATE_FORMAT_TEXT = [
+	public const DATE_FORMAT_TEXT = [
 		self::DATE_FORMAT_DAYS => 'Day',
-		self::DATE_FORMAT_HOURS_DAYS => 'Hour of the Day',
+		self::DATE_FORMAT_HOURS => 'Hour',
 		self::DATE_FORMAT_WEEKS => 'Week',
 		self::DATE_FORMAT_MONTH => 'Month',
-		self::DATE_FORMAT_HOURS => 'Hour',
+		self::DATE_FORMAT_HOURS_DAYS => 'Hour of the Day',
 		self::DATE_FORMAT_WEEKDAYS => 'Day of the Week',
 
 	];
 
-	private const DATE_FORMAT_LIST_ID = [
+	public const DATE_FORMAT_LIST_ID = [
 		self::DATE_FORMAT_HOURS,
 		self::DATE_FORMAT_DAYS,
 		self::DATE_FORMAT_WEEKS,
@@ -82,7 +82,7 @@ class CallGraphsSearch extends CallSearch
 		self::DATE_FORMAT_WEEKDAYS
 	];
 
-	private const DATE_FORMAT_LIST = [
+	public const DATE_FORMAT_LIST = [
 		self::DATE_FORMAT_HOURS_DAYS => '%H:00',
 		self::DATE_FORMAT_HOURS => '%Y-%m-%d %H:00',
 		self::DATE_FORMAT_DAYS => '%Y-%m-%d',
@@ -243,14 +243,14 @@ class CallGraphsSearch extends CallSearch
 
 		if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
 			$query->addSelect(["concat(str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as created_formatted"]);
-			$query->addSelect(["sum(incoming) / count(distinct str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as 'incoming_avg'"]);
-			$query->addSelect(["sum(outgoing) / count(distinct str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as 'outgoing_avg'"]);
-			$query->addSelect(["sum(incoming + outgoing) / count(distinct date_format(created, '%Y-%m-%d')) as total_calls_avg"]);
+//			$query->addSelect(["sum(incoming) / count(distinct str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as 'incoming_avg'"]);
+//			$query->addSelect(["sum(outgoing) / count(distinct str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as 'outgoing_avg'"]);
+//			$query->addSelect(["sum(incoming + outgoing) / count(distinct date_format(created, '%Y-%m-%d')) as total_calls_avg"]);
 		} else {
 			$query->addSelect(["date_format(`created`, '$dateFormat') as created_formatted"]);
-			$query->addSelect(['sum(incoming) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as incoming_avg']);
-			$query->addSelect(['sum(outgoing) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as outgoing_avg']);
-			$query->addSelect(['sum(incoming + outgoing) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as total_calls_avg']);
+//			$query->addSelect(['sum(incoming) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as incoming_avg']);
+//			$query->addSelect(['sum(outgoing) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as outgoing_avg']);
+//			$query->addSelect(['sum(incoming + outgoing) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as total_calls_avg']);
 		}
 
 
