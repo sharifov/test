@@ -70,7 +70,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Completed',
             'value' => function($data) {
-                return $data['outgoingCallsCompleted'] + $data['incomingCompletedCalls'] + $data['redialCompleted'];
+                return $data['outgoingCallsCompleted'] + $data['incomingCompletedCalls'] + $data['redialCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [

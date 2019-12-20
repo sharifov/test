@@ -22,41 +22,19 @@ use common\models\Employee;
                         'hideInput' => true,
                         'convertFormat' => true,
                         'pluginOptions' => [
-                            'timePicker' => false,
+                            'minDate' => date("Y-m-d 00:00", strtotime("- 61 days")),
+                            'maxDate' => date("Y-m-d 23:59"),
+                            'timePicker' => true,
                             'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
                             'locale' => [
-                                'format' => 'Y-m-d',
+                                'format' => 'Y-m-d H:i',
                                 'separator' => ' - '
                             ]
                         ]
-                    ])->label('Calls Created Date');
+                    ])->label('Created Date');
                     ?>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="col-md-6">
-                <?=
-                $form->field($model, 'timeFrom')->widget(
-                    \kartik\time\TimePicker::class, [
-                    'pluginOptions' => [
-                        'defaultTime' => '00:00',
-                        'showSeconds' => false,
-                        'showMeridian' => false,
-                    ]])->label('Report Hour From');
-                ?>
-            </div>
-            <div class="col-md-6">
-                <?=
-                $form->field($model, 'timeTo')->widget(
-                    \kartik\time\TimePicker::class, [
-                    'pluginOptions' => [
-                        'defaultTime' => '23:59',
-                        'showSeconds' => false,
-                        'showMeridian' => false,
-                    ]])->label('Report Hour To');
-                ?>
             </div>
         </div>
         <div class="col-md-3">
@@ -71,6 +49,22 @@ use common\models\Employee;
                 'pluginOptions' => ['allowClear' => true],
             ]);
             ?>
+        </div>
+        <div class="col-md-3">
+            <?php
+            $hoursList = [];
+            foreach(range(0, 23) as $hour) {
+                $hoursList[sprintf("%02d:00", $hour )] = sprintf("%02d", $hour );
+            }
+            ?>
+            <div class="row">
+                <div class="col-md-3">
+                    <?= $form->field($model, 'timeFrom')->dropDownList($hoursList) ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $form->field($model, 'timeTo')->dropDownList($hoursList) ?>
+                </div>
+            </div>
         </div>
     </div>
 
