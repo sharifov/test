@@ -14,7 +14,7 @@ class UserProjectParamsQuery extends \yii\db\ActiveQuery
      * @param string $phone
      * @return $this
      */
-    public function findByPhone(string $phone): self
+    public function byPhone(string $phone): self
     {
         return $this->where(['upp_tw_phone_number' => $phone])->orderBy(['upp_created_dt' => SORT_DESC]);
     }
@@ -23,7 +23,7 @@ class UserProjectParamsQuery extends \yii\db\ActiveQuery
      * @param string $email
      * @return $this
      */
-    public function findByEmail(string $email): self
+    public function byEmail(string $email): self
     {
         return $this->where(['upp_email' => $email])->orderBy(['upp_created_dt' => SORT_DESC]);
     }

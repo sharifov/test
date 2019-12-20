@@ -178,7 +178,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         if (!$email->save()) {
                             \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
                         } else {
-                            if ($lead_id === null && $case_id === null) {
+                            if ($lead_id === null && $case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
                                 try {
                                     $emailIncomingService = Yii::createObject(EmailIncomingService::class);
                                     $process = $emailIncomingService->create(

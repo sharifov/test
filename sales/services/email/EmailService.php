@@ -2,8 +2,11 @@
 namespace sales\services\email;
 
 use common\models\ClientEmail;
+use common\models\DepartmentEmailProject;
 use common\models\Email;
+use common\models\Employee;
 use common\models\Lead;
+use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -84,6 +87,24 @@ class EmailService
 
 		return $email->e_case_id;
 	}
+
+    /**
+     * @param string $email
+     * @return bool
+     */
+    public function isNotInternalEmail(string $email): bool
+    {
+        if (UserProjectParams::find()->byEmail($email)->one()) {
+            return false;
+        }
+        if (Employee::find()->byEmail($email)->one()) {
+            return false;
+        }
+        if (DepartmentEmailProject::find()->byEmail($email)->one()) {
+            return false;
+        }
+        return true;
+    }
 
 	/**
 	 * @param string|null $subject

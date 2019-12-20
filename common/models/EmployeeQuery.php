@@ -17,4 +17,12 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         return $this->andWhere(['status' => Employee::STATUS_ACTIVE]);
     }
 
+    /**
+     * @param string $email
+     * @return $this
+     */
+    public function byEmail(string $email): self
+    {
+        return $this->andWhere(['email' => $email])->limit(1);
+    }
 }
