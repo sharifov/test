@@ -12,7 +12,7 @@ use yii\data\ActiveDataProvider;
 use common\models\Call;
 use common\models\UserGroupAssign;
 use Yii;
-use yii\data\SqlDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Query;
 
 /**
@@ -365,10 +365,10 @@ class CallSearch extends Call
     /**
      * @param $params
      * @param $user Employee
-     * @return SqlDataProvider
+     * @return ArrayDataProvider
      * @throws \Exception
      */
-    public function searchCallsReport($params, $user):SqlDataProvider
+    public function searchCallsReport($params, $user):ArrayDataProvider
     {
         $this->load($params);
         $timezone = $user->timezone;
@@ -455,10 +455,30 @@ class CallSearch extends Call
         $query->groupBy(['c_created_user_id', 'createdDate']);
 
         $command = $query->createCommand();
-        $sql = $command->sql;
+        $data = $command->queryAll();
+
+        foreach ($data as $key => $model){
+            if (
+                $model['outgoingCallsDuration'] == 0 &&
+                $model['outgoingCalls'] == 0 &&
+                $model['outgoingCallsCompleted'] == 0 &&
+                $model['outgoingCallsNoAnswer'] == 0 &&
+                $model['outgoingCallsBusy'] == 0 &&
+                $model['incomingCallsDuration'] == 0 &&
+                $model['incomingCompletedCalls'] == 0 &&
+                $model['incomingDirectLine'] == 0 &&
+                $model['incomingGeneralLine'] == 0 &&
+                $model['redialCallsDuration'] == 0 &&
+                $model['totalAttempts'] == 0 &&
+                $model['redialCompleted'] == 0
+
+            ){
+                unset($data[$key]);
+            }
+        }
 
         $paramsData = [
-            'sql' => $sql,
+            'allModels' => $data,
             'sort' => [
                 //'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
@@ -483,7 +503,7 @@ class CallSearch extends Call
             ],
         ];
 
-		return new SqlDataProvider($paramsData);
+        return $dataProvider = new ArrayDataProvider($paramsData);
     }
 
     /**
