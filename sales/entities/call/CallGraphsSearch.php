@@ -430,11 +430,11 @@ class CallGraphsSearch extends CallSearch
 		}
 
 		if ($this->betweenHoursFrom) {
-			$query->andWhere(['>=', 'hour(c_created_dt)', $this->betweenHoursFrom]);
+			$query->andWhere(['>=', 'hour(convert_tz(c_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursFrom]);
 		}
 
 		if ($this->betweenHoursTo) {
-			$query->andWhere(['<=', 'hour(c_created_dt)', $this->betweenHoursTo]);
+			$query->andWhere(['<=', 'hour(convert_tz(c_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursTo]);
 		}
 
 		$query->groupBy('created')->orderBy('created');
