@@ -31,6 +31,8 @@ $pjaxId = 'pjax-offer-form';
 
         <?= $form->field($model, 'of_name')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'of_client_currency')->dropDownList(\common\models\Currency::getList(), ['prompt' => '---']) ?>
+
         <div class="form-group text-center">
             <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
         </div>

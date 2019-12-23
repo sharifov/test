@@ -131,8 +131,7 @@ $lead = $leadForm->getLead();
             <?php else: ?>
                 <div id="lead-preferences">
                     <?= $this->render('partial/_lead_preferences', [
-                        'lead' => $lead,
-                        'leadForm' => $leadForm
+                        'lead' => $lead
                     ]) ?>
                 </div>
             <?php endif; ?>

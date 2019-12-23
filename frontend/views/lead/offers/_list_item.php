@@ -1,6 +1,6 @@
 <?php
 /* @var $this yii\web\View */
-/* @var $model Offer */
+/* @var $offer Offer */
 /* @var $index integer */
 
 use common\models\Offer;
@@ -11,11 +11,11 @@ use yii\bootstrap4\Html;
 <div class="x_panel">
     <div class="x_title">
 
-            <?= Html::checkbox('offer_checkbox', false, ['id' => 'off_ch' . $model->of_id, 'style' => 'width: 16px; height: 16px;'])?>
-            <small><span class="badge badge-white">OF<?=($model->of_id)?></span></small>
-            "<b><?=\yii\helpers\Html::encode($model->of_name)?></b>"
-            (<span title="UID"><?=\yii\helpers\Html::encode($model->of_uid)?></span>)
-             <?=$model->getStatusLabel()?>
+            <?= Html::checkbox('offer_checkbox', false, ['id' => 'off_ch' . $offer->of_id, 'style' => 'width: 16px; height: 16px;'])?>
+            <small><span class="badge badge-white">OF<?=($offer->of_id)?></span></small>
+            "<b><?=\yii\helpers\Html::encode($offer->of_name)?></b>"
+            (<span title="UID"><?=\yii\helpers\Html::encode($offer->of_uid)?></span>)
+             <?=$offer->getStatusLabel()?>
 
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
@@ -23,7 +23,7 @@ use yii\bootstrap4\Html;
             <!--            </li>-->
             <li>
                 <?= Html::a('<i class="fa fa-edit warning"></i> Update offer', null, [
-                    'data-url' => \yii\helpers\Url::to(['/offer/update-ajax', 'id' => $model->of_id]),
+                    'data-url' => \yii\helpers\Url::to(['/offer/update-ajax', 'id' => $offer->of_id]),
                     'class' => 'btn-update-offer'
                 ])?>
             </li>
@@ -38,7 +38,7 @@ use yii\bootstrap4\Html;
 
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete offer', null, [
                         'class' => 'dropdown-item text-danger btn-delete-offer',
-                        'data-offer-id' => $model->of_id,
+                        'data-offer-id' => $offer->of_id,
                         'data-url' => \yii\helpers\Url::to(['offer/delete-ajax']),
                     ]) ?>
                 </div>
@@ -49,7 +49,7 @@ use yii\bootstrap4\Html;
     <div class="x_content" style="display: block">
 
         <table class="table table-bordered">
-        <?php if ($model->offerProducts):
+        <?php if ($offer->offerProducts):
 
             $originTotalPrice = 0;
             $clientTotalPrice = 0;
@@ -69,8 +69,8 @@ use yii\bootstrap4\Html;
                 <th>Client Price</th>
                 <th></th>
             </tr>
-            <?php if ($model->offerProducts):?>
-                <?php foreach ($model->offerProducts as $product):
+            <?php if ($offer->offerProducts):?>
+                <?php foreach ($offer->offerProducts as $product):
                         $quote = $product->opProductQuote;
                         $originTotalPrice += $quote->pq_price;
                         $clientTotalPrice += $quote->pq_client_price;
@@ -96,7 +96,7 @@ use yii\bootstrap4\Html;
                         <td>
                             <?php
                               echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
-                                    'data-offer-id' => $model->of_id,
+                                    'data-offer-id' => $offer->of_id,
                                     'data-product-quote-id' => $quote->pq_id,
                                     'class' => 'btn-delete-quote-from-offer',
                                     'data-url' => \yii\helpers\Url::to(['offer-product/delete-ajax'])
@@ -124,10 +124,11 @@ use yii\bootstrap4\Html;
         <?php endif; ?>
         </table>
 
-        <i class="fa fa-user"></i> <?=$model->ofCreatedUser ? Html::encode($model->ofCreatedUser->username) : '-'?>,
-        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->of_created_dt)) ?>
+        <i class="fa fa-user"></i> <?=$offer->ofCreatedUser ? Html::encode($offer->ofCreatedUser->username) : '-'?>,
+        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($offer->of_created_dt)) ?>,
+        <i class="fa fa-money" title="currency"></i> <?=Html::encode($offer->of_client_currency)?> <span title="Rate: <?=$offer->of_client_currency_rate?>">(<?=round($offer->of_client_currency_rate, 3)?>)</span>
 
-        <div class="text-right"><h4>Total: <?=number_format($model->offerTotalCalcSum, 2)?> USD</h4></div>
+        <div class="text-right"><h4>Total: <?=number_format($offer->offerTotalCalcSum, 2)?> USD</h4></div>
 
 
     </div>

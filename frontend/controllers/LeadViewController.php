@@ -749,6 +749,9 @@ class LeadViewController extends FController
 				$form = new LeadPreferencesForm($lead);
 				if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
+
+				    //VarDumper::dump($form->attributes, 10, true); exit;
+
 					$this->leadPreferencesManageService->edit($form, $lead);
 
 					$lead->refresh();

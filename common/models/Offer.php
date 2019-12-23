@@ -6,6 +6,7 @@ use common\models\query\OfferQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 
@@ -14,16 +15,21 @@ use yii\helpers\Html;
  *
  * @property int $of_id
  * @property string $of_gid
- * @property string $of_uid
- * @property string $of_name
+ * @property string|null $of_uid
+ * @property string|null $of_name
  * @property int $of_lead_id
- * @property int $of_status_id
- * @property int $of_owner_user_id
- * @property int $of_created_user_id
- * @property int $of_updated_user_id
- * @property string $of_created_dt
- * @property string $of_updated_dt
+ * @property int|null $of_status_id
+ * @property int|null $of_owner_user_id
+ * @property int|null $of_created_user_id
+ * @property int|null $of_updated_user_id
+ * @property string|null $of_created_dt
+ * @property string|null $of_updated_dt
+ * @property string|null $of_client_currency
+ * @property float|null $of_client_currency_rate
+ * @property float|null $of_app_total
+ * @property float|null $of_client_total
  *
+ * @property Currency $ofClientCurrency
  * @property Employee $ofCreatedUser
  * @property Lead $ofLead
  * @property Employee $ofOwnerUser
@@ -71,11 +77,14 @@ class Offer extends \yii\db\ActiveRecord
             [['of_gid', 'of_lead_id'], 'required'],
             [['of_lead_id', 'of_status_id', 'of_owner_user_id', 'of_created_user_id', 'of_updated_user_id'], 'integer'],
             [['of_created_dt', 'of_updated_dt'], 'safe'],
+            [['of_client_currency_rate', 'of_app_total', 'of_client_total'], 'number'],
             [['of_gid'], 'string', 'max' => 32],
             [['of_uid'], 'string', 'max' => 15],
             [['of_name'], 'string', 'max' => 40],
+            [['of_client_currency'], 'string', 'max' => 3],
             [['of_gid'], 'unique'],
             [['of_uid'], 'unique'],
+            [['of_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['of_client_currency' => 'cur_code']],
             [['of_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['of_created_user_id' => 'id']],
             [['of_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['of_lead_id' => 'id']],
             [['of_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['of_owner_user_id' => 'id']],
@@ -100,6 +109,10 @@ class Offer extends \yii\db\ActiveRecord
             'of_updated_user_id' => 'Updated User ID',
             'of_created_dt' => 'Created Dt',
             'of_updated_dt' => 'Updated Dt',
+            'of_client_currency' => 'Client Currency',
+            'of_client_currency_rate' => 'Client Currency Rate',
+            'of_app_total' => 'App Total',
+            'of_client_total' => 'Client Total',
         ];
     }
 
@@ -136,61 +149,68 @@ class Offer extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOfCreatedUser()
+    public function getOfClientCurrency(): ActiveQuery
+    {
+        return $this->hasOne(Currency::class, ['cur_code' => 'of_client_currency']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOfCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'of_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOfLead()
+    public function getOfLead(): ActiveQuery
     {
         return $this->hasOne(Lead::class, ['id' => 'of_lead_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOfOwnerUser()
+    public function getOfOwnerUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'of_owner_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOfUpdatedUser()
+    public function getOfUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'of_updated_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOfferProducts()
+    public function getOfferProducts(): ActiveQuery
     {
         return $this->hasMany(OfferProduct::class, ['op_offer_id' => 'of_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
-    public function getOpProductQuotes()
+    public function getOpProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['of_id' => 'op_product_quote_id'])->viaTable('offer_product', ['op_offer_id' => 'of_id']);
     }
 
     /**
-     * {@inheritdoc}
      * @return OfferQuery the active query used by this AR class.
      */
     public static function find()
     {
-        return new OfferQuery(get_called_class());
+        return new OfferQuery(static::class);
     }
 
     /**
@@ -266,5 +286,14 @@ class Offer extends \yii\db\ActiveRecord
             $sum = round($sum, 2);
         }
         return $sum;
+    }
+
+    public function updateOfferTotalByCurrency(): void
+    {
+        if ($this->ofClientCurrency) {
+            $this->of_client_currency_rate = (float) $this->ofClientCurrency->cur_app_rate;
+        }
+
+        $this->of_client_total = round($this->of_app_total * $this->of_client_currency_rate, 2);
     }
 }

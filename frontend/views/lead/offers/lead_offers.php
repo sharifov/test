@@ -44,7 +44,7 @@ use yii\bootstrap4\Html;
                     'emptyText' => '<div class="text-center">Not found offers</div>',
                     //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
                     'itemView' => function ($model, $key, $index, $widget) {
-                        return $this->render('_list_item', ['model' => $model, 'index' => $index]);
+                        return $this->render('_list_item', ['offer' => $model, 'index' => $index]);
                     },
 
                     'itemOptions' => [

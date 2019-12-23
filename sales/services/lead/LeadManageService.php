@@ -338,7 +338,8 @@ class LeadManageService
             $leadId,
             $preferencesForm->marketPrice,
             $preferencesForm->clientsBudget,
-            $preferencesForm->numberStops
+            $preferencesForm->numberStops,
+            $preferencesForm->currency
         );
         $this->leadPreferencesRepository->save($preferences);
     }

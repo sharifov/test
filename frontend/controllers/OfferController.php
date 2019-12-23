@@ -5,7 +5,6 @@ namespace frontend\controllers;
 use common\models\Lead;
 use common\models\OfferProduct;
 use frontend\models\form\OfferForm;
-use http\Url;
 use Yii;
 use common\models\Offer;
 use common\models\search\OfferSearch;
@@ -106,6 +105,15 @@ class OfferController extends FController
                 $offer->initCreate();
                 $offer->of_lead_id = $model->of_lead_id;
                 $offer->of_name = $model->of_name;
+
+                $offer->of_client_currency = $model->of_client_currency;
+                $offer->of_client_currency_rate = $model->of_client_currency_rate;
+                $offer->of_app_total = $model->of_app_total;
+
+//                $offer->of_client_total = $model->of_client_total;
+
+
+
 //                $offer->of_gid = Offer::generateGid();
 //                $offer->of_uid = Offer::generateUid();
 //                $offer->of_status_id = Offer::STATUS_NEW;
@@ -113,6 +121,8 @@ class OfferController extends FController
                 if (!$offer->of_name && $offer->of_lead_id) {
                     $offer->of_name = $offer->generateName();
                 }
+
+                $offer->updateOfferTotalByCurrency();
 
                 if ($offer->save()) {
                     return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-offers", timout: 8000});</script>';
@@ -187,6 +197,12 @@ class OfferController extends FController
             if ($model->validate()) {
                 $modelOffer->of_name = $model->of_name;
                 $modelOffer->of_status_id = $model->of_status_id;
+
+                $modelOffer->of_client_currency = $model->of_client_currency;
+                $modelOffer->of_client_currency_rate = $model->of_client_currency_rate;
+                $modelOffer->of_app_total = $model->of_app_total;
+
+                $modelOffer->updateOfferTotalByCurrency();
 
                 if ($modelOffer->save()) {
                     return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-offers", timout: 8000});</script>';

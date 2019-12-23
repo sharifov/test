@@ -65,10 +65,11 @@ class LeadPreferencesManageService
 				$leadPreferences->edit(
 					$form->marketPrice,
 					$form->clientsBudget,
-					$form->numberStops
+					$form->numberStops,
+                    $form->currency
 				);
 			} else {
-				$leadPreferences = LeadPreferences::create($lead->id, $form->marketPrice, $form->clientsBudget, $form->numberStops);
+				$leadPreferences = LeadPreferences::create($lead->id, $form->marketPrice, $form->clientsBudget, $form->numberStops, $form->currency);
 			}
 			$this->leadPreferencesRepository->save($leadPreferences);
 		});

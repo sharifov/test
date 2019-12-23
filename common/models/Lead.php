@@ -7,6 +7,7 @@ use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
+use DateTime;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
@@ -54,58 +55,58 @@ use yii\helpers\VarDumper;
  * This is the model class for table "leads".
  *
  * @property int $id
- * @property string $gid
- * @property int $client_id
- * @property int $employee_id
- * @property int $status
- * @property string $uid
- * @property int $project_id
- * @property int $source_id
- * @property string $trip_type
- * @property string $cabin
- * @property int $adults
- * @property int $children
- * @property int $infants
- * @property string $notes_for_experts
- * @property string $request_ip
- * @property string $offset_gmt
- * @property string $request_ip_detail
- * @property int $rating
- * @property string $created
- * @property string $updated
- * @property string $snooze_for
- * @property boolean $called_expert
- * @property string $discount_id
- * @property int $bo_flight_id
- * @property string $additional_information
- * @property int $l_answered
- * @property int $clone_id
- * @property string $description
- * @property double $final_profit
- * @property double $tips
- * @property int $l_call_status_id
- * @property string $l_pending_delay_dt
- * @property string $l_client_first_name
- * @property string $l_client_last_name
- * @property string $l_client_phone
- * @property string $l_client_email
- * @property string $l_client_lang
- * @property string $l_client_ua
- * @property string $l_request_hash
- * @property int $l_duplicate_lead_id
- * @property double $l_init_price
- * @property string $l_last_action_dt
- * @property int $l_dep_id
- * @property boolean $l_delayed_charge
- * @property int $l_type_create
+ * @property int|null $client_id
+ * @property int|null $employee_id
+ * @property int|null $status
+ * @property string|null $uid
+ * @property int|null $project_id
+ * @property int|null $source_id
+ * @property string|null $trip_type
+ * @property string|null $cabin
+ * @property int|null $adults
+ * @property int|null $children
+ * @property int|null $infants
+ * @property string|null $notes_for_experts
+ * @property string|null $created
+ * @property string|null $updated
+ * @property string|null $request_ip
+ * @property string|null $request_ip_detail
+ * @property string|null $offset_gmt
+ * @property string|null $snooze_for
+ * @property int|null $rating
+ * @property int|null $called_expert
+ * @property string|null $discount_id
+ * @property int|null $bo_flight_id
+ * @property string|null $additional_information
+ * @property int|null $l_answered
+ * @property int|null $clone_id
+ * @property string|null $description
+ * @property float|null $final_profit
+ * @property float|null $tips
+ * @property string|null $gid
+ * @property float|null $agents_processing_fee
+ * @property int|null $l_call_status_id
+ * @property string|null $l_pending_delay_dt
+ * @property string|null $l_client_first_name
+ * @property string|null $l_client_last_name
+ * @property string|null $l_client_phone
+ * @property string|null $l_client_email
+ * @property string|null $l_client_lang
+ * @property string|null $l_client_ua
+ * @property string|null $l_request_hash
+ * @property int|null $l_duplicate_lead_id
+ * @property float|null $l_init_price
+ * @property string|null $l_last_action_dt
+ * @property int|null $l_dep_id
+ * @property int|null $l_delayed_charge
+ * @property int|null $l_type_create
  * @property int $l_is_test
  *
- * @property double $finalProfit
+ * @property float $finalProfit
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
  * @property int $quotesExpertCount
- * @property double $agentsProcessingFee
- * @property double $agents_processing_fee
+ * @property float $agentsProcessingFee
  * @property string $l_client_time
  * @property boolean $enableActiveRecordEvents
  * @property $totalTips
@@ -148,6 +149,46 @@ use yii\helpers\VarDumper;
  * @property $outCallsDuration
  * @property $smsOffers
  * @property $emailOffers
+ * @property int $delayPendingTime
+ * @property null|DateTime $clientTime2
+ * @property mixed $sumPercentProfitSplit
+ * @property ActiveQuery $leadTasks
+ * @property null|string $tripType
+ * @property mixed $firstFlightSegment
+ * @property bool $answered
+ * @property null|DateTime $clientTime2Old
+ * @property mixed $bookedQuoteUid
+ * @property int $owner
+ * @property mixed $allTipsSplits
+ * @property string $taskInfo
+ * @property null|string $lastActivityByNote
+ * @property int $callStatus
+ * @property mixed $quoteSendInfo
+ * @property null|string $additionalInformationFormFirstElementPnr
+ * @property string $statusLabelClass
+ * @property array $paxTypes
+ * @property ActiveQuery $reasons
+ * @property mixed $bookedQuote
+ * @property null $departure
+ * @property ActiveQuery $tsUsers
+ * @property string $requestHash
+ * @property \common\models\local\LeadAdditionalInformation $additionalInformationFormFirstElement
+ * @property null|Quote $appliedAlternativeQuotes
+ * @property mixed $flowTransition
+ * @property mixed $sumPercentTipsSplit
+ * @property ActiveQuery $appliedQuote
+ * @property ActiveQuery $psUsers
+ * @property mixed $allProfitSplits
+ * @property null|string $lastReasonFromLeadFlow
+ * @property array|Quote[] $altQuotes
+ * @property string|mixed $cabinClassName
+ * @property array $leadInformationForExpert
+ * @property ActiveQuery $leadFlowSold
+ * @property string $communicationInfo
+ * @property int $countOutCallsLastFlow
+ * @property string $flightTypeName
+ * @property mixed $sentCount
+ * @property bool $calledExpert
  * @property $quoteType
  *
  */
@@ -1445,7 +1486,7 @@ class Lead extends ActiveRecord
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLDep()
     {
@@ -1453,7 +1494,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getCalls()
     {
@@ -1461,7 +1502,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getEmails()
     {
@@ -1469,7 +1510,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadCallExperts()
     {
@@ -1477,7 +1518,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadChecklists(): ActiveQuery
     {
@@ -1485,7 +1526,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLDuplicateLead(): ActiveQuery
     {
@@ -1493,7 +1534,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeads0()
     {
@@ -1501,7 +1542,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadFlows()
     {
@@ -1509,7 +1550,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadFlowSold()
     {
@@ -1518,7 +1559,7 @@ class Lead extends ActiveRecord
 
     // TODO: update LeadFlow SORT created -> id
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLastLeadFlow(): ActiveQuery
     {
@@ -1526,7 +1567,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadLogs()
     {
@@ -1535,7 +1576,7 @@ class Lead extends ActiveRecord
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getSms(): ActiveQuery
     {
@@ -1544,7 +1585,7 @@ class Lead extends ActiveRecord
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getNotes(): ActiveQuery
     {
@@ -1552,7 +1593,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getTipsSplits(): ActiveQuery
     {
@@ -1560,7 +1601,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getQuotes(): ActiveQuery
     {
@@ -1568,7 +1609,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getReasons()
     {
@@ -1585,7 +1626,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUserConnections(): ActiveQuery
     {
@@ -1593,7 +1634,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadFlightSegments(): ActiveQuery
     {
@@ -1601,7 +1642,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadPreferences(): ActiveQuery
     {
@@ -1609,7 +1650,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadTasks()
     {
@@ -1617,7 +1658,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadQcall(): ActiveQuery
     {
@@ -1625,7 +1666,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getClient(): ActiveQuery
     {
@@ -1633,7 +1674,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getEmployee(): ActiveQuery
     {
@@ -1641,7 +1682,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getClone(): ActiveQuery
     {
@@ -1649,7 +1690,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getProfitSplits(): ActiveQuery
     {
@@ -1657,7 +1698,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getPsUsers()
     {
@@ -1665,7 +1706,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getSource(): ActiveQuery
     {
@@ -1673,7 +1714,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getProject(): ActiveQuery
     {
@@ -1959,17 +2000,17 @@ class Lead extends ActiveRecord
     public static function getSnoozeCountdown($id, $snooze_for): string
     {
         if (!empty($snooze_for)) {
-            return self::getCountdownTimer(new \DateTime($snooze_for), sprintf('snooze-countdown-%d', $id));
+            return self::getCountdownTimer(new DateTime($snooze_for), sprintf('snooze-countdown-%d', $id));
         }
         return '-';
     }
 
     /**
-     * @param \DateTime $expired
+     * @param DateTime $expired
      * @param $spanId
      * @return string
      */
-    public static function getCountdownTimer(\DateTime $expired, $spanId): string
+    public static function getCountdownTimer(DateTime $expired, $spanId): string
     {
         //var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
 
@@ -1992,8 +2033,8 @@ class Lead extends ActiveRecord
      */
     public static function getLastActivity($updated): string
     {
-        $now = new \DateTime();
-        $lastUpdate = new \DateTime($updated);
+        $now = new DateTime();
+        $lastUpdate = new DateTime($updated);
         /*if (!empty($note_created)) {
             $created = new \DateTime($note_created);
             return ($lastUpdate->getTimestamp() > $created->getTimestamp())
@@ -2049,18 +2090,18 @@ class Lead extends ActiveRecord
 
     public function getPendingAfterCreate($created = null)
     {
-        $now = new \DateTime();
+        $now = new DateTime();
         if (empty($created)) {
             $created = $this->created;
         }
-        $created = new \DateTime($created);
+        $created = new DateTime($created);
         return self::diffFormat($now->diff($created));
     }
 
     public function getPendingInLastStatus($updated)
     {
-        $now = new \DateTime();
-        $updated = new \DateTime($updated);
+        $now = new DateTime();
+        $updated = new DateTime($updated);
         return self::diffFormat($now->diff($updated));
     }
 
@@ -2845,10 +2886,10 @@ Reason: {reason}
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      * @throws \Exception
      */
-    public function getClientTime2():? \DateTime
+    public function getClientTime2():? DateTime
     {
         $clientDt = null;
         $offset = false;
@@ -2866,7 +2907,7 @@ Reason: {reason}
             if (is_numeric($offset) && $offset > 0) {
                 $offset = '+' . $offset;
             }
-            $clientDt = new \DateTime();
+            $clientDt = new DateTime();
             $timezoneName = timezone_name_from_abbr('', (int)$offset * 3600, date('I', time()));
             if ($timezoneName) {
                 $timezone = new \DateTimeZone($timezoneName);
@@ -2878,7 +2919,7 @@ Reason: {reason}
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      * @throws \Exception
      */
     public function getClientTime2Old()
@@ -2975,7 +3016,7 @@ Reason: {reason}
             //-----------------------------------------------------------
 
 
-            $dt = new \DateTime();
+            $dt = new DateTime();
             if($timezoneName) {
                 $timezone = new \DateTimeZone($timezoneName);
                 $dt->setTimezone($timezone);
