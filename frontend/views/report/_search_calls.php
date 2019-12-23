@@ -59,10 +59,10 @@ use common\models\Employee;
             ?>
             <div class="row">
                 <div class="col-md-3">
-                    <?= $form->field($model, 'timeFrom')->dropDownList($hoursList) ?>
+                    <?= $form->field($model, 'timeFrom')->dropDownList($hoursList)->label('Hour From') ?>
                 </div>
                 <div class="col-md-3">
-                    <?= $form->field($model, 'timeTo')->dropDownList($hoursList, ['prompt' => ""]) ?>
+                    <?= $form->field($model, 'timeTo')->dropDownList($hoursList, ['prompt' => ""])->label('Hour To') ?>
                 </div>
             </div>
         </div>

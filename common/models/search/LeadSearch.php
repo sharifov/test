@@ -2681,17 +2681,15 @@ class LeadSearch extends Lead
             $timezone = $this->reportTimezone;
             $this->defaultUserTz = $this->reportTimezone;
         }
-
         if ($this->timeTo == ""){
-            $this->timeTo = "24:00";
-        }
-
-        if((strtotime($this->timeTo) - strtotime($this->timeFrom)) < 0){
-            $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+            $differenceTimeToFrom  = "24:00";
         } else {
-            $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
+            if((strtotime($this->timeTo) - strtotime($this->timeFrom)) <= 0){
+                $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+            } else {
+                $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
+            }
         }
-
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($dates[0]));
