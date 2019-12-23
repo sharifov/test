@@ -2682,12 +2682,20 @@ class LeadSearch extends Lead
             $this->defaultUserTz = $this->reportTimezone;
         }
 
+        if ($this->timeTo == ""){
+            $this->timeTo = "24:00";
+        }
+
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($dates[0]));
             $timeSub = date('G', strtotime($this->timeFrom));
 
-            $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+            if((strtotime($this->timeTo) - strtotime($this->timeFrom)) < 0){
+                $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+            } else {
+                $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
+            }
 
             $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
@@ -2700,6 +2708,7 @@ class LeadSearch extends Lead
             $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
             $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+
             if((strtotime($this->timeTo) - strtotime($this->timeFrom)) < 0){
                 $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
             } else {
