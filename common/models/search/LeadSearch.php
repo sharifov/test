@@ -2682,12 +2682,20 @@ class LeadSearch extends Lead
             $this->defaultUserTz = $this->reportTimezone;
         }
 
+        if ($this->timeTo == ""){
+            $this->timeTo = "24:00";
+        }
+
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($dates[0]));
             $timeSub = date('G', strtotime($this->timeFrom));
 
-            $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+            if((strtotime($this->timeTo) - strtotime($this->timeFrom)) < 0){
+                $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+            } else {
+                $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
+            }
 
             $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
@@ -2700,7 +2708,12 @@ class LeadSearch extends Lead
             $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
             $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
-            $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+
+            if((strtotime($this->timeTo) - strtotime($this->timeFrom)) < 0){
+                $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+            } else {
+                $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
+            }
         }
 
         if($this->lfOwnerId != null) {
@@ -2743,7 +2756,7 @@ class LeadSearch extends Lead
 
         $query = new Query();
 
-        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$hourSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt, 
+        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt, 
                 
             (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '.Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS newTotal,    
             (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Take" '. $queryByProject . $queryByCreatedType .') AS inboxLeadsTaken,    
