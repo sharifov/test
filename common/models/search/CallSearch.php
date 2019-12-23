@@ -380,11 +380,20 @@ class CallSearch extends Call
             $this->defaultUserTz = $this->reportTimezone;
         }
 
+        if ($this->timeTo == ""){
+            $this->timeTo = "24:00";
+        }
+
+        if((strtotime($this->timeTo) - strtotime($this->timeFrom)) < 0){
+            $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+        } else {
+            $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
+        }
+
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($this->timeFrom));
             $timeSub = date('G', strtotime($this->timeFrom));
-            $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
 
             $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
@@ -393,7 +402,6 @@ class CallSearch extends Call
         } else {
             $hourSub = date('G', strtotime(date('Y-m-d 00:00')));
             $timeSub = date('G', strtotime(date('00:00')));
-            $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
 
             $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00')), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
@@ -412,7 +420,7 @@ class CallSearch extends Call
         }
 
         $query = new Query();
-        $query->select(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$hourSub.' HOUR), "+00:00", "'. $utcOffsetDST. '")) AS createdDate,
+        $query->select(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$timeSub.' HOUR), "+00:00", "'. $utcOffsetDST. '")) AS createdDate,
         
         SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), c_call_duration, 0)) AS outgoingCallsDuration,
         SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCalls,
