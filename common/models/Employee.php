@@ -6,6 +6,7 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
 use common\models\search\EmployeeSearch;
 use sales\access\EmployeeGroupAccess;
+use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use Yii;
@@ -63,6 +64,8 @@ use yii\web\NotFoundHttpException;
  * @property bool $isAllowCallExpert
  * @property int $callExpertCountByShiftTime
  * @property int $callExpertCount
+ *
+ * @property Access $access
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -116,6 +119,20 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     private $departmentAccess = [];
     private $projectAccess = [];
+
+    private $access;
+
+    /**
+     * @return Access
+     */
+    public function getAccess(): Access
+    {
+        if ($this->access !== null) {
+            return $this->access;
+        }
+        $this->access = new Access($this);
+        return $this->access;
+    }
 
     /**
      * @param string $hash
