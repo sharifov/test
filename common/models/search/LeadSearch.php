@@ -21,6 +21,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Lead;
 use yii\data\SqlDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
@@ -2666,10 +2667,10 @@ class LeadSearch extends Lead
     /**
      * @param $params
      * @param $user Employee
-     * @return SqlDataProvider
+     * @return ArrayDataProvider
      * @throws \Exception
      */
-    public function leadFlowReport($params, $user):SqlDataProvider
+    public function leadFlowReport($params, $user):ArrayDataProvider
     {
         $this->load($params);
         $timezone = $user->timezone;
@@ -2764,10 +2765,30 @@ class LeadSearch extends Lead
         $query->groupBy(['created_date', 'lf.lf_owner_id']);
 
         $command = $query->createCommand();
-        $sql = $command->sql;
+        $data = $command->queryAll();
+
+        foreach ($data as $key => $model){
+            if (
+                $model['newTotal'] == 0 &&
+                $model['inboxLeadsTaken'] == 0 &&
+                $model['callLeadsTaken'] == 0 &&
+                $model['redialLeadsTaken'] == 0 &&
+                $model['leadsCreated'] == 0 &&
+                $model['leadsCloned'] == 0 &&
+                $model['followUpTotal'] == 0 &&
+                $model['toFollowUp'] == 0 &&
+                $model['followUpLeadsTaken'] == 0 &&
+                $model['trashLeads'] == 0 &&
+                $model['soldLeads'] == 0 &&
+                $model['profit'] == 0 &&
+                $model['tips'] == 0
+            ){
+                unset($data[$key]);
+            }
+        }
 
         $paramsData = [
-            'sql' => $sql,
+            'allModels' => $data,
             'sort' => [
                 'defaultOrder' => [
                     'user_id' => SORT_ASC,
@@ -2796,6 +2817,6 @@ class LeadSearch extends Lead
             ],
         ];
 
-        return $dataProvider = new SqlDataProvider($paramsData);
+        return $dataProvider = new ArrayDataProvider($paramsData);
     }
 }
