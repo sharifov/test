@@ -245,6 +245,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'icon' => 'list',
             'items' => [
                 ['label' => 'Currency List', 'url' => ['/currency/index']],
+                ['label' => 'Currency History', 'url' => ['/currency-history/index']],
                 ['label' => 'Product Types', 'url' => ['/product-type/index']],
                 ['label' => 'Products', 'url' => ['/product/index']],
                 ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],

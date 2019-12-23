@@ -6,6 +6,8 @@ use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientPhone;
+use common\models\Currency;
+use common\models\CurrencyHistory;
 use common\models\Department;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
@@ -1669,6 +1671,31 @@ die;
 		}
 
 		print_r($hours);
+	}
+
+	public function actionTestCurrencyHistoryLog()
+	{
+		$date = '2019-12-24';
+		$currency = Currency::find()->all();
+		foreach ($currency as $item) {
+			$currencyHistory = (new CurrencyHistory())->findOrCreateByPrimaryKeys($item->cur_code, $date);
+
+			$currencyHistory->cur_his_code = $item->cur_code;
+			$currencyHistory->cur_his_base_rate = $item->cur_base_rate;
+			$currencyHistory->cur_his_app_rate = $item->cur_app_rate;
+			$currencyHistory->cur_his_app_percent = $item->cur_app_percent;
+			$currencyHistory->cur_his_main_created_dt = $item->cur_created_dt;
+			$currencyHistory->cur_his_main_updated_dt = $item->cur_updated_dt;
+			$currencyHistory->cur_his_main_synch_dt = $item->cur_synch_dt;
+			$currencyHistory->cur_his_created = $date;
+
+			if (!$currencyHistory->save(false)) {
+				Yii::error($currencyHistory->cur_his_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+				echo 'Error';die;
+			}
+		}
+
+		echo 'Successful';
 	}
 
 }
