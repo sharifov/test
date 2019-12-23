@@ -37,9 +37,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'ug_disable:booleanByLabel',
             'ug_on_leaderboard:booleanByLabel',
             [
-                'attribute' => 'ug_user_group_id',
+                'attribute' => 'ug_user_group_set_id',
                 'value' => static function (UserGroup $model) {
-                    if ($model->ug_user_group_id) {
+                    if ($model->ug_user_group_set_id) {
                         return $model->userGroupSet->ugs_name;
                     }
                     return '';

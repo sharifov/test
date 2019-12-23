@@ -82,7 +82,7 @@ class UserGroupSet extends \yii\db\ActiveRecord
      */
     public function getUserGroups(): ActiveQuery
     {
-        return $this->hasMany(UserGroup::class, ['ug_user_group_id' => 'ugs_id']);
+        return $this->hasMany(UserGroup::class, ['ug_user_group_set_id' => 'ugs_id']);
     }
 
     /**

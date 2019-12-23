@@ -23,7 +23,9 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserConnection;
 use common\models\UserDepartment;
+use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use common\models\UserGroupSet;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use DateInterval;
@@ -149,8 +151,44 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $b = PhoneBlacklist::find()->isExists('+37369369654');
-        VarDumper::dump($b);
+
+        $idsCommongroups = EmployeeGroupAccess::getUsersIdsInCommonGroups(503);
+
+        $userId = 503;
+        $ids = Employee::find()->select('id')
+            ->andWhere(['or',
+                [
+                    'id' => EmployeeGroupAccess::getUsersIdsInCommonGroups($userId)
+                ],
+                [
+                    'id' => UserGroupAssign::find()->select(['ugs_user_id'])->andWhere([
+                        'ugs_group_id' =>
+                            UserGroup::find()->select('ug_id')->andWhere([
+                                'ug_user_group_set_id' =>
+                                    UserGroup::find()->select(['ug_user_group_set_id'])->andWhere([
+                                        'ug_id' =>
+                                            UserGroupAssign::find()->select(['ugs_group_id'])->andWhere([
+                                                'ugs_user_id' => $userId
+                                            ])
+                                    ])->andWhere(['IS NOT', 'ug_user_group_set_id', null])->andWhere(['ug_disable' => false])
+                            ])
+                    ])
+                ]
+            ])
+            ->asArray()->indexBy('id')->all();
+
+        VarDumper::dump($ids);
+
+die;
+
+
+        VarDumper::dump($ids);
+        die;
+        VarDumper::dump(count($idsCommongroups));
+        $user = Employee::findOne(500);
+        $idsGroups = array_keys($user->getUserGroupList());
+        VarDumper::dump($idsGroups);
+
         die;
         return $this->render('blank');
 
