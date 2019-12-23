@@ -42,6 +42,7 @@ class UserGroupSetSearch extends UserGroupSet
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['ugs_id' => SORT_DESC]]
         ]);
 
         $this->load($params);

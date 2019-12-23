@@ -63,10 +63,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]),
             ],
             [
-                'attribute' => 'ug_user_group_id',
+                'attribute' => 'ug_user_group_set_id',
                 'format' => 'raw',
                 'value' => function(\common\models\UserGroup $model) {
-                    if ($model->ug_user_group_id) {
+                    if ($model->ug_user_group_set_id) {
                         return $model->userGroupSet->ugs_name;
                     }
                     return '';

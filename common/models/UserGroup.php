@@ -18,7 +18,7 @@ use yii\helpers\ArrayHelper;
  * @property string $ug_updated_dt
  * @property int $ug_processing_fee
  * @property boolean $ug_on_leaderboard
- * @property int $ug_user_group_id
+ * @property int $ug_user_group_set_id
  *
  * @property UserGroupAssign[] $userGroupAssigns
  * @property Employee[] $ugsUsers
@@ -47,7 +47,7 @@ class UserGroup extends \yii\db\ActiveRecord
             [['ug_description'], 'string', 'max' => 255],
             [['ug_key'], 'unique'],
             [['ug_on_leaderboard'], 'boolean'],
-            ['ug_user_group_id', 'exist', 'targetClass' => UserGroupSet::class, 'targetAttribute' => ['ug_user_group_id' => 'ugs_id']]
+            ['ug_user_group_set_id', 'exist', 'targetClass' => UserGroupSet::class, 'targetAttribute' => ['ug_user_group_set_id' => 'ugs_id']]
         ];
     }
 
@@ -65,7 +65,7 @@ class UserGroup extends \yii\db\ActiveRecord
             'ug_updated_dt' => 'Updated Dt',
             'ug_processing_fee' => 'Processing Fee',
             'ug_on_leaderboard' => 'Show on Leaderboard',
-            'ug_user_group_id' => 'User Group Set',
+            'ug_user_group_set_id' => 'User Group Set',
         ];
     }
 
@@ -88,7 +88,7 @@ class UserGroup extends \yii\db\ActiveRecord
      */
     public function getUserGroupSet()
     {
-        return $this->hasOne(UserGroupSet::class, ['ugs_id' => 'ug_user_group_id']);
+        return $this->hasOne(UserGroupSet::class, ['ugs_id' => 'ug_user_group_set_id']);
     }
 
     /**
