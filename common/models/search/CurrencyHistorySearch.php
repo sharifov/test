@@ -17,8 +17,8 @@ class CurrencyHistorySearch extends CurrencyHistory
     public function rules()
     {
         return [
-            [['cur_his_code', 'cur_his_created', 'cur_his_main_created_dt', 'cur_his_main_updated_dt', 'cur_his_main_synch_dt'], 'safe'],
-            [['cur_his_base_rate', 'cur_his_app_rate', 'cur_his_app_percent'], 'number'],
+            [['ch_code', 'ch_created_date', 'ch_main_created_dt', 'ch_main_updated_dt', 'ch_main_synch_dt'], 'safe'],
+            [['ch_base_rate', 'ch_app_rate', 'ch_app_percent'], 'number'],
         ];
     }
 
@@ -48,7 +48,7 @@ class CurrencyHistorySearch extends CurrencyHistory
             'query' => $query,
 			'sort' => [
 				'defaultOrder' => [
-					'cur_his_created' => SORT_DESC,
+					'ch_created_date' => SORT_DESC,
 				]
 			]
         ]);
@@ -63,16 +63,16 @@ class CurrencyHistorySearch extends CurrencyHistory
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cur_his_base_rate' => $this->cur_his_base_rate,
-            'cur_his_app_rate' => $this->cur_his_app_rate,
-            'cur_his_app_percent' => $this->cur_his_app_percent,
-            'cur_his_created' => $this->cur_his_created,
-            'cur_his_main_created_dt' => $this->cur_his_main_created_dt,
-            'cur_his_main_updated_dt' => $this->cur_his_main_updated_dt,
-            'cur_his_main_synch_dt' => $this->cur_his_main_synch_dt,
+            'ch_base_rate' => $this->ch_base_rate,
+            'ch_app_rate' => $this->ch_app_rate,
+            'ch_app_percent' => $this->ch_app_percent,
+            'ch_created_date' => $this->ch_created_date,
+            'ch_main_created_dt' => $this->ch_main_created_dt,
+            'ch_main_updated_dt' => $this->ch_main_updated_dt,
+            'ch_main_synch_dt' => $this->ch_main_synch_dt,
         ]);
 
-        $query->andFilterWhere(['like', 'cur_his_code', $this->cur_his_code]);
+        $query->andFilterWhere(['like', 'ch_code', $this->ch_code]);
 
         return $dataProvider;
     }

@@ -1680,17 +1680,17 @@ die;
 		foreach ($currency as $item) {
 			$currencyHistory = (new CurrencyHistory())->findOrCreateByPrimaryKeys($item->cur_code, $date);
 
-			$currencyHistory->cur_his_code = $item->cur_code;
-			$currencyHistory->cur_his_base_rate = $item->cur_base_rate;
-			$currencyHistory->cur_his_app_rate = $item->cur_app_rate;
-			$currencyHistory->cur_his_app_percent = $item->cur_app_percent;
-			$currencyHistory->cur_his_main_created_dt = $item->cur_created_dt;
-			$currencyHistory->cur_his_main_updated_dt = $item->cur_updated_dt;
-			$currencyHistory->cur_his_main_synch_dt = $item->cur_synch_dt;
-			$currencyHistory->cur_his_created = $date;
+			$currencyHistory->ch_code = $item->cur_code;
+			$currencyHistory->ch_base_rate = $item->cur_base_rate;
+			$currencyHistory->ch_app_rate = $item->cur_app_rate;
+			$currencyHistory->ch_app_percent = $item->cur_app_percent;
+			$currencyHistory->ch_main_created_dt = $item->cur_created_dt;
+			$currencyHistory->ch_main_updated_dt = $item->cur_updated_dt;
+			$currencyHistory->ch_main_synch_dt = $item->cur_synch_dt;
+			$currencyHistory->ch_created_date = $date;
 
 			if (!$currencyHistory->save(false)) {
-				Yii::error($currencyHistory->cur_his_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+				Yii::error($currencyHistory->ch_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
 				echo 'Error';die;
 			}
 		}

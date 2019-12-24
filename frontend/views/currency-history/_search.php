@@ -18,21 +18,21 @@ use yii\widgets\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'cur_his_code') ?>
+    <?= $form->field($model, 'ch_code') ?>
 
-    <?= $form->field($model, 'cur_his_base_rate') ?>
+    <?= $form->field($model, 'ch_base_rate') ?>
 
-    <?= $form->field($model, 'cur_his_app_rate') ?>
+    <?= $form->field($model, 'ch_app_rate') ?>
 
-    <?= $form->field($model, 'cur_his_app_percent') ?>
+    <?= $form->field($model, 'ch_app_percent') ?>
 
-    <?= $form->field($model, 'cur_his_created') ?>
+    <?= $form->field($model, 'ch_created_date') ?>
 
-    <?php // echo $form->field($model, 'cur_his_main_created_dt') ?>
+    <?php // echo $form->field($model, 'ch_main_created_dt') ?>
 
-    <?php // echo $form->field($model, 'cur_his_main_updated_dt') ?>
+    <?php // echo $form->field($model, 'ch_main_updated_dt') ?>
 
-    <?php // echo $form->field($model, 'cur_his_main_synch_dt') ?>
+    <?php // echo $form->field($model, 'ch_main_synch_dt') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
