@@ -2700,7 +2700,6 @@ class LeadSearch extends Lead
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
             $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         } else {
-            $hourSub = date('G', strtotime(date('Y-m-d 00:00')));
             $timeSub = date('G', strtotime(date('00:00')));
             $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00')), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);

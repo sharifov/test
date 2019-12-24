@@ -392,7 +392,7 @@ class CallSearch extends Call
 
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
-            $hourSub = date('G', strtotime($this->timeFrom));
+            $hourSub = date('G', strtotime($dates[0]));
             $timeSub = date('G', strtotime($this->timeFrom));
 
             $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
@@ -400,7 +400,6 @@ class CallSearch extends Call
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
             $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         } else {
-            $hourSub = date('G', strtotime(date('Y-m-d 00:00')));
             $timeSub = date('G', strtotime(date('00:00')));
 
             $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00')), $this->defaultUserTz);
