@@ -47,14 +47,17 @@ use yii\bootstrap4\Html;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block">
+        <?php
+            $ordTotalPrice = 0;
+            $ordClientTotalPrice = 0;
+            $ordOptionTotalPrice = 0;
+            $ordTotalFee = 0;
+        ?>
 
         <table class="table table-bordered">
             <?php if ($order->orderProducts):
 
-                $ordTotalPrice = 0;
-                $ordClientTotalPrice = 0;
-                $ordOptionTotalPrice = 0;
-                $ordTotalFee = 0;
+
                 ?>
                 <tr>
                     <th>Quote ID</th>
