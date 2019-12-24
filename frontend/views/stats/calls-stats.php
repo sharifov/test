@@ -45,7 +45,7 @@ $this->title = 'Calls Stats';
 										'timePickerIncrement' => 1,
 										'timePicker24Hour' => true,
 										'locale' => [
-											'format' => 'd-M-Y H:i',
+											'format' => 'Y-m-d H:i:s',
 											'separator' => ' - '
 										]
 									]
