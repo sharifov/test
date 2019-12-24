@@ -7,21 +7,23 @@ use yii\helpers\ArrayHelper;
  */
 
 $totalRows = count($totalCallsDbData) ?: 1;
+$inRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'inc_dur_count')) ?: 1;
+$outRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'out_dur_count')) ?: 1;
 
 $totalCalls = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'total_calls'));
 $totalCallsAvg = $totalCalls / $totalRows;
 $totalRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'total_rec_duration'));
-$totalRecDurationAvg = $totalRecDuration / $totalRows;
+$totalRecDurationAvg = $totalRecDuration / ($inRecDuration + $outRecDuration);
 
 $totalIncomingCalls = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'incoming'));
 $totalIncomingCallsAvg = $totalIncomingCalls / $totalRows;
 $totalIncomingRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'in_rec_duration'));
-$totalIncomingRecDurationAvg = $totalIncomingRecDuration / $totalRows;
+$totalIncomingRecDurationAvg = $totalIncomingRecDuration / $inRecDuration;
 
 $totalOutgoingCalls = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'outgoing'));
 $totalOutgoingCallsAvg = $totalOutgoingCalls / $totalRows;
 $totalOutgoingRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'out_rec_duration'));
-$totalOutgoingRecDurationAvg = $totalOutgoingRecDuration / $totalRows;
+$totalOutgoingRecDurationAvg = $totalOutgoingRecDuration / $outRecDuration;
 
 ?>
 <div class="row" style="margin-top: 40px;">
