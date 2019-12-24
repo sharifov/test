@@ -180,6 +180,8 @@ class Lead extends ActiveRecord
     public const STATUS_TRASH       = 11;
     public const STATUS_BOOKED      = 12;
     public const STATUS_SNOOZE      = 13;
+    public const STATUS_BOOK_FAILED = 14;
+    public const STATUS_ALTERNATIVE = 15;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -191,6 +193,8 @@ class Lead extends ActiveRecord
         self::STATUS_TRASH          => 'Trash',
         self::STATUS_BOOKED         => 'Booked',
         self::STATUS_SNOOZE         => 'Snooze',
+        self::STATUS_BOOK_FAILED    => 'Book failed',
+        self::STATUS_ALTERNATIVE    => 'Alternative',
     ];
 
     public const STATUS_MULTIPLE_UPDATE_LIST = [
@@ -1230,9 +1234,19 @@ class Lead extends ActiveRecord
         return $this->status === self::STATUS_ON_HOLD;
     }
 
-    public function isReject()
+    public function isReject(): bool
     {
         return $this->status === self::STATUS_REJECT;
+    }
+
+    public function isBookFailed(): bool
+    {
+        return $this->status === self::STATUS_BOOK_FAILED;
+    }
+
+    public function isAlternative(): bool
+    {
+        return $this->status === self::STATUS_ALTERNATIVE;
     }
 
     /**
