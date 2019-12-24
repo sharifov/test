@@ -6,14 +6,13 @@ use Yii;
 use common\models\CurrencyHistory;
 use common\models\search\CurrencyHistorySearch;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * CurrencyHistoryController implements the CRUD actions for CurrencyHistory model.
  */
-class CurrencyHistoryController extends Controller
+class CurrencyHistoryController extends FController
 {
     /**
      * {@inheritdoc}
@@ -99,14 +98,16 @@ class CurrencyHistoryController extends Controller
         ]);
     }
 
-    /**
-     * Deletes an existing CurrencyHistory model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $ch_code
-     * @param string $ch_created_date
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+	/**
+	 * Deletes an existing CurrencyHistory model.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * @param string $ch_code
+	 * @param string $ch_created_date
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws \Throwable
+	 * @throws \yii\db\StaleObjectException
+	 */
     public function actionDelete($ch_code, $ch_created_date)
     {
         $this->findModel($ch_code, $ch_created_date)->delete();

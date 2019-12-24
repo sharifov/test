@@ -2,7 +2,8 @@
 
 namespace common\models;
 
-use Yii;
+use common\models\query\CurrencyHistoryQuery;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "currency_history".
@@ -15,6 +16,8 @@ use Yii;
  * @property string|null $ch_main_created_dt
  * @property string|null $ch_main_updated_dt
  * @property string|null $ch_main_synch_dt
+ *
+ * @property Currency $chCode
  */
 class CurrencyHistory extends \yii\db\ActiveRecord
 {
@@ -33,11 +36,13 @@ class CurrencyHistory extends \yii\db\ActiveRecord
     {
         return [
             [['ch_code', 'ch_created_date'], 'required'],
-            [['ch_base_rate', 'ch_app_rate', 'ch_app_percent'], 'number'],
+			[['ch_app_percent'], 'number', 'max' => 100],
+			[['ch_base_rate', 'ch_app_rate'], 'number', 'max' => 1000],
             [['ch_created_date', 'ch_main_created_dt', 'ch_main_updated_dt', 'ch_main_synch_dt'], 'safe'],
             [['ch_code'], 'string', 'max' => 3],
             [['ch_code', 'ch_created_date'], 'unique', 'targetAttribute' => ['ch_code', 'ch_created_date']],
-        ];
+			[['ch_code'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['ch_code' => 'cur_code']],
+		];
     }
 
     /**
@@ -56,6 +61,23 @@ class CurrencyHistory extends \yii\db\ActiveRecord
             'ch_main_synch_dt' => 'Main Synch Dt',
         ];
     }
+
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getChCode(): ActiveQuery
+	{
+		return $this->hasOne(Currency::class, ['cur_code' => 'ch_code']);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 * @return CurrencyHistoryQuery the active query used by this AR class.
+	 */
+	public static function find()
+	{
+		return new CurrencyHistoryQuery (static::class);
+	}
 
 	/**
 	 * @param Currency $currency

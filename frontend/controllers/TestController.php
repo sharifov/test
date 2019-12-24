@@ -1675,7 +1675,7 @@ die;
 
 	public function actionTestCurrencyHistoryLog()
 	{
-		$date = '2019-12-24';
+		$date = '2019-12-25';
 		$currency = Currency::find()->all();
 		foreach ($currency as $item) {
 			$currencyHistory = (new CurrencyHistory())->findOrCreateByPrimaryKeys($item->cur_code, $date);

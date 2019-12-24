@@ -49,6 +49,7 @@ class CurrencyHistorySearch extends CurrencyHistory
 			'sort' => [
 				'defaultOrder' => [
 					'ch_created_date' => SORT_DESC,
+					'ch_code' => SORT_ASC
 				]
 			]
         ]);

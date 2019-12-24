@@ -15,6 +15,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
+    <p>
+		<?= Html::a('Update', ['update', 'ch_code' => $model->ch_code, 'ch_created_date' => $model->ch_created_date], ['class' => 'btn btn-primary']) ?>
+		<?= Html::a('Delete', ['delete', 'ch_code' => $model->ch_code, 'ch_created_date' => $model->ch_created_date], [
+			'class' => 'btn btn-danger',
+			'data' => [
+				'confirm' => 'Are you sure you want to delete this item?',
+				'method' => 'post',
+			],
+		]) ?>
+    </p>
+
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [

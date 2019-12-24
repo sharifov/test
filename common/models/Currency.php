@@ -14,15 +14,17 @@ use yii\helpers\VarDumper;
  * @property string $cur_code
  * @property string $cur_name
  * @property string $cur_symbol
- * @property double $cur_base_rate
- * @property double $cur_app_rate
- * @property double $cur_app_percent
- * @property bool $cur_enabled
- * @property bool $cur_default
- * @property int $cur_sort_order
- * @property string $cur_created_dt
- * @property string $cur_updated_dt
- * @property string $cur_synch_dt
+ * @property float|null $cur_base_rate
+ * @property float|null $cur_app_rate
+ * @property float|null $cur_app_percent
+ * @property int|null $cur_enabled
+ * @property int|null $cur_default
+ * @property int|null $cur_sort_order
+ * @property string|null $cur_created_dt
+ * @property string|null $cur_updated_dt
+ * @property string|null $cur_synch_dt
+ *
+ * @property CurrencyHistory[] $currencyHistories
  */
 class Currency extends \yii\db\ActiveRecord
 {

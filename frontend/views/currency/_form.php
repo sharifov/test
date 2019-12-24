@@ -30,7 +30,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cur_app_rate')->input('number', ['step' => 0.00001]) ?>
 
-        <?= $form->field($model, 'cur_app_percent')->input('number', ['step' => 0.01]) ?>
+        <?= $form->field($model, 'cur_app_percent')->input('number', ['step' => 0.001]) ?>
 
         <?= $form->field($model, 'cur_sort_order')->dropDownList(range(0, 10), range(0, 10)) ?>
 
