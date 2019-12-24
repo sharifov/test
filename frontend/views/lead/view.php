@@ -74,20 +74,21 @@ $lead = $leadForm->getLead();
                 'is_manager' => $is_manager,
             ]) ?>
 
+            <?php if ($lead->products): ?>
+                <?= $this->render('offers/lead_offers', [
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'dataProviderOffers' => $dataProviderOffers,
+                    'is_manager' => $is_manager,
+                ]) ?>
 
-            <?= $this->render('offers/lead_offers', [
-                'lead' => $lead,
-                'leadForm' => $leadForm,
-                'dataProviderOffers' => $dataProviderOffers,
-                'is_manager' => $is_manager,
-            ]) ?>
-
-            <?= $this->render('orders/lead_orders', [
-                'lead' => $lead,
-                'leadForm' => $leadForm,
-                'dataProviderOrders' => $dataProviderOrders,
-                'is_manager' => $is_manager,
-            ]) ?>
+                <?= $this->render('orders/lead_orders', [
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'dataProviderOrders' => $dataProviderOrders,
+                    'is_manager' => $is_manager,
+                ]) ?>
+            <?php endif; ?>
 
 
         </div>

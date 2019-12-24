@@ -123,6 +123,9 @@ use yii\helpers\VarDumper;
  * @property Sms[] $sms
  * @property Quote[] $quotes
  * @property Note[] $notes
+ * @property Offer[] $offers
+ * @property Order[] $orders
+ * @property Product[] $products
  * @property LeadLog[] $leadLogs
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
@@ -1655,6 +1658,30 @@ class Lead extends ActiveRecord
     public function getNotes(): ActiveQuery
     {
         return $this->hasMany(Note::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOffers(): ActiveQuery
+    {
+        return $this->hasMany(Offer::class, ['of_lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOrders(): ActiveQuery
+    {
+        return $this->hasMany(Order::class, ['or_lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProducts(): ActiveQuery
+    {
+        return $this->hasMany(Product::class, ['pr_lead_id' => 'id']);
     }
 
     /**

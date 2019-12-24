@@ -5,7 +5,6 @@
  * @var $leadForm LeadForm
  * @var $itineraryForm ItineraryEditForm
  * @var $is_manager bool
- * @var $products \common\models\Product[]
  * @var $quotesProvider \yii\data\ActiveDataProvider
  *
  */
@@ -18,13 +17,11 @@ use yii\helpers\Html;
 ?>
 
 <?php
-    $products = \common\models\Product::find()->where(['pr_lead_id' => $lead->id])->all();
 
+    $products = $lead->products;
     //\yii\helpers\VarDumper::dump($products);
-
     $items = [];
 ?>
-
 
 <?php \yii\widgets\Pjax::begin(['id' => 'product-accordion', 'enablePushState' => false, 'timeout' => 10000])?>
 
@@ -49,7 +46,7 @@ use yii\helpers\Html;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: none">
+        <div class="x_content" style="display: <?=$products ? 'none' : 'block'?>">
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,
