@@ -22,6 +22,7 @@ use yii\base\Widget;
  * @property RedialUrl $takeUrl
  * @property RedialUrl $reservationUrl
  * @property RedialUrl $phoneNumberFromUrl
+ * @property RedialUrl $checkBlackPhoneUrl
  * @property string $script
  * @property ClientPhonesDTO[] $phonesTo
  */
@@ -37,6 +38,8 @@ class LeadRedialWidget extends Widget
     public $reservationUrl;
 
     public $phoneNumberFromUrl;
+
+    public $checkBlackPhoneUrl;
 
     public $script;
 
@@ -60,6 +63,9 @@ class LeadRedialWidget extends Widget
         if (!$this->phoneNumberFromUrl instanceof RedialUrl) {
             throw new \InvalidArgumentException('phoneNumberFromUrl property must be RedialUrl');
         }
+        if (!$this->checkBlackPhoneUrl instanceof RedialUrl) {
+            throw new \InvalidArgumentException('checkBlackPhoneUrl property must be RedialUrl');
+        }
     }
 
     /**
@@ -72,6 +78,7 @@ class LeadRedialWidget extends Widget
             'viewUrl' => $this->viewUrl,
             'takeUrl' => $this->takeUrl,
             'phoneNumberFromUrl' => $this->phoneNumberFromUrl,
+            'checkBlackPhoneUrl' => $this->checkBlackPhoneUrl,
             'reservationUrl' => $this->reservationUrl,
             'script' => $this->script,
             'phonesTo' => $this->findPhonesTo(),

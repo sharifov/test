@@ -249,6 +249,7 @@ class QuoteController extends ApiBaseController
             $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;
+            $response['gdsOfferId'] = $model->gds_offer_id;
 
             if(in_array($model->lead->status,[10,12])){
                 $response['lead_status'] = ($model->lead->status == 10)?'sold':'booked';

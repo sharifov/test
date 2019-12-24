@@ -364,6 +364,12 @@ JS;
             }
             ?>
         <?php endforeach;?>
+		<?php
+		$js = <<<JS
+    $('.quote__heading [data-toggle="tooltip"]').tooltip();
+JS;
+		$this->registerJs($js);
+		?>
     </div>
 <?php else:?>
     <div class="search-results__wrapper">

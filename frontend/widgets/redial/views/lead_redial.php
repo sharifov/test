@@ -17,6 +17,7 @@ use yii\web\JqueryAsset;
 /** @var RedialUrl $takeUrl */
 /** @var RedialUrl $reservationUrl */
 /** @var RedialUrl $phoneNumberFromUrl */
+/** @var RedialUrl $checkBlackPhoneUrl */
 /** @var string $script */
 
 /** @var ClientPhonesDTO[] $phonesTo */
@@ -130,7 +131,7 @@ $("#redial-lead-actions-block-call").on('click', function (e) {
         return ;
     }
     $('.group-redial-lead-phone-to').hide();
-    getPhoneNumberFromAndNext(phoneTo);
+    checkBlackPhoneAndNext(phoneTo);
 });
 
 $("#redial-lead-actions-take").on('click', function (e) {
@@ -161,6 +162,28 @@ function callInProgress() {
     $("#redial-lead-call-status-block-text").html('In progress ...');
     showActionBlock();
     startTimer({$redialAutoTakeSeconds});
+}
+
+function checkBlackPhoneAndNext(phoneTo) {
+    $.ajax({
+        type: '{$checkBlackPhoneUrl->method}',
+        url: '{$checkBlackPhoneUrl->url}',
+        data: {phone: phoneTo}
+    })
+    .done(function(data) {
+        if (data.success) {
+            getPhoneNumberFromAndNext(phoneTo);
+        } else {
+           let text = 'Error. Try again later';
+           if (data.message) {
+               text = data.message;
+           }
+           new PNotify({title: "Lead Redial", type: "error", text: text, hide: true});
+        }
+    })
+    .fail(function() {
+        new PNotify({title: "Lead Redial", type: "error", text: 'Try again later.', hide: true});
+    })
 }
 
 function getPhoneNumberFromAndNext(phoneTo) {

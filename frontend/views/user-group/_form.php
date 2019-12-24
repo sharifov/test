@@ -1,5 +1,6 @@
 <?php
 
+use common\models\UserGroupSet;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -23,7 +24,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ug_disable')->checkbox() ?>
 
-        <?//= $form->field($model, 'ug_updated_dt')->textInput() ?>
+        <?= $form->field($model, 'ug_on_leaderboard')->checkbox() ?>
+
+        <?= $form->field($model, 'ug_user_group_set_id')->dropDownList(UserGroupSet::getList(), ['prompt' => 'Select group']) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

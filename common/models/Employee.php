@@ -7,6 +7,7 @@ use common\components\BackOffice;
 use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
 use sales\access\EmployeeGroupAccess;
+use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use Yii;
@@ -64,6 +65,8 @@ use yii\web\NotFoundHttpException;
  * @property bool $isAllowCallExpert
  * @property int $callExpertCountByShiftTime
  * @property int $callExpertCount
+ *
+ * @property Access $access
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -117,6 +120,20 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     private $departmentAccess = [];
     private $projectAccess = [];
+
+    private $access;
+
+    /**
+     * @return Access
+     */
+    public function getAccess(): Access
+    {
+        if ($this->access !== null) {
+            return $this->access;
+        }
+        $this->access = new Access($this);
+        return $this->access;
+    }
 
     /**
      * @param string $hash
@@ -1551,7 +1568,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $sign = ($tz['offset'] > 0) ? '+' : '-';
             $offset = gmdate('H:i', abs($tz['offset']));
             $timezoneList[$tz['identifier']] = ($formatLong)
-                ? '(UTC ' . $sign . $offset . ') ' . $tz['identifier']
+                ? '(' . $sign . $offset . ') ' . $tz['identifier']
                 : $sign . $offset;
         }
 
@@ -1987,6 +2004,42 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $dateTime;
+    }
+
+    public static function convertToUTC(int $time, string $timezone): string
+    {
+        $dateTime = '';
+
+        if($time >= 0) {
+
+            $dateTime = date('Y-m-d H:i:s', $time);
+
+            try {
+                if ($timezone) {
+                    $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
+                    $date->setTimezone(new \DateTimeZone('UTC'));
+                    $dateTime = $date->format('Y-m-d H:i:s');
+                }
+            } catch (\Throwable $throwable) {
+                $dateTime = '';
+            }
+        }
+
+        return $dateTime;
+    }
+
+    public static function getUtcOffsetDst( $time_zone = 'Europe/Chisinau', $dateToCheck ) {
+        // Set UTC as default time zone.
+        //date_default_timezone_set( 'UTC' );
+        $utc = new \DateTime($dateToCheck);
+        // Calculate offset.
+        $current = timezone_open( $time_zone );
+        $offset_s  = timezone_offset_get( $current, $utc ); // seconds
+        $offset_s  = (string) $offset_s;
+        $sign = ($offset_s > 0) ? '+' : '-';
+        $hours = floor(abs($offset_s) / 3600);
+        $minutes = floor((abs($offset_s) / 60) % 60);
+        return $sign . sprintf("%02d:%02d", $hours, $minutes);
     }
 
 	/**

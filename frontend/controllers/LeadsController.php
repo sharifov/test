@@ -8,20 +8,32 @@ use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
 use frontend\models\LeadMultipleForm;
+use frontend\widgets;
 use sales\services\lead\LeadMultiUpdateService;
 use Yii;
 use common\models\Lead;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 use yii\widgets\ActiveForm;
 
 /**
  * LeadsController implements the CRUD actions for Lead model.
+ *
+ * @property widgets\lead\editTool\Service $toolService
  */
 class LeadsController extends FController
 {
+    private $toolService;
+
+    public function __construct($id, $module, widgets\lead\editTool\Service $toolService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->toolService = $toolService;
+    }
 
     public function behaviors()
     {
@@ -34,6 +46,42 @@ class LeadsController extends FController
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    /**
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionEdit(): Response
+    {
+        $lead = $this->findModel((int)Yii::$app->request->post('id'));
+        $form = new widgets\lead\editTool\Form($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->toolService->edit($lead, $form);
+                return $this->asJson(['success' => true]);
+            } catch (\DomainException $e) {
+                return $this->asJson(['success' => false, 'text'=> $e->getMessage()]);
+            }
+        } else {
+            return $this->asJson(['data' => $this->renderAjax('_tool_edit', ['lead' => $lead])]);
+        }
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionEditValidation(): array
+    {
+        $lead = $this->findModel((int)Yii::$app->request->post('id'));
+        $form = new widgets\lead\editTool\Form($lead);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
     }
 
     /**

@@ -5,6 +5,7 @@ namespace common\bootstrap;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\dispatchers\SimpleEventDispatcher;
+use sales\entities\cases\events\CasesCreatedEvent;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
 use sales\entities\cases\events\CasesPendingStatusEvent;
 use sales\entities\cases\events\CasesProcessingStatusEvent;
@@ -14,9 +15,11 @@ use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
+use sales\events\lead\LeadCreatedByIncomingEmailEvent;
 use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
+use sales\events\lead\LeadCreatedManuallyEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
@@ -31,6 +34,7 @@ use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\events\sms\SmsCreatedByIncomingSalesEvent;
 use sales\events\sms\SmsCreatedByIncomingSupportsEvent;
+use sales\events\sms\SmsCreatedEvent;
 use sales\listeners\cases\CasesFollowUpStatusEventLogListener;
 use sales\listeners\cases\CasesPendingStatusEventLogListener;
 use sales\listeners\cases\CasesProcessingStatusEventLogListener;
@@ -41,6 +45,7 @@ use sales\listeners\lead\LeadBookedNotificationsListener;
 use sales\listeners\lead\LeadCallExpertRequestEventListener;
 use sales\listeners\lead\LeadCreatedByApiLogEventListener;
 use sales\listeners\lead\LeadCreatedByIncomingCallLogListener;
+use sales\listeners\lead\LeadCreatedByIncomingEmailLogListener;
 use sales\listeners\lead\LeadCreatedByIncomingSmsLogListener;
 use sales\listeners\lead\LeadCreatedCloneByUserEventListener;
 use sales\listeners\lead\LeadCreatedEventListener;
@@ -80,6 +85,18 @@ class SetUp implements BootstrapInterface
         $container->setSingleton(DeferredEventDispatcher::class, function (Container $container) {
             return new DeferredEventDispatcher(new SimpleEventDispatcher($container, [
                 LeadCreatedEvent::class => [LeadCreatedEventListener::class],
+                LeadCreatedManuallyEvent::class => [],
+                LeadCreatedByIncomingCallEvent::class => [
+                    LeadCreatedByIncomingCallLogListener::class,
+                    LeadQcallAddListener::class,
+                ],
+                LeadCreatedByApiEvent::class => [
+                    LeadCreatedByApiLogEventListener::class,
+                    LeadQcallAddListener::class,
+                ],
+                LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
+                LeadCreatedByIncomingEmailEvent::class => [LeadCreatedByIncomingEmailLogListener::class],
+
                 LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
                 LeadOwnerChangedEvent::class => [LeadOwnerChangedNotificationsListener::class],
                 LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
@@ -109,24 +126,17 @@ class SetUp implements BootstrapInterface
                     LeadSnoozeEventLogListener::class,
                     LeadSnoozeNotificationsListener::class,
                 ],
-                LeadCreatedByIncomingCallEvent::class => [
-                    LeadCreatedByIncomingCallLogListener::class,
-                    LeadQcallAddListener::class,
-                ],
-                LeadCreatedByApiEvent::class => [
-                    LeadCreatedByApiLogEventListener::class,
-                    LeadQcallAddListener::class,
-                ],
-                LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
 
                 LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
 
+                CasesCreatedEvent::class => [],
                 CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],
                 CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class],
                 CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],
                 CasesSolvedStatusEvent::class => [CasesSolvedStatusEventLogListener::class],
                 CasesTrashStatusEvent::class => [CasesTrashStatusEventLogListener::class],
 
+                SmsCreatedEvent::class => [],
                 SmsCreatedByIncomingSalesEvent::class => [SmsCreatedByIncomingSalesNotificationListener::class],
                 SmsCreatedByIncomingSupportsEvent::class => [SmsCreatedByIncomingSupportNotificationListener::class],
             ]));

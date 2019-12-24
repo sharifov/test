@@ -59,6 +59,7 @@ class CasesSearch extends Cases
             ['cs_created_dt', 'string'],
             ['cs_client_id', 'integer'],
             ['cs_project_id', 'integer'],
+            ['cs_last_action_dt', 'safe'],
 
             ['cssSaleId', 'integer'],
             ['cssBookId', 'string'],
@@ -300,6 +301,10 @@ class CasesSearch extends Cases
 
         if ($this->cs_created_dt) {
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
+        }
+
+        if ($this->cs_last_action_dt) {
+            $query->andFilterWhere(['DATE(cs_last_action_dt)' => date('Y-m-d', strtotime($this->cs_last_action_dt))]);
         }
 
         return $dataProvider;

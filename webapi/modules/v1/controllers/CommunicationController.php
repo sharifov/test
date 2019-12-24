@@ -20,6 +20,8 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
 use sales\repositories\lead\LeadRepository;
+use sales\services\call\CallDeclinedException;
+use sales\services\call\CallService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
@@ -36,6 +38,7 @@ use yii\queue\Queue;
 /**
  * Class CommunicationController
  *
+ * @property CallService $callService
  */
 class CommunicationController extends ApiBaseController
 {
@@ -56,6 +59,22 @@ class CommunicationController extends ApiBaseController
     public const TYPE_NEW_SMS_MESSAGES_RECEIVED = 'new_sms_messages_received';
 
     public const TYPE_SMS_FINISH        = 'sms_finish';
+    /**
+     * @var CallService
+     */
+    private $callService;
+
+    /**
+     * @param $id
+     * @param $module
+     * @param CallService $callService
+     * @param array $config
+     */
+    public function __construct($id, $module, CallService $callService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->callService = $callService;
+    }
 
     /**
      * @api {post} /v1/communication/email Communication Email
@@ -277,6 +296,16 @@ class CommunicationController extends ApiBaseController
                 $response['error_code'] = 11;
             }
 
+            try {
+                $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
+            } catch (CallDeclinedException $e) {
+                $vr = new VoiceResponse();
+//                $sayParam = ['language' => 'en-US'];   // ['language' => 'en-US', 'voice' => 'alice']
+                //$vr->say('Test', $sayParam);
+                $vr->reject(['reason' => 'busy']);
+                return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: '. $e->getMessage());
+            }
+
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
             $conferenceRoom = ConferenceRoom::find()->where(['cr_phone_number' => $incoming_phone_number, 'cr_enabled' => true])->orderBy(['cr_id' => SORT_DESC])->limit(1)->one();
@@ -421,6 +450,10 @@ class CommunicationController extends ApiBaseController
 
             if (!$call) {
                 $call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+            }
+
+            if ($call->isGeneralParent()) {
+                $call = Call::find()->firstChild($call->c_id)->one();
             }
 
             if ($call && $callData['RecordingUrl']) {
@@ -868,6 +901,10 @@ class CommunicationController extends ApiBaseController
 
         if ($callSid) {
             $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
+            if ($call && $call->isDeclined()) {
+                $call->c_call_status = $callData['CallStatus'];
+                return $call;
+            }
         }
 
         if ($parentCallSid) {
@@ -1723,9 +1760,9 @@ class CommunicationController extends ApiBaseController
 
                 if ($lastEmail) {
                     //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                    $filter['last_id'] = $lastEmail->e_inbox_email_id + 1;
+                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
                 } else {
-                    $filter['last_id'] = 18100;
+                    $filter['last_id'] = 1;
                 }
             } else {
                 $filter['last_id'] = (int)$last_id;
@@ -1736,6 +1773,14 @@ class CommunicationController extends ApiBaseController
                     return $response;
                 }
 
+                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
+
+                if ($lastEmail) {
+                    //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
+                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
+                } else {
+                    $filter['last_id'] = 1;
+                }
             }
 
             $filter['limit'] = 20;

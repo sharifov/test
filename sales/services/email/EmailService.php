@@ -2,8 +2,11 @@
 namespace sales\services\email;
 
 use common\models\ClientEmail;
+use common\models\DepartmentEmailProject;
 use common\models\Email;
+use common\models\Employee;
 use common\models\Lead;
+use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -51,7 +54,7 @@ class EmailService
 			$lead = $this->getLeadFromSubjectByIdOrHash($subject);
 
 			if(!$lead && !$lead = $this->getLeadFromSubjectByKivTag($email->e_ref_message_id)) {
-				$lead = $this->getLeadByLastEmail($email->e_email_from);
+//				$lead = $this->getLeadByLastEmail($email->e_email_from);
 			}
 		} catch (NotFoundException $exception) {
 			Yii::error('('.$exception->getCode().') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')', 'SalesEmailService:detectLeadId:NotFoundException');
@@ -74,7 +77,7 @@ class EmailService
 			$case = $this->getCaseFromSubjectByIdOrHash($subject);
 
 			if(!$case && !$case = $this->getCaseFromSubjectByKivTag($email->e_ref_message_id)) {
-				$case = $this->getCaseByLastEmail($email->e_email_from);
+//				$case = $this->getCaseByLastEmail($email->e_email_from);
 			}
 		} catch (NotFoundException $exception) {
 			Yii::error('('.$exception->getCode().') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')', 'SalesEmailService:detectCaseId:NotFoundException');
@@ -85,12 +88,34 @@ class EmailService
 		return $email->e_case_id;
 	}
 
+    /**
+     * @param string $email
+     * @return bool
+     */
+    public function isNotInternalEmail(string $email): bool
+    {
+        if (UserProjectParams::find()->byEmail($email)->one()) {
+            return false;
+        }
+        if (Employee::find()->byEmail($email)->one()) {
+            return false;
+        }
+        if (DepartmentEmailProject::find()->byEmail($email)->one()) {
+            return false;
+        }
+        return true;
+    }
+
 	/**
-	 * @param string $subject
+	 * @param string|null $subject
 	 * @return Cases
 	 */
-	private function getCaseFromSubjectByIdOrHash(string $subject): ?Cases
+	private function getCaseFromSubjectByIdOrHash(?string $subject): ?Cases
 	{
+	    if (!$subject) {
+	        return null;
+        }
+
 		preg_match('~\[cid:(\d+)\]~si', $subject, $matches);
 
 		if(!empty($matches[1])) {
@@ -110,11 +135,15 @@ class EmailService
 	}
 
 	/**
-	 * @param string $refMessageId
+	 * @param string|null $refMessageId
 	 * @return Cases|null
 	 */
-	private function getCaseFromSubjectByKivTag(string $refMessageId): ?Cases
+	private function getCaseFromSubjectByKivTag(?string $refMessageId): ?Cases
 	{
+	    if (!$refMessageId) {
+	        return null;
+        }
+
 		$matches = [];
 		preg_match_all('~<kiv\.(.+)>~iU', $refMessageId, $matches);
 		if (!empty($matches[1])) {
@@ -151,11 +180,15 @@ class EmailService
 	}
 
 	/**
-	 * @param string $subject
+	 * @param string|null $subject
 	 * @return Lead|null
 	 */
-	private function getLeadFromSubjectByIdOrHash(string $subject): ?Lead
+	private function getLeadFromSubjectByIdOrHash(?string $subject): ?Lead
 	{
+	    if (!$subject) {
+	        return null;
+        }
+
 		preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
 
 		if(!empty($matches[1])) {
@@ -175,11 +208,15 @@ class EmailService
 	}
 
 	/**
-	 * @param string $refMessageId
+	 * @param string|null $refMessageId
 	 * @return Lead|null
 	 */
-	private function getLeadFromSubjectByKivTag(string $refMessageId): ?Lead
+	private function getLeadFromSubjectByKivTag(?string $refMessageId): ?Lead
 	{
+	    if (!$refMessageId) {
+	        return null;
+        }
+
 		$matches = [];
 		preg_match_all('~<kiv\.(.+)>~iU', $refMessageId, $matches);
 		if (!empty($matches[1])) {

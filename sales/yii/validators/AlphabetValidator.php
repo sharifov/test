@@ -1,7 +1,6 @@
 <?php
 
-
-namespace sales\validators;
+namespace sales\yii\validators;
 
 use yii\validators\RegularExpressionValidator;
 

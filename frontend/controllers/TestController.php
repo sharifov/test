@@ -6,14 +6,18 @@ use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientPhone;
+use common\models\Currency;
+use common\models\CurrencyHistory;
 use common\models\Department;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
+use common\models\Email;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Notifications;
+use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
@@ -21,9 +25,15 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserConnection;
 use common\models\UserDepartment;
+use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use common\models\UserGroupSet;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use DateInterval;
+use DatePeriod;
+use DateTime;
+use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
@@ -44,6 +54,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
+use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
@@ -142,7 +153,44 @@ class TestController extends FController
     public function actionTest()
     {
 
-       
+
+        $idsCommongroups = EmployeeGroupAccess::getUsersIdsInCommonGroups(503);
+
+        $userId = 503;
+        $ids = Employee::find()->select('id')
+            ->andWhere(['or',
+                [
+                    'id' => EmployeeGroupAccess::getUsersIdsInCommonGroups($userId)
+                ],
+                [
+                    'id' => UserGroupAssign::find()->select(['ugs_user_id'])->andWhere([
+                        'ugs_group_id' =>
+                            UserGroup::find()->select('ug_id')->andWhere([
+                                'ug_user_group_set_id' =>
+                                    UserGroup::find()->select(['ug_user_group_set_id'])->andWhere([
+                                        'ug_id' =>
+                                            UserGroupAssign::find()->select(['ugs_group_id'])->andWhere([
+                                                'ugs_user_id' => $userId
+                                            ])
+                                    ])->andWhere(['IS NOT', 'ug_user_group_set_id', null])->andWhere(['ug_disable' => false])
+                            ])
+                    ])
+                ]
+            ])
+            ->asArray()->indexBy('id')->all();
+
+        VarDumper::dump($ids);
+
+die;
+
+
+        VarDumper::dump($ids);
+        die;
+        VarDumper::dump(count($idsCommongroups));
+        $user = Employee::findOne(500);
+        $idsGroups = array_keys($user->getUserGroupList());
+        VarDumper::dump($idsGroups);
+
         die;
         return $this->render('blank');
 
@@ -150,8 +198,6 @@ class TestController extends FController
 
     public function actionT()
     {
-
-
 die;
 
 //        $case->processing(294);
@@ -1589,5 +1635,67 @@ die;
         //VarDumper::dump($response, 10, true);
         echo json_encode($response);
     }
+
+    public function actionGetCountWeekDays()
+	{
+		$week = ['Monday' => 0, 'Tuesday' => 0, 'Wednesday' => 0, 'Thursday' => 0, 'Friday' => 0, 'Saturday' => 0, 'Sunday' => 0];
+
+		$d1 = new DateTime('2019-12-01 01:00:00');
+		$d2 = new DateTime('2019-12-31 15:00:00');
+
+		$interval = DateInterval::createFromDateString('1 day');
+		$period   = new DatePeriod($d1, $interval, $d2);
+
+		foreach ($period as $date) {
+			$week[$date->format('l')]++;
+		}
+
+		print_r($week);
+	}
+
+	public function actionGetCountHourDays()
+	{
+		$hours = [];
+		for($i = 0; $i<=23; $i++) {
+			$hours[$i] = 0;
+		}
+
+		$d1 = new DateTime('2019-12-01 01:00:00');
+		$d2 = new DateTime('2019-12-31 15:00:00');
+
+		$interval = DateInterval::createFromDateString('1 hour');
+		$period   = new DatePeriod($d1, $interval, $d2);
+
+		foreach ($period as $date) {
+			$hours[$date->format('G')]++;
+		}
+
+		print_r($hours);
+	}
+
+	public function actionTestCurrencyHistoryLog()
+	{
+		$date = '2019-12-24';
+		$currency = Currency::find()->all();
+		foreach ($currency as $item) {
+			$currencyHistory = (new CurrencyHistory())->findOrCreateByPrimaryKeys($item->cur_code, $date);
+
+			$currencyHistory->cur_his_code = $item->cur_code;
+			$currencyHistory->cur_his_base_rate = $item->cur_base_rate;
+			$currencyHistory->cur_his_app_rate = $item->cur_app_rate;
+			$currencyHistory->cur_his_app_percent = $item->cur_app_percent;
+			$currencyHistory->cur_his_main_created_dt = $item->cur_created_dt;
+			$currencyHistory->cur_his_main_updated_dt = $item->cur_updated_dt;
+			$currencyHistory->cur_his_main_synch_dt = $item->cur_synch_dt;
+			$currencyHistory->cur_his_created = $date;
+
+			if (!$currencyHistory->save(false)) {
+				Yii::error($currencyHistory->cur_his_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+				echo 'Error';die;
+			}
+		}
+
+		echo 'Successful';
+	}
 
 }

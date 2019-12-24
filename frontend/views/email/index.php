@@ -23,7 +23,10 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 <div class="email-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
+	<?php Pjax::begin([
+		'id' => 'emails',
+		'timeout' => 5000
+	]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <div class="row">
@@ -120,10 +123,11 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
             //'e_template_type_id',
             [
-                'attribute' => 'e_template_type_id',
+                'attribute' => 'e_template_type_name',
                 'value' => static function (\common\models\Email $model) {
                     return $model->eTemplateType ? $model->eTemplateType->etp_name : '-';
                 },
+                'label' => 'Template Name'
                 //'filter' =>
             ],
             //'e_language_id',
@@ -179,8 +183,8 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 'attribute' => 'e_created_user_id',
                 'value' => static function (\common\models\Email $model) {
                     return  ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
-                },
                 'format' => 'raw'
+                },
             ],*/
             [
                 'attribute' => 'e_created_dt',

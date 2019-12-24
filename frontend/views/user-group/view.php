@@ -1,5 +1,6 @@
 <?php
 
+use common\models\UserGroup;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -33,15 +34,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'ug_name',
             'ug_description',
             'ug_processing_fee',
-            'ug_disable:boolean',
-            //'ug_updated_dt',
+            'ug_disable:booleanByLabel',
+            'ug_on_leaderboard:booleanByLabel',
             [
-                'attribute' => 'ug_updated_dt',
-                'value' => function(\common\models\UserGroup $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ug_updated_dt));
+                'attribute' => 'ug_user_group_set_id',
+                'value' => static function (UserGroup $model) {
+                    if ($model->ug_user_group_set_id) {
+                        return $model->userGroupSet->ugs_name;
+                    }
+                    return '';
                 },
-                'format' => 'html',
             ],
+            'ug_updated_dt:dateTimeByUserDt',
         ],
     ]) ?>
 

@@ -130,6 +130,13 @@ if ($user->isAdmin()) {
                 },
                 'format' => 'raw'
             ],
+            [
+                'attribute' => 'cs_last_action_dt',
+                'value' => static function (Cases $model) {
+                    return $model->cs_last_action_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_last_action_dt)) : '-';
+                },
+                'format' => 'raw'
+            ],
 
             [
                 'class' => 'yii\grid\ActionColumn',

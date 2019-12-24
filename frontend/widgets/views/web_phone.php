@@ -176,6 +176,8 @@ use yii\helpers\Html;
     $ajaxCallTransferUrl = Url::to(['phone/ajax-call-transfer']);
     $ajaxCheckUserForCallUrl = Url::to(['phone/ajax-check-user-for-call']);
     $ajaxPhoneDialUrl = Url::to(['phone/ajax-phone-dial']);
+    $ajaxBlackList = Url::to(['phone/check-black-phone']);
+
 ?>
 <script type="text/javascript">
 
@@ -185,6 +187,7 @@ use yii\helpers\Html;
     const ajaxCallTransferUrl = '<?=$ajaxCallTransferUrl?>';
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents?>';
     const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
+    const ajaxBlackList = '<?=$ajaxBlackList?>';
 
     const clientId = '<?=$clientId?>';
 
@@ -797,6 +800,8 @@ $js = <<<JS
         
         obj.attr('disabled', true);
         
+        console.log(connection.parameters);
+        
         if(connection && connection.parameters.CallSid) {
             if(objValue.length < 2) {
                 console.error('Error call forward param TO');
@@ -806,7 +811,6 @@ $js = <<<JS
             let modal = $('#web-phone-redirect-agents-modal');
             modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             // connection.accept();
-            //console.error(connection.parameters);
             
             $.ajax({
                 type: 'post',
@@ -904,6 +908,7 @@ $js = <<<JS
         e.preventDefault();
         
         $.post(ajaxCheckUserForCallUrl, {user_id: userId}, function(data) {
+            
             if(data && data.is_ready) {
                 let phone_to = $('#call-to-number').val();
                 let phone_from = $('#call-from-number').val();
@@ -917,7 +922,18 @@ $js = <<<JS
                 webPhoneWidget.slideDown();
                 $('.fabs2').hide();
                 
-                webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');
+                $.post(ajaxBlackList, {phone: phone_to}, function(data) {
+                    if (data.success) {
+                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');        
+                    } else {
+                        var text = 'Error. Try again later';
+                        if (data.message) {
+                            text = data.message;
+                        }
+                        new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                    }
+                }, 'json');
+                
             } else {
                 alert('You have active call');
                 return false;

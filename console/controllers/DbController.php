@@ -3,6 +3,7 @@ namespace console\controllers;
 
 use common\models\Airline;
 use common\models\ClientPhone;
+use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\GlobalLog;
 use common\models\Lead;
@@ -14,6 +15,7 @@ use common\models\ProjectWeight;
 use common\models\Quote;
 use common\models\UserProjectParams;
 use frontend\models\UserSiteActivity;
+use sales\entities\cases\Cases;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -46,6 +48,23 @@ class DbController extends Controller
 	 */
 	private $globalLogFormatAttrService;
 
+    public function actionUpdateCaseLastAction()
+    {
+        printf("\n --- Update last action ---\n");
+        $count = 0;
+        $cases = Cases::find()->select(['cs_updated_dt', 'cs_id'])->andWhere(['IS', 'cs_last_action_dt', null])->asArray()->all();
+        $counts = count($cases);
+        foreach ($cases as $index => $case) {
+            $count++;
+            if ($count === 1000) {
+                $count = 0;
+                printf("\n --- Left: %s Cases ---\n", $this->ansiFormat(($counts - $index), Console::FG_YELLOW));
+            }
+            Cases::updateAll(['cs_last_action_dt' => $case['cs_updated_dt']], 'cs_last_action_dt IS NULL AND cs_id = ' . $case['cs_id']);
+        }
+        printf("\n --- Done ---\n");
+	}
+
     public function actionInitProjectWeight()
     {
         if (((int)ProjectWeight::find()->count()) > 0) {
@@ -54,6 +73,12 @@ class DbController extends Controller
         $projects = Project::find()->select(['id'])->indexBy('id')->asArray()->all();
 
         Yii::$app->db->createCommand()->batchInsert('{{%project_weight}}', ['pw_project_id'],$projects)->execute();
+	}
+
+    public function actionSendEmptyDepartmentLeadToSales()
+    {
+        $leads = Lead::updateAll(['l_dep_id' => Department::DEPARTMENT_SALES], ['IS', 'l_dep_id', null]);
+        printf("\n --- Sent %s Leads ---\n", $this->ansiFormat($leads, Console::FG_YELLOW));
 	}
 
 	/**

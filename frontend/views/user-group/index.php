@@ -1,5 +1,6 @@
 <?php
 
+use common\models\UserGroupSet;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -33,6 +34,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'ug_description',
             'ug_processing_fee',
             'ug_disable:boolean',
+            //'ug_on_leaderboard:boolean',
+            [
+                'attribute' => 'ug_on_leaderboard',
+                'format' => 'raw',
+                'value' => function(\common\models\UserGroup $model) {
+                    return $model->ug_on_leaderboard ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                },
+                'contentOptions' => ['class' => 'text-left'],
+            ],
             [
                 'attribute' => 'ug_updated_dt',
                 'value' => function(\common\models\UserGroup $model) {
@@ -51,6 +61,17 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
+            ],
+            [
+                'attribute' => 'ug_user_group_set_id',
+                'format' => 'raw',
+                'value' => function(\common\models\UserGroup $model) {
+                    if ($model->ug_user_group_set_id) {
+                        return $model->userGroupSet->ugs_name;
+                    }
+                    return '';
+                },
+                'filter' => UserGroupSet::getList()
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

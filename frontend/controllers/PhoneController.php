@@ -9,6 +9,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Notifications;
+use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
@@ -17,6 +18,7 @@ use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
+use yii\web\Response;
 use const Grpc\CALL_ERROR;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -247,6 +249,20 @@ class PhoneController extends FController
     }
 
     /**
+     * @return Response
+     */
+    public function actionCheckBlackPhone(): Response
+    {
+        if (!$phone = (string)Yii::$app->request->post('phone')) {
+            return $this->asJson(['success' => false, 'message' => 'Phone number not found']);
+        }
+        if (PhoneBlacklist::find()->isExists($phone)) {
+            return $this->asJson(['success' => false, 'message' => 'Declined Call. Reason: Blacklisted']);
+        }
+        return $this->asJson(['success' => true]);
+    }
+
+    /**
      * @return array
      */
     public function actionAjaxCheckUserForCall(): array
@@ -324,9 +340,21 @@ class PhoneController extends FController
 //            $case_id = (int)Yii::$app->request->post('case_id');
             //$call = null;
 
+            $firstTransferToNumber = false;
+            $call = Call::find()->andWhere(['c_call_sid' => $sid])->one();
+            if ($call->isGeneralParent()) {
+                if ($call = Call::find()->lastChild($call->c_id)->one()) {
+                    $sid = $call->c_call_sid;
+                    $firstTransferToNumber = true;
+                }
+            }
+
+            if (!$from) {
+                $from = 'client:seller' . Yii::$app->user->id;
+            }
 
             $communication = \Yii::$app->communication;
-            $resultApi = $communication->callRedirect($sid, $type, $from, $to);
+            $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
 
             if ($resultApi && isset($resultApi['data']['result']['sid'])) {
 
@@ -550,12 +578,12 @@ class PhoneController extends FController
 
             $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
             $data['type'] = $type;
+            $data['isTransfer'] = true;
 
             if ($originCall->cParent) {
                 $callSid = $originCall->cParent->c_call_sid;
                 $result = $communication->redirectCall($callSid, $data, $callbackUrl);
             } else {
-
                 $childCall = Call::find()->where(['c_parent_id' => $originCall->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
                 if ($childCall) {

@@ -3,16 +3,64 @@ namespace console\controllers;
 
 
 use common\components\CommunicationService;
+use common\components\ReceiveEmailsJob;
+use common\models\DepartmentEmailProject;
 use common\models\Email;
+use common\models\UserProjectParams;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\BaseConsole;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
+use yii\queue\Queue;
 
 class CommunicationController extends Controller
 {
 
+
+    public function actionRunJobGetEmails()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        $lastId = BaseConsole::input('Enter Last Communication Id: ');
+        $limit = BaseConsole::input('Enter Limit: ');
+
+        $lastId = (int)$lastId;
+        $limit = (int)$limit;
+
+        $job = new ReceiveEmailsJob();
+
+        $job->request_data = [
+            'last_email_id' => $lastId,
+            'email_list' => $this->getEmailsForReceivedMessages(),
+            'limit' => $limit,
+        ];
+
+        $job->last_email_id = $lastId;
+        /** @var Queue $queue */
+        $queue = \Yii::$app->queue_email_job;
+        $jobId = $queue->push($job);
+        $response = [
+            'job_id' => $jobId,
+            'last_id' => $lastId,
+        ];
+
+        VarDumper::dump($response);
+
+        printf("\n --- Finish %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    /**
+     * @return array
+     */
+    private function getEmailsForReceivedMessages(): array
+    {
+        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
+        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+        $list = array_merge($mailsUpp, $mailsDep);
+        return $list;
+    }
 
     public function actionGetMails()
     {

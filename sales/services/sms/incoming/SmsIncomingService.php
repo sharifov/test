@@ -4,17 +4,14 @@ namespace sales\services\sms\incoming;
 
 use sales\entities\cases\Cases;
 use sales\services\cases\CasesCreateService;
+use sales\services\internalContact\InternalContactService;
 use Yii;
 use sales\services\TransactionManager;
 use common\models\Lead;
-use common\models\Project;
 use common\models\Sources;
 use sales\repositories\sms\SmsRepository;
 use sales\services\lead\LeadManageService;
-use common\models\Department;
-use common\models\DepartmentPhoneProject;
 use common\models\Sms;
-use common\models\UserProjectParams;
 use sales\forms\lead\PhoneCreateForm;
 use sales\services\client\ClientManageService;
 
@@ -26,6 +23,7 @@ use sales\services\client\ClientManageService;
  * @property SmsRepository $smsRepository
  * @property TransactionManager $transactionManager
  * @property CasesCreateService $casesCreate
+ * @property InternalContactService $internalContactService
  */
 class SmsIncomingService
 {
@@ -34,13 +32,15 @@ class SmsIncomingService
     private $smsRepository;
     private $transactionManager;
     private $casesCreate;
+    private $internalContactService;
 
     public function __construct(
         ClientManageService $clients,
         LeadManageService $leadManageService,
         SmsRepository $smsRepository,
         TransactionManager $transactionManager,
-        CasesCreateService $casesCreate
+        CasesCreateService $casesCreate,
+        InternalContactService $internalContactService
     )
     {
         $this->clients = $clients;
@@ -48,6 +48,7 @@ class SmsIncomingService
         $this->smsRepository = $smsRepository;
         $this->transactionManager = $transactionManager;
         $this->casesCreate = $casesCreate;
+        $this->internalContactService = $internalContactService;
     }
 
     /**
@@ -62,34 +63,37 @@ class SmsIncomingService
 
             $client = $this->clients->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->si_phone_from])]);
 
-            $dpp = DepartmentPhoneProject::find()->findByPhone($form->si_phone_to);
-            $upp = UserProjectParams::find()->findByPhone($form->si_phone_to);
+            $contact = $this->internalContactService->findByPhone($form->si_phone_to, $form->si_project_id);
 
-            $department = $this->findDepartment($form->si_phone_to, $dpp, $upp);
+            $form->replaceProject($contact->projectId);
 
-            if (!$project = $this->findProject($form->si_phone_to, $form->si_project_id, $dpp, $upp)) {
-                $form->si_project_id = null;
-            } else {
-                $this->checkProjects($form, $project->id);
+            if (!$form->si_project_id) {
+                throw new \DomainException('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Project Id not found');
             }
 
-            $ownerId = $upp ? $upp->upp_user_id : null;
-
-            if ($department) {
+            if ($department = $contact->department) {
                 if ($department->isSales()) {
-                    return $this->createSmsBySales($form, $client->id, $ownerId);
+                    $sms = $this->createSmsBySales($form, $client->id, $contact->userId);
+                    $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    return $sms;
                 }
                 if ($department->isExchange()) {
-                    return $this->createSmsByExchange($form, $client->id, $ownerId);
+                    $sms = $this->createSmsByExchange($form, $client->id, $contact->userId);
+                    $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    return $sms;
                 }
                 if ($department->isSupport()) {
-                    return $this->createSmsBySupport($form, $client->id, $ownerId);
+                    $sms = $this->createSmsBySupport($form, $client->id, $contact->userId);
+                    $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    return $sms;
                 }
             }
 
-            $sms = $this->createSmsByDefault($form, $client->id, $ownerId);
-            Yii::error('Not found Department for phone: ' . $form->si_phone_to . '. Created sms Id: ' . $sms->s_id, 'SmsIncomingService');
+            $sms = $this->createSmsByDefault($form, $client->id, $contact->userId);
+            $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+            Yii::error('Incoming sms. Sms Id: ' . $sms->s_id . ' | Not found Department for phone: ' . $form->si_phone_to, 'SmsIncomingService');
             return $sms;
+
         });
 
         return $sms;
@@ -101,10 +105,27 @@ class SmsIncomingService
      * @param int|null $ownerId
      * @return Sms
      */
-    private function createSmsByDefault(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
+    private function createSmsBySales(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
     {
-        $sms = Sms::createByIncomingDefault($form, $clientId, $ownerId);
+        $leadId = null;
+        if (!$lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $form->si_project_id)->one()) {
+            if ((bool)Yii::$app->params['settings']['create_new_lead_sms']) {
+                $lead = $this->leadManageService->createByIncomingSms(
+                    $form->si_phone_from,
+                    $clientId,
+                    $form->si_project_id,
+                    $this->findSource($form->si_project_id)
+                );
+                $leadId = $lead->id;
+            }
+        } else {
+            $leadId = $lead->id;
+        }
+        $sms = Sms::createByIncomingSales($form, $clientId, $ownerId, $leadId);
         $this->smsRepository->save($sms);
+        if ($leadId === null) {
+            Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new lead creation allowed on SMS.', 'SmsIncomingService');
+        }
         return $sms;
     }
 
@@ -116,14 +137,23 @@ class SmsIncomingService
      */
     private function createSmsBySupport(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
     {
+        $caseId = null;
         if (!$case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $form->si_project_id)->one()) {
-            $case = $this->casesCreate->createSupportByIncomingSms(
-                $clientId,
-                $form->si_project_id
-            );
+            if ((bool)Yii::$app->params['settings']['create_new_support_case_sms']) {
+                $case = $this->casesCreate->createSupportByIncomingSms(
+                    $clientId,
+                    $form->si_project_id
+                );
+                $caseId = $case->cs_id;
+            }
+        } else {
+            $caseId = $case->cs_id;
         }
-        $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $case->cs_id);
+        $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
+        if ($caseId === null) {
+            Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new support case creation allowed on SMS.', 'SmsIncomingService');
+        }
         return $sms;
     }
 
@@ -135,13 +165,47 @@ class SmsIncomingService
      */
     private function createSmsByExchange(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
     {
+        $caseId = null;
         if (!$case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
-            $case = $this->casesCreate->createExchangeByIncomingSms(
-                $clientId,
-                $form->si_project_id
-            );
+            if ((bool)Yii::$app->params['settings']['create_new_exchange_case_sms']) {
+                $case = $this->casesCreate->createExchangeByIncomingSms(
+                    $clientId,
+                    $form->si_project_id
+                );
+                $caseId = $case->cs_id;
+            }
+        } else {
+            $caseId = $case->cs_id;
         }
-        $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $case->cs_id);
+        $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $caseId);
+        $this->smsRepository->save($sms);
+        if ($caseId === null) {
+            Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new exchange case creation allowed on SMS.', 'SmsIncomingService');
+        }
+        return $sms;
+    }
+
+    /**
+     * @param SmsIncomingForm $form
+     * @param int $clientId
+     * @param int|null $ownerId
+     * @return Sms
+     */
+    private function createSmsByDefault(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
+    {
+        $leadId = null;
+        $caseId = null;
+        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $form->si_project_id)->one()) {
+            $leadId = $lead->id;
+        } elseif ($case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $form->si_project_id)->one()) {
+            $caseId = $case->cs_id;
+        } elseif ($case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
+            $caseId = $case->cs_id;
+        } else {
+            return $this->createSmsBySupportDefault($form, $clientId, $ownerId);
+        }
+
+        $sms = Sms::createByIncomingDefault($form, $clientId, $ownerId, $leadId, $caseId);
         $this->smsRepository->save($sms);
         return $sms;
     }
@@ -152,32 +216,22 @@ class SmsIncomingService
      * @param int|null $ownerId
      * @return Sms
      */
-    private function createSmsBySales(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
+    private function createSmsBySupportDefault(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
     {
-        if (!$lead = Lead::find()->findLastActiveLeadByClient($clientId, $form->si_project_id)) {
-            $lead = $this->leadManageService->createByIncomingSms(
-                $form->si_phone_from,
+        $caseId = null;
+        if ((bool)Yii::$app->params['settings']['create_new_support_case_sms']) {
+            $case = $this->casesCreate->createSupportByIncomingSms(
                 $clientId,
-                $form->si_project_id,
-                $this->findSource($form->si_project_id),
-                Department::DEPARTMENT_SALES
+                $form->si_project_id
             );
+            $caseId = $case->cs_id;
         }
-        $sms = Sms::createByIncomingSales($form, $clientId, $ownerId, $lead->id);
+        $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
-        return $sms;
-    }
-
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $projectId
-     */
-    private function checkProjects(SmsIncomingForm $form, int $projectId): void
-    {
-        if ($form->si_project_id !== $projectId) {
-            $form->si_project_id = $projectId;
-            Yii::error('Project incoming and project found not equal. Incoming: ' . $form->si_project_id . '. Found: ' . $projectId, 'SmsIncomingService');
+        if ($caseId === null) {
+            Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new support case creation allowed on SMS.', 'SmsIncomingService');
         }
+        return $sms;
     }
 
     /**
@@ -186,70 +240,12 @@ class SmsIncomingService
      */
     private function findSource(?int $projectId): ?int
     {
+        if ($projectId === null) {
+            return null;
+        }
         if ($source = Sources::find()->select('id')->where(['project_id' => $projectId, 'default' => true])->one()) {
             return $source->id;
         }
-        return null;
-    }
-
-    /**
-     * @param string $phone
-     * @param DepartmentPhoneProject|null $dpp
-     * @param UserProjectParams|null $upp
-     * @return Department|null
-     */
-    private function findDepartment(string $phone, ?DepartmentPhoneProject $dpp, ?UserProjectParams $upp): ?Department
-    {
-        if ($dpp) {
-            if ($department = $dpp->dppDep) {
-                return $department;
-            }
-            Yii::error('Not found department for departmentPhoneProject Id: ' . $dpp->dpp_id, 'SmsIncomingService');
-        }
-        if ($upp) {
-            if ($department = $upp->uppDep) {
-                return $department;
-            }
-            Yii::error('Not found department for userProjectParams tw_phone_number: ' . $upp->upp_tw_phone_number, 'SmsIncomingService');
-            if ($upp->uppUser) {
-                if ($upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0]) && $upp->uppUser->userDepartments[0]->udDep) {
-                    return $upp->uppUser->userDepartments[0]->udDep;
-                }
-                Yii::error('Not found department for user Id: ' . $upp->upp_user_id, 'SmsIncomingService');
-            }
-        }
-        Yii::error('Not found department for phone: ' . $phone, 'SmsIncomingService');
-        return null;
-    }
-
-    /**
-     * @param string $phone
-     * @param int|null $projectId
-     * @param DepartmentPhoneProject|null $dpp
-     * @param UserProjectParams|null $upp
-     * @return Project|null
-     */
-    private function findProject(string $phone, ?int $projectId, ?DepartmentPhoneProject $dpp, ?UserProjectParams $upp): ?Project
-    {
-        if ($dpp) {
-            if ($project = $dpp->dppProject) {
-                return $project;
-            }
-            Yii::error('Not found project for departmentPhoneProject Id: ' . $dpp->dpp_id, 'SmsIncomingService');
-        }
-        if ($upp) {
-            if ($project = $upp->uppProject) {
-                return $project;
-            }
-            Yii::error('Not found project for userProjectParams tw_phone_number: ' . $upp->upp_tw_phone_number, 'SmsIncomingService');
-        }
-        if ($projectId) {
-            if ($project = Project::findOne($projectId)) {
-                return $project;
-            }
-            Yii::error('Not found project for Id: ' . $projectId, 'SmsIncomingService');
-        }
-        Yii::error('Not found project for phone: ' . $phone, 'SmsIncomingService');
         return null;
     }
 }

@@ -124,6 +124,7 @@ class QuoteController extends FController
                             $quote->employee_id = Yii::$app->user->id;
                             $quote->employee_name = Yii::$app->user->identity->username;
                             $quote->origin_search_data = json_encode($entry);
+                            $quote->gds_offer_id = $entry['gdsOfferId'] ?? null;
 
                             if(isset($entry['tickets'])) {
                                 $quote->tickets = json_encode($entry['tickets']);

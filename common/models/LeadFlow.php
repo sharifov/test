@@ -5,8 +5,6 @@ namespace common\models;
 use common\models\query\LeadFlowQuery;
 use sales\entities\EventTrait;
 use Yii;
-use yii\helpers\VarDumper;
-use yii\validators\DateValidator;
 
 /**
  * This is the model class for table "lead_flow".

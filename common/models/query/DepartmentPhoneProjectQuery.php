@@ -50,10 +50,10 @@ class DepartmentPhoneProjectQuery extends \yii\db\ActiveQuery
 
     /**
      * @param string $phone
-     * @return DepartmentPhoneProject|null
+     * @return $this
      */
-    public function findByPhone(string $phone):? DepartmentPhoneProject
+    public function findByPhone(string $phone): self
     {
-        return $this->where(['dpp_phone_number' => $phone, 'dpp_enable' => true])->limit(1)->one();
+        return $this->where(['dpp_phone_number' => $phone, 'dpp_enable' => true])->limit(1);
     }
 }

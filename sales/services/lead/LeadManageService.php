@@ -86,22 +86,41 @@ class LeadManageService
     }
 
     /**
+     * @param string $clientEmail
+     * @param int $clientId
+     * @param int|null $projectId
+     * @param int|null $sourceId
+     * @return Lead
+     */
+    public function createByIncomingEmail(
+        string $clientEmail,
+        int $clientId,
+        ?int $projectId,
+        ?int $sourceId
+    ): Lead
+    {
+        $lead = Lead::createByIncomingEmail($clientEmail, $clientId, $projectId, $sourceId);
+
+        $this->leadRepository->save($lead);
+
+        return $lead;
+    }
+
+    /**
      * @param string $clientPhone
      * @param int $clientId
      * @param int|null $projectId
      * @param int|null $sourceId
-     * @param int|null $departmentId
      * @return Lead
      */
     public function createByIncomingSms(
         string $clientPhone,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId,
-        ?int $departmentId
+        ?int $sourceId
     ): Lead
     {
-        $lead = Lead::createByIncomingSms($clientPhone, $clientId, $projectId, $sourceId, $departmentId);
+        $lead = Lead::createByIncomingSms($clientPhone, $clientId, $projectId, $sourceId);
 
         $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$clientPhone]);
 
@@ -167,12 +186,12 @@ class LeadManageService
      * @return Lead
      * @throws \Exception
      */
-    public function create(LeadCreateForm $form, int $employeeId, ?int $creatorId = null, ?string $reason = ''): Lead
+    public function createManuallyByDefault(LeadCreateForm $form, int $employeeId, ?int $creatorId = null, ?string $reason = ''): Lead
     {
 
         $lead = $this->transaction->wrap(function () use ($form, $employeeId, $creatorId, $reason) {
 
-           return $this->createLead($form, $employeeId, $creatorId, $reason);
+           return $this->createManually($form, $employeeId, $creatorId, $reason);
 
         });
 
@@ -187,14 +206,14 @@ class LeadManageService
      * @return Lead
      * @throws \Exception
      */
-    public function createWithCase(LeadCreateForm $form, int $employeeId, ?int $creatorId = null, ?string $reason = ''): Lead
+    public function createManuallyFromCase(LeadCreateForm $form, int $employeeId, ?int $creatorId = null, ?string $reason = ''): Lead
     {
 
         $lead = $this->transaction->wrap(function () use ($form, $employeeId, $creatorId, $reason) {
 
             $case = $this->casesRepository->findFreeByGid($form->caseGid);
 
-            $lead = $this->createLead($form, $employeeId, $creatorId, $reason);
+            $lead = $this->createManually($form, $employeeId, $creatorId, $reason);
 
             $this->casesManageService->assignLead($case->cs_id, $lead->id);
 
@@ -212,12 +231,16 @@ class LeadManageService
      * @param string|null $reason
      * @return Lead
      */
-    private function createLead(LeadCreateForm $form, int $employeeId, ?int $creatorId = null, ?string $reason = ''): Lead
+    private function createManually(
+        LeadCreateForm $form,
+        int $employeeId,
+        ?int $creatorId,
+        ?string $reason
+    ): Lead
     {
-
         $client = $this->clientManageService->getOrCreate($form->phones, $form->emails, $form->client);
 
-        $lead = Lead::create(
+        $lead = Lead::createManually(
             $client->id,
             $form->client->firstName,
             $form->client->lastName,
@@ -232,8 +255,7 @@ class LeadManageService
             $form->clientPhone,
             $form->clientEmail,
             $form->depId,
-            $form->delayedCharge,
-            Lead::TYPE_CREATE_MANUALLY
+            $form->delayedCharge
         );
 
         $lead->processing($employeeId, $creatorId, $reason);
@@ -307,6 +329,8 @@ class LeadManageService
             $this->segmentRepository->removeOld($lead->leadFlightSegments, $newSegmentsIds);
 
             $this->leadRepository->save($lead);
+
+            $lead->updateLastAction();
 
         });
     }

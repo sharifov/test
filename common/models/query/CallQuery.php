@@ -11,26 +11,21 @@ use common\models\Call;
  */
 class CallQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
     /**
-     * {@inheritdoc}
-     * @return Call[]|array
+     * @param int $parentId
+     * @return CallQuery
      */
-    public function all($db = null)
+    public function firstChild(int $parentId): CallQuery
     {
-        return parent::all($db);
+        return $this->andWhere(['c_parent_id' => $parentId])->orderBy(['c_id' => SORT_ASC])->limit(1);
     }
 
     /**
-     * {@inheritdoc}
-     * @return Call|array|null
+     * @param int $parentId
+     * @return CallQuery
      */
-    public function one($db = null)
+    public function lastChild(int $parentId): CallQuery
     {
-        return parent::one($db);
+        return $this->andWhere(['c_parent_id' => $parentId])->orderBy(['c_id' => SORT_DESC])->limit(1);
     }
 }

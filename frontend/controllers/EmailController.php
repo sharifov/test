@@ -323,7 +323,7 @@ class EmailController extends FController
         }
 
         if(Yii::$app->request->get('preview')) {
-           return $model->e_email_body_html;
+           return $model->e_email_body_html ?: '';
         }
 
         return $this->render('view', [

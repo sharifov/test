@@ -3,6 +3,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use sales\access\EmployeeDepartmentAccess;
 use common\models\Lead;
+use common\models\Employee;
 ?>
 
 <div class="calls-search">
@@ -37,6 +38,38 @@ use common\models\Lead;
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <?= $form->field($model, 'reportTimezone')->widget(\kartik\select2\Select2::class, [
+                'data' => Employee::timezoneList(true),
+                'size' => \kartik\select2\Select2::SMALL,
+                'options' => [
+                    'placeholder' => 'Select TimeZone',
+                    'multiple' => false,
+                    'value' => $model->defaultUserTz
+                ],
+                'pluginOptions' => ['allowClear' => true],
+            ]);
+            ?>
+        </div>
+        <div class="col-md-3">
+            <?php
+            $hoursList = [];
+            foreach(range(0, 23) as $hour) {
+                $hoursList[sprintf("%02d:00", $hour )] = sprintf("%02d", $hour );
+            }
+            ?>
+            <div class="row">
+                <div class="col-md-3">
+                    <?= $form->field($model, 'timeFrom')->dropDownList($hoursList)->label('Hour From') ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $form->field($model, 'timeTo')->dropDownList($hoursList, ['prompt' => ""])->label('Hour To') ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
