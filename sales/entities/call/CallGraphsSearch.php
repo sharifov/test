@@ -143,6 +143,20 @@ class CallGraphsSearch extends CallSearch
 	];
 
 	/**
+	 * CallGraphsSearch constructor.
+	 * @param array $config
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function __construct($config = [])
+	{
+		parent::__construct($config);
+		$this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT)) . ' - ' . date('Y-m-d H:i:s');
+		$this->betweenHoursFrom = 0;
+		$this->betweenHoursTo = 24;
+		$this->recordingDurationFrom = 30;
+	}
+
+	/**
 	 * {@inheritdoc}
 	 */
 	public function rules(): array
