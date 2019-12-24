@@ -96,6 +96,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
             //'e_reply_id',
             'e_lead_id',
+            'e_case_id',
             //'e_project_id',
             [
                 'attribute' => 'e_project_id',
