@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ConferenceParticipantQuery;
 use Yii;
 
 /**

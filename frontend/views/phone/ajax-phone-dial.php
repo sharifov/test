@@ -77,14 +77,14 @@ use yii\helpers\Html;
                     [
                         'attribute' => 'created',
                         'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDate(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
                     [
                         'attribute' => 'updated',
                         'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDate(strtotime($model->updated));
                         },
                         'format' => 'html',
                     ],
@@ -99,16 +99,24 @@ use yii\helpers\Html;
         <?php if($currentCall): ?>
 
             <div class="alert alert-warning" role="alert">
-                <p><b>Warning!</b></p>
-                <p>Sorry, you can not call now. At the moment you have a call ID (<?=$currentCall->c_id?>). Please check that your telephone line is free.</p>
+                <h5><i class="fa fa-warning"></i> Warning!</h5>
+                <b>You can not call now. At the moment you have a call ID (<?=$currentCall->c_id?>). Please check that your web-phone line is free.</b>
+
+            </div>
+
+            <div class="text-center">
+                <?=Html::a('<i class="fa fa-remove"></i> Emergency Cancel Call Process', ['call/ajax-call-cancel', 'id' => $currentCall->c_id], ['class' => 'btn btn-sm btn-danger', 'data' => [
+                    'confirm' => 'Attention! This function is used only for emergency cases. ' . "\r\n". 'Are you sure you want to cancel this Call?',
+                    'method' => 'post',
+                ] ])?>
             </div>
 
             <div>
-                <h2>Current Call</h2>
+                <h2>Current Call (<?=$currentCall->c_id?>)</h2>
                 <?= \yii\widgets\DetailView::widget([
                     'model' => $currentCall,
                     'attributes' => [
-                        'c_id',
+                        //'c_id',
                         'c_call_sid',
                         [
                             'attribute' => 'c_call_type_id',
@@ -134,7 +142,7 @@ use yii\helpers\Html;
                                 return $model->cDep ? $model->cDep->dep_name : '-';
                             },
                         ],
-                        'c_caller_name',
+                        //'c_caller_name',
                         [
                             'attribute' => 'c_project_id',
                             'value' => static function (\common\models\Call $model) {
@@ -152,16 +160,11 @@ use yii\helpers\Html;
                 ]) ?>
             </div>
 
-            <div class="alert alert-info" role="alert">
+            <?/*<div class="alert alert-info" role="alert">
                 <p>If there is no call and an error has occurred, please inform the manager of the problem.</p>
-            </div>
+            </div>*/?>
 
-            <div class="text-center">
-                <?=Html::a('<i class="fa fa-remove"></i> Emergency Cancel Call Process', ['call/ajax-call-cancel', 'id' => $currentCall->c_id], ['class' => 'btn btn-sm btn-danger', 'data' => [
-                    'confirm' => 'Attention! This function is used only for emergency cases. ' . "\r\n". 'Are you sure you want to cancel this Call?',
-                    'method' => 'post',
-                ] ])?>
-            </div>
+
 
         <?php else: ?>
             <h2>Call</h2>

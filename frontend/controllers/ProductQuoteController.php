@@ -2,13 +2,18 @@
 
 namespace frontend\controllers;
 
+use common\models\ProductType;
+use modules\hotel\models\Hotel;
+use modules\hotel\models\HotelQuote;
 use Yii;
 use common\models\ProductQuote;
 use common\models\search\ProductQuoteSearch;
 use frontend\controllers\FController;
+use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * ProductQuoteController implements the CRUD actions for ProductQuote model.
@@ -25,6 +30,7 @@ class ProductQuoteController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                    'delete-ajax' => ['POST'],
                 ],
             ],
         ];
@@ -109,6 +115,41 @@ class ProductQuoteController extends FController
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionDeleteAjax(): array
+    {
+        $id = (int) Yii::$app->request->post('id');
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+
+            if (!$id) {
+                throw new Exception('Product quote ID not found', 3);
+            }
+
+            $model = $this->findModel($id);
+            if (!$model->delete()) {
+                throw new Exception('Product Quote ('.$id.') not deleted', 4);
+            }
+
+            if ((int) $model->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
+                $modelHotelQuote = HotelQuote::findOne(['hq_product_quote_id' => $model->pq_id]);
+                if ($modelHotelQuote) {
+                    if (!$modelHotelQuote->delete()) {
+                        throw new Exception('Hotel Quote (' . $modelHotelQuote->hq_id . ') not deleted', 5);
+                    }
+                }
+            }
+
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        return ['message' => 'Successfully removed product quote (' . $model->pq_id . ')'];
     }
 
     /**

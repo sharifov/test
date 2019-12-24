@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\UserConnectionQuery;
 use sales\entities\cases\Cases;
 use Yii;
 

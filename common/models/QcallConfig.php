@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\QcallConfigQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

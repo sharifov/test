@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\CommunicationService;
+use common\models\query\SmsTemplateTypeQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

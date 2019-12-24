@@ -121,7 +121,8 @@ use yii\helpers\Html;
 <?php Modal::begin([
     'id' => 'web-phone-dial-modal',
     'title' => 'Phone Dial',
-    'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
+    //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
+    'size' => Modal::SIZE_LARGE
 ]); ?>
 <?php Modal::end(); ?>
 

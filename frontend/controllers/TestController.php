@@ -1619,7 +1619,7 @@ die;
 
 
         $rooms[] = ['rooms' => 1, 'adults' => 1];
-        $rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
+        $rooms[] = ['rooms' => 2, 'adults' => 2, 'children' => 2, 'paxes' => [
             ['paxType' => 1, 'age' => 6],
             ['paxType' => 1, 'age' => 14],
         ]];

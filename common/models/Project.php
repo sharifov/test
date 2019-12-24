@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\local\ContactInfo;
+use common\models\query\ProjectQuery;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;

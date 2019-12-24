@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\CallQuery;
 use sales\access\EmployeeDepartmentAccess;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;

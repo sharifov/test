@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\jobs\TelegramSendMessageJob;
+use common\models\query\NotificationsQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

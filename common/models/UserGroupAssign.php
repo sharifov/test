@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\UserGroupAssignQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

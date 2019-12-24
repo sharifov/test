@@ -77,7 +77,7 @@ return [
             'baseUrl' => '/bpanel',
         ],
         'user' => [
-            'identityClass' => 'common\models\User2',
+            'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
         ],

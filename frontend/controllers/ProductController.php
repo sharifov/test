@@ -2,13 +2,21 @@
 
 namespace frontend\controllers;
 
+use common\models\Lead;
+use common\models\ProductType;
+use frontend\models\form\ProductForm;
+use modules\hotel\models\Hotel;
 use Yii;
 use common\models\Product;
 use common\models\search\ProductSearch;
 use frontend\controllers\FController;
+use yii\base\Exception;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * ProductController implements the CRUD actions for Product model.
@@ -25,6 +33,7 @@ class ProductController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                    'delete-ajax' => ['POST'],
                 ],
             ],
         ];
@@ -77,6 +86,95 @@ class ProductController extends FController
         ]);
     }
 
+
+    /**
+     * @return array|string
+     * @throws BadRequestHttpException
+     */
+    public function actionCreateAjax()
+    {
+        $model = new ProductForm(); //new Product();
+
+
+        if ($model->load(Yii::$app->request->post())) {
+
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            if ($model->validate()) {
+                $modelProduct = new Product();
+                $modelProduct->attributes = $model->attributes;
+
+                if ($modelProduct->save()) {
+
+                    if ((int) $model->pr_type_id === ProductType::PRODUCT_HOTEL) {
+                        if (class_exists('\modules\hotel\HotelModule')) {
+                            $modelHotel = new Hotel();
+                            $modelHotel->ph_product_id = $modelProduct->pr_id;
+                            if (!$modelHotel->save()) {
+                                Yii::error(VarDumper::dumpAsString($modelHotel->errors),
+                                    'ProductController:actionCreateAjax:Hotel:save');
+                            }
+                        } else {
+                            Yii::error('Not exists class "\modules\hotel\HotelModule"',
+                                'ProductController:actionCreateAjax:Hotel');
+                        }
+                    }
+                    return ['message' => 'Successfully added a new product'];
+                }
+
+                return ['errors' => \yii\widgets\ActiveForm::validate($modelProduct)];
+            }
+            return ['errors' => \yii\widgets\ActiveForm::validate($model)];
+        } else {
+
+            $leadId = (int) Yii::$app->request->get('id');
+
+            if (!$leadId) {
+                throw new BadRequestHttpException('Not found lead identity.');
+            }
+
+            $lead = Lead::findOne($leadId);
+            if (!$lead) {
+                throw new BadRequestHttpException('Not found this lead');
+            }
+
+            $model->pr_lead_id = $leadId;
+        }
+
+        return $this->renderAjax('_ajax_form', [
+            'model' => $model,
+        ]);
+    }
+
+
+//    public function actionCreateAjax()
+//    {
+//        //$this->layout = false;
+//        $model = new ProductForm(); //new Product();
+//
+//        if ($model->load(Yii::$app->request->post())) {
+//
+//            //\Yii::$app->response->format = Response::FORMAT_JSON;
+//
+//            if ($model->validate()) {
+//                $modelProduct = new Product();
+//                $modelProduct->attributes = $model->attributes;
+//
+//                if ($modelProduct->save()) {
+//                    return ['message' => 'Successfully added a new product'];
+//                }
+//
+//                //return ['errors' => \yii\widgets\ActiveForm::validate($modelProduct)];
+//            }
+//            //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
+//        }
+//
+//        return $this->renderAjax('_ajax_form', [
+//            'model' => $model,
+//        ]);
+//    }
+
+
     /**
      * Updates an existing Product model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -112,6 +210,36 @@ class ProductController extends FController
     }
 
     /**
+     * @return array
+     */
+    public function actionDeleteAjax(): array
+    {
+        $id = Yii::$app->request->post('id');
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+            $model = $this->findModel($id);
+            if (!$model->delete()) {
+                throw new Exception('Product ('.$id.') not deleted', 2);
+            }
+
+            if ((int) $model->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
+                $modelHotel = Hotel::findOne(['ph_product_id' => $model->pr_id]);
+                if ($modelHotel) {
+                    if (!$modelHotel->delete()) {
+                        throw new Exception('Hotel (' . $modelHotel->ph_id . ') not deleted', 3);
+                    }
+                }
+            }
+
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        return ['message' => 'Successfully removed product (' . $model->pr_id . ')'];
+    }
+
+    /**
      * Finds the Product model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
@@ -124,6 +252,6 @@ class ProductController extends FController
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('The requested product does not exist.', 1);
     }
 }

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\BackOffice;
+use common\models\query\LeadCallExpertQuery;
 use Yii;
 
 /**

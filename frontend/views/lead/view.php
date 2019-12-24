@@ -1,95 +1,57 @@
 <?php
 /**
  * @var $leadForm LeadForm
- * @var $comForm \frontend\models\CommunicationForm
- * @var $previewEmailForm \frontend\models\LeadPreviewEmailForm
- * @var $previewSmsForm \frontend\models\LeadPreviewSmsForm
- * @var $quotesProvider \yii\data\ActiveDataProvider
- * @var $dataProviderCommunication \yii\data\ActiveDataProvider
- * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
- * @var $dataProviderNotes \yii\data\ActiveDataProvider
+ * @var $comForm CommunicationForm
+ * @var $previewEmailForm LeadPreviewEmailForm
+ * @var $previewSmsForm LeadPreviewSmsForm
+ * @var $quotesProvider ActiveDataProvider
+ * @var $dataProviderCommunication ActiveDataProvider
+ * @var $dataProviderCallExpert ActiveDataProvider
+ * @var $dataProviderNotes ActiveDataProvider
  * @var $enableCommunication boolean
- * @var $modelLeadCallExpert \common\models\LeadCallExpert
- * @var  $modelNote \common\models\Note
- * @var $modelLeadChecklist \common\models\LeadChecklist
- * @var $dataProviderChecklist \yii\data\ActiveDataProvider
+ * @var $modelLeadCallExpert LeadCallExpert
+ * @var $modelNote Note
+ * @var $modelLeadChecklist LeadChecklist
+ * @var $dataProviderChecklist ActiveDataProvider
  * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
+ * @var $dataProviderOffers ActiveDataProvider
+ * @var $dataProviderOrders ActiveDataProvider
  */
 
-use sales\formatters\client\ClientTimeFormatter;
-use yii\bootstrap\Html;
+use common\models\LeadCallExpert;
+use common\models\LeadChecklist;
+use common\models\Note;
+use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
+use frontend\models\LeadPreviewEmailForm;
+use frontend\models\LeadPreviewSmsForm;
+use yii\data\ActiveDataProvider;
 
-$bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
+\frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
+// $this->params['breadcrumbs'][] = $this->title;
 
 $userId = Yii::$app->user->id;
 $user = Yii::$app->user->identity;
 
-$is_manager = false;
-$is_admin = $user->canRole('admin');
-$is_qa = $user->canRole('qa');
+$is_admin = $user->isAdmin();
+$is_qa = $user->isQa();
 $is_supervision = $user->canRole('supervision');
 
 if($is_admin || $is_supervision) {
     $is_manager = true;
+} else {
+    $is_manager = false;
 }
 
 $lead = $leadForm->getLead();
 ?>
 
-<div class="page-header">
-    <div class="container-fluid">
-        <div class="page-header__wrapper">
-            <h2 class="page-header__title">
-            <?= Html::encode($this->title) ?>
-            <?php
-                if($lead->clone_id) {
-                    $cloneLead = \common\models\Lead::findOne($lead->clone_id);
-                    if($cloneLead) {
-                        echo \yii\helpers\Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
-                    }
-                }
-            ?>
-            <?php if ($leadForm->getLead()->isNewRecord) : ?>
-            	<span class="label status-label label-info">New</span>
-            <?php else:?>
-            	<?= $leadForm->getLead()->getStatusLabel() ?>
-            <?php endif;?>
-            </h2>
-            <div class="page-header__general">
-                <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-                    <?php if (!empty($leadForm->getLead()->employee_id)) : ?>
-                        <div class="page-header__general-item">
-                            <strong>Assigned to:</strong>
-                            <i class="fa fa-user"></i> <?= $leadForm->getLead()->employee->username ?>
-                        </div>
-                    <?php endif; ?>
-                    <div class="page-header__general-item">
-                        <strong>Client:</strong>
-                        <?= ClientTimeFormatter::format($leadForm->getLead()->getClientTime2(), $leadForm->getLead()->offset_gmt); ?>
-                    </div>
-                    <div class="page-header__general-item">
-                        <strong>UID:</strong>
-                        <span><?=Html::encode($leadForm->getLead()->uid)?></span>
-                            <?//= Html::a($leadForm->getLead()->uid, '#', ['id' => 'view-flow-transition']) ?>
-                    </div>
+<?= $this->render('partial/_view_header', [
+    'lead' => $lead,
+    'title' => $this->title
+]) ?>
 
-                    <div class="page-header__general-item">
-                        <strong>Market:</strong>
-                        <span><?= (($leadForm->getLead()->project)?$leadForm->getLead()->project->name:'').
-                        (($leadForm->getLead()->source)?' - '.$leadForm->getLead()->source->name:'')?></span>
-                    </div>
-                    <div class="page-header__general-item">
-                        <?= $this->render('partial/_rating', [
-                            'lead' => $leadForm->getLead()
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="main-sidebars">
     <div class="panel panel-main">
@@ -99,31 +61,49 @@ $lead = $leadForm->getLead();
         ?>
 
         <div class="col-md-12">
-            <br>
             <?= \common\widgets\Alert::widget() ?>
-            <br>
         </div>
 
         <div class="col-md-6">
-            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
-            <?= $this->render('partial/_flightDetails', [
+
+            <?= $this->render('products/_products', [
+                'lead' => $lead,
                 'itineraryForm' => $itineraryForm,
-                'leadForm' => $leadForm
+                'quotesProvider' => $quotesProvider,
+                'leadForm' => $leadForm,
+                'is_manager' => $is_manager,
             ]) ?>
-            <?php \yii\widgets\Pjax::end()?>
+
+            <?php if ($lead->products): ?>
+                <?= $this->render('offers/lead_offers', [
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'dataProviderOffers' => $dataProviderOffers,
+                    'is_manager' => $is_manager,
+                ]) ?>
+
+                <?= $this->render('orders/lead_orders', [
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'dataProviderOrders' => $dataProviderOrders,
+                    'is_manager' => $is_manager,
+                ]) ?>
+            <?php endif; ?>
+
+
         </div>
         <div class="col-md-6">
-            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$leadForm->getLead()->isOwner(Yii::$app->user->id)):?>
+            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner(Yii::$app->user->id)):?>
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Client information is not available in VIEW MODE, please take lead!</p>
                 </div>
 
-            <?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->isFollowUp() || ($leadForm->getLead()->isPending() && !$leadForm->getLead()->isNewRecord) ) && !$leadForm->getLead()->isOwner(Yii::$app->user->id)):?>
+            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner(Yii::$app->user->id)):?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
+                    <p>Client information is not available for this status (<?=strtoupper($lead->getStatusName())?>)!</p>
                 </div>
 
             <?php else: ?>
@@ -135,153 +115,133 @@ $lead = $leadForm->getLead();
                 ]) ?>
 
             <?php endif;?>
-        </div>
-
-        <div class="clearfix"></div>
-
-        <div class="col-md-6">
 
 
 
-            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-                <div class="row">
-                    <div class="col-md-12">
-                        <?php if(!$leadForm->getLead()->l_answered): ?>
-
-                            <?php if($leadForm->getLead()->isProcessing()):?>
-                                <?= Html::a(($leadForm->getLead()->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $leadForm->getLead()->id, 'act' => 'answer'], [
-                                    'class' => 'btn '.($leadForm->getLead()->l_answered ? 'btn-success' : 'btn-info'),
-                                    'data-pjax' => false,
-                                    'data' => [
-                                        'confirm' => 'Are you sure?',
-                                        'method' => 'post',
-                                        'pjax' => 0
-                                    ],
-                                ]) ?>
-                            <?php else: ?>
-                                <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>
-                            <?php endif;?>
-
-                        <?php else: ?>
-                            <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>
-                        <?php endif; ?>
-
-                    </div>
-
-                </div>
-                <br>
-            <?php endif; ?>
-
-
-
-
-        	<?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $leadForm->getLead()->employee_id !== Yii::$app->user->id):?>
+            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $lead->employee_id !== Yii::$app->user->id):?>
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Lead Preferences is not available in VIEW MODE, please take lead!</p>
                 </div>
-			<?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->isFollowUp() || ($leadForm->getLead()->isPending() && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id !== Yii::$app->user->id):?>
+            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && $lead->employee_id !== Yii::$app->user->id):?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
+                    <p>Client information is not available for this status (<?=strtoupper($lead->getStatusName())?>)!</p>
                 </div>
             <?php else: ?>
                 <div id="lead-preferences">
                     <?= $this->render('partial/_lead_preferences', [
-                        'lead' => $lead,
-                        'leadForm' => $leadForm
+                        'lead' => $lead
                     ]) ?>
                 </div>
             <?php endif; ?>
 
 
-            <?php if (!$leadForm->getLead()->isNewRecord):?>
+            <?= $this->render('checklist/lead_checklist', [
+                'lead' => $lead,
+                'comForm'       => $comForm,
+                'leadId'        => $lead->id,
+                'dataProvider'  => $dataProviderChecklist,
+                'isAdmin'       => $is_admin,
+                'modelLeadChecklist'       => $modelLeadChecklist,
+            ]) ?>
 
-                <?= $this->render('quotes/quote_list', [
-                    'dataProvider' => $quotesProvider,
-                    'lead' => $lead,
-                    'leadForm' => $leadForm,
-                    'is_manager' => $is_manager,
-                ]); ?>
+            <?= $this->render('partial/_task_list', [
+                'lead' => $lead
+            ]); ?>
 
-            <?php endif;?>
-
-            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-
-                <?/*= $this->render('partial/_task_list', [
-                    'lead' => $leadForm->getLead()
-                ]);*/ ?>
-
-                <?/*= $this->render('partial/_notes', [
-                    'notes' => $leadForm->getLead()->notes
-                ]); */?>
-
-                <?= $this->render('notes/agent_notes', [
-                    'lead' => $leadForm->getLead(),
-                    'dataProviderNotes'  => $dataProviderNotes,
-                    'modelNote'  => $modelNote,
-                ]) ?>
-
-                <?/*= $this->render('partial/_leadLog', [
-                    'logs' => $leadForm->getLead()->leadLogs
-                ]);*/ ?>
-
-            <?php endif; ?>
-
-        </div>
-
-
-        <div class="col-md-6">
-            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-
-                <?= $this->render('checklist/lead_checklist', [
-                    'lead' => $leadForm->getLead(),
+            <?php if ($enableCommunication) : ?>
+                <?= $this->render('communication/lead_communication', [
+                    'leadForm'      => $leadForm,
+                    'previewEmailForm' => $previewEmailForm,
+                    'previewSmsForm' => $previewSmsForm,
                     'comForm'       => $comForm,
                     'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderChecklist,
-                    'isAdmin'       => $is_admin,
-                    'modelLeadChecklist'       => $modelLeadChecklist,
-                ]) ?>
-
-                <?= $this->render('partial/_task_list', [
-                    'lead' => $leadForm->getLead()
-                ]); ?>
-
-                <?php if ($enableCommunication) : ?>
-                    <?= $this->render('communication/lead_communication', [
-                        'leadForm'      => $leadForm,
-                        'previewEmailForm' => $previewEmailForm,
-                        'previewSmsForm' => $previewSmsForm,
-                        'comForm'       => $comForm,
-                        'leadId'        => $lead->id,
-                        'dataProvider'  => $dataProviderCommunication,
-                        'isAdmin'       => $is_admin
-                    ]);
-                    ?>
-                <?php else: ?>
-                    <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
-                <?php endif;?>
+                    'dataProvider'  => $dataProviderCommunication,
+                    'isAdmin'       => $is_admin
+                ]);
+                ?>
+            <?php else: ?>
+                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
+            <?php endif;?>
 
 
             <?//php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
 
 
 
-                <?php if(Yii::$app->user->identity->isAllowCallExpert): ?>
-                    <?= $this->render('call-expert/lead_call_expert', [
-                        'lead' => $leadForm->getLead(),
-                        'comForm'       => $comForm,
-                        'leadId'        => $lead->id,
-                        'dataProvider'  => $dataProviderCallExpert,
-                        'isAdmin'       => $is_admin,
-                        'modelLeadCallExpert'       => $modelLeadCallExpert,
-                    ]) ?>
-                <?php endif;?>
-
-
+            <?php if(Yii::$app->user->identity->isAllowCallExpert): ?>
+                <?= $this->render('call-expert/lead_call_expert', [
+                    'lead' => $lead,
+                    'comForm'       => $comForm,
+                    'leadId'        => $lead->id,
+                    'dataProvider'  => $dataProviderCallExpert,
+                    'isAdmin'       => $is_admin,
+                    'modelLeadCallExpert'       => $modelLeadCallExpert,
+                ]) ?>
             <?php endif;?>
+
+
+
         </div>
+
+        <div class="col-md-6">
+
+<!--            --><?php //if (!$lead->isNewRecord) : ?>
+<!--                <div class="row">-->
+<!--                    <div class="col-md-12">-->
+<!--                        --><?php //if(!$lead->l_answered): ?>
+<!---->
+<!--                            --><?php //if($lead->isProcessing()):?>
+<!--                                --><?//= Html::a(($lead->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $lead->id, 'act' => 'answer'], [
+//                                    'class' => 'btn '.($lead->l_answered ? 'btn-success' : 'btn-info'),
+//                                    'data-pjax' => false,
+//                                    'data' => [
+//                                        'confirm' => 'Are you sure?',
+//                                        'method' => 'post',
+//                                        'pjax' => 0
+//                                    ],
+//                                ]) ?>
+<!--                            --><?php //else: ?>
+<!--                                <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>-->
+<!--                            --><?php //endif;?>
+<!---->
+<!--                        --><?php //else: ?>
+<!--                            <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>-->
+<!--                        --><?php //endif; ?>
+<!---->
+<!--                    </div>-->
+<!---->
+<!--                </div>-->
+<!--            --><?php //endif; ?>
+
+
+
+
+
+<!--                --><?//= $this->render('quotes/quote_list', [
+//                    'dataProvider' => $quotesProvider,
+//                    'lead' => $lead,
+//                    'leadForm' => $leadForm,
+//                    'is_manager' => $is_manager,
+//                ]); ?>
+
+
+
+
+
+                <?= $this->render('notes/agent_notes', [
+                    'lead' => $lead,
+                    'dataProviderNotes'  => $dataProviderNotes,
+                    'modelNote'  => $modelNote,
+                ]) ?>
+
+
+        </div>
+
+
+
 
         <div class="clearfix"></div>
         <br/>
@@ -294,10 +254,10 @@ $lead = $leadForm->getLead();
 
 <?php
 
-if (!$leadForm->getLead()->isNewRecord) {
+if (!$lead->isNewRecord) {
     $flowTransitionUrl = \yii\helpers\Url::to([
         'lead/flow-transition',
-        'leadId' => $leadForm->getLead()->id
+        'leadId' => $lead->id
     ]);
 
     $js = <<<JS

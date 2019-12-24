@@ -2,42 +2,55 @@
 
 namespace common\models;
 
+use common\models\query\OrderQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
- * This is the model class ftable "order".
+ * This is the model class for table "order".
  *
  * @property int $or_id
  * @property string $or_gid
- * @property string $or_uid
- * @property string $or_name
+ * @property string|null $or_uid
+ * @property string|null $or_name
  * @property int $or_lead_id
- * @property string $or_description
- * @property int $or_status_id
- * @property int $or_pay_status_id
- * @property string $or_app_total
- * @property string $or_app_markup
- * @property string $or_agent_markup
- * @property string $or_client_total
- * @property string $or_client_currency
- * @property string $or_client_currency_rate
- * @property int $or_owner_user_id
- * @property int $or_created_user_id
- * @property int $or_updated_user_id
- * @property string $or_created_dt
- * @property string $or_updated_dt
+ * @property string|null $or_description
+ * @property int|null $or_status_id
+ * @property int|null $or_pay_status_id
+ * @property float|null $or_app_total
+ * @property float|null $or_app_markup
+ * @property float|null $or_agent_markup
+ * @property float|null $or_client_total
+ * @property string|null $or_client_currency
+ * @property float|null $or_client_currency_rate
+ * @property int|null $or_owner_user_id
+ * @property int|null $or_created_user_id
+ * @property int|null $or_updated_user_id
+ * @property string|null $or_created_dt
+ * @property string|null $or_updated_dt
  *
+ * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
  * @property Lead $orLead
  * @property Employee $orCreatedUser
  * @property Employee $orOwnerUser
  * @property Employee $orUpdatedUser
+ * @property OrderProduct[] $orderProducts
+ * @property ProductQuote[] $orpProductQuotes
+ * @property float $orderTotalCalcSum
+ * @property string $statusName
+ * @property string $payStatusName
+ * @property string $statusLabel
+ * @property string $className
+ * @property string $payClassName
+ * @property string $payStatusLabel
  * @property ProductQuote[] $productQuotes
  */
-class Order extends \yii\db\ActiveRecord
+class Order extends ActiveRecord
 {
 
     public const STATUS_PENDING         = 1;
@@ -56,6 +69,15 @@ class Order extends \yii\db\ActiveRecord
         self::STATUS_CANCELED       => 'Canceled',
     ];
 
+    public const STATUS_CLASS_LIST        = [
+        self::STATUS_PENDING        => 'warning',
+        self::STATUS_IN_PROGRESS    => 'info',
+        self::STATUS_DONE           => 'success',
+        self::STATUS_MODIFIED       => 'warning',
+        self::STATUS_DECLINED       => 'danger',
+        self::STATUS_CANCELED       => 'danger',
+    ];
+
     public const PAY_STATUS_NOT_PAID        = 1;
     public const PAY_STATUS_PAID            = 2;
     public const PAY_STATUS_PARTIAL_PAID    = 3;
@@ -64,6 +86,12 @@ class Order extends \yii\db\ActiveRecord
         self::PAY_STATUS_NOT_PAID           => 'Not paid',
         self::PAY_STATUS_PAID               => 'Paid',
         self::PAY_STATUS_PARTIAL_PAID       => 'Partial paid',
+    ];
+
+    public const PAY_STATUS_CLASS_LIST        = [
+        self::PAY_STATUS_NOT_PAID           => 'warning',
+        self::PAY_STATUS_PAID               => 'success',
+        self::PAY_STATUS_PARTIAL_PAID       => 'info',
     ];
 
 
@@ -92,6 +120,7 @@ class Order extends \yii\db\ActiveRecord
             [['or_client_currency'], 'string', 'max' => 3],
             [['or_gid'], 'unique'],
             [['or_uid'], 'unique'],
+            [['or_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['or_client_currency' => 'cur_code']],
             [['or_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['or_lead_id' => 'id']],
             [['or_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_created_user_id' => 'id']],
             [['or_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_owner_user_id' => 'id']],
@@ -151,49 +180,85 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * Order init create
      */
-    public function getInvoices()
+    public function initCreate(): void
+    {
+        $this->or_gid = self::generateGid();
+        $this->or_uid = self::generateUid();
+        $this->or_status_id = self::STATUS_PENDING;
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOrClientCurrency(): ActiveQuery
+    {
+        return $this->hasOne(Currency::class, ['cur_code' => 'or_client_currency']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getInvoices(): ActiveQuery
     {
         return $this->hasMany(Invoice::class, ['inv_order_id' => 'or_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrLead()
+    public function getOrLead(): ActiveQuery
     {
         return $this->hasOne(Lead::class, ['id' => 'or_lead_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrCreatedUser()
+    public function getOrCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrOwnerUser()
+    public function getOrOwnerUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_owner_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getOrUpdatedUser()
+    public function getOrUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_updated_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getProductQuotes()
+    public function getOrderProducts(): ActiveQuery
+    {
+        return $this->hasMany(OrderProduct::class, ['orp_order_id' => 'or_id']);
+    }
+
+
+    /**
+     * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getOrpProductQuotes(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])->viaTable('order_product', ['orp_order_id' => 'or_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id']);
     }
@@ -204,7 +269,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new OrderQuery(get_called_class());
+        return new OrderQuery(static::class);
     }
 
     /**
@@ -236,6 +301,91 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getPayStatusName(): string
     {
-        return self::STATUS_LIST[$this->or_pay_status_id] ?? '';
+        return self::PAY_STATUS_LIST[$this->or_pay_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName(): string
+    {
+        return self::STATUS_CLASS_LIST[$this->or_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getPayClassName(): string
+    {
+        return self::PAY_STATUS_CLASS_LIST[$this->or_pay_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return Html::tag('span', $this->getStatusName(), ['class' => 'badge badge-' . $this->getClassName()]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPayStatusLabel(): string
+    {
+        return Html::tag('span', $this->getPayStatusName(), ['class' => 'badge badge-' . $this->getPayClassName()]);
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateGid(): string
+    {
+        return md5(uniqid('or', true));
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateUid(): string
+    {
+        return uniqid('or');
+    }
+
+    /**
+     * @return string
+     */
+    public function generateName(): string
+    {
+        $count = self::find()->where(['or_lead_id' => $this->or_lead_id])->count();
+        return 'Order ' . ($count + 1);
+    }
+
+    /**
+     * @return float
+     */
+    public function getOrderTotalCalcSum(): float
+    {
+        $sum = 0;
+        $orderProducts = $this->orderProducts;
+        if ($orderProducts) {
+            foreach ($orderProducts as $orderProduct) {
+                if ($quote = $orderProduct->orpProductQuote) {
+                    $sum += $quote->totalCalcSum;
+                }
+            }
+            $sum = round($sum, 2);
+        }
+        return $sum;
+    }
+
+
+    public function updateOrderTotalByCurrency(): void
+    {
+        if ($this->orClientCurrency) {
+            $this->or_client_currency_rate = (float) $this->orClientCurrency->cur_app_rate;
+        }
+
+        $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
     }
 }

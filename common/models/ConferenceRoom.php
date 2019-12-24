@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\query\ConferenceRoomQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

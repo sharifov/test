@@ -1,0 +1,36 @@
+<?php
+
+namespace common\models\query;
+
+use common\models\Lead;
+
+/**
+ * This is the ActiveQuery class for [[Lead]].
+ *
+ * @see Lead
+ */
+class LeadsQuery extends \yii\db\ActiveQuery
+{
+    /*public function active()
+    {
+        return $this->andWhere('[[status]]=1');
+    }*/
+
+    /**
+     * {@inheritdoc}
+     * @return Lead[]|array
+     */
+    public function all($db = null)
+    {
+        return parent::all($db);
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return Lead|array|null
+     */
+    public function one($db = null)
+    {
+        return parent::one($db);
+    }
+}

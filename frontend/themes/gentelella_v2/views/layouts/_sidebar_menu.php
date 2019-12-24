@@ -239,6 +239,15 @@ $isSuperAdmin = $user->canRole('superadmin');
             ]
         ];
 
+        if (class_exists('\modules\hotel\HotelModule')) {
+            $menuItems[] = [
+                'label' => 'Hotel module',
+                'url' => 'javascript:',
+                'icon' => 'hotel',
+                'items' => \modules\hotel\HotelModule::getListMenu()
+            ];
+        }
+
         $menuItems[] = [
             'label' => 'New Data',
             'url' => 'javascript:',
@@ -248,10 +257,13 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Currency History', 'url' => ['/currency-history/index']],
                 ['label' => 'Product Types', 'url' => ['/product-type/index']],
                 ['label' => 'Products', 'url' => ['/product/index']],
+                ['label' => 'Product Options', 'url' => ['/product-option/index']],
                 ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],
+                ['label' => 'Product Quote Options', 'url' => ['/product-quote-option/index']],
                 ['label' => 'Orders', 'url' => ['/order/index']],
                 ['label' => 'Offers', 'url' => ['/offer/index']],
                 ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
+                ['label' => 'Order Products', 'url' => ['/order-product/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/index']],
             ]
         ];

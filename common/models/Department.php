@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\DepartmentQuery;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

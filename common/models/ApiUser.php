@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ApiUserQuery;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;

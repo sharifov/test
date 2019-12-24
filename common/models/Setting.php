@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\SettingQuery;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;

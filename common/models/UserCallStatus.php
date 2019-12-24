@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\jobs\AgentCallQueueJob;
+use common\models\query\UserCallStatusQuery;
 use Yii;
 
 /**
