@@ -30,7 +30,7 @@ use yii\widgets\ActiveForm;
  * @property MultipleUpdateService $multipleUpdate
  * @property UpdateAllService $updateAllService
  */
-class LeadRedial2Controller extends FController
+class LeadRedialController extends FController
 {
     public function behaviors(): array
     {
