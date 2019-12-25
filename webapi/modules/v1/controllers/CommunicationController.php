@@ -296,15 +296,15 @@ class CommunicationController extends ApiBaseController
                 $response['error_code'] = 11;
             }
 
-//            try {
-//                $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
-//            } catch (CallDeclinedException $e) {
-//                $vr = new VoiceResponse();
-////                $sayParam = ['language' => 'en-US'];   // ['language' => 'en-US', 'voice' => 'alice']
-//                //$vr->say('Test', $sayParam);
-//                $vr->reject(['reason' => 'busy']);
-//                return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: '. $e->getMessage());
-//            }
+            try {
+                $this->callService->guardDeclined($client_phone_number, $postCall, Call::CALL_TYPE_IN);
+            } catch (CallDeclinedException $e) {
+                $vr = new VoiceResponse();
+//                $sayParam = ['language' => 'en-US'];   // ['language' => 'en-US', 'voice' => 'alice']
+                //$vr->say('Test', $sayParam);
+                $vr->reject(['reason' => 'busy']);
+                return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: '. $e->getMessage());
+            }
 
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
