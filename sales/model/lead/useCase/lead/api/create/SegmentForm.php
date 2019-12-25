@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\lead\useCase\api\create;
+namespace sales\model\lead\useCase\lead\api\create;
 
 use common\models\Airport;
 use yii\base\Model;

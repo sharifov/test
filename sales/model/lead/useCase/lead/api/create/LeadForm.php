@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\lead\useCase\api\create;
+namespace sales\model\lead\useCase\lead\api\create;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\Lead;
@@ -91,6 +91,7 @@ class LeadForm extends Model
 
             ['user_agent', 'string'],
 
+            ['status', 'required'],
             ['status', 'in', 'range' => [Lead::STATUS_BOOK_FAILED, Lead::STATUS_ALTERNATIVE]],
 
             ['phone', 'required'],

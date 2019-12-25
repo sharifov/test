@@ -10,6 +10,7 @@ use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
+use sales\events\lead\LeadCreatedByApiBOEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedByIncomingEmailEvent;
@@ -31,6 +32,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\model\lead\useCase\api\create\LeadForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -634,6 +636,28 @@ class Lead extends ActiveRecord
     public function eventLeadCreatedByApiEvent(): void
     {
         $this->recordEvent(new LeadCreatedByApiEvent($this, $this->status));
+    }
+
+    public static function createByApiBO(LeadForm $form, Client $client): self
+    {
+        $lead = self::create();
+        $lead->client_id = $client->id;
+        $lead->l_client_first_name = $client->first_name;
+        $lead->l_client_last_name = $client->last_name;
+        $lead->project_id = $form->project_id;
+        $lead->source_id = $form->source_id;
+        $lead->cabin = $form->cabin;
+        $lead->adults = $form->adults;
+        $lead->children = $form->children;
+        $lead->infants = $form->infants;
+        $lead->request_ip = $form->request_ip;
+        $lead->discount_id = $form->discount_id;
+        $lead->uid = $form->uid;
+        $lead->l_client_ua = $form->user_agent;
+        $lead->status = $form->status;
+        $lead->l_client_phone = $form->phone;
+        $lead->recordEvent(new LeadCreatedByApiBOEvent($lead, $lead->status));
+        return $lead;
     }
 
     /**
@@ -2166,6 +2190,10 @@ class Lead extends ActiveRecord
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_BOOK_FAILED:
+            case self::STATUS_ALTERNATIVE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
+                break;
         }
         return $label;
     }
@@ -2192,6 +2220,10 @@ class Lead extends ActiveRecord
             case self::STATUS_TRASH:
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_BOOK_FAILED:
+            case self::STATUS_ALTERNATIVE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
         return $label;
