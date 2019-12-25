@@ -1,13 +1,11 @@
 <?php
 
-namespace sales\yii\validators;
+namespace sales\services\client;
 
-use sales\services\client\InternalPhoneException;
-use sales\services\client\InternalPhoneGuard;
 use yii\validators\Validator;
 
 /**
- * Class InternalPhoneValidate
+ * Class InternalPhoneValidator
  *
  * @property InternalPhoneGuard $phoneGuard
  */
