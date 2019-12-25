@@ -45,11 +45,11 @@ class Handler
         $this->segmentRepository = $segmentRepository;
     }
 
-    public function handle(LeadForm $form)
+    public function handle(LeadForm $form): void
     {
         $this->transactionManager->wrap(function () use ($form) {
 
-            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->phone])]);
+            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->clientForm->phone])]);
 
             $lead = Lead::createByApiBO($form, $client);
 
@@ -60,19 +60,19 @@ class Handler
                 $form->children,
                 $form->infants,
                 $form->cabin,
-                [$form->phone],
-                $this->getSegments($form->segments)
+                [$form->clientForm->phone],
+                $this->getSegments($form->segmentsForm)
             );
 
             $lead->setRequestHash($hash);
 
-            $lead->setTripType($this->calculateTripType($form->segments));
+            $lead->setTripType($this->calculateTripType($form->segmentsForm));
 
-            $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$form->phone]);
+            $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$form->clientForm->phone]);
 
             $leadId = $this->leadRepository->save($lead);
 
-            $this->createFlightSegments($leadId, $form->segments);
+            $this->createFlightSegments($leadId, $form->segmentsForm);
 
         });
     }
@@ -114,14 +114,12 @@ class Handler
     }
 
     /**
-     * @param array $segments
+     * @param SegmentForm[] $segments
      * @return string
      */
     private function calculateTripType(array $segments): string
     {
         $segmentsDTO = [];
-
-        /** @var SegmentForm $segment */
         foreach ($segments as $segment) {
             $segmentsDTO[] = new SegmentDTO($segment->origin, $segment->destination);
         }

@@ -32,7 +32,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
-use sales\model\lead\useCase\api\create\LeadForm;
+use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -655,7 +655,7 @@ class Lead extends ActiveRecord
         $lead->uid = $form->uid;
         $lead->l_client_ua = $form->user_agent;
         $lead->status = $form->status;
-        $lead->l_client_phone = $form->phone;
+        $lead->l_client_phone = $form->clientForm->phone;
         $lead->recordEvent(new LeadCreatedByApiBOEvent($lead, $lead->status));
         return $lead;
     }

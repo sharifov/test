@@ -155,24 +155,31 @@ class TestController extends FController
     {
 
         $data = [
+            'client' => [
+                'phone' => '+37369636963',
+            ],
+            'uid' => '346g6142wdg22rhdf',
             'status' => Lead::STATUS_BOOK_FAILED,
-            'uid' => '346g61dg2rhdf',
             'sub_sources_code' => 'JIVOCH',
             'cabin' => 'E',
             'adults' => 2,
             'children' => 2,
             'infants' => 2,
-            'phone' => '+37369388124',
-            'flights' => [
+            'segments' => [
                 [
                     'origin' => 'NYC',
                     'destination' => 'LON',
-                    'departure' => '2019-12-15',
+                    'departure' => '2019-12-16',
                 ],
                 [
                     'origin' => 'LON',
                     'destination' => 'NYC',
-                    'departure' => '2019-12-30',
+                    'departure' => '2019-12-17',
+                ],
+                [
+                    'origin' => 'LON',
+                    'destination' => 'NYC',
+                    'departure' => '2019-12-18',
                 ],
             ],
         ];
@@ -184,8 +191,6 @@ class TestController extends FController
         } else {
             VarDumper::dump($form->errors);
         }
-
-
 
 die;
 
