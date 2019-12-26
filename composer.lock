@@ -5293,16 +5293,16 @@
         },
         {
             "name": "workerman/workerman",
-            "version": "v3.5.22",
+            "version": "v3.5.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/walkor/Workerman.git",
-                "reference": "488f108f9e446f31bac4d689bb9f9fe3705862cf"
+                "reference": "416f864e4815bc8b1475793056520db4543e4455"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/walkor/Workerman/zipball/488f108f9e446f31bac4d689bb9f9fe3705862cf",
-                "reference": "488f108f9e446f31bac4d689bb9f9fe3705862cf",
+                "url": "https://api.github.com/repos/walkor/Workerman/zipball/416f864e4815bc8b1475793056520db4543e4455",
+                "reference": "416f864e4815bc8b1475793056520db4543e4455",
                 "shasum": ""
             },
             "require": {
@@ -5335,7 +5335,7 @@
                 "asynchronous",
                 "event-loop"
             ],
-            "time": "2019-09-06T03:42:47+00:00"
+            "time": "2019-12-23T05:06:17+00:00"
         },
         {
             "name": "xtetis/yii2-bootstrap4-glyphicons",
