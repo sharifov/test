@@ -705,7 +705,7 @@ class CasesController extends FController
 
             $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
             if($cs) {
-                $data['error'] = 'This sale ('.$saleData['saleId'].') exist in this Case Id '.$model->cs_id;
+                $out['error'] = 'This sale ('.$saleData['saleId'].') exist in this Case Id '.$model->cs_id;
             } else {
                 $cs = new CaseSale();
                 $cs->css_cs_id = $model->cs_id;
