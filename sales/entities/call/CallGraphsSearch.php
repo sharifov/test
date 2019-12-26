@@ -8,6 +8,7 @@ use common\models\query\CallQuery;
 use common\models\search\CallSearch;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
+use Yii;
 use yii\data\SqlDataProvider;
 use yii\db\ActiveRecord;
 use DateTime;
@@ -153,6 +154,7 @@ class CallGraphsSearch extends CallSearch
 		$this->betweenHoursFrom = 0;
 		$this->betweenHoursTo = 24;
 		$this->recordingDurationFrom = 30;
+		$this->timeZone = $this->timeZone ?? Yii::$app->user->identity->timezone;
 	}
 
 	/**

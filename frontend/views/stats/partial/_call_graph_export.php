@@ -9,7 +9,6 @@ use sales\viewModel\call\ViewModelTotalCallGraph;
 ?>
 <script>
     $('a[id^=export-links]').each( function (i, element ) {
-        console.log($(element).attr('id'));
         $(document).off("click.exportmenu", "#"+$(element).attr('id'));
     });
 </script>
