@@ -3,12 +3,11 @@
 namespace sales\entities\call;
 
 use common\models\Call;
-use common\models\CallQuery;
 use common\models\Employee;
+use common\models\query\CallQuery;
 use common\models\search\CallSearch;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
-use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 use yii\db\ActiveRecord;
 use DateTime;

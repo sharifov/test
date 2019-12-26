@@ -7,6 +7,12 @@ use sales\viewModel\call\ViewModelTotalCallGraph;
  * @var ViewModelTotalCallGraph $viewModel
  */
 ?>
+<script>
+    $('a[id^=export-links]').each( function (i, element ) {
+        console.log($(element).attr('id'));
+        $(document).off("click.exportmenu", "#"+$(element).attr('id'));
+    });
+</script>
 
 <div class="d-flex">
 	<?php echo ExportMenu::widget([
@@ -20,6 +26,9 @@ use sales\viewModel\call\ViewModelTotalCallGraph;
 		'columnSelectorOptions' => [
 			'label' => 'Export Fields'
 		],
-        'showConfirmAlert' => false
+        'showConfirmAlert' => false,
+        'options' => [
+            'id' => 'export-links'
+        ],
 	]); ?>
 </div>
