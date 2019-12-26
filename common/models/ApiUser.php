@@ -59,6 +59,11 @@ class ApiUser extends ActiveRecord implements IdentityInterface
         ];
     }
 
+    public function isDisabled(): bool
+    {
+        return $this->au_enabled ? false : true;
+    }
+
 
     /**
      * {@inheritdoc}
