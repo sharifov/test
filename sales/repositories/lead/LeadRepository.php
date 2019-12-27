@@ -4,6 +4,7 @@ namespace sales\repositories\lead;
 
 use common\models\Lead;
 use sales\dispatchers\EventDispatcher;
+use sales\model\lead\LeadCodeException;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
@@ -38,7 +39,7 @@ class LeadRepository extends Repository
         if ($lead = Lead::findOne($id)) {
             return $lead;
         }
-        throw new NotFoundException('Lead is not found');
+        throw new NotFoundException('Lead is not found', LeadCodeException::NOT_FOUND);
     }
 
     /**
@@ -50,7 +51,7 @@ class LeadRepository extends Repository
         if ($lead = Lead::findOne(['gid' => $gid])) {
             return $lead;
         }
-        throw new NotFoundException('Lead is not found');
+        throw new NotFoundException('Lead is not found', LeadCodeException::NOT_FOUND);
     }
 
     /**
@@ -62,7 +63,7 @@ class LeadRepository extends Repository
         if ($lead = Lead::findOne(['uid' => $uid])) {
             return $lead;
         }
-        throw new NotFoundException('Lead is not found');
+        throw new NotFoundException('Lead is not found', LeadCodeException::NOT_FOUND);
     }
 
 
@@ -134,8 +135,8 @@ class LeadRepository extends Repository
     {
         $lead->disableAREvents();
 
-        if (!$lead->save(false)) {
-            throw new \RuntimeException('Saving error');
+        if ($lead->save(false)) {
+            throw new \RuntimeException('Saving error', LeadCodeException::SAVE);
         }
         $this->eventDispatcher->dispatchAll($lead->releaseEvents());
         return $lead->id;
@@ -147,7 +148,7 @@ class LeadRepository extends Repository
     public function updateOnlyTripType(Lead $lead): void
     {
         if (!$lead->updateAttributes(['trip_type'])) {
-            throw new \RuntimeException('Update trip type error');
+            throw new \RuntimeException('Update trip type error', LeadCodeException::UPDATE_TRIP_TYPE);
         }
     }
 
@@ -159,7 +160,7 @@ class LeadRepository extends Repository
     public function remove(Lead $lead): void
     {
         if (!$lead->delete()) {
-            throw new \RuntimeException('Removing error');
+            throw new \RuntimeException('Removing error', LeadCodeException::REMOVE);
         }
         $this->eventDispatcher->dispatchAll($lead->releaseEvents());
     }
