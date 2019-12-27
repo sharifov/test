@@ -4,16 +4,17 @@ namespace sales\repositories\client;
 
 use common\models\Client;
 use sales\dispatchers\EventDispatcher;
+use sales\model\client\ClientCodeException;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
 /**
  * Class ClientRepository
+ *
  * @method null|Client get($id)
  */
 class ClientRepository extends Repository
 {
-
     private $eventDispatcher;
 
     /**
@@ -34,7 +35,7 @@ class ClientRepository extends Repository
         if ($client = Client::findOne($id)) {
             return $client;
         }
-        throw new NotFoundException('Client is not found');
+        throw new NotFoundException('Client is not found', ClientCodeException::CLIENT_NOT_FOUND);
     }
 
     /**
@@ -44,7 +45,7 @@ class ClientRepository extends Repository
     public function save(Client $client): int
     {
         if (!$client->save(false)) {
-            throw new \RuntimeException('Saving error');
+            throw new \RuntimeException('Saving error', ClientCodeException::CLIENT_SAVE);
         }
         $this->eventDispatcher->dispatchAll($client->releaseEvents());
         return $client->id;
@@ -58,7 +59,7 @@ class ClientRepository extends Repository
     public function remove(Client $client): void
     {
         if (!$client->delete()) {
-            throw new \RuntimeException('Removing error');
+            throw new \RuntimeException('Removing error', ClientCodeException::CLIENT_REMOVE);
         }
         $this->eventDispatcher->dispatchAll($client->releaseEvents());
     }

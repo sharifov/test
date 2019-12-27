@@ -4,11 +4,13 @@ namespace sales\repositories\client;
 
 use common\models\ClientPhone;
 use sales\dispatchers\EventDispatcher;
+use sales\model\client\ClientCodeException;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
 /**
  * Class ClientPhoneRepository
+ *
  * @method null|ClientPhone get($id)
  * @method null|ClientPhone getByPhone($phone)
  */
@@ -34,7 +36,7 @@ class ClientPhoneRepository extends Repository
         if ($phone = ClientPhone::findOne($id)) {
             return $phone;
         }
-        throw new NotFoundException('Phone is not found');
+        throw new NotFoundException('Phone is not found', ClientCodeException::CLIENT_PHONE_NOT_FOUND);
     }
 
     /**
@@ -46,7 +48,7 @@ class ClientPhoneRepository extends Repository
         if ($clientPhone = ClientPhone::find()->where(['phone' => $phone])->orderBy(['id' => SORT_DESC])->limit(1)->one()) {
             return $clientPhone;
         }
-        throw new NotFoundException('Phone is not found');
+        throw new NotFoundException('Phone is not found', ClientCodeException::CLIENT_PHONE_NOT_FOUND);
     }
 
     /**
@@ -66,7 +68,7 @@ class ClientPhoneRepository extends Repository
     public function save(ClientPhone $phone): int
     {
         if (!$phone->save(false)) {
-            throw new \RuntimeException('Saving error');
+            throw new \RuntimeException('Saving error', ClientCodeException::CLIENT_PHONE_SAVE);
         }
         $this->eventDispatcher->dispatchAll($phone->releaseEvents());
         return $phone->id;
@@ -80,7 +82,7 @@ class ClientPhoneRepository extends Repository
     public function remove(ClientPhone $phone): void
     {
         if (!$phone->delete()) {
-            throw new \RuntimeException('Removing error');
+            throw new \RuntimeException('Removing error', ClientCodeException::CLIENT_PHONE_REMOVE);
         }
         $this->eventDispatcher->dispatchAll($phone->releaseEvents());
     }
