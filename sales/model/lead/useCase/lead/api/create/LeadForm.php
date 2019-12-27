@@ -107,6 +107,11 @@ class LeadForm extends Model
         ];
     }
 
+    public function formName(): string
+    {
+        return 'lead';
+    }
+
     private function loadAndValidateSegments(): void
     {
         $isValid = true;
