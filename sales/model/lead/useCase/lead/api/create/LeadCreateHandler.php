@@ -22,7 +22,7 @@ use sales\services\TransactionManager;
  * @property LeadRepository $leadRepository
  * @property LeadSegmentRepository $segmentRepository
  */
-class Handler
+class LeadCreateHandler
 {
     private $clientManageService;
     private $transactionManager;
@@ -45,9 +45,9 @@ class Handler
         $this->segmentRepository = $segmentRepository;
     }
 
-    public function handle(LeadForm $form): void
+    public function handle(LeadForm $form): Lead
     {
-        $this->transactionManager->wrap(function () use ($form) {
+        $lead = $this->transactionManager->wrap(function () use ($form) {
 
             $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->clientForm->phone])]);
 
@@ -74,7 +74,11 @@ class Handler
 
             $this->createFlightSegments($leadId, $form->segmentsForm);
 
+            return $lead;
+
         });
+
+        return $lead;
     }
 
     /**

@@ -14,4 +14,7 @@ class LeadCodeException
     public const SEGMENT_NOT_FOUND = Module::LEAD . 200;
     public const SEGMENT_SAVE = Module::LEAD . 201;
     public const SEGMENT_REMOVE = Module::LEAD . 202;
+
+    public const API_LEAD_NOT_FOUND_DATA_ON_REQUEST = Module::LEAD . 300;
+    public const API_LEAD_VALIDATE = Module::LEAD . 301;
 }

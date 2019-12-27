@@ -644,6 +644,8 @@ class Lead extends ActiveRecord
         $lead->client_id = $client->id;
         $lead->l_client_first_name = $client->first_name;
         $lead->l_client_last_name = $client->last_name;
+        $lead->l_client_phone = $form->clientForm->phone;
+        $lead->l_client_ua = $form->user_agent;
         $lead->project_id = $form->project_id;
         $lead->source_id = $form->source_id;
         $lead->cabin = $form->cabin;
@@ -652,10 +654,8 @@ class Lead extends ActiveRecord
         $lead->infants = $form->infants;
         $lead->request_ip = $form->request_ip;
         $lead->discount_id = $form->discount_id;
-        $lead->uid = $form->uid;
-        $lead->l_client_ua = $form->user_agent;
+        $lead->uid = $form->uid ?: $lead->uid;
         $lead->status = $form->status;
-        $lead->l_client_phone = $form->clientForm->phone;
         $lead->recordEvent(new LeadCreatedByApiBOEvent($lead, $lead->status));
         return $lead;
     }
