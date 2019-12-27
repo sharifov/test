@@ -45,7 +45,7 @@ class LeadCreateHandler
         $this->segmentRepository = $segmentRepository;
     }
 
-    public function handle(LeadForm $form): Lead
+    public function handle(LeadCreateForm $form): Lead
     {
         $lead = $this->transactionManager->wrap(function () use ($form) {
 

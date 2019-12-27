@@ -32,7 +32,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
-use sales\model\lead\useCase\lead\api\create\LeadForm;
+use sales\model\lead\useCase\lead\api\create\LeadCreateForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -638,7 +638,7 @@ class Lead extends ActiveRecord
         $this->recordEvent(new LeadCreatedByApiEvent($this, $this->status));
     }
 
-    public static function createByApiBO(LeadForm $form, Client $client): self
+    public static function createByApiBO(LeadCreateForm $form, Client $client): self
     {
         $lead = self::create();
         $lead->client_id = $client->id;

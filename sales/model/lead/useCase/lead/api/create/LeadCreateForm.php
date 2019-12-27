@@ -29,7 +29,7 @@ use yii\base\Model;
  * @property SegmentForm[] $segmentsForm
  * @property ClientForm $clientForm
  */
-class LeadForm extends Model
+class LeadCreateForm extends Model
 {
     public $sub_sources_code;
     public $source_id;

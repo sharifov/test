@@ -3,10 +3,10 @@
 namespace webapi\modules\v2\controllers;
 
 use sales\model\lead\LeadCodeException;
-use webapi\src\response\lead\LeadCreateResponse;
+use sales\model\lead\useCase\lead\api\create\LeadCreateResponse;
 use Yii;
 use sales\model\lead\useCase\lead\api\create\LeadCreateHandler;
-use sales\model\lead\useCase\lead\api\create\LeadForm;
+use sales\model\lead\useCase\lead\api\create\LeadCreateForm;
 use webapi\src\logger\ApiLogger;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\Response;
@@ -35,7 +35,7 @@ class LeadController extends BaseController
 
     public function actionCreate(): Response
     {
-        $form = new LeadForm();
+        $form = new LeadCreateForm();
 
         if (!$form->load(Yii::$app->request->post())) {
             $message = 'Not found Lead data on POST request';

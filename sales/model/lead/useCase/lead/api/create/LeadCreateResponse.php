@@ -1,6 +1,6 @@
 <?php
 
-namespace webapi\src\response\lead;
+namespace sales\model\lead\useCase\lead\api\create;
 
 use webapi\src\response\DataResponse;
 
