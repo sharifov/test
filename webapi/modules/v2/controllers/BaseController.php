@@ -86,20 +86,23 @@ class BaseController extends Controller
 
     public function afterAction($action, $result)
     {
+        /** @var \webapi\src\response\Response $result */
         $result = parent::afterAction($action, $result);
 
         $this->logger->end(
             new EndDTO([
-                'result' => @json_encode($result),
+                'result' => @json_encode($result->getResponse()),
                 'endTime' => microtime(true),
                 'endMemory' => memory_get_usage(),
                 'profiling' => Yii::getLogger()->getDbProfiling(),
             ])
         );
 
-        /** @var \webapi\src\response\Response $result */
         $result->addData('request', Yii::$app->request->post());
         $result->addData('technical', $this->logger->getTechnicalInfo());
+
+        Yii::$app->response->statusCode = $result->getResponseStatusCode();
+
         return $result->getResponse();
     }
 

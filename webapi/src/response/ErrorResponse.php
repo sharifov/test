@@ -2,30 +2,48 @@
 
 namespace webapi\src\response;
 
-use yii\helpers\Json;
-use yii\web\UnprocessableEntityHttpException;
-
 /**
  * Class ErrorResponse
  *
+ * @property int $statusCode
  * @property array $errors
  * @property int $code
  */
 class ErrorResponse extends Response
 {
+    public const STATUS_CODE_DEFAULT = 422;
+    public const MESSAGE_DEFAULT = 'Error';
+
+    public $statusCode;
     public $errors = [];
     public $code = 0;
 
-    public function getResponse()
+    public function getResponse(): array
     {
-        throw new UnprocessableEntityHttpException($this->errorsToString(), $this->code);
+        $statusCode = $this->statusCode ?: self::STATUS_CODE_DEFAULT;
+        $message = $this->message ?: self::MESSAGE_DEFAULT;
+
+        return $this->createResponse($statusCode, $message, $this->errors, $this->code);
     }
 
-    public function addData(string $key, array $data): void { }
-    public function addDataResponse(DataResponse $response): void { }
-
-    private function errorsToString(): string
+    public function getResponseStatusCode(): int
     {
-        return Json::encode($this->errors);
+        return $this->statusCode ?: self::STATUS_CODE_DEFAULT;
+    }
+
+    private function createResponse($statusCode, $message, $errors, $code): array
+    {
+        $response = [
+            'status' => $statusCode,
+            'message' => $message,
+            'errors' => $errors,
+            'code' => $code,
+        ];
+
+        if (!empty($this->data)) {
+            $response['data'] = $this->data;
+        }
+
+        return $response;
     }
 }

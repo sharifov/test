@@ -4,33 +4,28 @@ namespace webapi\src\response;
 
 /**
  * Class SuccessResponse
- *
- * @property $status
- * @property $message
- * @property $data
  */
 class SuccessResponse extends Response
 {
-    public $status = 200;
-    public $message = 'Success';
-    public $data = [];
+    public const STATUS_CODE_SUCCESS = 200;
+    public const MESSAGE_SUCCESS = 'Success';
 
-    public function getResponse(): self
+    public function getResponse(): array
     {
-        return $this;
+        return [
+            'status' => $this->getResponseStatusCode(),
+            'message' => $this->generateMessage(),
+            'data' => $this->data,
+        ];
     }
 
-    public function addData(string $key, array $data): void
+    public function getResponseStatusCode(): int
     {
-        $this->data[$key] = $data;
+        return self::STATUS_CODE_SUCCESS;
     }
 
-    public function addDataResponse(DataResponse $response): void
+    private function generateMessage(): string
     {
-        if ($key = $response->getKey()) {
-            $this->data['response'][$key] = $response;
-        } else {
-            $this->data['response'] = $response;
-        }
+        return $this->message ?: self::MESSAGE_SUCCESS;
     }
 }
