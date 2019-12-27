@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
     <?//= $form->field($model, 'ph_product_id')->textInput() ?>
 
 
-    <?= $form->field($model, 'ph_check_in_date')->widget(
+    <?= $form->field($model, 'ph_check_in_dt')->widget(
         \dosamigos\datepicker\DatePicker::class, [
         'inline' => false,
         'clientOptions' => [
@@ -26,7 +26,7 @@ use yii\widgets\ActiveForm;
     ])?>
 
 
-    <?= $form->field($model, 'ph_check_out_date')->widget(
+    <?= $form->field($model, 'ph_check_out_dt')->widget(
         \dosamigos\datepicker\DatePicker::class, [
         'inline' => false,
         'clientOptions' => [

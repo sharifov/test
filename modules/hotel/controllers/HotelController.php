@@ -4,14 +4,14 @@ namespace modules\hotel\controllers;
 
 use common\models\ProductType;
 use modules\hotel\models\forms\HotelForm;
+use modules\hotel\src\helpers\HotelFormatHelper;
 use Yii;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\search\HotelSearch;
 use frontend\controllers\FController;
 use yii\base\Exception;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -127,9 +127,12 @@ class HotelController extends FController
 
                 //$modelHotel->attributes = $model->attributes;
 
+                $modelHotel->ph_zone_code = $model->ph_zone_code;
+                $modelHotel->ph_hotel_code = $model->ph_hotel_code;
                 $modelHotel->ph_destination_code = $model->ph_destination_code;
-                $modelHotel->ph_check_in_date = $model->ph_check_in_date;
-                $modelHotel->ph_check_out_date = $model->ph_check_out_date;
+                $modelHotel->ph_destination_label = $model->ph_destination_label;
+                $modelHotel->ph_check_in_dt = $model->ph_check_in_dt;
+                $modelHotel->ph_check_out_dt = $model->ph_check_out_dt;
 
                 $modelHotel->ph_max_price_rate = $model->ph_max_price_rate;
                 $modelHotel->ph_min_price_rate = $model->ph_min_price_rate;
@@ -189,19 +192,40 @@ class HotelController extends FController
     }
 
 
-    /**
-     * Deletes an existing Hotel model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
-    {
+	/**
+	 * @param $id
+	 * @return Response
+	 * @throws NotFoundHttpException
+	 * @throws \Throwable
+	 * @throws StaleObjectException
+	 */
+    public function actionDelete($id): Response
+	{
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
+
+	/**
+	 * @param string $term
+	 * @param array $destType
+	 * @return Response
+	 */
+    public function actionAjaxGetDestinationList(string $term = null, array $destType = []): Response
+	{
+		$keyCache = $term . implode('_', $destType);
+		$result = Yii::$app->cache->get($keyCache);
+
+		if($result === false) {
+			$apiHotelService = Yii::$app->getModule('hotel')->apiService;
+			$result = $apiHotelService->searchDestination($term);
+			if($result) {
+				Yii::$app->cache->set($keyCache, $result, 600);
+			}
+		}
+
+		return $this->asJson(['results' => HotelFormatHelper::formatRows($result, $term)]);
+	}
 
     /**
      * Finds the Hotel model based on its primary key value.
@@ -210,8 +234,8 @@ class HotelController extends FController
      * @return Hotel the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
-    {
+    protected function findModel($id): Hotel
+	{
         if (($model = Hotel::findOne($id)) !== null) {
             return $model;
         }

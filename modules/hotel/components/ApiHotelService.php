@@ -75,9 +75,12 @@ class ApiHotelService extends Component
         //$options = ['RETURNTRANSFER' => 1];
 
         $this->request->setMethod($method)
-            ->setFormat(Client::FORMAT_JSON)
             ->setUrl($url)
             ->setData($data);
+
+        if ($method === 'post') {
+			$this->request->setFormat(Client::FORMAT_JSON);
+		}
 
         if ($headers) {
             $this->request->addHeaders($headers);
@@ -136,5 +139,43 @@ class ApiHotelService extends Component
 
         return $out;
     }
+
+	/**
+	 * @param string $term
+	 * @param string $lang
+	 * @param string $hc
+	 * @param string $zc
+	 * @return array
+	 */
+    public function searchDestination(string $term, string $lang = '', string $hc = '', string $zc = ''): array
+	{
+		$out = ['error' => false, 'data' => []];
+
+		$data['term'] = $term;
+		$data['lang'] = $lang;
+		$data['hc'] = $hc;
+		$data['zc'] = $zc;
+
+		try {
+			$response = $this->sendRequest('content/destinations', $data, 'get');
+
+			if ($response->isOk) {
+				if (isset($response->data['destinations'])) {
+					$out['data'] = $response->data;
+				} else {
+					$out['error'] = 'Not found destination';
+				}
+			} else {
+				$out['error'] = 'Error ('.$response->statusCode.'): ' . $response->content;
+				\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService:searchDestination:');
+			}
+
+		} catch (\Throwable $throwable) {
+			\Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiHotelService:searchDestination:throwable');
+			$out['error'] = 'ApiHotelService error: ' . $throwable->getMessage();
+		}
+
+		return $out;
+	}
 
 }

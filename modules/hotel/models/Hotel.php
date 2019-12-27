@@ -11,9 +11,12 @@ use yii\helpers\VarDumper;
  *
  * @property int $ph_id
  * @property int|null $ph_product_id
- * @property string|null $ph_check_in_date
- * @property string|null $ph_check_out_date
+ * @property string|null $ph_check_in_dt
+ * @property string|null $ph_check_out_dt
+ * @property integer|null $ph_zone_code
+ * @property integer|null $ph_hotel_code
  * @property string|null $ph_destination_code
+ * @property string|null $ph_destination_label
  * @property int|null $ph_min_star_rate
  * @property int|null $ph_max_star_rate
  * @property int|null $ph_max_price_rate
@@ -25,6 +28,17 @@ use yii\helpers\VarDumper;
  */
 class Hotel extends \yii\db\ActiveRecord
 {
+
+	private const DESTINATION_TYPE_COUNTRY = 0;
+	private const DESTINATION_TYPE_CITY = 1;
+	private const DESTINATION_TYPE_HOTEL = 2;
+
+	private const DESTINATION_TYPE_LIST = [
+		self::DESTINATION_TYPE_COUNTRY => 'Countries',
+		self::DESTINATION_TYPE_CITY => 'Cities',
+		self::DESTINATION_TYPE_HOTEL => 'Hotels'
+	];
+
     /**
      * {@inheritdoc}
      */
@@ -39,9 +53,11 @@ class Hotel extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['ph_product_id', 'ph_min_star_rate', 'ph_max_star_rate', 'ph_max_price_rate', 'ph_min_price_rate'], 'integer'],
-            [['ph_check_in_date', 'ph_check_out_date'], 'safe'],
+            [['ph_product_id', 'ph_min_star_rate', 'ph_max_star_rate', 'ph_max_price_rate', 'ph_min_price_rate', 'ph_zone_code', 'ph_hotel_code'], 'integer'],
+            [['ph_check_in_dt', 'ph_check_out_dt'], 'safe'],
+            [['ph_zone_code', 'ph_hotel_code'], 'string', 'max' => 11],
             [['ph_destination_code'], 'string', 'max' => 10],
+            [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
         ];
     }
@@ -54,9 +70,12 @@ class Hotel extends \yii\db\ActiveRecord
         return [
             'ph_id' => 'ID',
             'ph_product_id' => 'Product ID',
-            'ph_check_in_date' => 'Check In Date',
-            'ph_check_out_date' => 'Check Out Date',
+            'ph_check_in_dt' => 'Check In Date',
+            'ph_check_out_dt' => 'Check Out Date',
+            'ph_zone_code' => 'Zone Code',
+            'ph_hotel_code' => 'Hotel Code',
             'ph_destination_code' => 'Destination Code',
+            'ph_destination_label' => 'Destination Label',
             'ph_min_star_rate' => 'Min Star Rate',
             'ph_max_star_rate' => 'Max Star Rate',
             'ph_max_price_rate' => 'Max Price Rate',
@@ -144,7 +163,7 @@ class Hotel extends \yii\db\ActiveRecord
             $result = Yii::$app->cache->get($keyCache);
 
             if($result === false) {
-                $response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
+                $response = $apiHotelService->search($this->ph_check_in_dt, $this->ph_check_out_dt, $this->ph_destination_code, $rooms, $params);
 
                 if (isset($response['data']['hotels'])) {
                     $result = $response['data'];
@@ -220,4 +239,12 @@ class Hotel extends \yii\db\ActiveRecord
         }
         return false;
     }
+
+	/**
+	 * @return array
+	 */
+    public static function getDestinationList(): array
+	{
+		return self::DESTINATION_TYPE_LIST;
+	}
 }

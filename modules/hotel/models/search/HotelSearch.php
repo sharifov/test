@@ -17,8 +17,8 @@ class HotelSearch extends Hotel
     public function rules()
     {
         return [
-            [['ph_id', 'ph_product_id', 'ph_min_star_rate', 'ph_max_star_rate', 'ph_max_price_rate', 'ph_min_price_rate'], 'integer'],
-            [['ph_check_in_date', 'ph_check_out_date', 'ph_destination_code'], 'safe'],
+            [['ph_id', 'ph_product_id', 'ph_min_star_rate', 'ph_max_star_rate', 'ph_max_price_rate', 'ph_min_price_rate', 'ph_zone_code', 'ph_hotel_code'], 'integer'],
+            [['ph_check_in_dt', 'ph_check_out_dt', 'ph_destination_code', 'ph_destination_label'], 'safe'],
         ];
     }
 
@@ -60,15 +60,18 @@ class HotelSearch extends Hotel
         $query->andFilterWhere([
             'ph_id' => $this->ph_id,
             'ph_product_id' => $this->ph_product_id,
-            'ph_check_in_date' => $this->ph_check_in_date,
-            'ph_check_out_date' => $this->ph_check_out_date,
+            'ph_check_in_dt' => $this->ph_check_in_dt,
+            'ph_check_out_dt' => $this->ph_check_out_dt,
             'ph_min_star_rate' => $this->ph_min_star_rate,
             'ph_max_star_rate' => $this->ph_max_star_rate,
             'ph_max_price_rate' => $this->ph_max_price_rate,
             'ph_min_price_rate' => $this->ph_min_price_rate,
+			'ph_zone_code' => $this->ph_zone_code,
+			'ph_hotel_code' => $this->ph_hotel_code
         ]);
 
         $query->andFilterWhere(['like', 'ph_destination_code', $this->ph_destination_code]);
+        $query->andFilterWhere(['like', 'ph_destination_label', $this->ph_destination_label]);
 
         return $dataProvider;
     }

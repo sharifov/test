@@ -22,9 +22,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ph_product_id') ?>
 
-    <?= $form->field($model, 'ph_check_in_date') ?>
+    <?= $form->field($model, 'ph_check_in_dt') ?>
 
-    <?= $form->field($model, 'ph_check_out_date') ?>
+    <?= $form->field($model, 'ph_check_out_dt') ?>
 
     <?= $form->field($model, 'ph_destination_code') ?>
 
