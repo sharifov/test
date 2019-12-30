@@ -92,7 +92,7 @@ class ApiUser extends ActiveRecord implements IdentityInterface
      */
     public static function find()
     {
-        return new ApiUserQuery(get_called_class());
+        return new ApiUserQuery(static::class);
     }
 
     /**

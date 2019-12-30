@@ -116,6 +116,6 @@ class UserParams extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserParamsQuery(get_called_class());
+        return new UserParamsQuery(static::class);
     }
 }

@@ -4423,7 +4423,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public static function find(): LeadQuery
     {
-        return new LeadQuery(get_called_class());
+        return new LeadQuery(static::class);
     }
     
     /**

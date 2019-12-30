@@ -74,7 +74,7 @@ class UserCallStatus extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserCallStatusQuery(get_called_class());
+        return new UserCallStatusQuery(static::class);
     }
 
     /**

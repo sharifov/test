@@ -441,7 +441,7 @@ class Sms extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new SmsQuery(get_called_class());
+        return new SmsQuery(static::class);
     }
 
 

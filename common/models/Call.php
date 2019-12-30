@@ -538,7 +538,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new CallQuery(get_called_class());
+        return new CallQuery(static::class);
     }
 
     /**

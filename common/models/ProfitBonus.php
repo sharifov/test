@@ -96,6 +96,6 @@ class ProfitBonus extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ProfitBonusQuery(get_called_class());
+        return new ProfitBonusQuery(static::class);
     }
 }

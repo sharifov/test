@@ -92,7 +92,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ConferenceParticipantQuery(get_called_class());
+        return new ConferenceParticipantQuery(static::class);
     }
 
     /**

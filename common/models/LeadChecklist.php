@@ -115,6 +115,6 @@ class LeadChecklist extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new LeadChecklistQuery(get_called_class());
+        return new LeadChecklistQuery(static::class);
     }
 }

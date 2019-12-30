@@ -121,7 +121,7 @@ class GlobalLog extends ActiveRecord
      */
     public static function find(): GlobalLogQuery
     {
-        return new GlobalLogQuery(get_called_class());
+        return new GlobalLogQuery(static::class);
     }
 
 	/**

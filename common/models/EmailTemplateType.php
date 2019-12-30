@@ -138,7 +138,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new EmailTemplateTypeQuery(get_called_class());
+        return new EmailTemplateTypeQuery(static::class);
     }
 
 

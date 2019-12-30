@@ -140,7 +140,7 @@ class Sources extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new SourcesQuery(get_called_class());
+        return new SourcesQuery(static::class);
     }
 
 

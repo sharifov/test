@@ -307,7 +307,7 @@ class Email extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new EmailQuery(get_called_class());
+        return new EmailQuery(static::class);
     }
 
     public function setEmailData($emailData)

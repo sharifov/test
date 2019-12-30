@@ -110,6 +110,6 @@ class OrderProduct extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new OrderProductQuery(get_called_class());
+        return new OrderProductQuery(static::class);
     }
 }

@@ -166,6 +166,6 @@ class Product extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ProductQuery(get_called_class());
+        return new ProductQuery(static::class);
     }
 }

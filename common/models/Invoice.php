@@ -178,7 +178,7 @@ class Invoice extends ActiveRecord
      */
     public static function find()
     {
-        return new InvoiceQuery(get_called_class());
+        return new InvoiceQuery(static::class);
     }
 
     /**

@@ -2062,6 +2062,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function find(): EmployeeQuery
     {
-        return new EmployeeQuery(get_called_class());
+        return new EmployeeQuery(static::class);
     }
 }

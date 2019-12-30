@@ -105,6 +105,6 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
      */
     public static function find(): PhoneBlacklistQuery
     {
-        return new PhoneBlacklistQuery(get_called_class());
+        return new PhoneBlacklistQuery(static::class);
     }
 }

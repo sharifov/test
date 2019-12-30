@@ -231,6 +231,6 @@ class Client extends ActiveRecord
      */
     public static function find(): ClientQuery
     {
-        return new ClientQuery(get_called_class());
+        return new ClientQuery(static::class);
     }
 }

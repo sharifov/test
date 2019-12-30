@@ -90,6 +90,6 @@ class UserGroupAssign extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserGroupAssignQuery(get_called_class());
+        return new UserGroupAssignQuery(static::class);
     }
 }

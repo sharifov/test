@@ -244,6 +244,6 @@ class LeadQcall extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new LeadQcallQuery(get_called_class());
+        return new LeadQcallQuery(static::class);
     }
 }
