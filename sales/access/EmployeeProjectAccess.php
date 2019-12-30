@@ -2,7 +2,7 @@
 
 namespace sales\access;
 
-use common\models\ProjectQuery;
+use common\models\query\ProjectQuery;
 use common\models\ProjectEmployeeAccess;
 use common\models\Employee;
 use common\models\Project;
