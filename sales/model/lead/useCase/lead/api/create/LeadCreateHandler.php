@@ -66,6 +66,13 @@ class LeadCreateHandler
 
             $lead->setRequestHash($hash);
 
+            if ($duplicate = $this->leadRepository->getByRequestHash($hash)) {
+                $lead->status = null;
+                $lead->duplicate($duplicate->id, null, null);
+            } else {
+                $lead->eventLeadCreatedByApiBOEvent();
+            }
+
             $lead->setTripType($this->calculateTripType($form->segmentsForm));
 
             $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$form->clientForm->phone]);
