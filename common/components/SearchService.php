@@ -142,7 +142,12 @@ class SearchService
         if ($response->isOk) {
             return $response->data;
         } else {
-            \Yii::error(VarDumper::dumpAsString($response->content, 10), 'SearchService::getOnlineQuotes');
+            \Yii::error(
+                'LeadId: ' . $lead->id
+                . ' Params: ' . VarDumper::dumpAsString($params, 10)
+                . ' Error: ' . VarDumper::dumpAsString($response->content, 10)
+                , 'SearchService::getOnlineQuotes'
+            );
         }
 
         ///
