@@ -66,10 +66,10 @@ class CasesSearch extends Cases
             ['salePNR', 'string'],
             ['clientPhone', 'string'],
             ['clientEmail', 'string'],
-            ['ticketNumber', 'string'],
-            ['airlineConfirmationNumber', 'string'],
-            ['paxFirstName', 'string'],
-            ['paxLastName', 'string'],
+            ['ticketNumber', 'string', 'min' => 3],
+            ['airlineConfirmationNumber', 'string', 'min' => 3],
+            ['paxFirstName', 'string', 'min' => 3],
+            ['paxLastName', 'string', 'min' => 3],
         ];
     }
 
@@ -335,12 +335,15 @@ class CasesSearch extends Cases
     /**
      * @return array
      */
-    private function getCaseSaleData(): array
+    private function getCaseSaleData($search): array
     {
-        if ($this->cacheSaleData) {
-            return $this->cacheSaleData;
-        }
-        $this->cacheSaleData = CaseSale::find()->select(['css_sale_data'])->all();
+//        if ($this->cacheSaleData) {
+//            return $this->cacheSaleData;
+//        }
+        $this->cacheSaleData = CaseSale::find()
+            ->select(['css_sale_data'])
+            ->andWhere(['LIKE', 'css_sale_data', $search])
+            ->all();
         return $this->cacheSaleData;
     }
 
@@ -350,7 +353,7 @@ class CasesSearch extends Cases
      */
     private function getSaleIdByTicket($tickerNum): ?int
     {
-        foreach ($this->getCaseSaleData() as $sale) {
+        foreach ($this->getCaseSaleData($tickerNum) as $sale) {
             $decodeSale = json_decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->ticket_number, $tickerNum) === 0) {
@@ -367,7 +370,7 @@ class CasesSearch extends Cases
      */
     private function getSaleIdByPaxFirstName($firstName): ?int
     {
-        foreach ($this->getCaseSaleData() as $sale) {
+        foreach ($this->getCaseSaleData($firstName) as $sale) {
             $decodeSale = json_decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->first_name, $firstName) === 0) {
@@ -384,7 +387,7 @@ class CasesSearch extends Cases
      */
     private function getSaleIdByPaxLastName($lastName): ?int
     {
-        foreach ($this->getCaseSaleData() as $sale) {
+        foreach ($this->getCaseSaleData($lastName) as $sale) {
             $decodeSale = json_decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->last_name, $lastName) === 0) {
@@ -401,7 +404,7 @@ class CasesSearch extends Cases
      */
     private function getSaleIdByAcn($acn): ?int
     {
-        foreach ($this->getCaseSaleData() as $sale) {
+        foreach ($this->getCaseSaleData($acn) as $sale) {
             $decodeSale = json_decode($sale['css_sale_data'], false);
             foreach ($decodeSale->itinerary as $itinerary) {
                 foreach ($itinerary->segments as $segment) {
