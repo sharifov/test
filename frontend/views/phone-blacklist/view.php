@@ -35,8 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pbl_phone',
             'pbl_description',
             'pbl_enabled:booleanByLabel',
-            'pbl_created_dt:dateTimeByUserDt',
-            'pbl_updated_dt:dateTimeByUserDt',
+            'pbl_created_dt:byUserDateTime',
+            'pbl_updated_dt:byUserDateTime',
             'updatedUser:userName',
         ],
     ]) ?>

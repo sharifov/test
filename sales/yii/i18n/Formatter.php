@@ -12,9 +12,9 @@ class Formatter extends \yii\i18n\Formatter
      * @return string
      * @throws \yii\base\InvalidConfigException
      */
-    public function asDateTimeByUserDt($dateTime): string
+    public function asByUserDateTime($dateTime): string
     {
-        return $dateTime ? '<i class="fa fa-calendar"></i> ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]') : '-';
+        return $dateTime ? '<i class="fa fa-calendar"></i> ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]') : $this->nullDisplay;
     }
 
     /**
@@ -24,8 +24,9 @@ class Formatter extends \yii\i18n\Formatter
     public function asUserName($user): string
     {
         if (!$user) {
-            return '';
+            return $this->nullDisplay;
         }
+
         if ($user instanceof Employee) {
             $userName = $user->username;
         } elseif (is_int($user)) {

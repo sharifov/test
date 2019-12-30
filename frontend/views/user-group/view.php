@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return '';
                 },
             ],
-            'ug_updated_dt:dateTimeByUserDt',
+            'ug_updated_dt:byUserDateTime',
         ],
     ]) ?>
 

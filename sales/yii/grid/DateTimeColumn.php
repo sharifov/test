@@ -7,7 +7,7 @@ use yii\grid\DataColumn;
 
 class DateTimeColumn extends DataColumn
 {
-    public $format = 'dateTimeByUserDt';
+    public $format = 'byUserDateTime';
 
     public function init(): void
     {
