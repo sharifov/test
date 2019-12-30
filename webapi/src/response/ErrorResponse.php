@@ -33,6 +33,9 @@ class ErrorResponse extends Response
 
     private function createResponse($statusCode, $message, $errors, $code): array
     {
+        if ($code) {
+            $code = (int)$code;
+        }
         $response = [
             'status' => $statusCode,
             'message' => $message,

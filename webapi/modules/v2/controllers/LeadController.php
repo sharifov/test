@@ -65,7 +65,7 @@ class LeadController extends BaseController
      * @apiParam {string{20}}           lead.client.phone                           Client phone
      * @apiParam {int{2}=14-BOOK_FAILED, 15-ALTERNATIVE}   lead.status              Status
      * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} lead.cabin   Cabin
-     * @qpiParam {int}                  lead.flight_id                              BO Flight ID
+     * @apiParam {int}                  lead.flight_id                              BO Flight ID
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -185,7 +185,7 @@ class LeadController extends BaseController
      *              "The format of Phone is invalid."
      *           ]
      *       },
-     *       "code": "10301",
+     *       "code": 10301,
      *       "data": {
      *           "request": {
      *               ...
@@ -205,7 +205,7 @@ class LeadController extends BaseController
      *       "errors": [
      *           "Not found Lead data on POST request"
      *       ],
-     *       "code": "10300",
+     *       "code": 10300,
      *       "data": {
      *           "request": {
      *               ...
