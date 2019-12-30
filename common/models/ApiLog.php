@@ -3,6 +3,9 @@
 namespace common\models;
 
 use common\models\query\ApiLogQuery;
+use webapi\src\logger\EndDTO;
+use webapi\src\logger\StartDTO;
+
 use Yii;
 use yii\db\Query;
 use yii\helpers\VarDumper;
@@ -23,6 +26,11 @@ use yii\helpers\VarDumper;
  * @property float $al_db_execution_time
  * @property integer $al_db_query_count
  *
+ * @property $start_microtime
+ * @property $end_microtime
+ * @property $start_memory_usage
+ * @property $end_memory_usage
+ *
  * @property ApiUser[] $apiUser
  */
 class ApiLog extends \yii\db\ActiveRecord
@@ -33,6 +41,63 @@ class ApiLog extends \yii\db\ActiveRecord
 
     public $start_memory_usage = 0;
     public $end_memory_usage = 0;
+
+    public static function start(StartDTO $dto): self
+    {
+        $log = new static();
+        $log->al_request_data = $dto->data;
+        $log->al_action = $dto->action;
+        $log->al_user_id = $dto->userId;
+        $log->al_ip_address = $dto->ip;
+        $log->start_microtime = $dto->startTime;
+        $log->start_memory_usage = $dto->startMemory;
+        $log->al_request_dt = date('Y-m-d H:i:s');
+        return $log;
+    }
+
+    public function end(EndDTO $dto): void
+    {
+        $this->al_response_data = $dto->result;
+        $this->al_response_dt = date('Y-m-d H:i:s');
+        $this->end_microtime = $dto->endTime;
+        $this->end_memory_usage = $dto->endMemory;
+        $this->profiling($dto->profiling);
+        $this->calculateExecutionTime();
+        $this->calculateMemoryUsage();
+    }
+
+    public function profiling(array $profiling): void
+    {
+        if ($profiling) {
+            if (isset($profiling[0])) {
+                $this->al_db_query_count = (int)$profiling[0];
+            }
+            if (isset($profiling[1])) {
+                $this->al_db_execution_time = round($profiling[1], 3);
+            }
+        }
+    }
+
+    public function calculateExecutionTime(): void
+    {
+        if ($this->end_microtime && $this->start_microtime) {
+            if (($time = round($this->end_microtime - $this->start_microtime, 3)) > 999) {
+                $time = 999;
+            }
+            $this->al_execution_time = $time;
+        } else {
+            $this->al_execution_time = 0;
+        }
+    }
+
+    public function calculateMemoryUsage(): void
+    {
+        if ($this->end_memory_usage && $this->start_memory_usage) {
+            $this->al_memory_usage = $this->end_memory_usage - $this->start_memory_usage;
+        } else {
+            $this->al_memory_usage = 0;
+        }
+    }
 
     /**
      * @inheritdoc
@@ -95,7 +160,6 @@ class ApiLog extends \yii\db\ActiveRecord
     {
         return new ApiLogQuery(get_called_class());
     }
-
 
     /**
      * @param array $responseData

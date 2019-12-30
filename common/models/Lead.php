@@ -12,6 +12,7 @@ use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
+use sales\events\lead\LeadCreatedByApiBOEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedByIncomingEmailEvent;
@@ -33,6 +34,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\model\lead\useCase\lead\api\create\LeadCreateForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -225,6 +227,8 @@ class Lead extends ActiveRecord
     public const STATUS_TRASH       = 11;
     public const STATUS_BOOKED      = 12;
     public const STATUS_SNOOZE      = 13;
+    public const STATUS_BOOK_FAILED = 14;
+    public const STATUS_ALTERNATIVE = 15;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -236,6 +240,8 @@ class Lead extends ActiveRecord
         self::STATUS_TRASH          => 'Trash',
         self::STATUS_BOOKED         => 'Booked',
         self::STATUS_SNOOZE         => 'Snooze',
+        self::STATUS_BOOK_FAILED    => 'Book failed',
+        self::STATUS_ALTERNATIVE    => 'Alternative',
     ];
 
     public const STATUS_MULTIPLE_UPDATE_LIST = [
@@ -675,6 +681,35 @@ class Lead extends ActiveRecord
     public function eventLeadCreatedByApiEvent(): void
     {
         $this->recordEvent(new LeadCreatedByApiEvent($this, $this->status));
+    }
+
+    public static function createByApiBO(LeadCreateForm $form, Client $client): self
+    {
+        $lead = self::create();
+        $lead->client_id = $client->id;
+        $lead->l_client_first_name = $client->first_name;
+        $lead->l_client_last_name = $client->last_name;
+        $lead->l_client_phone = $form->clientForm->phone;
+        $lead->l_client_ua = $form->user_agent;
+        $lead->project_id = $form->project_id;
+        $lead->source_id = $form->source_id;
+        $lead->cabin = $form->cabin;
+        $lead->adults = $form->adults;
+        $lead->children = $form->children;
+        $lead->infants = $form->infants;
+        $lead->request_ip = $form->request_ip;
+        $lead->discount_id = $form->discount_id;
+        $lead->uid = $form->uid ?: $lead->uid;
+        $lead->status = $form->status;
+        $lead->bo_flight_id = $form->flight_id;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_type_create = self::TYPE_CREATE_API;
+        return $lead;
+    }
+
+    public function eventLeadCreatedByApiBOEvent(): void
+    {
+        $this->recordEvent(new LeadCreatedByApiBOEvent($this, $this->status));
     }
 
     /**
@@ -1275,9 +1310,19 @@ class Lead extends ActiveRecord
         return $this->status === self::STATUS_ON_HOLD;
     }
 
-    public function isReject()
+    public function isReject(): bool
     {
         return $this->status === self::STATUS_REJECT;
+    }
+
+    public function isBookFailed(): bool
+    {
+        return $this->status === self::STATUS_BOOK_FAILED;
+    }
+
+    public function isAlternative(): bool
+    {
+        return $this->status === self::STATUS_ALTERNATIVE;
     }
 
     /**
@@ -2221,6 +2266,10 @@ class Lead extends ActiveRecord
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_BOOK_FAILED:
+            case self::STATUS_ALTERNATIVE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
+                break;
         }
         return $label;
     }
@@ -2247,6 +2296,10 @@ class Lead extends ActiveRecord
             case self::STATUS_TRASH:
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_BOOK_FAILED:
+            case self::STATUS_ALTERNATIVE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
         return $label;

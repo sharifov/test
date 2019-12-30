@@ -4,16 +4,17 @@ namespace sales\repositories\lead;
 
 use common\models\LeadFlightSegment;
 use sales\dispatchers\EventDispatcher;
+use sales\model\lead\LeadCodeException;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
 /**
  * Class LeadSegmentRepository
+ *
  * @method null|LeadFlightSegment get($id)
  */
 class LeadSegmentRepository extends Repository
 {
-
     private $eventDispatcher;
 
     /**
@@ -34,7 +35,7 @@ class LeadSegmentRepository extends Repository
         if ($segment = LeadFlightSegment::findOne($id)) {
             return $segment;
         }
-        throw new NotFoundException('FlightSegment is not found.');
+        throw new NotFoundException('FlightSegment is not found.', LeadCodeException::SEGMENT_NOT_FOUND);
     }
 
     /**
@@ -44,7 +45,7 @@ class LeadSegmentRepository extends Repository
     public function save(LeadFlightSegment $segment): int
     {
         if (!$segment->save(false)) {
-            throw new \RuntimeException('Saving error.');
+            throw new \RuntimeException('Saving error.', LeadCodeException::SEGMENT_SAVE);
         }
         $this->eventDispatcher->dispatchAll($segment->releaseEvents());
         return $segment->id;
@@ -58,7 +59,7 @@ class LeadSegmentRepository extends Repository
     public function remove(LeadFlightSegment $segment): void
     {
         if (!$segment->delete()) {
-            throw new \RuntimeException('Removing error.');
+            throw new \RuntimeException('Removing error.', LeadCodeException::SEGMENT_REMOVE);
         }
         $this->eventDispatcher->dispatchAll($segment->releaseEvents());
     }

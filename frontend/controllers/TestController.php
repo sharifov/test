@@ -56,6 +56,9 @@ use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
+use sales\model\lead\useCase\lead\api\create\Handler;
+use sales\model\lead\useCase\lead\api\create\LeadForm;
+use sales\model\lead\useCase\lead\api\create\SegmentForm;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
@@ -153,33 +156,43 @@ class TestController extends FController
     public function actionTest()
     {
 
-
-        $idsCommongroups = EmployeeGroupAccess::getUsersIdsInCommonGroups(503);
-
-        $userId = 503;
-        $ids = Employee::find()->select('id')
-            ->andWhere(['or',
+        $data = [
+            'client' => [
+                'phone' => '+37369636963',
+            ],
+            'uid' => '346g6142wdg22rhdf',
+            'status' => Lead::STATUS_BOOK_FAILED,
+            'sub_sources_code' => 'JIVOCH',
+            'cabin' => 'E',
+            'adults' => 2,
+            'children' => 2,
+            'infants' => 2,
+            'segments' => [
                 [
-                    'id' => EmployeeGroupAccess::getUsersIdsInCommonGroups($userId)
+                    'origin' => 'NYC',
+                    'destination' => 'LON',
+                    'departure' => '2019-12-16',
                 ],
                 [
-                    'id' => UserGroupAssign::find()->select(['ugs_user_id'])->andWhere([
-                        'ugs_group_id' =>
-                            UserGroup::find()->select('ug_id')->andWhere([
-                                'ug_user_group_set_id' =>
-                                    UserGroup::find()->select(['ug_user_group_set_id'])->andWhere([
-                                        'ug_id' =>
-                                            UserGroupAssign::find()->select(['ugs_group_id'])->andWhere([
-                                                'ugs_user_id' => $userId
-                                            ])
-                                    ])->andWhere(['IS NOT', 'ug_user_group_set_id', null])->andWhere(['ug_disable' => false])
-                            ])
-                    ])
-                ]
-            ])
-            ->asArray()->indexBy('id')->all();
+                    'origin' => 'LON',
+                    'destination' => 'NYC',
+                    'departure' => '2019-12-17',
+                ],
+                [
+                    'origin' => 'LON',
+                    'destination' => 'NYC',
+                    'departure' => '2019-12-18',
+                ],
+            ],
+        ];
 
-        VarDumper::dump($ids);
+        $form = new LeadForm();
+        if ($form->load($data, '') && $form->validate()) {
+            $handler = Yii::createObject(Handler::class);
+            $handler->handle($form);
+        } else {
+            VarDumper::dump($form->errors);
+        }
 
 die;
 

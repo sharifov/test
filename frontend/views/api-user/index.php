@@ -1,9 +1,10 @@
 <?php
 
+use sales\yii\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ApiUserSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -35,28 +36,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     'au_email:email',
                     'au_enabled:boolean',
                     [
+                        'class' => DateTimeColumn::class,
                         'attribute' => 'au_updated_dt',
-                        'value' => static function (\common\models\ApiUser $model) {
-                            return $model->au_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->au_updated_dt)) : '-';
-                        },
-                        'format' => 'raw',
-                        'filter' => DatePicker::widget([
-                            'model' => $searchModel,
-                            'attribute' => 'au_updated_dt',
-                            'clientOptions' => [
-                                'autoclose' => true,
-                                'format' => 'yyyy-mm-dd',
-                            ],
-                            'options' => [
-                                'autocomplete' => 'off',
-                                'placeholder' =>'Choose Date'
-                            ],
-                        ]),
                     ],
                     'auProject.name',
                     /*[
                             'attribute' => 'auUpdatedUser.username',
                     ]*/
+                    'au_rate_limit_number',
+                    'au_rate_limit_reset',
 
                     ['class' => 'yii\grid\ActionColumn'],
                 ],

@@ -6,6 +6,7 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\ClientPhone;
 use sales\services\client\InternalPhoneException;
 use sales\services\client\InternalPhoneGuard;
+use sales\services\client\InternalPhoneValidator;
 use yii\base\Model;
 
 /**
@@ -62,23 +63,13 @@ class PhoneCreateForm extends Model
             ['phone', 'filter', 'filter' => static function($value) {
 				return $value === null ? null : str_replace(['-', ' '], '', trim($value));
             }],
-            ['phone', 'internalPhoneValidate'],
+            ['phone', InternalPhoneValidator::class],
 			[['type', 'client_id', 'id'], 'integer'],
 			['type', 'checkTypeForExistence'],
 			[['phone', 'client_id'], 'unique', 'targetClass' => ClientPhone::class,  'targetAttribute' => ['phone', 'client_id'], 'message' => 'Client already has this phone number', 'except' => 'update'],
 			['phone', 'checkUniqueClientPhone', 'on' => 'update'],
             ['comments', 'string'],
 		];
-    }
-
-    public function internalPhoneValidate($attribute): void
-    {
-        try {
-            $guard = \Yii::createObject(InternalPhoneGuard::class);
-            $guard->guard($this->phone);
-        } catch (InternalPhoneException $e) {
-            $this->addError($attribute, $e->getMessage());
-        }
     }
 
     public function validateRequired($attribute, $params): void

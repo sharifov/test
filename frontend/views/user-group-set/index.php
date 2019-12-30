@@ -39,12 +39,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'ugs_created_dt',
-                'searchModel' => $searchModel,
             ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'ugs_updated_dt',
-                'searchModel' => $searchModel,
             ],
             [
                 'class' => UserColumn::class,

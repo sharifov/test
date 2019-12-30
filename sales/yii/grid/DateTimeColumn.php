@@ -7,7 +7,6 @@ use yii\grid\DataColumn;
 
 class DateTimeColumn extends DataColumn
 {
-    public $searchModel;
     public $format = 'dateTimeByUserDt';
 
     public function init(): void
@@ -15,7 +14,7 @@ class DateTimeColumn extends DataColumn
         parent::init();
         if (!$this->filter) {
             $this->filter = DatePicker::widget([
-                'model' => $this->searchModel,
+                'model' => $this->grid->filterModel,
                 'attribute' => $this->attribute,
                 'clientOptions' => [
                     'autoclose' => true,
