@@ -8,7 +8,7 @@ namespace webapi\src\response;
 class SuccessResponse extends Response
 {
     public const STATUS_CODE_SUCCESS = 200;
-    public const MESSAGE_SUCCESS = 'Success';
+    public const MESSAGE_SUCCESS = 'OK';
 
     public function getResponse(): array
     {
