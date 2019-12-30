@@ -33,6 +33,16 @@ class ApiHotelService extends Component
 
     private $request;
 
+    private const DESTINATION_LOCATIONS = 0;
+    private const DESTINATION_CITY_ZONE = 1;
+    private const DESTINATION_HOTEL = 2;
+
+    private const DESTINATION_AVAILABLE_TYPE = [
+    	self::DESTINATION_LOCATIONS,
+		self::DESTINATION_CITY_ZONE,
+		self::DESTINATION_HOTEL
+	];
+
     public function init() : void
     {
         parent::init();
@@ -145,9 +155,10 @@ class ApiHotelService extends Component
 	 * @param string $lang
 	 * @param string $hc
 	 * @param string $zc
+	 * @param array $type
 	 * @return array
 	 */
-    public function searchDestination(string $term, string $lang = '', string $hc = '', string $zc = ''): array
+    public function searchDestination(string $term, string $lang = '', string $hc = '', string $zc = '', array $type = null): array
 	{
 		$out = ['error' => false, 'data' => []];
 
@@ -155,6 +166,8 @@ class ApiHotelService extends Component
 		$data['lang'] = $lang;
 		$data['hc'] = $hc;
 		$data['zc'] = $zc;
+
+		$data['t'] = implode(',', $type ?: self::getDestinationAvailableTypeList());
 
 		try {
 			$response = $this->sendRequest('content/destinations', $data, 'get');
@@ -176,6 +189,14 @@ class ApiHotelService extends Component
 		}
 
 		return $out;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getDestinationAvailableTypeList(): array
+	{
+		return self::DESTINATION_AVAILABLE_TYPE;
 	}
 
 }

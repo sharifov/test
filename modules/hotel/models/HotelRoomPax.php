@@ -28,6 +28,16 @@ class HotelRoomPax extends \yii\db\ActiveRecord
         self::PAX_TYPE_CHD => 'Child',
     ];
 
+    public const PAX_AGE_RANGE = [
+    	self::PAX_TYPE_CHD => [
+    		'min' => 1,
+			'max' => 12
+		],
+		self::PAX_TYPE_ADL => [
+			'min' => 13,
+			'max' => 130
+		]
+	];
 
         /**
      * {@inheritdoc}
@@ -46,8 +56,7 @@ class HotelRoomPax extends \yii\db\ActiveRecord
             [['hrp_hotel_room_id', 'hrp_type_id'], 'required'],
             [['hrp_hotel_room_id', 'hrp_type_id', 'hrp_age'], 'integer'],
             [['hrp_dob'], 'filter', 'filter' => static function ($value) {
-                $result = date('Y-m-d', strtotime($value));
-                return $result;
+				return date('Y-m-d', strtotime($value));
             }, 'skipOnEmpty' => true],
             //[['hrp_dob'], 'safe'],
             [['hrp_first_name', 'hrp_last_name'], 'string', 'max' => 40],
@@ -119,4 +128,13 @@ class HotelRoomPax extends \yii\db\ActiveRecord
     {
         return (int) $this->hrp_type_id === self::PAX_TYPE_CHD;
     }
+
+	/**
+	 * @param int $paxId
+	 * @return array|null
+	 */
+    public function getPaxAgeRangeByPaxId(int $paxId): ?array
+	{
+		return self::PAX_AGE_RANGE[$paxId] ?? null;
+	}
 }

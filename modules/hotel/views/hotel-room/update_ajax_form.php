@@ -98,8 +98,11 @@ $pjaxId = 'pjax-hotel-room-form';
                     },
                     //'items' => \modules\hotel\models\HotelRoomPax::getPaxTypeList(),
                     'headerOptions' => [
-                        //'style' => 'width: 80px;',
-                    ]
+                        'style' => 'max-width: 130px;',
+                    ],
+                    'options' => [
+						'class' => 'form-control input_hrp_age',
+                    ],
                 ],
 
                 [
@@ -118,6 +121,19 @@ $pjaxId = 'pjax-hotel-room-form';
                             'autocomplete' => 'off',
                             'placeholder' =>'Choose Date'
                         ],
+                        'clientEvents' => [
+                            'change' => 'function (e, elem) {
+                                let selectedDate = $(e.target).val();
+                                
+                                let diff_ms = Date.now() - new Date(selectedDate);
+                                let age_dt = new Date(diff_ms); 
+                                let age = age_dt.getUTCFullYear() - 1970;
+                                
+                                if (age >= 0) {
+                                    $(e.target).closest("tr").find(".input_hrp_age").val(age == 0 ? ++age : age);
+                                }
+                            }'
+                        ]
                     ]
                     //'defaultValue' => date('d-m-Y h:i')
                 ],

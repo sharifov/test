@@ -218,7 +218,7 @@ class HotelController extends FController
 
 		if($result === false) {
 			$apiHotelService = Yii::$app->getModule('hotel')->apiService;
-			$result = $apiHotelService->searchDestination($term);
+			$result = $apiHotelService->searchDestination($term, '', '', '', $destType);
 			if($result) {
 				Yii::$app->cache->set($keyCache, $result, 600);
 			}

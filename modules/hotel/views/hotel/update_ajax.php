@@ -1,6 +1,5 @@
 <?php
 
-use dosamigos\datetimepicker\DateTimePicker;
 use kartik\select2\Select2;
 use modules\hotel\models\forms\HotelForm;
 use modules\hotel\models\Hotel;
@@ -8,6 +7,8 @@ use yii\web\View;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
 use yii\web\JsExpression;
+//use kartik\datetime\DateTimePicker;
+use dosamigos\datetimepicker\DateTimePicker;
 
 /* @var $this yii\web\View */
 /* @var $model HotelForm */
@@ -34,7 +35,9 @@ $pjaxId = 'pjax-hotel-update'
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd hh:ii',
-                    'todayBtn' => true
+                    'todayBtn' => true,
+                    'readonly' => false
+
                 ]
             ])?>
 

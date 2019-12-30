@@ -51,7 +51,12 @@ class HotelForm extends Model
 			[['ph_destination_code'], 'string', 'max' => 10],
             [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
-        ];
+			[['ph_check_in_dt', 'ph_check_out_dt'], 'filter', 'filter' => static function ($value) {
+        		return date('Y-m-d H:i:s', strtotime($value));
+			}],
+			[['ph_check_in_dt', 'ph_check_out_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+			['ph_check_in_dt', 'compare', 'compareAttribute' => 'ph_check_out_dt', 'operator' => '<', 'enableClientValidation' => true]
+		];
     }
 
     /**

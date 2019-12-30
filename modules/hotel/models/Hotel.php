@@ -35,7 +35,7 @@ class Hotel extends \yii\db\ActiveRecord
 
 	private const DESTINATION_TYPE_LIST = [
 		self::DESTINATION_TYPE_COUNTRY => 'Countries',
-		self::DESTINATION_TYPE_CITY => 'Cities',
+		self::DESTINATION_TYPE_CITY => 'Cities/Zones',
 		self::DESTINATION_TYPE_HOTEL => 'Hotels'
 	];
 
@@ -59,7 +59,10 @@ class Hotel extends \yii\db\ActiveRecord
             [['ph_destination_code'], 'string', 'max' => 10],
             [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
-        ];
+			[['ph_check_in_dt', 'ph_check_out_dt'], 'required'],
+			[['ph_check_in_dt', 'ph_check_out_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+			['ph_check_in_dt', 'compare', 'compareAttribute' => 'ph_check_out_dt', 'operator' => '<', 'enableClientValidation' => true]
+		];
     }
 
     /**
@@ -246,5 +249,15 @@ class Hotel extends \yii\db\ActiveRecord
     public static function getDestinationList(): array
 	{
 		return self::DESTINATION_TYPE_LIST;
+	}
+
+	/**
+	 * @return void
+	 */
+	public function validateDates(): void
+	{
+		if (strtotime($this->ph_check_out_dt) <= strtotime($this->ph_check_in_dt)) {
+			$this->addError('ph_check_out_dt','Check Out Date must be gather then Check In Date.');
+		}
 	}
 }
