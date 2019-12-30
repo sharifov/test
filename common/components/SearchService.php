@@ -142,6 +142,7 @@ class SearchService
         if ($response->isOk) {
             return $response->data;
         } else {
+
             \Yii::error(
                 'LeadId: ' . $lead->id
                 . ' Params: ' . VarDumper::dumpAsString($params, 10)
