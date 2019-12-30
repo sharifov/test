@@ -11,7 +11,7 @@ use yii\base\Model;
 /**
  * Class LeadForm
  *
- * @property $sub_sources_code
+ * @property $source_code
  * @property $source_id
  * @property $project_id
  * @property $status
@@ -26,12 +26,13 @@ use yii\base\Model;
  * @property $user_agent
  * @property array $segments
  * @property array $client
+ * @property int $flight_id
  * @property SegmentForm[] $segmentsForm
  * @property ClientForm $clientForm
  */
 class LeadCreateForm extends Model
 {
-    public $sub_sources_code;
+    public $source_code;
     public $source_id;
     public $project_id;
     public $status;
@@ -46,6 +47,7 @@ class LeadCreateForm extends Model
     public $user_agent;
     public $segments;
     public $client;
+    public $flight_id;
 
     public $segmentsForm;
     public $clientForm;
@@ -53,14 +55,14 @@ class LeadCreateForm extends Model
     public function rules(): array
     {
         return [
-            ['sub_sources_code', 'required'],
-            ['sub_sources_code', 'string'],
-            ['sub_sources_code', function () {
-                if ($source = Sources::find()->select(['id', 'project_id'])->where(['cid' => $this->sub_sources_code])->asArray()->limit(1)->one()) {
+            ['source_code', 'required'],
+            ['source_code', 'string', 'max' => 20],
+            ['source_code', function () {
+                if ($source = Sources::find()->select(['id', 'project_id'])->where(['cid' => $this->source_code])->asArray()->limit(1)->one()) {
                     $this->source_id = $source['id'];
                     $this->project_id = $source['project_id'];
                 } else {
-                    $this->addError('sub_sources_code', 'Source not found');
+                    $this->addError('source_code', 'Source not found');
                 }
             }],
 
@@ -86,10 +88,10 @@ class LeadCreateForm extends Model
 
             ['request_ip', 'ip'],
 
-            ['discount_id', 'string'],
+            ['discount_id', 'string', 'max' => 32],
 
             ['uid', 'required'],
-            ['uid', 'string'],
+            ['uid', 'string', 'max' => 40],
             ['uid', 'unique', 'targetClass' => Lead::class, 'targetAttribute' => ['uid' => 'uid']],
 
             ['user_agent', 'string'],
@@ -104,6 +106,10 @@ class LeadCreateForm extends Model
             ['client', 'required'],
             ['client', IsArrayValidator::class],
             ['client', function () { $this->loadAndValidateClient($this->client); }, 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['flight_id', 'required'],
+            ['flight_id', 'integer'],
+            ['flight_id', 'filter', 'filter' => 'intval'],
         ];
     }
 
