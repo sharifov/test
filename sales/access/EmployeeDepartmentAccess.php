@@ -6,7 +6,7 @@ use common\models\UserDepartment;
 use common\models\Department;
 use common\models\Employee;
 use sales\helpers\user\UserFinder;
-use common\models\UserDepartmentQuery;
+use common\models\query\UserDepartmentQuery;
 
 class EmployeeDepartmentAccess
 {
