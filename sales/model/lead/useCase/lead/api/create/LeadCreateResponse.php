@@ -8,6 +8,7 @@ class LeadCreateResponse extends DataResponse
 {
     protected $key = 'lead';
 
+    public $id;
     public $uid;
     public $gid;
 }
