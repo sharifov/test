@@ -11,19 +11,19 @@ use yii\base\Model;
 /**
  * Class LeadForm
  *
- * @property $source_code
- * @property $source_id
- * @property $project_id
- * @property $status
- * @property $uid
- * @property $trip_type
- * @property $cabin
- * @property $adults
- * @property $children
- * @property $infants
- * @property $request_ip
- * @property $discount_id
- * @property $user_agent
+ * @property string $source_code
+ * @property int $source_id
+ * @property int $project_id
+ * @property int $status
+ * @property string $uid
+ * @property string $trip_type
+ * @property string $cabin
+ * @property int $adults
+ * @property int $children
+ * @property int $infants
+ * @property string $request_ip
+ * @property string $discount_id
+ * @property string $user_agent
  * @property array $segments
  * @property array $client
  * @property int $flight_id
