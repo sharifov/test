@@ -656,8 +656,15 @@ class Lead extends ActiveRecord
         $lead->discount_id = $form->discount_id;
         $lead->uid = $form->uid ?: $lead->uid;
         $lead->status = $form->status;
-        $lead->recordEvent(new LeadCreatedByApiBOEvent($lead, $lead->status));
+        $lead->bo_flight_id = $form->flight_id;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_type_create = self::TYPE_CREATE_API;
         return $lead;
+    }
+
+    public function eventLeadCreatedByApiBOEvent(): void
+    {
+        $this->recordEvent(new LeadCreatedByApiBOEvent($this, $this->status));
     }
 
     /**
