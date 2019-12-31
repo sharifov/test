@@ -41,7 +41,7 @@ use common\components\SearchService;
  * @property string $employee_name
  * @property string $last_ticket_date
  * @property double $service_fee_percent
- * @property boolean $alternative
+ * @property int $q_type_id
  * @property string $tickets
  * @property string $origin_search_data
  * @property string $gds_offer_id
@@ -124,6 +124,35 @@ class Quote extends \yii\db\ActiveRecord
     public $hasAirportChange = false;
     public $hasOvernight = false;
 
+    public const TYPE_BASE = 0;
+    public const TYPE_ORIGINAL = 1;
+    public const TYPE_ALTERNATIVE = 2;
+
+    public const TYPE_LIST = [
+        self::TYPE_BASE => 'Base',
+        self::TYPE_ORIGINAL => 'Original',
+        self::TYPE_ALTERNATIVE => 'Alternative',
+    ];
+
+    public static function getTypeName($type)
+    {
+        return self::TYPE_LIST[$type] ?? '-';
+    }
+
+    public function isBase(): bool
+    {
+        return $this->q_type_id === self::TYPE_BASE;
+    }
+
+    public function isOriginal(): bool
+    {
+        return $this->q_type_id === self::TYPE_ORIGINAL;
+    }
+
+    public function isAlternative(): bool
+    {
+        return $this->q_type_id === self::TYPE_ALTERNATIVE;
+    }
 
     /**
      * {@inheritdoc}
@@ -141,7 +170,7 @@ class Quote extends \yii\db\ActiveRecord
         return [
             [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
             [['lead_id', 'status' ], 'integer'],
-            [[ 'check_payment', 'alternative'], 'boolean'],
+            [[ 'check_payment'], 'boolean'],
             [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
 
@@ -151,6 +180,9 @@ class Quote extends \yii\db\ActiveRecord
 
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
+
+            ['q_type_id', 'integer'],
+            ['q_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
         ];
     }
 
@@ -180,7 +212,7 @@ class Quote extends \yii\db\ActiveRecord
             'service_fee_percent' => 'Service Fee Percent',
             'reservation_dump' => 'Reservation Dump',
             'pricing_info' => 'Pricing info',
-            'alternative' => 'Alternative',
+            'q_type_id' => 'Type',
             'tickets'   => 'Tickets JSON',
             'origin_search_data' => 'Original Search JSON',
 			'gds_offer_id' => 'GDS Offer ID'
@@ -232,14 +264,6 @@ class Quote extends \yii\db\ActiveRecord
     public function decline(): void
     {
         $this->setStatus(self::STATUS_DECLINED);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAlternative(): bool
-    {
-        return (bool)$this->alternative;
     }
 
     /**

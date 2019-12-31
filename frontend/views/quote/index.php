@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-center'],
             ],
 
-            'alternative:boolean',
+            'q_type_id:quoteType',
 
             //'created',
             //'updated',

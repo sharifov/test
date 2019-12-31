@@ -1,6 +1,7 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
+use sales\yii\grid\quote\QuoteTypeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
@@ -127,7 +128,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Quote::STATUS_LIST
             ],
             'check_payment:boolean',
-            'alternative:boolean',
+            ['class' => QuoteTypeColumn::class],
             'fare_type',
             [
                 'header' => 'Prices',

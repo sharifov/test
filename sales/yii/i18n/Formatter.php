@@ -3,10 +3,36 @@
 namespace sales\yii\i18n;
 
 use common\models\Employee;
+use common\models\Quote;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asQuoteType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        switch ($value) {
+            case Quote::TYPE_BASE:
+                $class = 'label label-info';
+                break;
+            case Quote::TYPE_ORIGINAL:
+                $class = 'label label-success';
+                break;
+            case Quote::TYPE_ALTERNATIVE:
+                $class = 'label label-warning';
+                break;
+            default:
+                $class = 'label label-default';
+        }
+
+        return Html::tag('span', Quote::getTypeName($value), [
+            'class' => $class,
+        ]);
+    }
+
     /**
      * @param $dateTime
      * @return string

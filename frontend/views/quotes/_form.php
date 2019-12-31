@@ -36,7 +36,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'check_payment')->checkbox() ?>
 
-    <?= $form->field($model, 'alternative')->checkbox() ?>
+    <?= $form->field($model, 'q_type_id')->dropDownList(\common\models\Quote::TYPE_LIST) ?>
 
     <?= $form->field($model, 'fare_type')->textInput(['maxlength' => true]) ?>
 
