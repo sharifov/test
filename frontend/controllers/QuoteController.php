@@ -151,6 +151,12 @@ class QuoteController extends FController
                                 $quote->tickets = json_encode($tickets);
                             }*/
 
+                            if ($lead->originalQuoteExist()) {
+                                $quote->alternative();
+                            } else {
+                                $quote->base();
+                            }
+
                             if (!$quote->save()) {
                                 $result['error'] = VarDumper::dumpAsString($quote->errors);
                                 Yii::error(VarDumper::dumpAsString($quote->getErrors()), 'QuoteController:create-quote-from-search:quote:save');
@@ -563,6 +569,15 @@ class QuoteController extends FController
                             $selling = 0;
                             $itinerary = $quote::createDump($quote->itinerary);
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
+
+                            if ($quote->isNewRecord) {
+                                if ($lead->originalQuoteExist()) {
+                                    $quote->alternative();
+                                } else {
+                                    $quote->base();
+                                }
+                            }
+
                             if($quote->save(false)) {
                                if($lead->called_expert) {
                                    $quote->sendUpdateBO();
