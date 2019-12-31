@@ -7,8 +7,14 @@ use yii\db\ActiveQuery;
 
 class QuoteQuery extends ActiveQuery
 {
-    public function originalExist(int $leadId): bool
+    public function originalExist(int $leadId, int $excludeQuoteId = null): bool
     {
-        return $this->andWhere(['lead_id' => $leadId])->andWhere(['q_type_id' => Quote::TYPE_ORIGINAL])->exists();
+        $query = $this
+            ->andWhere(['lead_id' => $leadId])
+            ->andWhere(['type_id' => Quote::TYPE_ORIGINAL]);
+        if ($excludeQuoteId) {
+            $query->andWhere(['<>', 'id', $excludeQuoteId]);
+        }
+        return $query->exists();
     }
 }

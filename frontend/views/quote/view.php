@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'record_locator',
                     'check_payment:boolean',
-                    'q_type_id:quoteType',
+                    'type_id:quoteType',
                 ],
             ]) ?>
         </div>

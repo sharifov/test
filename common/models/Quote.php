@@ -42,7 +42,7 @@ use common\components\SearchService;
  * @property string $employee_name
  * @property string $last_ticket_date
  * @property double $service_fee_percent
- * @property int $q_type_id
+ * @property int $type_id
  * @property string $tickets
  * @property string $origin_search_data
  * @property string $gds_offer_id
@@ -142,32 +142,32 @@ class Quote extends \yii\db\ActiveRecord
 
     public function isBase(): bool
     {
-        return $this->q_type_id === self::TYPE_BASE;
+        return $this->type_id === self::TYPE_BASE;
     }
 
     public function base(): void
     {
-        $this->q_type_id = self::TYPE_BASE;
+        $this->type_id = self::TYPE_BASE;
     }
 
     public function isOriginal(): bool
     {
-        return $this->q_type_id === self::TYPE_ORIGINAL;
+        return $this->type_id === self::TYPE_ORIGINAL;
     }
 
     public function original(): void
     {
-        $this->q_type_id = self::TYPE_ORIGINAL;
+        $this->type_id = self::TYPE_ORIGINAL;
     }
 
     public function isAlternative(): bool
     {
-        return $this->q_type_id === self::TYPE_ALTERNATIVE;
+        return $this->type_id === self::TYPE_ALTERNATIVE;
     }
 
     public function alternative(): void
     {
-        $this->q_type_id = self::TYPE_ALTERNATIVE;
+        $this->type_id = self::TYPE_ALTERNATIVE;
     }
 
     /**
@@ -197,8 +197,8 @@ class Quote extends \yii\db\ActiveRecord
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
 
-            ['q_type_id', 'integer'],
-            ['q_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
+            ['type_id', 'integer'],
+            ['type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
         ];
     }
 
@@ -228,7 +228,7 @@ class Quote extends \yii\db\ActiveRecord
             'service_fee_percent' => 'Service Fee Percent',
             'reservation_dump' => 'Reservation Dump',
             'pricing_info' => 'Pricing info',
-            'q_type_id' => 'Type',
+            'type_id' => 'Type',
             'tickets'   => 'Tickets JSON',
             'origin_search_data' => 'Original Search JSON',
 			'gds_offer_id' => 'GDS Offer ID'

@@ -9,5 +9,5 @@ class QuoteTypeColumn extends DataColumn
 {
     public $format = 'quoteType';
     public $filter = Quote::TYPE_LIST;
-    public $attribute = 'q_type_id';
+    public $attribute = 'type_id';
 }

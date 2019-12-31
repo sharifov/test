@@ -55,7 +55,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     ],
                     'record_locator',
                     'check_payment:boolean',
-                    'q_type_id:quoteType',
+                    'type_id:quoteType',
                 ],
             ]) ?>
         </div>
