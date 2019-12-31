@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\BackOffice;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
+use common\models\query\QuoteQuery;
 use sales\entities\EventTrait;
 use Yii;
 use yii\base\ErrorException;
@@ -144,14 +145,29 @@ class Quote extends \yii\db\ActiveRecord
         return $this->q_type_id === self::TYPE_BASE;
     }
 
+    public function base(): void
+    {
+        $this->q_type_id = self::TYPE_BASE;
+    }
+
     public function isOriginal(): bool
     {
         return $this->q_type_id === self::TYPE_ORIGINAL;
     }
 
+    public function original(): void
+    {
+        $this->q_type_id = self::TYPE_ORIGINAL;
+    }
+
     public function isAlternative(): bool
     {
         return $this->q_type_id === self::TYPE_ALTERNATIVE;
+    }
+
+    public function alternative(): void
+    {
+        $this->q_type_id = self::TYPE_ALTERNATIVE;
     }
 
     /**
@@ -236,12 +252,18 @@ class Quote extends \yii\db\ActiveRecord
     /**
      * @param array $attributes
      * @param int $leadId
+     * @param bool $isAlternative
      * @return static
      */
-    public static function cloneByUid(array $attributes, int $leadId): self
+    public static function cloneByUid(array $attributes, int $leadId, bool $isAlternative): self
     {
         $quote = new self();
         $quote->attributes = $attributes;
+        if ($isAlternative) {
+            $quote->alternative();
+        } else {
+            $quote->base();
+        }
         $quote->lead_id = $leadId;
         $quote->uid = uniqid();
         $quote->status = self::STATUS_CREATED;
@@ -2402,5 +2424,10 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return $segments;
+    }
+
+    public static function find(): QuoteQuery
+    {
+        return new QuoteQuery(get_called_class());
     }
 }
