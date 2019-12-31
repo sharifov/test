@@ -88,5 +88,10 @@ return [
 	],
 	'test_allow_ip_address_list' => [
 //		'127.0.0.1'
-	]
+	],
+    'crypt' => [
+        'method'    => 'aes-256-cbc',
+        'password'  => '',
+        'iv'        => '',
+    ]
 ];

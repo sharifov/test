@@ -2,10 +2,12 @@
 
 namespace frontend\controllers;
 
+use frontend\models\form\CreditCardForm;
 use Yii;
 use common\models\CreditCard;
 use common\models\search\CreditCardSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -66,10 +68,17 @@ class CreditCardController extends FController
      */
     public function actionCreate()
     {
-        $model = new CreditCard();
+        $model = new CreditCardForm();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cc_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $modelCc = new CreditCard();
+            $modelCc->attributes = $model->attributes;
+            $modelCc->updateSecureCardNumber();
+            $modelCc->updateSecureCvv();
+
+            if ($modelCc->save()) {
+                return $this->redirect(['view', 'id' => $modelCc->cc_id]);
+            }
         }
 
         return $this->render('create', [
@@ -86,10 +95,32 @@ class CreditCardController extends FController
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $modelCc = $this->findModel($id);
+        $model = new CreditCardForm();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cc_id]);
+        if ($model->load(Yii::$app->request->post())) {
+
+            if ($model->validate()) {
+                $modelCc->attributes = $model->attributes;
+
+                $modelCc->cc_expiration_month = $model->cc_expiration_month;
+                $modelCc->cc_expiration_year = $model->cc_expiration_year;
+
+                $modelCc->updateSecureCardNumber();
+                $modelCc->updateSecureCvv();
+                if ($modelCc->save()) {
+                    return $this->redirect(['view', 'id' => $modelCc->cc_id]);
+                } else {
+                    Yii::error(VarDumper::dumpAsString($modelCc->errors), 'CreditCard:Update:save');
+                }
+            }
+        } else {
+            $model->attributes = $modelCc->attributes;
+            $model->cc_number = $modelCc->initNumber;
+            $model->cc_cvv = $modelCc->initCvv;
+            $model->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year.'-'.$modelCc->cc_expiration_month.'-01'));
+
+            $model->cc_id = $modelCc->cc_id;
         }
 
         return $this->render('update', [

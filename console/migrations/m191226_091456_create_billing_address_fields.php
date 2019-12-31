@@ -45,12 +45,12 @@ class m191226_091456_create_billing_address_fields extends Migration
 
         $this->createTable('{{%credit_card}}',	[
             'cc_id'				        => $this->primaryKey(),
-            'cc_number'     	        => $this->string(32)->notNull(),
+            'cc_number'     	        => $this->string(50)->notNull(),
             'cc_display_number'	        => $this->string(18),
             'cc_holder_name'	        => $this->string(50),
             'cc_expiration_month'       => $this->tinyInteger(2)->notNull(),
             'cc_expiration_year'        => $this->smallInteger()->notNull(),
-            'cc_cvv'                    => $this->string(16),
+            'cc_cvv'                    => $this->string(32),
             'cc_type_id'                => $this->tinyInteger(1),
             'cc_status_id'              => $this->tinyInteger(1)->defaultValue(0),
             'cc_is_expired'             => $this->boolean()->defaultValue(false),

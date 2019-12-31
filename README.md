@@ -343,6 +343,30 @@ php -r "echo geoip_time_zone_by_country_and_region('US', 'CA') . PHP_EOL;"
 
 ```
 
+CRYPTO - PgSQL 
+-------------------
+```
+CREATE EXTENSION pgcrypto;
+SELECT encode(encrypt_iv('Hello!', 'PASSWORD', 'IV-STRING-16', 'aes-cbc'), 'base64');
+SELECT convert_from(decrypt_iv(decode('a5S7B5nas5XaWibbuX45AA==','base64'), 'PASSWORD', 'IV-STRING-16', 'aes-cbc'),'SQL_ASCII') AS str;
+```
+
+
+CRYPTO - MySQL 
+-------------------
+```
+SET block_encryption_mode = 'aes-256-cbc';
+SELECT TO_BASE64(AES_ENCRYPT('Hello!','PASSWORD', 'IV-STRING-16')) AS aes
+SELECT AES_DECRYPT(FROM_BASE64('PRZKw4PIlNtSPRFuNWYmbA=='), 'PASSWORD', 'IV-STRING-16') AS aes
+```
+
+CRYPTO - PHP 
+-------------------
+```
+
+```
+
+
 Command must return the time zone of the USA - California ---> America/Los_Angeles
 
 

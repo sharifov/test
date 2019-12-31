@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\CreditCard */
 
-$this->title = $model->cc_id;
+$this->title = 'Card: ' . $model->cc_id;
 $this->params['breadcrumbs'][] = ['label' => 'Credit Cards', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -32,17 +32,41 @@ $this->params['breadcrumbs'][] = $this->title;
             'cc_id',
             'cc_number',
             'cc_display_number',
+            [
+                'label' => 'Number UnSecure',
+                'value' => static function(\common\models\CreditCard $model) {
+                    return $model->initNumber;
+                },
+            ],
+            [
+                'label' => 'CVV UnSecure',
+                'value' => static function(\common\models\CreditCard $model) {
+                    return $model->initCvv;
+                },
+            ],
             'cc_holder_name',
             'cc_expiration_month',
             'cc_expiration_year',
             'cc_cvv',
-            'cc_type_id',
-            'cc_status_id',
-            'cc_is_expired',
-            'cc_created_user_id',
-            'cc_updated_user_id',
-            'cc_created_dt',
-            'cc_updated_dt',
+            //'cc_type_id',
+            [
+                'attribute' => 'cc_type_id',
+                'value' => static function(\common\models\CreditCard $model) {
+                    return $model->typeName;
+                },
+            ],
+            [
+                'attribute' => 'cc_status_id',
+                'value' => static function(\common\models\CreditCard $model) {
+                    return $model->statusName;
+                },
+            ],
+            //'cc_status_id',
+            'cc_is_expired:boolean',
+            'cc_created_user_id:UserName',
+            'cc_updated_user_id:UserName',
+            'cc_created_dt:DateTimeByUserDt',
+            'cc_updated_dt:DateTimeByUserDt',
         ],
     ]) ?>
 
