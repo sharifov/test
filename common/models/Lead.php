@@ -729,6 +729,17 @@ class Lead extends ActiveRecord
         return $segments === $originSegments;
     }
 
+    public function originalQuoteExist(): bool
+    {
+        //return Quote::find()->originalExist($this->id);
+        foreach ($this->quotes as $quote) {
+            if ($quote->isOriginal()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return bool
      */
@@ -4309,7 +4320,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = Quote::find()->where(['lead_id' => $this->id]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['q_type_id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

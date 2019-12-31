@@ -32,7 +32,9 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 	<?php endforeach;?>
 	<div class="quote__heading" <?=$model->isAlternative() ? 'style="background-color: #fdffe5;"' : ''?>>
 		<div class="quote__heading-left">
-			<?php if (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED])) : ?>
+            <?php if ($model->isOriginal()): ?>
+                <span class="label label-primary"><?= Quote::getTypeName($model->q_type_id) ?></span>
+			<?php elseif (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED])) : ?>
 			<div class="custom-checkbox">
 				<input class="quotes-uid" id="q<?= $model->uid ?>" value="<?= $model->uid ?>" data-id="<?=$model->id?>" type="checkbox" name="quote[<?= $model->uid ?>]">
                 <label for="q<?= $model->uid ?>"></label>
