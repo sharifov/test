@@ -100,7 +100,7 @@ class LeadCloneQuoteService
 
         $result = $this->transactionManager->wrap(function () use ($currentQuote, $lead) {
 
-            $quote = Quote::cloneByUid($currentQuote->attributes, $lead->id);
+            $quote = Quote::cloneByUid($currentQuote->attributes, $lead->id, $lead->originalQuoteExist());
             $this->quoteRepository->save($quote);
 
             $selling = $this->cloneQuotePrices($currentQuote, $lead, $quote->id);
