@@ -67,8 +67,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'cc_is_expired:boolean',
             'cc_created_user_id:UserName',
             'cc_updated_user_id:UserName',
-            'cc_created_dt:DateTimeByUserDt',
-            'cc_updated_dt:DateTimeByUserDt',
+            'cc_created_dt:ByUserDateTime',
+            'cc_updated_dt:ByUserDateTime',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

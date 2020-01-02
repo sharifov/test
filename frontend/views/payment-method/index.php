@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\PaymentMethod::getCategoryList()
             ],
             'pm_updated_user_id:UserName',
-            'pm_updated_dt:DateTimeByUserDt',
+            'pm_updated_dt:ByUserDateTime',
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

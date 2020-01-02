@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'pm_updated_user_id:UserName',
-            'pm_updated_dt:DateTimeByUserDt',
+            'pm_updated_dt:ByUserDateTime',
         ],
     ]) ?>
 
