@@ -2,6 +2,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use sales\access\EmployeeDepartmentAccess;
+use common\models\Employee;
 ?>
 
 <div class="calls-search">
@@ -21,6 +22,8 @@ use sales\access\EmployeeDepartmentAccess;
                         'hideInput' => true,
                         'convertFormat' => true,
                         'pluginOptions' => [
+                            'minDate' => date("Y-m-d 00:00", strtotime("- 61 days")),
+                            'maxDate' => date("Y-m-d 23:59"),
                             'timePicker' => true,
                             'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
@@ -29,11 +32,43 @@ use sales\access\EmployeeDepartmentAccess;
                                 'separator' => ' - '
                             ]
                         ]
-                    ])->label('Calls Created Date');
+                    ])->label('Created Date');
                     ?>
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <?= $form->field($model, 'reportTimezone')->widget(\kartik\select2\Select2::class, [
+                'data' => Employee::timezoneList(true),
+                'size' => \kartik\select2\Select2::SMALL,
+                'options' => [
+                    'placeholder' => 'Select TimeZone',
+                    'multiple' => false,
+                    'value' => $model->defaultUserTz
+                ],
+                'pluginOptions' => ['allowClear' => true],
+            ]);
+            ?>
+        </div>
+        <div class="col-md-3">
+            <?php
+            $hoursList = [];
+            foreach(range(0, 23) as $hour) {
+                $hoursList[sprintf("%02d:00", $hour )] = sprintf("%02d", $hour );
+            }
+            ?>
+            <div class="row">
+                <div class="col-md-3">
+                    <?= $form->field($model, 'timeFrom')->dropDownList($hoursList)->label('Hour From') ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $form->field($model, 'timeTo')->dropDownList($hoursList, ['prompt' => ""])->label('Hour To') ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <dinv class="row">
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
@@ -64,7 +99,7 @@ use sales\access\EmployeeDepartmentAccess;
                 </div>
             </div>
         </div>
-    </div>
+    </dinv>
 
     <div class="row">
         <div class="col-md-12">

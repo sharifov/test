@@ -89,7 +89,7 @@ class InternalContactService
             $log->add('Not found department for departmentPhoneProject Id: ' . $dpp->dpp_id);
         }
 
-        if ($upp = UserProjectParams::find()->findByPhone($phone)->one()) {
+        if ($upp = UserProjectParams::find()->byPhone($phone)->one()) {
             if ($upp->upp_dep_id && $department = $upp->uppDep) {
                 if ($upp->upp_project_id === null) {
                     $log->add('Not found project for userProjectParams tw_phone_number: ' . $upp->upp_tw_phone_number);
@@ -131,7 +131,7 @@ class InternalContactService
             $log->add('Incoming Project is empty');
         }
 
-        if ($dep = DepartmentEmailProject::find()->findByEmail($email)->one()) {
+        if ($dep = DepartmentEmailProject::find()->byEmail($email)->one()) {
             if ($dep->dep_dep_id && $department = $dep->depDep) {
                 if ($dep->dep_project_id === null) {
                     $log->add('Not found project for departmentEmailProject Id: ' . $dep->dep_id);
@@ -144,7 +144,7 @@ class InternalContactService
             $log->add('Not found department for departmentEmailProject Id: ' . $dep->dep_id);
         }
 
-        if ($upp = UserProjectParams::find()->findByEmail($email)->one()) {
+        if ($upp = UserProjectParams::find()->byEmail($email)->one()) {
             if ($upp->upp_dep_id && $department = $upp->uppDep) {
                 if ($upp->upp_project_id === null) {
                     $log->add('Not found project for userProjectParams email: ' . $upp->upp_email);

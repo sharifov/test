@@ -514,29 +514,31 @@ class QuoteController extends FController
                             $response['pricing'] = $pricing;
                             $response[Html::getInputId($quote, 'gds')] = 'S';
 
-                            foreach ($attr['QuotePrice'] as $key => $quotePrice) {
-                                $price = empty($quotePrice['id'])
-                                ? new QuotePrice()
-                                : QuotePrice::findOne(['id' => $quotePrice['id']]);
-                                if ($price !== null) {
-                                    $price->attributes = $quotePrice;
-                                    $price->quote_id = $quote->id;
+                            if (isset($attr['QuotePrice'])) {
+                                foreach ($attr['QuotePrice'] as $key => $quotePrice) {
+                                    $price = empty($quotePrice['id'])
+                                        ? new QuotePrice()
+                                        : QuotePrice::findOne(['id' => $quotePrice['id']]);
+                                    if ($price !== null) {
+                                        $price->attributes = $quotePrice;
+                                        $price->quote_id = $quote->id;
 
-                                    if(isset($pricing['prices'][$price->passenger_type])){
-                                        $price->fare = $pricing['prices'][$price->passenger_type]['fare'];
-                                        $price->taxes = $pricing['prices'][$price->passenger_type]['taxes'];
-                                        $price->net = $price->fare + $price->taxes;
-                                        $price->selling = $price->net + $price->mark_up;
+                                        if (isset($pricing['prices'][$price->passenger_type])) {
+                                            $price->fare = $pricing['prices'][$price->passenger_type]['fare'];
+                                            $price->taxes = $pricing['prices'][$price->passenger_type]['taxes'];
+                                            $price->net = $price->fare + $price->taxes;
+                                            $price->selling = $price->net + $price->mark_up;
+                                        }
+
+                                        $price->oldParams = '';
+                                        $price->oldParams = serialize($price->attributes);
+
+                                        $price->toFloat();
+                                        $response[Html::getInputId($price, '[' . $key . ']fare')] = $price->fare;
+                                        $response[Html::getInputId($price, '[' . $key . ']taxes')] = $price->taxes;
+                                        $response[Html::getInputId($price, '[' . $key . ']net')] = $price->net;
+                                        $response[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
                                     }
-
-                                    $price->oldParams = '';
-                                    $price->oldParams = serialize($price->attributes);
-
-                                    $price->toFloat();
-                                    $response[Html::getInputId($price, '[' . $key . ']fare')] = $price->fare;
-                                    $response[Html::getInputId($price, '[' . $key . ']taxes')] = $price->taxes;
-                                    $response[Html::getInputId($price, '[' . $key . ']net')] = $price->net;
-                                    $response[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
                                 }
                             }
                         }

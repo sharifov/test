@@ -2,20 +2,31 @@
 
 namespace frontend\controllers;
 
+use sales\services\sources\SourceManageService;
 use Yii;
 use common\models\Sources;
 use common\models\search\SourcesSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * SourcesController implements the CRUD actions for Sources model.
+ *
+ * @property SourceManageService $sourceManageService
  */
 class SourcesController extends FController
 {
+    private $sourceManageService;
+
+    public function __construct($id, $module, SourceManageService $sourceManageService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->sourceManageService = $sourceManageService;
+    }
 
     public function behaviors()
     {
@@ -24,10 +35,24 @@ class SourcesController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'logout' => ['POST'],
+                    'set-default' => ['POST'],
                 ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function actionSetDefault()
+    {
+        $id = Yii::$app->request->post('id');
+        $source = $this->findModel($id);
+        try {
+            $this->sourceManageService->setDefault($source->id);
+            Yii::$app->getSession()->setFlash('success', 'Success');
+        } catch (\DomainException $e) {
+            Yii::$app->getSession()->setFlash('error', $e->getMessage());
+        }
+        return $this->redirect((Yii::$app->request->referrer ? Yii::$app->request->referrer : ['sources/index']));
     }
 
     /**

@@ -6,6 +6,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
+use sales\events\call\CallCreatedEvent;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -58,7 +59,10 @@ use Locale;
  * @property int $c_parent_id
  * @property string $c_recording_sid
  * @property int $c_source_id
- *
+ * @property string $c_offset_gmt
+ * @property string $c_from_country
+ * @property string $c_from_state
+ * @property string $c_from_city
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
@@ -112,6 +116,7 @@ class Call extends \yii\db\ActiveRecord
     public const STATUS_FAILED         = 8;
     public const STATUS_CANCELED       = 9;
     public const STATUS_DELAY          = 10;
+    public const STATUS_DECLINED       = 11;
 
     public const STATUS_LIST = [
         self::STATUS_IVR           => 'IVR',
@@ -123,7 +128,8 @@ class Call extends \yii\db\ActiveRecord
         self::STATUS_NO_ANSWER     => 'No answer',
         self::STATUS_FAILED        => 'Failed',
         self::STATUS_CANCELED      => 'Canceled',
-        self::STATUS_DELAY          => 'Delay',
+        self::STATUS_DELAY         => 'Delay',
+        self::STATUS_DECLINED      => 'Declined',
     ];
 
 
@@ -138,6 +144,7 @@ class Call extends \yii\db\ActiveRecord
         self::STATUS_FAILED         => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::STATUS_LIST[self::STATUS_FAILED] . '</span>',
         self::STATUS_CANCELED       => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::STATUS_LIST[self::STATUS_CANCELED] . '</span>',
         self::STATUS_DELAY          => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DELAY] . '</span>',
+        self::STATUS_DECLINED       => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DECLINED] . '</span>',
     ];
 
 
@@ -266,6 +273,15 @@ class Call extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return static
+     */
+    private static function create(): self
+    {
+        $call = new static();
+        $call->recordEvent(new CallCreatedEvent($call));
+        return $call;
+    }
 
     /**
      * @param $callSid
@@ -273,36 +289,60 @@ class Call extends \yii\db\ActiveRecord
      * @param $from
      * @param $to
      * @param $createdDt
-     * @param $recordingUrl
-     * @param $recordingDuration
-     * @param $callerName
-     * @param $projectId
-     * @return Call
+     * @param $comCallId
+     * @param $offsetGmt
+     * @param $fromCountry
+     * @param $fromState
+     * @param $fromCity
+     * @param $createdUserId
+     * @return static
      */
-    public static function create(
+    public static function createDeclined(
         $callSid,
         $callTypeId,
         $from,
         $to,
         $createdDt,
-        $recordingUrl,
-        $recordingDuration,
-        $callerName,
-        $projectId
+        $comCallId,
+        $offsetGmt,
+        $fromCountry,
+        $fromState,
+        $fromCity,
+        $createdUserId
     ): self
     {
-        $call = new static();
+        $call = self::create();
         $call->c_call_sid = $callSid;
         $call->c_call_type_id = $callTypeId;
         $call->c_from = $from;
         $call->c_to = $to;
+        $call->c_com_call_id = $comCallId;
+        $call->c_offset_gmt = $offsetGmt;
+        $call->c_from_country = $fromCountry;
+        $call->c_from_state = $fromState;
+        $call->c_from_city = $fromCity;
+        $call->c_created_user_id = $createdUserId;
+        $call->c_is_new = true;
         $call->c_created_dt = $createdDt;
         $call->c_updated_dt = date('Y-m-d H:i:s');
-        $call->c_recording_url = $recordingUrl;
-        $call->c_recording_duration = $recordingDuration;
-        $call->c_caller_name = $callerName;
-        $call->c_project_id = $projectId;
+        $call->declined();
         return $call;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChild(): bool
+    {
+        return $this->c_parent_id !== null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGeneralParent(): bool
+    {
+        return $this->c_parent_id === null;
     }
 
     /**
@@ -468,6 +508,21 @@ class Call extends \yii\db\ActiveRecord
     {
         return $this->hasOne(self::class, ['c_id' => 'c_parent_id']);
     }
+
+    /**
+     * @return $this|null
+     */
+    public function getGrandParent(): ?self
+    {
+        $current = $this;
+        $parent = null;
+        while ($pCall = $current->cParent) {
+            $current = $pCall;
+            $parent = clone $pCall;
+        }
+        return $parent;
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -680,7 +735,7 @@ class Call extends \yii\db\ActiveRecord
                             'cua_call_id' => $this->c_id
                         ])->exists();
 
-                        if (!$isCallUserAccepted) {
+                        if (!$isCallUserAccepted && !$this->isDeclined()) {
                             $this->c_status_id = self::STATUS_NO_ANSWER;
                             self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
                         }
@@ -1516,6 +1571,19 @@ class Call extends \yii\db\ActiveRecord
         $this->c_status_id = self::STATUS_CANCELED;
     }
 
+    public function declined(): void
+    {
+        $this->c_status_id = self::STATUS_DECLINED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeclined(): bool
+    {
+        return $this->c_status_id === self::STATUS_DECLINED;
+    }
+
     /**
      * @return bool
      */
@@ -1531,5 +1599,13 @@ class Call extends \yii\db\ActiveRecord
     public function isOwner(int $userId): bool
     {
         return $this->c_created_user_id === $userId;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTransfer(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
     }
 }

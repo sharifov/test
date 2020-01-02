@@ -3,8 +3,7 @@
 namespace sales\forms\lead;
 
 use sales\helpers\lead\LeadFlightSegmentHelper;
-use sales\validators\DateValidator;
-use sales\validators\IataValidator;
+use sales\yii\validators\IataValidator;
 use yii\base\Model;
 
 /**
@@ -48,7 +47,7 @@ class SegmentForm extends Model
             }],
 
             ['departure', 'required'],
-            ['departure', DateValidator::class, 'format' => 'd-M-Y'],
+            ['departure', 'date', 'format' => 'php:d-M-Y'],
             ['departure', 'filter', 'filter' => function($value) {
                 return date('Y-m-d', strtotime($value));
             }],

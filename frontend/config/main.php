@@ -1,5 +1,6 @@
 <?php
 
+use sales\yii\i18n\Formatter;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
@@ -111,6 +112,7 @@ return [
         ],
 
         'formatter' => [
+            'class' => Formatter::class,
             'dateFormat' => 'php:d-M-Y', //'dd.MM.yyyy',
             'datetimeFormat' => 'php:d-M-Y [H:i]',
             'timeFormat' => 'php:H:i',

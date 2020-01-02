@@ -14,15 +14,17 @@ use yii\helpers\VarDumper;
  * @property string $cur_code
  * @property string $cur_name
  * @property string $cur_symbol
- * @property double $cur_base_rate
- * @property double $cur_app_rate
- * @property double $cur_app_percent
- * @property bool $cur_enabled
- * @property bool $cur_default
- * @property int $cur_sort_order
- * @property string $cur_created_dt
- * @property string $cur_updated_dt
- * @property string $cur_synch_dt
+ * @property float|null $cur_base_rate
+ * @property float|null $cur_app_rate
+ * @property float|null $cur_app_percent
+ * @property int|null $cur_enabled
+ * @property int|null $cur_default
+ * @property int|null $cur_sort_order
+ * @property string|null $cur_created_dt
+ * @property string|null $cur_updated_dt
+ * @property string|null $cur_synch_dt
+ *
+ * @property CurrencyHistory[] $currencyHistories
  */
 class Currency extends \yii\db\ActiveRecord
 {
@@ -41,7 +43,8 @@ class Currency extends \yii\db\ActiveRecord
     {
         return [
             [['cur_code', 'cur_name', 'cur_symbol'], 'required'],
-            [['cur_base_rate', 'cur_app_rate', 'cur_app_percent'], 'number'],
+            [['cur_app_percent'], 'number', 'max' => 100],
+            [['cur_base_rate', 'cur_app_rate'], 'number', 'max' => 1000],
             [['cur_enabled', 'cur_default'], 'boolean'],
             [['cur_sort_order'], 'integer'],
             [['cur_created_dt', 'cur_updated_dt', 'cur_synch_dt'], 'safe'],
@@ -97,6 +100,19 @@ class Currency extends \yii\db\ActiveRecord
     {
         return new CurrencyQuery(get_called_class());
     }
+
+	/**
+	 * @param bool $insert
+	 * @param array $changedAttributes
+	 */
+    public function afterSave($insert, $changedAttributes)
+	{
+		parent::afterSave($insert, $changedAttributes);
+		$currencyHistory = (new CurrencyHistory())->fillByCurrency($this);
+		if (!$currencyHistory->save(false)) {
+			Yii::error($currencyHistory->cur_his_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+		}
+	}
 
     /**
      * @return array

@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'e_id',
                 'e_reply_id',
                 'e_lead_id',
+                'e_case_id',
                 'e_project_id',
                 'e_email_from:email',
                 'e_email_from_name',

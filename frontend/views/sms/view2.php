@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 's_lead_id',
                     'value' => static function (\common\models\Sms $model) {
-                        return Html::a($model->s_lead_id, ['lead/view', 'gid' => $model->sLead->gid], ['target' => '_blank']);
+                        return $model->sLead ? (Html::a($model->s_lead_id, ['lead/view', 'gid' => $model->sLead->gid], ['target' => '_blank'])) : '';
                     },
                     'format' => 'raw',
                 ],

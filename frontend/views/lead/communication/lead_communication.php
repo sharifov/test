@@ -16,6 +16,7 @@ use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
+use vova07\imperavi\Widget;
 
 $c_type_id = $comForm->c_type_id;
 ?>
@@ -122,6 +123,23 @@ $c_type_id = $comForm->c_type_id;
                         </div>
                     </div>
                     <div class="form-group">
+
+
+<!--                        --><?php
+//                        echo $form2->field($previewEmailForm, 'e_email_message')->widget(Widget::class, [
+//                            'settings' => [
+//                                'lang' => 'en',
+//                                'minHeight' => 300,
+//                                'plugins' => [
+//                                    'clips',
+//                                    'fullscreen',
+//                                    'advanced'
+//                                ]
+//                            ],
+//                        ]);
+//                        ?>
+
+
                         <?= $form2->field($previewEmailForm, 'e_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
                             'options' => [
                                 'rows' => 6,
@@ -391,22 +409,37 @@ $c_type_id = $comForm->c_type_id;
                             <div class="form-group" id="email-textarea-div">
                                 <?//= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
 
-                                <?= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
-                                    'options' => [
-                                        'rows' => 6,
-                                        'readonly' => false
-                                    ],
-                                    'preset' => 'custom',
-                                    'clientOptions' => [
-                                        'height' => 500,
-                                        'fullPage' => false,
 
-                                        'allowedContent' => true,
-                                        'resize_enabled' => false,
-                                        'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                                        'removePlugins' => 'elementspath',
-                                    ]
-                                ]) ?>
+                                <?php
+                                    echo $form->field($comForm, 'c_email_message')->widget(Widget::class, [
+                                        'settings' => [
+                                            'lang' => 'en',
+                                            'minHeight' => 300,
+                                            'plugins' => [
+                                                'clips',
+                                                'fullscreen',
+                                                'advanced'
+                                            ]
+                                        ],
+                                    ]);
+                                ?>
+
+<!--                                --><?//= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
+//                                    'options' => [
+//                                        'rows' => 6,
+//                                        'readonly' => false
+//                                    ],
+//                                    'preset' => 'custom',
+//                                    'clientOptions' => [
+//                                        'height' => 500,
+//                                        'fullPage' => false,
+//
+//                                        'allowedContent' => true,
+//                                        'resize_enabled' => false,
+//                                        'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
+//                                        'removePlugins' => 'elementspath',
+//                                    ]
+//                                ]) ?>
 
                             </div>
                             <div class="btn-wrapper">

@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Department;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -48,11 +49,19 @@ function renderChildCallsRecursive($calls): void {
                     <tr>
                         <td style="width:70px; border: none">
                             <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
+                            <?php if ($callItem->isIn()): ?>
+                                <span class="badge badge-danger">In</span>
+                            <?php else: ?>
+                                <span class="badge badge-danger">Out</span>
+                            <?php endif; ?>
                         </td>
                         <td style="width: 50px">
                             <?php if ($callItem->c_source_type_id):?>
                                 <span class="label label-info"><?=$callItem->getShortSourceName()?></span>
                             <?php endif; ?>
+
+                            <span class="label label-warning"><?= Department::DEPARTMENT_LIST[$callItem->c_dep_id] ?? '-' ?></span>
+
                         </td>
                         <td style="width: 120px">
                             <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName()?>

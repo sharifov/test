@@ -3,26 +3,19 @@
 namespace frontend\controllers;
 
 use common\models\ApiLog;
-use common\models\Call;
 use common\models\Employee;
-use common\models\Lead;
+use kartik\export\ExportMenu;
+use sales\entities\call\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadSearch;
-use common\models\search\LeadTaskSearch;
 use common\models\Setting;
 use common\models\Sms;
 use common\models\Email;
-use common\models\UserParams;
+use sales\viewModel\call\ViewModelTotalCallGraph;
 use Yii;
-use yii\data\ActiveDataProvider;
-use yii\db\Expression;
-use yii\helpers\ArrayHelper;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use common\models\LoginForm;
-use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
+use yii\base\Model;
+use yii\widgets\ActiveForm;
 
 /**
  * Stats controller
@@ -145,24 +138,44 @@ class StatsController extends FController
 
     public function actionCallsGraph()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $chartOptions = Yii::$app->request->post();
-            $rangeBy = Yii::$app->request->post('groupBy');
-            $date = explode("/", $chartOptions['dateRange']);
-            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy, (int)$chartOptions['callType']);
+		$params = Yii::$app->request->queryParams;
+		$model = new CallGraphsSearch();
+		$model->load($params);
 
-            return $this->renderAjax('calls-stats', [
-                'callsGraphData' => $callsGraphData
-            ]);
-        } else {
-            $currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $callsGraphData = Call::getCallStats($currentDate, $currentDate, null, 0);
+		if (Yii::$app->request->post('export_type') && $model->validate()) {
+			return $this->render('partial/_call_graph_export', [
+				'viewModel' => new ViewModelTotalCallGraph($model->getTotalCalls(), $model),
+			]);
+		} else {
+			return $this->render('calls-stats', [
+				'model' => $model
+			]);
+		}
 
-            return $this->render('calls-stats', [
-                'callsGraphData' => $callsGraphData
-            ]);
-        }
-    }
+	}
+
+	/**
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function actionAjaxGetTotalChart(): \yii\web\Response
+	{
+		$callSearch = new CallGraphsSearch();
+		$callSearch->load(Yii::$app->request->post());
+		if ($callSearch->validate()) {
+
+			$html = $this->renderAjax('partial/_total_calls_chart', [
+				'viewModel' => new ViewModelTotalCallGraph($callSearch->getTotalCalls(), $callSearch),
+			]);
+		}
+
+		$response = [
+			'html' => $html ?? '',
+			'error' => $callSearch->hasErrors(),
+			'message' => $callSearch->getErrorSummary(true)
+		];
+
+		return $this->asJson($response);
+	}
 
     public function actionSmsGraph()
     {
@@ -281,8 +294,11 @@ class StatsController extends FController
 
         $agentsSettings = Setting::find()->where(['s_key' => 'agents_ratings'])->asArray()->one();
         $teamsSettings = Setting::find()->where(['s_key' => 'teams_ratings'])->asArray()->one();
+        $teamsSettingsSkill = Setting::find()->where(['s_key' => 'exclude_agent_skill'])->asArray()->one();
+
         $agentsBoardsSettings = json_decode($agentsSettings['s_value'], true);
         $teamsBoardsSettings = json_decode($teamsSettings['s_value'], true);
+        $teamsSkill = json_decode($teamsSettingsSkill['s_value'], true);
 
         if(Yii::$app->request->isPost){
            $period = Yii::$app->request->post('period');
@@ -296,11 +312,11 @@ class StatsController extends FController
         $tipsDataProvider = $searchLeader->searchTopAgents('tips', $period);
         $conversionDataProvider = $searchLeader->searchTopAgents('leadConversion', $period);
 
-        $teamsProfitDataProvider = $searchLeader->searchTopTeams('teamsProfit', $period);
-        $avgSoldLeadsDataProvider = $searchLeader->searchTopTeams('teamsSoldLeads', $period);
-        $avgProfitPerPax = $searchLeader->searchTopTeams('teamsProfitPerPax', $period);
-        $avgProfitPerAgent = $searchLeader->searchTopTeams('teamsProfitPerAgent', $period);
-        $teamConversion = $searchLeader->searchTopTeams('teamsConversion', $period);
+        $teamsProfitDataProvider = $searchLeader->searchTopTeams('teamsProfit', $period, $teamsSkill);
+        $avgSoldLeadsDataProvider = $searchLeader->searchTopTeams('teamsSoldLeads', $period, $teamsSkill);
+        $avgProfitPerPax = $searchLeader->searchTopTeams('teamsProfitPerPax', $period, $teamsSkill);
+        $avgProfitPerAgent = $searchLeader->searchTopTeams('teamsProfitPerAgent', $period, $teamsSkill);
+        $teamConversion = $searchLeader->searchTopTeams('teamsConversion', $period, $teamsSkill);
 
         $params = [
             'profitDataProvider' => $profitDataProvider,

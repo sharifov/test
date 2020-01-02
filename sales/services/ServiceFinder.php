@@ -2,11 +2,13 @@
 
 namespace sales\services;
 
+use common\models\Call;
 use common\models\Client;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadPreferences;
 use sales\entities\cases\Cases;
+use sales\repositories\call\CallRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\client\ClientRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
@@ -21,6 +23,7 @@ use sales\repositories\user\UserRepository;
  * @property CasesRepository $casesRepository
  * @property ClientRepository $clientRepository
  * @property LeadPreferencesRepository $leadPreferencesRepository
+ * @property CallRepository $callRepository
  */
 class ServiceFinder
 {
@@ -30,6 +33,7 @@ class ServiceFinder
     private $casesRepository;
     private $clientRepository;
 	private $leadPreferencesRepository;
+	private $callRepository;
 
 	/**
 	 * @param LeadRepository $leadRepository
@@ -37,19 +41,22 @@ class ServiceFinder
 	 * @param CasesRepository $casesRepository
 	 * @param ClientRepository $clientRepository
 	 * @param LeadPreferencesRepository $leadPreferencesRepository
+	 * @param CallRepository $callRepository
 	 */
     public function __construct(
     	LeadRepository $leadRepository,
 		UserRepository $userRepository,
 		CasesRepository $casesRepository,
 		ClientRepository $clientRepository,
-		LeadPreferencesRepository $leadPreferencesRepository
+		LeadPreferencesRepository $leadPreferencesRepository,
+        CallRepository $callRepository
     ) {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
         $this->casesRepository = $casesRepository;
         $this->clientRepository = $clientRepository;
 		$this->leadPreferencesRepository = $leadPreferencesRepository;
+		$this->callRepository = $callRepository;
 	}
 
     /**
@@ -129,6 +136,21 @@ class ServiceFinder
             return $this->userRepository->find($tryUser);
         }
         throw new \InvalidArgumentException('$user must be integer or Employee');
+    }
+
+    /**
+     * @param int|Call $call
+     * @return Call
+     */
+    public function callFind($call): Call
+    {
+        if (is_int($call)) {
+            return $this->callRepository->find($call);
+        }
+        if ($call instanceof Call) {
+            return $call;
+        }
+        throw new \InvalidArgumentException('$call must be integer or Call');
     }
 
 }

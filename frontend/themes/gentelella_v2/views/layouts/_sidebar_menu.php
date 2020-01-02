@@ -192,6 +192,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'items' => [
                 ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
                 ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
+                ['label' => 'User Groups Set', 'url' => ['/user-group-set/index'], 'icon' => 'users'],
                 ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
                 ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
                 ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
@@ -220,6 +221,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
                 ['label' => 'Department Emails', 'url' => ['/department-email-project/index'], 'icon' => 'envelope'],
                 ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
+                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
                 ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
@@ -243,6 +245,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'icon' => 'list',
             'items' => [
                 ['label' => 'Currency List', 'url' => ['/currency/index']],
+                ['label' => 'Currency History', 'url' => ['/currency-history/index']],
                 ['label' => 'Product Types', 'url' => ['/product-type/index']],
                 ['label' => 'Products', 'url' => ['/product/index']],
                 ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],

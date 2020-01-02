@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use sales\helpers\query\QueryHelper;
 use sales\services\lead\qcall\DayTimeHours;
 use Yii;
 use common\models\Call;
@@ -49,7 +50,10 @@ class LeadQcallSearch extends LeadQcall
             [['lqc_lead_id', 'lqc_weight', 'l_is_test', 'deadline'], 'integer'],
 
             [['current_dt', 'l_is_test', 'deadline'], 'safe'],
-            [['lqc_dt_from', 'lqc_dt_to', 'lqc_created_dt'], 'string'],
+
+            ['lqc_created_dt', 'date', 'format' => 'php:Y-m-d'],
+            ['lqc_dt_from', 'date', 'format' => 'php:Y-m-d'],
+            ['lqc_dt_to', 'date', 'format' => 'php:Y-m-d'],
 
             ['projectId', 'integer'],
             ['leadStatus', 'integer'],
@@ -367,18 +371,15 @@ class LeadQcallSearch extends LeadQcall
             }
 
             if ($this->lqc_dt_from) {
-                $query->andFilterWhere(['>=', 'lqc_dt_from', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_from))])
-                    ->andFilterWhere(['<=', 'lqc_dt_from', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_from) + 3600 * 24)]);
+                QueryHelper::dayEqualByUserTZ($query, 'lqc_dt_from', $this->lqc_dt_from, $user->timezone);
             }
 
             if ($this->lqc_dt_to) {
-                $query->andFilterWhere(['>=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to))])
-                    ->andFilterWhere(['<=', 'lqc_dt_to', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_dt_to) + 3600 * 24)]);
+                QueryHelper::dayEqualByUserTZ($query, 'lqc_dt_to', $this->lqc_dt_to, $user->timezone);
             }
 
             if ($this->lqc_created_dt) {
-                $query->andFilterWhere(['>=', 'lqc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_created_dt))])
-                    ->andFilterWhere(['<=', 'lqc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lqc_created_dt) + 3600 * 24)]);
+                QueryHelper::dayEqualByUserTZ($query, 'lqc_created_dt', $this->lqc_created_dt, $user->timezone);
             }
 
             if ($this->lqc_weight === '0') {

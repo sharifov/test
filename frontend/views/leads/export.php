@@ -70,6 +70,16 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             },
             'filter' => \common\models\Lead::STATUS_LIST
         ],
+        [
+            'header' => 'Status Date',
+            'value' => function(\common\models\Lead $model){
+                foreach ($model->leadFlows as $flow){
+                    if ($model->id === $flow['lead_id'] && $model->status === $flow['status']){
+                        return Yii::$app->formatter->asDatetime(strtotime($flow['created']), 'php: Y-m-d H:i');
+                    }
+                }
+            }
+        ],
         'reason' => [
             'header' => 'Trash/Reject reason.',
             'value' => function(\common\models\Lead $model) {
@@ -345,8 +355,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 return $country;
             },
         ],
-
-
 
         [
             'header' => 'Profit',
