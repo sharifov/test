@@ -137,52 +137,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-center'],
             ],
 
-            //'created',
-            //'updated',
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'created',
             ],
 
             [
-                'attribute' => 'created',
-                'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                },
-                'format' => 'html',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'created',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
-            ],
-
-            [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'updated',
-                'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-                },
-                'format' => 'html',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'updated',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
             ],
 
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],

@@ -12,6 +12,14 @@ use yii\grid\DataColumn;
  *
  * @property $userId
  * @property $relation
+ *
+ * Ex.
+    [
+        'class' => \sales\yii\grid\UserColumn::class,
+        'attribute' => 'ugs_updated_user_id',
+        'relation' => 'updatedUser',
+    ],
+ *
  */
 class UserColumn extends DataColumn
 {

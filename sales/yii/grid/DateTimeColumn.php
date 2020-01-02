@@ -5,6 +5,16 @@ namespace sales\yii\grid;
 use dosamigos\datepicker\DatePicker;
 use yii\grid\DataColumn;
 
+/**
+ * Class DateTimeColumn
+ *
+ * Ex.
+    [
+        'class' => \sales\yii\grid\DateTimeColumn::class,
+        'attribute' => 'pbl_updated_dt',
+    ],
+ *
+ */
 class DateTimeColumn extends DataColumn
 {
     public $format = 'byUserDateTime';

@@ -29,7 +29,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'formatter' => ['class' => Formatter::class],
         'columns' => [
             'pbl_id',
             'pbl_phone',
@@ -37,6 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => BooleanColumn::class,
                 'attribute' => 'pbl_enabled',
+                'format' => 'raw'
             ],
             [
                 'class' => DateTimeColumn::class,

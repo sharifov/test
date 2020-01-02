@@ -9,12 +9,20 @@ use yii\helpers\Html;
  * Class LeadColumn
  *
  * @property $relation
+ *
+ *  Ex.
+    [
+        'class' => \sales\yii\grid\lead\LeadColumn::class,
+        'attribute' => 'lead_id',
+        'relation' => 'lead',
+    ],
+ *
  */
 class LeadColumn extends DataColumn
 {
     public $relation;
 
-    public function init()
+    public function init(): void
     {
         parent::init();
         if (!$this->relation) {
@@ -22,7 +30,7 @@ class LeadColumn extends DataColumn
         }
     }
 
-    protected function renderDataCellContent($model, $key, $index)
+    protected function renderDataCellContent($model, $key, $index): string
     {
         if ($leadId = $model->{$this->attribute}) {
             return '<i class="fa fa-arrow-right"></i> ' . Html::a(
