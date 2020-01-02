@@ -85,7 +85,7 @@ class Task extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new TaskQuery(get_called_class());
+        return new TaskQuery(static::class);
     }
 
     /**

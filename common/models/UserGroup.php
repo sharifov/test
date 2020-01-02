@@ -114,7 +114,7 @@ class UserGroup extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserGroupQuery(get_called_class());
+        return new UserGroupQuery(static::class);
     }
 
     /**

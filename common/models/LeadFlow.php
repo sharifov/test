@@ -231,6 +231,6 @@ class LeadFlow extends \yii\db\ActiveRecord
      */
     public static function find(): LeadFlowQuery
     {
-        return new LeadFlowQuery(get_called_class());
+        return new LeadFlowQuery(static::class);
     }
 }

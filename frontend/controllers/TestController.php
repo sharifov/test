@@ -6,6 +6,7 @@ use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientPhone;
+use common\models\CreditCard;
 use common\models\Currency;
 use common\models\CurrencyHistory;
 use common\models\Department;
@@ -54,6 +55,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
+use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\lead\useCase\lead\api\create\Handler;
@@ -1710,5 +1712,41 @@ die;
 
 		echo 'Successful';
 	}
+
+	public function actionEncrypt()
+    {
+
+        $text = 'Hello!';
+        $encryptData = CreditCard::encrypt($text);
+        $decryptData = CreditCard::decrypt($encryptData);
+
+        VarDumper::dump($encryptData, 10, true);
+        echo '<br><hr>';
+        VarDumper::dump($decryptData, 10, true);
+    }
+
+    public function actionMask()
+    {
+
+        $number = '41112222333344445';
+        //echo  substr_replace($number, str_repeat('*', strlen( $number ) - 4), 0, strlen( $number ) - 4);
+
+        $creditCard[] = '5362267121053405'; // Mastercard
+        $creditCard[] = '4556189015881361'; // Visa 16
+        $creditCard[] = '4716904617062'; // Visa 13
+        $creditCard[] = '372348371455844'; // American Express
+        $creditCard[] = '6011757892594291'; // Discover
+        $creditCard[] = '30329445722959'; // Diners Club
+        $creditCard[] = '214927124363421'; // enRoute
+        $creditCard[] = '180012855304868'; // JCB 15
+        $creditCard[] = '3528066275370961'; // JCB 16
+        $creditCard[] = '8699775919'; // Voyager
+
+        for($i=0;$i < count($creditCard);$i++)
+        {
+            echo CreditCardHelper::formatCreditCard(CreditCardHelper::maskCreditCard($creditCard[$i])).'<br>'; //FormatCreditCard(MaskCreditCard(($creditCard[$i])))."\n";
+        }
+    }
+
 
 }

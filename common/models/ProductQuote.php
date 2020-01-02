@@ -269,7 +269,7 @@ class ProductQuote extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ProductQuoteQuery(get_called_class());
+        return new ProductQuoteQuery(static::class);
     }
 
     /**

@@ -112,7 +112,7 @@ class LeadChecklistType extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new LeadChecklistTypeQuery(get_called_class());
+        return new LeadChecklistTypeQuery(static::class);
     }
 
 

@@ -158,7 +158,7 @@ class ApiLog extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ApiLogQuery(get_called_class());
+        return new ApiLogQuery(static::class);
     }
 
     /**

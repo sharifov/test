@@ -213,7 +213,7 @@ class ConferenceRoom extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ConferenceRoomQuery(get_called_class());
+        return new ConferenceRoomQuery(static::class);
     }
 
     /**

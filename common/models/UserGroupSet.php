@@ -106,6 +106,6 @@ class UserGroupSet extends \yii\db\ActiveRecord
      */
     public static function find(): UserGroupSetQuery
     {
-        return new UserGroupSetQuery(get_called_class());
+        return new UserGroupSetQuery(static::class);
     }
 }

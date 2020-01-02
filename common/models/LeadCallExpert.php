@@ -168,7 +168,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new LeadCallExpertQuery(get_called_class());
+        return new LeadCallExpertQuery(static::class);
     }
 
     /**

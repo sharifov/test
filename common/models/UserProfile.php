@@ -111,6 +111,6 @@ class UserProfile extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserProfileQuery(get_called_class());
+        return new UserProfileQuery(static::class);
     }
 }

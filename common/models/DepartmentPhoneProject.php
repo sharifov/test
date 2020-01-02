@@ -172,6 +172,6 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new DepartmentPhoneProjectQuery(get_called_class());
+        return new DepartmentPhoneProjectQuery(static::class);
     }
 }

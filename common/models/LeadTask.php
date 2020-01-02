@@ -95,7 +95,7 @@ class LeadTask extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new LeadTaskQuery(get_called_class());
+        return new LeadTaskQuery(static::class);
     }
 
 

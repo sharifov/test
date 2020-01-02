@@ -93,6 +93,6 @@ class UserDepartment extends ActiveRecord
      */
     public static function find(): UserDepartmentQuery
     {
-        return new UserDepartmentQuery(get_called_class());
+        return new UserDepartmentQuery(static::class);
     }
 }

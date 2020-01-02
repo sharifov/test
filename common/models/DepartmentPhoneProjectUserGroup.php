@@ -90,6 +90,6 @@ class DepartmentPhoneProjectUserGroup extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new DepartmentPhoneProjectUserGroupQuery(get_called_class());
+        return new DepartmentPhoneProjectUserGroupQuery(static::class);
     }
 }

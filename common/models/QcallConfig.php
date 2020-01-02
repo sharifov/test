@@ -114,7 +114,7 @@ class QcallConfig extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new QcallConfigQuery(get_called_class());
+        return new QcallConfigQuery(static::class);
     }
 
 

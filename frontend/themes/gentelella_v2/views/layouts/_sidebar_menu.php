@@ -265,6 +265,11 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
                 ['label' => 'Order Products', 'url' => ['/order-product/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/index']],
+                ['label' => 'Billing Info', 'url' => ['/billing-info/index']],
+                ['label' => 'Credit Cards', 'url' => ['/credit-card/index']],
+                ['label' => 'Payments', 'url' => ['/payment/index']],
+                ['label' => 'Payment Methods', 'url' => ['/payment-method/index']],
+                ['label' => 'Transactions', 'url' => ['/transaction/index']],
             ]
         ];
 

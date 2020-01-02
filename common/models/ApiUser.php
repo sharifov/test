@@ -110,7 +110,7 @@ class ApiUser extends ActiveRecord implements IdentityInterface, RateLimitInterf
      */
     public static function find()
     {
-        return new ApiUserQuery(get_called_class());
+        return new ApiUserQuery(static::class);
     }
 
     /**

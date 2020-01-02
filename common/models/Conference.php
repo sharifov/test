@@ -118,7 +118,7 @@ class Conference extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ConferenceQuery(get_called_class());
+        return new ConferenceQuery(static::class);
     }
 
     /**

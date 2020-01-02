@@ -138,7 +138,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new SmsTemplateTypeQuery(get_called_class());
+        return new SmsTemplateTypeQuery(static::class);
     }
 
     /**

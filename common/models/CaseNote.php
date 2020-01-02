@@ -106,6 +106,6 @@ class CaseNote extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new CaseNoteQuery(get_called_class());
+        return new CaseNoteQuery(static::class);
     }
 }
