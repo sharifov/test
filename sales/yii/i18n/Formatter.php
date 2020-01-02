@@ -28,9 +28,7 @@ class Formatter extends \yii\i18n\Formatter
                 $class = 'label label-default';
         }
 
-        return Html::tag('span', Quote::getTypeName($value), [
-            'class' => $class,
-        ]);
+        return Html::tag('span', Quote::getTypeName($value), ['class' => $class]);
     }
 
     /**
@@ -40,7 +38,10 @@ class Formatter extends \yii\i18n\Formatter
      */
     public function asByUserDateTime($dateTime): string
     {
-        return $dateTime ? '<i class="fa fa-calendar"></i> ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]') : $this->nullDisplay;
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]');
     }
 
     /**
@@ -66,7 +67,7 @@ class Formatter extends \yii\i18n\Formatter
         } else {
             throw new \InvalidArgumentException('user must be Employee|int|string|null');
         }
-        return '<i class="fa fa-user"></i> ' . Html::encode($userName);
+        return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($userName);
     }
 
     /**
@@ -76,8 +77,8 @@ class Formatter extends \yii\i18n\Formatter
     public function asBooleanByLabel($value): string
     {
         if ($value) {
-            return '<span class="label label-success">Yes</span>';
+            return Html::tag('span', 'Yes', ['class' => 'label label-success']);
         }
-        return '<span class="label label-danger">No</span>';
+        return Html::tag('span', 'No', ['class' => 'label label-danger']);
     }
 }

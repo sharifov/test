@@ -1,7 +1,10 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
+use sales\yii\grid\DateTimeColumn;
+use sales\yii\grid\lead\LeadColumn;
 use sales\yii\grid\quote\QuoteTypeColumn;
+use sales\yii\grid\UserColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
@@ -70,19 +73,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'uid',
             [
+                'class' => LeadColumn::class,
                 'attribute' => 'lead_id',
-                'format' => 'raw',
-                'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['lead/view', 'gid' => $model->lead->gid], ['target' => '_blank', 'data-pjax' => 0]);
-                },
+                'relation' => 'lead',
             ],
             [
+                'class' => UserColumn::class,
                 'attribute' => 'employee_id',
-                'format' => 'raw',
-                'value' => function(\common\models\Quote $model) {
-                    return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
-                },
-                'filter' => \common\models\Employee::getList()
+                'relation' => 'employee',
             ],
             'record_locator',
 
@@ -141,6 +139,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
             //'created',
             //'updated',
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'created',
+            ],
 
             [
                 'attribute' => 'created',

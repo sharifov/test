@@ -1,4 +1,6 @@
-<?php use yii\grid\ActionColumn;
+<?php
+
+use yii\grid\ActionColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
@@ -156,15 +158,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 },
                 'format' => 'raw'
             ],
-
-            [
-                'attribute' => 'username',
-                'value' => static function (\common\models\Employee $model) {
-                    return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
-                },
-                'format' => 'raw'
-            ],
-
+            'username:userName',
             [
                 'attribute' => 'roles',
                 'label' => 'Role',
