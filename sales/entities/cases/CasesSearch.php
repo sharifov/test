@@ -66,10 +66,10 @@ class CasesSearch extends Cases
             ['salePNR', 'string'],
             ['clientPhone', 'string'],
             ['clientEmail', 'string'],
-            ['ticketNumber', 'string', 'min' => 3],
-            ['airlineConfirmationNumber', 'string', 'min' => 3],
-            ['paxFirstName', 'string', 'min' => 3],
-            ['paxLastName', 'string', 'min' => 3],
+            ['ticketNumber', 'string', 'min' => 4],
+            ['airlineConfirmationNumber', 'string', 'min' => 4],
+            ['paxFirstName', 'string', 'min' => 2],
+            ['paxLastName', 'string', 'min' => 2],
         ];
     }
 
