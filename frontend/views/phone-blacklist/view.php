@@ -29,7 +29,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= DetailView::widget([
         'model' => $model,
-        'formatter' => ['class' => Formatter::class],
         'attributes' => [
             'pbl_id',
             'pbl_phone',
