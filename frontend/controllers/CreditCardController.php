@@ -120,8 +120,10 @@ class CreditCardController extends FController
             $model->cc_cvv = $modelCc->initCvv;
             $model->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year.'-'.$modelCc->cc_expiration_month.'-01'));
 
-            $model->cc_id = $modelCc->cc_id;
+
         }
+
+        $model->cc_id = $modelCc->cc_id;
 
         return $this->render('update', [
             'model' => $model,

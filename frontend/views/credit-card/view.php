@@ -26,13 +26,15 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
+    <div class="col-md-6">
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
             'cc_id',
             'cc_number',
+            'cc_cvv',
             'cc_display_number',
-            [
+            /*[
                 'label' => 'Number UnSecure',
                 'value' => static function(\common\models\CreditCard $model) {
                     return $model->initNumber;
@@ -43,31 +45,42 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function(\common\models\CreditCard $model) {
                     return $model->initCvv;
                 },
-            ],
+            ],*/
             'cc_holder_name',
             'cc_expiration_month',
             'cc_expiration_year',
-            'cc_cvv',
-            //'cc_type_id',
-            [
-                'attribute' => 'cc_type_id',
-                'value' => static function(\common\models\CreditCard $model) {
-                    return $model->typeName;
-                },
-            ],
-            [
-                'attribute' => 'cc_status_id',
-                'value' => static function(\common\models\CreditCard $model) {
-                    return $model->statusName;
-                },
-            ],
-            //'cc_status_id',
-            'cc_is_expired:boolean',
-            'cc_created_user_id:UserName',
-            'cc_updated_user_id:UserName',
-            'cc_created_dt:DateTimeByUserDt',
-            'cc_updated_dt:DateTimeByUserDt',
+
+
         ],
     ]) ?>
+    </div>
+    <div class="col-md-6">
+        <?= DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+
+
+                //'cc_type_id',
+                [
+                    'attribute' => 'cc_type_id',
+                    'value' => static function(\common\models\CreditCard $model) {
+                        return $model->typeName;
+                    },
+                ],
+                [
+                    'attribute' => 'cc_status_id',
+                    'value' => static function(\common\models\CreditCard $model) {
+                        return $model->statusName;
+                    },
+                ],
+                //'cc_status_id',
+                'cc_is_expired:boolean',
+                'cc_created_user_id:UserName',
+                'cc_updated_user_id:UserName',
+                'cc_created_dt:DateTimeByUserDt',
+                'cc_updated_dt:DateTimeByUserDt',
+            ],
+        ]) ?>
+    </div>
 
 </div>

@@ -30,20 +30,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'cc_id',
             //'cc_number',
             'cc_display_number',
-            [
-                'label' => 'Display',
-                'value' => static function(\common\models\CreditCard $model) {
-                    return $model->initNumber;
-                },
-                'filter' => false
-            ],
-            [
-                'label' => 'Display CVV',
-                'value' => static function(\common\models\CreditCard $model) {
-                    return $model->initCvv;
-                },
-                'filter' => false
-            ],
+//            [
+//                'label' => 'Display',
+//                'value' => static function(\common\models\CreditCard $model) {
+//                    return $model->initNumber;
+//                },
+//                'filter' => false
+//            ],
+//            [
+//                'label' => 'Display CVV',
+//                'value' => static function(\common\models\CreditCard $model) {
+//                    return $model->initCvv;
+//                },
+//                'filter' => false
+//            ],
             'cc_holder_name',
             'cc_expiration_month',
             'cc_expiration_year',
