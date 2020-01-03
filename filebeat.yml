@@ -25,7 +25,7 @@ filebeat.inputs:
 
     # Paths that should be crawled and fetched. Glob based paths.
     paths:
-      - /var/www/sale/backend/runtime/logs/stash.log
+      - /var/www/sale/frontend/runtime/logs/stash.log
       - /var/www/sale/console/runtime/logs/stash.log
       - /var/www/sale/webapi/runtime/logs/stash.log
       #- c:\programdata\elasticsearch\logs\*
