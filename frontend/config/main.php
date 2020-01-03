@@ -44,7 +44,7 @@ return [
             'on afterLogin' => function($event) {
                 \webvimark\modules\UserManagement\models\UserVisitLog::newVisitor($event->identity->id);
             },
-            'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => false],
+            'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => false],
         ],*/
 
         'session' => [

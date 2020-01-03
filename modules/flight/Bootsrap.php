@@ -1,10 +1,10 @@
 <?php
-namespace modules\hotel;
+namespace modules\flight;
 use Yii;
 use yii\i18n\PhpMessageSource;
 /**
  * Class Bootstrap
- * @package modules\hotel
+ * @package modules\flight
  */
 class Bootstrap
 {
@@ -14,19 +14,19 @@ class Bootstrap
     public function __construct()
     {
         $i18n = Yii::$app->i18n;
-        $i18n->translations['modules/hotel/*'] = [
+        $i18n->translations['modules/flight/*'] = [
             'class' => PhpMessageSource::class,
-            'basePath' => '@modules/hotel/messages',
+            'basePath' => '@modules/flight/messages',
             'fileMap' => [
-                'modules/hotel/module' => 'module.php',
+                'modules/flight/module' => 'module.php',
             ]
         ];
         $urlManager = Yii::$app->urlManager;
         $urlManager->addRules(
             [
                 // Declaration of rules here
-                '' => 'hotel/default/index',
-                '<_a:(act1|act2)>' => 'hotel/default/<_a>'
+                '' => 'flight/default/index',
+                '<_a:(act1|act2)>' => 'flight/default/<_a>'
             ]
         );
     }

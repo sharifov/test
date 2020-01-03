@@ -5,12 +5,11 @@
 
 use yii\helpers\Html;
 
-//\backend\assets\AppAsset::register($this);
 $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
 
-//$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
-//Yii::$app->view->registerCssFile('@backend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
+//$this->registerCssFile('@frontend/themes/gentelella/css/custom.css');
+//Yii::$app->view->registerCssFile('@frontend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
 
 \frontend\assets\NotifyAsset::register($this);
 
@@ -153,7 +152,6 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
                         <?/*php endif;*/?>
 
-                        <?//= backend\widgets\ChatNotifications::widget(); ?>
 
                     </ul>
                 </nav>
