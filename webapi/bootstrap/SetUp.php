@@ -24,7 +24,7 @@ class SetUp implements BootstrapInterface
                 ->addData(['apiKey' => $app->params['bo']['apiKey']])
                 ->setOptions([
                     CURLOPT_ENCODING => 'gzip',
-                    'timeout' => 30
+                    'timeout' => 30,
                 ]);
             return new RequestBo($request, $app->params['bo']['url']);
         });

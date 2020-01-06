@@ -2,8 +2,10 @@
 
 namespace webapi\src\response;
 
-use webapi\src\response\messages\BoMessage;
+use webapi\src\response\messages\SourceMessage;
+use webapi\src\response\messages\Sources;
 use webapi\src\response\messages\StatusCodeMessage;
+use webapi\src\response\messages\StatusFailedMessage;
 use Yii;
 use webapi\src\response\messages\Message;
 
@@ -21,7 +23,8 @@ class ProxyResponse extends Response
         $messages = [];
 
         if (!$response->isOk) {
-            $messages[] = new BoMessage();
+            $messages[] = new SourceMessage(Sources::BO, $this->getStatusCodeFromResponse($response));
+            $messages[] = new StatusFailedMessage();
         }
 
         $messages[] = $this->processStatusCodeMessage($response);
@@ -65,10 +68,10 @@ class ProxyResponse extends Response
 
     private function processStatusCodeMessage(\yii\httpclient\Response $response): StatusCodeMessage
     {
-        return new StatusCodeMessage($this->getStatusCodeMessage($response));
+        return new StatusCodeMessage($this->getStatusCodeFromResponse($response));
     }
 
-    private function getStatusCodeMessage(\yii\httpclient\Response $response)
+    private function getStatusCodeFromResponse(\yii\httpclient\Response $response)
     {
         try {
             return $response->getStatusCode();

@@ -7,8 +7,11 @@ namespace webapi\src\response\messages;
  */
 class SourceMessage extends Message
 {
-    public function __construct($value)
+    public function __construct($type, $statusCode)
     {
-        parent::__construct(Message::SOURCE_MESSAGE, $value);
+        parent::__construct(Message::SOURCE_MESSAGE, [
+            'type' => (int)$type,
+            'status' => $statusCode,
+        ]);
     }
 }

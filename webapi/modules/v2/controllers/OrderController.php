@@ -11,6 +11,7 @@ use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\MessageMessage;
+use webapi\src\response\messages\StatusFailedMessage;
 use webapi\src\response\ProxyResponse;
 use Yii;
 use yii\httpclient\Response;
@@ -57,6 +58,7 @@ class OrderController extends BaseController
             }
         } catch (\Throwable $e) {
             return new ErrorResponse(
+                new StatusFailedMessage(),
                 new MessageMessage($e->getMessage()),
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())

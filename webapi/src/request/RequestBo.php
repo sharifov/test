@@ -2,7 +2,6 @@
 
 namespace webapi\src\request;
 
-use yii\helpers\VarDumper;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
 
