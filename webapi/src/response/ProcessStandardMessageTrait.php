@@ -7,9 +7,9 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\messages\StatusMessage;
 
-trait ProcessStandartMessageTrait
+trait ProcessStandardMessageTrait
 {
-    private function processMessages(Message ...$messages): array
+    public function processStandardMessages(Message ...$messages): array
     {
         $messageExist = false;
         $statusExist = false;
