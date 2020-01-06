@@ -242,6 +242,10 @@ return [
         ],
 
 
+        'flight' => [
+            'class' => \modules\flight\FlightModule::class,
+        ],
+
         'hotel' => [
             'class' => \modules\hotel\HotelModule::class,
         ],

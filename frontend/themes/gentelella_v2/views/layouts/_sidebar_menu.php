@@ -239,14 +239,14 @@ $isSuperAdmin = $user->canRole('superadmin');
             ]
         ];
 
-        //if (class_exists('\modules\flight\FlightModule')) {
+        if (class_exists('\modules\flight\FlightModule')) {
             $menuItems[] = [
                 'label' => 'Flight module',
                 'url' => 'javascript:',
-                'icon' => 'flight',
+                'icon' => 'plane',
                 'items' => \modules\flight\FlightModule::getListMenu()
             ];
-        //}
+        }
 
         if (class_exists('\modules\hotel\HotelModule')) {
             $menuItems[] = [

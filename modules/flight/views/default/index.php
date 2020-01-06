@@ -4,11 +4,11 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var array $links */
 
-$this->title = 'Hotel Product Module';
+$this->title = 'Flight Product Module';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="hotel-default-index">
-    <h1><i class="fa fa-hotel"></i> <?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-plane"></i> <?= Html::encode($this->title) ?></h1>
     <div class="row">
         <div class="col-lg-6">
             <?php if ($links): ?>
