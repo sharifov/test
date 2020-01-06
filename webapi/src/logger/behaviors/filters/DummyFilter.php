@@ -3,9 +3,9 @@
 namespace webapi\src\logger\behaviors\filters;
 
 /**
- * Class LoggerDataFilter
+ * Class DummyFilter
  */
-class LoggerDataFilter implements Filterable
+class DummyFilter implements Filterable
 {
     public function filterData($data): array
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace webapi\src\logger\behaviors;
+namespace webapi\src\logger\behaviors\filters;
 
 /**
  * Interface Filterable
