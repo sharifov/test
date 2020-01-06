@@ -71,6 +71,12 @@ use yii\helpers\Html;
         ]) ?>
     <?php endif; ?>
 
+    <?php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_FLIGHT && $product->flight): ?>
+        <?= $this->render('@modules/flight/views/flight/partial/_product_flight', [
+            'product' => $product,
+        ]) ?>
+    <?php endif; ?>
+
 <?php endforeach; ?>
 
 <?php \yii\widgets\Pjax::end()?>

@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Lead;
 use common\models\ProductType;
 use frontend\models\form\ProductForm;
+use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
 use Yii;
 use common\models\Product;
@@ -106,18 +107,38 @@ class ProductController extends FController
 
                 if ($modelProduct->save()) {
 
+                    $errors = null;
+
                     if ((int) $model->pr_type_id === ProductType::PRODUCT_HOTEL) {
                         if (class_exists('\modules\hotel\HotelModule')) {
                             $modelHotel = new Hotel();
                             $modelHotel->ph_product_id = $modelProduct->pr_id;
                             if (!$modelHotel->save()) {
-                                Yii::error(VarDumper::dumpAsString($modelHotel->errors),
+                                $errors = VarDumper::dumpAsString($modelHotel->errors);
+                                Yii::error($errors,
                                     'ProductController:actionCreateAjax:Hotel:save');
                             }
                         } else {
                             Yii::error('Not exists class "\modules\hotel\HotelModule"',
                                 'ProductController:actionCreateAjax:Hotel');
                         }
+                    } elseif ((int) $model->pr_type_id === ProductType::PRODUCT_FLIGHT) {
+                        if (class_exists('\modules\flight\FlightModule')) {
+                            $modelFlight = new Flight();
+                            $modelFlight->fl_product_id = $modelProduct->pr_id;
+                            if (!$modelFlight->save()) {
+                                $errors = VarDumper::dumpAsString($modelFlight->errors);
+                                Yii::error($errors,
+                                    'ProductController:actionCreateAjax:Flight:save');
+                            }
+                        } else {
+                            Yii::error('Not exists class "\modules\flight\FlightModule"',
+                                'ProductController:actionCreateAjax:Flight');
+                        }
+                    }
+
+                    if ($errors) {
+                        return ['errors' => $errors];
                     }
                     return ['message' => 'Successfully added a new product'];
                 }

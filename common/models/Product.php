@@ -3,10 +3,12 @@
 namespace common\models;
 
 use common\models\query\ProductQuery;
+use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -24,6 +26,8 @@ use yii\db\ActiveRecord;
  * @property string|null $pr_created_dt
  * @property string|null $pr_updated_dt
  *
+ * @property Flight[] $flights
+ * @property Flight $flight
  * @property Hotel[] $hotels
  * @property Hotel $hotel
  * @property Employee $prCreatedUser
@@ -104,58 +108,75 @@ class Product extends \yii\db\ActiveRecord
         ];
     }
 
+
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHotels()
+    public function getFlights(): ActiveQuery
+    {
+        return $this->hasMany(Flight::class, ['fl_product_id' => 'pr_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getFlight(): ActiveQuery
+    {
+        return $this->hasOne(Flight::class, ['fl_product_id' => 'pr_id'])->orderBy(['fl_id' => SORT_DESC])->limit(1);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getHotels(): ActiveQuery
     {
         return $this->hasMany(Hotel::class, ['ph_product_id' => 'pr_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHotel()
+    public function getHotel(): ActiveQuery
     {
         return $this->hasOne(Hotel::class, ['ph_product_id' => 'pr_id'])->orderBy(['ph_id' => SORT_DESC])->limit(1);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPrCreatedUser()
+    public function getPrCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'pr_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPrLead()
+    public function getPrLead(): ActiveQuery
     {
         return $this->hasOne(Lead::class, ['id' => 'pr_lead_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPrType()
+    public function getPrType(): ActiveQuery
     {
         return $this->hasOne(ProductType::class, ['pt_id' => 'pr_type_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPrUpdatedUser()
+    public function getPrUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'pr_updated_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getProductQuotes()
+    public function getProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_product_id' => 'pr_id']);
     }
