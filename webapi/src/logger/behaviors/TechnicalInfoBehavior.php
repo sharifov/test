@@ -18,6 +18,10 @@ class TechnicalInfoBehavior extends LoggerBehavior
 
     public function afterAction(ActionEvent $event)
     {
+        if ($this->isDisabled($event->action)) {
+            return $event->result;
+        }
+
         $result = $event->result;
 
         if (!$logger = $this->checkLogger($event->action->controller)) {

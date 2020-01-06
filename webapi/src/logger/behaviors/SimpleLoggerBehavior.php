@@ -1,21 +1,26 @@
 <?php
 
-namespace webapi\src\behaviors;
+namespace webapi\src\logger\behaviors;
 
+use webapi\src\logger\behaviors\filters\Filterable;
 use Yii;
 use webapi\src\logger\EndDTO;
-use webapi\src\response\Response;
-use webapi\src\logger\ApiLogger;
 use webapi\src\logger\StartDTO;
 use yii\base\Action;
 use yii\base\ActionEvent;
-use yii\base\Behavior;
 use yii\base\Request;
 use yii\rest\Controller;
 use yii\web\IdentityInterface;
 
+/**
+ * Class SimpleLoggerBehavior
+ *
+ * @property Filterable $filter
+ */
 class SimpleLoggerBehavior extends LoggerBehavior
 {
+    public $filter;
+
     public function events(): array
     {
         return [
@@ -26,6 +31,10 @@ class SimpleLoggerBehavior extends LoggerBehavior
 
     public function beforeAction(ActionEvent $event): bool
     {
+        if ($this->isDisabled($event->action)) {
+            return $event->isValid;
+        }
+
         if (!$logger = $this->checkLogger($event->action->controller)) {
             return $event->isValid;
         }
@@ -41,7 +50,7 @@ class SimpleLoggerBehavior extends LoggerBehavior
 
         $logger->start(
             new StartDTO([
-                'data' => @json_encode($request->post()),
+                'data' => @json_encode($this->filterData($request->post())),
                 'action' => $action->uniqueId,
                 'userId' => $user->getId(),
                 'ip' => $request->getRemoteIP(),
@@ -55,6 +64,10 @@ class SimpleLoggerBehavior extends LoggerBehavior
 
     public function afterAction(ActionEvent $event)
     {
+        if ($this->isDisabled($event->action)) {
+            return $event->result;
+        }
+
         $result = $event->result;
 
         if (!$logger = $this->checkLogger($event->action->controller)) {
@@ -76,5 +89,23 @@ class SimpleLoggerBehavior extends LoggerBehavior
         );
 
         return $result;
+    }
+
+    protected function filterData($data)
+    {
+        if ($this->filter === null) {
+            return $data;
+        }
+
+        try {
+            $filter = Yii::createObject($this->filter);
+            if ($filter instanceof Filterable) {
+                return $filter->filterData($data);
+            }
+        } catch (\Throwable $e) {
+            Yii::error('Error create filter. ' . $e->getMessage(), 'SimpleLoggerBehavior');
+        }
+
+        return $data;
     }
 }

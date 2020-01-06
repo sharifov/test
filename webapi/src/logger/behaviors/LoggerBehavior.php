@@ -1,12 +1,12 @@
 <?php
 
-namespace webapi\src\behaviors;
+namespace webapi\src\logger\behaviors;
 
+use webapi\src\behaviors\BaseBehavior;
 use Yii;
 use webapi\src\logger\ApiLogger;
-use yii\base\Behavior;
 
-class LoggerBehavior extends Behavior
+class LoggerBehavior extends BaseBehavior
 {
     protected function checkLogger($controller): ?ApiLogger
     {
