@@ -3,12 +3,12 @@
 namespace webapi\src\response\messages;
 
 /**
- * Class BoCodeMessage
+ * Class BoMessage
  */
-class BoErrorMessage extends Message
+class BoMessage extends Message
 {
     public function __construct()
     {
-        parent::__construct(Message::BO_ERROR, true);
+        parent::__construct(Message::SOURCE_MESSAGE, Sources::BO);
     }
 }

@@ -2,7 +2,13 @@
 
 namespace webapi\src\response\messages;
 
-class SourceMessage
+/**
+ * Class SourceMessage
+ */
+class SourceMessage extends Message
 {
-
+    public function __construct($value)
+    {
+        parent::__construct(Message::SOURCE_MESSAGE, $value);
+    }
 }

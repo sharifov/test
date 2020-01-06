@@ -2,7 +2,13 @@
 
 namespace webapi\src\response\messages;
 
-class TechnicalMessage
+/**
+ * Class TechnicalMessage
+ */
+class TechnicalMessage extends Message
 {
-
+    public function __construct(...$value)
+    {
+        parent::__construct(Message::TECHNICAL_MESSAGE, ...$value);
+    }
 }

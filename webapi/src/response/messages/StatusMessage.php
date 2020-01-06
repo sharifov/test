@@ -1,14 +1,14 @@
 <?php
 
-namespace webapi\src\response;
+namespace webapi\src\response\messages;
 
 /**
  * Class StatusMessage
  */
 class StatusMessage extends Message
 {
-    public function __construct($value)
+    public function __construct($value = null)
     {
-        parent::__construct(Message::MESSAGE_STATUS, $value);
+        parent::__construct(Message::STATUS_MESSAGE, $value);
     }
 }

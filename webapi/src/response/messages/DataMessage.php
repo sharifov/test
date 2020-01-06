@@ -2,7 +2,13 @@
 
 namespace webapi\src\response\messages;
 
-class DataMessage
+/**
+ * Class DataMessage
+ */
+class DataMessage extends Message
 {
-
+    public function __construct(...$value)
+    {
+        parent::__construct(Message::DATA_MESSAGE, ...$value);
+    }
 }
