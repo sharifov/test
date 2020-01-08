@@ -8,4 +8,5 @@ class CodeExceptionsModule
     public const CLIENT = 11;
     public const ORDER = 12;
     public const API = 13;
+    public const DEPARTMENT = 14;
 }

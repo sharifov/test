@@ -30,8 +30,6 @@ class ProxyResponse extends Response
 
     public function getResponse(): array
     {
-        $this->sortUp(Message::STATUS_MESSAGE);
-        $this->sortDown(Message::SOURCE_MESSAGE);
         return $this->getResponseMessages();
     }
 

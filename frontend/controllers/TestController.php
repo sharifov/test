@@ -60,7 +60,7 @@ use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
-use sales\model\lead\useCase\lead\api\create\SegmentForm;
+use sales\model\lead\useCases\lead\api\create\SegmentForm;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;

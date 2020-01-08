@@ -10,6 +10,7 @@ use webapi\src\response\behaviors\RequestBehavior;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\SourceMessage;
 use webapi\src\response\messages\Sources;
@@ -207,6 +208,9 @@ class OrderController extends BaseController
             $response,
             new SourceMessage(Sources::BO, $responseStatusCode)
         );
+
+        $result->sortUp(Message::STATUS_MESSAGE);
+        $result->sortDown(Message::SOURCE_MESSAGE);
 
         return $result;
     }

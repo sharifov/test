@@ -33,7 +33,14 @@ class Message
 
     public function replace($value): void
     {
-        $this->value = $this->processValue($value);
+        $process = self::processValue($value);
+        if (is_array($process)) {
+            $this->removeValue();
+            $this->createArrayValue();
+            $this->addToArray($process);
+            return;
+        }
+        $this->value = $process;
     }
 
     public function add($value): void
@@ -43,12 +50,12 @@ class Message
         }
 
         if ($this->isEqual($value)) {
-            $value = $this->processEqualValue($value);
+            $value = self::processEqualValue($value);
         } elseif (!$this->value) {
             $this->replace($value);
             return;
         } else {
-            $value = $this->processValue($value);
+            $value = self::processValue($value);
         }
 
         $oldValue = $this->value;
@@ -129,7 +136,7 @@ class Message
 
         if (is_array($value)) {
             foreach ($value as $k => $v) {
-                $this->value[$k] = $v;
+                $this->value[$k] = self::processValue($v);
             }
 //            $this->value = array_merge($this->value, $value);
         } else {
@@ -142,12 +149,12 @@ class Message
         return is_object($value) && is_a($value, self::class);
     }
 
-    private function processEqualValue(Message $value): array
+    private static function processEqualValue(Message $value): array
     {
-        return [$value->getKey() => $this->processValue($value->getValue())];
+        return [$value->getKey() => self::processValue($value->getValue())];
     }
 
-    private function processValue($value)
+    private static function processValue($value)
     {
         /** @var MessageValue $value */
         return (is_object($value) && is_a($value, MessageValue::class)) ? $value->getData() : $value;
