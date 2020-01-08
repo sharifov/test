@@ -24,6 +24,7 @@ use yii\db\ActiveRecord;
  * @property bool $dpp_redial
  * @property string $dpp_description
  * @property int $dpp_default
+ * @property bool $dpp_show_on_site
  *
  * @property array $user_group_list
  *
@@ -71,6 +72,8 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
 
             ['dpp_redial', 'boolean'],
             ['dpp_description', 'string', 'max' => 255],
+
+            ['dpp_show_on_site', 'boolean'],
         ];
     }
 
@@ -92,7 +95,8 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             'dpp_updated_dt' => 'Updated Date',
             'dpp_redial' => 'Redial phone',
             'dpp_description' => 'Description',
-			'dpp_default' => 'Default'
+			'dpp_default' => 'Default',
+			'dpp_show_on_site' => 'Show on site',
         ];
     }
 
