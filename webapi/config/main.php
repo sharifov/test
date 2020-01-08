@@ -89,8 +89,8 @@ return [
                     'except' => [
                         'yii\web\HttpException:404',
                     ],
-                    //'logVars' => [],
-                    'logVars' => ['_POST', '_GET'],
+                    'logVars' => [],
+//                    'logVars' => ['_POST', '_GET'],
                     'prefix' => function () {
                         $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
                         $ip = $_SERVER['REMOTE_ADDR'];
