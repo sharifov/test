@@ -4,7 +4,7 @@ namespace sales\services\lead\qcall;
 
 use common\models\Call;
 use common\models\DepartmentPhoneProject;
-use common\models\DepartmentPhoneProjectQuery;
+use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\Lead;
 use common\models\ProjectWeight;
 use sales\repositories\lead\LeadFlowRepository;
