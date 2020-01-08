@@ -3,8 +3,14 @@
 namespace webapi\modules\v2\controllers;
 
 use sales\model\lead\LeadCodeException;
-use sales\model\lead\useCase\lead\api\create\LeadCreateResponse;
+use sales\model\lead\useCase\lead\api\create\LeadCreateMessage;
+use sales\model\lead\useCase\lead\api\create\LeadCreateValue;
 use webapi\src\Messages;
+use webapi\src\response\messages\CodeMessage;
+use webapi\src\response\messages\DataMessage;
+use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\MessageMessage;
+use webapi\src\response\messages\StatusCodeMessage;
 use Yii;
 use sales\model\lead\useCase\lead\api\create\LeadCreateHandler;
 use sales\model\lead\useCase\lead\api\create\LeadCreateForm;
@@ -112,56 +118,54 @@ class LeadController extends BaseController
      *       "status": 200,
      *       "message": "OK",
      *       "data": {
-     *           "response": {
-     *               "lead": {
-     *                   "id": 370949,
-     *                   "uid": "WD6q53PO3b",
-     *                   "gid": "63e1505f4a8a87e6651048e3e3eae4e1"
-     *               }
-     *           },
-     *           "request": {
-     *               "lead": {
-     *                   "client": {
-     *                       "phone": "+37369636963"
-     *                   },
-     *                   "uid": "WD6q53PO3b",
-     *                   "status": 14,
-     *                   "source_code": "JIVOCH",
-     *                   "cabin": "E",
-     *                   "adults": 2,
-     *                   "children": 2,
-     *                   "infants": 2,
-     *                   "request_ip": "12.12.12.12",
-     *                   "discount_id": "123123",
-     *                   "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
-     *                   "flight_id": 12457,
-     *                   "segments": [
-     *                       {
-     *                           "origin": "NYC",
-     *                           "destination": "LON",
-     *                           "departure": "2019-12-16"
-     *                       },
-     *                       {
-     *                           "origin": "LON",
-     *                           "destination": "NYC",
-     *                           "departure": "2019-12-17"
-     *                       },
-     *                       {
-     *                           "origin": "LON",
-     *                           "destination": "NYC",
-     *                           "departure": "2019-12-18"
-     *                       }
-     *                   ]
-     *               }
-     *           },
-     *           "technical": {
-     *               "action": "v2/lead/create",
-     *               "response_id": 11930215,
-     *               "request_dt": "2019-12-30 12:22:20",
-     *               "response_dt": "2019-12-30 12:22:21",
-     *               "execution_time": 0.055,
-     *               "memory_usage": 1394416
+     *          "lead": {
+     *               "id": 370949,
+     *               "uid": "WD6q53PO3b",
+     *               "gid": "63e1505f4a8a87e6651048e3e3eae4e1"
      *           }
+     *       }
+     *       "request": {
+     *           "lead": {
+     *              "client": {
+     *                   "phone": "+37369636963"
+     *               },
+     *               "uid": "WD6q53PO3b",
+     *               "status": 14,
+     *               "source_code": "JIVOCH",
+     *               "cabin": "E",
+     *               "adults": 2,
+     *               "children": 2,
+     *               "infants": 2,
+     *               "request_ip": "12.12.12.12",
+     *               "discount_id": "123123",
+     *               "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+     *               "flight_id": 12457,
+     *               "segments": [
+     *                   {
+     *                       "origin": "NYC",
+     *                       "destination": "LON",
+     *                       "departure": "2019-12-16"
+     *                   },
+     *                   {
+     *                       "origin": "LON",
+     *                       "destination": "NYC",
+     *                       "departure": "2019-12-17"
+     *                   },
+     *                   {
+     *                       "origin": "LON",
+     *                       "destination": "NYC",
+     *                       "departure": "2019-12-18"
+     *                   }
+     *               ]
+     *           }
+     *       },
+     *       "technical": {
+     *           "action": "v2/lead/create",
+     *           "response_id": 11930215,
+     *           "request_dt": "2019-12-30 12:22:20",
+     *           "response_dt": "2019-12-30 12:22:21",
+     *           "execution_time": 0.055,
+     *           "memory_usage": 1394416
      *       }
      * }
      *
@@ -186,14 +190,12 @@ class LeadController extends BaseController
      *           ]
      *       },
      *       "code": 10301,
-     *       "data": {
-     *           "request": {
-     *               ...
-     *           },
-     *           "technical": {
-     *               ...
-     *           }
-     *       }
+     *       "request": {
+     *           ...
+     *       },
+     *       "technical": {
+     *           ...
+     *      }
      * }
      *
      * @apiErrorExample {json} Error-Response (400):
@@ -206,14 +208,12 @@ class LeadController extends BaseController
      *           "Not found Lead data on POST request"
      *       ],
      *       "code": 10300,
-     *       "data": {
-     *           "request": {
-     *               ...
-     *           },
-     *           "technical": {
-     *               ...
-     *           }
-     *       }
+     *       "request": {
+     *           ...
+     *       },
+     *       "technical": {
+     *           ...
+     *      }
      * }
      *
      * @apiErrorExample {json} Error-Response (422):
@@ -226,14 +226,12 @@ class LeadController extends BaseController
      *           "Saving error"
      *       ],
      *       "code": 10101,
-     *       "data": {
-     *           "request": {
-     *               ...
-     *           },
-     *           "technical": {
-     *               ...
-     *           }
-     *       }
+     *       "request": {
+     *           ...
+     *       },
+     *       "technical": {
+     *           ...
+     *      }
      * }
      *
      */
@@ -242,42 +240,42 @@ class LeadController extends BaseController
         $form = new LeadCreateForm();
 
         if (!$form->load(Yii::$app->request->post())) {
-            return new ErrorResponse([
-                'statusCode' => 400,
-                'message' => Messages::LOAD_DATA_ERROR,
-                'errors' => ['Not found Lead data on POST request'],
-                'code' => LeadCodeException::API_LEAD_NOT_FOUND_DATA_ON_REQUEST,
-            ]);
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found Lead data on POST request'),
+                new CodeMessage(LeadCodeException::API_LEAD_NOT_FOUND_DATA_ON_REQUEST)
+            );
         }
 
         if (!$form->validate()) {
-            return new ErrorResponse([
-                'message' => Messages::VALIDATION_ERROR,
-                'errors' => $form->errors,
-                'code' => LeadCodeException::API_LEAD_VALIDATE,
-            ]);
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+                new CodeMessage(LeadCodeException::API_LEAD_VALIDATE)
+            );
         }
 
         try {
             $lead = $this->leadCreateHandler->handle($form);
         } catch (\Throwable $e) {
-            return new ErrorResponse([
-                'message' => $e->getMessage(),
-                'errors' => [$e->getMessage()],
-                'code' => $e->getCode(),
-            ]);
+            return new ErrorResponse(
+                new MessageMessage($e->getMessage()),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
         }
 
-        $response = new SuccessResponse();
-
-        $response->addDataResponse(
-            new LeadCreateResponse([
-                'id' => $lead->id,
-                'uid' => $lead->uid,
-                'gid' => $lead->gid,
-            ])
+        return new SuccessResponse(
+            new DataMessage(
+                new LeadCreateMessage(
+                    new LeadCreateValue([
+                        'id' => $lead->id,
+                        'uid' => $lead->uid,
+                        'gid' => $lead->gid,
+                    ])
+                )
+            )
         );
-
-        return $response;
     }
 }

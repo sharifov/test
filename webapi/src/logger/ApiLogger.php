@@ -9,10 +9,13 @@ use common\models\ApiLog;
  * Class ApiLogger
  *
  * @property ApiLog $log;
+ * @property TechnicalData[] $technicalData;
  */
 class ApiLogger
 {
     public $log;
+
+    private $technicalData = [];
 
     public function start(StartDTO $dto): void
     {
@@ -46,13 +49,18 @@ class ApiLogger
             return [];
         }
 
-        return [
+        return array_merge([
             'action' => $log->al_action,
             'response_id' => $log->al_id,
             'request_dt' => $log->al_request_dt,
             'response_dt' => $log->al_response_dt,
             'execution_time' => $log->al_execution_time,
             'memory_usage' => $log->al_memory_usage,
-        ];
+        ], $this->technicalData);
+    }
+
+    public function addTechnicalData(TechnicalData $data): void
+    {
+        $this->technicalData[$data->getKey()] = $data->getData();
     }
 }

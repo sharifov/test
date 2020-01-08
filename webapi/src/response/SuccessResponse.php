@@ -2,30 +2,37 @@
 
 namespace webapi\src\response;
 
+use webapi\src\response\messages\Message;
+
 /**
  * Class SuccessResponse
  */
-class SuccessResponse extends Response
+class SuccessResponse extends Response implements StandardResponseInterface
 {
-    public const STATUS_CODE_SUCCESS = 200;
-    public const MESSAGE_SUCCESS = 'OK';
+    use ProcessStandardMessageTrait;
+
+    public const STATUS_CODE_DEFAULT = 200;
+    public const MESSAGE_DEFAULT = 'OK';
+
+    public function __construct(Message ...$messages)
+    {
+        $messages = $this->processStandardMessages(...$messages);
+        parent::__construct(...$messages);
+    }
 
     public function getResponse(): array
     {
-        return [
-            'status' => $this->getResponseStatusCode(),
-            'message' => $this->generateMessage(),
-            'data' => $this->data,
-        ];
+        $this->sortUp('status', 'message');
+        return $this->getResponseMessages();
     }
 
-    public function getResponseStatusCode(): int
+    public function getStatusCodeDefault(): int
     {
-        return self::STATUS_CODE_SUCCESS;
+        return self::STATUS_CODE_DEFAULT;
     }
 
-    private function generateMessage(): string
+    public function getMessageDefault(): string
     {
-        return $this->message ?: self::MESSAGE_SUCCESS;
+        return self::MESSAGE_DEFAULT;
     }
 }

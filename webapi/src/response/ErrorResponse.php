@@ -2,51 +2,68 @@
 
 namespace webapi\src\response;
 
+use webapi\src\response\messages\CodeMessage;
+use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\Message;
+
 /**
  * Class ErrorResponse
- *
- * @property int $statusCode
- * @property array $errors
- * @property int $code
  */
-class ErrorResponse extends Response
+class ErrorResponse extends Response implements StandardResponseInterface
 {
+    use ProcessStandardMessageTrait;
+
     public const STATUS_CODE_DEFAULT = 422;
     public const MESSAGE_DEFAULT = 'Error';
+    public const CODE_DEFAULT = 0;
 
-    public $statusCode;
-    public $errors = [];
-    public $code = 0;
+    public function __construct(Message ...$messages)
+    {
+        $messages = $this->processStandardMessages(...$messages);
+        $messages = $this->processMessages(...$messages);
+        parent::__construct(...$messages);
+    }
 
     public function getResponse(): array
     {
-        $statusCode = $this->statusCode ?: self::STATUS_CODE_DEFAULT;
-        $message = $this->message ?: self::MESSAGE_DEFAULT;
-
-        return $this->createResponse($statusCode, $message, $this->errors, $this->code);
+        $this->sortUp('status', 'message');
+        return $this->getResponseMessages();
     }
 
-    public function getResponseStatusCode(): int
+    public function getMessageDefault(): string
     {
-        return $this->statusCode ?: self::STATUS_CODE_DEFAULT;
+        return self::MESSAGE_DEFAULT;
     }
 
-    private function createResponse($statusCode, $message, $errors, $code): array
+    public function getStatusCodeDefault(): int
     {
-        if ($code) {
-            $code = (int)$code;
-        }
-        $response = [
-            'status' => $statusCode,
-            'message' => $message,
-            'errors' => $errors,
-            'code' => $code,
-        ];
+        return self::STATUS_CODE_DEFAULT;
+    }
 
-        if (!empty($this->data)) {
-            $response['data'] = $this->data;
+    private function processMessages(Message ...$messages)
+    {
+        $errorsExist = false;
+        $codeExist = false;
+
+        foreach ($messages as $message) {
+
+            if ($message->isErrors()) {
+                $errorsExist = true;
+            }
+
+            if ($message->isCode()) {
+                $codeExist = true;
+            }
         }
 
-        return $response;
+        if (!$errorsExist) {
+            $messages[] = new ErrorsMessage([]);
+        }
+
+        if (!$codeExist) {
+            $messages[] = new CodeMessage(self::CODE_DEFAULT);
+        }
+
+        return $messages;
     }
 }
