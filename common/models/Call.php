@@ -622,6 +622,7 @@ class Call extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         $leadRepository = Yii::createObject(LeadRepository::class);
+        $qCallService = Yii::createObject(QCallService::class);
 
         $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
@@ -672,6 +673,14 @@ class Call extends \yii\db\ActiveRecord
                         try {
                             $lead->followUp(null, null, 'Redial Pending max attempts reached');
                             $leadRepository->save($lead);
+                            $qCallService->remove($lead->id);
+                            $qCallService->create(
+                                $lead->id,
+                                new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                                new FindWeightParams($lead->project_id),
+                                $lead->offset_gmt,
+                                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                            );
                         } catch (\Throwable $e) {
                             Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead follow up');
                         }
@@ -684,7 +693,6 @@ class Call extends \yii\db\ActiveRecord
                             && ($departure = $lead->getDeparture())
                             && strtotime($departure) < time()
                         ) {
-                            $qCallService = Yii::createObject(QCallService::class);
                             $qCallService->remove($lead->id);
                             $lead->trash($lead->employee_id, null, 'Travel Dates Passed');
                             $leadRepository->save($lead);
@@ -697,7 +705,6 @@ class Call extends \yii\db\ActiveRecord
 
             if ($lead->leadQcall) {
                 try {
-                    $qCallService = Yii::createObject(QCallService::class);
                     $qCallService->updateInterval(
                         $lead->leadQcall,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
@@ -780,7 +787,6 @@ class Call extends \yii\db\ActiveRecord
                             $lead->processing($this->c_created_user_id, null, LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD);
                             $leadRepository->save($lead);
 
-                            $qCallService = Yii::createObject(QCallService::class);
                             $qCallService->remove($lead->id);
 
                             Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
@@ -889,7 +895,6 @@ class Call extends \yii\db\ActiveRecord
             && ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy())
             && ($lead = $this->cLead)
         ) {
-            $qCallService = Yii::createObject(QCallService::class);
 
             if ($lead->isFollowUp()) {
                 try {
