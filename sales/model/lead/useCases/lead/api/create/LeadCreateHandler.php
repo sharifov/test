@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\lead\useCase\lead\api\create;
+namespace sales\model\lead\useCases\lead\api\create;
 
 use common\models\Lead;
 use common\models\LeadFlightSegment;

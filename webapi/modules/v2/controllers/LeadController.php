@@ -3,8 +3,8 @@
 namespace webapi\modules\v2\controllers;
 
 use sales\model\lead\LeadCodeException;
-use sales\model\lead\useCase\lead\api\create\LeadCreateMessage;
-use sales\model\lead\useCase\lead\api\create\LeadCreateValue;
+use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
+use sales\model\lead\useCases\lead\api\create\LeadCreateValue;
 use webapi\src\Messages;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
@@ -12,8 +12,8 @@ use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use Yii;
-use sales\model\lead\useCase\lead\api\create\LeadCreateHandler;
-use sales\model\lead\useCase\lead\api\create\LeadCreateForm;
+use sales\model\lead\useCases\lead\api\create\LeadCreateHandler;
+use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use webapi\src\logger\ApiLogger;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\Response;
