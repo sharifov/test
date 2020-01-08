@@ -23,8 +23,6 @@ use yii\grid\DataColumn;
  */
 class UserColumn extends DataColumn
 {
-    public $label = 'Employee';
-
     public $format = 'userName';
 
     public $userId;
