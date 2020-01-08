@@ -11,7 +11,7 @@ use common\models\Lead;
  * @property int $status
  * @property string $created
  */
-class LeadCreatedByApiBOEvent
+class LeadCreatedByApiBOEvent implements LeadableEventInterface
 {
     public $lead;
     public $status;
@@ -22,5 +22,10 @@ class LeadCreatedByApiBOEvent
         $this->lead = $lead;
         $this->status = $status;
         $this->created = date('Y-m-d H:i:s');
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->lead;
     }
 }

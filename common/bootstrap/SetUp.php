@@ -98,6 +98,7 @@ class SetUp implements BootstrapInterface
                 ],
                 LeadCreatedByApiBOEvent::class => [
                     LeadCreatedByApiBOLogEventListener::class,
+                    LeadQcallAddListener::class,
                 ],
                 LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
                 LeadCreatedByIncomingEmailEvent::class => [LeadCreatedByIncomingEmailLogListener::class],
