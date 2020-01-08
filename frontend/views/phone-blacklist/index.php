@@ -3,7 +3,6 @@
 use sales\yii\grid\BooleanColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\UserColumn;
-use sales\yii\i18n\Formatter;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -36,7 +35,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => BooleanColumn::class,
                 'attribute' => 'pbl_enabled',
-                'format' => 'raw'
             ],
             [
                 'class' => DateTimeColumn::class,
