@@ -11,7 +11,7 @@ class SourceMessage extends Message
     {
         parent::__construct(Message::SOURCE_MESSAGE, [
             'type' => (int)$type,
-            'status' => $statusCode,
+            'status' => (int)$statusCode,
         ]);
     }
 }

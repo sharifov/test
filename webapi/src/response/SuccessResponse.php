@@ -22,7 +22,7 @@ class SuccessResponse extends Response implements StandardResponseInterface
 
     public function getResponse(): array
     {
-        $this->sort('status', 'message');
+        $this->sortUp('status', 'message');
         return $this->getResponseMessages();
     }
 

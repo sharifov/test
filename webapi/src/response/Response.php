@@ -93,7 +93,17 @@ abstract class Response extends BaseObject implements Arrayable
         return $response;
     }
 
-    public function sort(string ...$keys)
+    public function sortUp(string ...$keys)
+    {
+        $this->sort(true, ...$keys);
+    }
+
+    public function sortDown(string ...$keys)
+    {
+        $this->sort(false, ...$keys);
+    }
+
+    public function sort(bool $isUp, string ...$keys)
     {
         $sortValues = [];
         foreach ($keys as $key) {
@@ -106,12 +116,22 @@ abstract class Response extends BaseObject implements Arrayable
         $oldMessages = $this->messages;
         $this->truncateMessages();
 
-        foreach ($sortValues as $key => $sortValue) {
-            $this->messages[$key] = $sortValue;
-        }
+        if ($isUp) {
+            foreach ($sortValues as $key => $sortValue) {
+                $this->messages[$key] = $sortValue;
+            }
 
-        foreach ($oldMessages as $key => $oldMessage) {
-            $this->messages[$key] = $oldMessage;
+            foreach ($oldMessages as $key => $oldMessage) {
+                $this->messages[$key] = $oldMessage;
+            }
+        } else {
+            foreach ($oldMessages as $key => $oldMessage) {
+                $this->messages[$key] = $oldMessage;
+            }
+
+            foreach ($sortValues as $key => $sortValue) {
+                $this->messages[$key] = $sortValue;
+            }
         }
     }
 

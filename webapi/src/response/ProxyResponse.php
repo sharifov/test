@@ -2,8 +2,6 @@
 
 namespace webapi\src\response;
 
-use webapi\src\response\messages\SourceMessage;
-use webapi\src\response\messages\Sources;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\messages\StatusFailedMessage;
 use Yii;
@@ -16,26 +14,24 @@ class ProxyResponse extends Response
 {
     public const STATUS_CODE_DEFAULT = 200;
 
-    public function __construct(\yii\httpclient\Response $response)
+    public function __construct(\yii\httpclient\Response $response, Message ...$messages)
     {
-        $data = $this->processResponseData($response);
+        $messages[] = new StatusCodeMessage(self::getStatusCodeFromResponse($response));
 
-        $messages = [];
+        $data = self::processResponseData($response);
+        $messages = self::processMessages($data, $messages);
 
         if (!$response->isOk) {
-            $messages[] = new SourceMessage(Sources::BO, $this->getStatusCodeFromResponse($response));
             $messages[] = new StatusFailedMessage();
         }
-
-        $messages[] = $this->processStatusCodeMessage($response);
-
-        $messages = $this->processMessages($data, $messages);
 
         parent::__construct(...$messages);
     }
 
     public function getResponse(): array
     {
+        $this->sortUp(Message::STATUS_MESSAGE);
+        $this->sortDown(Message::SOURCE_MESSAGE);
         return $this->getResponseMessages();
     }
 
@@ -44,7 +40,7 @@ class ProxyResponse extends Response
         return self::STATUS_CODE_DEFAULT;
     }
 
-    private function processMessages($data, $messages): array
+    private static function processMessages($data, $messages): array
     {
         if (is_array($data)) {
             foreach ($data as $key => $value) {
@@ -56,7 +52,7 @@ class ProxyResponse extends Response
         return $messages;
     }
 
-    private function processResponseData(\yii\httpclient\Response $response)
+    private static function processResponseData(\yii\httpclient\Response $response)
     {
         try {
             return $response->getData();
@@ -66,12 +62,7 @@ class ProxyResponse extends Response
         }
     }
 
-    private function processStatusCodeMessage(\yii\httpclient\Response $response): StatusCodeMessage
-    {
-        return new StatusCodeMessage($this->getStatusCodeFromResponse($response));
-    }
-
-    private function getStatusCodeFromResponse(\yii\httpclient\Response $response)
+    private static function getStatusCodeFromResponse(\yii\httpclient\Response $response)
     {
         try {
             return $response->getStatusCode();
