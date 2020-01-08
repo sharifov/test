@@ -177,6 +177,104 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v2/department-phone-project/get",
+    "title": "Get Department Phone Project",
+    "version": "0.2.0",
+    "name": "GetDepartmentPhoneProject",
+    "group": "DepartmentPhoneProject",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "project_id",
+            "description": "<p>Project ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "source_id",
+            "description": "<p>Source ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "1",
+            "allowedValues": [
+              "1-SALES",
+              "2-EXCHANGE",
+              "3-SUPPORT"
+            ],
+            "optional": true,
+            "field": "department_id",
+            "description": "<p>Department ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n    \"project_id\": 6,\n    \"source_id\": 44,\n    \"department_id\": 1\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200\n       \"message\": \"OK\",\n       \"data\": {\n           \"phones\": [\n               {\n                   \"phone\": \"+15211111111\",\n                   \"source_id\": 40,\n                   \"department_id\": 1\n               },\n               {\n                   \"phone\": \"+15222222222\",\n                   \"source_id\": 44,\n                   \"department_id\": 2\n              }\n           ]\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": {\n            \"project_id\": [\n                \"Project Id cannot be blank.\"\n            ],\n            \"source_id\": [\n                \"Source Id must be an integer.\"\n            ],\n            \"department_id\": [\n                \"Department Id is invalid.\"\n            ]\n       },\n       \"code\": \"14301\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n           \"Not found Department Phone Project data on POST request\"\n      ],\n      \"code\": \"14300\",\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/DepartmentPhoneProjectController.php",
+    "groupTitle": "DepartmentPhoneProject"
+  },
+  {
+    "type": "post",
     "url": "/v2/lead/create",
     "title": "Create Lead",
     "version": "0.2.0",

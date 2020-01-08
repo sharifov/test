@@ -21,6 +21,104 @@ use sales\model\department\departmentPhoneProject\useCases\api\get\DepartmentPho
  */
 class DepartmentPhoneProjectController extends BaseController
 {
+     /**
+      * @api {post} /v2/department-phone-project/get Get Department Phone Project
+      * @apiVersion 0.2.0
+      * @apiName GetDepartmentPhoneProject
+      * @apiGroup DepartmentPhoneProject
+      * @apiPermission Authorized User
+      *
+      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+      * @apiHeaderExample {json} Header-Example:
+      *  {
+      *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+      *  }
+      *
+      * @apiParam {int}            project_id                                   Project ID
+      * @apiParam {int}            [source_id]                                  Source ID
+      * @apiParam {int{1}=1-SALES, 2-EXCHANGE, 3-SUPPORT}   [department_id]     Department ID
+      *
+      * @apiParamExample {json} Request-Example:
+      *
+      * {
+      *     "project_id": 6,
+      *     "source_id": 44,
+      *     "department_id": 1
+      * }
+      *
+      * @apiSuccessExample {json} Success-Response:
+      *
+      * HTTP/1.1 200 OK
+      * {
+      *        "status": 200
+      *        "message": "OK",
+      *        "data": {
+      *            "phones": [
+      *                {
+      *                    "phone": "+15211111111",
+      *                    "source_id": 40,
+      *                    "department_id": 1
+      *                },
+      *                {
+      *                    "phone": "+15222222222",
+      *                    "source_id": 44,
+      *                    "department_id": 2
+      *               }
+      *            ]
+      *        },
+      *        "technical": {
+      *           ...
+      *        },
+      *        "request": {
+      *           ...
+      *        }
+      * }
+      *
+      * @apiErrorExample {json} Error-Response (422):
+      *
+      * HTTP/1.1 422 Unprocessable entity
+      * {
+      *        "status": 422,
+      *        "message": "Validation error",
+      *        "errors": {
+      *             "project_id": [
+      *                 "Project Id cannot be blank."
+      *             ],
+      *             "source_id": [
+      *                 "Source Id must be an integer."
+      *             ],
+      *             "department_id": [
+      *                 "Department Id is invalid."
+      *             ]
+      *        },
+      *        "code": "14301",
+      *        "technical": {
+      *           ...
+      *        },
+      *        "request": {
+      *           ...
+      *        }
+      * }
+      *
+      * @apiErrorExample {json} Error-Response (400):
+      *
+      * HTTP/1.1 400 Bad Request
+      * {
+      *       "status": 400,
+      *       "message": "Load data error",
+      *       "errors": [
+      *            "Not found Department Phone Project data on POST request"
+      *       ],
+      *       "code": "14300",
+      *       "request": {
+      *           ...
+      *       },
+      *       "technical": {
+      *           ...
+      *      }
+      * }
+      */
     public function actionGet()
     {
         $form = new DepartmentPhoneProjectForm();
