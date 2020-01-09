@@ -87,11 +87,11 @@ class OrderController extends BaseController
      *        }
      * }
      *
-     * @apiSuccessExample {json} Success-Response:
+     * @apiErrorExample {json} Error-Response:
      *
      * HTTP/1.1 200 OK
      * {
-     *        "status": "Success",
+     *        "status": "Failed",
      *        "success": [],
      *        "failure": {
      *              "message": "Price Increase"
