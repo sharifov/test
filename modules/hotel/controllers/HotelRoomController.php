@@ -125,7 +125,7 @@ class HotelRoomController extends FController
 
 							$paxModel->attributes = $paxForm->attributes;
 							if (!$paxModel->save()) {
-								Yii::error('attr: '  . VarDumper::dumpAsString($paxModel->attributes) . ', errors:' . VarDumper::dumpAsString($paxModel->errors), 'HotelRoomController:actionUpdateAjax:HotelRoomPax:save');
+								Yii::error('attr: '  . VarDumper::dumpAsString($paxModel->attributes) . ', errors:' . VarDumper::dumpAsString($paxModel->errors), 'HotelRoomController:actionCreateAjax:HotelRoomPax:save');
 							} else {
 								$paxIDs[] = $paxModel->hrp_id;
 							}

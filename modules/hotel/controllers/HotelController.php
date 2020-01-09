@@ -131,8 +131,8 @@ class HotelController extends FController
                 $modelHotel->ph_hotel_code = $model->ph_hotel_code;
                 $modelHotel->ph_destination_code = $model->ph_destination_code;
                 $modelHotel->ph_destination_label = $model->ph_destination_label;
-                $modelHotel->ph_check_in_dt = $model->ph_check_in_dt;
-                $modelHotel->ph_check_out_dt = $model->ph_check_out_dt;
+                $modelHotel->ph_check_in_date = $model->ph_check_in_date;
+                $modelHotel->ph_check_out_date = $model->ph_check_out_date;
 
                 $modelHotel->ph_max_price_rate = $model->ph_max_price_rate;
                 $modelHotel->ph_min_price_rate = $model->ph_min_price_rate;

@@ -16,9 +16,9 @@ use yii\widgets\ActiveForm;
         <div class="col-md-3">
             <?= $form->field($model, 'ph_product_id')->textInput() ?>
 
-            <?= $form->field($model, 'ph_check_in_dt')->textInput() ?>
+            <?= $form->field($model, 'ph_check_in_date')->textInput() ?>
 
-            <?= $form->field($model, 'ph_check_out_dt')->textInput() ?>
+            <?= $form->field($model, 'ph_check_out_date')->textInput() ?>
 
             <?= $form->field($model, 'ph_destination_code')->textInput(['maxlength' => true]) ?>
 

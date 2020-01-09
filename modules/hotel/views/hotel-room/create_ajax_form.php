@@ -117,7 +117,7 @@ $pjaxId = 'pjax-hotel-room-form';
                                     let age = age_dt.getUTCFullYear() - 1970;
                                     
                                     if (age >= 0) {
-                                        $(e.target).closest("tr").find(".input_hrp_age").val(age);
+                                        $(e.target).closest("tr").find(".input_hrp_age").val(age == 0 ? ++age : age);
                                     }
                                 }'
                         ]

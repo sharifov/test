@@ -11,8 +11,8 @@ use yii\helpers\VarDumper;
  *
  * @property int $ph_id
  * @property int|null $ph_product_id
- * @property string|null $ph_check_in_dt
- * @property string|null $ph_check_out_dt
+ * @property string|null $ph_check_in_date
+ * @property string|null $ph_check_out_date
  * @property integer|null $ph_zone_code
  * @property integer|null $ph_hotel_code
  * @property string|null $ph_destination_code
@@ -54,13 +54,13 @@ class Hotel extends \yii\db\ActiveRecord
     {
         return [
             [['ph_product_id', 'ph_min_star_rate', 'ph_max_star_rate', 'ph_max_price_rate', 'ph_min_price_rate', 'ph_zone_code', 'ph_hotel_code'], 'integer'],
-            [['ph_check_in_dt', 'ph_check_out_dt'], 'safe'],
+            [['ph_check_in_date', 'ph_check_out_date'], 'safe'],
             [['ph_zone_code', 'ph_hotel_code'], 'string', 'max' => 11],
             [['ph_destination_code'], 'string', 'max' => 10],
             [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
-			[['ph_check_in_dt', 'ph_check_out_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-			['ph_check_in_dt', 'compare', 'compareAttribute' => 'ph_check_out_dt', 'operator' => '<', 'enableClientValidation' => true]
+			[['ph_check_in_date', 'ph_check_out_date'], 'date', 'format' => 'php:Y-m-d'],
+			['ph_check_in_date', 'compare', 'compareAttribute' => 'ph_check_out_date', 'operator' => '<', 'enableClientValidation' => true]
 		];
     }
 
@@ -72,8 +72,8 @@ class Hotel extends \yii\db\ActiveRecord
         return [
             'ph_id' => 'ID',
             'ph_product_id' => 'Product ID',
-            'ph_check_in_dt' => 'Check In Date',
-            'ph_check_out_dt' => 'Check Out Date',
+            'ph_check_in_date' => 'Check In Date',
+            'ph_check_out_date' => 'Check Out Date',
             'ph_zone_code' => 'Zone Code',
             'ph_hotel_code' => 'Hotel Code',
             'ph_destination_code' => 'Destination Code',
@@ -165,7 +165,7 @@ class Hotel extends \yii\db\ActiveRecord
             $result = Yii::$app->cache->get($keyCache);
 
             if($result === false) {
-                $response = $apiHotelService->search($this->ph_check_in_dt, $this->ph_check_out_dt, $this->ph_destination_code, $rooms, $params);
+                $response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
 
                 if (isset($response['data']['hotels'])) {
                     $result = $response['data'];
@@ -255,8 +255,8 @@ class Hotel extends \yii\db\ActiveRecord
 	 */
 	public function validateDates(): void
 	{
-		if (strtotime($this->ph_check_out_dt) <= strtotime($this->ph_check_in_dt)) {
-			$this->addError('ph_check_out_dt','Check Out Date must be gather then Check In Date.');
+		if (strtotime($this->ph_check_out_date) <= strtotime($this->ph_check_in_date)) {
+			$this->addError('ph_check_out_date','Check Out Date must be gather then Check In Date.');
 		}
 	}
 }

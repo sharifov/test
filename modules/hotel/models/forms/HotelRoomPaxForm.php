@@ -2,11 +2,9 @@
 
 namespace modules\hotel\models\forms;
 
+use DateTime;
 use modules\hotel\models\HotelRoom;
 use modules\hotel\models\HotelRoomPax;
-use Yii;
-use yii\base\Model;
-use yii\helpers\VarDumper;
 
 /**
  * This is the model form class for table "hotel_room_pax".
@@ -84,20 +82,24 @@ class HotelRoomPaxForm extends HotelRoomPax
 
 	/**
 	 * @return void
+	 * @throws \Exception
 	 */
 	public function checkDateOfBirth(): void
 	{
 		$ageRange = $this->getPaxAgeRangeByPaxId($this->hrp_type_id);
-		if ($this->hrp_age !== null && $ageRange && ($this->hrp_age < $ageRange['min'] || $this->hrp_age > $ageRange['max'])) {
-			$this->addError('hrp_age', 'The age of the '.$this->getPaxTypeName().', should be from '.$ageRange['min'].' to '.$ageRange['max'].' years old');
+		if ($this->hrp_age !== null && $ageRange && ($this->hrp_age < $ageRange['min'] || (isset($ageRange['max']) && $this->hrp_age > $ageRange['max']))) {
+
+			$message = 'The age of the '.$this->getPaxTypeName().', should be from '.$ageRange['min'].' '. (isset($ageRange['max']) ? ' to ' . $ageRange['max'] : '').' years old';
+			$this->addError('hrp_age', $message);
 		}
 
 		if ($this->hrp_age && $this->hrp_dob) {
-			$dobTime = strtotime($this->hrp_dob);
-			$now = time();
+			$dobTime = new DateTime($this->hrp_dob);
+			$now = new DateTime();
 
-			$age = date('Y', $now) - date('Y', $dobTime);
-			$age = $age === 0 ? 1 : $age;
+			$interval = $now->diff($dobTime);
+
+			$age = $interval->y == 0 ? 1 : $interval->y;
 
 			if ($age != $this->hrp_age) {
 				$this->addError('hrp_age', 'Date of birth does not match the entered age.');

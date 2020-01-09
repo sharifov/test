@@ -5748,6 +5748,9 @@ input[disabled] + .radio-tab__text {
 .notifications-list table tr.warning {
     background-color: #fff3cd;
 }
+#update_hotel_request_dest_type_wrap input.select2-search__field {
+    width: initial !important;
+}
 /****** END OTHER ******/
 
 

@@ -34,9 +34,10 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
             'attributes' => [
                 'ph_id',
                 //'ph_product_id',
-                'ph_check_in_dt:date',
-                'ph_check_out_dt:date',
+                'ph_check_in_date:date',
+                'ph_check_out_date:date',
                 'ph_destination_code',
+                'ph_destination_label',
                 'ph_min_star_rate',
                 'ph_max_star_rate',
                 'ph_max_price_rate',

@@ -29,8 +29,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'ph_id',
             'ph_product_id',
-            'ph_check_in_dt',
-            'ph_check_out_dt',
+            'ph_check_in_date',
+            'ph_check_out_date',
             'ph_destination_code',
             'ph_destination_label',
             'ph_zone_code',

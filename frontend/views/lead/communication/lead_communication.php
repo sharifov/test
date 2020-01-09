@@ -413,12 +413,10 @@ $c_type_id = $comForm->c_type_id;
                                 <?php
                                     echo $form->field($comForm, 'c_email_message')->widget(Widget::class, [
                                         'settings' => [
-                                            'lang' => 'en',
                                             'minHeight' => 300,
                                             'plugins' => [
                                                 'clips',
                                                 'fullscreen',
-                                                'advanced'
                                             ]
                                         ],
                                     ]);

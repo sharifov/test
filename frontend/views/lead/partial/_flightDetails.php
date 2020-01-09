@@ -149,7 +149,12 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                         <div class="separator"></div>
 
                         <div id="modeFlightSegments" data-value="edit" style="display: none"></div>
-
+						<?php
+						$js = <<<JS
+    pjaxOffFormSubmit('#product-accordion');
+JS;
+						$this->registerJs($js);
+						?>
                         <div class="sl-itinerary-form2">
                             <?php $form = ActiveForm::begin([
                                 'action' => ['/lead-itinerary/edit'],

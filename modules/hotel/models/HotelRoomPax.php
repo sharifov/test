@@ -34,8 +34,7 @@ class HotelRoomPax extends \yii\db\ActiveRecord
 			'max' => 12
 		],
 		self::PAX_TYPE_ADL => [
-			'min' => 13,
-			'max' => 130
+			'min' => 13
 		]
 	];
 

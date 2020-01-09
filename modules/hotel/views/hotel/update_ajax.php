@@ -1,5 +1,6 @@
 <?php
 
+use dosamigos\datepicker\DatePicker;
 use kartik\select2\Select2;
 use modules\hotel\models\forms\HotelForm;
 use modules\hotel\models\Hotel;
@@ -7,8 +8,6 @@ use yii\web\View;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
 use yii\web\JsExpression;
-//use kartik\datetime\DateTimePicker;
-use dosamigos\datetimepicker\DateTimePicker;
 
 /* @var $this yii\web\View */
 /* @var $model HotelForm */
@@ -25,29 +24,30 @@ $pjaxId = 'pjax-hotel-update'
         $form = ActiveForm::begin([
             'options' => ['data-pjax' => true],
             'action' => ['/hotel/hotel/update-ajax', 'id' => $model->ph_id],
-            'method' => 'post'
+            'method' => 'post',
+            'enableClientValidation' => false
         ]);
         ?>
 
-            <?= $form->field($model, 'ph_check_in_dt')->widget(
-				DateTimePicker::class, [
-                'inline' => false,
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'yyyy-mm-dd hh:ii',
-                    'todayBtn' => true,
-                    'readonly' => false
+		    <?= $form->errorSummary($model) ?>
 
-                ]
+            <?= $form->field($model, 'ph_check_in_date')->widget(
+				DatePicker::class, [
+					'inline' => false,
+					'clientOptions' => [
+						'autoclose' => true,
+						'format' => 'yyyy-mm-dd',
+						'todayBtn' => true
+					]
             ])?>
 
 
-            <?= $form->field($model, 'ph_check_out_dt')->widget(
-				DateTimePicker::class, [
+            <?= $form->field($model, 'ph_check_out_date')->widget(
+				DatePicker::class, [
                 'inline' => false,
                 'clientOptions' => [
                     'autoclose' => true,
-					'format' => 'yyyy-mm-dd hh:ii',
+					'format' => 'yyyy-mm-dd',
 					'todayBtn' => true
                 ]
             ])?>
@@ -98,19 +98,22 @@ $pjaxId = 'pjax-hotel-update'
                 ]
             ]) ?>
 
-            <div class="col-md-6">
-                <?= $form->field($model, 'ph_min_star_rate')->dropDownList(array_combine(range(1, 5), range(1, 5)), ['prompt' => '-']) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($model, 'ph_max_star_rate')->dropDownList(array_combine(range(1, 5), range(1, 5)), ['prompt' => '-']) ?>
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $form->field($model, 'ph_min_star_rate')->dropDownList(array_combine(range(1, 5), range(1, 5)), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'ph_max_star_rate')->dropDownList(array_combine(range(1, 5), range(1, 5)), ['prompt' => '-']) ?>
+                </div>
+
+                <div class="col-md-6">
+                    <?= $form->field($model, 'ph_min_price_rate')->input('number', ['min' => 0]) ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'ph_max_price_rate')->input('number', ['min' => 0]) ?>
+                </div>
             </div>
 
-            <div class="col-md-6">
-                <?= $form->field($model, 'ph_min_price_rate')->input('number', ['min' => 0]) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($model, 'ph_max_price_rate')->input('number', ['min' => 0]) ?>
-            </div>
 
             <?= $form->field($model, 'ph_destination_code')->hiddenInput([
                 'id' => 'ph_destination_code'
