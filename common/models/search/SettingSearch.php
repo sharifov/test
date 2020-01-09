@@ -17,7 +17,7 @@ class SettingSearch extends Setting
     public function rules()
     {
         return [
-            [['s_id', 's_updated_user_id'], 'integer'],
+            [['s_id', 's_updated_user_id', 's_category_id'], 'integer'],
             [['s_key', 's_name', 's_type', 's_value', 's_updated_dt'], 'safe'],
         ];
     }
@@ -61,6 +61,7 @@ class SettingSearch extends Setting
             's_id' => $this->s_id,
             's_updated_dt' => $this->s_updated_dt,
             's_updated_user_id' => $this->s_updated_user_id,
+            's_category_id' => $this->s_category_id,
         ]);
 
         $query->andFilterWhere(['like', 's_key', $this->s_key])

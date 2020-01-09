@@ -12,7 +12,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'sc_name')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'sc_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
 
     <?= $form->field($model, 'sc_enabled')->checkbox() ?>
 

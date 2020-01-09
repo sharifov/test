@@ -32,28 +32,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'sc_id',
             'sc_name',
-            [
-                'attribute' => 'sc_enabled',
-                'value' => static function (SettingCategory $model) {
-                    return '<span class="label label-' . (boolval($model->sc_enabled) ? 'success' : 'danger') . '">' .
-                        (boolval($model->sc_enabled) ? 'true' : 'false') . '</span>';
-                },
-                'format' => 'raw',
-            ],
-            [
-                'attribute' => 'sc_created_dt',
-                'value' => static function (SettingCategory $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->sc_created_dt));
-                },
-                'format' => 'raw',
-            ],
-            [
-                'attribute' => 'sc_updated_dt',
-                'value' => static function (SettingCategory $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->sc_created_dt));
-                },
-                'format' => 'raw',
-            ],
+            'sc_enabled:booleanByLabel',
+            'sc_created_dt:byUserDateTime',
+            'sc_updated_dt:byUserDateTime',
         ],
     ]) ?>
 

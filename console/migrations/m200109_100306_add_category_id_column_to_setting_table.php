@@ -7,16 +7,18 @@ use yii\db\Migration;
  */
 class m200109_100306_add_category_id_column_to_setting_table extends Migration
 {
+    private $_columnName = 's_category_id';
+
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-        $this->addColumn('{{%setting}}', 'category_id', $this->integer());
+        $this->addColumn('{{%setting}}', $this->_columnName, $this->integer());
         $this->addForeignKey(
             'fk-setting-setting_category',
             '{{%setting}}',
-            'category_id',
+            $this->_columnName,
             '{{%setting_category}}',
             'sc_id',
             'CASCADE'
@@ -29,6 +31,6 @@ class m200109_100306_add_category_id_column_to_setting_table extends Migration
     public function safeDown()
     {
         $this->dropForeignKey('fk-setting-setting_category', '{{%setting}}');
-        $this->dropColumn('{{%setting}}', 'category_id');
+        $this->dropColumn('{{%setting}}', $this->_columnName);
     }
 }

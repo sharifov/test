@@ -4,6 +4,7 @@ namespace common\models;
 
 use yii\db\ActiveRecord;
 use common\models\query\SettingCategoryQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "setting_category".
@@ -67,5 +68,14 @@ class SettingCategory extends ActiveRecord
     public static function find()
     {
         return new SettingCategoryQuery(get_called_class());
+    }
+
+    /**
+     * @return array
+     */
+    public static function getList(): array
+    {
+        $data = self::find()->active()->orderBy(['sc_id' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'sc_id', 'sc_name');
     }
 }

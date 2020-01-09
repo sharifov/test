@@ -1,5 +1,6 @@
 <?php
 
+use common\models\SettingCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -25,13 +26,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
             's_id',
             's_key',
             's_name',
             //'s_type',
-
+            [
+                'attribute' => 's_category_id',
+                'value' => static function (\common\models\Setting $model) {
+                     return $model->sCategory ? $model->sCategory->sc_name : '-';
+                },
+                'filter' => SettingCategory::getList()
+            ],
             [
                 'attribute' => 's_type',
                 'value' => static function (\common\models\Setting $model) {
@@ -79,7 +84,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
-                    'class' => 'yii\grid\ActionColumn',
+                'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {update}'
             ],
         ],
