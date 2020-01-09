@@ -46,6 +46,10 @@ class FlightSearch extends Flight
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['fl_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ]
         ]);
 
         $this->load($params);

@@ -47,6 +47,10 @@ class FlightQuoteSegmentPaxBaggageChargeSearch extends FlightQuoteSegmentPaxBagg
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['qsbc_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ]
         ]);
 
         $this->load($params);

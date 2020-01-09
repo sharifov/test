@@ -47,6 +47,10 @@ class FlightQuoteSearch extends FlightQuote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['fq_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ]
         ]);
 
         $this->load($params);

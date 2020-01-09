@@ -47,6 +47,10 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['qpp_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ]
         ]);
 
         $this->load($params);

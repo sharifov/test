@@ -46,6 +46,10 @@ class FlightQuoteStatusLogSearch extends FlightQuoteStatusLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['qsl_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ]
         ]);
 
         $this->load($params);

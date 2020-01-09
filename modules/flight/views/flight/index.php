@@ -25,15 +25,15 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+//            ['class' => 'yii\grid\SerialColumn'],
 
             'fl_id',
             'fl_product_id',
             'fl_trip_type_id',
             'fl_cabin_class',
             'fl_adults',
-            //'fl_children',
-            //'fl_infants',
+            'fl_children',
+            'fl_infants',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -25,17 +25,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+//            ['class' => 'yii\grid\SerialColumn'],
 
             'qsb_id',
             'qsb_flight_pax_code_id',
             'qsb_flight_quote_segment_id',
             'qsb_airline_code',
             'qsb_allow_pieces',
-            //'qsb_allow_weight',
-            //'qsb_allow_unit',
-            //'qsb_allow_max_weight',
-            //'qsb_allow_max_size',
+            'qsb_allow_weight',
+            'qsb_allow_unit',
+            'qsb_allow_max_weight',
+            'qsb_allow_max_size',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

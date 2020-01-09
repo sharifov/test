@@ -25,16 +25,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+//            ['class' => 'yii\grid\SerialColumn'],
 
             'qss_id',
             'qss_quote_segment_id',
             'qss_location_iata',
             'qss_equipment',
             'qss_elapsed_time:datetime',
-            //'qss_duration',
-            //'qss_departure_dt',
-            //'qss_arrival_dt',
+            'qss_duration',
+            'qss_departure_dt',
+            'qss_arrival_dt',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
