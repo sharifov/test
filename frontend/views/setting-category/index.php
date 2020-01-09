@@ -18,7 +18,6 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Setting Category', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
@@ -50,6 +49,5 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
-
 
 </div>
