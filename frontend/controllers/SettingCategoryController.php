@@ -5,14 +5,13 @@ namespace frontend\controllers;
 use Yii;
 use common\models\SettingCategory;
 use yii\data\ActiveDataProvider;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * SettingCategoryController implements the CRUD actions for SettingCategory model.
  */
-class SettingCategoryController extends Controller
+class SettingCategoryController extends FController
 {
     /**
      * {@inheritdoc}
