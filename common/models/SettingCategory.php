@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use yii\behaviors\AttributeBehavior;
 use yii\db\ActiveRecord;
 use common\models\query\SettingCategoryQuery;
 use yii\helpers\ArrayHelper;
@@ -50,6 +51,23 @@ class SettingCategory extends ActiveRecord
             'sc_enabled' => 'Enabled',
             'sc_created_dt' => 'Created',
             'sc_updated_dt' => 'Updated',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => AttributeBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['sc_created_dt', 'sc_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['sc_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ]
         ];
     }
 
