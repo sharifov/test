@@ -6,32 +6,46 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Reason;
 use frontend\models\LeadMultipleForm;
-use yii\helpers\VarDumper;
+use sales\services\lead\qcall\Config;
+use sales\services\lead\qcall\FindPhoneParams;
+use sales\services\lead\qcall\FindWeightParams;
+use sales\services\lead\qcall\QCallService;
 
 /**
  * Class LeadMultiUpdateService
  *
  * @property LeadStateService $leadStateService
+ * @property QCallService $qCallService
  */
 class LeadMultiUpdateService
 {
-
     private $leadStateService;
+    private $qCallService;
 
-    public function __construct(LeadStateService $leadStateService)
+    public function __construct(LeadStateService $leadStateService, QCallService $qCallService)
     {
         $this->leadStateService = $leadStateService;
+        $this->qCallService = $qCallService;
     }
 
-    public function update(LeadMultipleForm $multipleForm, int $creatorId): array
+    public function update(LeadMultipleForm $multipleForm, Employee $user): array
     {
         $report = [];
+        $creatorId = $user->id;
+
         foreach ($multipleForm->lead_list as $lead_id) {
 
             $leadId = (int)$lead_id;
 
             if (!$lead = Lead::findOne($leadId)) {
                 $report[] = 'Not found Lead: ' . $leadId;
+                continue;
+            }
+
+            if ($multipleForm->isRedialProcess()) {
+                if ($user->isAdmin()) {
+                    $report[] = $this->redialProcess($multipleForm, $lead);
+                }
                 continue;
             }
 
@@ -260,4 +274,42 @@ class LeadMultiUpdateService
         return 'Undefined username';
     }
 
+    private function redialProcess(LeadMultipleForm $form, Lead $lead): string
+    {
+        $report = '';
+        if ($form->isRedialAdd()) {
+            if ($this->qCallService->isExist($lead->id)) {
+                $report = 'Lead: ' . $lead->id . ' already exist on Qcall List';
+            } else {
+                try {
+                    $qCall = $this->qCallService->create(
+                        $lead->id,
+                        new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                        new FindWeightParams($lead->project_id),
+                        $lead->offset_gmt,
+                        new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                    );
+                    if ($qCall) {
+                        $report = 'Lead: ' . $lead->id . ' added to Qcall List';
+                    } else {
+                        $report = 'Lead: ' . $lead->id . ' not added to Qcall List';
+                    }
+                } catch (\Throwable $e) {
+                    $report = 'Lead: ' . $lead->id . ' added to Qcall List error';
+                }
+            }
+        } elseif ($form->isRedialRemove()) {
+            if ($this->qCallService->isExist($lead->id)) {
+                try {
+                    $this->qCallService->remove($lead->id);
+                    $report = 'Lead: ' . $lead->id . ' was removed from Qcall List';
+                } catch (\Throwable $e) {
+                    $report = 'Lead: ' . $lead->id . ' removed from Qcall List error';
+                }
+            } else {
+                $report = 'Lead: ' . $lead->id . ' not found on Qcall List';
+            }
+        }
+        return $report;
+    }
 }

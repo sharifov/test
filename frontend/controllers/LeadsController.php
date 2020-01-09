@@ -152,7 +152,7 @@ class LeadsController extends FController
                 if ($multipleForm->validate()) {
                     /** @var LeadMultiUpdateService $service */
                     $service = Yii::createObject(LeadMultiUpdateService::class);
-                    $report = $service->update($multipleForm, $user->id);
+                    $report = $service->update($multipleForm, $user);
                 }
             }
         }

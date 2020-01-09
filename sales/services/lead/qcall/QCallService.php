@@ -70,6 +70,7 @@ class QCallService
      * @param string|null $clientGmt
      * @param FindPhoneParams $findPhoneParams
      * @param string|null $phoneFrom
+     * @return int|null
      */
     public function create(
         int $leadId,
@@ -78,16 +79,16 @@ class QCallService
         ?string $clientGmt,
         FindPhoneParams $findPhoneParams,
         ?string $phoneFrom = null
-    ): void
+    ): ?int
     {
         if (!$qConfig = $this->findConfig($config)) {
             Yii::warning('QCallService:create. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
-            return;
+            return null;
         }
 
-        if ($this->isExists($leadId)) {
+        if ($this->isExist($leadId)) {
             Yii::error('QCallService:create. LeadId: ' . $leadId . ' is exists');
-            return;
+            return null;
         }
 
         $weight = $this->findWeight($findWeightParams);
@@ -105,6 +106,8 @@ class QCallService
         $qCall = LeadQcall::create($leadId, $weight, $interval, $phone);
 
         $this->leadQcallRepository->save($qCall);
+
+        return $qCall->lqc_lead_id;
     }
 
     /**
@@ -359,7 +362,7 @@ class QCallService
      * @param int $leadId
      * @return bool
      */
-    private function isExists(int $leadId): bool
+    public function isExist(int $leadId): bool
     {
         return LeadQcall::find()->andWhere(['lqc_lead_id' => $leadId])->exists();
     }

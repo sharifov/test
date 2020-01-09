@@ -14,13 +14,24 @@ use yii\base\Model;
  * @property int $rating
  * @property int $reason_id
  * @property string $reason_description
+ * @property int $redial_queue
  */
 class LeadMultipleForm extends Model
 {
+    public const REDIAL_ADD = 1;
+    public const REDIAL_REMOVE = 2;
+
+    public const REDIAL_QUEUE_LIST = [
+        self::REDIAL_ADD => 'Add to Redial Queue',
+        self::REDIAL_REMOVE => 'Remove from Redial Queue',
+    ];
+
     public $lead_list;
     public $employee_id;
     public $status_id;
     public $rating;
+
+    public $redial_queue;
 
     public $reason_id;
     public $reason_description;
@@ -48,7 +59,25 @@ class LeadMultipleForm extends Model
             }],
             ['employee_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['employee_id', 'default', 'value' => null],
+
+            ['redial_queue', 'in', 'range' => array_keys(self::REDIAL_QUEUE_LIST)],
+            ['redial_queue', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
         ];
+    }
+
+    public function isRedialProcess(): bool
+    {
+        return array_key_exists($this->redial_queue, self::REDIAL_QUEUE_LIST);
+    }
+
+    public function isRedialAdd(): bool
+    {
+        return $this->redial_queue === self::REDIAL_ADD;
+    }
+
+    public function isRedialRemove(): bool
+    {
+        return $this->redial_queue === self::REDIAL_REMOVE;
     }
 
     public function leadListValidate(): void

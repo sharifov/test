@@ -727,23 +727,35 @@ $lists = new ListsAccess($user->id);
                         }
 
                         ?>
-                        <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
 
-                        <div id="reason_id_div" style="display: none">
-                            <?= $form->field($multipleForm, 'reason_id')->dropDownList([], ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
+                        <div class="redial_queue-wrapper">
 
-                            <div id="reason_description_div"
-                                 style="display: none">
-                                <?= $form->field($multipleForm, 'reason_description')->textarea(['rows' => '3']) ?>
+                            <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
+
+                            <div id="reason_id_div" style="display: none">
+                                <?= $form->field($multipleForm, 'reason_id')->dropDownList([], ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
+
+                                <div id="reason_description_div"
+                                     style="display: none">
+                                    <?= $form->field($multipleForm, 'reason_description')->textarea(['rows' => '3']) ?>
+                                </div>
                             </div>
+
+                            <?php
+                                if ($employees = $lists->getEmployees(true)) {
+                                    $employees[-1] = '--- REMOVE EMPLOYEE ---';
+                                    echo $form->field($multipleForm, 'employee_id')->dropDownList($employees, ['prompt' => '-']);
+                                }
+                            ?>
+
                         </div>
 
-                        <?php
-                            if ($employees = $lists->getEmployees(true)) {
-                                $employees[-1] = '--- REMOVE EMPLOYEE ---';
-                                echo $form->field($multipleForm, 'employee_id')->dropDownList($employees, ['prompt' => '-']);
-                            }
-                        ?>
+                        <?php if ($user->isAdmin()): ?>
+                            <?= $form->field($multipleForm, 'redial_queue')->dropDownList($multipleForm::REDIAL_QUEUE_LIST, [
+                                'prompt' => '',
+                                'onChange' => 'let wrapper = $(this).val(); if (wrapper == 1 || wrapper == 2) $(".redial_queue-wrapper").hide(); else $(".redial_queue-wrapper").show();'
+                            ]) ?>
+                        <?php endif; ?>
 
                         <div class="form-group text-right">
                             <?= Html::submitButton('<i class="fa fa-check-square"></i> Update selected Leads', ['class' => 'btn btn-info']) ?>
@@ -770,6 +782,7 @@ $lists = new ListsAccess($user->id);
     $js = <<<JS
 
     $(document).on('pjax:start', function() {
+        
         $("#modalUpdate .close").click();
     });
 
