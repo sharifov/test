@@ -219,30 +219,22 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "int",
-            "optional": true,
-            "field": "source_id",
-            "description": "<p>Source ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "size": "1",
+            "type": "string",
             "allowedValues": [
-              "1-SALES",
-              "2-EXCHANGE",
-              "3-SUPPORT"
+              "Sales",
+              "Exchange",
+              "Support"
             ],
             "optional": true,
-            "field": "department_id",
-            "description": "<p>Department ID</p>"
+            "field": "department",
+            "description": "<p>Department</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "\n{\n    \"project_id\": 6,\n    \"source_id\": 44,\n    \"department_id\": 1\n}",
+          "content": "\n{\n    \"project_id\": 6,\n    \"department\": \"Sales\"\n}",
           "type": "json"
         }
       ]
@@ -251,7 +243,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200\n       \"message\": \"OK\",\n       \"data\": {\n           \"phones\": [\n               {\n                   \"phone\": \"+15211111111\",\n                   \"source_id\": 40,\n                   \"department_id\": 1\n               },\n               {\n                   \"phone\": \"+15222222222\",\n                   \"source_id\": 44,\n                   \"department_id\": 2\n              }\n           ]\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n       \"status\": 200\n       \"message\": \"OK\",\n       \"data\": {\n           \"phones\": [\n               {\n                   \"phone\": \"+15211111111\",\n                   \"cid\": \"WOWMAC\",\n                   \"department_id\": 1,\n                   \"department\": \"Sales\",\n                   \"updated_dt\": \"2019-01-08 11:44:57\"\n               },\n               {\n                   \"phone\": \"+15222222222\",\n                   \"cid\": \"WSUDCV\",\n                   \"department_id\": 3,\n                   \"department\": \"Support\",\n                   \"updated_dt\": \"2019-01-09 11:50:25\"\n              }\n           ]\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         }
       ]
@@ -260,7 +252,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response (422):",
-          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": {\n            \"project_id\": [\n                \"Project Id cannot be blank.\"\n            ],\n            \"source_id\": [\n                \"Source Id must be an integer.\"\n            ],\n            \"department_id\": [\n                \"Department Id is invalid.\"\n            ]\n       },\n       \"code\": \"14301\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": {\n            \"project_id\": [\n                \"Project Id cannot be blank.\"\n            ],\n            \"department\": [\n                \"Department is invalid.\"\n            ]\n       },\n       \"code\": \"14301\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
         },
         {
