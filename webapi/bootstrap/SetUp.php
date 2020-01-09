@@ -21,10 +21,10 @@ class SetUp implements BootstrapInterface
                 //->addHeaders(['Authorization' => 'Basic ' . base64_encode('username' . ':' . 'password')])
                 ->setFormat(Client::FORMAT_JSON)
                 ->setMethod('POST')
-                ->addData(['apiKey' => $app->params['bo']['apiKey']])
+//                ->addData(['apiKey' => $app->params['bo']['apiKey']])
                 ->setOptions([
                     CURLOPT_ENCODING => 'gzip',
-                    'timeout' => 30,
+                    'timeout' => 28,
                 ]);
             return new RequestBo($request, $app->params['bo']['url']);
         });

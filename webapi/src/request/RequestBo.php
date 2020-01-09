@@ -2,6 +2,8 @@
 
 namespace webapi\src\request;
 
+use Yii;
+use yii\helpers\VarDumper;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
 
@@ -15,6 +17,9 @@ class RequestBo
 {
     private const ACTION_CLICK_TO_BOOK = 'flight-request/booking';
     private const ACTION_PHONE_TO_BOOK = 'lead/book-quote';
+
+    private const REDIRECT_STATUSES = [307];
+    private const REDIRECT_ATTEMPTS = 1;
 
     private $next;
     private $url;
@@ -35,7 +40,12 @@ class RequestBo
         if ($data !== null) {
             $this->addData($data);
         }
-        return $this->next->setUrl($this->createUrl($action))->send();
+
+        $response = $this->next->setUrl($this->createUrl($action))->send();
+
+        $response = $this->checkRedirect($response);
+
+        return $response;
     }
 
     public function sendClickToBook($data): Response
@@ -51,5 +61,32 @@ class RequestBo
     private function createUrl($action): string
     {
         return $this->url . $action;
+    }
+
+    private function checkRedirect(Response $response): Response
+    {
+        $statusCode = $this->getResponseStatusCode($response);
+
+        $attempts = 0;
+        while (in_array($statusCode, self::REDIRECT_STATUSES, true) && $attempts < self::REDIRECT_ATTEMPTS) {
+            $attempts++;
+            if ($location = $response->getHeaders()->get('location')) {
+                Yii::warning('Detect redirect to ' . VarDumper::dumpAsString($location), 'RequestBo:checkRedirect');
+                $response = $this->next->setUrl($location)->send();
+                $statusCode = $this->getResponseStatusCode($response);
+            } else {
+                Yii::warning('Detect redirect status code, but location not found on params: ' . VarDumper::dumpAsString($response->getHeaders()), 'RequestBo:checkRedirect');
+            }
+        }
+        return $response;
+    }
+
+    private function getResponseStatusCode(Response $response): ?int
+    {
+        try {
+            return (int)$response->getStatusCode();
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }
