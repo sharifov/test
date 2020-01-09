@@ -4,20 +4,19 @@ namespace sales\model\department\departmentPhoneProject\useCases\api\get;
 
 use common\models\Department;
 use common\models\Project;
-use common\models\Sources;
 use yii\base\Model;
 
 /**
  * Class DepartmentPhoneProjectForm
  *
  * @property int $project_id
- * @property int $source_id
+ * @property string $department
  * @property int $department_id
  */
 class DepartmentPhoneProjectForm extends Model
 {
     public $project_id;
-    public $source_id;
+    public $department;
     public $department_id;
 
     public function rules(): array
@@ -27,11 +26,17 @@ class DepartmentPhoneProjectForm extends Model
             ['project_id', 'integer'],
             ['project_id', 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
 
-            ['source_id', 'integer'],
-            ['source_id', 'exist', 'targetClass' => Sources::class, 'targetAttribute' => ['source_id' => 'id']],
-
-            ['department_id', 'in', 'range' => array_keys(Department::DEPARTMENT_LIST)],
+            ['department', 'in', 'range' => Department::DEPARTMENT_LIST],
         ];
+    }
+
+    public function afterValidate()
+    {
+        parent::afterValidate();
+        if ($this->department && !$this->getErrors()) {
+            $list = array_flip(Department::DEPARTMENT_LIST);
+            $this->department_id = $list[$this->department] ?? null;
+        }
     }
 
     public function formName(): string

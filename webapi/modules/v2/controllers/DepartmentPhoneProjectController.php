@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use sales\model\department\DepartmentCodeException;
 use webapi\src\Messages;
@@ -35,16 +36,14 @@ class DepartmentPhoneProjectController extends BaseController
       *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
       *  }
       *
-      * @apiParam {int}            project_id                                   Project ID
-      * @apiParam {int}            [source_id]                                  Source ID
-      * @apiParam {int{1}=1-SALES, 2-EXCHANGE, 3-SUPPORT}   [department_id]     Department ID
+      * @apiParam {int}                               project_id               Project ID
+      * @apiParam {string=Sales, Exchange, Support}   [department]             Department
       *
       * @apiParamExample {json} Request-Example:
       *
       * {
       *     "project_id": 6,
-      *     "source_id": 44,
-      *     "department_id": 1
+      *     "department": "Sales"
       * }
       *
       * @apiSuccessExample {json} Success-Response:
@@ -57,13 +56,18 @@ class DepartmentPhoneProjectController extends BaseController
       *            "phones": [
       *                {
       *                    "phone": "+15211111111",
-      *                    "source_id": 40,
-      *                    "department_id": 1
+      *                    "cid": "WOWMAC",
+      *                    "department_id": 1,
+      *                    "department": "Sales",
+      *                    "updated_dt": "2019-01-08 11:44:57"
       *                },
       *                {
       *                    "phone": "+15222222222",
-      *                    "source_id": 44,
-      *                    "department_id": 2
+      *                    "cid": "WSUDCV",
+      *                    "department_id": 3,
+      *                    "department": "Support",
+      *                    "updated_dt": "2019-01-09 11:50:25"
+
       *               }
       *            ]
       *        },
@@ -85,11 +89,8 @@ class DepartmentPhoneProjectController extends BaseController
       *             "project_id": [
       *                 "Project Id cannot be blank."
       *             ],
-      *             "source_id": [
-      *                 "Source Id must be an integer."
-      *             ],
-      *             "department_id": [
-      *                 "Department Id is invalid."
+      *             "department": [
+      *                 "Department is invalid."
       *             ]
       *        },
       *        "code": "14301",
@@ -143,7 +144,6 @@ class DepartmentPhoneProjectController extends BaseController
         $phones = DepartmentPhoneProject::find()
             ->andWhere(['dpp_project_id' => $form->project_id])
             ->andWhere(['dpp_show_on_site' => true])
-            ->andFilterWhere(['dpp_source_id' => $form->source_id])
             ->andFilterWhere(['dpp_dep_id' => $form->department_id])
             ->all();
 
@@ -152,8 +152,10 @@ class DepartmentPhoneProjectController extends BaseController
         foreach ($phones as $key => $phone) {
             $data[] = [
                 'phone' => $phone->dpp_phone_number,
-                'source_id' => $phone->dpp_source_id,
+                'cid' => $phone->dppSource ? $phone->dppSource->cid : null,
                 'department_id' => $phone->dpp_dep_id,
+                'department' => $phone->dpp_dep_id ? Department::getName($phone->dpp_dep_id) : null,
+                'updated_dt' => $phone->dpp_updated_dt,
             ];
         }
 
