@@ -32,7 +32,7 @@ class SettingCategory extends ActiveRecord
     public function rules():array
     {
         return [
-            [['sc_enabled'], 'integer'],
+            [['sc_enabled'], 'boolean'],
             [['sc_created_dt', 'sc_updated_dt'], 'safe'],
             [['sc_name'], 'string', 'max' => 255],
         ];
