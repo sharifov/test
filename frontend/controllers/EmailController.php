@@ -308,8 +308,9 @@ class EmailController extends FController
      */
     public function actionView($id): string
     {
-
         $model =$this->findModel($id);
+
+        $model->e_email_body_html;
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;

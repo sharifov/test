@@ -16,6 +16,7 @@ class EmailHtmlToText extends Behavior
     public function events(): array
     {
         return [
+            ActiveRecord::EVENT_BEFORE_INSERT => 'clean',
             ActiveRecord::EVENT_BEFORE_UPDATE => 'clean',
         ];
     }

@@ -15,6 +15,7 @@ class CompressString extends Behavior
     public function events(): array
     {
         return [
+            ActiveRecord::EVENT_BEFORE_INSERT => 'compress',
             ActiveRecord::EVENT_BEFORE_UPDATE => 'compress',
         ];
     }

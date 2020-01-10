@@ -774,5 +774,20 @@ class Email extends \yii\db\ActiveRecord
 
     }
 
+    /**
+     * @return false|string
+     */
+    public function getEEmailBodyHtml()
+    {
+        echo '<pre>'; var_dump('getEEmailBodyHtml'); exit();
 
+        return ($this->e_email_body_blob) ? gzuncompress($this->e_email_body_blob) : $this->e_email_body_html;
+    }
+
+    public function getE_email_body_html()
+    {
+        echo '<pre>'; var_dump('getE_email_body_html'); exit();
+
+        return ($this->e_email_body_blob) ? gzuncompress($this->e_email_body_blob) : $this->e_email_body_html;
+    }
 }
