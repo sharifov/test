@@ -193,7 +193,7 @@ class Cases extends ActiveRecord
      */
     public function assignLead(int $leadId): void
     {
-        if ($this->cs_lead_id) {
+        if ($this->cs_lead_id === $leadId) {
             throw new \DomainException('This Lead is already assigned to case');
         }
         $this->recordEvent(new CasesAssignLeadEvent($this, $this->cs_lead_id, $leadId));
