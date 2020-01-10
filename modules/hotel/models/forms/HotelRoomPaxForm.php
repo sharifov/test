@@ -37,7 +37,8 @@ class HotelRoomPaxForm extends HotelRoomPax
     {
         return [
             [['hrp_type_id'], 'required'],
-            [['hrp_hotel_room_id', 'hrp_type_id', 'hrp_age', 'hrp_id'], 'integer'],
+			['hrp_age', 'string', 'max' => 3],
+			[['hrp_hotel_room_id', 'hrp_type_id', 'hrp_age', 'hrp_id'], 'integer'],
             [['hrp_dob'], 'safe'],
 			[['hrp_age'], 'required', 'when' => static function ($model) {
         		return $model->isChild();
