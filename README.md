@@ -58,6 +58,18 @@ DB user: sales
 DB pass:
 ```
 
+
+Nginx configuration
+-------------------
+Example config file: ./nginx.conf
+```
+#for API endpoint
+location ~ \.php$ {
+    ...
+    fastcgi_read_timeout 90s;
+}
+```
+
 Migration (RBAC + LOG):
 -------------------
 ```
