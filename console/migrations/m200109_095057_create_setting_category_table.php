@@ -31,7 +31,7 @@ class m200109_095057_create_setting_category_table extends Migration
     {
         $this->createTable('{{%setting_category}}', [
             'sc_id' => $this->primaryKey(),
-            'sc_name' => $this->string()->unique()->notNull(),
+            'sc_name' => $this->string(50)->unique()->notNull(),
             'sc_enabled' => $this->boolean()->defaultValue(true),
             'sc_created_dt' => $this->dateTime(),
             'sc_updated_dt' => $this->dateTime(),

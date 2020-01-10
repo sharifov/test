@@ -36,7 +36,9 @@ class SettingCategory extends ActiveRecord
         return [
             [['sc_enabled'], 'boolean'],
             [['sc_created_dt', 'sc_updated_dt'], 'safe'],
-            [['sc_name'], 'string', 'max' => 255],
+            [['sc_name'], 'trim'],
+            [['sc_name'], 'unique'],
+            [['sc_name'], 'string', 'min' => 1, 'max' => 50],
         ];
     }
 
