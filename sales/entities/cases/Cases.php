@@ -84,7 +84,7 @@ class Cases extends ActiveRecord
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
-        $case->pending('Created by incoming sms');
+        $case->pending(null, 'Created by incoming sms');
         return $case;
     }
 
@@ -99,7 +99,7 @@ class Cases extends ActiveRecord
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
-        $case->pending('Created by incoming sms');
+        $case->pending(null, 'Created by incoming sms');
         return $case;
     }
 
@@ -114,7 +114,7 @@ class Cases extends ActiveRecord
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
-        $case->pending('Created by incoming email');
+        $case->pending(null, 'Created by incoming email');
         return $case;
     }
 
@@ -129,7 +129,7 @@ class Cases extends ActiveRecord
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
-        $case->pending('Created by incoming email');
+        $case->pending(null, 'Created by incoming email');
         return $case;
     }
 
@@ -147,7 +147,7 @@ class Cases extends ActiveRecord
         $case->cs_call_id = $callId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = $depId;
-        $case->pending('Created by call');
+        $case->pending(null, 'Created by call');
         return $case;
     }
 
@@ -158,6 +158,7 @@ class Cases extends ActiveRecord
      * @param int $depId
      * @param string|null $subject
      * @param string|null $description
+     * @param int|null $creatorId
      * @return Cases
      */
     public static function createByWeb(
@@ -166,7 +167,8 @@ class Cases extends ActiveRecord
         string $clientId,
         int $depId,
         ?string $subject,
-        ?string $description
+        ?string $description,
+        ?int $creatorId
     ): self
     {
         $case = self::create();
@@ -176,7 +178,7 @@ class Cases extends ActiveRecord
         $case->cs_dep_id = $depId;
         $case->cs_subject = $subject;
         $case->cs_description = $description;
-        $case->pending('Created by web');
+        $case->pending($creatorId, 'Created by web');
         return $case;
     }
 
@@ -201,12 +203,13 @@ class Cases extends ActiveRecord
     }
 
     /**
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function pending(?string $description = ''): void
+    public function pending(?int $creatorId, ?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PENDING);
-        $this->recordEvent(new CasesPendingStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
+        $this->recordEvent(new CasesPendingStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_PENDING);
     }
 

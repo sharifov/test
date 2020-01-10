@@ -91,10 +91,11 @@ class CasesCreateService
 
     /**
      * @param CasesCreateByWebForm $form
+     * @param int $creatorId
      * @return Cases
      * @throws \Throwable
      */
-    public function createByWeb(CasesCreateByWebForm $form): Cases
+    public function createByWeb(CasesCreateByWebForm $form, int $creatorId): Cases
     {
         $case = $this->transaction->wrap(function () use ($form) {
 

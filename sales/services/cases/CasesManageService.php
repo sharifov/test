@@ -101,12 +101,13 @@ class CasesManageService
 
     /**
      * @param int $caseId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function pending(int $caseId, ?string $description = ''): void
+    public function pending(int $caseId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
-        $case->pending($description);
+        $case->pending($creatorId, $description);
         $this->casesRepository->save($case);
     }
 

@@ -790,7 +790,7 @@ class CasesController extends FController
         $form = new CasesCreateByWebForm($user);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $case = $this->casesCreateService->createByWeb($form);
+                $case = $this->casesCreateService->createByWeb($form, $user->id);
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
@@ -980,7 +980,7 @@ class CasesController extends FController
                         $this->casesManageService->solved($case->cs_id, $form->message);
                         break;
                     case CasesStatus::STATUS_PENDING :
-                        $this->casesManageService->pending($case->cs_id, $form->message);
+                        $this->casesManageService->pending($case->cs_id, $creatorId, $form->message);
                         break;
                     default:
                         Yii::$app->session->setFlash('error', 'Undefined status');
