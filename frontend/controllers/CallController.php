@@ -832,4 +832,17 @@ class CallController extends FController
         return $this->redirect(Yii::$app->request->referrer);
     }
 
+    public function actionRecord()
+    {
+        $cid =  Yii::$app->request->post('cid');
+        $recordUrl = Call::find()->select(['c_recording_url'])->where(['c_call_sid' => $cid])->one();
+
+        $mediaFile = file_get_contents($recordUrl->c_recording_url);
+        $encodedRecord = base64_encode($mediaFile);
+        //var_dump(base64_encode($mediaFile)); die();
+
+        return $mediaFile = "data:audio/ogg;base64," . $encodedRecord;
+        //return $mediaFile = "data:audio/ogg;base64," . $encodedRecord;
+    }
+
 }
