@@ -280,12 +280,13 @@ class Cases extends ActiveRecord
     }
 
     /**
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function solved(?string $description = ''): void
+    public function solved(?int $creatorId, ?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_SOLVED);
-        $this->recordEvent(new CasesSolvedStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
+        $this->recordEvent(new CasesSolvedStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_SOLVED);
     }
 

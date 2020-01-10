@@ -977,7 +977,7 @@ class CasesController extends FController
                         $this->casesManageService->trash($case->cs_id, $form->message);
                         break;
                     case CasesStatus::STATUS_SOLVED :
-                        $this->casesManageService->solved($case->cs_id, $form->message);
+                        $this->casesManageService->solved($case->cs_id, $creatorId, $form->message);
                         break;
                     case CasesStatus::STATUS_PENDING :
                         $this->casesManageService->pending($case->cs_id, $creatorId, $form->message);

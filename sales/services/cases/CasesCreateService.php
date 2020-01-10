@@ -97,7 +97,7 @@ class CasesCreateService
      */
     public function createByWeb(CasesCreateByWebForm $form, int $creatorId): Cases
     {
-        $case = $this->transaction->wrap(function () use ($form) {
+        $case = $this->transaction->wrap(function () use ($form, $creatorId) {
 
             $client = $this->clientManageService->getOrCreate(
                 [new PhoneCreateForm(['phone' => $form->clientPhone])],
@@ -110,7 +110,8 @@ class CasesCreateService
                 $client->id,
                 $form->depId,
                 $form->subject,
-                $form->description
+                $form->description,
+                $creatorId
             );
             $this->casesRepository->save($case);
 

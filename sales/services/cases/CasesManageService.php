@@ -128,12 +128,13 @@ class CasesManageService
 
     /**
      * @param int $caseId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function solved(int $caseId, ?string $description = ''): void
+    public function solved(int $caseId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
-        $case->solved($description);
+        $case->solved($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
