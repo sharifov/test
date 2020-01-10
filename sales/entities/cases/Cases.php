@@ -231,15 +231,16 @@ class Cases extends ActiveRecord
 
     /**
      * @param int $userId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function processing(int $userId, ?string $description = ''): void
+    public function processing(int $userId, ?int $creatorId, ?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PROCESSING);
         if ($this->isProcessing() && $this->isOwner($userId)) {
             throw new \DomainException('Case is already processing to this user');
         }
-        $this->recordEvent(new CasesProcessingStatusEvent($this, $this->cs_status, $userId, $this->cs_user_id, $description));
+        $this->recordEvent(new CasesProcessingStatusEvent($this, $this->cs_status, $userId, $this->cs_user_id, $creatorId, $description));
         if (!$this->isOwner($userId)) {
             $this->setOwner($userId);
         }

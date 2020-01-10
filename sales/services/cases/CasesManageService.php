@@ -67,35 +67,38 @@ class CasesManageService
     /**
      * @param int $caseId
      * @param int $userId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function take(int $caseId, int $userId, ?string $description = ''): void
+    public function take(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
     {
-        $this->processing($caseId, $userId, $description);
+        $this->processing($caseId, $userId, $creatorId, $description);
     }
 
     /**
      * @param string $caseGid
      * @param int $userId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function takeByGid(string $caseGid, int $userId, ?string $description = ''): void
+    public function takeByGid(string $caseGid, int $userId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->findByGid($caseGid);
-        $this->processing($case->cs_id, $userId, $description);
+        $this->processing($case->cs_id, $userId, $creatorId, $description);
     }
 
     /**
      * @param int $caseId
      * @param int $userId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function processing(int $caseId, int $userId, ?string $description = ''): void
+    public function processing(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
         $user = $this->userRepository->find($userId);
         $this->guardAccessUserToCase($case, $user);
-        $case->processing($user->id, $description);
+        $case->processing($user->id, $creatorId, $description);
         $this->casesRepository->save($case);
     }
 
