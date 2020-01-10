@@ -951,6 +951,8 @@ class CasesController extends FController
      */
     public function actionChangeStatus()
     {
+        $creatorId = Yii::$app->user->id;
+
         $gid = (string)Yii::$app->request->get('gid');
         $case = $this->findModelByGid($gid);
 
@@ -969,7 +971,7 @@ class CasesController extends FController
 
                 switch ((int)$form->status) {
                     case CasesStatus::STATUS_FOLLOW_UP :
-                        $this->casesManageService->followUp($case->cs_id, $form->message);
+                        $this->casesManageService->followUp($case->cs_id, $creatorId, $form->message);
                         break;
                     case CasesStatus::STATUS_TRASH :
                         $this->casesManageService->trash($case->cs_id, $form->message);
