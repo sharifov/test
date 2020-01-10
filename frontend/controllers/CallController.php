@@ -836,6 +836,16 @@ class CallController extends FController
     {
         $cid =  Yii::$app->request->get('cid');
         $recordUrl = Call::find()->select(['c_recording_url'])->where(['c_call_sid' => $cid])->one();
+        $twilioHeaders = array_change_key_case(get_headers($recordUrl->c_recording_url, 1));
+
+        Yii::$app->response->format = Response::FORMAT_RAW;
+        $headers = Yii::$app->response->headers;
+        $headers->add('Accept-Ranges', 'bytes');
+        $headers->add('Content-Type', 'audio/x-wav');
+        if(isset($twilioHeaders['content-length'])){
+            $headers->add('Content-Length', $twilioHeaders['content-length']);
+        }
+
         return file_get_contents($recordUrl->c_recording_url);
     }
 }
