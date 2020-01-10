@@ -7,8 +7,13 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $model sales\forms\cases\CasesChangeStatusForm */
 /* @var $form yii\widgets\ActiveForm */
+
+$pjaxId = 'pjax-cases-change-status-form';
 ?>
-<?php Pjax::begin(['id' => 'pjax-cases-change-status-form', 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+    <script>
+        pjaxOffFormSubmit('#<?=$pjaxId?>');
+    </script>
+<?php Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="cases-change-status">
 
     <?php $form = ActiveForm::begin([
