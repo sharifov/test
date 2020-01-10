@@ -2832,7 +2832,7 @@ Reason: {reason}
                                 $this->status,
                                 $this->getCountOutCallsLastFlow()
                             ),
-                            new FindWeightParams($this->project_id),
+                            new FindWeightParams($this->project_id, $this->status),
                             $this->offset_gmt,
                             new FindPhoneParams($this->project_id, $this->l_dep_id)
                         );

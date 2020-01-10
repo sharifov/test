@@ -677,7 +677,7 @@ class Call extends \yii\db\ActiveRecord
                             $qCallService->create(
                                 $lead->id,
                                 new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                                new FindWeightParams($lead->project_id),
+                                new FindWeightParams($lead->project_id, $lead->status),
                                 $lead->offset_gmt,
                                 new FindPhoneParams($lead->project_id, $lead->l_dep_id)
                             );
@@ -710,7 +710,7 @@ class Call extends \yii\db\ActiveRecord
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
                         $lead->offset_gmt,
                         new FindPhoneParams($lead->project_id, $lead->l_dep_id),
-                        new FindWeightParams($lead->project_id)
+                        new FindWeightParams($lead->project_id, $lead->status)
                     );
                 } catch (\Throwable $e) {
                     Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:QCallService:updateInterval');
@@ -904,7 +904,7 @@ class Call extends \yii\db\ActiveRecord
                     $qCallService->create(
                         $lead->id,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                        new FindWeightParams($lead->project_id),
+                        new FindWeightParams($lead->project_id, $lead->status),
                         $lead->offset_gmt,
                         new FindPhoneParams($lead->project_id, $lead->l_dep_id)
                     );
@@ -918,7 +918,7 @@ class Call extends \yii\db\ActiveRecord
                     $qCallService->create(
                         $lead->id,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                        new FindWeightParams($lead->project_id),
+                        new FindWeightParams($lead->project_id, $lead->status),
                         $lead->offset_gmt,
                         new FindPhoneParams($lead->project_id, $lead->l_dep_id)
                     );
