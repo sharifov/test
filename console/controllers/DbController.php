@@ -5,6 +5,7 @@ use common\models\Airline;
 use common\models\ClientPhone;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use common\models\Email;
 use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\LeadFlow;
@@ -25,6 +26,7 @@ use yii\console\Controller;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Exception;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
@@ -481,6 +483,54 @@ ORDER BY lf.lead_id, id';
 			echo $e->getMessage() . PHP_EOL;
 		}
 	}
+
+    public function actionCompressEmail(int $limit = 1, int $offset = 0): void /* TODO limit to 1000 */
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
+        $time_start = microtime(true);
+
+        $emails = Email::find()
+            //->where(['is', 'e_email_body_text', new Expression('NULL')]) /* TODO  */
+            ->andWhere(['e_email_to' => 'andrew.snake@wowfare.com']) /* TODO remove */
+            ->limit($limit)
+            ->offset($offset)
+            ->orderBy('e_id DESC') /* TODO to ASC */
+            //->asArray() /* TODO  */
+            ->all();
+
+        $processed = 0;
+        $db = Yii::$app->getDb();
+
+        foreach ($emails as $key => $email) {
+
+            $email->e_email_body_text = strip_tags($email->e_email_body_html);
+            $email->e_email_body_html = gzcompress($email->e_email_body_html, 9);
+            $email->save();
+
+            /*$sql = sprintf('UPDATE email SET e_email_body_html = COMPRESS(\'%s\') WHERE e_id = %d', $email->e_email_body_html, $email->e_id);
+            $db->createCommand($sql)->execute();*/
+
+            $processed++;
+        }
+
+        $time = number_format(round(microtime(true) - $time_start, 2), 2);
+        printf("\nExecute Time: %s, Processed: " . $processed, $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    private function cleanTmp($text)
+    {
+        $text = strip_tags($text);
+        //$text = preg_replace('| +|', ' ', $text);
+        //$text = preg_replace('|\s+|', ' ', $text);
+        //$text = preg_replace("/[\r\n]+/", "\n", $text);
+        //$text = preg_replace("/\s+/", ' ', $text);
+
+        $text = preg_replace("/[\r\n]+/", "\n", $text);
+        $text = preg_replace("/\s+/", ' ', $text);
+
+        return $text;
+    }
 
 	/**
 	 * @param string $modelPath

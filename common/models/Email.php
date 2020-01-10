@@ -135,7 +135,8 @@ class Email extends \yii\db\ActiveRecord
             [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'e_case_id'], 'integer'],
             [['e_is_new', 'e_is_deleted'], 'boolean'],
             [['e_email_from', 'e_email_to'], 'required'],
-            [['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
+            /*[['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],*/ /* TODO  */
+            [['e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
             [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id', 'e_email_from_name', 'e_email_to_name'], 'string', 'max' => 255],
             [['e_language_id'], 'string', 'max' => 5],
@@ -196,8 +197,6 @@ class Email extends \yii\db\ActiveRecord
         ];
     }
 
-
-
     /**
      * @return array
      */
@@ -212,6 +211,7 @@ class Email extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
+            /* TODO: e_email_body_html to zip */
             /*'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'e_created_user_id',
@@ -384,7 +384,7 @@ class Email extends \yii\db\ActiveRecord
         $data = [];
         $data['project_id'] = $this->e_project_id;
 
-        $content_data['email_body_html'] = $this->e_email_body_html;
+        $content_data['email_body_html'] = $this->e_email_body_html; /* TODO  */
         $content_data['email_body_text'] = $this->e_email_body_text;
         $content_data['email_subject'] = $this->e_email_subject;
         $content_data['email_reply_to'] = $this->e_email_from;

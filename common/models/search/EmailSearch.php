@@ -145,7 +145,6 @@ class EmailSearch extends Email
             ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
             ->andFilterWhere(['like', 'e_email_bc', $this->e_email_bc])
             ->andFilterWhere(['like', 'e_email_subject', $this->e_email_subject])
-            ->andFilterWhere(['like', 'e_email_body_html', $this->e_email_body_html])
             ->andFilterWhere(['like', 'e_email_body_text', $this->e_email_body_text])
             ->andFilterWhere(['like', 'e_attach', $this->e_attach])
             ->andFilterWhere(['like', 'e_email_data', $this->e_email_data])
@@ -192,13 +191,9 @@ class EmailSearch extends Email
             ],
         ]);
 
-        //var_dump($params);        exit;
-
         $this->load($params);
 
         if(isset($params['email_type_id']) && $params['email_type_id'] > 0) {
-
-            //echo $this->email_type_id; exit;
 
             $this->email_type_id = (int) $params['email_type_id'];
 
@@ -232,18 +227,11 @@ class EmailSearch extends Email
             $query->andWhere(['or', ['e_email_from' => $params['EmailSearch']['email']], ['and', ['e_email_to' => $params['EmailSearch']['email']], ['e_type_id' => Email::TYPE_INBOX]]]);
         }
 
-
-
-
-
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
         }
-
-
-
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -274,7 +262,6 @@ class EmailSearch extends Email
             ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
             ->andFilterWhere(['like', 'e_email_bc', $this->e_email_bc])
             ->andFilterWhere(['like', 'e_email_subject', $this->e_email_subject])
-            ->andFilterWhere(['like', 'e_email_body_html', $this->e_email_body_html])
             ->andFilterWhere(['like', 'e_email_body_text', $this->e_email_body_text])
             ->andFilterWhere(['like', 'e_attach', $this->e_attach])
             ->andFilterWhere(['like', 'e_email_data', $this->e_email_data])
