@@ -27,35 +27,9 @@ $("document").ready(function(){
         let source_src = $(this).data('source_src');
         let rateStr = '<div class="col-md-1"><div class="form-group"><label class="control-label" for="rate_audio_controls">Playback Rate</label> <input type="number" min="0.8" max="5" step="0.1" class="form-control" id="rate_audio_controls" name="rate_audio_controls" value="1"></div></div>';
 
-        $.ajax({
-            url: 'record',
-            data: { cid: source_src },
-            method: 'POST',
-            success: function( data ) {
-                console.log(data);
-                /*$('audio #source').attr('src', data);
-                $('audio').get(0).load();
-                $('audio').get(0).play();*/
-
-                modal.find('.modal-body').html(rateStr + '<div class="col-md-12"><audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source id="source" src="'+ data +'"></audio></div>');
-                modal.find('.modal-title').html('Play Call record');
-                modal.modal('show');
-            },
-            error: function (error) {
-                new PNotify({
-                    title: 'Error',
-                    text: 'Permission Denied',
-                    type: 'error'
-                });
-            },
-            complete: function () {
-                //au$('#source').remove();
-            }
-        });
-
-        /*modal.find('.modal-body').html(rateStr + '<div class="col-md-12"><audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio></div>');
+        modal.find('.modal-body').html(rateStr + '<div class="col-md-12"><audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio></div>');
         modal.find('.modal-title').html('Play Call record');
-        modal.modal('show');*/
+        modal.modal('show');
     });
 
     $(document).on('change', '#rate_audio_controls', function() {
