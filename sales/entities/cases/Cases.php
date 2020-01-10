@@ -299,12 +299,13 @@ class Cases extends ActiveRecord
     }
 
     /**
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function trash(?string $description = ''): void
+    public function trash(?int $creatorId, ?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_TRASH);
-        $this->recordEvent(new CasesTrashStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
+        $this->recordEvent(new CasesTrashStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_TRASH);
     }
 

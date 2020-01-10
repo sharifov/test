@@ -140,12 +140,13 @@ class CasesManageService
 
     /**
      * @param int $caseId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function trash(int $caseId, ?string $description = ''): void
+    public function trash(int $caseId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
-        $case->trash($description);
+        $case->trash($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
