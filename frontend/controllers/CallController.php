@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Conference;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
@@ -832,20 +833,35 @@ class CallController extends FController
         return $this->redirect(Yii::$app->request->referrer);
     }
 
-    public function actionRecord()
+    /**
+     * @param string $sid
+     * @param bool $cfRecord
+     * @return string
+     */
+    public function actionRecord(string $sid, bool $cfRecord = false):string
     {
-        $cid =  Yii::$app->request->get('cid');
-        $recordUrl = Call::find()->select(['c_recording_url'])->where(['c_call_sid' => $cid])->one();
-        $twilioHeaders = array_change_key_case(get_headers($recordUrl->c_recording_url, 1));
-
-        Yii::$app->response->format = Response::FORMAT_RAW;
-        $headers = Yii::$app->response->headers;
-        $headers->add('Accept-Ranges', 'bytes');
-        $headers->add('Content-Type', 'audio/x-wav');
-        if(isset($twilioHeaders['content-length'])){
-            $headers->add('Content-Length', $twilioHeaders['content-length']);
+        if (!$cfRecord){
+            $recordUrl = Call::find()->select(['c_recording_url'])->where(['c_call_sid' => $sid])->one();
+            $url = $recordUrl->c_recording_url;
+        } else {
+            $recordUrl = Conference::find()->select(['cf_recording_url'])->where(['cf_sid' => $sid])->one();
+            $url = $recordUrl->cf_recording_url;
         }
 
-        return file_get_contents($recordUrl->c_recording_url);
+        try {
+            $twilioHeaders = array_change_key_case(get_headers($url, 1));
+            Yii::$app->response->format = Response::FORMAT_RAW;
+            $headers = Yii::$app->response->headers;
+            $headers->add('Accept-Ranges', 'bytes');
+            $headers->add('Content-Type', 'audio/x-wav');
+            if(isset($twilioHeaders['content-length'])){
+                $headers->add('Content-Length', $twilioHeaders['content-length']);
+            }
+
+            return file_get_contents($url);
+        }
+        catch (Exception $e) {
+            echo $e->getMessage();
+        }
     }
 }
