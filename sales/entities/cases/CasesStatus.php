@@ -81,7 +81,7 @@ class CasesStatus
      * @param int|null $status
      * @return array
      */
-    public static function getAllowList(?int $status): array
+    public static function getAllowTransferList(?int $status): array
     {
         $list = [];
         if (!isset(self::STATUS_ROUTE_RULES[$status])) {

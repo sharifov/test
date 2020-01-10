@@ -951,19 +951,22 @@ class CasesController extends FController
      */
     public function actionChangeStatus()
     {
-        $creatorId = Yii::$app->user->id;
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        $creatorId = $user->id;
 
         $gid = (string)Yii::$app->request->get('gid');
         $case = $this->findModelByGid($gid);
 
-        $form = new CasesChangeStatusForm($case);
+        $form = new CasesChangeStatusForm($case, $user);
 
         $statusReasons = CasesStatus::STATUS_REASON_LIST;
 
         try {
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-                $isSimpleAgent = Yii::$app->user->identity->isSimpleAgent();
+                $isSimpleAgent = $user->isSimpleAgent();
 
                 if ($isSimpleAgent && empty($case->cs_category)) {
                     throw new \Exception('Status of a case without a category cannot be changed!');

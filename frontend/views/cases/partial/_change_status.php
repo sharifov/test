@@ -23,22 +23,17 @@ $pjaxId = 'pjax-cases-change-status-form';
     ]); ?>
 
     <?php
-    echo $form->errorSummary($model);
+        echo $form->errorSummary($model);
     ?>
     <?php
         $reasonCollapse = empty($model->hasErrors('reason')) && empty($model->hasErrors('message'))  ? 'collapse' : '';
         $messageCollapse = empty($model->hasErrors('message')) ? 'collapse' : '';
-
     ?>
     <?= $form->field($model, 'status')->dropDownList($model->getStatusList(), ['prompt' => '-']) ?>
 
     <?= $form->field($model, 'reason', ['options' => ['class' => "form-group required {$reasonCollapse}"]])->dropDownList($model->getReasonsList(),['prompt' => '-','id' => 'reason',]) ?>
 
-    <?= $form->field($model, 'message', [
-            'options' => [
-                    'class' => "form-group required {$messageCollapse}"
-            ]
-    ])->textarea(['rows' => 3]) ?>
+    <?= $form->field($model, 'message', ['options' => ['class' => "form-group required {$messageCollapse}"]])->textarea(['rows' => 3]) ?>
 
     <div class="form-group text-center">
         <?= Html::submitButton('Change Status', ['class' => 'btn btn-warning']) ?>

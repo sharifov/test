@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use sales\helpers\cases\CasesViewRenderHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
@@ -36,6 +37,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 <div class="cases-view">
 
@@ -50,9 +54,9 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
     <div class="x_panel">
         <div class="x_content" style="display: block;">
             <p>
-                <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status)?>
+                <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
                 <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->casesStatusLogs ? '(' . count($model->casesStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
-                <?= CasesViewRenderHelper::renderTakeButton($model, Yii::$app->user->id) ?>
+                <?= CasesViewRenderHelper::renderTakeButton($model, $user) ?>
                 <?/*= Html::a('Update', ['update', 'id' => $model->cs_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->cs_id], [
             'class' => 'btn btn-danger',
@@ -178,8 +182,8 @@ Modal::end();
 
 
 <?php
-    $ajaxUrl = \yii\helpers\Url::to(['cases/change-status', 'gid' => $model->cs_gid]);
-    $statusHistoryajaxUrl = \yii\helpers\Url::to(['cases/status-history', 'gid' => $model->cs_gid]);
+    $changeStatusAjaxUrl = \yii\helpers\Url::to(['cases/change-status', 'gid' => $model->cs_gid]);
+    $statusHistoryAjaxUrl = \yii\helpers\Url::to(['cases/status-history', 'gid' => $model->cs_gid]);
 
     $js = <<<JS
      $(document).on('click', '#btn-change-status', function(){
@@ -188,7 +192,7 @@ Modal::end();
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             $('#modalCaseSm-label').html($(this).attr('title'));
             
-            $.get('$ajaxUrl', function(data) {
+            $.get('$changeStatusAjaxUrl', function(data) {
                 modal.find('.modal-body').html(data);
             });
             
@@ -201,7 +205,7 @@ Modal::end();
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             $('#modalCase-label').html($(this).attr('title'));
             
-            $.get('$statusHistoryajaxUrl', function(data) {
+            $.get('$statusHistoryAjaxUrl', function(data) {
                 modal.find('.modal-body').html(data);
             });
             
