@@ -28,14 +28,13 @@ class CasesFollowUpStatusEventLogListener
      */
     public function handle(CasesFollowUpStatusEvent $event): void
     {
-        $createdUserId = Yii::$app->user->id ?? null;
         try {
             $this->casesStatusLogService->log(
                 $event->case->cs_id,
                 CasesStatus::STATUS_FOLLOW_UP,
                 $event->oldStatus,
                 null,
-                $createdUserId,
+                $event->creatorId,
                 $event->description
             );
         } catch (\Throwable $e) {

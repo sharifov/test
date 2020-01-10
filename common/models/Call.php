@@ -761,7 +761,7 @@ class Call extends \yii\db\ActiveRecord
                 if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
                         $casesManageService = Yii::createObject(CasesManageService::class);
-                        $casesManageService->take($this->c_case_id, $this->c_created_user_id);
+                        $casesManageService->take($this->c_case_id, $this->c_created_user_id, null);
                     } catch (\Throwable $exception) {
                         Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
                     }
@@ -834,7 +834,7 @@ class Call extends \yii\db\ActiveRecord
 
                         try {
                             $caseRepo = Yii::createObject(CasesRepository::class);
-                            $case->processing((int)$this->c_created_user_id);
+                            $case->processing((int)$this->c_created_user_id, null);
                             $caseRepo->save($case);
 
                             Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);

@@ -67,79 +67,86 @@ class CasesManageService
     /**
      * @param int $caseId
      * @param int $userId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function take(int $caseId, int $userId, ?string $description = ''): void
+    public function take(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
     {
-        $this->processing($caseId, $userId, $description);
+        $this->processing($caseId, $userId, $creatorId, $description);
     }
 
     /**
      * @param string $caseGid
      * @param int $userId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function takeByGid(string $caseGid, int $userId, ?string $description = ''): void
+    public function takeByGid(string $caseGid, int $userId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->findByGid($caseGid);
-        $this->processing($case->cs_id, $userId, $description);
+        $this->processing($case->cs_id, $userId, $creatorId, $description);
     }
 
     /**
      * @param int $caseId
      * @param int $userId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function processing(int $caseId, int $userId, ?string $description = ''): void
+    public function processing(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
         $user = $this->userRepository->find($userId);
         $this->guardAccessUserToCase($case, $user);
-        $case->processing($user->id, $description);
+        $case->processing($user->id, $creatorId, $description);
         $this->casesRepository->save($case);
     }
 
     /**
      * @param int $caseId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function pending(int $caseId, ?string $description = ''): void
+    public function pending(int $caseId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
-        $case->pending($description);
+        $case->pending($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
     /**
      * @param int $caseId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function followUp(int $caseId, ?string $description = ''): void
+    public function followUp(int $caseId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
-        $case->followUp($description);
+        $case->followUp($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
     /**
      * @param int $caseId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function solved(int $caseId, ?string $description = ''): void
+    public function solved(int $caseId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
-        $case->solved($description);
+        $case->solved($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
     /**
      * @param int $caseId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function trash(int $caseId, ?string $description = ''): void
+    public function trash(int $caseId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
-        $case->trash($description);
+        $case->trash($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
