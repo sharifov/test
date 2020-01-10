@@ -10,10 +10,12 @@ use webapi\src\response\messages\MessageValue;
  * @property $id
  * @property $uid
  * @property $gid
+ * @property $client_id
  */
 class LeadCreateValue extends MessageValue
 {
     public $id;
     public $uid;
     public $gid;
+    public $client_id;
 }

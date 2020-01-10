@@ -121,7 +121,8 @@ class LeadController extends BaseController
      *          "lead": {
      *               "id": 370949,
      *               "uid": "WD6q53PO3b",
-     *               "gid": "63e1505f4a8a87e6651048e3e3eae4e1"
+     *               "gid": "63e1505f4a8a87e6651048e3e3eae4e1",
+     *               "client_id": 1034
      *           }
      *       }
      *       "request": {
@@ -273,6 +274,7 @@ class LeadController extends BaseController
                         'id' => $lead->id,
                         'uid' => $lead->uid,
                         'gid' => $lead->gid,
+                        'client_id' => $lead->client_id,
                     ])
                 )
             )
