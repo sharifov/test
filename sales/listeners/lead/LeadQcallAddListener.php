@@ -38,7 +38,7 @@ class LeadQcallAddListener
                     $lead->status,
                     $lead->getCountOutCallsLastFlow()
                 ),
-                new FindWeightParams($lead->project_id),
+                new FindWeightParams($lead->project_id, $lead->status),
                 $lead->offset_gmt,
                 new FindPhoneParams($lead->project_id, $lead->l_dep_id)
             );

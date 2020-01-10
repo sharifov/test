@@ -7,6 +7,7 @@ use common\models\DepartmentPhoneProject;
 use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\Lead;
 use common\models\ProjectWeight;
+use common\models\StatusWeight;
 use sales\repositories\lead\LeadFlowRepository;
 use sales\repositories\lead\LeadQcallRepository;
 use Yii;
@@ -50,13 +51,13 @@ class QCallService
                 new Config($lead->status, $lead->getCountOutCallsLastFlow()),
                 $lead->offset_gmt,
                 new FindPhoneParams($lead->project_id, $lead->l_dep_id),
-                new FindWeightParams($lead->project_id)
+                new FindWeightParams($lead->project_id, $lead->status)
             );
         } else {
             $this->create(
                 $lead->id,
                 new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                new FindWeightParams($lead->project_id),
+                new FindWeightParams($lead->project_id, $lead->status),
                 $lead->offset_gmt,
                 new FindPhoneParams($lead->project_id, $lead->l_dep_id)
             );
@@ -373,9 +374,16 @@ class QCallService
      */
     private function findWeight(FindWeightParams $params): int
     {
+        $projectWeight = 0;
         if ($weight = ProjectWeight::find()->andWhere(['pw_project_id' => $params->projectId])->one()) {
-            return (int)$weight->pw_weight;
+            $projectWeight = (int)$weight->pw_weight;
         }
-        return 0;
+
+        $statusWeight = 0;
+        if ($weight = StatusWeight::find()->andWhere(['sw_status_id' => $params->statusId])->one()) {
+            $statusWeight = (int)$weight->sw_weight;
+        }
+
+        return ($projectWeight + $statusWeight);
     }
 }
