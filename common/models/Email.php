@@ -6,8 +6,11 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\EmailQuery;
 use DateTime;
+use frontend\components\CompressString;
+use frontend\components\EmailHtmlToText;
 use sales\entities\cases\Cases;
 use Yii;
+use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveRecord;
@@ -27,6 +30,7 @@ use yii\helpers\VarDumper;
  * @property string $e_email_subject
  * @property string $e_email_body_html
  * @property string $e_email_body_text
+ * @property string $e_email_body_blob
  * @property string $e_attach
  * @property string $e_email_data
  * @property int $e_type_id
@@ -135,8 +139,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'e_case_id'], 'integer'],
             [['e_is_new', 'e_is_deleted'], 'boolean'],
             [['e_email_from', 'e_email_to'], 'required'],
-            /*[['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],*/ /* TODO  */
-            [['e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
+            [['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
             [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id', 'e_email_from_name', 'e_email_to_name'], 'string', 'max' => 255],
             [['e_language_id'], 'string', 'max' => 5],
@@ -211,7 +214,16 @@ class Email extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            /* TODO: e_email_body_html to zip */
+            [
+                'class' => CompressString::class,
+                'inAttribute' => 'e_email_body_html',
+                'outAttribute' => 'e_email_body_blob',
+            ],
+            [
+                'class' => EmailHtmlToText::class,
+                'inAttribute' => 'e_email_body_html',
+                'outAttribute' => 'e_email_body_text',
+            ],
             /*'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'e_created_user_id',

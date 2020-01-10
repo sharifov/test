@@ -21,6 +21,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\log\GlobalLogFormatAttrService;
+use Soundasleep\Html2Text;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
@@ -484,52 +485,33 @@ ORDER BY lf.lead_id, id';
 		}
 	}
 
-    public function actionCompressEmail(int $limit = 1, int $offset = 0): void /* TODO limit to 1000 */
+    public function actionCompressEmail(int $limit = 1000, int $offset = 0, int $level = 9): void
     {
-        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
+        $this->_printInfo('Start', $this->action->id);
         $time_start = microtime(true);
+        $processed = 0;
 
         $emails = Email::find()
-            //->where(['is', 'e_email_body_text', new Expression('NULL')]) /* TODO  */
-            ->andWhere(['e_email_to' => 'andrew.snake@wowfare.com']) /* TODO remove */
+            ->where(['is', 'e_email_body_text', new Expression('NULL')])
             ->limit($limit)
             ->offset($offset)
-            ->orderBy('e_id DESC') /* TODO to ASC */
-            //->asArray() /* TODO  */
+            ->orderBy('e_id ASC')
             ->all();
 
-        $processed = 0;
-        $db = Yii::$app->getDb();
-
         foreach ($emails as $key => $email) {
-
-            $email->e_email_body_text = strip_tags($email->e_email_body_html);
-            $email->e_email_body_html = gzcompress($email->e_email_body_html, 9);
-            $email->save();
-
-            /*$sql = sprintf('UPDATE email SET e_email_body_html = COMPRESS(\'%s\') WHERE e_id = %d', $email->e_email_body_html, $email->e_id);
-            $db->createCommand($sql)->execute();*/
-
-            $processed++;
+            try {
+                $email->e_email_body_text = Html2Text::convert($email->e_email_body_html, ['ignore_errors' => true]);
+                $email->e_email_body_blob = gzcompress($email->e_email_body_html, $level);
+                $email->save();
+                $processed++;
+            } catch (Exception $e) {
+                echo $e->getMessage() . PHP_EOL;
+            }
         }
 
         $time = number_format(round(microtime(true) - $time_start, 2), 2);
-        printf("\nExecute Time: %s, Processed: " . $processed, $this->ansiFormat($time . ' s', Console::FG_RED));
-        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
-    }
-
-    private function cleanTmp($text)
-    {
-        $text = strip_tags($text);
-        //$text = preg_replace('| +|', ' ', $text);
-        //$text = preg_replace('|\s+|', ' ', $text);
-        //$text = preg_replace("/[\r\n]+/", "\n", $text);
-        //$text = preg_replace("/\s+/", ' ', $text);
-
-        $text = preg_replace("/[\r\n]+/", "\n", $text);
-        $text = preg_replace("/\s+/", ' ', $text);
-
-        return $text;
+        $this->_printResult($time, $processed);
+        $this->_printInfo('End', $this->action->id);
     }
 
 	/**
@@ -604,4 +586,22 @@ ORDER BY lf.lead_id, id';
 			}
 		}
 	}
+
+    /**
+     * @param string $info
+     * @param string $action
+     */
+    private function _printInfo(string $info, string $action = '')
+    {
+        printf("\n --- %s %s ---\n", $info, $this->ansiFormat(self::class . '/' . $action, Console::FG_YELLOW));
+    }
+
+    /**
+     * @param $time
+     * @param $processed
+     */
+    private function _printResult($time, $processed)
+    {
+        printf("\nExecute Time: %s, Processed: %s ", $this->ansiFormat($time . ' s', Console::FG_RED),  $processed);
+    }
 }
