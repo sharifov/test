@@ -3,6 +3,7 @@
 namespace sales\services\cases;
 
 use common\models\Employee;
+use common\models\Lead;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\Cases;
@@ -53,13 +54,13 @@ class CasesManageService
     }
 
     /**
-     * @param int $caseId
-     * @param int $leadId
+     * @param int|Cases $case
+     * @param int|Lead $lead
      */
-    public function assignLead(int $caseId, int $leadId): void
+    public function assignLead($case, $lead): void
     {
-        $case = $this->casesRepository->find($caseId);
-        $lead = $this->leadRepository->find($leadId);
+        $case = $this->finder->caseFind($case);
+        $lead = $this->finder->leadFind($lead);
         $case->assignLead($lead->id);
         $this->casesRepository->save($case);
     }
@@ -88,64 +89,64 @@ class CasesManageService
     }
 
     /**
-     * @param int $caseId
-     * @param int $userId
+     * @param int|Cases $case
+     * @param int|Employee $user
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function processing(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
+    public function processing($case, $user, ?int $creatorId, ?string $description = ''): void
     {
-        $case = $this->casesRepository->find($caseId);
-        $user = $this->userRepository->find($userId);
+        $case = $this->finder->caseFind($case);
+        $user = $this->finder->userFind($user);
         $this->guardAccessUserToCase($case, $user);
         $case->processing($user->id, $creatorId, $description);
         $this->casesRepository->save($case);
     }
 
     /**
-     * @param int $caseId
+     * @param int|Cases $case
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function pending(int $caseId, ?int $creatorId, ?string $description = ''): void
+    public function pending($case, ?int $creatorId, ?string $description = ''): void
     {
-        $case = $this->casesRepository->find($caseId);
+        $case = $this->finder->caseFind($case);
         $case->pending($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
     /**
-     * @param int $caseId
+     * @param int|Cases $case
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function followUp(int $caseId, ?int $creatorId, ?string $description = ''): void
+    public function followUp($case, ?int $creatorId, ?string $description = ''): void
     {
-        $case = $this->casesRepository->find($caseId);
+        $case = $this->finder->caseFind($case);
         $case->followUp($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
     /**
-     * @param int $caseId
+     * @param int|Cases $case
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function solved(int $caseId, ?int $creatorId, ?string $description = ''): void
+    public function solved($case, ?int $creatorId, ?string $description = ''): void
     {
-        $case = $this->casesRepository->find($caseId);
+        $case = $this->finder->caseFind($case);
         $case->solved($creatorId, $description);
         $this->casesRepository->save($case);
     }
 
     /**
-     * @param int $caseId
+     * @param int|Cases $case
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function trash(int $caseId, ?int $creatorId, ?string $description = ''): void
+    public function trash($case, ?int $creatorId, ?string $description = ''): void
     {
-        $case = $this->casesRepository->find($caseId);
+        $case = $this->finder->caseFind($case);
         $case->trash($creatorId, $description);
         $this->casesRepository->save($case);
     }
@@ -188,5 +189,4 @@ class CasesManageService
             }
         }
     }
-
 }
