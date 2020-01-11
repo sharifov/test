@@ -6,9 +6,9 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\EmailQuery;
 use DateTime;
-use frontend\components\CompressString;
-use frontend\components\EmailHtmlToText;
 use sales\entities\cases\Cases;
+use sales\model\email\behaviors\CompressText;
+use sales\model\email\behaviors\HtmlToText;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -214,15 +214,11 @@ class Email extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            [
-                'class' => CompressString::class,
-                'inAttribute' => 'e_email_body_html',
-                'outAttribute' => 'e_email_body_blob',
+            'body_html_to_text' => [
+                'class' => HtmlToText::class,
             ],
-            [
-                'class' => EmailHtmlToText::class,
-                'inAttribute' => 'e_email_body_html',
-                'outAttribute' => 'e_email_body_text',
+            'body_html_to_blob' => [
+                'class' => CompressText::class,
             ],
             /*'user' => [
                 'class' => BlameableBehavior::class,

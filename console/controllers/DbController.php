@@ -500,6 +500,7 @@ ORDER BY lf.lead_id, id';
 
         foreach ($emails as $key => $email) {
             try {
+                /* TODO  */
                 $email->e_email_body_text = Html2Text::convert($email->e_email_body_html, ['ignore_errors' => true]);
                 $email->e_email_body_blob = gzcompress($email->e_email_body_html, $level);
                 $email->save();
