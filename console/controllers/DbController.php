@@ -22,6 +22,7 @@ use sales\logger\db\LogDTO;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\log\GlobalLogFormatAttrService;
 use Soundasleep\Html2Text;
+use Soundasleep\Html2TextException;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
@@ -500,14 +501,11 @@ ORDER BY lf.lead_id, id';
 
         foreach ($emails as $key => $email) {
             try {
-                /* TODO  */
-                $email->e_email_body_text = Html2Text::convert($email->e_email_body_html, ['ignore_errors' => true]);
-                $email->e_email_body_blob = gzcompress($email->e_email_body_html, $level);
-                $email->save();
+                $email->setBodyTextAndBlob();
                 $processed++;
             } catch (Exception $e) {
                 echo $e->getMessage() . PHP_EOL;
-            }
+            } 
         }
 
         $time = number_format(round(microtime(true) - $time_start, 2), 2);

@@ -310,8 +310,6 @@ class EmailController extends FController
     {
         $model =$this->findModel($id);
 
-        $model->e_email_body_html;
-
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         $roleAccess = ($user->isAdmin() || $user->isSupervision() || $user->isExSuper() || $user->isSupSuper() || $user->isQa());
@@ -324,7 +322,7 @@ class EmailController extends FController
         }
 
         if(Yii::$app->request->get('preview')) {
-           return $model->e_email_body_html ?: '';
+           return $model->getEmailBodyHtml() ?: '';
         }
 
         return $this->render('view', [

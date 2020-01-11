@@ -4,6 +4,7 @@
  * @var $errors []
  */
 
+use dosamigos\ckeditor\CKEditor;
 use yii\bootstrap\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
@@ -52,21 +53,25 @@ if (empty($errors)) :
     <div class="form-group">
     	<?= $form->field($email,'e_email_subject')?>
     </div>
+
     <div class="form-group">
-		<?= $form->field($email, 'e_email_body_html')->widget(\dosamigos\ckeditor\CKEditor::class, [
-            'options' => [
-                'rows' => 6,
-                'readonly' => false
-            ],
-            'preset' => 'custom',
-            'clientOptions' => [
-                'height' => 500,
-                'allowedContent' => true,
-                'resize_enabled' => false,
-                'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                'removePlugins' => 'elementspath',
+        <?= CKEditor::widget([
+                'name' => 'e_email_body_html',
+                'value' => $email->getEmailBodyHtml(),
+                'options' => [
+                    'rows' => 6,
+                    'readonly' => false
+                ],
+                'preset' => 'custom',
+                'clientOptions' => [
+                    'height' => 500,
+                    'allowedContent' => true,
+                    'resize_enabled' => false,
+                    'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
+                    'removePlugins' => 'elementspath',
+                ]
             ]
-        ]) ?>
+        );?>
     </div>
     <div class="btn-wrapper">
         <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
