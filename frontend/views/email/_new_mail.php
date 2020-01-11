@@ -142,7 +142,7 @@ use yii\widgets\ActiveForm;
                     'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
                 ]
             ]
-        );?>
+        ) ?>
 
         <?//= $form->field($model, 'e_email_body_text')->textarea(['rows' => 6]) ?>
 

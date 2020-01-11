@@ -17,12 +17,11 @@ use common\models\Quote;
 use common\models\UserProjectParams;
 use frontend\models\UserSiteActivity;
 use sales\entities\cases\Cases;
+use sales\helpers\email\TextConvertingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\log\GlobalLogFormatAttrService;
-use Soundasleep\Html2Text;
-use Soundasleep\Html2TextException;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
@@ -486,30 +485,31 @@ ORDER BY lf.lead_id, id';
 		}
 	}
 
-    public function actionCompressEmail(int $limit = 1000, int $offset = 0, int $level = 9): void
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @param int $level
+     * @throws \Soundasleep\Html2TextException
+     */
+    public function actionCompressEmail(int $limit = 1000, int $offset = 0): void
     {
         $this->_printInfo('Start', $this->action->id);
-        $time_start = microtime(true);
+        $timeStart = microtime(true);
         $processed = 0;
 
-        $emails = Email::find()
-            ->where(['is', 'e_email_body_text', new Expression('NULL')])
-            ->limit($limit)
-            ->offset($offset)
-            ->orderBy('e_id ASC')
-            ->all();
-
-        foreach ($emails as $key => $email) {
+        foreach ($this->findEmailBodyTextEmpty($limit, $offset) as $email) {
             try {
-                $email->setBodyTextAndBlob();
+                $email->updateAttributes([
+                    'e_email_body_text' => TextConvertingHelper::htmlToText($email->e_email_body_html),
+                    'e_email_body_blob' => TextConvertingHelper::compress($email->e_email_body_html)
+                ]);
                 $processed++;
             } catch (Exception $e) {
                 echo $e->getMessage() . PHP_EOL;
             } 
         }
 
-        $time = number_format(round(microtime(true) - $time_start, 2), 2);
-        $this->_printResult($time, $processed);
+        $this->_printResult($timeStart, $processed);
         $this->_printInfo('End', $this->action->id);
     }
 
@@ -599,8 +599,24 @@ ORDER BY lf.lead_id, id';
      * @param $time
      * @param $processed
      */
-    private function _printResult($time, $processed)
+    private function _printResult($timeStart, $processed)
     {
+        $time = number_format(round(microtime(true) - $timeStart, 2), 2);
         printf("\nExecute Time: %s, Processed: %s ", $this->ansiFormat($time . ' s', Console::FG_RED),  $processed);
+    }
+
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @return array|Email[]
+     */
+    private function findEmailBodyTextEmpty(int $limit, int $offset)
+    {
+        return Email::find()
+            ->where(['is', 'e_email_body_text', new Expression('NULL')])
+            ->limit($limit)
+            ->offset($offset)
+            ->orderBy('e_id ASC')
+            ->all();
     }
 }

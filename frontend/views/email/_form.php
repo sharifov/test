@@ -49,7 +49,7 @@ use yii\widgets\ActiveForm;
                 'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
             ]
         ]
-    );?>
+    ) ?>
 
     <?= $form->field($model, 'e_attach')->textInput(['maxlength' => true]) ?>
 

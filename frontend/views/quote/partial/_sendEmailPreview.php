@@ -71,7 +71,7 @@ if (empty($errors)) :
                     'removePlugins' => 'elementspath',
                 ]
             ]
-        );?>
+        ) ?>
     </div>
     <div class="btn-wrapper">
         <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
