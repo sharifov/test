@@ -770,7 +770,7 @@ class Email extends \yii\db\ActiveRecord
      * @return int
      * @throws \Soundasleep\Html2TextException
      */
-    public function setBodyTextAndBlob()
+    public function setBodyTextAndBlob(): int
     {
         return $this->updateAttributes([
             'e_email_body_text' => TextConvertingHelper::htmlToText($this->e_email_body_html),
