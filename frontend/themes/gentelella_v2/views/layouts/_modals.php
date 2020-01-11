@@ -25,3 +25,9 @@ use yii\bootstrap4\Modal;
     //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
     'size' => Modal::SIZE_DEFAULT
 ]); ?>
+
+<?php echo Modal::widget([
+	'id' => 'modal-md',
+	'title' => '',
+	'size' => 'modal-md',
+]); ?>

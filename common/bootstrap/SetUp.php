@@ -2,6 +2,8 @@
 
 namespace common\bootstrap;
 
+use modules\flight\src\events\FlightCountPassengersChangedEvent;
+use modules\flight\src\listeners\FlightCountPassengersChangedEventListener;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\dispatchers\SimpleEventDispatcher;
@@ -145,6 +147,8 @@ class SetUp implements BootstrapInterface
                 SmsCreatedEvent::class => [],
                 SmsCreatedByIncomingSalesEvent::class => [SmsCreatedByIncomingSalesNotificationListener::class],
                 SmsCreatedByIncomingSupportsEvent::class => [SmsCreatedByIncomingSupportNotificationListener::class],
+
+				FlightCountPassengersChangedEvent::class => [FlightCountPassengersChangedEventListener::class]
             ]));
         });
     }

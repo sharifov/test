@@ -4,7 +4,7 @@ namespace modules\flight\models;
 
 use common\models\Employee;
 use common\models\ProductQuote;
-use Yii;
+use modules\flight\models\query\FlightQuoteQuery;
 
 /**
  * This is the model class for table "flight_quote".
@@ -148,25 +148,25 @@ class FlightQuote extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFlightQuoteStatusLogs()
-    {
+    public function getFlightQuoteStatusLogs(): \yii\db\ActiveQuery
+	{
         return $this->hasMany(FlightQuoteStatusLog::class, ['qsl_flight_quote_id' => 'fq_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFlightQuoteTrips()
-    {
+    public function getFlightQuoteTrips(): \yii\db\ActiveQuery
+	{
         return $this->hasMany(FlightQuoteTrip::class, ['fqt_flight_quote_id' => 'fq_id']);
     }
 
     /**
      * {@inheritdoc}
-     * @return \modules\flight\models\query\FlightQuoteQuery the active query used by this AR class.
+     * @return FlightQuoteQuery the active query used by this AR class.
      */
     public static function find()
     {
-        return new \modules\flight\models\query\FlightQuoteQuery(static::class);
+        return new FlightQuoteQuery(static::class);
     }
 }

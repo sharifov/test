@@ -1,69 +1,97 @@
 <?php
 
-use modules\flight\models\forms\FlightForm;
+use modules\flight\models\Flight;
+use modules\flight\models\forms\ItineraryEditForm;
+use modules\flight\src\helpers\FlightFormatHelper;
+use \common\widgets\Alert;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model FlightForm */
+/**
+ * @var $itineraryForm ItineraryEditForm
+ */
 
-$pjaxId = 'pjax-flight-update'
+
+$pjaxId = 'pjax-flight-update';
+
+$itineraryFormId = $itineraryForm->formName() . '-form';
 ?>
 <div class="flight-update-ajax">
     <div class="hotel-form">
         <script>
-            pjaxOffFormSubmit('#<?=$pjaxId?>');
+            pjaxOffFormSubmit('#<?= $pjaxId ?>');
         </script>
-        <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
-        <?php
-            $form = ActiveForm::begin([
-                'options' => ['data-pjax' => true],
-                'action' => ['/flight/flight/update-ajax', 'id' => $model->fl_id],
-                'method' => 'post'
-            ]);
+        <?php Pjax::begin(['id' => $pjaxId, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 
-            $arrayRange = array_combine(range(1, 9), range(1, 9));
+        <div class="clearfix"></div>
+        <div class="request-form collapse in show" id="request" aria-expanded="true">
+            <div id="modeFlightSegments" data-value="edit" style="display: none"></div>
+            <div class="sl-itinerary-form2">
+				<?php $form = ActiveForm::begin([
+					'action' => ['/flight/flight/ajax-update-itinerary'],
+					'enableClientValidation' => false,
+					'options' => [
+						'data-pjax' => true
+					]
+				]); ?>
 
-        ?>
+				<?php
+				    echo $form->errorSummary($itineraryForm);
+				?>
 
-        <?php
-            echo $form->errorSummary($model);
-        ?>
+				<?= Html::hiddenInput('flightId', $itineraryForm->flightId) ?>
 
-        <div class="row">
-            <div class="col-md-4">
-                <?= $form->field($model, 'fl_product_id')->input('number', ['min' => 0]) ?>
-            </div>
-            <div class="col-md-4">
-                <?= $form->field($model, 'fl_trip_type_id')->input('number', ['min' => 0]) ?>
-            </div>
-            <div class="col-md-4">
-                <?= $form->field($model, 'fl_cabin_class')->textInput() ?>
+                <div class="sl-itinerary-form__tabs">
+                    <div class="sl-itinerary-form__tab sl-itinerary-form__tab--rt js-tab"
+                         id="flight-segments">
+						<?= $this->render('partial/_formFlightSegment', [
+							'model' => $itineraryForm,
+							'form' => $form
+                        ]) ?>
+                    </div>
+                </div>
+
+                <div class="row ">
+                    <div class="col-sm-3">
+						<?= $form->field($itineraryForm, 'cabin', [
+						])->dropDownList(Flight::getCabinClassList(), [
+							'prompt' => '---']) ?>
+                    </div>
+                    <div class="col-sm-2">
+						<?= $form->field($itineraryForm, 'adults')->dropDownList(FlightFormatHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
+                    </div>
+                    <div class="col-sm-2">
+						<?= $form->field($itineraryForm, 'children')->dropDownList(FlightFormatHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
+                    </div>
+                    <div class="col-sm-2">
+						<?= $form->field($itineraryForm, 'infants')->dropDownList(FlightFormatHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+						<?= Alert::widget() ?>
+                    </div>
+                </div>
+
+                <div class="btn-wrapper text-center" style="margin-top: 10px;">
+
+					<?= Html::submitButton('<i class="fa fa-check"></i> Save flight request', [
+						'class' => 'btn btn-success',
+					]) ?>
+
+                </div>
+
+				<?php ActiveForm::end(); ?>
             </div>
         </div>
 
-
-        <div class="row">
-            <div class="col-md-4">
-                <?= $form->field($model, 'fl_adults')->dropDownList($arrayRange, ['prompt' => '-']) ?>
-            </div>
-            <div class="col-md-4">
-                <?= $form->field($model, 'fl_children')->dropDownList($arrayRange, ['prompt' => '-']) ?>
-            </div>
-            <div class="col-md-4">
-                <?= $form->field($model, 'fl_infants')->dropDownList($arrayRange, ['prompt' => '-']) ?>
-            </div>
-        </div>
-
-        <div class="form-group text-center">
-            <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
-        </div>
-
-        <?php ActiveForm::end(); ?>
-        <?php \yii\widgets\Pjax::end(); ?>
+        <?php Pjax::end(); ?>
     </div>
 </div>
-
 <?php
 $js = <<<JS
 

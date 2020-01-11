@@ -189,4 +189,13 @@ class Product extends \yii\db\ActiveRecord
     {
         return new ProductQuery(static::class);
     }
+
+	/**
+	 * @param int $employeeId
+	 * @return bool
+	 */
+	public function canAgentEdit(int $employeeId): bool
+	{
+		return ($this->prLead->employee_id && $this->prLead->employee_id === $employeeId);
+	}
 }

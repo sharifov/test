@@ -9,4 +9,5 @@ class CodeExceptionsModule
     public const ORDER = 12;
     public const API = 13;
     public const DEPARTMENT = 14;
+    public const FLIGHT = 15;
 }

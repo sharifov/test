@@ -4,6 +4,8 @@ namespace modules\flight\models;
 
 use common\models\Product;
 use modules\flight\models\query\FlightQuery;
+use modules\flight\src\events\FlightCountPassengersChangedEvent;
+use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
 
 /**
@@ -17,6 +19,8 @@ use yii\db\ActiveQuery;
  * @property int|null $fl_children
  * @property int|null $fl_infants
  *
+ * @property bool $enableActiveRecordEvents
+ *
  * @property Product $flProduct
  * @property FlightPax[] $flightPaxes
  * @property FlightQuote[] $flightQuotes
@@ -26,6 +30,7 @@ use yii\db\ActiveQuery;
  */
 class Flight extends \yii\db\ActiveRecord
 {
+	use EventTrait;
 
     public const TRIP_TYPE_ONE_WAY           = 1;
     public const TRIP_TYPE_ROUND_TRIP        = 2;
@@ -48,6 +53,8 @@ class Flight extends \yii\db\ActiveRecord
         self::CABIN_CLASS_BUSINESS    => 'Business',
         self::CABIN_CLASS_FIRST       => 'First',
     ];
+
+    public $enableActiveRecordEvents = true;
 
     /**
      * @return string
@@ -157,4 +164,63 @@ class Flight extends \yii\db\ActiveRecord
     {
         return self::CABIN_CLASS_LIST[$this->fl_cabin_class] ?? '-';
     }
+
+	/**
+	 * @param string $cabin
+	 * @param int $adults
+	 * @param int $children
+	 * @param int $infants
+	 */
+    public function editItinerary(string $cabin, int $adults, int $children, int $infants): void
+	{
+		$this->fl_cabin_class = $cabin;
+		$this->editPassengers($adults, $children, $infants);
+	}
+
+	/**
+	 * @param int $adults
+	 * @param int $children
+	 * @param int $infants
+	 */
+	public function editPassengers(int $adults, int $children, int $infants): void
+	{
+		if ($this->fl_adults !== $adults || $this->fl_children !== $children || $this->fl_infants !== $infants) {
+			$this->recordEvent(new FlightCountPassengersChangedEvent($this));
+		}
+		$this->fl_adults = $adults;
+		$this->fl_children = $children;
+		$this->fl_infants = $infants;
+	}
+
+	/**
+	 * @param string|null $type
+	 */
+	public function setTripType(string $type = null): void
+	{
+		if ($type) {
+			$list = self::getTripTypeList();
+			if (isset($list[$type])) {
+				$this->fl_trip_type_id = $type;
+				return;
+			}
+		}
+		$this->fl_trip_type_id = null;
+	}
+
+	/**
+	 * @return void
+	 */
+	public function disableAREvents(): void
+	{
+		$this->enableActiveRecordEvents = false;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function updateLastAction() : int
+	{
+		return 1;
+//		return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+	}
 }

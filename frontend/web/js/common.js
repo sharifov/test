@@ -1,9 +1,9 @@
 /** v.1.0 **/
 
-;( function () {
+;( function (window) {
     window.pjaxOffFormSubmit = function pjaxOffFormSubmit(selector) {
         if (typeof selector === 'string' && $(selector).length) {
             $(document).off('submit', selector + ' form[data-pjax]');
         }
     };
-})();
+})(window);
