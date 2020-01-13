@@ -80,6 +80,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const ROLE_SUP_SUPER = 'sup_super';
     public const ROLE_EX_AGENT = 'ex_agent';
     public const ROLE_EX_SUPER = 'ex_super';
+    /** admin child role  */
+    public const ROLE_SALES_SENIOR = 'sales_senior';
 
     public const SCENARIO_REGISTER = 'register';
 
@@ -224,7 +226,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isAdmin(): bool
     {
-        return in_array(self::ROLE_ADMIN, $this->getRoles(true), true);
+        return
+            in_array(self::ROLE_ADMIN, $this->getRoles(true), true)
+            || in_array(self::ROLE_SALES_SENIOR, $this->getRoles(true), true);
     }
 
     /**
@@ -240,6 +244,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return !$this->canRoles([
             self::ROLE_SUPER_ADMIN,
             self::ROLE_ADMIN,
+            self::ROLE_SALES_SENIOR,
             self::ROLE_SUP_SUPER,
             self::ROLE_EX_SUPER
         ]);
