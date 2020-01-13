@@ -318,6 +318,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Action Logs', 'url' => ['/log/action'], 'icon' => 'bars'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+                ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'cogs'],
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
 				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
