@@ -3,6 +3,7 @@
 namespace sales\helpers\email;
 
 use Soundasleep\Html2Text;
+use Soundasleep\Html2TextException;
 
 class TextConvertingHelper
 {
@@ -10,15 +11,15 @@ class TextConvertingHelper
      * @param string $text
      * @param array $options
      * @return string
-     * @throws \Soundasleep\Html2TextException
      */
-    public static function htmlToText(string $text, array $options = ['ignore_errors' => false, 'drop_links' => false]): string
+    public static function htmlToText(string $text, array $options = ['ignore_errors' => true, 'drop_links' => false]): string
     {
         try {
             $text = Html2Text::convert($text, $options);
-        } catch (Exception $e) {
+        } catch (Html2TextException $e) {
             $text = strip_tags($text);
         }
+
         return $text;
     }
 
