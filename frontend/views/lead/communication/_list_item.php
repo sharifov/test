@@ -68,13 +68,9 @@ use \common\models\Call;
         <div class="card-body">
             <?php if($call->c_recording_url):?>
 
-
                 <?=Html::button(gmdate('i:s', $call->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                    ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $call->c_recording_url]) ?>
+                    ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => yii\helpers\Url::to(['call/record', 'sid' =>  $call->c_call_sid ]) ]) ?>
 
-                <?/*<audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
-                    <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
-                </audio>*/?>
             <?php else: ?>
                 <div><?=$call->getStatusIcon()?>  <?=$call->getStatusName()?></div>
             <?php endif;?>
@@ -83,7 +79,6 @@ use \common\models\Call;
             <?php if ($call->calls):?>
                 <?php \sales\helpers\communication\CommunicationHelper::renderChildCallsRecursive($call->calls)?>
             <?php endif;?>
-
 
         </div>
     </div>

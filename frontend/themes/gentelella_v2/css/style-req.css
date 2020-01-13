@@ -5751,6 +5751,9 @@ input[disabled] + .radio-tab__text {
 #update_hotel_request_dest_type_wrap input.select2-search__field {
     width: initial !important;
 }
+.form-control.is-invalid {
+    background-position: right calc(0.775em + 0.1875rem) center;
+}
 /****** END OTHER ******/
 
 
@@ -5763,6 +5766,11 @@ input[disabled] + .radio-tab__text {
 @media only screen and (max-width: 1299px) {
     .create-lead-main-sidebars {
         flex-direction: column;
+    }
+}
+@media only screen and (min-width: 992px) {
+    .modal-md {
+        max-width: 800px !important;
     }
 }
 @media only screen and (max-width: 580px) {

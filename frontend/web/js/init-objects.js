@@ -27,7 +27,7 @@ $("document").ready(function(){
         let source_src = $(this).data('source_src');
         let rateStr = '<div class="col-md-1"><div class="form-group"><label class="control-label" for="rate_audio_controls">Playback Rate</label> <input type="number" min="0.8" max="5" step="0.1" class="form-control" id="rate_audio_controls" name="rate_audio_controls" value="1"></div></div>';
 
-        modal.find('.modal-body').html(rateStr + '<div class="col-md-12"><audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio></div>');
+        modal.find('.modal-body').html(rateStr + '<div class="col-md-12"><audio preload="auto" controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio></div>');
         modal.find('.modal-title').html('Play Call record');
         modal.modal('show');
     });

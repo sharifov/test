@@ -2,8 +2,10 @@
 
 namespace sales\forms\cases;
 
+use common\models\Employee;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
+use sales\entities\cases\CasesStatusTransferList;
 use yii\base\Model;
 
 /**
@@ -14,6 +16,7 @@ use yii\base\Model;
  * @property int $caseStatus
  * @property array $statusList
  * @property string $caseGid
+ * @property Employee $user
  */
 class CasesChangeStatusForm extends Model
 {
@@ -24,17 +27,14 @@ class CasesChangeStatusForm extends Model
 
     public $caseGid;
     private $caseStatus;
+    private $user;
 
-    /**
-     * CasesChangeStatusForm constructor.
-     * @param Cases $case
-     * @param array $config
-     */
-    public function __construct(Cases $case, $config = [])
+    public function __construct(Cases $case, Employee $user, $config = [])
     {
         parent::__construct($config);
         $this->caseStatus = $case->cs_status;
         $this->caseGid = $case->cs_gid;
+        $this->user = $user;
     }
 
     /**
@@ -44,7 +44,7 @@ class CasesChangeStatusForm extends Model
     {
         return [
             ['status', 'required'],
-            [['status'], 'integer'],
+            ['status', 'integer'],
             ['status', 'in', 'range' => array_keys($this->getStatusList()), 'message' => 'This status disallow'],
             ['status', 'validateReason'],
 
@@ -71,7 +71,7 @@ class CasesChangeStatusForm extends Model
      */
     public function getStatusList(): array
     {
-        $list = CasesStatus::getAllowList($this->caseStatus);
+        $list = CasesStatusTransferList::getAllowTransferListByUser($this->caseStatus, $this->user);
         if (isset($list[CasesStatus::STATUS_PROCESSING])) {
             unset($list[CasesStatus::STATUS_PROCESSING]);
         }
@@ -119,5 +119,4 @@ class CasesChangeStatusForm extends Model
             $this->message = $this->reason ?? '';
         }
     }
-
 }

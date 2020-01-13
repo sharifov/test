@@ -1,5 +1,6 @@
 <?php
 
+use common\widgets\Alert;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -57,6 +58,12 @@ The SPA service at Christmas is closed on December 25 and January 1.'
          *
          */
     ?>
+
+    <div class="row">
+        <div class="col-md-12">
+			<?= Alert::widget() ?>
+        </div>
+    </div>
 
     <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>

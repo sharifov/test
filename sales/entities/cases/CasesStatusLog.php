@@ -31,7 +31,7 @@ class CasesStatusLog extends ActiveRecord
      * @param int $caseId
      * @param int $toStatus
      * @param int|null $fromStatus
-     * @param int|null $createdUserId
+     * @param int|null $creatorId
      * @param int|null $ownerId
      * @param string|null $description
      * @return CasesStatusLog
@@ -40,7 +40,7 @@ class CasesStatusLog extends ActiveRecord
         int $caseId,
         int $toStatus,
         ?int $fromStatus,
-        ?int $createdUserId,
+        ?int $creatorId,
         ?int $ownerId,
         ?string $description = ''
     ): self
@@ -49,7 +49,7 @@ class CasesStatusLog extends ActiveRecord
         $status->csl_case_id = $caseId;
         $status->csl_to_status = $toStatus;
         $status->csl_from_status = $fromStatus;
-        $status->csl_created_user_id = $createdUserId;
+        $status->csl_created_user_id = $creatorId;
         $status->csl_owner_id = $ownerId;
         $status->csl_description = $description;
         $status->csl_start_dt = date('Y-m-d H:i:s');

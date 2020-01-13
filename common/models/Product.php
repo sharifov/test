@@ -211,6 +211,7 @@ class Product extends \yii\db\ActiveRecord
         return new ProductQuery(static::class);
     }
 
+<<<<<<< HEAD
     /**
      * @return array
      */
@@ -218,4 +219,14 @@ class Product extends \yii\db\ActiveRecord
     {
         return array_intersect_key($this->attributes, array_flip($this->extraFields()));
     }
+=======
+	/**
+	 * @param int $employeeId
+	 * @return bool
+	 */
+	public function canAgentEdit(int $employeeId): bool
+	{
+		return ($this->prLead->employee_id && $this->prLead->employee_id === $employeeId);
+	}
+>>>>>>> develop
 }

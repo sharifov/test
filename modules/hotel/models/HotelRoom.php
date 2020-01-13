@@ -98,7 +98,6 @@ class HotelRoom extends \yii\db\ActiveRecord
             }
         }
 
-
         if ($adults) {
             $data['adults'] = $adults;
         }

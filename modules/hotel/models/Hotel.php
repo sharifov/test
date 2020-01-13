@@ -121,63 +121,63 @@ class Hotel extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public function getSearchData(): array
-    {
+	public function getSearchData(): array
+	{
 
-            $params = [];
+		$params = [];
 
-            $apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            // $service = $hotel->apiService;
+		$apiHotelService = Yii::$app->getModule('hotel')->apiService;
+		// $service = $hotel->apiService;
 
-            $rooms = [];
+		$rooms = [];
 
-            if ($this->hotelRooms) {
-                foreach ($this->hotelRooms as $room) {
-                    $rooms[] = $room->getDataSearch();
-                }
+		if ($this->hotelRooms) {
+			foreach ($this->hotelRooms as $room) {
+				$rooms[] = $room->getDataSearch();
+			}
 
-            }
+		}
 
-            /*$rooms[] = ['rooms' => 1, 'adults' => 1];
-            $rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
-                ['paxType' => 1, 'age' => 6],
-                ['paxType' => 1, 'age' => 14],
-            ]];*/
+		/*$rooms[] = ['rooms' => 1, 'adults' => 1];
+		$rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
+			['paxType' => 1, 'age' => 6],
+			['paxType' => 1, 'age' => 14],
+		]];*/
 
-            //            if ($this->ph_max_star_rate) {
-            //
-            //            }
+		//            if ($this->ph_max_star_rate) {
+		//
+		//            }
 
-            if ($this->ph_max_price_rate) {
-                $params['maxRate'] = $this->ph_max_price_rate;
-            }
+		if ($this->ph_max_price_rate) {
+			$params['maxRate'] = $this->ph_max_price_rate;
+		}
 
-            if ($this->ph_min_price_rate) {
-                $params['minRate'] = $this->ph_min_price_rate;
-            }
+		if ($this->ph_min_price_rate) {
+			$params['minRate'] = $this->ph_min_price_rate;
+		}
 
-            // $params['maxRate'] = 120;
-            //$params['maxHotels'] = 10;
+		// $params['maxRate'] = 120;
+		//$params['maxHotels'] = 10;
 
-            // MaxRatesPerRoom
+		// MaxRatesPerRoom
 
-            $keyCache = 'hotel_' . $this->ph_id . '_' . implode('_', $params);
-            $result = Yii::$app->cache->get($keyCache);
+		$keyCache = 'hotel_' . $this->ph_id . '_' . implode('_', $params);
+		$result = Yii::$app->cache->get($keyCache);
 
-            if($result === false) {
-                $response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
+		if ($result === false) {
+			$response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
 
-                if (isset($response['data']['hotels'])) {
-                    $result = $response['data'];
-                    Yii::$app->cache->set($keyCache, $result, 100);
-                } else {
-                    $result = [];
-                    Yii::error('Not found response[data][hotels]', 'Model:Hotel:getSearchData:apiService');
-                }
-            }
+			if (isset($response['data']['hotels'])) {
+				$result = $response['data'];
+				Yii::$app->cache->set($keyCache, $result, 100);
+			} else {
+				$result = [];
+				Yii::error('Not found response[data][hotels]', 'Model:Hotel:getSearchData:apiService');
+			}
+		}
 
-            return $result;
-    }
+		return $result;
+	}
 
 
     /**

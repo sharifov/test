@@ -36,9 +36,6 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
                 </li>
 
                 <?//php if ($is_manager) : ?>
-                <!--                    <li>-->
-                <!--                        --><?//=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
-                <!--                    </li>-->
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                     <div class="dropdown-menu" role="menu">
