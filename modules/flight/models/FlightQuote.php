@@ -4,13 +4,11 @@ namespace modules\flight\models;
 
 use common\models\Employee;
 use common\models\ProductQuote;
-<<<<<<< HEAD
 use sales\interfaces\QuoteCommunicationInterface;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-=======
 use modules\flight\models\query\FlightQuoteQuery;
->>>>>>> develop
+
 
 /**
  * This is the model class for table "flight_quote".
