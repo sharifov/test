@@ -1,14 +1,16 @@
 <?php
 
 use common\models\Employee;
+use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesCategory;
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use sales\entities\cases\Cases;
 use \sales\entities\cases\CasesStatus;
 use yii\helpers\Url;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -53,10 +55,31 @@ if ($user->isAdmin()) {
         </div>
     </div>
 
-    <?= GridView::widget([
+    <?php
+        $gridId = 'cases-grid-id';
+    ?>
+
+    <div class="multiple-update-summary"></div>
+
+    <?php if ($user->isAdmin() || $user->isExSuper() || $user->isSupSuper()): ?>
+        <?= MultipleUpdateButtonWidget::widget([
+            'modalId' => 'modal-df',
+            'showUrl' => Url::to(['/cases-multiple-update/show']),
+            'gridId' => $gridId,
+        ]) ?>
+    <?php endif;?>
+
+    <?php Pjax::begin(['id' => 'cases-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+
+        <?= GridView::widget([
+        'id' => $gridId,
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
+            [
+                'class' => '\kartik\grid\CheckboxColumn',
+                'visible' => $user->isAdmin() || $user->isExSuper() || $user->isSupSuper(),
+            ],
             [
                 'attribute' => 'cs_id',
                 'options' => [
@@ -158,4 +181,6 @@ if ($user->isAdmin()) {
 
         ],
     ]); ?>
+
+    <?php Pjax::end() ?>
 </div>
