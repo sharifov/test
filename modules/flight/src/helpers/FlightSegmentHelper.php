@@ -32,10 +32,10 @@ class FlightSegmentHelper
 	}
 
 	/**
-	 * @param string $type
+	 * @param int $type
 	 * @return string
 	 */
-	public static function flexibilityTypeName(string $type): string
+	public static function flexibilityTypeName(int $type): string
 	{
 		return ArrayHelper::getValue(self::flexibilityTypeList(), $type);
 	}

@@ -1,10 +1,11 @@
 <?php
 
 use common\models\Product;
-use modules\hotel\models\search\HotelQuoteSearch;
+use modules\flight\models\Flight;
+use modules\flight\models\forms\ItineraryEditForm;
+use modules\flight\src\helpers\FlightFormatHelper;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
-use yii\widgets\Pjax;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $product Product */
@@ -28,10 +29,48 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
                 <?php if ($product->pr_description):?>
                     <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
                 <?php endif;?>
-                (<?=count($product->productQuotes)?>)
+                (<?=count($product->flight->flightQuotes)?>)
             </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?//php if ($is_manager) : ?>
+                    <li>
+                        <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
+                            <?php
+                            switch ($product->flight->fl_trip_type_id) {
+                                case Flight::TRIP_TYPE_ONE_WAY : $iconClass = 'fa fa-long-arrow-right';
+                                    break;
+                                case Flight::TRIP_TYPE_ROUND_TRIP : $iconClass = 'fa fa-exchange';
+                                    break;
+                                case Flight::TRIP_TYPE_MULTI_DESTINATION : $iconClass = 'fa fa-random';
+                                    break;
+                                default: $iconClass = '';
+                            }
+                            ?>
+                            <i class="<?=$iconClass?> text-success" aria-hidden="true" style="margin-right: 10px;"></i>
+                            <?= FlightFormatHelper::tripTypeName($product->flight->fl_trip_type_id) ?> •
+                            <b><?= FlightFormatHelper::cabinName($product->flight->fl_cabin_class) ?></b> •
+                            <?= (int)$product->flight->fl_adults + (int)$product->flight->fl_children + (int)$product->flight->fl_infants ?> pax
+                        </span>
+                    </li>
+                    <li>
+                        <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
+                            <?php if ($product->flight->fl_adults): ?>
+                                <span style="font-size: 12px; color: #596b7d;display: flex;align-items: center;"><strong class="label label-success"
+                                                                                       style="margin-left: 7px;padding: 4px 6px;margin-right: 2px;"
+                                              style="margin-left: 7px;"><?= $product->flight->fl_adults ?></strong> ADT</span>
+                            <?php endif; ?>
+                                <?php if ($product->flight->fl_children): ?>
+                                    <span style="font-size: 12px; color: #596b7d;display: flex;align-items: center;"><strong class="label label-success"
+                                                                                           style="margin-left: 7px;padding: 4px 6px;margin-right: 2px;"
+                                                  style="margin-left: 7px;"><?= $product->flight->fl_children ?></strong> CHD</span>
+                                <?php endif; ?>
+                                <?php if ($product->flight->fl_infants): ?>
+                                    <span style="font-size: 12px; color: #596b7d;display: flex;align-items: center;"><strong class="label label-success"
+                                                                                           style="margin-left: 7px;padding: 4px 6px;margin-right: 2px;"
+                                                  style="margin-left: 7px;"><?= $product->flight->fl_infants ?></strong> INF</span>
+                                <?php endif; ?>
+                        </span>
+                    </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                         <div class="dropdown-menu" role="menu">
@@ -50,7 +89,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
 //                            ]) ?>
 
                             <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
-                                'data-url' => \yii\helpers\Url::to([
+                                'data-url' => Url::to([
                                     '/flight/flight/ajax-update-itinerary-view',
                                     'id' => $product->flight->fl_id
                                 ]),
@@ -74,15 +113,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: none">
-            <?//php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
-                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
-<!--                --><?//= $this->render('_view_search', [
-//                    'model' => $product->hotel,
-//                    //'dataProviderQuotes' => $dataProviderQuotes
-//                    //'dataProviderRooms'
-//                ]) ?>
-                <?php \yii\widgets\Pjax::end();?>
-            <?//php endif; ?>
+            <?= $this->render('_view_flight_request', [ 'itineraryForm' => (new ItineraryEditForm($product->flight)) ]) ?>
         </div>
     </div>
 <?//php \yii\widgets\Pjax::end()?>

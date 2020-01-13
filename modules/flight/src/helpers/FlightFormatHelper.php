@@ -35,4 +35,13 @@ class FlightFormatHelper
 			Flight::TRIP_TYPE_MULTI_DESTINATION => 'Multi destination'
 		];
 	}
+
+	/**
+	 * @param string|null $type
+	 * @return string|null
+	 */
+	public static function tripTypeName(?string $type): ?string
+	{
+		return ArrayHelper::getValue(self::tripTypeList(), $type);
+	}
 }
