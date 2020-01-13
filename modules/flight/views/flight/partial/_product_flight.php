@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Product;
+use common\widgets\Alert;
 use modules\flight\models\Flight;
 use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\helpers\FlightFormatHelper;
@@ -9,6 +10,7 @@ use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $product Product */
+/* @var  $pjaxRequest bool */
 
 
 
@@ -19,9 +21,12 @@ $searchModel = new HotelQuoteSearch();
 $params = Yii::$app->request->queryParams;
 $params['HotelQuoteSearch']['hq_hotel_id'] = $model->ph_id;
 $dataProviderQuotes = $searchModel->searchProduct($params);*/
+$pjaxId = 'pjax-product-' . $product->flight->fl_id;
+$pjaxRequest = $pjaxRequest ?? false;
 
+$chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
 ?>
-<?//php \yii\widgets\Pjax::begin(['id' => 'pjax-product-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
+<?php \yii\widgets\Pjax::begin(['id' => $pjaxId,  'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 2000])?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
@@ -93,7 +98,8 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
                                     '/flight/flight/ajax-update-itinerary-view',
                                     'id' => $product->flight->fl_id
                                 ]),
-                                'data-hotel-id' => $product->flight->fl_id,
+                                'data-flight-id' => $product->flight->fl_id,
+                                'data-pjax-id' => $pjaxId,
                                 'class' => 'dropdown-item text-warning btn-update-flight-request'
                             ]) ?>
 
@@ -107,16 +113,21 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
                     </li>
                 <?//php endif; ?>
                 <li>
-                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    <a class="collapse-link"><i class="<?= $chevronClass ?>"></i></a>
                 </li>
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: none">
+        <div class="x_content" <?php if(!$pjaxRequest): ?>style="display: none"<?php endif; ?>>
+            <div class="row">
+                <div class="col-md-12">
+					<?= Alert::widget() ?>
+                </div>
+            </div>
             <?= $this->render('_view_flight_request', [ 'itineraryForm' => (new ItineraryEditForm($product->flight)) ]) ?>
         </div>
     </div>
-<?//php \yii\widgets\Pjax::end()?>
+<?php \yii\widgets\Pjax::end()?>
 
 
 
@@ -127,13 +138,12 @@ $js = <<<JS
    $('body').off('click', '.btn-update-flight-request').on('click', '.btn-update-flight-request', function (e) {
        e.preventDefault();
        let updateHotelRequestUrl = $(this).data('url');
-       //$('#preloader').removeClass('d-none');
+       let pjaxId = $(this).data('pjaxId');
        
        let modal = $('#modal-md');
        modal.find('.modal-body').html('');
        modal.find('.modal-title').html('Update flight request');
-       modal.find('.modal-body').load(updateHotelRequestUrl, function( response, status, xhr ) {
-           //$('#preloader').addClass('d-none');
+       modal.find('.modal-body').load(updateHotelRequestUrl, {pjaxIdWrap: pjaxId}, function( response, status, xhr ) {
            modal.modal({
              backdrop: 'static',
              show: true

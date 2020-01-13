@@ -3,7 +3,6 @@
 use modules\flight\models\Flight;
 use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\helpers\FlightFormatHelper;
-use \common\widgets\Alert;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
 use yii\widgets\Pjax;
@@ -11,6 +10,7 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /**
  * @var $itineraryForm ItineraryEditForm
+ * @var $pjaxIdWrap string;
  */
 
 
@@ -42,6 +42,7 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
 				?>
 
 				<?= Html::hiddenInput('flightId', $itineraryForm->flightId) ?>
+				<?= Html::hiddenInput('pjaxIdWrap', $pjaxIdWrap) ?>
 
                 <div class="sl-itinerary-form__tabs">
                     <div class="sl-itinerary-form__tab sl-itinerary-form__tab--rt js-tab"
@@ -69,12 +70,6 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
 						<?= $form->field($itineraryForm, 'infants')->dropDownList(FlightFormatHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
                     </div>
 
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12">
-						<?= Alert::widget() ?>
-                    </div>
                 </div>
 
                 <div class="btn-wrapper text-center" style="margin-top: 10px;">

@@ -2,6 +2,7 @@
 
 namespace modules\flight\controllers;
 
+use common\models\Product;
 use common\models\ProductType;
 use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\repositories\flight\FlightRepository;
@@ -139,6 +140,7 @@ class FlightController extends FController
     public function actionAjaxUpdateItineraryView(): string
 	{
 		$id = Yii::$app->request->get('id');
+		$pjaxIdWrap = Yii::$app->request->post('pjaxIdWrap');
 
 		$flight = Flight::findOne($id);
 
@@ -153,6 +155,7 @@ class FlightController extends FController
 		$form = new ItineraryEditForm($flight);
 		return $this->renderAjax('update_ajax', [
 			'itineraryForm' => $form,
+			'pjaxIdWrap' => $pjaxIdWrap
 		]);
 	}
 
@@ -164,6 +167,7 @@ class FlightController extends FController
     public function actionAjaxUpdateItinerary(): string
     {
 		$id = Yii::$app->request->post('flightId');
+		$pjaxIdWrap = Yii::$app->request->post('pjaxIdWrap');
 		$flight = $this->findModel($id);
 
 		if (!Yii::$app->user->can('updateProduct', ['product' => $flight->flProduct])) {
@@ -182,8 +186,7 @@ class FlightController extends FController
 				$this->service->editItinerary($id, $form);
 				Yii::$app->session->setFlash('success', 'Segments saved.');
 
-				$flight = $this->findModel($id);
-				$form = new ItineraryEditForm($flight);
+				return '<script>$("#modal-md").modal("hide"); $.pjax.reload({container: "#'.$pjaxIdWrap.'", url: "/flight/flight/pjax-flight-request-view?pr_id='.$flight->fl_product_id.'", push: false, replace: false})</script>';
 			} catch (\Exception | \Throwable $e) {
 				Yii::$app->errorHandler->logException($e);
 				Yii::$app->session->setFlash('error', $e->getMessage());
@@ -192,8 +195,19 @@ class FlightController extends FController
 
         return $this->renderAjax('update_ajax', [
             'itineraryForm' => $form,
+			'pjaxIdWrap' => $pjaxIdWrap
         ]);
     }
+
+	/**
+	 * @throws NotFoundHttpException
+	 */
+    public function actionPjaxFlightRequestView(): string
+	{
+		$id = Yii::$app->request->get('pr_id');
+		$product = Product::findOne($id);
+		return $this->renderAjax('partial/_product_flight', ['product' => $product, 'pjaxRequest' => true]);
+	}
 
     /**
      * Deletes an existing Flight model.
