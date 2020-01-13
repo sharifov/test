@@ -88,6 +88,8 @@ class EmailController extends FController
                 }
             }
 
+
+
             if(!$modelNewEmail->e_project_id) {
                 $modelNewEmail->addError('e_subject', 'Error! Project ID not detected');
             }
@@ -193,7 +195,7 @@ class EmailController extends FController
                             //$modelNewEmail->e_email_body_html = ($errorJson['message'] ?? $mailPreview['error']);
 
                         } else {
-                            $modelNewEmail->e_email_body_blob = $mailPreview['data']['email_body_html'];
+                            $modelNewEmail->e_email_body_blob = TextConvertingHelper::compress($mailPreview['data']['email_body_html']);
                         }
                     }
 
@@ -220,6 +222,7 @@ class EmailController extends FController
 
         if($e_id = Yii::$app->request->get('id')) {
             $modelEmailView = Email::findOne($e_id);
+
             if($modelEmailView && $modelEmailView->e_is_new) {
                 $modelEmailView->e_is_new = 0;
                 $modelEmailView->save();
@@ -259,7 +262,8 @@ class EmailController extends FController
                 //$modelNewEmail->e_message_id = $modelNewEmail->generateMessageId();
                 // $modelNewEmail->e_email_body_html = '<p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p>';
 
-                $modelNewEmail->e_email_body_blob = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->getEmailBodyHtml())).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p></body></html>';
+                $body = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->getEmailBodyHtml())).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p></body></html>';
+                $modelNewEmail->e_email_body_blob = TextConvertingHelper::compress($body);
 
                 $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
                 /*if($modelNewEmail->save()) {

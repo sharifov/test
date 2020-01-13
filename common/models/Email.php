@@ -6,6 +6,7 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\EmailQuery;
 use DateTime;
+use Faker\Provider\ar_JO\Text;
 use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
 use sales\model\email\behaviors\CompressText;
@@ -152,7 +153,12 @@ class Email extends \yii\db\ActiveRecord
             [['e_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
             [['quotes'], 'safe'],
             ['e_email_body_blob', 'filter', 'filter' => function () {
-                return TextConvertingHelper::compress($this->e_email_body_blob);
+                if (array_key_exists('e_email_body_blob', $this->getDirtyAttributes())) {
+                    $value = TextConvertingHelper::compress($this->e_email_body_blob);
+                } else {
+                    $value = $this->e_email_body_blob;
+                }
+                return $value;
             }],
         ];
     }
@@ -441,7 +447,6 @@ class Email extends \yii\db\ActiveRecord
         }
 
         //VarDumper::dump($request, 10, true); exit;
-
 
         // VarDumper::dump($request, 10, true); exit;
 

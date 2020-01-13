@@ -610,6 +610,7 @@ ORDER BY lf.lead_id, id';
     {
         return Email::find()
             ->where(['is', 'e_email_body_text', new Expression('NULL')])
+            ->andWhere(['is', 'e_email_body_html', new Expression('NULL')])
             ->limit($limit)
             ->offset($offset)
             ->orderBy('e_id ASC')
