@@ -106,38 +106,38 @@ class ApiFlightService extends Component
      */
     public function search(string $checkIn, string $checkOut, string $destination, array $rooms = [], array $params = []): array
     {
-        $out = ['error' => false, 'data' => []];
-
-        $data = $params;
-
-        $data['checkIn'] = $checkIn;
-        $data['checkOut'] = $checkOut;
-        $data['destination'] = $destination;
-
-        if ($rooms) {
-            $data['rooms'] = $rooms;
-        }
-
-        try {
-            $response = $this->sendRequest('booking/search', $data, 'POST');
-            // VarDumper::dump($response->data, 10, true); exit;
-
-            if ($response->isOk) {
-                if (isset($response->data['hotels'])) {
-                    $out['data'] = $response->data;
-                } else {
-                    $out['error'] = 'Not found in response array data key [hotels]';
-                }
-            } else {
-                $out['error'] = 'Error ('.$response->statusCode.'): ' . $response->content;
-                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService::search');
-            }
-        } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiHotelService::throwable');
-            $out['error'] = 'ApiHotelService error: ' . $throwable->getMessage();
-        }
-
-        return $out;
+//        $out = ['error' => false, 'data' => []];
+//
+//        $data = $params;
+//
+//        $data['checkIn'] = $checkIn;
+//        $data['checkOut'] = $checkOut;
+//        $data['destination'] = $destination;
+//
+//        if ($rooms) {
+//            $data['rooms'] = $rooms;
+//        }
+//
+//        try {
+//            $response = $this->sendRequest('booking/search', $data, 'POST');
+//            // VarDumper::dump($response->data, 10, true); exit;
+//
+//            if ($response->isOk) {
+//                if (isset($response->data['hotels'])) {
+//                    $out['data'] = $response->data;
+//                } else {
+//                    $out['error'] = 'Not found in response array data key [hotels]';
+//                }
+//            } else {
+//                $out['error'] = 'Error ('.$response->statusCode.'): ' . $response->content;
+//                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService::search');
+//            }
+//        } catch (\Throwable $throwable) {
+//            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiHotelService::throwable');
+//            $out['error'] = 'ApiHotelService error: ' . $throwable->getMessage();
+//        }
+//
+//        return $out;
     }
 
 

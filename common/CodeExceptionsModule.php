@@ -10,4 +10,5 @@ class CodeExceptionsModule
     public const API = 13;
     public const DEPARTMENT = 14;
     public const FLIGHT = 15;
+    public const HOTEL = 16;
 }

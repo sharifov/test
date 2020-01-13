@@ -4,6 +4,9 @@ namespace modules\hotel\controllers;
 
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
+use modules\hotel\src\repositories\hotel\HotelRepository;
+use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
+use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use Yii;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\search\HotelQuoteSearch;
@@ -12,17 +15,36 @@ use yii\base\Exception;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
  * HotelQuoteController implements the CRUD actions for HotelQuote model.
+ *
+ * @property HotelRepository $hotelRepository
+ * @property HotelQuoteSearchService $hotelQuoteSearchService
  */
 class HotelQuoteController extends FController
 {
-    /**
+	/**
+	 * @var HotelRepository
+	 */
+	private $hotelRepository;
+	/**
+	 * @var HotelQuoteSearchService
+	 */
+	private $hotelQuoteSearchService;
+
+	public function __construct($id, $module, HotelQuoteSearchService $hotelQuoteSearchService, HotelRepository $hotelRepository, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+
+		$this->hotelQuoteSearchService = $hotelQuoteSearchService;
+		$this->hotelRepository = $hotelRepository;
+	}
+
+	/**
      * @return array
      */
     public function behaviors(): array
@@ -62,12 +84,16 @@ class HotelQuoteController extends FController
     {
 
         $hotelId = (int) Yii::$app->request->get('id');
-        $hotelSearch = Hotel::findOne($hotelId);
+        $hotel = $this->hotelRepository->find($hotelId);
 
         $result = [];
 
-        if ($hotelSearch) {
-            $result = $hotelSearch->getSearchData();
+        if ($hotel) {
+			try {
+            	$result = $this->hotelQuoteSearchService->search(HotelQuoteSearchGuard::guard($hotel));
+			} catch (\DomainException $e) {
+				Yii::$app->session->setFlash('error', $e->getMessage());
+			}
         }
         $hotelList = $result['hotels'] ?? [];
 
@@ -81,12 +107,9 @@ class HotelQuoteController extends FController
             ],
         ]);
 
-        // VarDumper::dump($models, 2, true); exit;
-
         return $this->renderAjax('search/_search_quotes', [
-            //'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'hotelSearch'   => $hotelSearch
+            'hotelSearch'   => $hotel
         ]);
     }
 
