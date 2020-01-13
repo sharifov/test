@@ -94,6 +94,30 @@ class Offer extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public function extraFields(): array
+    {
+        return [
+            //'of_id',
+            'of_gid',
+            'of_uid',
+            'of_name',
+            'of_lead_id',
+            'of_status_id',
+//            'of_owner_user_id',
+//            'of_created_user_id',
+//            'of_updated_user_id',
+//            'of_created_dt',
+//            'of_updated_dt',
+            'of_client_currency',
+            'of_client_currency_rate',
+            'of_app_total',
+            'of_client_total',
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function attributeLabels()
@@ -312,13 +336,29 @@ class Offer extends \yii\db\ActiveRecord
      */
     public function getCommunicationData(): array
     {
-        $data = $this->attributes;
+        $data = $this->extraData;
 
         $offerProducts = $this->offerProducts;
         if ($offerProducts) {
             foreach ($offerProducts as $offerProduct) {
                 if ($quote = $offerProduct->opProductQuote) {
-                    $data['quotes'][] = $quote->attributes;
+
+                    $quoteData = $quote->extraData;
+                    $quoteData['product'] = $quote->pqProduct->extraData;
+
+                    $productQuoteOptions = $quote->productQuoteOptions;
+                    $productQuoteOptionsData = [];
+
+                    if ($productQuoteOptions) {
+                        foreach ($productQuoteOptions as $productQuoteOption) {
+                            $productQuoteOptionsData[] = $productQuoteOption->extraData;
+                        }
+                    }
+
+                    //$quoteData['productQuoteData'] = $quote->extraData;
+                    $quoteData['productQuoteOptions'] = $productQuoteOptionsData;
+
+                    $data['quotes'][] = $quoteData;
                     //$sum += $quote->totalCalcSum + $quote->pq_service_fee_sum;
                 }
             }
@@ -326,5 +366,13 @@ class Offer extends \yii\db\ActiveRecord
         }
 
         return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function getExtraData(): array
+    {
+        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
     }
 }

@@ -25,8 +25,7 @@ use yii\helpers\VarDumper;
  * @property Hotel $hqHotel
  * @property HotelList $hqHotelList
  * @property ProductQuote $hqProductQuote
- * @property array $smsTemplateData
- * @property array $emailTemplateData
+ * @property array $extraData
  * @property HotelQuoteRoom[] $hotelQuoteRooms
  */
 class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
@@ -228,16 +227,19 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
     /**
      * @return array
      */
-    public function getEmailTemplateData(): array
+    public function getExtraData(): array
     {
-        return []; // TODO: Implement getEmailTemplateData() method.
+        $data = [];
+        $hotelQuoteRoomData = [];
+        if ($this->hotelQuoteRooms) {
+            foreach ($this->hotelQuoteRooms as $hotelQuoteRoom) {
+                $hotelQuoteRoomData[] = $hotelQuoteRoom->extraData;
+            }
+        }
+
+        $data['hotel'] = $this->hqHotelList ? $this->hqHotelList->extraData : [];
+        $data['rooms'] = $hotelQuoteRoomData;
+        return $data;
     }
 
-    /**
-     * @return array
-     */
-    public function getSmsTemplateData(): array
-    {
-        return []; // TODO: Implement getSmsTemplateData() method.
-    }
 }

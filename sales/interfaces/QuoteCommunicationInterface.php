@@ -11,10 +11,5 @@ interface QuoteCommunicationInterface
     /**
      * @return array
      */
-    public function getEmailTemplateData(): array;
-
-    /**
-     * @return array
-     */
-    public function getSmsTemplateData(): array;
+    public function getExtraData(): array;
 }

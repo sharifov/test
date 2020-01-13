@@ -2,8 +2,10 @@
 
 namespace modules\hotel\models;
 
+use modules\hotel\models\query\HotelListQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
@@ -41,14 +43,16 @@ use yii\helpers\VarDumper;
  * @property string|null $hl_created_dt
  * @property string|null $hl_updated_dt
  *
+ * @property array $extraData
  * @property HotelQuote[] $hotelQuotes
  */
 class HotelList extends \yii\db\ActiveRecord
 {
+
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'hotel_list';
     }
@@ -77,25 +81,44 @@ class HotelList extends \yii\db\ActiveRecord
         ];
     }
 
+
     /**
      * @return array
      */
-    public function behaviors(): array
+    public function extraFields(): array
     {
         return [
-            'timestamp' => [
-                'class' => TimestampBehavior::class,
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['hl_created_dt', 'hl_created_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['hl_updated_dt'],
-                ],
-                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-            ],
+            //'hl_id',
+            //'hl_code',
+            //'hl_hash_key',
+            'hl_name',
+            'hl_star',
+            'hl_category_name',
+            //'hl_destination_code',
+            'hl_destination_name',
+            'hl_zone_name',
+            //'hl_zone_code',
+            'hl_country_code',
+            'hl_state_code',
+            'hl_description',
+            'hl_address',
+            'hl_postal_code',
+            'hl_city',
+            'hl_email',
+            'hl_web',
+            //'hl_phone_list',
+            //'hl_image_list',
+            'hl_image_base_url',
+            //'hl_board_codes',
+            //'hl_segment_codes',
+            //'hl_latitude',
+            //'hl_longitude',
+            //'hl_ranking',
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function attributeLabels()
     {
@@ -134,20 +157,37 @@ class HotelList extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return array
      */
-    public function getHotelQuotes()
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['hl_created_dt', 'hl_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['hl_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
+
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getHotelQuotes(): ActiveQuery
     {
         return $this->hasMany(HotelQuote::class, ['hq_hotel_list_id' => 'hl_id']);
     }
 
     /**
-     * {@inheritdoc}
-     * @return \modules\hotel\models\query\HotelListQuery the active query used by this AR class.
+     * @return HotelListQuery the active query used by this AR class.
      */
-    public static function find()
+    public static function find(): HotelListQuery
     {
-        return new \modules\hotel\models\query\HotelListQuery(get_called_class());
+        return new HotelListQuery(static::class);
     }
 
     /**
@@ -261,5 +301,13 @@ class HotelList extends \yii\db\ActiveRecord
             }
         }
         return $hotel;
+    }
+
+    /**
+     * @return array
+     */
+    public function getExtraData(): array
+    {
+        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
     }
 }

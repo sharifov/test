@@ -5,7 +5,8 @@ namespace modules\flight\models;
 use common\models\Employee;
 use common\models\ProductQuote;
 use sales\interfaces\QuoteCommunicationInterface;
-use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "flight_quote".
@@ -39,11 +40,10 @@ use Yii;
  * @property FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @property FlightQuoteSegment[] $flightQuoteSegments
  * @property FlightQuoteStatusLog[] $flightQuoteStatusLogs
- * @property array $smsTemplateData
- * @property array $emailTemplateData
+ * @property array $extraData
  * @property FlightQuoteTrip[] $flightQuoteTrips
  */
-class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInterface
+class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 {
     /**
      * {@inheritdoc}
@@ -109,7 +109,7 @@ class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInte
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFqCreatedUser()
     {
@@ -117,7 +117,7 @@ class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInte
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFqFlight()
     {
@@ -125,7 +125,7 @@ class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInte
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFqProductQuote()
     {
@@ -133,7 +133,7 @@ class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInte
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuotePaxPrices()
     {
@@ -141,7 +141,7 @@ class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInte
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteSegments()
     {
@@ -149,7 +149,7 @@ class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInte
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteStatusLogs()
     {
@@ -157,7 +157,7 @@ class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInte
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteTrips()
     {
@@ -176,16 +176,9 @@ class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInte
     /**
      * @return array
      */
-    public function getEmailTemplateData(): array
+    public function getExtraData(): array
     {
-        return []; // TODO: Implement getEmailTemplateData() method.
+        return []; // TODO: Implement getExtraData() method.
     }
 
-    /**
-     * @return array
-     */
-    public function getSmsTemplateData(): array
-    {
-        return []; // TODO: Implement getSmsTemplateData() method.
-    }
 }
