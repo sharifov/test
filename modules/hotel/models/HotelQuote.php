@@ -3,7 +3,11 @@
 namespace modules\hotel\models;
 
 use common\models\ProductQuote;
+use modules\hotel\models\query\HotelQuoteQuery;
+use sales\interfaces\QuoteCommunicationInterface;
 use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
 /**
@@ -21,20 +25,22 @@ use yii\helpers\VarDumper;
  * @property Hotel $hqHotel
  * @property HotelList $hqHotelList
  * @property ProductQuote $hqProductQuote
+ * @property array $smsTemplateData
+ * @property array $emailTemplateData
  * @property HotelQuoteRoom[] $hotelQuoteRooms
  */
-class HotelQuote extends \yii\db\ActiveRecord
+class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 {
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'hotel_quote';
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -53,9 +59,9 @@ class HotelQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'hq_id' => 'ID',
@@ -70,44 +76,43 @@ class HotelQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHqHotel()
+    public function getHqHotel(): ActiveQuery
     {
         return $this->hasOne(Hotel::class, ['ph_id' => 'hq_hotel_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHqHotelList()
+    public function getHqHotelList(): ActiveQuery
     {
         return $this->hasOne(HotelList::class, ['hl_id' => 'hq_hotel_list_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHqProductQuote()
+    public function getHqProductQuote(): ActiveQuery
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'hq_product_quote_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHotelQuoteRooms()
+    public function getHotelQuoteRooms(): ActiveQuery
     {
         return $this->hasMany(HotelQuoteRoom::class, ['hqr_hotel_quote_id' => 'hq_id']);
     }
 
     /**
-     * {@inheritdoc}
-     * @return \modules\hotel\models\query\HotelQuoteQuery the active query used by this AR class.
+     * @return HotelQuoteQuery the active query used by this AR class.
      */
     public static function find()
     {
-        return new \modules\hotel\models\query\HotelQuoteQuery(get_called_class());
+        return new HotelQuoteQuery(static::class);
     }
 
     public static function getHashKey(string $roomKey): string
@@ -130,7 +135,7 @@ class HotelQuote extends \yii\db\ActiveRecord
             if (isset($quoteData['groupKey'])) {
                 $hashKey = self::getHashKey($quoteData['groupKey']);
 
-                $hQuote = HotelQuote::find()->where([
+                $hQuote = self::find()->where([
                     'hq_hotel_list_id' => $hotelModel->hl_id,
                     'hq_hotel_id' => $hotelRequest->ph_id,
                     'hq_hash_key' => $hashKey
@@ -218,5 +223,21 @@ class HotelQuote extends \yii\db\ActiveRecord
     public static function generateGid(): string
     {
         return md5(uniqid('hq', true));
+    }
+
+    /**
+     * @return array
+     */
+    public function getEmailTemplateData(): array
+    {
+        return []; // TODO: Implement getEmailTemplateData() method.
+    }
+
+    /**
+     * @return array
+     */
+    public function getSmsTemplateData(): array
+    {
+        return []; // TODO: Implement getSmsTemplateData() method.
     }
 }

@@ -4,6 +4,7 @@ namespace modules\flight\models;
 
 use common\models\Employee;
 use common\models\ProductQuote;
+use sales\interfaces\QuoteCommunicationInterface;
 use Yii;
 
 /**
@@ -38,9 +39,11 @@ use Yii;
  * @property FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @property FlightQuoteSegment[] $flightQuoteSegments
  * @property FlightQuoteStatusLog[] $flightQuoteStatusLogs
+ * @property array $smsTemplateData
+ * @property array $emailTemplateData
  * @property FlightQuoteTrip[] $flightQuoteTrips
  */
-class FlightQuote extends \yii\db\ActiveRecord
+class FlightQuote extends \yii\db\ActiveRecord implements QuoteCommunicationInterface
 {
     /**
      * {@inheritdoc}
@@ -168,5 +171,21 @@ class FlightQuote extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \modules\flight\models\query\FlightQuoteQuery(static::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function getEmailTemplateData(): array
+    {
+        return []; // TODO: Implement getEmailTemplateData() method.
+    }
+
+    /**
+     * @return array
+     */
+    public function getSmsTemplateData(): array
+    {
+        return []; // TODO: Implement getSmsTemplateData() method.
     }
 }

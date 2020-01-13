@@ -39,6 +39,7 @@ use yii\helpers\Html;
  * @property string $className
  * @property string $statusName
  * @property float $offerTotalCalcSum
+ * @property array $communicationData
  * @property ProductQuote[] $opProductQuotes
  */
 class Offer extends \yii\db\ActiveRecord
@@ -136,6 +137,15 @@ class Offer extends \yii\db\ActiveRecord
                 'updatedByAttribute' => 'of_updated_user_id',
             ],
         ];
+    }
+
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->of_client_currency_rate      = $this->of_client_currency_rate === null ? null : (float) $this->of_client_currency_rate;
+        $this->of_app_total                 = $this->of_app_total === null ? null : (float) $this->of_app_total;
+        $this->of_client_total              = $this->of_client_total === null ? null : (float) $this->of_client_total;
     }
 
     /**
@@ -295,5 +305,26 @@ class Offer extends \yii\db\ActiveRecord
         }
 
         $this->of_client_total = round($this->of_app_total * $this->of_client_currency_rate, 2);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCommunicationData(): array
+    {
+        $data = $this->attributes;
+
+        $offerProducts = $this->offerProducts;
+        if ($offerProducts) {
+            foreach ($offerProducts as $offerProduct) {
+                if ($quote = $offerProduct->opProductQuote) {
+                    $data['quotes'][] = $quote->attributes;
+                    //$sum += $quote->totalCalcSum + $quote->pq_service_fee_sum;
+                }
+            }
+            //$sum = round($sum, 2);
+        }
+
+        return $data;
     }
 }
