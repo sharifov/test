@@ -32,6 +32,7 @@ use yii\helpers\Html;
  * @property string $statusLabel
  * @property string $className
  * @property string $statusName
+ * @property array $extraData
  * @property Employee $pqoUpdatedUser
  */
 class ProductQuoteOption extends ActiveRecord
@@ -90,6 +91,27 @@ class ProductQuoteOption extends ActiveRecord
         ];
     }
 
+    /**
+     * @return array
+     */
+    public function extraFields(): array
+    {
+        return [
+            //'pqo_id',
+            //'pqo_product_quote_id',
+            //'pqo_product_option_id',
+            'pqo_name',
+            'pqo_description',
+            'pqo_status_id',
+            'pqo_price',
+            'pqo_client_price',
+            'pqo_extra_markup',
+            //'pqo_created_user_id',
+            //'pqo_updated_user_id',
+            //'pqo_created_dt',
+            //'pqo_updated_dt',
+        ];
+    }
 
     /**
      * @return array
@@ -111,6 +133,14 @@ class ProductQuoteOption extends ActiveRecord
             'pqo_created_dt' => 'Created Dt',
             'pqo_updated_dt' => 'Updated Dt',
         ];
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->pqo_price                     = $this->pqo_price === null ? null : (float) $this->pqo_price;
+        $this->pqo_client_price              = $this->pqo_client_price === null ? null : (float) $this->pqo_client_price;
+        $this->pqo_extra_markup              = $this->pqo_extra_markup === null ? null : (float) $this->pqo_extra_markup;
     }
 
     /**
@@ -206,5 +236,13 @@ class ProductQuoteOption extends ActiveRecord
     public function getStatusLabel(): string
     {
         return Html::tag('span', $this->getStatusName(), ['class' => 'badge badge-' . $this->getClassName()]);
+    }
+
+    /**
+     * @return array
+     */
+    public function getExtraData(): array
+    {
+        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
     }
 }

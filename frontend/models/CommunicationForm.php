@@ -28,9 +28,11 @@ use yii\base\Model;
  * @property integer $c_user_id
  * @property string $c_language_id
  * @property string $c_quotes
+ * @property string $c_offers
  * @property integer $c_call_id
  *
- * @property array $quoteList;
+ * @property array $quoteList
+ * @property array $offerList
  *
  * @property integer $c_preview_email
  * @property integer $c_preview_sms
@@ -58,13 +60,15 @@ class CommunicationForm extends Model
     public const TPL_TYPE_EMAIL_BLANK       = 8;
 
 
-    public const TPL_TYPE_EMAIL_OFFER_KEY       = 'cl_offer';
-    public const TPL_TYPE_EMAIL_OFFER_VIEW_KEY  = 'offer_quote_view';
-    public const TPL_TYPE_EMAIL_BLANK_KEY       = 'cl_agent_blank';
+    public const TPL_TYPE_EMAIL_OFFER_KEY               = 'cl_offer';
+    public const TPL_TYPE_EMAIL_OFFER_VIEW_KEY          = 'offer_quote_view';
+    public const TPL_TYPE_EMAIL_BLANK_KEY               = 'cl_agent_blank';
+    public const TPL_TYPE_EMAIL_PRODUCT_OFFER_KEY       = 'cl_product_offer';
 
-    public const TPL_TYPE_SMS_OFFER_KEY         = 'sms_client_offer';
-    public const TPL_TYPE_SMS_OFFER_VIEW_KEY    = 'sms_client_offer_view';
-    public const TPL_TYPE_SMS_BLANK_KEY         = 'sms_agent_blank';
+    public const TPL_TYPE_SMS_OFFER_KEY                 = 'sms_client_offer';
+    public const TPL_TYPE_SMS_PRODUCT_OFFER_KEY         = 'sms_product_offer';
+    public const TPL_TYPE_SMS_OFFER_VIEW_KEY            = 'sms_client_offer_view';
+    public const TPL_TYPE_SMS_BLANK_KEY                 = 'sms_agent_blank';
 
 
 
@@ -93,8 +97,10 @@ class CommunicationForm extends Model
     public $c_call_id;
 
     public $c_quotes;
+    public $c_offers;
 
     public $quoteList;
+    public $offerList;
 
 
 
@@ -106,35 +112,35 @@ class CommunicationForm extends Model
         return [
             [['c_type_id', 'c_lead_id'], 'required'],
 
-            [['c_email_to', 'c_language_id', 'c_email_tpl_key'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_email_to', 'c_language_id', 'c_email_tpl_key'], 'required', 'when' => static function (CommunicationForm $model) {
                         return (int) $model->c_type_id === self::TYPE_EMAIL;
                     },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_EMAIL . '; }'
             ],
 
 
-            [['c_email_message', 'c_email_subject'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_email_message', 'c_email_subject'], 'required', 'when' => static function (CommunicationForm $model) {
                 return $model->c_email_tpl_key === self::TPL_TYPE_EMAIL_BLANK_KEY && (int) $model->c_type_id === self::TYPE_EMAIL;
             },
                 'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && $('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_BLANK_KEY . "'); }"
             ],
 
 
-            [['c_phone_number', 'c_sms_tpl_key'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_phone_number', 'c_sms_tpl_key'], 'required', 'when' => static function (CommunicationForm $model) {
                 return (int) $model->c_type_id === self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
             ],
 
 
-            /*[['c_sms_message'], 'required', 'when' => function (CommunicationForm $model) {
+            /*[['c_sms_message'], 'required', 'when' => static function (CommunicationForm $model) {
                 return $model->c_sms_tpl_id != self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && $('#c_sms_tpl_id').val() != " . self::TPL_TYPE_SMS_OFFER . '; }'
             ],*/
 
 
-            [['c_phone_number'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_phone_number'], 'required', 'when' => static function (CommunicationForm $model) {
                 return (int) $model->c_type_id === self::TYPE_VOICE;
             },
                 'whenClient' => "function (attribute, value) {
@@ -143,16 +149,29 @@ class CommunicationForm extends Model
 
 
 
-            [['c_quotes'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
                     return ($model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_KEY || $model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_EMAIL;
                 },
                 'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && ($('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY . "' || $('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_KEY . "')); }"
             ],
 
-            [['c_quotes'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
                     return ($model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_KEY || $model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_SMS;
                 },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && ($('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_OFFER_KEY . "' || $('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_OFFER_VIEW_KEY . "'); }"
+            ],
+
+
+            [['c_offers'], 'required', 'when' => static function (CommunicationForm $model) {
+                return ($model->c_email_tpl_key === self::TPL_TYPE_EMAIL_PRODUCT_OFFER_KEY) && (int) $model->c_type_id === self::TYPE_EMAIL;
+            },
+                'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && ($('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_PRODUCT_OFFER_KEY . "')); }"
+            ],
+
+            [['c_offers'], 'required', 'when' => static function (CommunicationForm $model) {
+                return ($model->c_sms_tpl_key === self::TPL_TYPE_SMS_PRODUCT_OFFER_KEY) && (int) $model->c_type_id === self::TYPE_SMS;
+            },
+                'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && ($('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_PRODUCT_OFFER_KEY . "'); }"
             ],
 
 
@@ -178,6 +197,9 @@ class CommunicationForm extends Model
 
             [['c_quotes'], 'string'], //'each', 'rule' => ['integer']],
             [['c_quotes'], 'validateQuotes'],
+
+            [['c_offers'], 'string'], //'each', 'rule' => ['integer']],
+            [['c_offers'], 'validateOffers'],
 
             [['c_email_tpl_key'], 'validateEmailTemplateKey'],
             [['c_sms_tpl_key'], 'validateSmsTemplateKey'],
@@ -208,6 +230,21 @@ class CommunicationForm extends Model
                $this->quoteList = [];
            }
        }
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     * @param $validator
+     */
+    public function validateOffers($attribute, $params, $validator): void
+    {
+        if (!empty($this->c_offers)) {
+            $this->offerList = @json_decode($this->c_offers, true);
+            if(!is_array($this->offerList)) {
+                $this->offerList = [];
+            }
+        }
     }
 
     /**
@@ -260,7 +297,8 @@ class CommunicationForm extends Model
             'c_phone_number'    => 'Phone number',
             'c_language_id'     => 'Language',
             'c_user_id'         => 'Agent ID',
-            'c_quotes'          => 'Checked Quotes'
+            'c_quotes'          => 'Checked Quotes',
+            'c_offers'          => 'Checked Offers',
         ];
     }
 

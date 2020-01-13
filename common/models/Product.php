@@ -34,6 +34,7 @@ use yii\db\ActiveRecord;
  * @property Lead $prLead
  * @property ProductType $prType
  * @property Employee $prUpdatedUser
+ * @property array $extraData
  * @property ProductQuote[] $productQuotes
  */
 class Product extends \yii\db\ActiveRecord
@@ -63,6 +64,26 @@ class Product extends \yii\db\ActiveRecord
             [['pr_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductType::class, 'targetAttribute' => ['pr_type_id' => 'pt_id']],
             [['pr_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pr_updated_user_id' => 'id']],
 
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function extraFields(): array
+    {
+        return [
+            //'pr_id',
+            'pr_type_id',
+            'pr_name',
+            'pr_lead_id',
+            'pr_description',
+            'pr_status_id',
+            'pr_service_fee_percent',
+//            'pr_created_user_id',
+//            'pr_updated_user_id',
+//            'pr_created_dt',
+//            'pr_updated_dt',
         ];
     }
 
@@ -190,6 +211,15 @@ class Product extends \yii\db\ActiveRecord
         return new ProductQuery(static::class);
     }
 
+
+    /**
+     * @return array
+     */
+    public function getExtraData(): array
+    {
+        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
+    }
+
 	/**
 	 * @param int $employeeId
 	 * @return bool
@@ -198,4 +228,5 @@ class Product extends \yii\db\ActiveRecord
 	{
 		return ($this->prLead->employee_id && $this->prLead->employee_id === $employeeId);
 	}
+
 }

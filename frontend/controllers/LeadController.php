@@ -566,7 +566,14 @@ class LeadController extends FController
 
 
                         //VarDumper::dump($content_data, 10 , true); exit;
-                        $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+
+                        if ($comForm->offerList) {
+                            $content_data = $lead->getOfferEmailData($comForm->offerList, $projectContactInfo);
+                        } else {
+                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                        }
+
+
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
 

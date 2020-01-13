@@ -160,8 +160,8 @@ $c_type_id = $comForm->c_type_id;
                     <?php if($isAdmin):?>
                     <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
-                            //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
-                            echo json_encode($previewEmailForm->e_content_data);
+                            \yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
+                            //echo json_encode($previewEmailForm->e_content_data);
                         ?>
                         </pre>
                     </div>
@@ -355,7 +355,8 @@ $c_type_id = $comForm->c_type_id;
 
 
                                 <?= $form->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
-                                <?= $form->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false); ?>
+                                <?= $form->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false) ?>
+                                <?= $form->field($comForm, 'c_offers')->hiddenInput(['id' => 'c_offers'])->label(false) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
@@ -749,6 +750,24 @@ $js = <<<JS
             jsonQuotes = JSON.stringify(quoteList);
         }
         $('#c_quotes').val(jsonQuotes);
+    });
+    
+     $('body').on('change', '.offer-checkbox', function() {
+        
+        let offerList = [];
+        let jsonOffers = '';
+        
+        $('input[type=checkbox].offer-checkbox:checked').each(function() {
+            offerList.push($(this).data('id'));
+        });
+        
+        if (offerList.length === 0) {
+            jsonOffers = '';
+            
+        } else {
+            jsonOffers = JSON.stringify(offerList);
+        }
+        $('#c_offers').val(jsonOffers);
     });
     
        

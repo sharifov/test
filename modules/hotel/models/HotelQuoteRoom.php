@@ -3,7 +3,9 @@
 namespace modules\hotel\models;
 
 use common\models\Currency;
-use Yii;
+use modules\hotel\models\query\HotelQuoteRoomQuery;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "hotel_quote_room".
@@ -26,20 +28,21 @@ use Yii;
  * @property int|null $hqr_children
  *
  * @property Currency $hqrCurrency
+ * @property array $extraData
  * @property HotelQuote $hqrHotelQuote
  */
-class HotelQuoteRoom extends \yii\db\ActiveRecord
+class HotelQuoteRoom extends ActiveRecord
 {
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'hotel_quote_room';
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -61,9 +64,33 @@ class HotelQuoteRoom extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function attributeLabels()
+    public function extraFields(): array
+    {
+        return [
+            //'hqr_id',
+            'hqr_room_name',
+            //'hqr_key',
+            //'hqr_code',
+            'hqr_class',
+            'hqr_amount',
+            'hqr_currency',
+            'hqr_cancel_amount',
+            'hqr_cancel_from_dt',
+            // 'hqr_payment_type',
+            //'hqr_board_code',
+            'hqr_board_name',
+            'hqr_rooms',
+            'hqr_adults',
+            'hqr_children',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array
     {
         return [
             'hqr_id' => 'ID',
@@ -85,28 +112,42 @@ class HotelQuoteRoom extends \yii\db\ActiveRecord
         ];
     }
 
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->hqr_amount                     = $this->hqr_amount === null ? null : (float) $this->hqr_amount;
+    }
+
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHqrCurrency()
+    public function getHqrCurrency(): ActiveQuery
     {
         return $this->hasOne(Currency::class, ['cur_code' => 'hqr_currency']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHqrHotelQuote()
+    public function getHqrHotelQuote(): ActiveQuery
     {
         return $this->hasOne(HotelQuote::class, ['hq_id' => 'hqr_hotel_quote_id']);
     }
 
     /**
-     * {@inheritdoc}
-     * @return \modules\hotel\models\query\HotelQuoteRoomQuery the active query used by this AR class.
+     * @return HotelQuoteRoomQuery the active query used by this AR class.
      */
-    public static function find()
+    public static function find(): HotelQuoteRoomQuery
     {
-        return new \modules\hotel\models\query\HotelQuoteRoomQuery(get_called_class());
+        return new HotelQuoteRoomQuery(static::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function getExtraData(): array
+    {
+        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
     }
 }

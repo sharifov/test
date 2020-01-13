@@ -4,7 +4,11 @@ namespace modules\flight\models;
 
 use common\models\Employee;
 use common\models\ProductQuote;
+use sales\interfaces\QuoteCommunicationInterface;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use modules\flight\models\query\FlightQuoteQuery;
+
 
 /**
  * This is the model class for table "flight_quote".
@@ -38,9 +42,10 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @property FlightQuoteSegment[] $flightQuoteSegments
  * @property FlightQuoteStatusLog[] $flightQuoteStatusLogs
+ * @property array $extraData
  * @property FlightQuoteTrip[] $flightQuoteTrips
  */
-class FlightQuote extends \yii\db\ActiveRecord
+class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 {
     /**
      * {@inheritdoc}
@@ -106,7 +111,7 @@ class FlightQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFqCreatedUser()
     {
@@ -114,7 +119,7 @@ class FlightQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFqFlight()
     {
@@ -122,7 +127,7 @@ class FlightQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFqProductQuote()
     {
@@ -130,7 +135,7 @@ class FlightQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuotePaxPrices()
     {
@@ -138,7 +143,7 @@ class FlightQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteSegments()
     {
@@ -146,7 +151,7 @@ class FlightQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteStatusLogs(): \yii\db\ActiveQuery
 	{
@@ -154,7 +159,7 @@ class FlightQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getFlightQuoteTrips(): \yii\db\ActiveQuery
 	{
@@ -169,4 +174,13 @@ class FlightQuote extends \yii\db\ActiveRecord
     {
         return new FlightQuoteQuery(static::class);
     }
+
+    /**
+     * @return array
+     */
+    public function getExtraData(): array
+    {
+        return []; // TODO: Implement getExtraData() method.
+    }
+
 }

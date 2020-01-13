@@ -39,6 +39,7 @@ use yii\helpers\Html;
  * @property string $className
  * @property string $statusName
  * @property float $offerTotalCalcSum
+ * @property array $communicationData
  * @property ProductQuote[] $opProductQuotes
  */
 class Offer extends \yii\db\ActiveRecord
@@ -93,6 +94,30 @@ class Offer extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public function extraFields(): array
+    {
+        return [
+            //'of_id',
+            'of_gid',
+            'of_uid',
+            'of_name',
+            'of_lead_id',
+            'of_status_id',
+//            'of_owner_user_id',
+//            'of_created_user_id',
+//            'of_updated_user_id',
+//            'of_created_dt',
+//            'of_updated_dt',
+            'of_client_currency',
+            'of_client_currency_rate',
+            'of_app_total',
+            'of_client_total',
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function attributeLabels()
@@ -136,6 +161,15 @@ class Offer extends \yii\db\ActiveRecord
                 'updatedByAttribute' => 'of_updated_user_id',
             ],
         ];
+    }
+
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->of_client_currency_rate      = $this->of_client_currency_rate === null ? null : (float) $this->of_client_currency_rate;
+        $this->of_app_total                 = $this->of_app_total === null ? null : (float) $this->of_app_total;
+        $this->of_client_total              = $this->of_client_total === null ? null : (float) $this->of_client_total;
     }
 
     /**
@@ -295,5 +329,50 @@ class Offer extends \yii\db\ActiveRecord
         }
 
         $this->of_client_total = round($this->of_app_total * $this->of_client_currency_rate, 2);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCommunicationData(): array
+    {
+        $data = $this->extraData;
+
+        $offerProducts = $this->offerProducts;
+        if ($offerProducts) {
+            foreach ($offerProducts as $offerProduct) {
+                if ($quote = $offerProduct->opProductQuote) {
+
+                    $quoteData = $quote->extraData;
+                    $quoteData['product'] = $quote->pqProduct->extraData;
+
+                    $productQuoteOptions = $quote->productQuoteOptions;
+                    $productQuoteOptionsData = [];
+
+                    if ($productQuoteOptions) {
+                        foreach ($productQuoteOptions as $productQuoteOption) {
+                            $productQuoteOptionsData[] = $productQuoteOption->extraData;
+                        }
+                    }
+
+                    //$quoteData['productQuoteData'] = $quote->extraData;
+                    $quoteData['productQuoteOptions'] = $productQuoteOptionsData;
+
+                    $data['quotes'][] = $quoteData;
+                    //$sum += $quote->totalCalcSum + $quote->pq_service_fee_sum;
+                }
+            }
+            //$sum = round($sum, 2);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function getExtraData(): array
+    {
+        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
     }
 }

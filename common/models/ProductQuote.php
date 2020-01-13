@@ -3,6 +3,8 @@
 namespace common\models;
 
 use common\models\query\ProductQuoteQuery;
+use modules\flight\models\FlightQuote;
+use modules\hotel\models\HotelQuote;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -50,6 +52,7 @@ use yii\helpers\Html;
  * @property string $className
  * @property float $optionAmountSum
  * @property float $totalCalcSum
+ * @property array $extraData
  * @property ProductQuoteOption[] $productQuoteOptions
  */
 class ProductQuote extends \yii\db\ActiveRecord
@@ -113,10 +116,40 @@ class ProductQuote extends \yii\db\ActiveRecord
         ];
     }
 
+
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function attributeLabels()
+    public function extraFields(): array
+    {
+        return [
+//            'pq_id',
+            'pq_gid',
+            'pq_name',
+//            'pq_product_id',
+            'pq_order_id',
+            'pq_description',
+            'pq_status_id',
+            'pq_price',
+            'pq_origin_price',
+            'pq_client_price',
+            'pq_service_fee_sum',
+            'pq_origin_currency',
+            'pq_client_currency',
+//            'pq_origin_currency_rate',
+//            'pq_client_currency_rate',
+//            'pq_owner_user_id',
+//            'pq_created_user_id',
+//            'pq_updated_user_id',
+//            'pq_created_dt',
+//            'pq_updated_dt',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array
     {
         return [
             'pq_id' => 'ID',
@@ -162,6 +195,17 @@ class ProductQuote extends \yii\db\ActiveRecord
                 'updatedByAttribute' => 'pq_updated_user_id',
             ],
         ];
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->pq_price                     = $this->pq_price === null ? null : (float) $this->pq_price;
+        $this->pq_origin_price              = $this->pq_origin_price === null ? null : (float) $this->pq_origin_price;
+        $this->pq_client_price              = $this->pq_client_price === null ? null : (float) $this->pq_client_price;
+        $this->pq_service_fee_sum           = $this->pq_service_fee_sum === null ? null : (float) $this->pq_service_fee_sum;
+        $this->pq_origin_currency_rate      = $this->pq_origin_currency_rate === null ? null : (float) $this->pq_origin_currency_rate;
+        $this->pq_client_currency_rate      = $this->pq_client_currency_rate === null ? null : (float) $this->pq_client_currency_rate;
     }
 
     /**
@@ -326,6 +370,43 @@ class ProductQuote extends \yii\db\ActiveRecord
     public function getTotalCalcSum(): float
     {
         return round($this->optionAmountSum + $this->pq_price, 2);
+    }
+
+
+//    public function getQuoteItem()
+//    {
+//        $quote = null;
+//        if ($this->pqProduct->pr_type_id === ProductType::PRODUCT_FLIGHT) {
+//            $quote = FlightQuote::find()->where(['fq_product_quote_id' => $this->pq_id])->one();
+//        } elseif ($this->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL) {
+//            $quote = HotelQuote::find()->where(['hq_product_quote_id' => $this->pq_id])->one();
+//        }
+//
+//        return $quote;
+//    }
+
+    /**
+     * @return array
+     */
+    public function getExtraData(): array
+    {
+        $quoteData = array_intersect_key($this->attributes, array_flip($this->extraFields()));
+
+        if ($this->pqProduct->pr_type_id === ProductType::PRODUCT_FLIGHT) {
+            $quote = FlightQuote::find()->where(['fq_product_quote_id' => $this->pq_id])->one();
+            if ($quote) {
+                $quoteData['data'] = $quote->extraData;
+            }
+        } elseif ($this->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL) {
+            $quote = HotelQuote::find()->where(['hq_product_quote_id' => $this->pq_id])->one();
+            if ($quote) {
+                $quoteData['data'] = $quote->extraData;
+            }
+        }
+
+        //$quoteData['attr'] = array_intersect_key($this->attributes, array_flip($this->extraFields()));
+
+        return $quoteData;
     }
 
 
