@@ -6,10 +6,8 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\EmailQuery;
 use DateTime;
-use Faker\Provider\ar_JO\Text;
 use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
-use sales\model\email\behaviors\CompressText;
 use sales\model\email\behaviors\HtmlToText;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -138,7 +136,7 @@ class Email extends \yii\db\ActiveRecord
         return [
             [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'e_case_id'], 'integer'],
             [['e_is_new', 'e_is_deleted'], 'boolean'],
-            [['e_email_from', 'e_email_to'], 'required'],
+            [['e_email_body_blob', 'e_email_from', 'e_email_to'], 'required'],
             [['e_email_data', 'e_ref_message_id'], 'string'],
             [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id', 'e_email_from_name', 'e_email_to_name'], 'string', 'max' => 255],
@@ -152,14 +150,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_template_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_template_type_id' => 'etp_id']],
             [['e_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
             [['quotes'], 'safe'],
-            ['e_email_body_blob', 'filter', 'filter' => function () {
-                if (array_key_exists('e_email_body_blob', $this->getDirtyAttributes())) {
-                    $value = TextConvertingHelper::compress($this->e_email_body_blob);
-                } else {
-                    $value = $this->e_email_body_blob;
-                }
-                return $value;
-            }],
+            ['e_email_body_blob', 'filter', 'filter' => [$this, 'compressBodyBlob']],
         ];
     }
 
@@ -780,6 +771,19 @@ class Email extends \yii\db\ActiveRecord
             $value = TextConvertingHelper::unCompress($this->e_email_body_blob);
         } else {
             $value = $this->e_email_body_html;
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param $value
+     * @return false|string
+     */
+    public function compressBodyBlob($value)
+    {
+        if (array_key_exists('e_email_body_blob', $this->getDirtyAttributes())) {
+            $value = TextConvertingHelper::compress($value);
         }
 
         return $value;
