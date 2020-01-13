@@ -63,6 +63,45 @@ class RbacMigrationService
         }
     }
 
+    /**
+     * from /controller/* to /controller/index  /controller/view ...
+     */
+    public function changeGroupRouteToRoutes(string $roleName): array
+    {
+        $report = [];
+        $auth = $this->getAuth();
+
+        if ($role = $auth->getRole($roleName)) {
+            foreach ($this->getAllGroupByRole($role) as $group) {
+                foreach ($this->getAllRoutesByGroup($group) as $route) {
+                    $permission = $this->getOrCreatePermission($route);
+                    if (!$auth->hasChild($role, $permission)) {
+                        if ($auth->canAddChild($role, $permission)) {
+                            if ($auth->addChild($role, $permission)) {
+                               $report[] = 'added: ' . $route;
+                            } else {
+                                $report[] =  'not added: ' . $route;
+                            }
+                        } else {
+                            $report[] = 'cant add: ' . $route;
+                        }
+                    }
+                }
+                if ($groupRole = $auth->getPermission($group)) {
+                    if ($auth->removeChild($role, $groupRole)) {
+                        $report[] = 'removed: ' . $group;
+                    } else {
+                        $report[] = 'not removed: ' . $group;
+                    }
+                }
+            }
+        } else {
+            $report[] = 'not found role: ' . $roleName;
+        }
+
+        return $report;
+    }
+
     public function getAllGroupByRole(Role $role): array
     {
         $auth = $this->getAuth();
