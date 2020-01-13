@@ -185,7 +185,7 @@ class CasesController extends FController
                 $mail->e_type_id = Email::TYPE_OUTBOX;
                 $mail->e_status_id = Email::STATUS_PENDING;
                 $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                $mail->e_email_body_blob = $previewEmailForm->e_email_message;
+                $mail->body_html = $previewEmailForm->e_email_message;
                 $mail->e_email_from = $previewEmailForm->e_email_from;
 
                 $mail->e_email_from_name = $previewEmailForm->e_email_from_name;

@@ -609,8 +609,7 @@ ORDER BY lf.lead_id, id';
     private function findEmailBodyTextEmpty(int $limit, int $offset)
     {
         return Email::find()
-            ->where(['is', 'e_email_body_text', new Expression('NULL')])
-            ->andWhere(['is', 'e_email_body_html', new Expression('NULL')])
+            ->where(['e_email_body_text' => null])
             ->limit($limit)
             ->offset($offset)
             ->orderBy('e_id ASC')

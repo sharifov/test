@@ -54,12 +54,20 @@ use yii\helpers\VarDumper;
  * @property string $e_email_to_name
  * @property int $e_case_id
  *
+ * @property string $body_html
+ *
  * @property Employee $eCreatedUser
  * @property Cases $eCase
  * @property Language $eLanguage
  * @property Lead $eLead
  * @property Project $eProject
  * @property EmailTemplateType $eTemplateType
+ * @property mixed $emailData
+ * @property string|mixed $statusName
+ * @property array $usersIdByEmail
+ * @property string|mixed $typeName
+ * @property string $emailBodyHtml
+ * @property string|mixed $priorityName
  * @property Employee $eUpdatedUser
  */
 class Email extends \yii\db\ActiveRecord
@@ -119,6 +127,8 @@ class Email extends \yii\db\ActiveRecord
         self::FILTER_TYPE_TRASH     => 'TRASH',
     ];
 
+    public $body_html;
+
     /**
      * {@inheritdoc}
      */
@@ -136,7 +146,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'e_case_id'], 'integer'],
             [['e_is_new', 'e_is_deleted'], 'boolean'],
             [['e_email_from', 'e_email_to'], 'required'],
-            [['e_email_body_blob', 'e_email_data', 'e_ref_message_id'], 'string'],
+            [['e_email_body_blob', 'e_email_data', 'e_ref_message_id', 'body_html'], 'string'],
             [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id', 'e_email_from_name', 'e_email_to_name'], 'string', 'max' => 255],
             [['e_language_id'], 'string', 'max' => 5],
@@ -170,6 +180,7 @@ class Email extends \yii\db\ActiveRecord
             'e_email_bc' => 'Bc',
             'e_email_subject' => 'Subject',
             'e_email_body_blob' => 'Body Html',
+            'body_html' => 'Body Html',
             'e_email_body_text' => 'Body Text',
             'e_attach' => 'Attach',
             'e_email_data' => 'Email Data',
@@ -765,11 +776,10 @@ class Email extends \yii\db\ActiveRecord
     {
          if (parent::beforeSave($insert)) {
 
-            if (array_key_exists('e_email_body_blob', $this->getDirtyAttributes())) {
-                $this->e_email_body_text = TextConvertingHelper::htmlToText($this->e_email_body_blob);
-                $this->e_email_body_blob = TextConvertingHelper::compress($this->e_email_body_blob);
+            if (!empty($this->body_html)) {
+                $this->e_email_body_text = TextConvertingHelper::htmlToText($this->body_html);
+                $this->e_email_body_blob = TextConvertingHelper::compress($this->body_html);
             }
-
             return true;
         }
         return false;
@@ -778,14 +788,13 @@ class Email extends \yii\db\ActiveRecord
     /**
      * @return string
      */
-    public function getEmailBodyHtml(): string
+    public function getEmailBodyHtml(): ?string
     {
         if (!empty($this->e_email_body_blob)) {
             $value = TextConvertingHelper::unCompress($this->e_email_body_blob);
         } else {
             $value = $this->e_email_body_html;
         }
-
         return $value;
     }
 }

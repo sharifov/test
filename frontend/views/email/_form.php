@@ -33,23 +33,20 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'e_email_subject')->textInput(['maxlength' => true]) ?>
 
-    <?= CKEditor::widget([
-            'name' => 'Email[e_email_body_blob]',
-            'value' => $model->getEmailBodyHtml(),
-            'options' => [
-                'rows' => 6,
-                'readonly' => false
-            ],
-            'preset' => 'custom',
-            'clientOptions' => [
-                'height' => 300,
-                'fullPage' => true,
-                'allowedContent' => true,
-                'resize_enabled' => false,
-                'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-            ]
+    <?= $form->field($model, 'body_html')->widget(CKEditor::class, [
+        'options' => [
+            'rows' => 6,
+            'readonly' => false
+        ],
+        'preset' => 'custom',
+        'clientOptions' => [
+            'height' => 300,
+            'fullPage' => true,
+            'allowedContent' => true,
+            'resize_enabled' => false,
+            'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
         ]
-    ) ?>
+    ]) ?>
 
     <?= $form->field($model, 'e_attach')->textInput(['maxlength' => true]) ?>
 

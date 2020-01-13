@@ -142,7 +142,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                 $email->e_project_id = $project->id;
                             }
                         }
-                        $email->e_email_body_blob = $mail['ei_email_text'];
+                        $email->body_html = $mail['ei_email_text'];
                         $email->e_created_dt = $mail['ei_created_dt'];
 
                         $email->e_inbox_email_id = $mail['ei_id'];

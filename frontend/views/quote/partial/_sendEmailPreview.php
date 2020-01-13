@@ -55,23 +55,20 @@ if (empty($errors)) :
     </div>
 
     <div class="form-group">
-        <?= CKEditor::widget([
-                'name' => 'Email[e_email_body_blob]',
-                'value' => $email->getEmailBodyHtml(),
-                'options' => [
-                    'rows' => 6,
-                    'readonly' => false
-                ],
-                'preset' => 'custom',
-                'clientOptions' => [
-                    'height' => 500,
-                    'allowedContent' => true,
-                    'resize_enabled' => false,
-                    'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                    'removePlugins' => 'elementspath',
-                ]
+        <?= $form->field($email, 'body_html')->widget(CKEditor::class, [
+            'options' => [
+                'rows' => 6,
+                'readonly' => false
+            ],
+            'preset' => 'custom',
+            'clientOptions' => [
+                'height' => 500,
+                'fullPage' => true,
+                'allowedContent' => true,
+                'resize_enabled' => false,
+                'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
             ]
-        ) ?>
+        ]) ?>
     </div>
     <div class="btn-wrapper">
         <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
