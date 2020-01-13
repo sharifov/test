@@ -48,6 +48,19 @@ class DbController extends Controller
 	 */
 	private $globalLogFormatAttrService;
 
+    /**
+     * DbController constructor.
+     * @param $id
+     * @param $module
+     * @param GlobalLogFormatAttrService $globalLogFormatAttrService
+     * @param array $config
+     */
+    public function __construct($id, $module, GlobalLogFormatAttrService $globalLogFormatAttrService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->globalLogFormatAttrService = $globalLogFormatAttrService;
+    }
+
     public function actionUpdateCaseLastAction()
     {
         printf("\n --- Update last action ---\n");
@@ -79,19 +92,6 @@ class DbController extends Controller
     {
         $leads = Lead::updateAll(['l_dep_id' => Department::DEPARTMENT_SALES], ['IS', 'l_dep_id', null]);
         printf("\n --- Sent %s Leads ---\n", $this->ansiFormat($leads, Console::FG_YELLOW));
-	}
-
-	/**
-	 * DbController constructor.
-	 * @param $id
-	 * @param $module
-	 * @param GlobalLogFormatAttrService $globalLogFormatAttrService
-	 * @param array $config
-	 */
-	public function __construct($id, $module, GlobalLogFormatAttrService $globalLogFormatAttrService, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->globalLogFormatAttrService = $globalLogFormatAttrService;
 	}
 
     public function actionRemoveClientSystemPhones()
