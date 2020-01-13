@@ -128,7 +128,7 @@ class CommunicationController extends Controller
                 $email->e_email_from = $mail['ei_email_from'];
                 $email->e_email_subject = $mail['ei_email_subject'];
                 $email->e_project_id = $mail['ei_project_id'];
-                $email->e_email_body_html = $mail['ei_email_text'];
+                $email->e_email_body_blob = $mail['ei_email_text'];
                 $email->e_created_dt = $mail['ei_created_dt'];
 
                 $email->e_inbox_email_id = $mail['ei_id'];

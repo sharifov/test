@@ -127,7 +127,7 @@ use yii\widgets\ActiveForm;
         ?>
 
         <?= CKEditor::widget([
-                'name' => 'e_email_body_html',
+                'name' => 'Email[e_email_body_blob]',
                 'value' => $model->getEmailBodyHtml(),
                 'options' => [
                     'rows' => 6,

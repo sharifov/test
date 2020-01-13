@@ -8,7 +8,7 @@ use yii\db\ActiveRecord;
 
 class HtmlToText extends Behavior
 {
-    public $fromAttribute = 'e_email_body_html';
+    public $fromAttribute = 'e_email_body_blob';
     public $toAttribute = 'e_email_body_text';
 
     /**
@@ -24,7 +24,7 @@ class HtmlToText extends Behavior
 
     public function clean(): void
     {
-        $this->owner->{$this->toAttribute} = TextConvertingHelper::htmlToText($this->owner->{$this->fromAttribute});
+        $this->owner->{$this->toAttribute} = TextConvertingHelper::unCompressAndHtmlToText($this->owner->{$this->fromAttribute});
     }
 
     public function checkUpdate(): void

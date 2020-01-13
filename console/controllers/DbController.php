@@ -498,15 +498,11 @@ ORDER BY lf.lead_id, id';
         $processed = 0;
 
         foreach ($this->findEmailBodyTextEmpty($limit, $offset) as $email) {
-            try {
-                $email->updateAttributes([
-                    'e_email_body_text' => TextConvertingHelper::htmlToText($email->e_email_body_html),
-                    'e_email_body_blob' => TextConvertingHelper::compress($email->e_email_body_html)
-                ]);
-                $processed++;
-            } catch (Exception $e) {
-                echo $e->getMessage() . PHP_EOL;
-            } 
+            $email->updateAttributes([
+                'e_email_body_text' => TextConvertingHelper::htmlToText($email->e_email_body_html),
+                'e_email_body_blob' => TextConvertingHelper::compress($email->e_email_body_html)
+            ]);
+            $processed++;
         }
 
         $this->_printResult($timeStart, $processed);

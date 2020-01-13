@@ -103,7 +103,7 @@ use \common\models\Call;
             <div class="card-body">
                 <h5 class="chat__subtitle"><?=Html::encode($mail->e_email_subject)?></h5>
                 <div class="">
-                    <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->e_email_body_html), 300, '...', null, true)?>
+                    <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
                 <div class="chat__message-footer">
                     <?=Html::a('<i class="fa fa-search-plus"></i> Details', '#', ['class' => 'chat__details', 'data-id' => $mail->e_id])?>

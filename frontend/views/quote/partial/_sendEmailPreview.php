@@ -56,7 +56,7 @@ if (empty($errors)) :
 
     <div class="form-group">
         <?= CKEditor::widget([
-                'name' => 'e_email_body_html',
+                'name' => 'Email[e_email_body_blob]',
                 'value' => $email->getEmailBodyHtml(),
                 'options' => [
                     'rows' => 6,

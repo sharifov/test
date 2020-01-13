@@ -6,6 +6,7 @@ use common\components\CommunicationService;
 use common\models\Employee;
 use common\models\UserProjectParams;
 use http\Url;
+use sales\helpers\email\TextConvertingHelper;
 use Yii;
 use common\models\Email;
 use common\models\search\EmailSearch;
@@ -192,7 +193,7 @@ class EmailController extends FController
                             //$modelNewEmail->e_email_body_html = ($errorJson['message'] ?? $mailPreview['error']);
 
                         } else {
-                            $modelNewEmail->e_email_body_html = $mailPreview['data']['email_body_html'];
+                            $modelNewEmail->e_email_body_blob = $mailPreview['data']['email_body_html'];
                         }
                     }
 
@@ -258,7 +259,8 @@ class EmailController extends FController
                 //$modelNewEmail->e_message_id = $modelNewEmail->generateMessageId();
                 // $modelNewEmail->e_email_body_html = '<p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p>';
 
-                $modelNewEmail->e_email_body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p></body></html>';
+                $body = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->getEmailBodyHtml())).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p></body></html>';
+                $modelNewEmail->e_email_body_blob = TextConvertingHelper::compress($body);
 
                 $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
                 /*if($modelNewEmail->save()) {

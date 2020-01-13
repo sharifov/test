@@ -40,4 +40,14 @@ class TextConvertingHelper
     {
         return gzuncompress($compressedText);
     }
+
+    /**
+     * @param string $text
+     * @return string
+     * @throws \Soundasleep\Html2TextException
+     */
+    public static function unCompressAndHtmlToText(string $text)
+    {
+        return self::htmlToText(self::unCompress($text));
+    }
 }

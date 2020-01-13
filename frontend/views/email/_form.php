@@ -34,7 +34,7 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'e_email_subject')->textInput(['maxlength' => true]) ?>
 
     <?= CKEditor::widget([
-            'name' => 'Email[e_email_body_html]',
+            'name' => 'Email[e_email_body_blob]',
             'value' => $model->getEmailBodyHtml(),
             'options' => [
                 'rows' => 6,
