@@ -13,15 +13,15 @@ class HotelQuoteSearchGuard
 	public static function guard(Hotel $hotel): Hotel
 	{
 		if (!$hotel->ph_check_in_date) {
-			throw new \DomainException('Check in date is not provided; Fill Hotel data;');
+			throw new \DomainException('Missing check in date in Hotel data; Fill Hotel data;');
 		}
 
 		if (!$hotel->ph_check_out_date) {
-			throw  new \DomainException('Check out date is not provided; Fill Hotel data;');
+			throw  new \DomainException('Missing check out date in Hotel data; Fill Hotel data;');
 		}
 
 		if (!$hotel->ph_destination_code) {
-			throw new \DomainException('Destination is not provided; Fill Hotel data;');
+			throw new \DomainException('Missing destination in Hotel data; Fill Hotel data;');
 		}
 
 		return $hotel;
