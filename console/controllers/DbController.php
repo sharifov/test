@@ -493,7 +493,7 @@ ORDER BY lf.lead_id, id';
      */
     public function actionCompressEmail(int $limit = 1000, int $offset = 0): void
     {
-        $this->_printInfo('Start', $this->action->id);
+        $this->printInfo('Start', $this->action->id);
         $timeStart = microtime(true);
         $processed = 0;
 
@@ -505,8 +505,11 @@ ORDER BY lf.lead_id, id';
             $processed++;
         }
 
-        $this->_printResult($timeStart, $processed);
-        $this->_printInfo('End', $this->action->id);
+        $resultInfo = 'Processed: ' . $processed .
+            ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+
+        Yii::info($resultInfo , 'info\Console:' . self::class . ':' . $this->action->id);
+        $this->printInfo($resultInfo, $this->action->id);
     }
 
 	/**
@@ -585,20 +588,11 @@ ORDER BY lf.lead_id, id';
     /**
      * @param string $info
      * @param string $action
+     * @param int $color
      */
-    private function _printInfo(string $info, string $action = '')
+    private function printInfo(string $info, string $action = '', $color = Console::FG_YELLOW)
     {
-        printf("\n --- %s %s ---\n", $info, $this->ansiFormat(self::class . '/' . $action, Console::FG_YELLOW));
-    }
-
-    /**
-     * @param $time
-     * @param $processed
-     */
-    private function _printResult($timeStart, $processed)
-    {
-        $time = number_format(round(microtime(true) - $timeStart, 2), 2);
-        printf("\nExecute Time: %s, Processed: %s ", $this->ansiFormat($time . ' s', Console::FG_RED),  $processed);
+        printf("\n --- %s %s ---\n", $info, $this->ansiFormat(self::class . '/' . $action, $color));
     }
 
     /**
@@ -610,9 +604,10 @@ ORDER BY lf.lead_id, id';
     {
         return Email::find()
             ->where(['e_email_body_text' => null])
+            ->andWhere(['not', ['e_email_body_html' => null]])
             ->limit($limit)
             ->offset($offset)
-            ->orderBy('e_id ASC')
+            ->orderBy(['e_id' => SORT_ASC])
             ->all();
     }
 }
