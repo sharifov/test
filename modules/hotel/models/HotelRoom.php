@@ -2,7 +2,9 @@
 
 namespace modules\hotel\models;
 
+use modules\hotel\models\query\HotelRoomQuery;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "hotel_room".
@@ -12,20 +14,26 @@ use Yii;
  * @property string|null $hr_room_name
  *
  * @property Hotel $hrHotel
+ * @property int $adtCount
+ * @property int $chdCount
+ * @property array $dataSearch
  * @property HotelRoomPax[] $hotelRoomPaxes
  */
 class HotelRoom extends \yii\db\ActiveRecord
 {
+    private $_adults    = null;
+    private $_children  = null;
+
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'hotel_room';
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -38,9 +46,9 @@ class HotelRoom extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'hr_id' => 'ID',
@@ -50,7 +58,7 @@ class HotelRoom extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getHrHotel()
     {
@@ -58,20 +66,20 @@ class HotelRoom extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHotelRoomPaxes()
+    public function getHotelRoomPaxes(): ActiveQuery
     {
         return $this->hasMany(HotelRoomPax::class, ['hrp_hotel_room_id' => 'hr_id']);
     }
 
     /**
      * {@inheritdoc}
-     * @return \modules\hotel\models\query\HotelRoomQuery the active query used by this AR class.
+     * @return HotelRoomQuery the active query used by this AR class.
      */
     public static function find()
     {
-        return new \modules\hotel\models\query\HotelRoomQuery(get_called_class());
+        return new HotelRoomQuery(static::class);
     }
 
     /**
@@ -110,10 +118,36 @@ class HotelRoom extends \yii\db\ActiveRecord
             $data['paxes'] = $paxes;
         }
 
+        $this->_adults = $adults;
+        $this->_children = $children;
+
 //        ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
 //            ['paxType' => 1, 'age' => 6],
 //            ['paxType' => 1, 'age' => 14],
 //        ]];
+
         return $data;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAdtCount(): int
+    {
+        if ($this->_adults === null) {
+            $this->getDataSearch();
+        }
+        return $this->_adults ?: 0;
+    }
+
+    /**
+     * @return int
+     */
+    public function getChdCount(): int
+    {
+        if ($this->_children === null) {
+            $this->getDataSearch();
+        }
+        return $this->_children ?: 0;
     }
 }
