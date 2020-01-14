@@ -55,6 +55,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
+use sales\helpers\app\AppHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
@@ -1746,6 +1747,23 @@ die;
         {
             echo CreditCardHelper::formatCreditCard(CreditCardHelper::maskCreditCard($creditCard[$i])).'<br>'; //FormatCreditCard(MaskCreditCard(($creditCard[$i])))."\n";
         }
+    }
+
+
+    public function actionFilter()
+    {
+
+        $array[] = ['price' => 1, 'gds' => 'A', 'data' => []];
+        $array[] = ['price' => 2, 'gds' => 'B', 'data' => []];
+        $array[] = ['price' => 3.5, 'gds' => 'C', 'data' => []];
+        $array[] = ['price' => 1.3, 'gds' => 'A', 'data' => []];
+
+        $result = AppHelper::filterByValue($array, 'gds', 'A');
+        $result = AppHelper::filterByRange($array, 'price', null, 3);
+        $result = AppHelper::filterByRange($array, 'price', 2, 3);
+        $result = AppHelper::filterByArray($array, 'gds', ['A', 'B']);
+
+        VarDumper::dump($result, 10, true);
     }
 
 
