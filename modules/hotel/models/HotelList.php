@@ -106,8 +106,8 @@ class HotelList extends \yii\db\ActiveRecord
             'hl_city',
             'hl_email',
             'hl_web',
-            //'hl_phone_list',
-            //'hl_image_list',
+            'hl_phone_list',
+            'hl_image_list',
             'hl_image_base_url',
             //'hl_board_codes',
             //'hl_segment_codes',
@@ -308,6 +308,29 @@ class HotelList extends \yii\db\ActiveRecord
      */
     public function getExtraData(): array
     {
-        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
+
+        $attr = $this->attributes;
+
+        $imgList = isset($attr['hl_image_list']) ? @json_decode($attr['hl_image_list'], true) : [];
+        $attr['hl_image_list'] = [];
+
+        if ($imgList) {
+            $i = 0;
+            foreach ($imgList as $item) {
+                $attr['hl_image_list'][] = $item;
+                if (++ $i > 2) {
+                    break;
+                }
+            }
+        }
+
+        //$attr['hl_image_list'] = isset($attr['hl_image_list']) ? @json_decode($attr['hl_image_list'], true) : [];
+        $attr['hl_phone_list'] = isset($attr['hl_phone_list']) ? @json_decode($attr['hl_phone_list'], true) : [];
+
+
+        //$attr['hl_image_base_url'] = 'https://dev-hotels.travel-dev.com/hotel/img/';
+
+
+        return array_intersect_key($attr, array_flip($this->extraFields()));
     }
 }
