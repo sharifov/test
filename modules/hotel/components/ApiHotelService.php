@@ -88,7 +88,7 @@ class ApiHotelService extends Component
             ->setUrl($url)
             ->setData($data);
 
-        if ($method === 'post') {
+        if (strtolower($method) === 'post') {
 			$this->request->setFormat(Client::FORMAT_JSON);
 		}
 
@@ -129,7 +129,7 @@ class ApiHotelService extends Component
         }
 
         try {
-            $response = $this->sendRequest('booking/search', $data, 'POST');
+            $response = $this->sendRequest('booking/search', $data, 'post');
             // VarDumper::dump($response->data, 10, true); exit;
 
             if ($response->isOk) {

@@ -55,6 +55,20 @@ class Flight extends \yii\db\ActiveRecord
         self::CABIN_CLASS_FIRST       => 'First',
     ];
 
+	public const CABIN_ECONOMY = 'Y';
+	public const CABIN_PREMIUM_ECONOMY = 'S';
+	public const CABIN_BUSINESS = 'C';
+	public const CABIN_PREMIUM_BUSINESS = 'J';
+	public const CABIN_FIRST = 'F';
+	public const CABIN_PREMIUM_FIRST = 'P';
+
+    public const CABIN_CLASS_REAL_LIST = [
+		self::CABIN_CLASS_ECONOMY => self::CABIN_ECONOMY,
+		self::CABIN_CLASS_PREMIUM => self::CABIN_PREMIUM_ECONOMY,
+		self::CABIN_CLASS_BUSINESS => self::CABIN_BUSINESS ,
+		self::CABIN_CLASS_FIRST => self::CABIN_FIRST,
+	];
+
     public $enableActiveRecordEvents = true;
 
     /**
@@ -247,6 +261,35 @@ class Flight extends \yii\db\ActiveRecord
 	public function disableAREvents(): void
 	{
 		$this->enableActiveRecordEvents = false;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function generateQuoteSearchKeyCache(): string
+	{
+		$key = 'fl_quote_search_' . $this->fl_id . '-' . $this->fl_adults . '-' . $this->fl_children . '-' . $this->fl_children;
+		foreach ($this->flightSegments as $segment) {
+			$key .= '-' . $segment->fs_origin_iata . '-' . $segment->fs_destination_iata . '-' . strtotime($segment->fs_departure_date);
+		}
+		return md5($key);
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getCabinClassRealList(): array
+	{
+		return self::CABIN_CLASS_REAL_LIST;
+	}
+
+	/**
+	 * @param string $code
+	 * @return mixed|string
+	 */
+	public function getCabinRealCode(string $code)
+	{
+		return self::getCabinClassRealList()[$code] ?? '';
 	}
 
 	/**

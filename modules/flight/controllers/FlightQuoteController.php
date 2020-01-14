@@ -2,6 +2,9 @@
 
 namespace modules\flight\controllers;
 
+use modules\flight\src\repositories\flight\FlightRepository;
+use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
+use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
 use Yii;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\search\FlightQuoteSearch;
@@ -11,10 +14,37 @@ use yii\filters\VerbFilter;
 
 /**
  * FlightQuoteController implements the CRUD actions for FlightQuote model.
+ *
+ * @property FlightRepository $flightRepository
+ * @property FlightQuoteSearchService $quoteSearchService
  */
 class FlightQuoteController extends FController
 {
-    /**
+	/**
+	 * @var FlightRepository
+	 */
+	private $flightRepository;
+	/**
+	 * @var FlightQuoteSearchService
+	 */
+	private $quoteSearchService;
+
+	/**
+	 * FlightQuoteController constructor.
+	 * @param $id
+	 * @param $module
+	 * @param FlightRepository $flightRepository
+	 * @param FlightQuoteSearchService $quoteSearchService
+	 * @param array $config
+	 */
+	public function __construct($id, $module, FlightRepository $flightRepository, FlightQuoteSearchService $quoteSearchService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->flightRepository = $flightRepository;
+		$this->quoteSearchService = $quoteSearchService;
+	}
+
+	/**
      * {@inheritdoc}
      */
     public function behaviors()
@@ -95,19 +125,41 @@ class FlightQuoteController extends FController
         ]);
     }
 
-    /**
-     * Deletes an existing FlightQuote model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+	/**
+	 * Deletes an existing FlightQuote model.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * @param integer $id
+	 * @return mixed
+	 * @throws NotFoundHttpException if the model cannot be found
+	 * @throws \Throwable
+	 * @throws \yii\db\StaleObjectException
+	 */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
+
+	/**
+	 * @return string
+	 */
+    public function actionAjaxSearchQuote(): string
+	{
+		$flightId = Yii::$app->request->get('id');
+		$gds = Yii::$app->request->post('gds', '');
+		$flight = $this->flightRepository->find($flightId);
+
+		$quotes = $this->quoteSearchService->search($flight, $gds);
+
+		$viewData = FlightQuoteSearchHelper::getAirlineLocationInfo($quotes);
+		$viewData['result'] = $quotes;
+		$viewData['flightId'] = $flight->fl_id;
+		$viewData['gds'] = $gds;
+		$viewData['flight'] = $flight;
+
+		return $this->renderAjax('partial/_quote_search', $viewData);
+	}
 
     /**
      * Finds the FlightQuote model based on its primary key value.

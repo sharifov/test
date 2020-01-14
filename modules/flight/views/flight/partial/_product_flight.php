@@ -84,14 +84,14 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
 
-<!--                            --><?//= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
-//                                'data-url' => \yii\helpers\Url::to([
-//                                    '/flight/flight-quote/search-ajax',
-//                                    'id' => $product->flight->fl_id
-//                                ]),
-//                                'data-hotel-id' => $product->flight->fl_id,
-//                                'class' => 'dropdown-item text-success btn-search-flight-quotes'
-//                            ]) ?>
+                            <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
+                                'data-url' => \yii\helpers\Url::to([
+                                    '/flight/flight-quote/ajax-search-quote',
+                                    'id' => $product->flight->fl_id
+                                ]),
+                                'data-hotel-id' => $product->flight->fl_id,
+                                'class' => 'dropdown-item text-success btn-search-flight-quotes'
+                            ]) ?>
 
                             <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
                                 'data-url' => Url::to([
@@ -185,21 +185,21 @@ $js = <<<JS
 //    });
 //    
 //    
-//     $('body').off('click', '.btn-search-flight-quotes').on('click', '.btn-search-flight-quotes', function (e) {
-//        e.preventDefault();
-//        $('#preloader').removeClass('d-none');          
-//        let url = $(this).data('url');
-//        let modal = $('#modal-lg');
-//        modal.find('.modal-body').html('');
-//        modal.find('.modal-title').html('Search flight Quotes');
-//        modal.find('.modal-body').load(url, function( response, status, xhr ) {
-//            $('#preloader').addClass('d-none');
-//            modal.modal({
-//              backdrop: 'static',
-//              show: true
-//            });
-//        });
-//    });
+     $('body').off('click', '.btn-search-flight-quotes').on('click', '.btn-search-flight-quotes', function (e) {
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');          
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Search flight Quotes');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            $('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
 //    
 //    
 //    $('body').off('click', '.btn-delete-flight-room').on('click', '.btn-delete-flight-room', function(e) {
