@@ -37,7 +37,7 @@ class EmailSearch extends Email
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['e_id', 'e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'email_type_id', 'supervision_id', 'e_case_id'], 'integer'],
 			[['e_template_type_name'], 'string'],
-            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_html', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_created_dt', 'e_updated_dt', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
+            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_created_dt', 'e_updated_dt', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
         ];
     }
 
@@ -145,7 +145,6 @@ class EmailSearch extends Email
             ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
             ->andFilterWhere(['like', 'e_email_bc', $this->e_email_bc])
             ->andFilterWhere(['like', 'e_email_subject', $this->e_email_subject])
-            ->andFilterWhere(['like', 'e_email_body_html', $this->e_email_body_html])
             ->andFilterWhere(['like', 'e_email_body_text', $this->e_email_body_text])
             ->andFilterWhere(['like', 'e_attach', $this->e_attach])
             ->andFilterWhere(['like', 'e_email_data', $this->e_email_data])
@@ -192,13 +191,9 @@ class EmailSearch extends Email
             ],
         ]);
 
-        //var_dump($params);        exit;
-
         $this->load($params);
 
         if(isset($params['email_type_id']) && $params['email_type_id'] > 0) {
-
-            //echo $this->email_type_id; exit;
 
             $this->email_type_id = (int) $params['email_type_id'];
 
@@ -232,18 +227,11 @@ class EmailSearch extends Email
             $query->andWhere(['or', ['e_email_from' => $params['EmailSearch']['email']], ['and', ['e_email_to' => $params['EmailSearch']['email']], ['e_type_id' => Email::TYPE_INBOX]]]);
         }
 
-
-
-
-
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
         }
-
-
-
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -274,7 +262,6 @@ class EmailSearch extends Email
             ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
             ->andFilterWhere(['like', 'e_email_bc', $this->e_email_bc])
             ->andFilterWhere(['like', 'e_email_subject', $this->e_email_subject])
-            ->andFilterWhere(['like', 'e_email_body_html', $this->e_email_body_html])
             ->andFilterWhere(['like', 'e_email_body_text', $this->e_email_body_text])
             ->andFilterWhere(['like', 'e_attach', $this->e_attach])
             ->andFilterWhere(['like', 'e_email_data', $this->e_email_data])

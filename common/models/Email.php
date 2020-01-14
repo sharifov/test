@@ -7,9 +7,9 @@ use common\components\CommunicationService;
 use common\models\query\EmailQuery;
 use DateTime;
 use sales\entities\cases\Cases;
+use sales\helpers\email\TextConvertingHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
@@ -25,8 +25,9 @@ use yii\helpers\VarDumper;
  * @property string $e_email_cc
  * @property string $e_email_bc
  * @property string $e_email_subject
- * @property string $e_email_body_html
  * @property string $e_email_body_text
+ * @property string $e_email_body_html // Please use $model->getEmailBodyHtml()
+ * @property string $e_email_body_blob
  * @property string $e_attach
  * @property string $e_email_data
  * @property int $e_type_id
@@ -53,12 +54,20 @@ use yii\helpers\VarDumper;
  * @property string $e_email_to_name
  * @property int $e_case_id
  *
+ * @property string $body_html
+ *
  * @property Employee $eCreatedUser
  * @property Cases $eCase
  * @property Language $eLanguage
  * @property Lead $eLead
  * @property Project $eProject
  * @property EmailTemplateType $eTemplateType
+ * @property mixed $emailData
+ * @property string|mixed $statusName
+ * @property array $usersIdByEmail
+ * @property string|mixed $typeName
+ * @property string $emailBodyHtml
+ * @property string|mixed $priorityName
  * @property Employee $eUpdatedUser
  */
 class Email extends \yii\db\ActiveRecord
@@ -118,6 +127,8 @@ class Email extends \yii\db\ActiveRecord
         self::FILTER_TYPE_TRASH     => 'TRASH',
     ];
 
+    public $body_html;
+
     /**
      * {@inheritdoc}
      */
@@ -135,7 +146,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'e_case_id'], 'integer'],
             [['e_is_new', 'e_is_deleted'], 'boolean'],
             [['e_email_from', 'e_email_to'], 'required'],
-            [['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
+            [['e_email_body_blob', 'e_email_data', 'e_ref_message_id', 'body_html'], 'string'],
             [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id', 'e_email_from_name', 'e_email_to_name'], 'string', 'max' => 255],
             [['e_language_id'], 'string', 'max' => 5],
@@ -147,7 +158,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
             [['e_template_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_template_type_id' => 'etp_id']],
             [['e_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
-            [['quotes'],'safe']
+            [['quotes'], 'safe'],
         ];
     }
 
@@ -168,7 +179,8 @@ class Email extends \yii\db\ActiveRecord
             'e_email_cc' => 'Cc',
             'e_email_bc' => 'Bc',
             'e_email_subject' => 'Subject',
-            'e_email_body_html' => 'Body Html',
+            'e_email_body_blob' => 'Body Html',
+            'body_html' => 'Body Html',
             'e_email_body_text' => 'Body Text',
             'e_attach' => 'Attach',
             'e_email_data' => 'Email Data',
@@ -195,8 +207,6 @@ class Email extends \yii\db\ActiveRecord
             'e_case_id' => 'Case ID',
         ];
     }
-
-
 
     /**
      * @return array
@@ -327,14 +337,14 @@ class Email extends \yii\db\ActiveRecord
 
     public function getQuotes()
     {
-        return explode(',',$this->quotes);
+        return explode(',', $this->quotes);
     }
 
     /**
      * @param $text
      * @return mixed
      */
-    public static function strip_html_tags($text )
+    public static function strip_html_tags($text)
     {
         $text = preg_replace(
             [
@@ -362,9 +372,9 @@ class Email extends \yii\db\ActiveRecord
                 "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0",
                 "\n\$0", "\n\$0",
             ],
-            $text );
+            $text);
 
-        $text = strip_tags( $text );
+        $text = strip_tags($text);
         $text = preg_replace('!\s+!', ' ', $text);
 
         return $text;
@@ -384,22 +394,22 @@ class Email extends \yii\db\ActiveRecord
         $data = [];
         $data['project_id'] = $this->e_project_id;
 
-        $content_data['email_body_html'] = $this->e_email_body_html;
+        $content_data['email_body_html'] = $this->getEmailBodyHtml();
         $content_data['email_body_text'] = $this->e_email_body_text;
         $content_data['email_subject'] = $this->e_email_subject;
         $content_data['email_reply_to'] = $this->e_email_from;
         $content_data['email_cc'] = $this->e_email_cc;
         $content_data['email_bcc'] = $this->e_email_bc;
 
-        if($this->e_email_from_name) {
+        if ($this->e_email_from_name) {
             $content_data['email_from_name'] = $this->e_email_from_name;
         }
 
-        if($this->e_email_to_name) {
+        if ($this->e_email_to_name) {
             $content_data['email_to_name'] = $this->e_email_to_name;
         }
 
-        if($this->e_message_id) {
+        if ($this->e_message_id) {
             $content_data['email_message_id'] = $this->e_message_id;
         }
 
@@ -409,7 +419,7 @@ class Email extends \yii\db\ActiveRecord
             $request = $communication->mailSend($this->e_project_id, $tplType, $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
 
 
-            if($request && isset($request['data']['eq_status_id'])) {
+            if ($request && isset($request['data']['eq_status_id'])) {
                 $this->e_status_id = $request['data']['eq_status_id'];
                 $this->e_communication_id = $request['data']['eq_id'];
                 $this->save();
@@ -417,7 +427,7 @@ class Email extends \yii\db\ActiveRecord
 
             //VarDumper::dump($request, 10, true); exit;
 
-            if($request && isset($request['error']) && $request['error']) {
+            if ($request && isset($request['error']) && $request['error']) {
                 $this->e_status_id = self::STATUS_ERROR;
                 $errorData = @json_decode($request['error'], true);
                 $this->e_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
@@ -434,9 +444,6 @@ class Email extends \yii\db\ActiveRecord
         }
 
         //VarDumper::dump($request, 10, true); exit;
-
-
-
 
         // VarDumper::dump($request, 10, true); exit;
 
@@ -536,7 +543,7 @@ class Email extends \yii\db\ActiveRecord
         $users = [];
         $params = UserProjectParams::find()->where(['upp_email' => $this->e_email_to])->all();
 
-        if($params) {
+        if ($params) {
             foreach ($params as $param) {
                 $users[$param->upp_user_id] = $param->upp_user_id;
             }
@@ -544,7 +551,7 @@ class Email extends \yii\db\ActiveRecord
 
         $employees = Employee::find()->where(['email' => $this->e_email_to])->all();
 
-        if($employees) {
+        if ($employees) {
             foreach ($employees as $employe) {
                 $users[$employe->id] = $employe->id;
             }
@@ -577,37 +584,37 @@ class Email extends \yii\db\ActiveRecord
      * @param string $str
      * @return string
      */
-    public static function reSubject($str = '') : string
+    public static function reSubject($str = ''): string
     {
         $str = trim($str);
-        if(strpos($str, 'Re:', 0) === false && strpos($str, 'Re[', 0) === false) {
-            return 'Re:'. $str;
+        if (strpos($str, 'Re:', 0) === false && strpos($str, 'Re[', 0) === false) {
+            return 'Re:' . $str;
         } else {
             preg_match_all('/Re\[([\d]+)\]:/i', $str, $m);
-            if($m && is_array($m) && isset($m[0], $m[1])) {
-                if(count($m[0]) > 1) {
+            if ($m && is_array($m) && isset($m[0], $m[1])) {
+                if (count($m[0]) > 1) {
                     $cnt = 0;
                     foreach ($m[0] AS $repl) {
-                        if(isset($m[0][$cnt+1])) {
-                            $from = '/'.preg_quote($repl, '/').'/';
+                        if (isset($m[0][$cnt + 1])) {
+                            $from = '/' . preg_quote($repl, '/') . '/';
                             $str = preg_replace($from, '', $str, 1);
                             $str = preg_replace("/(.*?)$repl/i", '', $str, 1);
                         }
-                        $cnt ++;
+                        $cnt++;
                     }
                 }
             }
-            $str =  preg_replace("/(.*?)Re\[([\d]+)\]:/i", 'Re[$2]: ', $str, 1);
-            if(mb_substr($str, 0,3, 'utf-8') === 'Re:') {
-                $str =  preg_replace("/(Re:)/i", 'Re[1]:', $str, 1);
-            } elseif(preg_match('/Re\[([\d]+)\]:/i', $str, $matches)) {
-                if(isset($matches[0], $matches[1])) {
+            $str = preg_replace("/(.*?)Re\[([\d]+)\]:/i", 'Re[$2]: ', $str, 1);
+            if (mb_substr($str, 0, 3, 'utf-8') === 'Re:') {
+                $str = preg_replace("/(Re:)/i", 'Re[1]:', $str, 1);
+            } elseif (preg_match('/Re\[([\d]+)\]:/i', $str, $matches)) {
+                if (isset($matches[0], $matches[1])) {
                     $newVal = $matches[1] + 1;
-                    $str =  preg_replace('/Re\[([\d]+)\]:/i', 'Re['.$newVal.']:', $str, 1);
+                    $str = preg_replace('/Re\[([\d]+)\]:/i', 'Re[' . $newVal . ']:', $str, 1);
                 }
             }
         }
-        $str = preg_replace("/ {2,}/"," ",$str);
+        $str = preg_replace("/ {2,}/", " ", $str);
 
         return trim($str);
     }
@@ -620,23 +627,23 @@ class Email extends \yii\db\ActiveRecord
      * @return array
      * @throws \Exception
      */
-    public static function getEmailsStats(string $startDate, string $endDate, ?string $groupingBy, int $emailsType) : array
+    public static function getEmailsStats(string $startDate, string $endDate, ?string $groupingBy, int $emailsType): array
     {
-        $sDate = $startDate." 00:00:00";
-        $eDate = $endDate." 23:59:59";
-        switch ($groupingBy){
+        $sDate = $startDate . " 00:00:00";
+        $eDate = $endDate . " 23:59:59";
+        switch ($groupingBy) {
             case null:
-                if (strtotime($startDate) == strtotime($endDate)){
-                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                if (strtotime($startDate) == strtotime($endDate)) {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'H:i:s');
                 } else {
                     $daysRange = ChartTools::getDaysRange($startDate, $endDate);
                 }
                 break;
             case 'hours':
-                if (strtotime($startDate) == strtotime($endDate)){
-                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                if (strtotime($startDate) == strtotime($endDate)) {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'H:i:s');
                 } else {
-                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
                 }
                 break;
             case 'days':
@@ -651,14 +658,14 @@ class Email extends \yii\db\ActiveRecord
                 $eDate = date('Y-m-31', strtotime($endDate));
                 break;
         }
-        if ($emailsType == 0){
+        if ($emailsType == 0) {
             $emails = self::find()->select(['e_status_id', 'e_created_dt'])
-                ->where(['e_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
+                ->where(['e_status_id' => [self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 'e_created_dt', $sDate, $eDate])
                 ->all();
         } else {
             $emails = self::find()->select(['e_status_id', 'e_created_dt'])
-                ->where(['e_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
+                ->where(['e_status_id' => [self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 'e_created_dt', $sDate, $eDate])
                 ->andWhere(['=', 'e_type_id', $emailsType])
                 ->all();
@@ -666,23 +673,23 @@ class Email extends \yii\db\ActiveRecord
 
         $emailStats = [];
         $item = [];
-        if (strtotime($startDate) < strtotime($endDate)){
+        if (strtotime($startDate) < strtotime($endDate)) {
             if (isset($daysRange)) {
                 $timeLine = $daysRange;
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m-d';
-            } elseif (isset($monthsRange)){
+            } elseif (isset($monthsRange)) {
                 $timeLine = $monthsRange;
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m';
                 $item['timeLine'] = 'Y, M';
-            } elseif (isset($weeksPeriods)){
+            } elseif (isset($weeksPeriods)) {
                 $timeLine = $weeksPeriods;
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m-d';
-            }elseif (isset($hoursRange)){
+            } elseif (isset($hoursRange)) {
                 $timeLine = $hoursRange;
                 $item['timeLine'] = 'H:i';
                 $dateFormat = 'Y-m-d H:i:s';
@@ -694,7 +701,7 @@ class Email extends \yii\db\ActiveRecord
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m-d';
-            } elseif (isset($hoursRange)){
+            } elseif (isset($hoursRange)) {
                 $timeLine = $hoursRange;
                 $item['timeLine'] = 'H:i';
                 $dateFormat = 'H:i:s';
@@ -704,7 +711,7 @@ class Email extends \yii\db\ActiveRecord
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m';
                 $item['timeLine'] = 'Y, M';
-            } elseif (isset($weeksPeriods)){
+            } elseif (isset($weeksPeriods)) {
                 $timeLine = $weeksPeriods;
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
@@ -713,22 +720,21 @@ class Email extends \yii\db\ActiveRecord
         }
 
         $done = $error = 0;
-        foreach ($timeLine as $key => $timeSignature){
+        foreach ($timeLine as $key => $timeSignature) {
             $weekInterval = explode('/', $timeSignature);
-            if (count($weekInterval) != 2){
+            if (count($weekInterval) != 2) {
                 $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
-                if ($EndPoint == '00:00:00'){
+                if ($EndPoint == '00:00:00') {
                     $EndPoint = '23:59:59';
                 }
             } else {
                 $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
                 $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
             }
-            foreach ($emails as $emailItem){
+            foreach ($emails as $emailItem) {
                 $smsUpdatedTime = date($dateFormat, strtotime($emailItem->e_created_dt));
-                if ($smsUpdatedTime >= $timeSignature && $smsUpdatedTime <= $EndPoint)
-                {
-                    switch ($emailItem->e_status_id){
+                if ($smsUpdatedTime >= $timeSignature && $smsUpdatedTime <= $EndPoint) {
+                    switch ($emailItem->e_status_id) {
                         case self::STATUS_DONE :
                             $done++;
                             break;
@@ -762,5 +768,33 @@ class Email extends \yii\db\ActiveRecord
 
     }
 
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert): bool
+    {
+         if (parent::beforeSave($insert)) {
 
+            if (!empty($this->body_html)) {
+                $this->e_email_body_text = TextConvertingHelper::htmlToText($this->body_html);
+                $this->e_email_body_blob = TextConvertingHelper::compress($this->body_html);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmailBodyHtml(): ?string
+    {
+        if (!empty($this->e_email_body_blob)) {
+            $value = TextConvertingHelper::unCompress($this->e_email_body_blob);
+        } else {
+            $value = $this->e_email_body_html;
+        }
+        return $value;
+    }
 }

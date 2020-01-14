@@ -321,8 +321,10 @@ CRONs
 */5 * * * *         php /var/www/sale/yii logger/format-log-managed-attr
 */5 * * * *         php /var/www/sale/yii lead/return-lead-to-ready
 10   1-3  *  *  *     php /var/www/sale/yii service/update-currency
+*/1  *  *  *  *     php /var/www/sale/yii db/compress-email 
 ```
-
+Note: php /var/www/sale/yii db/compress-email - Временный скрипт. Удалить запись после дополнительного тикета по :
+ALTER TABLE "email" DROP "e_email_body_text";  
 ```
 sudo chmod 777 /var/spool/cron/crontabs/root
 ```

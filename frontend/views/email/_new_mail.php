@@ -1,5 +1,6 @@
 <?php
 
+use dosamigos\ckeditor\CKEditor;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -125,8 +126,7 @@ use yii\widgets\ActiveForm;
 
         ?>
 
-
-        <?= $form->field($model, 'e_email_body_html')->widget(\dosamigos\ckeditor\CKEditor::class, [
+        <?= $form->field($model, 'body_html')->widget(CKEditor::class, [
             'options' => [
                 'rows' => 6,
                 'readonly' => false
@@ -135,14 +135,11 @@ use yii\widgets\ActiveForm;
             'clientOptions' => [
                 'height' => 500,
                 'fullPage' => true,
-
                 'allowedContent' => true,
                 'resize_enabled' => false,
                 'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                //'removePlugins' => 'elementspath',
             ]
         ]) ?>
-
 
         <?//= $form->field($model, 'e_email_body_text')->textarea(['rows' => 6]) ?>
 
