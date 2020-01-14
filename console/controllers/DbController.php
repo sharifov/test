@@ -508,7 +508,7 @@ ORDER BY lf.lead_id, id';
         $resultInfo = 'Processed: ' . $processed .
             ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
 
-        Yii::info($resultInfo , 'info\Console:' . self::class . ':' . $this->action->id);
+        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
         $this->printInfo($resultInfo, $this->action->id);
     }
 
