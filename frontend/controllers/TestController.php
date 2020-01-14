@@ -31,6 +31,7 @@ use common\models\UserGroupAssign;
 use common\models\UserGroupSet;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use console\migrations\RbacMigrationService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -157,6 +158,16 @@ class TestController extends FController
 
     public function actionTest()
     {
+
+        $serv = Yii::createObject(RbacMigrationService::class);
+        $t = $serv->getAllRoutesByGroup('/global-log/*');
+       foreach ($t as $value) {
+           echo "'" . $value . "', ";
+       }
+       echo PHP_EOL;
+       VarDumper::dump($t);
+
+        die;
 
         $data = [
             'client' => [
