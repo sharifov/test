@@ -13,5 +13,6 @@ class LogsToolsPermissions
         '/user-site-activity/clear-logs', '/user-site-activity/create', '/user-site-activity/delete', '/user-site-activity/index',
         '/user-site-activity/report', '/user-site-activity/update', '/user-site-activity/view',
         '/global-log/ajax-view-general-lead-log', '/global-log/create', '/global-log/index', '/global-log/view',
+        '/setting-category/create', '/setting-category/delete', '/setting-category/index', '/setting-category/update', '/setting-category/view',
     ];
 }
