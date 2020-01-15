@@ -7,7 +7,7 @@ use Yii;
 /**
  * Class m200115_084039_add_column_request_hash_tbl_flight
  */
-class m200115_084039_add_column_request_hash_tbl_flight extends Migration
+class m200115_084039_add_column_request_hash_tbl_hotel extends Migration
 {
     /**
      * @return bool|void
