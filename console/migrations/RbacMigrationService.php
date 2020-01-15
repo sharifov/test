@@ -73,25 +73,27 @@ class RbacMigrationService
 
         if ($role = $auth->getRole($roleName)) {
             foreach ($this->getAllGroupByRole($role) as $group) {
-                foreach ($this->getAllRoutesByGroup($group) as $route) {
-                    $permission = $this->getOrCreatePermission($route);
-                    if (!$auth->hasChild($role, $permission)) {
-                        if ($auth->canAddChild($role, $permission)) {
-                            if ($auth->addChild($role, $permission)) {
-                               $report[] = 'added: ' . $route;
-                            } else {
-                                $report[] =  'not added: ' . $route;
-                            }
-                        } else {
-                            $report[] = 'cant add: ' . $route;
-                        }
-                    }
-                }
                 if ($groupRole = $auth->getPermission($group)) {
                     if ($auth->removeChild($role, $groupRole)) {
                         $report[] = 'removed: ' . $group;
                     } else {
                         $report[] = 'not removed: ' . $group;
+                    }
+                }
+                foreach ($this->getAllRoutesByGroup($group) as $route) {
+                    $permission = $this->getOrCreatePermission($route);
+                    if (!$auth->hasChild($role, $permission)) {
+                        if ($auth->canAddChild($role, $permission)) {
+                            if ($auth->addChild($role, $permission)) {
+                                $report[] = 'added: ' . $route;
+                            } else {
+                                $report[] = 'not added: ' . $route;
+                            }
+                        } else {
+                            $report[] = 'cant add: ' . $route;
+                        }
+                    } else {
+                        $report[] =  'permission: ' . $permission->name . ' already assigned' . PHP_EOL;
                     }
                 }
             }
@@ -141,7 +143,7 @@ class RbacMigrationService
      */
     public function getAllRoutesByGroup(string $group): array
     {
-        $group = substr($group, 0, (strlen($group)-1));
+        $group = substr($group, 0, (strlen($group) - 1));
         $routes = [];
         foreach ($this->getAllRoutes() as $route) {
             if (($route !== $group . '*') && strpos($route, $group) === 0) {

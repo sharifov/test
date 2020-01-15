@@ -34,33 +34,41 @@ class RbacController extends Controller
             }
 
             $permissions = array_diff(self::getAllPermissionsFromAdmin(), $excludePermissions);
-            self::assignPermissionsToRole($permissions, $role);
+            foreach (self::assignPermissionsToRole($permissions, $role) as $report) {
+                echo $report . PHP_EOL;
+            }
+        } else {
+            echo 'cant get role: ' . $roleName . PHP_EOL;
         }
     }
 
-    private static function assignPermissionsToRole(array $permissions, Role $role): void
+    private static function assignPermissionsToRole(array $permissions, Role $role): array
     {
         $auth = Yii::$app->authManager;
+
+        $report = [];
 
         foreach ($permissions as $item) {
             if ($permission = $auth->getPermission($item)) {
                 if (!$auth->hasChild($role, $permission)) {
                     if ($auth->canAddChild($role, $permission)) {
                         if ($auth->addChild($role, $permission)) {
-                            echo 'added: ' . $permission->name . PHP_EOL;
+                            $report[] = 'added: ' . $permission->name;
                         } else {
-                            echo 'not added: ' . $permission->name . PHP_EOL;
+                            $report[] = 'not added: ' . $permission->name;
                         }
                     } else {
-                        echo 'cant add: ' . $permission->name . PHP_EOL;
+                        $report[] = 'cant add: ' . $permission->name;
                     }
                 } else {
-                    echo 'permission: ' . $permission->name . ' already assigned' . PHP_EOL;
+                    $report[] = 'permission: ' . $permission->name . ' already assigned';
                 }
             } else {
-                echo 'cant get permission: ' . $item . PHP_EOL;
+                $report[] = 'cant get permission: ' . $item;
             }
         }
+
+        return $report;
     }
 
     private static function getAllPermissionsFromAdmin(): array
