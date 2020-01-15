@@ -18,6 +18,7 @@ use yii\db\ActiveQuery;
  * @property int|null $fl_adults
  * @property int|null $fl_children
  * @property int|null $fl_infants
+ * @property string|null $fl_request_hash_key
  *
  * @property bool $enableActiveRecordEvents
  *
@@ -72,6 +73,7 @@ class Flight extends \yii\db\ActiveRecord
         return [
             [['fl_product_id', 'fl_trip_type_id', 'fl_adults', 'fl_children', 'fl_infants'], 'integer'],
             [['fl_cabin_class'], 'string', 'max' => 1],
+            [['fl_request_hash_key'], 'string', 'max' => 32],
             [['fl_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['fl_product_id' => 'pr_id']],
         ];
     }
@@ -89,6 +91,7 @@ class Flight extends \yii\db\ActiveRecord
             'fl_adults' => 'Adults',
             'fl_children' => 'Children',
             'fl_infants' => 'Infants',
+            'fl_request_hash_key' => 'Request Hash key',
         ];
     }
 
@@ -131,6 +134,37 @@ class Flight extends \yii\db\ActiveRecord
     public static function find()
     {
         return new FlightQuery(static::class);
+    }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            $request_hash_key = $this->generateRequestHashKey();
+            if ($this->fl_request_hash_key !== $request_hash_key) {
+                $this->fl_request_hash_key = $request_hash_key;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return string
+     */
+    private function generateRequestHashKey(): string
+    {
+        $keyData[] = $this->fl_cabin_class . '|' . $this->fl_adults . '|' . $this->fl_children . '|' . $this->fl_infants;
+        if ($this->flightSegments) {
+            foreach ($this->flightSegments as $segment) {
+                $keyData[] = $segment->fs_origin_iata . '|' . $segment->fs_destination_iata . '|' . $segment->fs_departure_date;
+            }
+        }
+        $key = implode('|', $keyData);
+        return md5($key);
     }
 
     /**

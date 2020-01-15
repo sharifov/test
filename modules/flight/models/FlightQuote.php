@@ -35,6 +35,7 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property string|null $fq_pricing_info
  * @property string|null $fq_origin_search_data
  * @property string|null $fq_last_ticket_date
+ * @property string|null $fq_request_hash
  *
  * @property Employee $fqCreatedUser
  * @property Flight $fqFlight
@@ -66,7 +67,7 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
             [['fq_service_fee_percent'], 'number'],
             [['fq_reservation_dump', 'fq_pricing_info'], 'string'],
             [['fq_origin_search_data', 'fq_last_ticket_date'], 'safe'],
-            [['fq_hash_key'], 'string', 'max' => 32],
+            [['fq_hash_key', 'fq_request_hash'], 'string', 'max' => 32],
             [['fq_record_locator'], 'string', 'max' => 8],
             [['fq_gds', 'fq_main_airline'], 'string', 'max' => 2],
             [['fq_gds_pcc'], 'string', 'max' => 10],
@@ -107,6 +108,7 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
             'fq_pricing_info' => 'Pricing Info',
             'fq_origin_search_data' => 'Origin Search Data',
             'fq_last_ticket_date' => 'Last Ticket Date',
+            'fq_request_hash' => 'Request Hash',
         ];
     }
 

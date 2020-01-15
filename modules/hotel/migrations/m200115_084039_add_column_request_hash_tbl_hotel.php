@@ -5,7 +5,7 @@ use yii\db\Migration;
 use Yii;
 
 /**
- * Class m200115_084039_add_column_request_hash_tbl_flight
+ * Class m200115_084039_add_column_request_hash_tbl_hotel
  */
 class m200115_084039_add_column_request_hash_tbl_hotel extends Migration
 {
