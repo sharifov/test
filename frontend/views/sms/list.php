@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -14,10 +15,13 @@ use yii\widgets\Pjax;
 
 $this->title = 'My Sms';
 $this->params['breadcrumbs'][] = $this->title;
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 ?>
 <div class="sms-index">
 
-    <?php /*if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) : ?>
+    <?php /*if($user->isAdmin()) : ?>
     <div class="lead-search">
         <div class="row">
             <div class="col-md-3">
@@ -325,21 +329,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\ActionColumn',
                 //'controller' => 'order-shipping',
                 'template' => '{view2} {soft-delete}',
-
-                /*'visibleButtons' => [
-                    'view' => function ($model, $key, $index) {
-                        return User::hasPermission('viewOrder');
-                    },
-                    'update' => function ($model, $key, $index) {
-                        return User::hasPermission('updateOrder');
-                    },
-                    'delete' => function ($model, $key, $index) {
-                        return User::hasRole(['admin']);
-                    },
-                    'soft-delete' => function ($model, $key, $index) {
-                        return User::hasPermission('deleteOrder');
-                    },
-                ],*/
 
                 'buttons' => [
                     'view2' => function ($url, $model) {

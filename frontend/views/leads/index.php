@@ -716,21 +716,10 @@ $lists = new ListsAccess($user->id);
             <div class="col-md-12">
                 <div class="card card-default">
                     <div class="card-body">
-                        <?php
-
-                        if ($user->isAdmin()) {
-                            $role = 'admin';
-                        } elseif ($user->isSupervision()) {
-                            $role = 'supervision';
-                        } else {
-                            $role = null;
-                        }
-
-                        ?>
 
                         <div class="redial_queue-wrapper">
 
-                            <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
+                            <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($user), ['prompt' => '-', 'id' => 'status_id']) ?>
 
                             <div id="reason_id_div" style="display: none">
                                 <?= $form->field($multipleForm, 'reason_id')->dropDownList([], ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>

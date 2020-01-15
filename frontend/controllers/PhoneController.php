@@ -144,7 +144,10 @@ class PhoneController extends FController
     public function actionGetToken()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $username = 'seller'. \Yii::$app->user->identity->id;
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        $username = 'seller'. $user->id;
         //VarDumper::dump($username, 10, true); exit;
         $data = Yii::$app->communication->getJwtTokenCache($username, true);
         return $data;

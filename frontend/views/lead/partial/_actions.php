@@ -87,7 +87,7 @@ $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadMode
     'data-pjax' => 0
 ]);
 
-$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && $user->canRoles(['admin', 'supervision']));
+$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
 $buttonsSubAction = [];
 $takeConditions = false;
 if (!$leadModel->isNewRecord) {
@@ -96,7 +96,7 @@ if (!$leadModel->isNewRecord) {
     $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
     if($processingConditions){
-        if ($user->canRoles(['admin', 'supervision'])) {
+        if ($user->isAdmin() || $user->isSupervision()) {
             $buttonsSubAction[] = $buttonAnswer;
         }
         //$buttonsSubAction[] = $buttonHoldOn;
@@ -166,7 +166,7 @@ if($project){
 
 
 
-    <?php if(!$leadModel->isNewRecord && $user->canRoles(['admin', 'supervision'])):
+    <?php if(!$leadModel->isNewRecord && ($user->isAdmin() || $user->isSupervision())):
 
         $productTypes = \common\models\ProductType::find()->/*where(['pt_enabled' => true])*/all();
 
@@ -184,7 +184,7 @@ if($project){
     <?php endif; ?>
 
 
-    <?php if (!$user->canRole('qa')) : ?>
+    <?php if (!$user->isQa()) : ?>
 
             <div class="panel-main__actions">
     	<?php if ($takeConditions){
@@ -237,7 +237,7 @@ if($project){
 
 
 
-        <?php if(!$leadModel->isNewRecord && $user->canRoles(['admin', 'supervision'])): ?>
+        <?php if(!$leadModel->isNewRecord && ($user->isAdmin() || $user->isSupervision())): ?>
             <?= Html::a('<i class="fa fa-bars"></i> Status Logs', null, [
                 'id' => 'view-flow-transition',
                 'class' => 'btn btn-default',
@@ -264,7 +264,7 @@ if($project){
         <?php endif; ?>
 
 
-        <?php if($leadModel->isSold() && $user->canRoles(['admin', 'supervision'])):?>
+        <?php if($leadModel->isSold() && ($user->isAdmin() || $user->isSupervision())):?>
         	<?= Html::button('<i class="fa fa-money"></i> Split profit', [
                     'class' => 'btn btn-default',
                     'id' => 'split-profit',
@@ -355,7 +355,7 @@ if($project){
 
 <?php
 
-if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && $user->canRoles(['admin', 'supervision']))) {
+if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()))) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
     $formLeadId = sprintf('%s-form', $leadModel->formName());
     $formClientId = sprintf('%s-form', $leadForm->getClient()->formName());

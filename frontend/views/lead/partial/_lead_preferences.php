@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use common\models\Lead;
 use sales\access\LeadPreferencesAccess;
 use yii\helpers\Url;
@@ -11,8 +12,11 @@ use \yii\helpers\Html;
  * @var $lead Lead
  */
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 $leadPreferences = $lead->leadPreferences;
-$manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPreference($lead, Yii::$app->user->id);
+$manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPreference($lead, $user);
 ?>
 
 

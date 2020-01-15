@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 use \common\models\Email;
 use \common\models\Sms;
@@ -11,7 +12,12 @@ use \common\models\Call;
 ?>
 
 <?php
-    $fromType = 'client';
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+$fromType = 'client';
+
 ?>
 
 <?//php \yii\helpers\VarDumper::dump($model, 10, true) ?>
@@ -60,7 +66,7 @@ use \common\models\Call;
             <?php endif;?>
 
             <div class="chat__date">
-                <?php if(Yii::$app->user->identity->isAdmin()):?>
+                <?php if($user->isAdmin()):?>
                     Id: <u title="SID: <?=Html::encode($call->c_call_sid)?>"><?=Html::a($call->c_id, ['call/view', 'id' => $call->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u>,
                 <?php endif; ?>
                 <i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt))?></div>

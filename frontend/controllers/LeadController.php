@@ -133,6 +133,8 @@ class LeadController extends FController
      */
     public function actionView(string $gid)
     {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
         $gid = mb_substr($gid, 0, 32);
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
@@ -141,16 +143,15 @@ class LeadController extends FController
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if (($lead->isTrash() || $lead->isPending()) && Yii::$app->user->identity->isAgent()) {
+        if ($user->isAgent() && ($lead->isTrash() || $lead->isPending())) {
             throw new ForbiddenHttpException('Access Denied for Agent (Status Lead)');
         }
         $itineraryForm = new ItineraryEditForm($lead);
-        $user = Yii::$app->user->identity;
 
-        $is_admin = $user->canRole('admin');
-        $isQA = $user->canRole('qa');
-        $is_supervision = $user->canRole('supervision');
-        $is_agent = $user->canRole('agent');
+        $is_admin = $user->isAdmin();
+        $isQA = $user->isQa();
+        $is_supervision = $user->isSupervision();
+        $is_agent = $user->isAgent();
 
 
         if (Yii::$app->request->post('hasEditable')) {

@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -12,6 +13,9 @@ use yii\helpers\Html;
 /* @var $case_id int */
 /* @var $selectProjectPhone string */
 /* @var $currentCall \common\models\Call */
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 ?>
 <div class="phone-update">
@@ -185,8 +189,8 @@ use yii\helpers\Html;
                     </td>
                     <td>
                         <?=Html::textInput('call-to-number', $phone_number, ['id' => 'call-to-number', 'class' => 'form-control',
-                                'readonly' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? false : true,
-                                'disable' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? false : true
+                                'readonly' => !$user->isAdmin(),
+                                'disable' => !$user->isAdmin()
                             ])
                         ?>
                         <?=Html::hiddenInput('call-lead-id', $lead_id, ['id' => 'call-lead-id'])?>

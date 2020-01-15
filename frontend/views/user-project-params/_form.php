@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -10,18 +11,18 @@ use borales\extensions\phoneInput\PhoneInput;
 /* @var $model common\models\UserProjectParams */
 /* @var $form yii\widgets\ActiveForm */
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 $userList = [];
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id)) {
+if ($user->isAdmin() || $user->isUserManager()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }
 
-$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
-
-//Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
-
+$projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 

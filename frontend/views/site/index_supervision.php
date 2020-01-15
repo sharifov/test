@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -18,7 +19,9 @@ $this->title = 'Dashboard - Supervision';
 JS;
 //$this->registerJs($js, \yii\web\View::POS_READY);*/
 
-$userId = Yii::$app->user->id;
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 
 <div class="site-index">
@@ -299,7 +302,7 @@ JS;
                             return $groupsValue;
                         },
                         'format' => 'raw',
-                        'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                        'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                     ],
 
                     [
@@ -410,17 +413,6 @@ JS;
                         'format' => 'raw',
                     ]
 
-
-                    /*[
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{update}',
-                        'visibleButtons' => [
-                            'update' => function (\common\models\Employee $model, $key, $index) {
-                                return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                            },
-                        ],
-
-                    ],*/
                 ]
             ])
             ?>

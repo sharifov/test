@@ -15,6 +15,7 @@
  * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  */
 
+use common\models\Employee;
 use sales\formatters\client\ClientTimeFormatter;
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
@@ -22,12 +23,14 @@ use frontend\models\LeadForm;
 $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
 //$this->registerCssFile('/css/style-req.css');
-$userId = Yii::$app->user->id;
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 $is_manager = false;
-$is_admin = Yii::$app->user->identity->canRole('admin');
-$is_qa = Yii::$app->user->identity->canRole('qa');
-$is_supervision = Yii::$app->user->identity->canRole('supervision');
+$is_admin = $user->isAdmin();
+$is_qa = $user->isQa();
+$is_supervision = $user->isSupervision();
 
 if($is_admin || $is_supervision) {
     $is_manager = true;

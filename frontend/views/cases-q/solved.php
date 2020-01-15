@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Department;
+use common\models\Employee;
 use common\models\Project;
 use sales\access\ListsAccess;
 use dosamigos\datepicker\DatePicker;
@@ -17,7 +18,10 @@ use sales\entities\cases\CasesQSearch;
 $this->title = 'Solved Queue';
 $this->params['breadcrumbs'][] = $this->title;
 
-$lists = new ListsAccess(Yii::$app->user->id);
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+$lists = new ListsAccess($user->id);
 ?>
 <h1>
     <i class="fa fa-flag"></i> <?= Html::encode($this->title) ?>
@@ -60,7 +64,7 @@ $lists = new ListsAccess(Yii::$app->user->id);
                     return $model->owner ? $model->owner->username : '';
                 },
                 'filter' => $lists->getEmployees(),
-                'visible' => Yii::$app->user->identity->isSupSuper() || Yii::$app->user->identity->isExSuper() || Yii::$app->user->identity->isAdmin()
+                'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
             ],
             [
                 'attribute' => 'cs_lead_id',

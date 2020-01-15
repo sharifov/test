@@ -6,11 +6,16 @@
  * @var $mainAgentProfit float
  * @var $splitForm ProfitSplitForm
  */
+
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\ProfitSplit;
 
-if (Yii::$app->user->identity->canRole('admin')) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
     $userList = \common\models\Employee::getListByRole('agent');

@@ -22,6 +22,8 @@ use yii\widgets\MaskedInput;
 $data = [];
 $dataProjects = [];
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 if($model->isNewRecord) {
     $this->title = 'Create new User';
@@ -33,13 +35,13 @@ $this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 
 
-if (Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin'])) {
+if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }
 
-$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+$projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 
@@ -69,7 +71,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <?php if($model->isNewRecord || Yii::$app->user->identity->canRoles(['admin', 'supervision', 'userManager', 'superadmin'])): ?>
+                        <?php if($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()): ?>
                             <?//= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
 
                             <?php
@@ -97,17 +99,16 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <?php if($model->isNewRecord || Yii::$app->user->identity->canRoles(['admin', 'supervision', 'agent', 'userManager', 'superadmin'])):
+                        <?php if($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager() || $user->isAgent()):
 
-
-                            if(Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin'])) {
+                            if($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
                                 $data = \common\models\UserGroup::getList();
                                 $dataProjects = \common\models\Project::getList();
                             }
 
-                            if(Yii::$app->user->identity->canRole('supervision')) {
-                                $data = Yii::$app->user->identity->getUserGroupList();
-                                $dataProjects = \yii\helpers\ArrayHelper::map(Yii::$app->user->identity->projects, 'id', 'name');
+                            if($user->isSupervision()) {
+                                $data = $user->getUserGroupList();
+                                $dataProjects = \yii\helpers\ArrayHelper::map($user->projects, 'id', 'name');
                                 //\yii\helpers\VarDumper::dump($dataProjects, 10, true);                             //exit;
                             }
 
@@ -182,7 +183,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
                 </div>
 
-                <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision', 'superadmin'])): ?>
+                <?php if($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()): ?>
 
                     <div class="row">
                         <div class="col-md-12">
@@ -523,7 +524,7 @@ JS;
     ])*/ ?>
 
     <?php /*
-    if (!$model->isNewRecord && $model->role != 'admin') {
+    if (!$model->isNewRecord && !$model->isAdmin()) {
         echo $this->render('partial/_permissions', [
             'model' => $model,
             'isProfile' => $isProfile

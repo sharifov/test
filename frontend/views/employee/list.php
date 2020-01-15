@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\grid\ActionColumn;
 
 /* @var $this yii\web\View */
@@ -18,20 +19,20 @@ use yii\bootstrap4\Modal;
 $this->title = 'User List';
 $this->params['breadcrumbs'][] = $this->title;
 
+/** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-$isUM = $user->canRole('userManager');
-$isAdmin = $user->canRoles(['admin', 'superadmin']);
-$isSuperAdmin = $user->canRole('superadmin');
+$isUM = $user->isUserManager();
+$isAdmin = $user->isAdmin() || $user->isSuperAdmin();
+$isSuperAdmin = $user->isSuperAdmin();
 
 if ($isAdmin || $isSuperAdmin) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }
-$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+$projectList = EmployeeProjectAccess::getProjects($user->id);
 
-//Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : $user->getUserGroupList()
 
 ?>
 <div class="employee-index">
@@ -69,7 +70,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
     )*/
     ?>
 
-    <?php if($user->canRoles(['admin', 'supervision'])) : ?>
+    <?php if($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
             <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
@@ -114,16 +115,16 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                         return User::hasPermission('viewOrder');
                     },*/
                     'update' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
-                        return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
+                        return ($isAdmin || !($model->isAdmin() || $model->isSuperAdmin()));
                     },
                     'projects' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
-                        return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
+                        return ($isAdmin || !($model->isAdmin() || $model->isSuperAdmin()));
                     },
                     'groups' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
-                        return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
+                        return ($isAdmin || !($model->isAdmin() || $model->isSuperAdmin()));
                     },
                     'switch' => static function (\common\models\Employee $model, $key, $index)  use ($isAdmin, $isUM) {
-                        return ($isAdmin && !$model->canRoles(['superadmin', 'admin']));
+                        return ($isAdmin && !($model->isAdmin() || $model->isSuperAdmin()));
                     },
                 ],
                 'buttons' => [

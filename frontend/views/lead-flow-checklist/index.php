@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -11,10 +12,13 @@ use yii\widgets\Pjax;
 $this->title = 'Lead Flow Checklist Status History';
 $this->params['breadcrumbs'][] = $this->title;
 
-if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }
 
 ?>
@@ -206,7 +210,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 //                    return $groupsValue;
 //                },
 //                'format' => 'raw',
-//                //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+//                //'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
 //            ],
 
             //'employee_id',

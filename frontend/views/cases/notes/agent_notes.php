@@ -7,9 +7,14 @@
  */
 
 
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 <?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
     <div class="x_panel">
@@ -17,7 +22,7 @@ use yii\widgets\Pjax;
             <h2><i class="fa fa-sticky-note-o"></i> Notes (<?=$dataProviderNotes->count?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <?php if($caseModel->cs_user_id === Yii::$app->user->id || Yii::$app->user->identity->canRoles(['admin'])): ?>
+                    <?php if($caseModel->cs_user_id === $user->id || $user->isAdmin()): ?>
                         <?php if(Yii::$app->request->get('act') === 'add-note-form'): ?>
                             <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['cases/view', 'gid' => $caseModel->gid])*/?>
                         <?php else: ?>

@@ -2226,7 +2226,11 @@ class Lead extends ActiveRecord
 
     public function permissionsView()
     {
-        if (!Yii::$app->user->identity->canRole('admin')) {
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if (!$user->isAdmin()) {
             $access = ProjectEmployeeAccess::findOne([
                 'employee_id' => Yii::$app->user->id,
                 'project_id' => $this->project_id
@@ -2252,7 +2256,7 @@ class Lead extends ActiveRecord
         return self::diffFormat($now->diff($created));
     }
 
-    public function getPendingInLastStatus($updated)
+    public static function getPendingInLastStatus($updated)
     {
         $now = new DateTime();
         $updated = new DateTime($updated);
@@ -4012,21 +4016,21 @@ Reason: {reason}
 
 
     /**
-     * @param null $role
+     * @param Employee $user
      * @return array
      */
-    public static function getStatusList($role = null): array
+    public static function getStatusList(Employee $user = null): array
     {
-
-        switch ($role) {
-            case 'admin' :
+        if ($user !== null) {
+            if ($user->isAdmin()) {
                 $list = self::STATUS_LIST;
-                break;
-            case 'supervision' :
+            } elseif ($user->isSupervision()) {
                 $list = self::STATUS_MULTIPLE_UPDATE_LIST;
-                break;
-            default :
+            } else {
                 $list = self::STATUS_LIST;
+            }
+        } else {
+            $list = self::STATUS_LIST;
         }
 
         if (isset($list[self::STATUS_ON_HOLD])) {

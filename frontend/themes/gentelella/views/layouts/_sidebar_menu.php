@@ -1,18 +1,20 @@
 <?php
 
+use common\models\Employee;
 use \yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /** @var \common\models\Employee $user */
 
+/** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-$isAdmin = $user->canRole('admin') || $user->canRole('superadmin');
-$isSupervision = $user->canRole('supervision');
-$isAgent = $user->canRole('agent');
-$isQA = $user->canRole('qa');
-$isUM = $user->canRole('userManager');
-$isSuperAdmin = $user->canRole('superadmin');
+$isAdmin = $user->isAdmin() || $user->isSuperAdmin();
+$isSupervision = $user->isSupervision();
+$isAgent = $user->isAgent();
+$isQA = $user->isQa();
+$isUM = $user->isUserManager();
+$isSuperAdmin = $user->isSuperAdmin();
 
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
@@ -38,7 +40,7 @@ $isSuperAdmin = $user->canRole('superadmin');
 
 
         if (!$isUM) {
-            $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
+            $cntNotifications = \common\models\Notifications::findNewCount($user->id);
             $menuItems[] = [
                 'label' => 'My Notifications' .
                     '<span id="div-cnt-notification">' . ($cntNotifications ? '<span class="label-success label pull-right">' . $cntNotifications . '</span>' : '') . '</span>',
@@ -50,7 +52,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
 
         $smsExist = \common\models\UserProjectParams::find()
-            ->where(['upp_user_id' => Yii::$app->user->id])
+            ->where(['upp_user_id' => $user->id])
             ->andWhere([
                 'AND', ['IS NOT', 'upp_tw_phone_number', null],
                 ['<>', 'upp_tw_phone_number', '']
