@@ -162,7 +162,7 @@ class RbacMigrationService
         if ($this->allRoutes !== null) {
             return $this->allRoutes;
         }
-        $routes = (Yii::createObject(RouteModel::class))->getAvailableAndAssignedRoutes();
+        $routes = (Yii::createObject(RouteModel::class))->getAppRoutes();
         $this->allRoutes = array_merge($routes['available'], $routes['assigned']);
         return $this->allRoutes;
     }
