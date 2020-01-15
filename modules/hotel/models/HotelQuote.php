@@ -21,6 +21,7 @@ use yii\helpers\VarDumper;
  * @property string|null $hq_destination_name
  * @property string $hq_hotel_name
  * @property int|null $hq_hotel_list_id
+ * @property string|null $hq_request_hash
  *
  * @property Hotel $hqHotel
  * @property HotelList $hqHotelList
@@ -47,7 +48,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             [['hq_hotel_id', 'hq_hotel_name'], 'required'],
             [['hq_hotel_id', 'hq_product_quote_id', 'hq_hotel_list_id'], 'integer'],
             [['hq_json_response'], 'safe'],
-            [['hq_hash_key'], 'string', 'max' => 32],
+            [['hq_hash_key', 'hq_request_hash'], 'string', 'max' => 32],
             [['hq_destination_name'], 'string', 'max' => 255],
             [['hq_hotel_name'], 'string', 'max' => 200],
             [['hq_hash_key'], 'unique'],
@@ -71,6 +72,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             'hq_destination_name' => 'Destination Name',
             'hq_hotel_name' => 'Hotel Name',
             'hq_hotel_list_id' => 'Hotel List ID',
+            'hq_request_hash' => 'Request Hash',
         ];
     }
 
@@ -175,6 +177,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                         $hQuote->hq_product_quote_id = $prQuote->pq_id;
                         $hQuote->hq_hotel_name = $hotelModel->hl_name;
                         $hQuote->hq_destination_name = $hotelModel->hl_destination_name;
+                        $hQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
 
                         if (!$hQuote->save()) {
                             Yii::error(VarDumper::dumpAsString($hQuote->errors),
