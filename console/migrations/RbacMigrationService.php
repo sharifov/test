@@ -10,7 +10,7 @@ use yii2mod\rbac\models\RouteModel;
 class RbacMigrationService
 {
 
-    private $allRoutes = [];
+    private $allRoutes;
     private $auth;
 
     /**
@@ -171,11 +171,11 @@ class RbacMigrationService
 
     public function getAllRoutes(): array
     {
-        if ($this->allRoutes) {
+        if ($this->allRoutes !== null) {
             return $this->allRoutes;
         }
         $routes = (Yii::createObject(RouteModel::class))->getAvailableAndAssignedRoutes();
-        Yii::info(VarDumper::dumpAsString($routes), '\info:debug');
+        Yii::error(VarDumper::dumpAsString($routes), '\info:debug');
         $this->allRoutes = array_merge($routes['available'], $routes['assigned']);
         return $this->allRoutes;
     }
