@@ -38,5 +38,7 @@ class DataSettingsPermissions
 
         '/lead-checklist-type/index', '/lead-checklist-type/view', '/lead-checklist-type/create', '/lead-checklist-type/update', '/lead-checklist-type/delete',
         'manageLeadChecklistType',
+
+        '/setting-category/create', '/setting-category/delete', '/setting-category/index', '/setting-category/update', '/setting-category/view',
     ];
 }
