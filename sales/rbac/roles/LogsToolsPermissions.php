@@ -6,7 +6,7 @@ class LogsToolsPermissions
 {
     public const PERMISSIONS = [
         '/api-log/create', '/api-log/delete', '/api-log/delete-all', '/api-log/index', '/api-log/update', '/api-log/view',
-        '/stats/agent-ratings', '/stats/ajax-get-total-chart', '/stats/api-graph', '/stats/call-sms', '/stats/calls-graph', '/stats/emails-graph', '/stats/index', '/stats/sms-graph',
+        '/stats/agent-ratings', '/stats/ajax-get-total-chart', '/stats/api-graph',
         '/log/clear', '/log/create', '/log/delete', '/log/index', '/log/view',
         '/clean/assets', '/clean/cache', '/clean/index', '/clean/runtime',
         '/setting/create', '/setting/delete', '/setting/index', '/setting/update', '/setting/view',
