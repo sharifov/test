@@ -162,9 +162,14 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $report = (Yii::createObject(RbacMigrationService::class))->changeGroupRouteToRoutes(Employee::ROLE_ADMIN);
+        foreach ($report as $item) {
+            echo $item . PHP_EOL;
+        }
+die;
 
         $serv = Yii::createObject(RbacMigrationService::class);
-        $t = $serv->getAllRoutesByGroup('/global-log/*');
+        $t = $serv->getAllRoutesByGroup('/billing-info/*');
        foreach ($t as $value) {
            echo "'" . $value . "', ";
        }
