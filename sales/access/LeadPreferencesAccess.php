@@ -2,23 +2,23 @@
 
 namespace sales\access;
 
+use common\models\Employee;
 use common\models\Lead;
-use Yii;
 
 class LeadPreferencesAccess
 {
 	/**
 	 * @param Lead $lead
-	 * @param int $userId
+	 * @param Employee $user
 	 * @return bool
 	 */
-	public static function isUserCanManageLeadPreference(Lead $lead, int $userId): bool
+	public static function isUserCanManageLeadPreference(Lead $lead, Employee $user): bool
 	{
 		return (
-			$lead->isOwner($userId) ||
-			!Yii::$app->user->identity->isSimpleAgent() ||
-			(Yii::$app->user->identity->isSupervision() && $lead->isGetOwner() &&
-				EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id))
+			$lead->isOwner($user->id) ||
+			!$user->isSimpleAgent() ||
+			($user->isSupervision() && $lead->isGetOwner() &&
+				EmployeeGroupAccess::isUserInCommonGroup($user->id, $lead->employee_id))
 		);
 	}
 }

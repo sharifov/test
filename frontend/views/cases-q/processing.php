@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Department;
+use common\models\Employee;
 use common\models\Project;
 use sales\access\ListsAccess;
 use sales\entities\cases\CasesCategory;
@@ -14,9 +15,12 @@ use sales\entities\cases\Cases;
 /* @var $searchModel sales\entities\cases\CasesQSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 $this->title = 'Processing Queue';
 $this->params['breadcrumbs'][] = $this->title;
-$lists = new ListsAccess(Yii::$app->user->id);
+$lists = new ListsAccess($user->id);
 ?>
 <style>
     .dropdown-menu {
@@ -112,7 +116,7 @@ $lists = new ListsAccess(Yii::$app->user->id);
 					return $model->owner ? $model->owner->username : '';
 				},
 				'filter' => $lists->getEmployees(),
-				'visible' => Yii::$app->user->identity->isSupSuper() || Yii::$app->user->identity->isExSuper() || Yii::$app->user->identity->isAdmin()
+				'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
 			],
 			[
 				'attribute' => 'cs_last_action_dt',

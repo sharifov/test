@@ -32,7 +32,9 @@ class EmployeeController extends FController
 
     public function actionSellerContactInfo($employeeId)
     {
-        $roles = Yii::$app->user->identity->getRoles();
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $roles = $user->getRoles();
 
         if(is_array($roles)) {
             $roles = array_keys($roles);
@@ -42,7 +44,7 @@ class EmployeeController extends FController
 
         if (empty($roles)) {
             throw new ForbiddenHttpException('Not found roles');
-        } elseif (!in_array('admin', $roles) && Yii::$app->user->identity->getId() != $employeeId) {
+        } elseif (!$user->isAdmin() && $user->id != $employeeId) {
             throw new ForbiddenHttpException('AccessDenied ('.$employeeId.')');
         }
 
@@ -317,8 +319,11 @@ class EmployeeController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->user->identity->canRole('supervision')) {
-            $params['EmployeeSearch']['supervision_id'] = Yii::$app->user->id;
+        /** @var Employee $auth */
+        $auth = Yii::$app->user->identity;
+
+        if($auth->isSupervision()) {
+            $params['EmployeeSearch']['supervision_id'] = $auth->id;
         }
 
         $dataProvider = $searchModel->search($params);
@@ -470,6 +475,9 @@ class EmployeeController extends FController
     public function actionUpdate()
     {
 
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
         if ($id = Yii::$app->request->get('id')) {
 
             $model = Employee::findOne($id);
@@ -479,22 +487,17 @@ class EmployeeController extends FController
             }
 
 
-            if(!Yii::$app->user->identity->canRole('superadmin')) {
-                if($model->canRole('superadmin')) {
+            if(!$user->isSuperAdmin()) {
+                if($model->isSuperAdmin()) {
                     throw new NotFoundHttpException('Access denied for Superadmin user: '.$model->id);
                 }
             }
 
-            if(Yii::$app->user->identity->canRoles(['userManager', 'supervisor', 'sup_super', 'ex_super'])) {
-                if($model->canRole('admin')) {
+            if($user->isUserManager() || $user->isAnySupervision()) {
+                if($model->isAdmin()) {
                     throw new NotFoundHttpException('Access denied for Admin user: '.$model->id);
                 }
             }
-
-//            if(!Yii::$app->user->identity->canRoles(['superadmin', 'admin', 'userManager', 'supervision'])) {
-//                throw new ForbiddenHttpException('Access denied for this user: '.$model->id);
-//            }
-
 
             $modelUserParams = UserParams::findOne($model->id);
             if(!$modelUserParams) {
@@ -503,7 +506,7 @@ class EmployeeController extends FController
 
 
 
-            if(Yii::$app->user->identity->canRole('supervision')) {
+            if($user->isSupervision()) {
                 $access = false;
 
                 $userGroups = array_keys($model->getUserGroupList());

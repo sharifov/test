@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -16,7 +17,10 @@ use yii\widgets\ListView;
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;
 
-$is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+$is_admin = $user->isAdmin();
 
 ?>
 

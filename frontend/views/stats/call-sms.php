@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -23,14 +24,16 @@ $js = <<<JS
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 
-$userId = Yii::$app->user->id;
 
-if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if($user->isAdmin() || $user->isQa()) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
+    $projectList = \common\models\Project::getListByUser($user->id);
 }
 
 ?>
@@ -181,7 +184,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                                 return $type . ' / '.$statusTitle.'';
                             },
                             'format' => 'raw',
-                            //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                            //'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                         ],
 
                         [
@@ -309,7 +312,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                                 return $groupsValue;
                             },
                             'format' => 'raw',
-                            'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                            'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                         ],
 
                         [
@@ -474,18 +477,6 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                              'format' => 'raw',
                          ],*/
 
-
-
-                        /*[
-                            'class' => 'yii\grid\ActionColumn',
-                            'template' => '{update}',
-                            'visibleButtons' => [
-                                'update' => function (\common\models\Employee $model, $key, $index) {
-                                    return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                                },
-                            ],
-
-                        ],*/
                     ]
                 ])
                 ?>

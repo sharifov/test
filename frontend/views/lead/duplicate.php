@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use sales\access\ListsAccess;
 use sales\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
@@ -12,13 +13,16 @@ use common\models\Lead;
 
 $this->title = 'Duplicate Queue';
 
-if (Yii::$app->user->identity->canRole('admin')) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if ($user->isAdmin()) {
     $isAdmin = true;
 } else {
     $isAdmin = false;
 }
 
-$lists = new ListsAccess(Yii::$app->user->id);
+$lists = new ListsAccess($user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 $this->registerCssFile('/css/style-duplicate.css');
@@ -511,8 +515,8 @@ echo \yii\grid\GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,
-    'rowOptions' => function (Lead $model) {
-        if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
+    'rowOptions' => function (Lead $lead) use ($user) {
+        if ($lead->isProcessing() && $lead->isOwner($user->id)) {
             return [
                 'class' => 'highlighted'
             ];

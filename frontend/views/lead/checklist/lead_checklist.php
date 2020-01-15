@@ -7,8 +7,12 @@
  */
 
 
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 ?>
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-checklist', 'enablePushState' => false, 'timeout' => 10000]) ?>
@@ -24,7 +28,7 @@ use yii\widgets\ActiveForm;
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
                 <?//php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
 
-                <?php if($lead->status === \common\models\Lead::STATUS_PROCESSING && ($lead->employee_id === Yii::$app->user->id || Yii::$app->user->identity->canRoles(['admin']))): ?>
+                <?php if($lead->isProcessing() && ($lead->isOwner($user->id) || $user->isAdmin())): ?>
                     <?php if(Yii::$app->request->get('act') === 'add-checklist-form'): ?>
                         <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
                     <?php else: ?>
@@ -34,7 +38,7 @@ use yii\widgets\ActiveForm;
 
                 <?//php endif; ?>
             </li>
-            <?php if(Yii::$app->user->identity->canRoles(['admin'])):?>
+            <?php if($user->isAdmin()):?>
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Details', ['lead-checklist/index', 'LeadChecklistSearch[lc_lead_id]' => $lead->id], ['data-pjax' => 0, 'target' => '_blank'])?>
                 </li>

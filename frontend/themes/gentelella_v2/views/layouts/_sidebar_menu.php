@@ -7,12 +7,12 @@ use \yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
 
-$isAdmin = $user->canRole('admin') || $user->canRole('superadmin');
-$isSupervision = $user->canRole('supervision');
-$isAgent = $user->canRole('agent');
-$isQA = $user->canRole('qa');
-$isUM = $user->canRole('userManager');
-$isSuperAdmin = $user->canRole('superadmin');
+$isAdmin = $user->isAdmin() || $user->isSuperAdmin();
+$isSupervision = $user->isSupervision();
+$isAgent = $user->isAgent();
+$isQA = $user->isQa();
+$isUM = $user->isUserManager();
+$isSuperAdmin = $user->isSuperAdmin();
 
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">

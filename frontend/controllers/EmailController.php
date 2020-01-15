@@ -316,7 +316,7 @@ class EmailController extends FController
         $roleAccess = ($user->isAdmin() || $user->isSupervision() || $user->isExSuper() || $user->isSupSuper() || $user->isQa());
 
         if(!$roleAccess) {
-            $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => Yii::$app->user->id])->exists();
+            $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => $user->id])->exists();
             if(!$userAccess) {
                 throw new ForbiddenHttpException('Access Denied. Email ID:'.$model->e_id);
             }

@@ -164,11 +164,6 @@ if ($user->isAdmin()) {
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
-//                'visibleButtons' => [
-//                    'view' => function ($model, $key, $index) {
-//                        return Yii::$app->user->can('admin');
-//                    },
-//                ],
                 'buttons' => [
                     'view' => function ($url, Cases $model, $key) {
                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to([

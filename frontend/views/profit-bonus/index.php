@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -12,10 +13,13 @@ use yii\helpers\Url;
 $this->title = 'Profit Bonuses';
 $this->params['breadcrumbs'][] = $this->title;
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }
 ?>
 <div class="profit-bonus-index">
