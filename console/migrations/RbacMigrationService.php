@@ -175,6 +175,7 @@ class RbacMigrationService
             return $this->allRoutes;
         }
         $routes = (Yii::createObject(RouteModel::class))->getAvailableAndAssignedRoutes();
+        Yii::info(VarDumper::dumpAsString($routes), '\info:debug');
         $this->allRoutes = array_merge($routes['available'], $routes['assigned']);
         return $this->allRoutes;
     }
