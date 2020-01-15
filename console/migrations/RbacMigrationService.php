@@ -7,6 +7,12 @@ use yii\helpers\VarDumper;
 use yii\rbac\Role;
 use yii2mod\rbac\models\RouteModel;
 
+/**
+ * Class RbacMigrationService
+ *
+ * @property $allRoutes
+ * @property $auth
+ */
 class RbacMigrationService
 {
 
@@ -83,7 +89,7 @@ class RbacMigrationService
                 }
 
                 $routes = $this->getAllRoutesByGroup($group);
-                //$report[] = 'found routes: ' . VarDumper::dumpAsString($routes);
+//                $report[] = 'found routes: ' . VarDumper::dumpAsString($routes);
                 foreach ($routes as $route) {
                     $permission = $this->getOrCreatePermission($route);
                     if (!$auth->hasChild($role, $permission)) {
@@ -162,8 +168,14 @@ class RbacMigrationService
         if ($this->allRoutes !== null) {
             return $this->allRoutes;
         }
-        $routes = (Yii::createObject(RouteModel::class))->getAppRoutes();
-        $this->allRoutes = array_merge($routes['available'], $routes['assigned']);
+        $routeModel = (Yii::createObject(RouteModel::class));
+        $appRoutes = $routeModel->getAppRoutes();
+        $availableAndAssignedRoutes = $routeModel->getAvailableAndAssignedRoutes();
+        $this->allRoutes = array_merge(
+            $availableAndAssignedRoutes['available'],
+            $availableAndAssignedRoutes['assigned'],
+            array_keys($appRoutes)
+        );
         return $this->allRoutes;
     }
 
