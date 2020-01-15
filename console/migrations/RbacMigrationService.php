@@ -95,7 +95,7 @@ class RbacMigrationService
                 }
 
                 $routes = $this->getAllRoutesByGroup($group);
-               // $report[] = 'found routes: ' . VarDumper::dumpAsString($routes);
+                $report[] = 'found routes: ' . VarDumper::dumpAsString($routes);
                 foreach ($routes as $route) {
                     $permission = $this->getOrCreatePermission($route);
                     if (!$auth->hasChild($role, $permission)) {
