@@ -3,6 +3,7 @@
 namespace console\migrations;
 
 use Yii;
+use yii\helpers\VarDumper;
 use yii\rbac\Role;
 use yii2mod\rbac\models\RouteModel;
 
@@ -80,7 +81,22 @@ class RbacMigrationService
                         $report[] = 'not removed: ' . $group;
                     }
                 }
-                foreach ($this->getAllRoutesByGroup($group) as $route) {
+                if (Yii::$app->cache) {
+                    Yii::$app->cache->flush();
+                }
+
+                Yii::$app->db->getSchema()->refreshTableSchema('{{%auth_assignment}}');
+                Yii::$app->db->getSchema()->refreshTableSchema('{{%auth_item}}');
+                Yii::$app->db->getSchema()->refreshTableSchema('{{%auth_item_child}}');
+                Yii::$app->db->getSchema()->refreshTableSchema('{{%auth_rule}}');
+
+                if (Yii::$app->cache) {
+                    Yii::$app->cache->flush();
+                }
+
+                $routes = $this->getAllRoutesByGroup($group);
+               // $report[] = 'found routes: ' . VarDumper::dumpAsString($routes);
+                foreach ($routes as $route) {
                     $permission = $this->getOrCreatePermission($route);
                     if (!$auth->hasChild($role, $permission)) {
                         if ($auth->canAddChild($role, $permission)) {
@@ -93,7 +109,7 @@ class RbacMigrationService
                             $report[] = 'cant add: ' . $route;
                         }
                     } else {
-                        $report[] =  'permission: ' . $permission->name . ' already assigned' . PHP_EOL;
+                        $report[] =  'already assigned: ' . $permission->name;
                     }
                 }
             }
