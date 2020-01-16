@@ -3,6 +3,7 @@
 namespace modules\hotel\models;
 
 use common\models\Product;
+use common\models\ProductQuote;
 use modules\hotel\models\query\HotelQuery;
 use Yii;
 use yii\db\ActiveQuery;
@@ -65,7 +66,7 @@ class Hotel extends ActiveRecord
             [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
 			[['ph_check_in_date', 'ph_check_out_date'], 'date', 'format' => 'php:Y-m-d'],
-			['ph_check_in_date', 'compare', 'compareAttribute' => 'ph_check_out_date', 'operator' => '<', 'enableClientValidation' => true]
+			['ph_check_out_date', 'compare', 'compareAttribute' => 'ph_check_in_date', 'operator' => '>=', 'enableClientValidation' => true]
 		];
     }
 
@@ -138,6 +139,35 @@ class Hotel extends ActiveRecord
         }
         return false;
     }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (isset($changedAttributes['ph_request_hash_key'])) {
+            $this->updateInvalidRequestQuotes();
+        }
+    }
+
+    /**
+     * Find invalid request quotes and update status 
+     */
+    public function updateInvalidRequestQuotes(): void
+    {
+        if ($this->hotelQuotes) {
+            foreach ($this->hotelQuotes as $quote) {
+                if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuote::STATUS_DONE) {
+                    $quote->hqProductQuote->pq_status_id = ProductQuote::STATUS_DECLINED;
+                    $quote->hqProductQuote->save();
+                }
+            }
+        }
+    }
+
 
     /**
      * @return string
@@ -286,13 +316,4 @@ class Hotel extends ActiveRecord
 		return self::DESTINATION_TYPE_LIST;
 	}
 
-	/**
-	 * @return void
-	 */
-	public function validateDates(): void
-	{
-		if (strtotime($this->ph_check_out_date) <= strtotime($this->ph_check_in_date)) {
-			$this->addError('ph_check_out_date','Check Out Date must be gather then Check In Date.');
-		}
-	}
 }
