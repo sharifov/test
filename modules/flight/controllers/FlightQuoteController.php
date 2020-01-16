@@ -3,12 +3,14 @@
 namespace modules\flight\controllers;
 
 use modules\flight\src\repositories\flight\FlightRepository;
+use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
 use Yii;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\search\FlightQuoteSearch;
 use frontend\controllers\FController;
+use yii\data\ArrayDataProvider;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -143,20 +145,54 @@ class FlightQuoteController extends FController
 
 	/**
 	 * @return string
+	 * @throws \ReflectionException
 	 */
     public function actionAjaxSearchQuote(): string
 	{
 		$flightId = Yii::$app->request->get('id');
 		$gds = Yii::$app->request->post('gds', '');
+
+		$form = new FlightQuoteSearchForm();
+		$form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
+
 		$flight = $this->flightRepository->find($flightId);
 
-		$quotes = $this->quoteSearchService->search($flight, $gds);
+		$keyCache = $flight->generateQuoteSearchKeyCache();
+		$quotes = \Yii::$app->cache->get($keyCache);
+
+		if ($quotes === false) {
+			$quotes = $this->quoteSearchService->search($flight, $gds);
+			if ($quotes) {
+				\Yii::$app->cache->set($keyCache, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
+			}
+		}
 
 		$viewData = FlightQuoteSearchHelper::getAirlineLocationInfo($quotes);
-		$viewData['result'] = $quotes;
+
+		if (Yii::$app->request->isPost) {
+			$params = ['page' => 1];
+		}
+
+		$quotes = $form->applyFilters($quotes);
+
+		$dataProvider = new ArrayDataProvider([
+			'allModels' => $quotes['results'] ?? [],
+			'pagination' => [
+				'pageSize' => 10,
+				'params' => array_merge(Yii::$app->request->get(), $form->getFilters(), $params ?? []),
+			],
+			'sort'=> [
+				'attributes' => ['price', 'duration'],
+				'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+			],
+		]);
+
+		$viewData['quotes'] = $quotes;
+		$viewData['dataProvider'] = $dataProvider;
 		$viewData['flightId'] = $flight->fl_id;
 		$viewData['gds'] = $gds;
 		$viewData['flight'] = $flight;
+		$viewData['searchForm'] = $form;
 
 		return $this->renderAjax('partial/_quote_search', $viewData);
 	}

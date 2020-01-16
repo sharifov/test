@@ -9,7 +9,6 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\flight\models\query\FlightQuoteQuery;
 
-
 /**
  * This is the model class for table "flight_quote".
  *
@@ -48,6 +47,73 @@ use modules\flight\models\query\FlightQuoteQuery;
  */
 class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 {
+
+	public const FARE_TYPE_PUBLIC = 'PUB';
+	public const FARE_TYPE_PRIVATE = 'SR';
+	public const FARE_TYPE_COMMISSION = 'COMM';
+	public const FARE_TYPE_TOUR = 'TOUR';
+
+	public const FARE_TYPE_LIST = [
+		self::FARE_TYPE_PUBLIC => 'Public',
+		self::FARE_TYPE_PRIVATE => 'Private',
+		self::FARE_TYPE_COMMISSION => 'Commission',
+		self::FARE_TYPE_TOUR => 'Tour',
+	];
+
+	public const STOPS_DIRECT = 0;
+	public const STOPS_UP_TO_1 = 1;
+	public const STOPS_UP_TO_2 = 2;
+
+	public const STOPS_LIST = [
+		self::STOPS_DIRECT => 'Direct only',
+		self::STOPS_UP_TO_1 => 'Up to 1 stop',
+		self::STOPS_UP_TO_2 => 'Up to 2 stop'
+	];
+
+	public const CHANGE_AIRPORT_ANY = 0;
+	public const CHANGE_AIRPORT_NO = 1;
+
+	public const CHANGE_AIRPORT_LIST = [
+		self::CHANGE_AIRPORT_ANY => '--',
+		self::CHANGE_AIRPORT_NO => 'No Airport Change'
+	];
+
+	public const BAGGAGE_ANY = 0;
+	public const BAGGAGE_ONE_PLUS = 1;
+	public const BAGGAGE_TWO_PLUS = 2;
+
+	public const BAGGAGE_LIST = [
+		self::BAGGAGE_ANY => '--',
+		self::BAGGAGE_ONE_PLUS => '1+',
+		self::BAGGAGE_TWO_PLUS => '2+'
+	];
+
+	public const SORT_BY_PRICE_ASC = 'price_asc';
+	public const SORT_BY_PRICE_DESC = 'price_desc';
+	public const SORT_BY_DURATION_ASC = 'duration_asc';
+	public const SORT_BY_DURATION_DESC = 'duration_desc';
+
+	public const SORT_BY_LIST = [
+		self::SORT_BY_PRICE_ASC => 'Price (ASC)',
+		self::SORT_BY_PRICE_DESC => 'Price (DESC)',
+		self::SORT_BY_DURATION_ASC => 'Destination (ASC)',
+		self::SORT_BY_DURATION_DESC => 'Destination (DESC)',
+	];
+
+	public const SORT_TYPE_LIST = [
+		self::SORT_BY_PRICE_ASC => SORT_ASC,
+		self::SORT_BY_PRICE_DESC => SORT_DESC,
+		self::SORT_BY_DURATION_ASC => SORT_ASC,
+		self::SORT_BY_DURATION_DESC => SORT_DESC
+	];
+
+	public const SORT_ATTRIBUTES_NAME_LIST = [
+		self::SORT_BY_PRICE_ASC	=> 'price',
+		self::SORT_BY_PRICE_DESC	=> 'price',
+		self::SORT_BY_DURATION_ASC	=> 'duration',
+		self::SORT_BY_DURATION_DESC	=> 'duration',
+	];
+
     /**
      * {@inheritdoc}
      */
@@ -185,4 +251,91 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
         return []; // TODO: Implement getExtraData() method.
     }
 
+
+	/**
+	 * @return array
+	 */
+    public static function getFareTypeList(): array
+	{
+		return self::FARE_TYPE_LIST;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getStopsLIst(): array
+	{
+		return self::STOPS_LIST;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getChangeAirportList(): array
+	{
+		return self::CHANGE_AIRPORT_LIST;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getBaggageList(): array
+	{
+		return self::BAGGAGE_LIST;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getSortList(): array
+	{
+		return self::SORT_BY_LIST;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getSortTypeList(): array
+	{
+		return self::SORT_TYPE_LIST;
+	}
+
+	/**
+	 * @param $sortId
+	 * @return int|null
+	 */
+	public static function getSortTypeBySortId($sortId): ?int
+	{
+		return self::getSortTypeList()[$sortId] ?? null;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public static function getDefaultSortType()
+	{
+		return self::getSortTypeList()[self::SORT_BY_PRICE_ASC];
+	}
+
+	public static function getDefaultSortAttributeName()
+	{
+		return self::getSortAttributesNameList()[self::SORT_BY_PRICE_ASC];
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getSortAttributesNameList(): array
+	{
+		return self::SORT_ATTRIBUTES_NAME_LIST;
+	}
+
+	/**
+	 * @param $sortId
+	 * @return string|null
+	 */
+	public static function getSortAttributeNameById($sortId): ?string
+	{
+		return self::getSortAttributesNameList()[$sortId] ?? null;
+	}
 }

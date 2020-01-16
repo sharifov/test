@@ -36,39 +36,29 @@ class FlightQuoteSearchService
 	 */
 	public function search(Flight $flight, $gdsCode = null)
 	{
-		$keyCache = $flight->generateQuoteSearchKeyCache();
-		$quotes = \Yii::$app->cache->get($keyCache);
+		$fl = [];
 
-		if ($quotes === false) {
-			$fl = [];
+		$params = [
+			'cabin' => $flight->getCabinRealCode($flight->fl_cabin_class),
+			'cid' => 'SAL101',
+			'adt' => $flight->fl_adults,
+			'chd' => $flight->fl_children,
+			'inf' => $flight->fl_infants,
+		];
 
-			$params = [
-				'cabin' => $flight->getCabinRealCode($flight->fl_cabin_class),
-				'cid' => 'SAL101',
-				'adt' => $flight->fl_adults,
-				'chd' => $flight->fl_children,
-				'inf' => $flight->fl_infants,
-			];
-
-			if($gdsCode) {
-				$params['gds'] = $gdsCode;
-			}
-
-			foreach ($flight->flightSegments as $segment) {
-				$fl[] = [
-					'o' => $segment->fs_origin_iata,
-					'd' => $segment->fs_destination_iata,
-					'dt' => $segment->fs_departure_date
-				];
-			}
-			$params['fl'] = $fl;
-
-			$quotes = $this->apiFlightQuoteSearchService->search($params)['data'];
-			if ($quotes) {
-				\Yii::$app->cache->set($keyCache, $quotes, 600);
-			}
+		if ($gdsCode) {
+			$params['gds'] = $gdsCode;
 		}
 
-		return $quotes;
+		foreach ($flight->flightSegments as $segment) {
+			$fl[] = [
+				'o' => $segment->fs_origin_iata,
+				'd' => $segment->fs_destination_iata,
+				'dt' => $segment->fs_departure_date
+			];
+		}
+		$params['fl'] = $fl;
+
+		return $this->apiFlightQuoteSearchService->search($params)['data'];
 	}
 }

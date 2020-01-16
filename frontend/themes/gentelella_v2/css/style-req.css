@@ -5751,6 +5751,9 @@ input[disabled] + .radio-tab__text {
 #update_hotel_request_dest_type_wrap input.select2-search__field {
     width: initial !important;
 }
+.select2 input.select2-search__field {
+    width: initial !important;
+}
 .form-control.is-invalid {
     background-position: right calc(0.775em + 0.1875rem) center;
 }

@@ -268,7 +268,7 @@ class Flight extends \yii\db\ActiveRecord
 	 */
 	public function generateQuoteSearchKeyCache(): string
 	{
-		$key = 'fl_quote_search_' . $this->fl_id . '-' . $this->fl_adults . '-' . $this->fl_children . '-' . $this->fl_children;
+		$key = 'fl_quote_search_' . $this->fl_adults . '-' . $this->fl_children . '-' . $this->fl_children;
 		foreach ($this->flightSegments as $segment) {
 			$key .= '-' . $segment->fs_origin_iata . '-' . $segment->fs_destination_iata . '-' . strtotime($segment->fs_departure_date);
 		}
