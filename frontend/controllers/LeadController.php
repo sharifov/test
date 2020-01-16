@@ -984,28 +984,28 @@ class LeadController extends FController
         }
 
 
-        $enableCommunication = false;
-
-        if (!$leadForm->getLead()->isNewRecord) {
-
-            //$leadForm->mode === $leadForm::VIEW_MODE
-
-            if ($is_admin || $isQA) {
-                $enableCommunication = true;
-            } elseif ($is_supervision) {
-                if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
-                    $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
-                }
-                if (!$leadForm->getLead()->hasOwner()) {
-                    $enableCommunication = true;
-                }
-            } elseif ($is_agent) {
-                if ($leadForm->getLead()->employee_id == Yii::$app->user->id) {
-                    $enableCommunication = true;
-                }
-            }
-
-        }
+//        $enableCommunication = false;
+//
+//        if (!$leadForm->getLead()->isNewRecord) {
+//
+//            //$leadForm->mode === $leadForm::VIEW_MODE
+//
+//            if ($is_admin || $isQA) {
+//                $enableCommunication = true;
+//            } elseif ($is_supervision) {
+//                if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
+//                    $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
+//                }
+//                if (!$leadForm->getLead()->hasOwner()) {
+//                    $enableCommunication = true;
+//                }
+//            } elseif ($is_agent) {
+//                if ($leadForm->getLead()->employee_id == Yii::$app->user->id) {
+//                    $enableCommunication = true;
+//                }
+//            }
+//
+//        }
 
         //$dataProviderCommunication
 
@@ -1103,7 +1103,7 @@ class LeadController extends FController
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
             'dataProviderCommunication' => $dataProviderCommunication,
-            'enableCommunication' => $enableCommunication,
+//            'enableCommunication' => $enableCommunication,
             'dataProviderCallExpert' => $dataProviderCallExpert,
             'modelLeadCallExpert' => $modelLeadCallExpert,
             'dataProviderChecklist' => $dataProviderChecklist,

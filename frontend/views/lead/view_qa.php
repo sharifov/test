@@ -130,7 +130,7 @@ if($is_admin || $is_supervision) {
                     'lead' => $leadForm->getLead()
                 ]); ?>
 
-                <?php if ($enableCommunication) : ?>
+                <?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
                     <?= $this->render('communication/lead_communication', [
                         'leadForm'      => $leadForm,
                         'previewEmailForm' => $previewEmailForm,
