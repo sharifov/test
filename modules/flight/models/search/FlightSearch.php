@@ -18,7 +18,7 @@ class FlightSearch extends Flight
     {
         return [
             [['fl_id', 'fl_product_id', 'fl_trip_type_id', 'fl_adults', 'fl_children', 'fl_infants'], 'integer'],
-            [['fl_cabin_class'], 'safe'],
+            [['fl_cabin_class', 'fl_request_hash_key'], 'safe'],
         ];
     }
 
@@ -68,6 +68,7 @@ class FlightSearch extends Flight
             'fl_adults' => $this->fl_adults,
             'fl_children' => $this->fl_children,
             'fl_infants' => $this->fl_infants,
+            'fl_request_hash_key' => $this->fl_request_hash_key,
         ]);
 
         $query->andFilterWhere(['like', 'fl_cabin_class', $this->fl_cabin_class]);

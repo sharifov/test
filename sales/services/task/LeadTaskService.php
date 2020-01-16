@@ -16,7 +16,7 @@ class LeadTaskService
      */
     public function createLeadTasks(Lead $lead): void
     {
-        if (!$lead->isGetOwner()) {
+        if (!$lead->hasOwner()) {
             return;
         }
 

@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -13,19 +14,22 @@ use yii\widgets\Pjax;
 $this->title = 'Sms';
 $this->params['breadcrumbs'][] = $this->title;
 
-if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if($user->isAdmin() || $user->isQa()) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
+    $projectList = \common\models\Project::getListByUser($user->id);
 }
 ?>
 <div class="sms-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php /*if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) : */?><!--
+    <?php /*if($user->isAdmin()) : */?><!--
     <div class="lead-search">
         <div class="row">
             <div class="col-md-3">
@@ -117,12 +121,12 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
                     },*/
-                    'update' => function ($model, $key, $index) {
-                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    'update' => static function ($model, $key, $index) use ($user) {
+                        return $user->isAdmin();
                     },
 
-                    'delete' => function ($model, $key, $index) {
-                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    'delete' => static function ($model, $key, $index) use ($user) {
+                        return $user->isAdmin();
                     },
                 ],
             ],

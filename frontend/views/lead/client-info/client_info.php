@@ -5,6 +5,7 @@
  * @var $leadForm LeadForm
  */
 
+use common\models\Employee;
 use common\models\Lead;
 use yii\helpers\Html;
 use frontend\models\LeadForm;
@@ -12,8 +13,11 @@ use yii\web\View;
 use \yii\helpers\Url;
 use yii\bootstrap4\Modal;
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 $formId = sprintf('%s-form', $leadForm->getClient()->formName());
-$manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id);
+$manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user);
 
 ?>
 
@@ -106,7 +110,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                 <div class="col-md-4">
                     <?= \frontend\widgets\client\ClientCounterWidget::widget([
                         'clientId' => $leadForm->getClient()->id,
-                        'userId' => Yii::$app->user->id
+                        'userId' => $user->id
                     ]) ?>
 
                     <?php if (!empty($leadForm->getLead()->request_ip)): ?>

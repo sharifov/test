@@ -49,6 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fq_pricing_info:ntext',
             'fq_origin_search_data',
             'fq_last_ticket_date',
+            'fq_request_hash',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

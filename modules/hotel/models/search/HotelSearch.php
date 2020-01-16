@@ -18,6 +18,7 @@ class HotelSearch extends Hotel
     {
         return [
             [['ph_id', 'ph_product_id', 'ph_min_star_rate', 'ph_max_star_rate', 'ph_max_price_rate', 'ph_min_price_rate', 'ph_zone_code', 'ph_hotel_code'], 'integer'],
+            [['ph_request_hash_key'], 'string'],
             [['ph_check_in_date', 'ph_check_out_date', 'ph_destination_code', 'ph_destination_label'], 'safe'],
         ];
     }
@@ -67,7 +68,8 @@ class HotelSearch extends Hotel
             'ph_max_price_rate' => $this->ph_max_price_rate,
             'ph_min_price_rate' => $this->ph_min_price_rate,
 			'ph_zone_code' => $this->ph_zone_code,
-			'ph_hotel_code' => $this->ph_hotel_code
+			'ph_hotel_code' => $this->ph_hotel_code,
+            'ph_request_hash_key' => $this->ph_request_hash_key
         ]);
 
         $query->andFilterWhere(['like', 'ph_destination_code', $this->ph_destination_code]);

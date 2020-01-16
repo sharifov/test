@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Employee;
 use common\models\LeadPreferences;
 use common\models\search\ClientSearch;
 use frontend\models\LeadForm;
@@ -225,11 +226,12 @@ class LeadViewController extends FController
 	 */
 	public function actionAjaxAddClientPhone()
 	{
+	    /** @var Employee $user */
 		$user = Yii::$app->user->identity;
 		$gid = (string)Yii::$app->request->get('gid');
 		$lead = $this->findLeadByGid($gid);
 
-		if (!$lead->isOwner(Yii::$app->user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+		if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
 			throw new HttpException(403, 'Access Denied');
 		}
 
@@ -247,7 +249,7 @@ class LeadViewController extends FController
 				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
 					'clientPhones' => $lead->client->clientPhones,
 					'lead' => $lead,
-					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
+					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
 				]);
 			} else {
 				$response['error'] = true;
@@ -333,12 +335,13 @@ class LeadViewController extends FController
 	 */
 	public function actionAjaxEditClientPhone()
 	{
+	    /** @var Employee $user */
 		$user = Yii::$app->user->identity;
 		try {
 			$gid = (string)Yii::$app->request->get('gid');
 			$lead = $this->findLeadByGid($gid);
 
-			if (!$lead->isOwner(Yii::$app->user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+			if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
 				throw new HttpException(403, 'Access Denied');
 			}
 
@@ -362,7 +365,7 @@ class LeadViewController extends FController
 				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
 					'clientPhones' => $lead->client->clientPhones,
 					'lead' => $lead,
-					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
+					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
 				]);
 			} else {
 				$response['error'] = true;
@@ -435,11 +438,12 @@ class LeadViewController extends FController
 	 */
 	public function actionAjaxAddClientEmail()
 	{
+	    /** @var Employee $user */
 		$user = Yii::$app->user->identity;
 		$gid = (string)Yii::$app->request->get('gid');
 		$lead = $this->findLeadByGid($gid);
 
-		if (!$lead->isOwner(Yii::$app->user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+		if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
 			throw new HttpException(403, 'Access Denied');
 		}
 
@@ -456,7 +460,7 @@ class LeadViewController extends FController
 				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
 					'clientEmails' => $lead->client->clientEmails,
 					'lead' => $lead,
-					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
+					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
 				]);
 			} else {
 				$response['error'] = true;
@@ -542,12 +546,13 @@ class LeadViewController extends FController
 	 */
 	public function actionAjaxEditClientEmail()
 	{
+	    /** @var Employee $user */
 		$user = Yii::$app->user->identity;
 		try {
 			$gid = (string)Yii::$app->request->get('gid');
 			$lead = $this->findLeadByGid($gid);
 
-			if (!$lead->isOwner(Yii::$app->user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+			if (!$lead->isOwner($user->id) && !$user->isAnySupervision() && !$user->isAdmin() && !$user->isSuperAdmin()) {
 				throw new HttpException(403, 'Access Denied');
 			}
 
@@ -570,7 +575,7 @@ class LeadViewController extends FController
 				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_email', [
 					'clientEmails' => $lead->client->clientEmails,
 					'lead' => $lead,
-					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, Yii::$app->user->id)
+					'manageClientInfoAccess' => ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user)
 				]);
 			} else {
 				$response['error'] = true;
@@ -738,10 +743,13 @@ class LeadViewController extends FController
 	 */
 	public function actionAjaxEditLeadPreferences(): Response
 	{
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
 		if (Yii::$app->request->isAjax) {
 			$gid = Yii::$app->request->get('gid');
 			$lead = $this->findLeadByGid($gid);
-			if (!LeadPreferencesAccess::isUserCanManageLeadPreference($lead, Yii::$app->user->id)) {
+			if (!LeadPreferencesAccess::isUserCanManageLeadPreference($lead, $user)) {
 				throw new HttpException(403, 'Access Denied');
 			}
 

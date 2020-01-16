@@ -18,6 +18,7 @@
  * @var $dataProviderOrders ActiveDataProvider
  */
 
+use common\models\Employee;
 use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
 use common\models\Note;
@@ -32,6 +33,7 @@ use yii\data\ActiveDataProvider;
 // $this->params['breadcrumbs'][] = $this->title;
 
 $userId = Yii::$app->user->id;
+/** @var Employee $user */
 $user = Yii::$app->user->identity;
 
 $is_admin = $user->isAdmin();
@@ -93,13 +95,13 @@ $lead = $leadForm->getLead();
 
         </div>
         <div class="col-md-6">
-            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner(Yii::$app->user->id)):?>
+            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):?>
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Client information is not available in VIEW MODE, please take lead!</p>
                 </div>
 
-            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner(Yii::$app->user->id)):?>
+            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
@@ -118,12 +120,12 @@ $lead = $leadForm->getLead();
 
 
 
-            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $lead->employee_id !== Yii::$app->user->id):?>
+            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):?>
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Lead Preferences is not available in VIEW MODE, please take lead!</p>
                 </div>
-            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && $lead->employee_id !== Yii::$app->user->id):?>
+            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
@@ -151,7 +153,7 @@ $lead = $leadForm->getLead();
                 'lead' => $lead
             ]); ?>
 
-            <?php if ($enableCommunication) : ?>
+            <?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
                     'previewEmailForm' => $previewEmailForm,

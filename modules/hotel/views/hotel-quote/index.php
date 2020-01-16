@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'hq_destination_name',
             'hq_hotel_name',
             'hq_hotel_list_id',
+            'hq_request_hash',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

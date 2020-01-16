@@ -18,6 +18,7 @@ class HotelQuoteSearch extends HotelQuote
     {
         return [
             [['hq_id', 'hq_hotel_id', 'hq_product_quote_id', 'hq_hotel_list_id'], 'integer'],
+            [['hq_request_hash'], 'string'],
             [['hq_hash_key', 'hq_json_response', 'hq_destination_name', 'hq_hotel_name'], 'safe'],
         ];
     }
@@ -62,6 +63,7 @@ class HotelQuoteSearch extends HotelQuote
             'hq_hotel_id' => $this->hq_hotel_id,
             'hq_product_quote_id' => $this->hq_product_quote_id,
             'hq_hotel_list_id' => $this->hq_hotel_list_id,
+            'hq_request_hash' => $this->hq_request_hash,
         ]);
 
         $query->andFilterWhere(['like', 'hq_hash_key', $this->hq_hash_key])

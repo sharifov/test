@@ -133,6 +133,8 @@ class LeadController extends FController
      */
     public function actionView(string $gid)
     {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
         $gid = mb_substr($gid, 0, 32);
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
@@ -141,16 +143,15 @@ class LeadController extends FController
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if (($lead->isTrash() || $lead->isPending()) && Yii::$app->user->identity->isAgent()) {
+        if ($user->isAgent() && ($lead->isTrash() || $lead->isPending())) {
             throw new ForbiddenHttpException('Access Denied for Agent (Status Lead)');
         }
         $itineraryForm = new ItineraryEditForm($lead);
-        $user = Yii::$app->user->identity;
 
-        $is_admin = $user->canRole('admin');
-        $isQA = $user->canRole('qa');
-        $is_supervision = $user->canRole('supervision');
-        $is_agent = $user->canRole('agent');
+        $is_admin = $user->isAdmin();
+        $isQA = $user->isQa();
+        $is_supervision = $user->isSupervision();
+        $is_agent = $user->isAgent();
 
 
         if (Yii::$app->request->post('hasEditable')) {
@@ -362,7 +363,7 @@ class LeadController extends FController
                 $mail->e_type_id = Email::TYPE_OUTBOX;
                 $mail->e_status_id = Email::STATUS_PENDING;
                 $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                $mail->e_email_body_html = $previewEmailForm->e_email_message;
+                $mail->body_html = $previewEmailForm->e_email_message;
                 $mail->e_email_from = $previewEmailForm->e_email_from;
 
                 $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
@@ -983,28 +984,28 @@ class LeadController extends FController
         }
 
 
-        $enableCommunication = false;
-
-        if (!$leadForm->getLead()->isNewRecord) {
-
-            //$leadForm->mode === $leadForm::VIEW_MODE
-
-            if ($is_admin || $isQA) {
-                $enableCommunication = true;
-            } elseif ($is_supervision) {
-                if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
-                    $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
-                }
-                if (!$leadForm->getLead()->isGetOwner()) {
-                    $enableCommunication = true;
-                }
-            } elseif ($is_agent) {
-                if ($leadForm->getLead()->employee_id == Yii::$app->user->id) {
-                    $enableCommunication = true;
-                }
-            }
-
-        }
+//        $enableCommunication = false;
+//
+//        if (!$leadForm->getLead()->isNewRecord) {
+//
+//            //$leadForm->mode === $leadForm::VIEW_MODE
+//
+//            if ($is_admin || $isQA) {
+//                $enableCommunication = true;
+//            } elseif ($is_supervision) {
+//                if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
+//                    $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
+//                }
+//                if (!$leadForm->getLead()->hasOwner()) {
+//                    $enableCommunication = true;
+//                }
+//            } elseif ($is_agent) {
+//                if ($leadForm->getLead()->employee_id == Yii::$app->user->id) {
+//                    $enableCommunication = true;
+//                }
+//            }
+//
+//        }
 
         //$dataProviderCommunication
 
@@ -1102,7 +1103,7 @@ class LeadController extends FController
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
             'dataProviderCommunication' => $dataProviderCommunication,
-            'enableCommunication' => $enableCommunication,
+//            'enableCommunication' => $enableCommunication,
             'dataProviderCallExpert' => $dataProviderCallExpert,
             'modelLeadCallExpert' => $modelLeadCallExpert,
             'dataProviderChecklist' => $dataProviderChecklist,

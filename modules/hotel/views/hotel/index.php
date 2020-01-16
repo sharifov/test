@@ -29,8 +29,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'ph_id',
             'ph_product_id',
-            'ph_check_in_date',
-            'ph_check_out_date',
+            'ph_check_in_date:date',
+            'ph_check_out_date:date',
             'ph_destination_code',
             'ph_destination_label',
             'ph_zone_code',
@@ -39,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ph_max_star_rate',
             'ph_max_price_rate',
             'ph_min_price_rate',
+            'ph_request_hash_key',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

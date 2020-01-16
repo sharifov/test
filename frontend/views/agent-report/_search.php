@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -7,6 +8,10 @@ use yii\widgets\ActiveForm;
 /* @var $model common\models\search\AgentActivitySearch */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $action string */
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 
 <div class="activity-search">
@@ -43,12 +48,12 @@ use yii\widgets\ActiveForm;
                 ?>
     	</div>
 		<div class="col-md-4">
-		<?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+		<?php if($user->isAdmin()) {
                 $groups = \common\models\UserGroup::getList();
             }
 
-            if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
-                $groups = Yii::$app->user->identity->getUserGroupList();                            //exit;
+            if($user->isSupervision()) {
+                $groups = $user->getUserGroupList();                            //exit;
             }?>
 		 <?= $form->field($model, 'user_groups')->widget(\kartik\select2\Select2::class, [
 		      'data' => $groups,

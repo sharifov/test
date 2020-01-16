@@ -851,7 +851,7 @@ class Lead extends ActiveRecord
         $this->called_expert = $value;
     }
 
-    public function isGetOwner(): bool
+    public function hasOwner(): bool
     {
         return $this->employee_id ? true : false;
     }
@@ -1001,7 +1001,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_SOLD);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isSold()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isSold()) {
             throw new \DomainException('Lead is already Sold without owner.');
         }
 
@@ -1042,7 +1042,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_BOOKED);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isBooked()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isBooked()) {
             throw new \DomainException('Lead is already Booked without owner.');
         }
 
@@ -1084,7 +1084,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_SNOOZE);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isSnooze()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isSnooze()) {
             throw new \DomainException('Lead is already Snooze without owner.');
         }
 
@@ -1134,7 +1134,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_FOLLOW_UP);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isFollowUp()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isFollowUp()) {
             throw new \DomainException('Lead is already Follow Up without owner.');
         }
 
@@ -1183,7 +1183,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_PROCESSING);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isProcessing()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isProcessing()) {
             throw new \DomainException('Lead is already Processing without owner.');
         }
 
@@ -1218,7 +1218,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_PENDING);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isPending()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isPending()) {
             throw new \DomainException('Lead is already Pending without owner.');
         }
 
@@ -1287,7 +1287,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_TRASH);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isTrash()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isTrash()) {
             throw new \DomainException('Lead is already Trash without owner.');
         }
 
@@ -1351,7 +1351,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_REJECT);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isReject()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isReject()) {
             throw new \DomainException('Lead is already Reject without owner.');
         }
 
@@ -2226,7 +2226,11 @@ class Lead extends ActiveRecord
 
     public function permissionsView()
     {
-        if (!Yii::$app->user->identity->canRole('admin')) {
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if (!$user->isAdmin()) {
             $access = ProjectEmployeeAccess::findOne([
                 'employee_id' => Yii::$app->user->id,
                 'project_id' => $this->project_id
@@ -2252,7 +2256,7 @@ class Lead extends ActiveRecord
         return self::diffFormat($now->diff($created));
     }
 
-    public function getPendingInLastStatus($updated)
+    public static function getPendingInLastStatus($updated)
     {
         $now = new DateTime();
         $updated = new DateTime($updated);
@@ -4012,21 +4016,21 @@ Reason: {reason}
 
 
     /**
-     * @param null $role
+     * @param Employee $user
      * @return array
      */
-    public static function getStatusList($role = null): array
+    public static function getStatusList(Employee $user = null): array
     {
-
-        switch ($role) {
-            case 'admin' :
+        if ($user !== null) {
+            if ($user->isAdmin()) {
                 $list = self::STATUS_LIST;
-                break;
-            case 'supervision' :
+            } elseif ($user->isSupervision()) {
                 $list = self::STATUS_MULTIPLE_UPDATE_LIST;
-                break;
-            default :
+            } else {
                 $list = self::STATUS_LIST;
+            }
+        } else {
+            $list = self::STATUS_LIST;
         }
 
         if (isset($list[self::STATUS_ON_HOLD])) {

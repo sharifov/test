@@ -24,10 +24,10 @@ class FlightRepository extends Repository
 	}
 
 	/**
-	 * @param int $id
+	 * @param int|null $id
 	 * @return Flight
 	 */
-	public function find(int $id): Flight
+	public function find(?int $id): Flight
 	{
 		if ($flight = Flight::findOne($id)) {
 			return $flight;

@@ -4,6 +4,7 @@
  * @var $lead \common\models\Lead
  */
 
+use common\models\Employee;
 use kartik\editable\Editable;
 use common\models\UserParams;
 
@@ -12,7 +13,9 @@ $taskList = \common\models\LeadTask::find()->where(['lt_lead_id' => $lead->id])-
 $dateItem = [];
 $taskByDate = [];
 $dateItemShift = [];
-$userId = Yii::$app->user->id;
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 if($taskList) {
     $usersParams = [];
@@ -42,7 +45,7 @@ if($taskList) {
         $taskDateUTCShiftEnd = clone $taskDateUTC;
         $taskDateUTCShiftEnd->add(new DateInterval('PT'.($usersParams[$task->lt_user_id]['up_work_minutes']*60).'S'));
 
-        if(!isset($dateItemShift[$task->lt_date]) || $task->lt_user_id == $userId){
+        if(!isset($dateItemShift[$task->lt_date]) || $task->lt_user_id == $user->id){
             $dateItemShift[$task->lt_date] = ['start' => $taskDateUTC, 'end' => $taskDateUTCShiftEnd];
         }
 
@@ -52,7 +55,7 @@ if($taskList) {
 }
 
 $is_manager = false;
-if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
+if($user->isAdmin() || $user->isSupervision()) {
     $is_manager = true;
 }
 
@@ -193,9 +196,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                                 $userNrDay = ($dDiffUser->days + 1);
                             }
 
-                        /** @var \common\models\Employee $user */
-                        $user = Yii::$app->user->identity;
-                            if($user_id != Yii::$app->user->id) {
+                            if($user_id != $user->id) {
                                 $agentName = 'Other agent';
                                 if(isset($userTasks[0]) && $userTasks[0]->ltUser && $is_manager) {
                                     $agentName = $userTasks[0]->ltUser->username . ' (Id: '.$userTasks[0]->ltUser->id.')';
@@ -258,7 +259,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                                     $disabledTask = true;
                                 }
 
-                                if(Yii::$app->user->id != $taskItem->lt_user_id) {
+                                if($user->id != $taskItem->lt_user_id) {
                                     $disabledTask = true;
                                 }
 
@@ -293,7 +294,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                                 <td>
                                     <?php
 
-                                    if(Yii::$app->user->id == $taskItem->lt_user_id) {
+                                    if($user->id == $taskItem->lt_user_id) {
                                         $name = 'task_notes[' . $taskItem->lt_task_id . '_' . $date . '_' . $taskItem->lt_user_id . ']';
 
                                         echo Editable::widget([

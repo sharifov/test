@@ -37,10 +37,12 @@ use common\models\Lead;
 
 $this->title = 'Auto find & redial';
 
-/*if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+$user = Yii::$app->user->identity;
+
+/*if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }*/
 
 /*$this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js', [
@@ -204,7 +206,7 @@ $duration = 10;
 
         <div class="row top_tiles">
 
-            <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)): ?>
+            <?php if($user->isAdmin()): ?>
             <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>

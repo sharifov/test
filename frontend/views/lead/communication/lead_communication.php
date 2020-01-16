@@ -160,8 +160,8 @@ $c_type_id = $comForm->c_type_id;
                     <?php if($isAdmin):?>
                     <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
-                            \yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
-                            //echo json_encode($previewEmailForm->e_content_data);
+                            //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
+                             echo json_encode($previewEmailForm->e_content_data);
                         ?>
                         </pre>
                     </div>

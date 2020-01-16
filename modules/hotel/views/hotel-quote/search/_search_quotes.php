@@ -204,7 +204,8 @@ $js = <<<JS
               } else {
                   
                   $.pjax.reload({
-                      container: '#pjax-product-quote-list-' + data.product_id
+                      container: '#pjax-product-quote-list-' + data.product_id,
+                      push: false, replace: false, timeout: 2000
                   });
                   
                   new PNotify({

@@ -29,11 +29,26 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'fl_id',
             'fl_product_id',
-            'fl_trip_type_id',
-            'fl_cabin_class',
+            [
+                    'attribute' => 'fl_trip_type_id',
+                    'value' => static function(\modules\flight\models\Flight $model) {
+                        return $model->tripTypeName;
+                    },
+                    'filter' => \modules\flight\models\Flight::getTripTypeList()
+            ],
+            [
+                'attribute' => 'fl_cabin_class',
+                'value' => static function(\modules\flight\models\Flight $model) {
+                    return $model->cabinClassName;
+                },
+                'filter' => \modules\flight\models\Flight::getCabinClassList()
+            ],
+            //'fl_trip_type_id',
+            //'fl_cabin_class',
             'fl_adults',
             'fl_children',
             'fl_infants',
+            'fl_request_hash_key',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

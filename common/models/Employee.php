@@ -80,6 +80,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const ROLE_SUP_SUPER = 'sup_super';
     public const ROLE_EX_AGENT = 'ex_agent';
     public const ROLE_EX_SUPER = 'ex_super';
+    /** admin child role  */
+    public const ROLE_SALES_SENIOR = 'sales_senior';
+    public const ROLE_EXCHANGE_SENIOR = 'exchange_senior';
+    public const ROLE_SUPPORT_SENIOR = 'support_senior';
 
     public const SCENARIO_REGISTER = 'register';
 
@@ -224,7 +228,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isAdmin(): bool
     {
-        return in_array(self::ROLE_ADMIN, $this->getRoles(true), true);
+        return
+            in_array(self::ROLE_ADMIN, $this->getRoles(true), true)
+            || in_array(self::ROLE_SALES_SENIOR, $this->getRoles(true), true)
+            || in_array(self::ROLE_EXCHANGE_SENIOR, $this->getRoles(true), true)
+            || in_array(self::ROLE_SUPPORT_SENIOR, $this->getRoles(true), true);
     }
 
     /**
@@ -237,12 +245,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function isSimpleAgent(): bool
     {
-        return !$this->canRoles([
-            self::ROLE_SUPER_ADMIN,
-            self::ROLE_ADMIN,
-            self::ROLE_SUP_SUPER,
-            self::ROLE_EX_SUPER
-        ]);
+        return !($this->isSuperAdmin() || $this->isAdmin() || $this->isSupSuper() || $this->isExSuper());
     }
 
     /**
@@ -748,26 +751,37 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $result = $auth->getRoles();
         $roles = ArrayHelper::map($result, 'name', 'description');
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
-        if(!Yii::$app->user->identity->canRole('admin') && !Yii::$app->user->identity->canRole('superadmin')) {
-            if(isset($roles['admin'])) {
-                unset($roles['admin']);
+        if(!$user->isAdmin() && !$user->isSuperAdmin()) {
+            if(isset($roles[self::ROLE_ADMIN])) {
+                unset($roles[self::ROLE_ADMIN]);
+            }
+            if(isset($roles[self::ROLE_SALES_SENIOR])) {
+                unset($roles[self::ROLE_SALES_SENIOR]);
+            }
+            if(isset($roles[self::ROLE_EXCHANGE_SENIOR])) {
+                unset($roles[self::ROLE_EXCHANGE_SENIOR]);
+            }
+            if(isset($roles[self::ROLE_SUPPORT_SENIOR])) {
+                unset($roles[self::ROLE_SUPPORT_SENIOR]);
             }
 
-            if(isset($roles['supervision'])) {
-                unset($roles['supervision']);
+            if(isset($roles[self::ROLE_SUPERVISION])) {
+                unset($roles[self::ROLE_SUPERVISION]);
             }
         }
 
-        if(!Yii::$app->user->identity->canRole('admin') && !Yii::$app->user->identity->canRole('superadmin') && !Yii::$app->user->identity->canRole('userManager') ) {
-            if(isset($roles['qa'])) {
-                unset($roles['qa']);
+        if(!$user->isAdmin() && !$user->isSuperAdmin() && !$user->isUserManager() ) {
+            if(isset($roles[self::ROLE_QA])) {
+                unset($roles[self::ROLE_QA]);
             }
         }
 
-        if(!Yii::$app->user->identity->canRole('superadmin')) {
-            if(isset($roles['superadmin'])) {
-                unset($roles['superadmin']);
+        if(!$user->isSuperAdmin()) {
+            if(isset($roles[self::ROLE_SUPER_ADMIN])) {
+                unset($roles[self::ROLE_SUPER_ADMIN]);
             }
         }
 
@@ -1022,7 +1036,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getListByProject($projectId, $withExperts = false): array
     {
-        if (Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if ($user->isAdmin() || $user->isSupervision()) {
             $data = self::find()
                 ->orderBy(['username' => SORT_ASC])
                 ->asArray()->all();

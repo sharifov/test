@@ -3,7 +3,11 @@
 namespace modules\hotel\models;
 
 use common\models\Product;
+use common\models\ProductQuote;
+use modules\hotel\models\query\HotelQuery;
 use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
 /**
@@ -21,34 +25,35 @@ use yii\helpers\VarDumper;
  * @property int|null $ph_max_star_rate
  * @property int|null $ph_max_price_rate
  * @property int|null $ph_min_price_rate
+ * @property string|null $ph_request_hash_key
  *
  * @property Product $phProduct
  * @property HotelQuote[] $hotelQuotes
  * @property HotelRoom[] $hotelRooms
  */
-class Hotel extends \yii\db\ActiveRecord
+class Hotel extends ActiveRecord
 {
 
-	private const DESTINATION_TYPE_COUNTRY = 0;
-	private const DESTINATION_TYPE_CITY = 1;
-	private const DESTINATION_TYPE_HOTEL = 2;
+	private const DESTINATION_TYPE_COUNTRY  = 0;
+	private const DESTINATION_TYPE_CITY     = 1;
+	private const DESTINATION_TYPE_HOTEL    = 2;
 
 	private const DESTINATION_TYPE_LIST = [
-		self::DESTINATION_TYPE_COUNTRY => 'Countries',
-		self::DESTINATION_TYPE_CITY => 'Cities/Zones',
-		self::DESTINATION_TYPE_HOTEL => 'Hotels'
+		self::DESTINATION_TYPE_COUNTRY  => 'Countries',
+		self::DESTINATION_TYPE_CITY     => 'Cities/Zones',
+		self::DESTINATION_TYPE_HOTEL    => 'Hotels'
 	];
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'hotel';
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -57,17 +62,18 @@ class Hotel extends \yii\db\ActiveRecord
             [['ph_check_in_date', 'ph_check_out_date'], 'safe'],
             [['ph_zone_code', 'ph_hotel_code'], 'string', 'max' => 11],
             [['ph_destination_code'], 'string', 'max' => 10],
+            [['ph_request_hash_key'], 'string', 'max' => 32],
             [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
 			[['ph_check_in_date', 'ph_check_out_date'], 'date', 'format' => 'php:Y-m-d'],
-			['ph_check_in_date', 'compare', 'compareAttribute' => 'ph_check_out_date', 'operator' => '<', 'enableClientValidation' => true]
+			['ph_check_out_date', 'compare', 'compareAttribute' => 'ph_check_in_date', 'operator' => '>=', 'enableClientValidation' => true]
 		];
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'ph_id' => 'ID',
@@ -82,40 +88,100 @@ class Hotel extends \yii\db\ActiveRecord
             'ph_max_star_rate' => 'Max Star Rate',
             'ph_max_price_rate' => 'Max Price Rate',
             'ph_min_price_rate' => 'Min Price Rate',
+            'ph_request_hash_key' => 'Request Hash Key',
         ];
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getPhProduct()
+    public function getPhProduct(): ActiveQuery
     {
         return $this->hasOne(Product::class, ['pr_id' => 'ph_product_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHotelQuotes()
+    public function getHotelQuotes(): ActiveQuery
     {
         return $this->hasMany(HotelQuote::class, ['hq_hotel_id' => 'ph_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHotelRooms()
+    public function getHotelRooms(): ActiveQuery
     {
         return $this->hasMany(HotelRoom::class, ['hr_hotel_id' => 'ph_id']);
     }
 
     /**
-     * {@inheritdoc}
-     * @return \modules\hotel\models\query\HotelQuery the active query used by this AR class.
+     * @return HotelQuery the active query used by this AR class.
      */
-    public static function find()
+    public static function find(): HotelQuery
     {
-        return new \modules\hotel\models\query\HotelQuery(get_called_class());
+        return new HotelQuery(static::class);
+    }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            $request_hash_key = $this->generateRequestHashKey();
+            if ($this->ph_request_hash_key !== $request_hash_key) {
+                $this->ph_request_hash_key = $request_hash_key;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (isset($changedAttributes['ph_request_hash_key'])) {
+            $this->updateInvalidRequestQuotes();
+        }
+    }
+
+    /**
+     * Find invalid request quotes and update status 
+     */
+    public function updateInvalidRequestQuotes(): void
+    {
+        if ($this->hotelQuotes) {
+            foreach ($this->hotelQuotes as $quote) {
+                if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuote::STATUS_DONE) {
+                    $quote->hqProductQuote->pq_status_id = ProductQuote::STATUS_DECLINED;
+                    $quote->hqProductQuote->save();
+                }
+            }
+        }
+    }
+
+
+    /**
+     * @return string
+     */
+    private function generateRequestHashKey(): string
+    {
+        $keyData[] = $this->ph_destination_code . '|' . $this->ph_check_in_date . '|' . $this->ph_check_out_date;
+        if ($this->hotelRooms) {
+            foreach ($this->hotelRooms as $room) {
+                $keyData[] = $room->adtCount . '|' . $room->chdCount;
+            }
+        }
+        $key = implode('|', $keyData);
+        return md5($key);
     }
 
     /**
@@ -161,7 +227,7 @@ class Hotel extends \yii\db\ActiveRecord
 
 		// MaxRatesPerRoom
 
-		$keyCache = 'hotel_' . $this->ph_id . '_' . implode('_', $params);
+		$keyCache = 'hotel_' . $this->ph_request_hash_key;
 		$result = Yii::$app->cache->get($keyCache);
 
 		if ($result === false) {
@@ -250,13 +316,4 @@ class Hotel extends \yii\db\ActiveRecord
 		return self::DESTINATION_TYPE_LIST;
 	}
 
-	/**
-	 * @return void
-	 */
-	public function validateDates(): void
-	{
-		if (strtotime($this->ph_check_out_date) <= strtotime($this->ph_check_in_date)) {
-			$this->addError('ph_check_out_date','Check Out Date must be gather then Check In Date.');
-		}
-	}
 }

@@ -140,21 +140,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'controller' => 'order-shipping',
                 'template' => '{view2} {soft-delete}',
 
-                /*'visibleButtons' => [
-                    'view' => function ($model, $key, $index) {
-                        return User::hasPermission('viewOrder');
-                    },
-                    'update' => function ($model, $key, $index) {
-                        return User::hasPermission('updateOrder');
-                    },
-                    'delete' => function ($model, $key, $index) {
-                        return User::hasRole(['admin']);
-                    },
-                    'soft-delete' => function ($model, $key, $index) {
-                        return User::hasPermission('deleteOrder');
-                    },
-                ],*/
-
                 'buttons' => [
                     'view2' => function ($url, $model) {
                         return Html::a('<i class="glyphicon glyphicon-search"></i>', $url, [

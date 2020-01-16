@@ -1,15 +1,21 @@
 <?php
+
+use common\models\Employee;
 use yii\helpers\Html;
 use \common\models\Call;
 
 /* @var $callList Call[] */
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 <?php if ($callList):?>
     <table class="table table-condensed" style="background-color: rgba(255, 255,255, .7)">
         <?php foreach ($callList as $callItem):?>
             <tr>
                 <td style="width:80px">
-                    <?php if (Yii::$app->user->identity->isAdmin()):?>
+                    <?php if ($user->isAdmin()):?>
                         <u title="SID: <?=Html::encode($callItem->c_call_sid)?>"><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u>
                     <?php endif; ?>
 

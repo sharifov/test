@@ -49,7 +49,7 @@ class LeadMultiUpdateService
                 continue;
             }
 
-            if (!$lead->isAvailableForMultiUpdate() && !\Yii::$app->user->identity->isAdmin()) {
+            if (!$lead->isAvailableForMultiUpdate() && !$user->isAdmin()) {
                 $report[] = 'Lead: ' . $leadId . ' with status: ' . $lead->getStatusName() . ' is not available for MultiUpdate. Available only status: Processing, FollowUp, Hold, Trash, Snooze';
                 continue;
             }
