@@ -996,7 +996,7 @@ class LeadController extends FController
                 if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
                     $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
                 }
-                if (!$leadForm->getLead()->isGetOwner()) {
+                if (!$leadForm->getLead()->hasOwner()) {
                     $enableCommunication = true;
                 }
             } elseif ($is_agent) {

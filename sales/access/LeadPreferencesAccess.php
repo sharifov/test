@@ -17,7 +17,7 @@ class LeadPreferencesAccess
 		return (
 			$lead->isOwner($user->id) ||
 			!$user->isSimpleAgent() ||
-			($user->isSupervision() && $lead->isGetOwner() &&
+			($user->isSupervision() && $lead->hasOwner() &&
 				EmployeeGroupAccess::isUserInCommonGroup($user->id, $lead->employee_id))
 		);
 	}
