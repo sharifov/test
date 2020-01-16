@@ -176,6 +176,7 @@ class RbacMigrationService
             $availableAndAssignedRoutes['assigned'],
             array_keys($appRoutes)
         );
+        $this->allRoutes = array_unique($this->allRoutes);
         return $this->allRoutes;
     }
 

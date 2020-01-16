@@ -16,6 +16,7 @@ class EmployeeProjectAccess
         Employee::ROLE_SUPER_ADMIN,
         Employee::ROLE_ADMIN,
         Employee::ROLE_SALES_SENIOR,
+        Employee::ROLE_EXCHANGE_SENIOR,
         Employee::ROLE_QA,
         Employee::ROLE_USER_MANAGER
     ];

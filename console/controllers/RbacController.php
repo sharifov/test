@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use common\models\Employee;
+use sales\rbac\roles\ExchangeSenior;
 use sales\rbac\roles\SalesSenior;
 use Yii;
 use console\migrations\RbacMigrationService;
@@ -18,6 +19,15 @@ class RbacController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         self::syncModifiedAdminRole(Employee::ROLE_SALES_SENIOR, SalesSenior::getExcludePermissions());
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionSyncExchangeSeniorRole(): void
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        self::syncModifiedAdminRole(Employee::ROLE_EXCHANGE_SENIOR, ExchangeSenior::getExcludePermissions());
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
