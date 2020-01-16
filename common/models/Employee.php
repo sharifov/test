@@ -83,6 +83,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /** admin child role  */
     public const ROLE_SALES_SENIOR = 'sales_senior';
     public const ROLE_EXCHANGE_SENIOR = 'exchange_senior';
+    public const ROLE_SUPPORT_SENIOR = 'support_senior';
 
     public const SCENARIO_REGISTER = 'register';
 
@@ -230,7 +231,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return
             in_array(self::ROLE_ADMIN, $this->getRoles(true), true)
             || in_array(self::ROLE_SALES_SENIOR, $this->getRoles(true), true)
-            || in_array(self::ROLE_EXCHANGE_SENIOR, $this->getRoles(true), true);
+            || in_array(self::ROLE_EXCHANGE_SENIOR, $this->getRoles(true), true)
+            || in_array(self::ROLE_SUPPORT_SENIOR, $this->getRoles(true), true);
     }
 
     /**
@@ -761,6 +763,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
             if(isset($roles[self::ROLE_EXCHANGE_SENIOR])) {
                 unset($roles[self::ROLE_EXCHANGE_SENIOR]);
+            }
+            if(isset($roles[self::ROLE_SUPPORT_SENIOR])) {
+                unset($roles[self::ROLE_SUPPORT_SENIOR]);
             }
 
             if(isset($roles[self::ROLE_SUPERVISION])) {

@@ -42,6 +42,7 @@ class BadgesController extends FController
                             Employee::ROLE_ADMIN,
                             Employee::ROLE_SALES_SENIOR,
                             Employee::ROLE_EXCHANGE_SENIOR,
+                            Employee::ROLE_SUPPORT_SENIOR,
                             Employee::ROLE_SUPERVISION,
                             Employee::ROLE_AGENT,
                             Employee::ROLE_QA,
