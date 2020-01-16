@@ -837,8 +837,11 @@ class CallController extends FController
      * @param string $sid
      * @param bool $cfRecord
      * @return string
+     *
+     * Potentially will be used future
+     *
      */
-    public function actionRecord(string $sid, bool $cfRecord = false):string
+    /*public function actionRecord(string $sid, bool $cfRecord = false):string
     {
         if (!$cfRecord){
             $recordUrl = Call::find()->select(['c_recording_url'])->where(['c_call_sid' => $sid])->one();
@@ -863,5 +866,5 @@ class CallController extends FController
         catch (Exception $e) {
             echo $e->getMessage();
         }
-    }
+    }*/
 }

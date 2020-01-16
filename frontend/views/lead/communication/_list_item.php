@@ -69,7 +69,7 @@ use \common\models\Call;
             <?php if($call->c_recording_url):?>
 
                 <?=Html::button(gmdate('i:s', $call->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                    ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => yii\helpers\Url::to(['call/record', 'sid' =>  $call->c_call_sid ]) ]) ?>
+                    ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $call->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $call->c_call_sid ])*/ ]) ?>
 
             <?php else: ?>
                 <div><?=$call->getStatusIcon()?>  <?=$call->getStatusName()?></div>

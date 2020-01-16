@@ -29,7 +29,7 @@ use \common\models\Call;
                 <td>
                     <?php if ($callItem->c_recording_url):?>
                         <?=Html::button(gmdate('i:s', $callItem->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                            ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ]) ]) ?>
+                            ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ])*/ ]) ?>
                     <?php endif;?>
                 </td>
                 <td class="text-center">

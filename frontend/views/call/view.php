@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="col-md-6">
     <?php if($model->c_recording_url):?>
-        <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=  yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ]) ?>" type="audio/mpeg"></audio>
+        <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?= $model->c_recording_url  /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ?>" type="audio/mpeg"></audio>
     <?php endif;?>
         <?= DetailView::widget([
             'model' => $model,
