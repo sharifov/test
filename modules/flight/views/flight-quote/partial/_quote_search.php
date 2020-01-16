@@ -2,6 +2,7 @@
 
 use modules\flight\models\Flight;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
+use yii\bootstrap4\Alert;
 use yii\data\ArrayDataProvider;
 use yii\web\View;
 use yii\widgets\Pjax;
@@ -13,6 +14,7 @@ use yii\widgets\Pjax;
  * @var $locations []
  * @var $flightId int
  * @var $gds string
+ * @var $errorMessage string
  * @var $flight Flight
  * @var $dataProvider ArrayDataProvider
  * @var $searchForm FlightQuoteSearchForm
@@ -114,6 +116,18 @@ $this->registerJs($js);
 ?>
 <?php else:?>
 	<div class="search-results__wrapper">
+		<?php if (!empty($errorMessage)): ?>
+            <div class="row">
+                <div class="col-md-12">
+					<?= Alert::widget([
+						'options' => [
+							'class' => 'alert-error',
+						],
+						'body' => $errorMessage,
+					]) ?>
+                </div>
+            </div>
+		<?php endif; ?>
 		<p>No search results</p>
 	</div>
 <?php endif;?>

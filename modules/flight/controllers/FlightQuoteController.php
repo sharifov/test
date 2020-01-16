@@ -155,16 +155,24 @@ class FlightQuoteController extends FController
 		$form = new FlightQuoteSearchForm();
 		$form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
 
-		$flight = $this->flightRepository->find($flightId);
+		try {
+			$flight = $this->flightRepository->find($flightId);
 
-		$keyCache = $flight->generateQuoteSearchKeyCache();
-		$quotes = \Yii::$app->cache->get($keyCache);
+			$keyCache = $flight->generateQuoteSearchKeyCache();
+			$quotes = \Yii::$app->cache->get($keyCache);
 
-		if ($quotes === false) {
-			$quotes = $this->quoteSearchService->search($flight, $gds);
-			if ($quotes) {
-				\Yii::$app->cache->set($keyCache, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
+			if ($quotes === false) {
+				$quotes = $this->quoteSearchService->search($flight, $gds);
+				if ($quotes['results']) {
+					\Yii::$app->cache->set($keyCache, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
+				}
 			}
+		} catch (NotFoundHttpException | \DomainException $e) {
+			$errorMessage = $e->getMessage();
+			$quotes = [];
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'Flight::FlightQuoteController::actionAjaxSearchQuote::Throwable');
+			$quotes = [];
 		}
 
 		$viewData = FlightQuoteSearchHelper::getAirlineLocationInfo($quotes);
@@ -193,6 +201,7 @@ class FlightQuoteController extends FController
 		$viewData['gds'] = $gds;
 		$viewData['flight'] = $flight;
 		$viewData['searchForm'] = $form;
+		$viewData['errorMessage'] = $errorMessage ?? '';
 
 		return $this->renderAjax('partial/_quote_search', $viewData);
 	}

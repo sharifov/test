@@ -4,7 +4,6 @@ namespace modules\flight\src\useCases\api\searchQuote;
 
 use common\models\Airline;
 use common\models\Airport;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightQuoteSearchHelper

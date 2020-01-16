@@ -38,6 +38,10 @@ class FlightQuoteSearchService
 	{
 		$fl = [];
 
+		if (!$flight->flightSegments) {
+			throw new \DomainException('Flight request has no segments; Fill flight request data;');
+		}
+
 		$params = [
 			'cabin' => $flight->getCabinRealCode($flight->fl_cabin_class),
 			'cid' => 'SAL101',
