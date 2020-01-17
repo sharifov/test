@@ -1,5 +1,6 @@
 <?php
 
+use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use yii\helpers\Url;
 use common\models\Email;
 use common\models\Sms;
@@ -42,6 +43,8 @@ if ($user->isAdmin()) {
 
 $lists = new ListsAccess($user->id);
 
+$gridId = 'leads-grid-id';
+
 ?>
 <style>
     .dropdown-menu {
@@ -51,6 +54,8 @@ $lists = new ListsAccess($user->id);
 <div class="lead-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
+
+    <div class="multiple-update-summary"></div>
 
 
     <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
@@ -86,6 +91,13 @@ $lists = new ListsAccess($user->id);
             <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle' => "modal", 'data-target' => "#modalUpdate"]) ?>
         </p>
     <?php endif; ?>
+
+
+    <?= MultipleUpdateButtonWidget::widget([
+        'modalId' => 'modal-df',
+        'showUrl' => Url::to(['/lead-multiple-update/show']),
+        'gridId' => $gridId,
+    ]) ?>
 
     <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple'] ?>
 
@@ -629,6 +641,7 @@ $lists = new ListsAccess($user->id);
      */
 
     echo GridView::widget([
+        'id' => $gridId,
         'dataProvider' => $dataProvider,
         'filterModel' => $isAgent ? false : $searchModel,
         // 'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false

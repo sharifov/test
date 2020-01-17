@@ -17,7 +17,7 @@ use yii\web\View;
 
 <?php
 $js = <<<JS
-$('body').on('click', '.{$buttonClass}', function(e) {
+$('.{$buttonClass}').on('click', function(e) {
     e.preventDefault();
     
     var ids = $('body').find('#{$gridId}').yiiGridView('getSelectedRows');
