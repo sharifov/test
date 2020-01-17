@@ -346,7 +346,7 @@ if (!empty($caseSaleModel)) {
                                                 document.activateButtonSync(data);
                                             }',
                                         ],
-                                        'placement' => PopoverX::ALIGN_TOP_LEFT,
+//                                        'placement' => PopoverX::ALIGN_TOP_LEFT,
                                         'pjaxContainerId' => 'pjax-sale-list'
                                     ]);
 								} else {
@@ -374,7 +374,7 @@ if (!empty($caseSaleModel)) {
 										    document.activateButtonSync(data);
 										}',
 										],
-										'placement' => PopoverX::ALIGN_TOP_LEFT,
+//										'placement' => PopoverX::ALIGN_TOP_LEFT,
 										'pjaxContainerId' => 'pjax-sale-list'
 									]);
 								} else {
@@ -400,7 +400,7 @@ if (!empty($caseSaleModel)) {
 										    document.activateButtonSync(data);
 										}',
 										],
-										'placement' => PopoverX::ALIGN_TOP_LEFT,
+//										'placement' => PopoverX::ALIGN_TOP_LEFT,
 										'pjaxContainerId' => 'pjax-sale-list'
 									]);
 								} else {
@@ -426,7 +426,7 @@ if (!empty($caseSaleModel)) {
                                                 document.activateButtonSync(data);
                                             }',
                                         ],
-                                        'placement' => PopoverX::ALIGN_LEFT,
+//                                        'placement' => PopoverX::ALIGN_LEFT,
                                         'pjaxContainerId' => 'pjax-sale-list'
                                     ]);
                                 } else {
@@ -517,8 +517,10 @@ if (!empty($caseSaleModel)) {
     </div>
     <?php
 	$url = \yii\helpers\Url::to(['/cases/ajax-sync-with-back-office/']);
+	$urlRefresh = \yii\helpers\Url::to(['/cases/ajax-refresh-sale-info']);
+
 	$js = <<<JS
-                    $(".sync-with-bo").on('click', function (e) {
+                    $(".update-to-bo").on('click', function (e) {
                         e.preventDefault();
                         e.stopPropagation();
                         var obj = $(this),
@@ -531,7 +533,7 @@ if (!empty($caseSaleModel)) {
                             data: {},
                             dataType: "json",
                             beforeSend: function () {
-                                obj.attr('disabled', true).find('i').toggleClass('fa-spin');
+                                obj.attr('disabled', true).find('i').toggleClass('fa-spin').removeClass('fa-upload').addClass('fa-refresh');
                                 $(obj).closest('.panel').find('.error-dump').html();
                             },
                             success: function (json) {
@@ -555,7 +557,7 @@ if (!empty($caseSaleModel)) {
                                 } else {
                                     obj.attr('disabled', true);
                                 }
-                                obj.find('i').toggleClass('fa-spin');
+                                obj.find('i').toggleClass('fa-spin').removeClass('fa-refresh').addClass('fa-upload');
                             },
                             error: function (text) {
                                 new PNotify({
@@ -564,10 +566,59 @@ if (!empty($caseSaleModel)) {
                                     text: "Internal Server Error. Try again letter.",
                                     hide: true
                                 });
-                                obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
+                                obj.removeAttr('disabled').find('i').toggleClass('fa-spin').removeClass('fa-refresh').addClass('fa-upload');
                             }
                         });
                     });
+
+$('.refresh-from-bo').on('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();  
+    
+    var obj = $(this),
+        caseId = obj.attr('data-case-id'),
+        caseSaleId = obj.attr('data-case-sale-id');
+    
+    $.ajax({
+        url: "$urlRefresh/" + caseId + '/' + caseSaleId,
+        type: 'post',
+        dataType: "json",    
+        beforeSend: function () {
+            obj.attr('disabled', true).find('i').toggleClass('fa-spin');
+            $(obj).closest('.panel').find('.error-dump').html();
+        },
+        success: function (data) {
+            if (data.error) {
+               new PNotify({
+                    title: "Error",
+                    type: "error",
+                    text: data.message,
+                    hide: true
+                }); 
+            } else {
+                new PNotify({
+                    title: "Success",
+                    type: "success",
+                    text: data.message,
+                    hide: true
+                }); 
+                $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: true,});
+            }
+        },
+        error: function (text) {
+            new PNotify({
+                title: "Error",
+                type: "error",
+                text: "Internal Server Error. Try again letter.",
+                hide: true
+            });
+        },
+        complete: function () {
+            obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
+            $(obj).closest('.panel').find('.error-dump').html();
+        }
+    });
+})
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
 JS;
