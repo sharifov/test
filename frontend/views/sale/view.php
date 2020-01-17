@@ -243,7 +243,7 @@ if (!empty($caseSaleModel)) {
                         <th>Gender</th>
                         <th>Meal</th>
                         <th>Wheelchair</th>
-                        <th>Frequent Fayer</th>
+                        <th>Frequent Flyer</th>
                         <th>KTN</th>
                     </tr>
                     </thead>
@@ -390,7 +390,7 @@ if (!empty($caseSaleModel)) {
                                 <?php if(!$canManageSaleInfo) {
 									echo Editable::widget([
 										'name' => 'cssSaleData[passengers][' . $key . '][ff_numbers]',
-										'header' => 'Frequent Fayer',
+										'header' => 'Frequent Flyer',
 										'asPopover' => false,
 										'inputType' => Editable::INPUT_TEXT,
 										'value' => Html::encode(!empty($passenger['ff_numbers']) && is_array($passenger['ff_numbers']) ? reset($passenger['ff_numbers']) : null),
