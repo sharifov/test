@@ -99,7 +99,7 @@ class AgentActivitySearch extends Call
      * @param $user Employee
      * @return SqlDataProvider
      */
-    public function searchAgentLeads($params, $user)
+    public function searchAgentLeads($params, $user):SqlDataProvider
     {
         $this->load($params);
 
@@ -148,12 +148,6 @@ class AgentActivitySearch extends Call
 
         $query->from('employees AS e');
 
-        /*if ($this->supervision_id > 0) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'e.id', $subQuery]);
-        }*/
-
         if ($user->isSupervision()) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
@@ -176,12 +170,10 @@ class AgentActivitySearch extends Call
         $command = $query->createCommand();
         $sql = $command->rawSql;
 
-        //var_dump($sql);die;
-
         $paramsData = [
             'sql' => $sql,
             //'params' => [':publish' => 1],
-            //'totalCount' => $totalCount,
+            'totalCount' => Employee::find()->count(),
             'sort' => [
                 'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
@@ -280,8 +272,7 @@ class AgentActivitySearch extends Call
             ],
         ];
 
-        $dataProvider = new SqlDataProvider($paramsData);
-        return $dataProvider;
+        return $dataProvider = new SqlDataProvider($paramsData);
     }
 
     public function searchCalls($params)
