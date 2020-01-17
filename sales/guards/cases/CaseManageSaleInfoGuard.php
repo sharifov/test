@@ -34,9 +34,10 @@ class CaseManageSaleInfoGuard
 	 * @param CaseSale $caseSale
 	 * @param Employee $user
 	 * @param array $passengers
+	 * @param bool $isRefresh
 	 * @return string|null
 	 */
-	public function canManageSaleInfo(CaseSale $caseSale, Employee $user, array $passengers = []): ?string
+	public function canManageSaleInfo(CaseSale $caseSale, Employee $user, array $passengers = [], bool $isRefresh = false): ?string
 	{
 		try {
 
@@ -50,11 +51,11 @@ class CaseManageSaleInfoGuard
 				throw new \DomainException('Sale info cannot be managed, reason: Access Denied');
 			}
 
-			if (!$caseSale->cssCs->isProcessing()) {
+			if (!$isRefresh && !$caseSale->cssCs->isProcessing()) {
 				throw new \DomainException('Sale info cannot be managed, reason: Case is not in status - ' . CasesStatus::getName(CasesStatus::STATUS_PROCESSING));
 			}
 
-			if (!$this->verifyPassengersAttributeNameref($passengers)) {
+			if (!$isRefresh && !$this->verifyPassengersAttributeNameref($passengers)) {
 				throw new \DomainException('Sale info cannot be managed, reason: passenger dont have all the necessary attributes to synchronize with B\O');
 			}
 

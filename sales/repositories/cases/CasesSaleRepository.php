@@ -3,6 +3,7 @@
 namespace sales\repositories\cases;
 
 use common\models\CaseSale;
+use sales\entities\cases\Cases;
 use sales\repositories\NotFoundException;
 
 class CasesSaleRepository
@@ -51,6 +52,27 @@ class CasesSaleRepository
 		} else {
 			$caseSale->css_sale_data = $caseSale->css_sale_data_updated;
 		}
+	}
+
+	/**
+	 * @param CaseSale $caseSale
+	 * @param Cases $case
+	 * @param array $saleData
+	 * @return CaseSale
+	 */
+	public function refreshOriginalSaleData(CaseSale $caseSale, Cases $case, array $saleData): CaseSale
+	{
+		$caseSale->css_cs_id = $case->cs_id;
+		$caseSale->css_sale_id = $saleData['saleId'];
+		$caseSale->css_sale_data = json_encode($saleData);
+		$caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
+		$caseSale->css_sale_created_dt = $saleData['created'] ?? null;
+		$caseSale->css_sale_book_id = $saleData['bookingId'] ?? null;
+		$caseSale->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
+		$caseSale->css_sale_data_updated = json_encode($saleData);
+		$caseSale->css_need_sync_bo = 0;
+
+		return $caseSale;
 	}
 
 	/**
