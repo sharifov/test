@@ -9,6 +9,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $data array */
 /* @var $csId int */
+/* @var $itemKey int */
 /* @var $caseSaleModel common\models\CaseSale */
 
 
@@ -257,7 +258,7 @@ if (!empty($caseSaleModel)) {
 								/*
 									$editable = Editable::begin([
 										'name' => 'cssSaleData[passengers]['.$key.'][last_name]',
-										'asPopover' => true,
+										'asPopover' => false,
 										'displayValue' => Html::encode($passenger['last_name'] . ' ' . $passenger['first_name'] . $passenger['middle_name']),
 										'inputType' => Editable::INPUT_TEXT,
 										'value' => Html::encode($passenger['last_name']),
@@ -280,7 +281,7 @@ if (!empty($caseSaleModel)) {
                                     $editable = Editable::begin([
                                         'name' => 'cssSaleData[passengers]['.$key.'][birth_date]',
                                         'header' => 'Date of Birth',
-                                        'asPopover' => true,
+                                        'asPopover' => false,
                                         'inputType' => Editable::INPUT_DATE,
                                         'displayValue' => date('d M Y', strtotime($passenger['birth_date'])),
                                         'value' => date('d M Y', strtotime($passenger['birth_date'])),
@@ -296,7 +297,6 @@ if (!empty($caseSaleModel)) {
                                         ],
                                         'pluginEvents' => [
                                             'editableSuccess' => 'function (event, val, form, data) {
-                                                console.log(form);
                                                 document.activateButtonSync(data);
                                             }',
                                         ],
@@ -313,7 +313,7 @@ if (!empty($caseSaleModel)) {
 								    echo Editable::widget([
                                             'name' => 'cssSaleData[passengers]['.$key.'][gender]',
                                             'header' => 'Gender',
-                                            'asPopover' => true,
+                                            'asPopover' => false,
                                             'inputType' => Editable::INPUT_DROPDOWN_LIST,
                                             'data' => ['F' => 'Female', 'M' => 'Male'],
                                             'value' => Html::encode($passenger['gender']),
@@ -335,7 +335,7 @@ if (!empty($caseSaleModel)) {
                                     echo Editable::widget([
                                         'name' => 'cssSaleData[passengers]['.$key.'][meal]',
                                         'header' => 'Meal',
-                                        'asPopover' => true,
+                                        'asPopover' => false,
                                         'inputType' => Editable::INPUT_DROPDOWN_LIST,
                                         'data' => CaseSale::PASSENGER_MEAL,
                                         'options' => ['prompt'=>'Select meal...'],
@@ -363,7 +363,7 @@ if (!empty($caseSaleModel)) {
 									echo Editable::widget([
 										'name' => 'cssSaleData[passengers][' . $key . '][wheelchair]',
 										'header' => 'Wheelchair',
-										'asPopover' => true,
+										'asPopover' => false,
 										'inputType' => Editable::INPUT_DROPDOWN_LIST,
 										'data' => CaseSale::PASSENGER_WHEELCHAIR,
 										'value' => Html::encode(!empty($passenger['wheelchair']) && is_array($passenger['wheelchair']) ? reset($passenger['wheelchair']) : null),
@@ -391,7 +391,7 @@ if (!empty($caseSaleModel)) {
 									echo Editable::widget([
 										'name' => 'cssSaleData[passengers][' . $key . '][ff_numbers]',
 										'header' => 'Frequent Fayer',
-										'asPopover' => true,
+										'asPopover' => false,
 										'inputType' => Editable::INPUT_TEXT,
 										'value' => Html::encode(!empty($passenger['ff_numbers']) && is_array($passenger['ff_numbers']) ? reset($passenger['ff_numbers']) : null),
 										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
@@ -417,7 +417,7 @@ if (!empty($caseSaleModel)) {
                                     echo Editable::widget([
                                         'name' => 'cssSaleData[passengers]['.$key.'][kt_numbers]',
                                         'header' => 'KTN',
-                                        'asPopover' => true,
+                                        'asPopover' => false,
                                         'inputType' => Editable::INPUT_TEXT,
                                         'value' => Html::encode(!empty($passenger['kt_numbers']) && is_array($passenger['kt_numbers']) ? reset($passenger['kt_numbers']) : null),
                                         'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
@@ -602,7 +602,7 @@ $('.refresh-from-bo').on('click', function (e) {
                     text: data.message,
                     hide: true
                 }); 
-                $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: true,});
+                $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
             }
         },
         error: function (text) {
