@@ -52,6 +52,7 @@ use yii\base\Exception;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -715,6 +716,7 @@ class CasesController extends FController
                 $cs->css_sale_created_dt = $saleData['created'] ?? null;
                 $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
                 $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
+                $cs->css_sale_data_updated = $cs->css_sale_data;
 
                 if(!$cs->save()) {
                     Yii::error(VarDumper::dumpAsString($cs->errors), 'CasesController:actionAddSale:CaseSale:save');
@@ -1409,21 +1411,56 @@ class CasesController extends FController
 
 	/**
 	 * @param CaseSale $caseSale
+	 * @param bool $isRefresh
 	 * @return bool
 	 * @throws \yii\base\InvalidConfigException
 	 */
-	private function checkAccessToManageCaseSaleInfo(CaseSale $caseSale): bool
+	private function checkAccessToManageCaseSaleInfo(CaseSale $caseSale, bool $isRefresh = false): bool
 	{
 		$caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
 		$canManageSaleInfo = $caseGuard->canManageSaleInfo(
 			$caseSale,
 			Yii::$app->user->identity,
-			json_decode((string)$caseSale->css_sale_data, true)['passengers'] ?? []);
+			json_decode((string)$caseSale->css_sale_data, true)['passengers'] ?? [], $isRefresh);
 
 		if ($canManageSaleInfo) {
 			throw new \DomainException($canManageSaleInfo, -3);
 		}
 
 		return true;
+	}
+
+	public function actionAjaxRefreshSaleInfo($caseId, $caseSaleId)
+	{
+		if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
+			throw new BadRequestHttpException();
+		}
+
+		try {
+			$out = [
+				'error' => 0,
+				'message' => ''
+			];
+
+			$case = $this->casesRepository->find((int)$caseId);
+			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
+			$this->checkAccessToManageCaseSaleInfo($caseSale, true);
+
+			$saleData = $this->findSale((int)$caseSale->css_sale_id);
+
+			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
+
+			$out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
+
+		} catch (\Throwable $throwable) {
+			$out['error'] = 1;
+			$out['message'] = 'An internal Sales error has occurred; Check system logs;';
+			if ($throwable->getCode() <= 0 && $throwable->getCode() > -4) {
+				$out['message'] = $throwable->getMessage();
+			}
+			Yii::error('Code: ' . $throwable->getCode() . '; ' . $throwable->getMessage() . '; File: ' . $throwable->getFile() . ': ' . $throwable->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
+		}
+
+		return $this->asJson($out);
 	}
 }
