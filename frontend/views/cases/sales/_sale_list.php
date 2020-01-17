@@ -75,19 +75,20 @@ $user = Yii::$app->user->identity;
                         <td>'.Yii::$app->formatter->asDatetime($item->css_created_dt).'</td>';
 
                     if ($caseModel->isProcessing()) {
-                        $label .= '<td>' . Html::button('<i class="fa fa-upload"></i> Upload data to B/O', [
-							'class' => 'update-to-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-warning'),
+                        $label .= '<td>' . Html::button('<i class="fa fa-upload"></i> Update', [
+							'class' => 'update-to-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-default'),
 							'disabled' => !$item->css_need_sync_bo ? true : false,
 							'id' => 'update-to-bo-' . $item->css_sale_id,
                             'data-case-id' => $item->css_cs_id,
-                            'data-case-sale-id' => $item->css_sale_id
+                            'data-case-sale-id' => $item->css_sale_id,
+                            'title' => 'Update data to B/O'
                             ]) . '</td>';
-                    }
-					if ($user->isAdmin() || $user->isSuperAdmin()) {
-					    $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Refresh from B/O', [
+
+					    $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Refresh', [
 					            'class' => 'refresh-from-bo btn btn-info',
 								'data-case-id' => $item->css_cs_id,
-								'data-case-sale-id' => $item->css_sale_id
+								'data-case-sale-id' => $item->css_sale_id,
+                                'title' => 'Refresh from B/O'
                             ]) . '</td>';
                     }
                     $label .= '</tr></table>';
@@ -98,7 +99,7 @@ $user = Yii::$app->user->identity;
 //                    echo '<pre>';
 //                    print_r($dataSale);die;
                     if(is_array($dataSale)) {
-                        $content = $this->render('/sale/view', ['data' => $dataSale, 'csId' => $caseModel->cs_id, 'caseSaleModel' => $item]);
+                        $content = $this->render('/sale/view', ['data' => $dataSale, 'csId' => $caseModel->cs_id, 'caseSaleModel' => $item, 'itemKey' => $itemKey]);
                         //echo '******';
                         //\yii\helpers\VarDumper::dump($content); exit;
                     }
@@ -108,7 +109,8 @@ $user = Yii::$app->user->identity;
                     $itemColls[] = [
                         'label' => $label,
                         'content' => $content,
-                        'contentOptions' => ['class' => $itemKey ? '' : 'show']
+                        'contentOptions' => ['class' => $itemKey ? '' : 'show'],
+                        'pjax' => true
                         //'options' => [...],
                         //'footer' => 'Footer' // the footer label in list-group
                     ];
@@ -117,7 +119,7 @@ $user = Yii::$app->user->identity;
 
             echo \yii\bootstrap\Collapse::widget([
                 'encodeLabels' => false,
-                'items' => $itemColls
+                'items' => $itemColls,
             ]);
 
             ?>

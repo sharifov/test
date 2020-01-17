@@ -5748,6 +5748,10 @@ input[disabled] + .radio-tab__text {
 .notifications-list table tr.warning {
     background-color: #fff3cd;
 }
+.kv-editable-form-inline .input-group {
+    display: flex;
+    margin: 0;
+}
 /****** END OTHER ******/
 
 
