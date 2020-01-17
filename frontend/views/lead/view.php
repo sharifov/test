@@ -67,8 +67,9 @@ $lead = $leadForm->getLead();
         </div>
 
         <div class="col-md-6">
+        <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'timeout' => 10000]) ?>
 
-            <?= $this->render('products/_products', [
+			<?= $this->render('products/_products', [
                 'lead' => $lead,
                 'itineraryForm' => $itineraryForm,
                 'quotesProvider' => $quotesProvider,
@@ -91,7 +92,7 @@ $lead = $leadForm->getLead();
                     'is_manager' => $is_manager,
                 ]) ?>
             <?php endif; ?>
-
+        <?php \yii\widgets\Pjax::end(); ?>
 
         </div>
         <div class="col-md-6">

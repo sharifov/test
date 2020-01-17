@@ -79,7 +79,9 @@ $js = <<<JS
               } else {
                   //reload pjax and close boostrap modal
                   $.pjax.reload({
-                      container: '#product-accordion'
+                      container: '#pjax-lead-products-wrap',
+                      timeout: 5000,
+                      async: false,
                   });
                   $('#modal-sm').modal('hide');
               }
