@@ -5,7 +5,9 @@ namespace sales\services\cases;
 use common\models\CaseSale;
 use Exception;
 use http\Exception\RuntimeException;
+use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesSaleRepository;
+use yii\helpers\VarDumper;
 
 class CasesSaleService
 {
@@ -215,5 +217,29 @@ class CasesSaleService
 			}
 		}
 		return $difference;
+	}
+
+	/**
+	 * @param CaseSale $caseSale
+	 * @param Cases $case
+	 * @param array $saleData
+	 * @return CaseSale
+	 */
+	public function refreshOriginalSaleData(CaseSale $caseSale, Cases $case, array $saleData): CaseSale
+	{
+		if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
+			$caseSale = $this->casesSaleRepository->refreshOriginalSaleData($caseSale, $case, $saleData);
+
+			if(!$caseSale->save()) {
+				\Yii::error(VarDumper::dumpAsString($caseSale->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
+				throw new \RuntimeException('An error occurred while trying to refresh original sale info;');
+			}
+
+			$case->updateLastAction();
+		} else {
+			throw new \DomainException('Sale info form B/O is not equal with current info');
+		}
+
+		return $caseSale;
 	}
 }

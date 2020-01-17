@@ -34,6 +34,10 @@ return [
         'pattern' => 'cases/ajax-sync-with-back-office/<caseId>/<caseSaleId>',
         'route' => 'cases/ajax-sync-with-back-office'
     ],
+	[
+        'pattern' => 'cases/ajax-refresh-sale-info/<caseId>/<caseSaleId>',
+        'route' => 'cases/ajax-refresh-sale-info'
+    ],
 
     [
         'pattern' => 'take/<gid>',

@@ -10,6 +10,7 @@ use yii\widgets\Pjax;
 /* @var $saleSearchModel common\models\search\SaleSearch */
 /* @var $saleDataProvider yii\data\ArrayDataProvider */
 
+$user = Yii::$app->user->identity;
 ?>
 
 <div class="x_panel">
@@ -48,7 +49,11 @@ use yii\widgets\Pjax;
                     <td>Sale Created Date</td>
                     <td>Added Date</td>
                     <?php if ($caseModel->isProcessing()): ?>
-                        <td>Sync with B/O</td>
+                        <td>Update to B/O</td>
+                    <?php endif; ?>
+
+                    <?php if ($user->isAdmin() || $user->isSuperAdmin()): ?>
+                        <td>Refresh Data From B/O</td>
                     <?php endif; ?>
                 </tr>
             </table>
@@ -70,12 +75,19 @@ use yii\widgets\Pjax;
                         <td>'.Yii::$app->formatter->asDatetime($item->css_created_dt).'</td>';
 
                     if ($caseModel->isProcessing()) {
-                        $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Sync with B/O', [
-							'class' => 'sync-with-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-warning'),
+                        $label .= '<td>' . Html::button('<i class="fa fa-upload"></i> Upload data to B/O', [
+							'class' => 'update-to-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-warning'),
 							'disabled' => !$item->css_need_sync_bo ? true : false,
-							'id' => 'sync-with-bo-' . $item->css_sale_id,
+							'id' => 'update-to-bo-' . $item->css_sale_id,
                             'data-case-id' => $item->css_cs_id,
                             'data-case-sale-id' => $item->css_sale_id
+                            ]) . '</td>';
+                    }
+					if ($user->isAdmin() || $user->isSuperAdmin()) {
+					    $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Refresh from B/O', [
+					            'class' => 'refresh-from-bo btn btn-info',
+								'data-case-id' => $item->css_cs_id,
+								'data-case-sale-id' => $item->css_sale_id
                             ]) . '</td>';
                     }
                     $label .= '</tr></table>';
@@ -174,9 +186,9 @@ $this->registerJs($jsCode, \yii\web\View::POS_READY);
 $js = <<<JS
 document.activateButtonSync = function(data) {
     if (data.output === '' && data.message === '' && data.sync) {
-        $('#sync-with-bo-'+data.caseSaleId).removeAttr('disabled').removeClass('btn-warning').addClass('btn-success');
+        $('#update-to-bo-'+data.caseSaleId).removeAttr('disabled').removeClass('btn-warning').addClass('btn-success');
     }else {
-        $('#sync-with-bo-'+data.caseSaleId).attr('disabled', true).removeClass('btn-success').addClass('btn-warning');
+        $('#update-to-bo-'+data.caseSaleId).attr('disabled', true).removeClass('btn-success').addClass('btn-warning');
     }
     
     if (data.success_message !== '') {
