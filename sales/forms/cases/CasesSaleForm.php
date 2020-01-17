@@ -46,7 +46,7 @@ class CasesSaleForm extends Model
 	 */
 	private $validators = [
 		'birth_date' => 'birthDateRangeValidator',
-		'ff_numbers' => 'onlyNumbers',
+		'ff_numbers' => 'onlyNumbersAndLetters',
 		'kt_numbers' => 'onlyNumbersAndLetters',
 	];
 
@@ -133,7 +133,7 @@ class CasesSaleForm extends Model
 	{
 		return [
 			'passengers' => 'Passengers',
-			'ff_numbers' => 'Frequent Fayer',
+			'ff_numbers' => 'Frequent Flyer',
 			'kt_numbers' => 'KTN'
 		];
 	}
