@@ -154,7 +154,7 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
     pjaxOffFormSubmit('#product-accordion');
     pjaxOffFormSubmit('#pjax-lead-products-wrap');
 JS;
-						$this->registerJs($js);
+						$this->registerJs($js, View::POS_HEAD);
 						?>
                         <div class="sl-itinerary-form2">
                             <?php $form = ActiveForm::begin([
