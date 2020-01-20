@@ -4057,7 +4057,7 @@ input[disabled] + .radio-tab__text {
 
 .quote__airline-logo {
   margin-right: 20px;
-  width: 26px;
+  width: auto;
   height: 26px;
   margin-top: 5px;
 }
@@ -5760,6 +5760,28 @@ input[disabled] + .radio-tab__text {
 .kv-editable-form-inline .input-group {
     display: flex;
     margin: 0;
+}
+.search-results__wrapper {
+    position: relative;
+    z-index: 1;
+}
+.search-results__wrapper.loading:after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    background-color: rgba(255,255,255,.5);
+}
+.list-view nav:last-child {
+    margin-top: 20px;
 }
 /****** END OTHER ******/
 

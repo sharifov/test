@@ -100,11 +100,12 @@ $js = <<<JS
     
     $("#pjax-quote-filter").on("pjax:beforeSend", function() {
         $('#pjax-quote-filter #flight-quote-search-submit i').removeClass('fa-filter').addClass('fa-spin fa-spinner disabled').prop('disabled', true);
-        $('.search-results__wrapper').html('');
+        $('.search-results__wrapper').addClass('loading');
     });
 
     $("#pjax-quote-filter").on("pjax:complete", function() {
         $('#pjax-quote-filter #flight-quote-search-submit i').removeClass('fa-spin fa-spinner disabled').addClass('fa-filter').removeAttr('disabled');
+        $('.search-results__wrapper').removeClass('loading');
     });
 
     // $("#pjax-quote-filter").on('pjax:timeout', function(event) {
