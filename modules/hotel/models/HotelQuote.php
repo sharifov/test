@@ -31,6 +31,19 @@ use yii\helpers\VarDumper;
  */
 class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 {
+    public const
+        STATUS_NEW = 1,
+        STATUS_PENDING = 2,
+        STATUS_BOOKED = 3,
+        STATUS_CANCELED = 4;
+
+    public const STATUS_LIST = [
+        self::STATUS_NEW => 'New',
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_BOOKED => 'Booked',
+        self::STATUS_CANCELED => 'Canceled',
+    ];
+
     /**
      * @return string
      */
@@ -245,4 +258,15 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
         return $data;
     }
 
+    /* TODO: */
+    public static function book()
+    {
+        return true;
+    }
+
+    /* TODO: */
+    public static function cancelBook()
+    {
+        return true;
+    }
 }
