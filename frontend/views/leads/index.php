@@ -73,13 +73,15 @@ $gridId = 'leads-grid-id';
     ]);
     ?>
 
-    <?= MultipleUpdateButtonWidget::widget([
-        'modalId' => 'modal-df',
-        'showUrl' => Url::to(['/lead-multiple-update/show']),
-        'gridId' => $gridId,
-        'buttonClass' => 'multiple-update-btn',
-        'buttonText' => 'Multiple update',
-    ]) ?>
+    <?php if (Auth::can('leads/index_MultipleUpdate')): ?>
+        <?= MultipleUpdateButtonWidget::widget([
+            'modalId' => 'modal-df',
+            'showUrl' => Url::to(['/lead-multiple-update/show']),
+            'gridId' => $gridId,
+            'buttonClass' => 'multiple-update-btn',
+            'buttonText' => 'Multiple update',
+        ]) ?>
+    <?php endif;?>
 
     <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple'] ?>
 
