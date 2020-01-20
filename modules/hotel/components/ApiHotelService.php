@@ -132,12 +132,15 @@ class ApiHotelService extends Component
             $response = $this->sendRequest('booking/search', $data, 'post');
             // VarDumper::dump($response->data, 10, true); exit;
 
-            if ($response->isOk) {
+            if ($response->isOk && !isset($response->data['error'])) {
                 if (isset($response->data['hotels'])) {
                     $out['data'] = $response->data;
                 } else {
                     $out['error'] = 'Not found in response array data key [hotels]';
                 }
+            } elseif (isset($response->data['error'])) {
+                $out['error'] = 'Not found in response array data key [hotels]';
+                \Yii::error(VarDumper::dumpAsString($response->data['error'], 10), 'Component:ApiHotelService::search');
             } else {
                 $out['error'] = 'Error ('.$response->statusCode.'): ' . $response->content;
                 \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService::search');
@@ -198,5 +201,7 @@ class ApiHotelService extends Component
 	{
 		return self::DESTINATION_AVAILABLE_TYPE;
 	}
+
+
 
 }
