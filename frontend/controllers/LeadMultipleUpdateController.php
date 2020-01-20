@@ -8,7 +8,6 @@ use sales\auth\Auth;
 use Yii;
 use yii\bootstrap4\ActiveForm;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
 use yii\web\Response;
 
 /**
@@ -16,7 +15,7 @@ use yii\web\Response;
  *
  * @property MultipleUpdateService $service
  */
-class LeadMultipleUpdateController extends Controller
+class LeadMultipleUpdateController extends FController
 {
     private $service;
 
@@ -24,6 +23,20 @@ class LeadMultipleUpdateController extends Controller
     {
         parent::__construct($id, $module, $config);
         $this->service = $service;
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'roles' => ['leads/index_MultipleUpdate'],
+            ],
+        ];
+
+        return $behaviors;
     }
 
     /**
