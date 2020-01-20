@@ -47,6 +47,12 @@ use yii\helpers\Html;
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: <?=$products ? 'none' : 'block'?>">
+			<?php
+			$js = <<<JS
+pjaxOffFormSubmit('#pj-itinerary');
+JS;
+			$this->registerJs($js);
+			?>
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,
