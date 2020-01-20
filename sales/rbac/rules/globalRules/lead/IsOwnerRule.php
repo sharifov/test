@@ -1,12 +1,14 @@
 <?php
 
-namespace sales\rbac\rules\lead\view\communicationBlock;
+namespace sales\rbac\rules\globalRules\lead;
 
 use common\models\Lead;
 use yii\rbac\Rule;
 
-class LeadViewCommunicationBlockEmptyOwnerRule extends Rule
+class IsOwnerRule extends Rule
 {
+    public $name = 'global/lead/isOwnerRule';
+
     public function execute($userId, $item, $params): bool
     {
         if (!isset($params['lead']) || !$params['lead'] instanceof Lead) {
@@ -16,6 +18,6 @@ class LeadViewCommunicationBlockEmptyOwnerRule extends Rule
         /** @var Lead $lead */
         $lead = $params['lead'];
 
-        return !$lead->hasOwner();
+        return $lead->isOwner($userId);
     }
 }
