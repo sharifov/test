@@ -2,6 +2,7 @@
 
 namespace common\models\query;
 
+use common\models\Department;
 use common\models\Lead;
 use yii\db\ActiveQuery;
 
