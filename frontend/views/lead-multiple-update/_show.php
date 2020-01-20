@@ -1,13 +1,13 @@
 <?php
 
+use common\models\Employee;
+
 /** @var array $validationUrl */
-
-use sales\rbac\Auth;
-
 /** @var array $action */
 /** @var string $modalId */
 /** @var string $ids */
 /** @var string $pjaxId */
+/** @var Employee $user */
 
 echo \frontend\widgets\multipleUpdate\lead\MultipleUpdateWidget::widget([
     'validationUrl' => $validationUrl,
@@ -15,5 +15,5 @@ echo \frontend\widgets\multipleUpdate\lead\MultipleUpdateWidget::widget([
     'modalId' => $modalId,
     'ids' => $ids,
     'pjaxId' => $pjaxId,
-    'user' => Auth::Identity(),
+    'user' => $user,
 ]);

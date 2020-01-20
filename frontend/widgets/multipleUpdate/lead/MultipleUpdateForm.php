@@ -88,6 +88,16 @@ class MultipleUpdateForm extends Model
         }
     }
 
+    public function needStatusUpdate(): bool
+    {
+        return $this->statusId ? true : false;
+    }
+
+    public function needOwnerUpdate(): bool
+    {
+        return $this->userId ? true : false;
+    }
+
     private function isEmptyForm(): bool
     {
         return !$this->statusId && !$this->userId && !$this->redial_queue;

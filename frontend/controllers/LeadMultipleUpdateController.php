@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use frontend\widgets\multipleUpdate\lead\MultipleUpdateForm;
 use frontend\widgets\multipleUpdate\lead\MultipleUpdateService;
-use sales\rbac\Auth;
+use sales\auth\Auth;
 use Yii;
 use yii\bootstrap4\ActiveForm;
 use yii\web\BadRequestHttpException;
@@ -39,6 +39,7 @@ class LeadMultipleUpdateController extends Controller
                 'modalId' => 'modal-df',
                 'ids' => Yii::$app->request->post('ids'),
                 'pjaxId' => 'lead-pjax-list',
+                'user' => Auth::user()
             ]);
         } catch (\DomainException $e) {
             return $this->renderAjax('_error', [
@@ -56,7 +57,7 @@ class LeadMultipleUpdateController extends Controller
      */
     public function actionValidation(): array
     {
-        $user = Auth::Identity();
+        $user = Auth::user();
 
         $form = new MultipleUpdateForm($user);
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
@@ -72,7 +73,7 @@ class LeadMultipleUpdateController extends Controller
      */
     public function actionUpdate(): Response
     {
-        $user = Auth::Identity();
+        $user = Auth::user();
 
         $form = new MultipleUpdateForm($user);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {

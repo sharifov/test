@@ -58,151 +58,158 @@ class MultipleUpdateService
 
             $newOwner = $this->getNewOwner($form->userId, $oldOwnerId);
 
-            if ($form->statusId) {
-
-                if ($form->isPending()) {
-                    try {
-                        $this->leadStateService->pending($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->movedStateMessage($lead, 'Pending', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:pending:LeadId:' . $lead->id);
-                    }
-                } elseif ($form->isProcessing()) {
-                    try {
-                        $this->leadStateService->processing($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->movedStateMessage($lead, 'Processing', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:processing:LeadId:' . $lead->id);
-                    }
-                } elseif ($form->isReject()) {
-                    try {
-                        $this->leadStateService->reject($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->movedStateMessage($lead, 'Reject', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:reject:LeadId:' . $lead->id);
-                    }
-                } elseif ($form->isFollowUp()) {
-                    try {
-                        $this->leadStateService->followUp($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->movedStateMessage($lead, 'Follow Up', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:followUp:LeadId:' . $lead->id);
-                    }
-                } elseif ($form->isSold()) {
-                    try {
-                        $this->leadStateService->sold($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->movedStateMessage($lead, 'Sold', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:sold:LeadId:' . $lead->id);
-                    }
-                } elseif ($form->isTrash()) {
-                    try {
-                        $this->leadStateService->trash($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->movedStateMessage($lead, 'Trash', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:trash:LeadId:' . $lead->id);
-                    }
-                } elseif ($form->isBooked()) {
-                    try {
-                        $this->leadStateService->booked($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->movedStateMessage($lead, 'Booked', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:booked:LeadId:' . $lead->id);
-                    }
-                } elseif ($form->isSnooze()) {
-                    try {
-                        $this->leadStateService->snooze($lead, $newOwner->id, '', $creatorId, $form->message);
-                        $this->addMessage($this->movedStateMessage($lead, 'Snooze', $oldOwnerId, $newOwner->id, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:snooze:LeadId:' . $lead->id);
-                    }
-                } else {
-                    $this->addMessage('Undefined status: ' . $form->statusId . ' for multi update Lead: ' . $lead->id);
-                    \Yii::warning('Undefined status: ' . $form->statusId . ' for multi update Lead: ' . $lead->id, 'lead\MultipleUpdateService:undefinedStatus:LeadId:' . $lead->id);
-                }
-
-            } elseif ($form->userId) {
-
-                if ($lead->isPending()) {
-                    try {
-                        $this->leadStateService->pending($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:pending:LeadId:' . $lead->id);
-                    }
-                } elseif ($lead->isProcessing()) {
-                    try {
-                        $this->leadStateService->processing($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:processing:LeadId:' . $lead->id);
-                    }
-                } elseif ($lead->isReject()) {
-                    try {
-                        $this->leadStateService->reject($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:reject:LeadId:' . $lead->id);
-                    }
-                } elseif ($lead->isFollowUp()) {
-                    try {
-                        $this->leadStateService->followUp($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:followUp:LeadId:' . $lead->id);
-                    }
-                } elseif ($lead->isSold()) {
-                    try {
-                        $this->leadStateService->sold($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:sold:LeadId:' . $lead->id);
-                    }
-                } elseif ($lead->isTrash()) {
-                    try {
-                        $this->leadStateService->trash($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:trash:LeadId:' . $lead->id);
-                    }
-                } elseif ($lead->isBooked()) {
-                    try {
-                        $this->leadStateService->booked($lead, $newOwner->id, $creatorId, $form->message);
-                        $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:booked:LeadId:' . $lead->id);
-                    }
-                } elseif ($lead->isSnooze()) {
-                    try {
-                        $this->leadStateService->snooze($lead, $newOwner->id, '', $creatorId, $form->message);
-                        $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
-                    } catch (\DomainException $e) {
-                        $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
-                        \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:snooze:LeadId:' . $lead->id);
-                    }
-                }
-
+            if ($form->needStatusUpdate()) {
+                $this->changeStatus($lead, $form, $newOwner, $oldOwnerId, $creatorId);
+            } elseif ($form->needOwnerUpdate()) {
+                $this->changeOwner($lead, $form, $newOwner, $creatorId);
             } else {
                 \Yii::warning('Undefined action for multi update ', 'lead\MultipleUpdateService:undefinedStatus:LeadId:' . $lead->id);
             }
 
         }
+
         return $this->report;
+    }
+
+    private function changeOwner(Lead $lead, MultipleUpdateForm $form, NewOwner $newOwner, $creatorId): void
+    {
+        if ($lead->isPending()) {
+            try {
+                $this->leadStateService->pending($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:pending:LeadId:' . $lead->id);
+            }
+        } elseif ($lead->isProcessing()) {
+            try {
+                $this->leadStateService->processing($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:processing:LeadId:' . $lead->id);
+            }
+        } elseif ($lead->isReject()) {
+            try {
+                $this->leadStateService->reject($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:reject:LeadId:' . $lead->id);
+            }
+        } elseif ($lead->isFollowUp()) {
+            try {
+                $this->leadStateService->followUp($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:followUp:LeadId:' . $lead->id);
+            }
+        } elseif ($lead->isSold()) {
+            try {
+                $this->leadStateService->sold($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:sold:LeadId:' . $lead->id);
+            }
+        } elseif ($lead->isTrash()) {
+            try {
+                $this->leadStateService->trash($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:trash:LeadId:' . $lead->id);
+            }
+        } elseif ($lead->isBooked()) {
+            try {
+                $this->leadStateService->booked($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:booked:LeadId:' . $lead->id);
+            }
+        } elseif ($lead->isSnooze()) {
+            try {
+                $this->leadStateService->snooze($lead, $newOwner->id, '', $creatorId, $form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:snooze:LeadId:' . $lead->id);
+            }
+        }
+    }
+
+    private function changeStatus(lead $lead, MultipleUpdateForm $form, NewOwner $newOwner, $oldOwnerId, $creatorId): void
+    {
+        if ($form->isPending()) {
+            try {
+                $this->leadStateService->pending($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Pending', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:pending:LeadId:' . $lead->id);
+            }
+        } elseif ($form->isProcessing()) {
+            try {
+                $this->leadStateService->processing($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Processing', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:processing:LeadId:' . $lead->id);
+            }
+        } elseif ($form->isReject()) {
+            try {
+                $this->leadStateService->reject($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Reject', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:reject:LeadId:' . $lead->id);
+            }
+        } elseif ($form->isFollowUp()) {
+            try {
+                $this->leadStateService->followUp($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Follow Up', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:followUp:LeadId:' . $lead->id);
+            }
+        } elseif ($form->isSold()) {
+            try {
+                $this->leadStateService->sold($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Sold', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:sold:LeadId:' . $lead->id);
+            }
+        } elseif ($form->isTrash()) {
+            try {
+                $this->leadStateService->trash($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Trash', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:trash:LeadId:' . $lead->id);
+            }
+        } elseif ($form->isBooked()) {
+            try {
+                $this->leadStateService->booked($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Booked', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:booked:LeadId:' . $lead->id);
+            }
+        } elseif ($form->isSnooze()) {
+            try {
+                $this->leadStateService->snooze($lead, $newOwner->id, '', $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Snooze', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:snooze:LeadId:' . $lead->id);
+            }
+        } else {
+            $this->addMessage('Undefined status: ' . $form->statusId . ' for multi update Lead: ' . $lead->id);
+            \Yii::warning('Undefined status: ' . $form->statusId . ' for multi update Lead: ' . $lead->id, 'lead\MultipleUpdateService:changeStatus:undefinedStatus:LeadId:' . $lead->id);
+        }
     }
 
     public function formatReport(array $reports): string
@@ -267,9 +274,9 @@ class MultipleUpdateService
     private function changeOwnerMessage(Lead $lead, $newOwnerUserName): string
     {
         if (!$newOwnerUserName) {
-            return  '<span style="color: #28a048">Lead: ' . $lead->id . ' removed owner </span>';
+            return '<span style="color: #28a048">Lead: ' . $lead->id . ' removed owner </span>';
         }
-        return  '<span style="color: #28a048">Lead: ' . $lead->id . ' changed owner to ' . $newOwnerUserName . '</span>';
+        return '<span style="color: #28a048">Lead: ' . $lead->id . ' changed owner to ' . $newOwnerUserName . '</span>';
     }
 
     /**
