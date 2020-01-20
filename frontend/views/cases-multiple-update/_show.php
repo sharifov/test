@@ -12,4 +12,6 @@ echo \frontend\widgets\multipleUpdate\cases\MultipleUpdateWidget::widget([
     'modalId' => $modalId,
     'ids' => $ids,
     'pjaxId' => $pjaxId,
+    'summaryIdentifier' => '.multiple-update-summary .card-body',
+    'script' => "$('.multiple-update-summary').slideDown();",
 ]);

@@ -5,18 +5,17 @@ namespace frontend\widgets\multipleUpdate\cases;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\services\cases\CasesManageService;
-use yii\bootstrap4\Html;
 
 /**
  * Class MultipleUpdateService
  *
  * @property CasesManageService $service
- * @property array $report
+ * @property array $messages
  */
 class MultipleUpdateService
 {
     private $service;
-    private $report = [];
+    private $messages = [];
 
     public function __construct(CasesManageService $service)
     {
@@ -27,7 +26,7 @@ class MultipleUpdateService
     {
         foreach ($form->ids as $id) {
             if (!$case = Cases::findOne($id)) {
-                $this->addMessage('Case: ' . $id . ' not found');
+                $this->addErrorMessage('ID ' . $id . ' not found');
                 continue;
             }
             if ($form->isChangeStatus()) {
@@ -39,16 +38,16 @@ class MultipleUpdateService
                 continue;
             }
         }
-        return $this->report;
+        return $this->messages;
     }
 
     private function processing(MultipleUpdateForm $form, Cases $case, int $creatorId): void
     {
         try {
             $this->service->processing($case, $form->userId, $creatorId);
-            $this->addMessage($this->movedProcessingMessage($case));
+            $this->addSuccessMessage($this->movedProcessingMessage($case));
         } catch (\DomainException $e) {
-            $this->addMessage('Case: ' . $case->cs_id . ' ' . $e->getMessage());
+            $this->addErrorMessage('ID ' . $case->cs_id . ' ' . $e->getMessage());
         }
     }
 
@@ -57,54 +56,64 @@ class MultipleUpdateService
         try {
             if ($form->isPending()) {
                 $this->service->pending($case, $creatorId, $form->message);
-                $this->addMessage($this->movedStatusMessage($case));
+                $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
             if ($form->isFollowUp()) {
                 $this->service->followUp($case, $creatorId, $form->message);
-                $this->addMessage($this->movedStatusMessage($case));
+                $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
             if ($form->isSolved()) {
                 $this->service->solved($case, $creatorId, $form->message);
-                $this->addMessage($this->movedStatusMessage($case));
+                $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
             if ($form->isTrash()) {
                 $this->service->trash($case, $creatorId, $form->message);
-                $this->addMessage($this->movedStatusMessage($case));
+                $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
         } catch (\DomainException $e) {
-            $this->addMessage('Case: ' . $case->cs_id . ' ' . $e->getMessage());
+            $this->addErrorMessage('ID ' . $case->cs_id . ' ' . $e->getMessage());
         }
     }
 
     private function movedStatusMessage(Cases $case): string
     {
-        return 'Case: ' . $case->cs_id .  ' moved to ' . CasesStatus::getName($case->cs_status);
+        return 'ID ' . $case->cs_id .  ' moved to ' . CasesStatus::getName($case->cs_status);
     }
 
     private function movedProcessingMessage(Cases $case): string
     {
-        return 'Case: ' . $case->cs_id .  ' moved to ' . CasesStatus::getName($case->cs_status) . ' with owner: ' . $case->owner->username;
+        return 'ID ' . $case->cs_id .  ' moved to ' . CasesStatus::getName($case->cs_status) . ' with owner: ' . $case->owner->username;
     }
 
-    public function formatReport(array $reports): string
+    public function formatMessages(Message ...$messages): string
     {
-        if (!$reports) {
+        if (!$messages) {
             return '';
         }
 
-        $out = '<div class="card" style="margin-bottom: 10px" ><div class="card-body"><ul>';
-        foreach ($reports as $report) {
-            $out .= Html::tag('li', Html::tag('span', $report, ['style' => 'color: #28a048']));
+        $out = '<ul>';
+        foreach ($messages as $message) {
+            $out .= '<li>' . $message->format() . '</li>';
         }
-        return $out . '</ul></div></div>';
+        return $out . '</ul>';
     }
 
-    private function addMessage(string $message): void
+    private function addMessage(Message $message): void
     {
-        $this->report[] = $message;
+        $this->messages[] = $message;
+    }
+
+    private function addSuccessMessage(string $message): void
+    {
+        $this->addMessage(new SuccessMessage($message));
+    }
+
+    private function addErrorMessage(string $message): void
+    {
+        $this->addMessage(new ErrorMessage($message));
     }
 }

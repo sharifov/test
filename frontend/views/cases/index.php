@@ -59,7 +59,23 @@ if ($user->isAdmin()) {
         $gridId = 'cases-grid-id';
     ?>
 
-    <div class="multiple-update-summary"></div>
+    <div class="card multiple-update-summary" style="margin-bottom: 10px; display: none">
+        <div class="card-header">
+            <span class="pull-right clickable close-icon"><i class="fa fa-times"></i></span>
+            Processing result log:
+        </div>
+        <div class="card-body"></div>
+    </div>
+
+    <?php
+$js = <<<JS
+$('.close-icon').on('click', function(){    
+    $('.multiple-update-summary').slideUp();
+})
+JS;
+$this->registerJs($js);
+
+    ?>
 
     <?php if ($user->isAdmin() || $user->isExSuper() || $user->isSupSuper()): ?>
         <?= MultipleUpdateButtonWidget::widget([

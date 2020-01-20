@@ -73,11 +73,11 @@ class CasesMultipleUpdateController extends FController
         $user = Yii::$app->user->identity;
         $form = new MultipleUpdateForm();
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            $report = $this->service->update($form, $user->id);
+            $messages = $this->service->update($form, $user->id);
             return $this->asJson([
                 'success' => true,
-                'message' => count($report) . ' rows affected.',
-                'text' => $this->service->formatReport($report),
+                'message' => count($messages) . ' rows affected.',
+                'text' => $this->service->formatMessages(...$messages),
             ]);
         }
         throw new BadRequestHttpException();
