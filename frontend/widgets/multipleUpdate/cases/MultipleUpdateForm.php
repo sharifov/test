@@ -71,7 +71,11 @@ class MultipleUpdateForm extends Model
 
     public function statusList(): array
     {
-        return CasesStatus::STATUS_LIST;
+        $statusList = CasesStatus::STATUS_LIST;
+        if (isset($statusList[CasesStatus::STATUS_PENDING])) {
+            unset($statusList[CasesStatus::STATUS_PENDING]);
+        }
+        return $statusList;
     }
 
     public function reasonValidate(): void
