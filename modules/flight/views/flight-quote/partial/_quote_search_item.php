@@ -230,7 +230,7 @@ $bagFilter = $result['bagFilter'];
     <div class="quote__details" id="result_<?= $resultKey?>" style="display:none;">
         <div class="text-right">
 			<?= Html::button('<i class="fa fa-check"></i>&nbsp; <span>Select</span>', [
-				'class' => 'btn btn-success create_quote__btn',
+				'class' => 'btn btn-success flight_create_quote__btn',
 				'data-title' => implode(', ',$tripsInfo),
 				'data-key' => $result['key'],
 				'data-gds' => $result['gds'],
@@ -365,7 +365,7 @@ $bagFilter = $result['bagFilter'];
 				'data-target' => '#result_'.$resultKey,
 			]) ?>
 			<?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
-				'class' => 'btn btn-success create_quote__btn',
+				'class' => 'btn btn-success flight_create_quote__btn',
 				'data-title' => implode(', ',$tripsInfo),
 				'data-key' => $result['key'],
 				'data-gds' => $result['gds'],

@@ -6,6 +6,8 @@ use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
+use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use sales\repositories\NotFoundException;
 use Yii;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\search\FlightQuoteSearch;
@@ -19,6 +21,7 @@ use yii\filters\VerbFilter;
  *
  * @property FlightRepository $flightRepository
  * @property FlightQuoteSearchService $quoteSearchService
+ * @property FlightQuoteManageService $flightQuoteManageService
  */
 class FlightQuoteController extends FController
 {
@@ -30,6 +33,10 @@ class FlightQuoteController extends FController
 	 * @var FlightQuoteSearchService
 	 */
 	private $quoteSearchService;
+	/**
+	 * @var FlightQuoteManageService
+	 */
+	private $flightQuoteManageService;
 
 	/**
 	 * FlightQuoteController constructor.
@@ -37,13 +44,15 @@ class FlightQuoteController extends FController
 	 * @param $module
 	 * @param FlightRepository $flightRepository
 	 * @param FlightQuoteSearchService $quoteSearchService
+	 * @param FlightQuoteManageService $flightQuoteManageService
 	 * @param array $config
 	 */
-	public function __construct($id, $module, FlightRepository $flightRepository, FlightQuoteSearchService $quoteSearchService, $config = [])
+	public function __construct($id, $module, FlightRepository $flightRepository, FlightQuoteSearchService $quoteSearchService, FlightQuoteManageService $flightQuoteManageService, $config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->flightRepository = $flightRepository;
 		$this->quoteSearchService = $quoteSearchService;
+		$this->flightQuoteManageService = $flightQuoteManageService;
 	}
 
 	/**
@@ -158,13 +167,12 @@ class FlightQuoteController extends FController
 		try {
 			$flight = $this->flightRepository->find($flightId);
 
-			$keyCache = $flight->generateQuoteSearchKeyCache();
-			$quotes = \Yii::$app->cache->get($keyCache);
+			$quotes = \Yii::$app->cache->get($flight->fl_request_hash_key);
 
 			if ($quotes === false) {
 				$quotes = $this->quoteSearchService->search($flight, $gds);
 				if ($quotes['results']) {
-					\Yii::$app->cache->set($keyCache, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
+					\Yii::$app->cache->set($flight->fl_request_hash_key, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
 				}
 			}
 		} catch (NotFoundHttpException | \DomainException $e) {
@@ -204,6 +212,50 @@ class FlightQuoteController extends FController
 		$viewData['errorMessage'] = $errorMessage ?? '';
 
 		return $this->renderAjax('partial/_quote_search', $viewData);
+	}
+
+	/**
+	 * @return \yii\web\Response
+	 */
+	public function actionAjaxAddQuote(): \yii\web\Response
+	{
+		$key = Yii::$app->request->post('key');
+		$flightId = Yii::$app->request->post('flightId');
+
+		$result = [
+			'error' => '',
+			'status' => false
+		];
+
+		try {
+			$flight = $this->flightRepository->find($flightId);
+
+			if (!$key) {
+				throw new \DomainException('Key is empty!');
+			}
+
+			$quotes = \Yii::$app->cache->get($flight->fl_request_hash_key);
+
+			if ($quotes === false && empty($quotes['results'])) {
+				throw new \DomainException('Not found Quote from Search result from Cache. Please update search request!');
+			}
+
+			$selectedQuote = array_filter($quotes['results'], static function ($item) use ($key) {
+				return $item['key'] === $key;
+			})[0] ?? [];
+
+			if (!$selectedQuote) {
+				throw new \DomainException('Not found Quote from Search result from Cache. Please update search request!');
+			}
+
+			$this->flightQuoteManageService->create($flight, $selectedQuote);
+
+		} catch (\DomainException | NotFoundException $e) {
+			Yii::error($e->getMessage(), 'Flight::FlightQuoteController::actionAjaxAddQuote::DomainException|NotFoundException');
+			$result['error'] = $e->getMessage();
+		}
+
+		return $this->asJson($result);
 	}
 
     /**

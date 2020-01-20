@@ -264,18 +264,6 @@ class Flight extends \yii\db\ActiveRecord
 	}
 
 	/**
-	 * @return string
-	 */
-	public function generateQuoteSearchKeyCache(): string
-	{
-		$key = 'fl_quote_search_' . $this->fl_adults . '-' . $this->fl_children . '-' . $this->fl_children;
-		foreach ($this->flightSegments as $segment) {
-			$key .= '-' . $segment->fs_origin_iata . '-' . $segment->fs_destination_iata . '-' . strtotime($segment->fs_departure_date);
-		}
-		return md5($key);
-	}
-
-	/**
 	 * @return array
 	 */
 	public static function getCabinClassRealList(): array

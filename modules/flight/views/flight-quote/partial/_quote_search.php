@@ -4,6 +4,7 @@ use modules\flight\models\Flight;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use yii\bootstrap4\Alert;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 
@@ -89,6 +90,7 @@ JS;
 
 
 <?php
+$urlCreateFlightQuoteFromSearch = Url::to(['/flight/flight-quote/ajax-add-quote']);
 $js = <<<JS
     $(document).on('click', '.js-filter .dropdown-menu', function(e) {
         if (!$(e.target).hasClass("js-dropdown-close")) {
@@ -107,11 +109,59 @@ $js = <<<JS
         $('#pjax-quote-filter #flight-quote-search-submit i').removeClass('fa-spin fa-spinner disabled').addClass('fa-filter').removeAttr('disabled');
         $('.search-results__wrapper').removeClass('loading');
     });
+    
+    $('.flight_create_quote__btn', document).off().on('click', function (e) {
+        e.preventDefault();
+        var key = $(this).data('key');
+        var gds = $(this).data('gds');
+        var searchResId = $(this).data('result');
+        $('#preloader').removeClass('hidden');
+        $.ajax({
+            url: '$urlCreateFlightQuoteFromSearch',
+            type: 'post',
+            data: {'key': key, 'gds': gds, flightId: '$flightId'},
+            success: function (data) {
+                var error = '';
+                
+                $('#preloader').addClass('hidden');
+                if(data.status == true){
+                    //$('#search-results__modal').modal('hide');
+                    $('#flight-details__modal').modal('hide');
+                    $('#'+searchResId).addClass('quote--selected');
 
-    // $("#pjax-quote-filter").on('pjax:timeout', function(event) {
-    // $('#pjax-quote-filter .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-filter');
-    // event.preventDefault()
-    // });
+                    $.pjax.reload({container: '#quotes_list', async: false});
+                    $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
+                    
+                    new PNotify({
+                        title: "Create quote - search",
+                        type: "success",
+                        text: 'Added new quote id: ' + searchResId,
+                        hide: true
+                    });
+                    
+                } else {
+                   
+                     if(data.error) {
+                        error = data.error;    
+                    } else {
+                        error = 'Some errors was happened during create quote. Please try again later';
+                    }
+                    
+                    new PNotify({
+                        title: "Error: Create quote - search",
+                        type: "error",
+                        text: error,
+                        hide: true
+                    });
+                    
+                   
+                }
+            },
+            error: function (error) {
+                console.log('Error: ' + error);
+            }
+        });
+    });
 JS;
 $this->registerJs($js);
 ?>

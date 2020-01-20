@@ -338,4 +338,12 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 	{
 		return self::getSortAttributesNameList()[$sortId] ?? null;
 	}
+
+	/**
+	 *
+	 */
+	public static function create()
+	{
+
+	}
 }
