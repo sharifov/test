@@ -63,7 +63,7 @@ $user = Yii::$app->user->identity;
                 <table class="table table-bordered">
                     <tr>
                         <th>My Username:</th>
-                        <td><i class="fa fa-user"></i> <?= $user->username?> (<?=$user->id?>)</td>
+                        <td><i class="fa fa-user"></i> <?= Html::encode($user->username)?> (<?=$user->id?>)</td>
                     </tr>
                     <tr>
                         <th>My Role:</th>
@@ -319,11 +319,15 @@ $user = Yii::$app->user->identity;
                                     ['Project', 'Count'],
                                     <?php foreach($dataSources as $k => $item):
 
-                                        $user = \common\models\ApiUser::findOne($item['al_user_id']);
-                                        if(!$user) continue;
+                                        $apiUser = \common\models\ApiUser::findOne($item['al_user_id']);
+                                        if (!$apiUser) {
+                                            continue;
+                                        }
 
-                                        $project = $user->auProject;
-                                        if(!$project) continue;
+                                        $project = $apiUser->auProject;
+                                        if (!$project) {
+                                            continue;
+                                        }
 
                                     ?>
                                     ['<?php echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],

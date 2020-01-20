@@ -61,7 +61,7 @@ $user = Yii::$app->user->identity;
             <table class="table table-bordered">
                 <tr>
                     <th>My Username:</th>
-                    <td><i class="fa fa-user"></i> <?= $user->username?> (<?=$user->id?>)</td>
+                    <td><i class="fa fa-user"></i> <?= Html::encode($user->username)?> (<?=$user->id?>)</td>
                 </tr>
                 <tr>
                     <th>My Role:</th>
