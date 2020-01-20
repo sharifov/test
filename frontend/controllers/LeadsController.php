@@ -7,13 +7,10 @@ use common\models\Reason;
 use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
-use frontend\models\LeadMultipleForm;
 use frontend\widgets;
-use sales\services\lead\LeadMultiUpdateService;
 use Yii;
 use common\models\Lead;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -143,26 +140,10 @@ class LeadsController extends FController
 
         }*/
 
-        $multipleForm = new LeadMultipleForm();
-
-        $report = [];
-
-        if ($user->isAdmin() || $user->isSupervision()) {
-            if ($multipleForm->load(Yii::$app->request->post())) {
-                if ($multipleForm->validate()) {
-                    /** @var LeadMultiUpdateService $service */
-                    $service = Yii::createObject(LeadMultiUpdateService::class);
-                    $report = $service->update($multipleForm, $user);
-                }
-            }
-        }
-
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'multipleForm' => $multipleForm,
             'isAgent' => $isAgent,
-            'report' => $report
         ]);
     }
 
