@@ -1,6 +1,7 @@
 <?php
 
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
+use sales\auth\Auth;
 use yii\helpers\Url;
 use common\models\Email;
 use common\models\Sms;
@@ -21,17 +22,14 @@ use common\models\Call;
 /* @var $this View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $multipleForm frontend\models\LeadMultipleForm */
 /* @var $isAgent bool */
-/** @var array $report */
 
 $this->title = 'Search Leads';
 $this->params['breadcrumbs'][] = $this->title;
 
 $statusList = Lead::STATUS_LIST;
 
-/** @var Employee $user */
-$user = Yii::$app->user->identity;
+$user = Auth::user();
 
 if ($user->isAdmin()) {
 
@@ -60,16 +58,6 @@ $gridId = 'leads-grid-id';
 
     <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
-    <?php if ($report): ?>
-        <div class="error-summary">
-            <ul>
-            <?php foreach ($report as $item): ?>
-                <li><?= $item ?></li>
-            <?php endforeach;?>
-            </ul>
-        </div>
-    <?php endif;?>
-
     <?php
 
     if ($isAgent) {
@@ -85,18 +73,12 @@ $gridId = 'leads-grid-id';
     ]);
     ?>
 
-    <?php if ($user->isAdmin() || $user->isSupervision()) : ?>
-        <p>
-            <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
-            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle' => "modal", 'data-target' => "#modalUpdate"]) ?>
-        </p>
-    <?php endif; ?>
-
-
     <?= MultipleUpdateButtonWidget::widget([
         'modalId' => 'modal-df',
         'showUrl' => Url::to(['/lead-multiple-update/show']),
         'gridId' => $gridId,
+        'buttonClass' => 'multiple-update-btn',
+        'buttonText' => 'Multiple update',
     ]) ?>
 
     <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple'] ?>
@@ -112,10 +94,10 @@ $gridId = 'leads-grid-id';
             'pageSummary' => true,
             'rowSelectedClass' => GridView::TYPE_INFO,
             'checkboxOptions' => function (Lead $model) {
-                $can = Yii::$app->user->can('leadSearchMultipleUpdate', ['lead' => $model]);
+                $can = Auth::can('leadSearchMultipleUpdate', ['lead' => $model]);
                 return ['style' => 'display:' . ($can ? 'visible' : 'none')];
             },
-            'visible' => Yii::$app->user->can('leadSearchMultipleSelect')
+            'visible' => Auth::can('leadSearchMultipleSelect')
         ],
 
         /*[
@@ -707,120 +689,25 @@ $gridId = 'leads-grid-id';
 
     ?>
 
-
-    <?php if ($user->isAdmin() || $user->isSupervision()) : ?>
-        <p>
-            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle' => 'modal', 'data-target' => '#modalUpdate']) ?>
-        </p>
-
-        <?php
-
-        Modal::begin([
-            'title' => 'Multiple update selected Leads',
-            // 'toggleButton' => ['label' => 'click me'],
-            'id' => 'modalUpdate'
-            // 'size' => 'modal-lg',
-        ]);
-        ?>
-
-        <?= $form->errorSummary($multipleForm) ?>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card card-default">
-                    <div class="card-body">
-
-                        <div class="redial_queue-wrapper">
-
-                            <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($user), ['prompt' => '-', 'id' => 'status_id']) ?>
-
-                            <div id="reason_id_div" style="display: none">
-                                <?= $form->field($multipleForm, 'reason_id')->dropDownList([], ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
-
-                                <div id="reason_description_div"
-                                     style="display: none">
-                                    <?= $form->field($multipleForm, 'reason_description')->textarea(['rows' => '3']) ?>
-                                </div>
-                            </div>
-
-                            <?php
-                                if ($employees = $lists->getEmployees(true)) {
-                                    $employees[-1] = '--- REMOVE EMPLOYEE ---';
-                                    echo $form->field($multipleForm, 'employee_id')->dropDownList($employees, ['prompt' => '-']);
-                                }
-                            ?>
-
-                        </div>
-
-                        <?php if ($user->isAdmin()): ?>
-                            <?= $form->field($multipleForm, 'redial_queue')->dropDownList($multipleForm::REDIAL_QUEUE_LIST, [
-                                'prompt' => '',
-                                'onChange' => 'let wrapper = $(this).val(); if (wrapper == 1 || wrapper == 2) $(".redial_queue-wrapper").hide(); else $(".redial_queue-wrapper").show();'
-                            ]) ?>
-                        <?php endif; ?>
-
-                        <div class="form-group text-right">
-                            <?= Html::submitButton('<i class="fa fa-check-square"></i> Update selected Leads', ['class' => 'btn btn-info']) ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <?php Modal::end(); ?>
-    <?php endif; ?>
+    <br>
+    <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info multiple-update-btn']) ?>
 
     <?php ActiveForm::end(); ?>
 
-
-
     <?php Pjax::end(); ?>
 
-
     <?php
-    $ajaxUrl = Url::to([
-        'leads/ajax-reason-list'
-    ]);
-    $js = <<<JS
 
-    $(document).on('pjax:start', function() {
-        
-        $("#modalUpdate .close").click();
-    });
+$js = <<<JS
 
     $(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
     });
 
-    $(document).on('change', '#reason_id', function() {
-        if( $(this).val() == '0' ) {
-            $('#reason_description_div').show();
-        }  else {
-            $('#reason_description_div').hide();
-        }
-    });
-
-     $(document).on('change', '#status_id', function() {
-         var status_id = $(this).val();
-        if( status_id > 0 ) {
-            $('#reason_id_div').show();
-
-           $.post("$ajaxUrl",{status_id: status_id}, function( data ) {
-                $("#reason_id").html( data ).trigger('change');
-           })
-
-        }  else {
-            $('#reason_id_div').hide();
-        }
-    });
-
-
    $('[data-toggle="tooltip"]').tooltip();
-
 
 JS;
     $this->registerJs($js, View::POS_READY);
     ?>
-
 
 </div>

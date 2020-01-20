@@ -143,11 +143,12 @@ class MultipleUpdateForm extends Model
             return false;
         }
 
-        return in_array($this->statusId, [
-            Lead::STATUS_TRASH,
-            Lead::STATUS_REJECT,
-            Lead::STATUS_FOLLOW_UP
-        ], true);
+        return false;
+//        return in_array($this->statusId, [
+//            Lead::STATUS_TRASH,
+//            Lead::STATUS_REJECT,
+//            Lead::STATUS_FOLLOW_UP
+//        ], true);
     }
 
     public function reasonList(): array
