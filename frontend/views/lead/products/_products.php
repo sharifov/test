@@ -23,7 +23,7 @@ use yii\helpers\Html;
     $items = [];
 ?>
 
-<?php \yii\widgets\Pjax::begin(['id' => 'product-accordion', 'enablePushState' => false, 'timeout' => 2000])?>
+<?php \yii\widgets\Pjax::begin(['id' => 'product-accordion', 'enablePushState' => false, 'enableReplaceState' => false])?>
 
 <div class="x_panel">
         <div class="x_title">
@@ -53,7 +53,7 @@ pjaxOffFormSubmit('#pj-itinerary');
 JS;
 			$this->registerJs($js);
 			?>
-            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 2000])?>
+            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'enableReplaceState' => false])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,
             ]) ?>

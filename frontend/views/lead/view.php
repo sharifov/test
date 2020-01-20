@@ -67,7 +67,7 @@ $lead = $leadForm->getLead();
         </div>
 
         <div class="col-md-6">
-        <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'timeout' => 2000]) ?>
+        <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
 			<?= $this->render('products/_products', [
                 'lead' => $lead,
