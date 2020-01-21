@@ -162,18 +162,54 @@ class AgentActivitySearch extends Call
             $query->andWhere(['IN', 'e.id', $subQuery]);
         }
 
-        //$totalCount = 20;
-
         // grid filtering conditions
         $query->andFilterWhere(['like', 'username', $this->username]);
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
 
+        $qCountEmployees = Employee::find();
+        if ($this->username) {
+            $qCountEmployees->andFilterWhere(['like', 'username', $this->username]);
+
+            if ($user->isSupervision()) {
+                $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
+                    ->leftJoin('auth_assignment', 'auth_assignment.user_id = ugs_user_id')
+                    ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT])
+                    ->orWhere(['auth_assignment.user_id' => $user->id]);
+                $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
+            }
+
+            if (!empty($this->user_groups)){
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
+                $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
+            }
+
+            $totalEmployees = $qCountEmployees->count();
+        } else {
+
+            if ($user->isSupervision()) {
+                $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
+                    ->leftJoin('auth_assignment', 'auth_assignment.user_id = ugs_user_id')
+                    ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT])
+                    ->orWhere(['auth_assignment.user_id' => $user->id]);
+                $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
+            }
+
+            if (!empty($this->user_groups)){
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
+                $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
+            }
+
+            $totalEmployees = $qCountEmployees->count();
+        }
+
         $paramsData = [
             'sql' => $sql,
             //'params' => [':publish' => 1],
-            'totalCount' => Employee::find()->count(),
+            'totalCount' => $totalEmployees,
             'sort' => [
                 'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
