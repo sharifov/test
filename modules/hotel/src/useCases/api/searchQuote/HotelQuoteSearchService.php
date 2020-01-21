@@ -46,7 +46,7 @@ class HotelQuoteSearchService
 			$params['minRate'] = $hotel->ph_min_price_rate;
 		}
 
-		$keyCache = 'hotel_' . $hotel->ph_id . '_' . implode('_', $params);
+		$keyCache = $hotel->ph_request_hash_key;
 		$result = \Yii::$app->cacheFile->get($keyCache);
 
 		if ($result === false) {

@@ -227,7 +227,7 @@ class Hotel extends ActiveRecord
 
 		// MaxRatesPerRoom
 
-		$keyCache = 'hotel_' . $this->ph_request_hash_key;
+		$keyCache = $this->ph_request_hash_key;
 		$result = Yii::$app->cache->get($keyCache);
 
 		if ($result === false) {
