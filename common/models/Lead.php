@@ -4286,7 +4286,12 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = Quote::find()->where(['lead_id' => $this->id]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['type_id' => SORT_ASC]],
+            'sort' => [
+                'defaultOrder' => [
+                    'type_id' => SORT_ASC,
+                    'id' => SORT_DESC,
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
