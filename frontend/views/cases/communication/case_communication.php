@@ -319,28 +319,30 @@ $c_type_id = $comForm->c_type_id;
                                                 }
                                             }
 
-                                            if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
+                                            if ($agentParams->upp_tw_phone_number) {
+                                                if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
 
-                                                if ($model->isDepartmentSupport()) {
-                                                    $typeList[$tk] = $itemName;
-                                                } else if ($agentParams->upp_tw_phone_number) {
-                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
-                                                }
-                                            }
-
-
-                                            if($call_type_id) {
-
-                                                $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-
-                                                if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-                                                    $callTypeName .= ' [empty account]';
+                                                    if ($model->isDepartmentSupport()) {
+                                                        $typeList[$tk] = $itemName;
+                                                    } else {
+                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
+                                                    }
                                                 }
 
-                                                if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
-                                                    //if ($userModel->userProfile->up_sip) {
+
+                                                if($call_type_id) {
+
+                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+
+                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+                                                        $callTypeName .= ' [empty account]';
+                                                    }
+
+                                                    if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
+                                                        //if ($userModel->userProfile->up_sip) {
                                                         $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
-                                                    //}
+                                                        //}
+                                                    }
                                                 }
                                             }
                                         }

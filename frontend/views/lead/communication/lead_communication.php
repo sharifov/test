@@ -326,28 +326,29 @@ $c_type_id = $comForm->c_type_id;
                                                 }
                                             }
 
-                                            if ($tk == CommunicationForm::TYPE_SMS) {
+                                            if ($agentParams->upp_tw_phone_number) {
 
-                                                if ($agentParams->upp_tw_phone_number) {
+                                                if ($tk == CommunicationForm::TYPE_SMS) {
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
                                                 }
-                                            }
 
 
-                                            if($call_type_id) {
+                                                if($call_type_id) {
 
-                                                $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
 
-                                                if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-                                                    $callTypeName .= ' [empty account]';
-                                                }
+                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+                                                        $callTypeName .= ' [empty account]';
+                                                    }
 
-                                                if ($tk == CommunicationForm::TYPE_VOICE) {
-                                                    //if ($userModel->userProfile->up_sip) {
+                                                    if ($tk == CommunicationForm::TYPE_VOICE) {
+                                                        //if ($userModel->userProfile->up_sip) {
                                                         $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
-                                                    //}
+                                                        //}
+                                                    }
                                                 }
                                             }
+
                                         }
                                     }
 
