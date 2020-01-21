@@ -780,7 +780,7 @@ class Call extends \yii\db\ActiveRecord
                     $lead = $this->cLead;
 
                     if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->isPending()) {
-                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
+                        //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
                         try {
 
                             $lead->answered();
