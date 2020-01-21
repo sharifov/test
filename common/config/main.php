@@ -37,8 +37,11 @@ return [
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
+            'keyPrefix' => 'FileCache'
         ],
-
+        'cacheFile' => [
+            'class' => 'yii\caching\FileCache',
+        ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',

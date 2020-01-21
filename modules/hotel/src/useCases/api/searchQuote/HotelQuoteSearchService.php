@@ -47,14 +47,14 @@ class HotelQuoteSearchService
 		}
 
 		$keyCache = 'hotel_' . $hotel->ph_id . '_' . implode('_', $params);
-		$result = \Yii::$app->cache->get($keyCache);
+		$result = \Yii::$app->cacheFile->get($keyCache);
 
 		if ($result === false) {
 			$response = $this->apiService->search($hotel->ph_check_in_date, $hotel->ph_check_out_date, $hotel->ph_destination_code, $rooms, $params);
 
 			if (isset($response['data']['hotels'])) {
 				$result = $response['data'];
-				\Yii::$app->cache->set($keyCache, $result, 100);
+				\Yii::$app->cacheFile->set($keyCache, $result, 100);
 			} else {
 				$result = [];
 				\Yii::error('Not found response[data][hotels]', 'useCases:api:searchQuote:HotelQuoteSearchService:search');
