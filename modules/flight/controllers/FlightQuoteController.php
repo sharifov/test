@@ -167,12 +167,12 @@ class FlightQuoteController extends FController
 		try {
 			$flight = $this->flightRepository->find($flightId);
 
-			$quotes = \Yii::$app->cache->get($flight->fl_request_hash_key);
+			$quotes = \Yii::$app->cacheFile->get($flight->fl_request_hash_key);
 
 			if ($quotes === false) {
 				$quotes = $this->quoteSearchService->search($flight, $gds);
 				if ($quotes['results']) {
-					\Yii::$app->cache->set($flight->fl_request_hash_key, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
+					\Yii::$app->cacheFile->set($flight->fl_request_hash_key, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
 				}
 			}
 		} catch (NotFoundHttpException | \DomainException $e) {
