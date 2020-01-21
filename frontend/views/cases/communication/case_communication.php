@@ -319,12 +319,12 @@ $c_type_id = $comForm->c_type_id;
                                                 }
                                             }
 
-                                            if ($agentParams->upp_tw_phone_number) {
+                                            //if ($agentParams->upp_tw_phone_number) {
                                                 if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
 
                                                     if ($model->isDepartmentSupport()) {
                                                         $typeList[$tk] = $itemName;
-                                                    } else {
+                                                    } elseif ($agentParams->upp_tw_phone_number){
                                                         $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
                                                     }
                                                 }
@@ -344,7 +344,7 @@ $c_type_id = $comForm->c_type_id;
                                                         //}
                                                     }
                                                 }
-                                            }
+                                            //}
                                         }
                                     }
 
