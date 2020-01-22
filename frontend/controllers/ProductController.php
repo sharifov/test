@@ -7,6 +7,7 @@ use common\models\ProductType;
 use frontend\models\form\ProductForm;
 use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
+use sales\auth\Auth;
 use Yii;
 use common\models\Product;
 use common\models\search\ProductSearch;
@@ -48,7 +49,7 @@ class ProductController extends FController
     public function actionIndex()
     {
         $searchModel = new ProductSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,

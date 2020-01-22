@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use common\models\ProductType;
 use common\models\search\ProductTypeSearch;
@@ -37,7 +38,7 @@ class ProductTypeController extends FController
     public function actionIndex()
     {
         $searchModel = new ProductTypeSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,
