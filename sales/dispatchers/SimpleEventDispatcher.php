@@ -4,6 +4,12 @@ namespace sales\dispatchers;
 
 use yii\di\Container;
 
+/**
+ * Class SimpleEventDispatcher
+ *
+ * @property Container $container
+ * @property array $listeners
+ */
 class SimpleEventDispatcher implements EventDispatcher
 {
     private $container;
