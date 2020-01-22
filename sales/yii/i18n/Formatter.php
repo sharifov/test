@@ -17,7 +17,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \modules\lead\helpers\formatters\lead\Formatter::asLead($lead);
+        return \modules\lead\src\helpers\formatters\lead\Formatter::asLead($lead);
     }
 
     public function asProductType($value): string
@@ -26,7 +26,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \modules\product\helpers\formatters\productType\Formatter::asProductType($value);
+        return \modules\product\src\helpers\formatters\productType\Formatter::asProductType($value);
     }
 
     public function asQuoteType($value): string

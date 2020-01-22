@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\lead\helpers\formatters\lead;
+namespace modules\lead\src\helpers\formatters\lead;
 
 use common\models\Lead;
 use yii\bootstrap4\Html;

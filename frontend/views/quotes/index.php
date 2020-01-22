@@ -1,7 +1,7 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
-use modules\lead\grid\columns\LeadColumn;
+use modules\lead\src\grid\columns\LeadColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\quote\QuoteTypeColumn;
 use sales\yii\grid\UserColumn;

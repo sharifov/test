@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\lead\grid\columns;
+namespace modules\lead\src\grid\columns;
 
 use yii\grid\DataColumn;
 
@@ -11,7 +11,7 @@ use yii\grid\DataColumn;
  *
  *  Ex.
     [
-        'class' => \modules\lead\grid\columns\LeadColumn::class,
+        'class' => \modules\lead\src\grid\columns\LeadColumn::class,
         'attribute' => 'lead_id',
         'relation' => 'lead',
     ],

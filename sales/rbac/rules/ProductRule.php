@@ -2,10 +2,8 @@
 
 namespace sales\rbac\rules;
 
-use common\models\Lead;
 use common\models\Product;
-use modules\flight\models\Flight;
-use sales\repositories\product\ProductRepository;
+use modules\product\src\repositories\ProductRepository;
 use Yii;
 use yii\rbac\Rule;
 

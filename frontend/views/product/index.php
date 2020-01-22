@@ -1,7 +1,7 @@
 <?php
 
-use modules\lead\grid\columns\LeadColumn;
-use modules\product\grid\columns\ProductTypeColumn;
+use modules\lead\src\grid\columns\LeadColumn;
+use modules\product\src\grid\columns\ProductTypeColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\UserColumn;
 use yii\helpers\Html;

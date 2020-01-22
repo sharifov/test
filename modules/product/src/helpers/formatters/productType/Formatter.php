@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\product\helpers\formatters\productType;
+namespace modules\product\src\helpers\formatters\productType;
 
 use common\models\ProductType;
 use yii\bootstrap4\Html;
