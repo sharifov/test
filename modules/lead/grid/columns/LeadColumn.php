@@ -1,9 +1,8 @@
 <?php
 
-namespace sales\yii\grid\lead;
+namespace modules\lead\grid\columns;
 
 use yii\grid\DataColumn;
-use yii\bootstrap4\Html;
 
 /**
  * Class LeadColumn
@@ -12,7 +11,7 @@ use yii\bootstrap4\Html;
  *
  *  Ex.
     [
-        'class' => \sales\yii\grid\lead\LeadColumn::class,
+        'class' => \modules\lead\grid\columns\LeadColumn::class,
         'attribute' => 'lead_id',
         'relation' => 'lead',
     ],
@@ -32,15 +31,8 @@ class LeadColumn extends DataColumn
 
     protected function renderDataCellContent($model, $key, $index): string
     {
-        if ($leadId = $model->{$this->attribute}) {
-
-            return Html::tag('i', '', ['class' => 'fa fa-arrow-right'])
-                . ' '
-                . Html::a(
-                    'lead: ' . $leadId,
-                    ['lead/view', 'gid' => $model->{$this->relation}->gid],
-                    ['target' => '_blank', 'data-pjax' => 0]
-                );
+        if ($model->{$this->attribute}) {
+            return $this->grid->formatter->format($model->{$this->relation}, 'lead');
         }
         return $this->grid->formatter->format(null, $this->format);
     }
