@@ -512,6 +512,36 @@ ORDER BY lf.lead_id, id';
         $this->printInfo($resultInfo, $this->action->id);
     }
 
+    /**
+     * @param int $limit
+     * @param int $offset
+     */
+    public function actionCleanBodyHtml(int $limit = 1000, int $offset = 0): void
+    {
+        $this->printInfo('Start', $this->action->id, Console::FG_GREEN);
+        $timeStart = microtime(true);
+        $processed = $failed = 0;
+
+        foreach ($this->findEmailBodyHtml($limit, $offset) as $email) {
+            try {
+                $email->updateAttributes([
+                    'e_email_body_html' => null
+                ]);
+                $processed++;
+            } catch (\Throwable $e) {
+                $failed++;
+                Yii::error(VarDumper::dumpAsString($e), self::class . ':' . $this->action->id . ':Clean failed' );
+                break;
+            }
+        }
+
+        $resultInfo = 'Processed: ' . $processed . ' Failed: ' . $failed .
+            ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+
+        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
+        $this->printInfo($resultInfo, $this->action->id, Console::FG_GREEN);
+    }
+
 	/**
 	 * @param string $modelPath
 	 * @param int $leadId
@@ -605,6 +635,22 @@ ORDER BY lf.lead_id, id';
         return Email::find()
             ->where(['e_email_body_text' => null])
             ->andWhere(['not', ['e_email_body_html' => null]])
+            ->limit($limit)
+            ->offset($offset)
+            ->orderBy(['e_id' => SORT_ASC])
+            ->all();
+    }
+
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @return array|Email[]
+     */
+    private function findEmailBodyHtml(int $limit, int $offset)
+    {
+        return Email::find()
+            ->where(['not', ['e_email_body_html' => null]])
+            ->andWhere(['not', ['e_email_body_blob' => null]])
             ->limit($limit)
             ->offset($offset)
             ->orderBy(['e_id' => SORT_ASC])

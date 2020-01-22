@@ -191,9 +191,6 @@ class EmailController extends FController
                             $errorJson = @json_decode($mailPreview['error'], true);
                             $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
                             Yii::error($mailPreview['error'], 'EmailController:inbox:mailPreview');
-
-                            //$modelNewEmail->e_email_body_html = ($errorJson['message'] ?? $mailPreview['error']);
-
                         } else {
                             $modelNewEmail->body_html = $mailPreview['data']['email_body_html'];
                         }
@@ -257,7 +254,6 @@ class EmailController extends FController
                 $modelNewEmail->e_email_subject = Email::reSubject($mail->e_email_subject);
 
                 //$modelNewEmail->e_message_id = $modelNewEmail->generateMessageId();
-                // $modelNewEmail->e_email_body_html = '<p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p>';
 
                 $modelNewEmail->body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->getEmailBodyHtml())).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p></body></html>';
 

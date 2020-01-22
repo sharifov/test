@@ -102,30 +102,6 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="clearfix"></div>
 
-
-
-        <?//= $form->field($model, 'e_email_body_html')->textarea(['rows' => 6]) ?>
-
-        <?php
-           /* echo $form->field($model, 'e_email_body_html')->widget(\vova07\imperavi\Widget::class, [
-                'settings' => [
-                    'lang' => 'en',
-                    'minHeight' => 400,
-                    'plugins' => [
-                        'clips',
-                        'fullscreen',
-                    ],
-                    'clips' => [
-                        ['Lorem ipsum...', 'Lorem...'],
-                        ['red', '<span class="label-red">red</span>'],
-                        ['green', '<span class="label-green">green</span>'],
-                        ['blue', '<span class="label-blue">blue</span>'],
-                    ],
-                ],
-            ]);*/
-
-        ?>
-
         <?= $form->field($model, 'body_html')->widget(CKEditor::class, [
             'options' => [
                 'rows' => 6,

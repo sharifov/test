@@ -52,7 +52,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'e_email_cc:email',
                 'e_email_bc:email',
                 'e_email_subject:email',
-                //'e_email_body_html:ntext',
                 //'e_email_body_text:ntext',
                 'e_attach',
                 'e_email_data:ntext',
