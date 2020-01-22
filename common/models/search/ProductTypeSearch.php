@@ -2,7 +2,8 @@
 
 namespace common\models\search;
 
-use yii\base\Model;
+use common\models\Employee;
+use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use common\models\ProductType;
 
@@ -11,35 +12,20 @@ use common\models\ProductType;
  */
 class ProductTypeSearch extends ProductType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+
+    public function rules(): array
     {
         return [
             [['pt_id', 'pt_enabled'], 'integer'],
             [['pt_service_fee_percent'], 'number'],
-            [['pt_key', 'pt_name', 'pt_description', 'pt_settings', 'pt_created_dt', 'pt_updated_dt'], 'safe'],
+            [['pt_key', 'pt_name', 'pt_description', 'pt_settings'], 'safe'],
+
+            ['pt_created_dt', 'date', 'format' => 'php:Y-m-d'],
+            ['pt_updated_dt', 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
-    }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = ProductType::find();
 
@@ -66,9 +52,15 @@ class ProductTypeSearch extends ProductType
             'pt_id' => $this->pt_id,
             'pt_enabled' => $this->pt_enabled,
             'pt_service_fee_percent' => $this->pt_service_fee_percent,
-            'pt_created_dt' => $this->pt_created_dt,
-            'pt_updated_dt' => $this->pt_updated_dt,
         ]);
+
+        if ($this->pt_created_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'pt_created_dt', $this->pt_created_dt, $user->timezone);
+        }
+
+        if ($this->pt_updated_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'pt_updated_dt', $this->pt_updated_dt, $user->timezone);
+        }
 
         $query->andFilterWhere(['like', 'pt_key', $this->pt_key])
             ->andFilterWhere(['like', 'pt_name', $this->pt_name])

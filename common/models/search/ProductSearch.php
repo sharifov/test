@@ -2,7 +2,8 @@
 
 namespace common\models\search;
 
-use yii\base\Model;
+use common\models\Employee;
+use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use common\models\Product;
 
@@ -11,37 +12,21 @@ use common\models\Product;
  */
 class ProductSearch extends Product
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['pr_id', 'pr_type_id', 'pr_lead_id', 'pr_status_id', 'pr_created_user_id', 'pr_updated_user_id'], 'integer'],
-            [['pr_name', 'pr_description', 'pr_created_dt', 'pr_updated_dt'], 'safe'],
+            [['pr_name', 'pr_description'], 'safe'],
             [['pr_service_fee_percent'], 'number'],
+
+            ['pr_created_dt', 'date', 'format' => 'php:Y-m-d'],
+            ['pr_updated_dt', 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
+    public function search($params, Employee $user): ActiveDataProvider
     {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
-    }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
-    {
-        $query = Product::find();
+        $query = Product::find()->with(['prUpdatedUser', 'prCreatedUser', 'prLead']);
 
         // add conditions that should always apply here
 
@@ -57,6 +42,13 @@ class ProductSearch extends Product
             return $dataProvider;
         }
 
+        if ($this->pr_created_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'pr_created_dt', $this->pr_created_dt, $user->timezone);
+        }
+        if ($this->pr_updated_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'pr_updated_dt', $this->pr_updated_dt, $user->timezone);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'pr_id' => $this->pr_id,
@@ -66,8 +58,6 @@ class ProductSearch extends Product
             'pr_service_fee_percent' => $this->pr_service_fee_percent,
             'pr_created_user_id' => $this->pr_created_user_id,
             'pr_updated_user_id' => $this->pr_updated_user_id,
-            'pr_created_dt' => $this->pr_created_dt,
-            'pr_updated_dt' => $this->pr_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'pr_name', $this->pr_name])
