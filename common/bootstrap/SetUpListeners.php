@@ -40,7 +40,7 @@ class SetUpListeners implements BootstrapInterface
             foreach ($modules as $module) {
                 $dir = $path . '/' . $module;
                 if ($dir !== '.' && $dir !== '..' && is_dir($dir)) {
-                    $file = $dir . '/listeners/listeners.php';
+                    $file = $dir . '/src/listeners/listeners.php';
                     if (file_exists($file)) {
                         $listeners = ArrayHelper::merge($listeners, $this->getListenersFromFile($file));
                     }
