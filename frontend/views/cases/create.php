@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'jsOptions' => [
                         'nationalMode' => false,
                         'preferredCountries' => ['us'],
+                        'customContainer' => 'intl-tel-input'
                     ]
                 ]) ?>
                 <div class="phone-notify"></div>

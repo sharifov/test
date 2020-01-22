@@ -17,6 +17,7 @@ use yii\widgets\ActiveForm;
         'jsOptions' => [
             'nationalMode' => false,
             'preferredCountries' => ['us'],
+            'customContainer' => 'intl-tel-input'
         ]
     ])->label(false); ?>
 

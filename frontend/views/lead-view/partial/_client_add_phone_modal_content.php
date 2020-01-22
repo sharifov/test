@@ -47,6 +47,7 @@ $addPhone->client_id = $lead->client_id;
                 'jsOptions' => [
                     'nationalMode' => false,
                     'preferredCountries' => ['us'],
+                    'customContainer' => 'intl-tel-input'
                 ]
             ]) ?>
         <?php endif; ?>
