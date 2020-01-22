@@ -7,8 +7,6 @@
 
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
-use yii\data\ArrayDataProvider;
-use yii\web\View;
 use yii\helpers\Html;
 
 ?>
@@ -79,7 +77,22 @@ use yii\helpers\Html;
                         'data-url' => \yii\helpers\Url::to(['product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
                     ]) ?>
-
+                    <?php if ($model->hqProductQuote->availableForBooking()): ?>
+                        <?php
+                            /* TODO:
+                                1) to ajax
+                                2) ...
+                             */
+                        ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Book',
+                            \yii\helpers\Url::to(['/hotel/hotel-quote/ajax-book', 'id' => $model->hq_id]),
+                            [
+                                'class' => 'dropdown-item btn-book-quote',
+                                'data-url' => '',
+                            ]
+                        ) ?>
+                    <? endif; ?>
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                         'class' => 'dropdown-item text-danger btn-delete-product-quote',

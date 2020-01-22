@@ -2,21 +2,21 @@
 
 namespace modules\hotel\controllers;
 
+use frontend\controllers\FController;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
+use modules\hotel\models\HotelQuote;
+use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use Yii;
-use modules\hotel\models\HotelQuote;
-use modules\hotel\models\search\HotelQuoteSearch;
-use frontend\controllers\FController;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
@@ -247,6 +247,26 @@ class HotelQuoteController extends FController
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionBook($id) /* TODO:  */
+    {
+        $result = [
+            'status' => 0,
+            'message' => '',
+        ];
+
+        /* TODO: to post  */
+        $id = (int) Yii::$app->request->get('id', 0);
+
+        if (!$id) {
+
+        }
+
+
+
+
+        return $this->asJson($result);
     }
 
     /**

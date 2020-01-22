@@ -317,6 +317,22 @@ class ProductQuote extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return bool
+     */
+    public function isPending(): bool
+    {
+        return $this->pq_status_id === self::STATUS_PENDING;
+    }
+
+    /**
+     * @return bool
+     */
+    public function availableForBooking(): bool /* TODO: confirmation A.C. */
+    {
+        return $this->isPending();
+    }
+
+    /**
      * @return array
      */
     public static function getStatusList(): array
