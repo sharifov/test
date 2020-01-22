@@ -531,7 +531,6 @@ ORDER BY lf.lead_id, id';
             } catch (\Throwable $e) {
                 $failed++;
                 Yii::error(VarDumper::dumpAsString($e), self::class . ':' . $this->action->id . ':Clean failed' );
-                break;
             }
         }
 
