@@ -4,12 +4,31 @@ namespace sales\yii\i18n;
 
 use common\models\Department;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Project;
 use common\models\Quote;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asLead(?Lead $lead): string
+    {
+        if ($lead === null) {
+            return $this->nullDisplay;
+        }
+
+        return \modules\lead\helpers\formatters\lead\Formatter::asLead($lead);
+    }
+
+    public function asProductType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \modules\product\helpers\formatters\productType\Formatter::asProductType($value);
+    }
+
     public function asQuoteType($value): string
     {
         if ($value === null) {
