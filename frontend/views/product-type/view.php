@@ -34,22 +34,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'pt_name',
             'pt_description:ntext',
             'pt_settings',
-            'pt_enabled',
-            [
-                'attribute' => 'pt_created_dt',
-                'value' => static function (\common\models\ProductType $model) {
-                    return $model->pt_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->pt_created_dt)) : '-';
-                },
-                'format' => 'raw'
-            ],
-
-            [
-                'attribute' => 'pt_updated_dt',
-                'value' => static function (\common\models\ProductType $model) {
-                    return $model->pt_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->pt_updated_dt)) : '-';
-                },
-                'format' => 'raw'
-            ],
+            'pt_enabled:booleanByLabel',
+            'pt_created_dt:byUserDateTime',
+            'pt_updated_dt:byUserDateTime',
         ],
     ]) ?>
 

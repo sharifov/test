@@ -26,7 +26,7 @@ $pjaxId = 'add-product-pjax'; // . uniqid();
     ?>
     <?//php $this->registerJs('$(document).off("submit", "#add-product-pjax form[data-pjax]");alert(12);', \yii\web\View::POS_READY)?>
 
-    <?= $form->field($model, 'pr_type_id')->dropDownList(\common\models\ProductType::getList()) ?>
+    <?= $form->field($model, 'pr_type_id')->dropDownList(\common\models\ProductType::getListEnabled()) ?>
 
     <?= $form->field($model, 'pr_name')->textInput(['maxlength' => true]) ?>
 

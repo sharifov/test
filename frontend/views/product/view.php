@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Product;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -30,29 +31,22 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'pr_id',
-            'pr_type_id',
+            'pr_type_id:productType',
             'pr_name',
-            'pr_lead_id',
+            [
+                'attribute' => 'pr_lead_id',
+                'value' => static function (Product $product) {
+                    return $product->pr_lead_id ? $product->prLead : null;
+                },
+                'format' => 'lead',
+            ],
             'pr_description:ntext',
             'pr_status_id',
             'pr_service_fee_percent',
-            'pr_created_user_id',
-            'pr_updated_user_id',
-            [
-                'attribute' => 'pr_created_dt',
-                'value' => static function(\common\models\Product $model) {
-                    return $model->pr_created_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->pr_created_dt)) : '-';
-                },
-                'format' => 'raw',
-            ],
-
-            [
-                'attribute' => 'pr_updated_dt',
-                'value' => static function(\common\models\Product $model) {
-                    return $model->pr_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->pr_updated_dt)) : '-';
-                },
-                'format' => 'raw',
-            ],
+            'pr_created_user_id:userName',
+            'pr_updated_user_id:userName',
+            'pr_created_dt:byUserDateTime',
+            'pr_updated_dt:byUserDateTime',
         ],
     ]) ?>
 

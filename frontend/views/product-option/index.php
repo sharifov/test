@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function(\common\models\ProductOption $model) {
                     return $model->poProductType ? $model->poProductType->pt_name : '-';
                 },
-                'filter' => \common\models\ProductType::getList()
+                'filter' => \common\models\ProductType::getListEnabled()
             ],
             'po_name',
             //'po_description:ntext',

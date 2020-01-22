@@ -1,8 +1,11 @@
 <?php
 
+use sales\yii\grid\BooleanColumn;
+use sales\yii\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ProductTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -31,24 +34,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'pt_name',
             'pt_service_fee_percent',
             'pt_description:ntext',
-            //'pt_settings',
-            'pt_enabled:boolean',
             [
+                'class' => BooleanColumn::class,
+                'attribute' => 'pt_enabled',
+            ],
+            [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'pt_created_dt',
-                'value' => static function (\common\models\ProductType $model) {
-                    return $model->pt_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->pt_created_dt)) : '-';
-                },
-                'format' => 'raw'
             ],
-
             [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'pt_updated_dt',
-                'value' => static function (\common\models\ProductType $model) {
-                    return $model->pt_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->pt_updated_dt)) : '-';
-                },
-                'format' => 'raw'
             ],
-
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
