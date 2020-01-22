@@ -49,4 +49,12 @@ class FlightRepository extends Repository
 		$this->eventDispatcher->dispatchAll($flight->releaseEvents());
 		return $flight->fl_id;
 	}
+
+	public function remove(Flight $flight): void
+	{
+		if (!$flight->delete()) {
+			throw new \RuntimeException('Removing error', FlightCodeException::FLIGHT_REMOVE);
+		}
+		$this->eventDispatcher->dispatchAll($flight->releaseEvents());
+	}
 }
