@@ -10,7 +10,6 @@ use sales\repositories\Repository;
 
 /**
  * Class FlightRepository
- * @package modules\flight\src\repositories\flight
  *
  * @property EventDispatcher $eventDispatcher
  */
@@ -23,10 +22,6 @@ class FlightRepository extends Repository
 		$this->eventDispatcher = $eventDispatcher;
 	}
 
-	/**
-	 * @param int|null $id
-	 * @return Flight
-	 */
 	public function find(?int $id): Flight
 	{
 		if ($flight = Flight::findOne($id)) {
@@ -35,14 +30,8 @@ class FlightRepository extends Repository
 		throw new NotFoundException('Flight is not found', FlightCodeException::FLIGHT_NOT_FOUND);
 	}
 
-	/**
-	 * @param Flight $flight
-	 * @return int
-	 */
 	public function save(Flight $flight): int
 	{
-		$flight->disableAREvents();
-
 		if (!$flight->save(false)) {
 			throw new \RuntimeException('Saving error', FlightCodeException::FLIGHT_SAVE);
 		}

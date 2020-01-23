@@ -3,8 +3,6 @@
 namespace common\models;
 
 use common\models\query\ProductTypeQuery;
-use Yii;
-use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "product_type".
@@ -25,18 +23,12 @@ class ProductType extends \yii\db\ActiveRecord
     public const PRODUCT_FLIGHT = 1;
     public const PRODUCT_HOTEL  = 2;
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'product_type';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['pt_id', 'pt_key', 'pt_name'], 'required'],
@@ -52,10 +44,7 @@ class ProductType extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'pt_id' => 'ID',
@@ -70,26 +59,39 @@ class ProductType extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     * @return ProductTypeQuery the active query used by this AR class.
-     */
-    public static function find()
+    public static function find(): ProductTypeQuery
     {
         return new ProductTypeQuery(static::class);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getListAll() : array
+    {
+        return self::getList(false);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getListEnabled() : array
+    {
+        return self::getList(true);
     }
 
     /**
      * @param bool $enabled
      * @return array
      */
-    public static function getList(bool $enabled = true) : array
+    private static function getList(bool $enabled) : array
     {
-        $query = self::find()->orderBy(['pt_id' => SORT_ASC]);
+        $query = self::find();
+
         if ($enabled) {
             $query->andWhere(['pt_enabled' => true]);
         }
-        $data = $query->asArray()->all();
-        return ArrayHelper::map($data, 'pt_id', 'pt_name');
+
+        return $query->select(['pt_name'])->orderBy(['pt_id' => SORT_ASC])->indexBy('pt_id')->asArray()->column();
     }
 }

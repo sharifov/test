@@ -5,6 +5,9 @@ namespace common\models;
 use common\models\query\ProductQuery;
 use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
+use modules\product\src\entities\product\events\ProductCreateEvent;
+use modules\product\src\useCases\create\ProductCreateForm;
+use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -39,18 +42,25 @@ use yii\db\ActiveRecord;
  */
 class Product extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+    use EventTrait;
+
+    public static function create(ProductCreateForm $form): self
+    {
+        $product = new static();
+        $product->pr_lead_id = $form->pr_lead_id;
+        $product->pr_type_id = $form->pr_type_id;
+        $product->pr_name = $form->pr_name;
+        $product->pr_description = $form->pr_description;
+        $product->recordEvent(new ProductCreateEvent($product));
+        return $product;
+    }
+
+    public static function tableName(): string
     {
         return 'product';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['pr_type_id', 'pr_lead_id'], 'required'],
@@ -67,9 +77,6 @@ class Product extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * @return array
-     */
     public function extraFields(): array
     {
         return [
@@ -87,21 +94,18 @@ class Product extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'pr_id' => 'ID',
-            'pr_type_id' => 'Type ID',
+            'pr_type_id' => 'Type',
             'pr_name' => 'Name',
             'pr_lead_id' => 'Lead ID',
             'pr_description' => 'Description',
             'pr_status_id' => 'Status ID',
             'pr_service_fee_percent' => 'Service Fee Percent',
-            'pr_created_user_id' => 'Created User ID',
-            'pr_updated_user_id' => 'Updated User ID',
+            'pr_created_user_id' => 'Created User',
+            'pr_updated_user_id' => 'Updated User',
             'pr_created_dt' => 'Created Dt',
             'pr_updated_dt' => 'Updated Dt',
         ];

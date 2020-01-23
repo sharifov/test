@@ -5,6 +5,8 @@ namespace modules\hotel\models;
 use common\models\Product;
 use common\models\ProductQuote;
 use modules\hotel\models\query\HotelQuery;
+use modules\product\src\interfaces\Productable;
+use sales\entities\EventTrait;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -31,8 +33,9 @@ use yii\helpers\VarDumper;
  * @property HotelQuote[] $hotelQuotes
  * @property HotelRoom[] $hotelRooms
  */
-class Hotel extends ActiveRecord
+class Hotel extends ActiveRecord implements Productable
 {
+    use EventTrait;
 
 	private const DESTINATION_TYPE_COUNTRY  = 0;
 	private const DESTINATION_TYPE_CITY     = 1;
@@ -43,6 +46,13 @@ class Hotel extends ActiveRecord
 		self::DESTINATION_TYPE_CITY     => 'Cities/Zones',
 		self::DESTINATION_TYPE_HOTEL    => 'Hotels'
 	];
+
+    public static function create(int $productId): self
+    {
+        $hotel = new static();
+        $hotel->ph_product_id = $productId;
+        return $hotel;
+	}
 
     /**
      * @return string
