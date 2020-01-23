@@ -36,8 +36,6 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'e_email_subject') ?>
 
-    <?php // echo $form->field($model, 'e_email_body_html') ?>
-
     <?php // echo $form->field($model, 'e_email_body_text') ?>
 
     <?php // echo $form->field($model, 'e_attach') ?>
