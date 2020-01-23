@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\CommunicationService;
+use common\models\query\SmsTemplateTypeQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -137,7 +138,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new SmsTemplateTypeQuery(get_called_class());
+        return new SmsTemplateTypeQuery(static::class);
     }
 
     /**

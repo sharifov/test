@@ -36,33 +36,22 @@ $this->params['breadcrumbs'][] = $this->title;
         },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-
             'dpp_id',
-
-            //'dpp_project_id',
             [
+                'class' => \sales\yii\grid\project\ProjectColumn::class,
                 'attribute' => 'dpp_project_id',
-                'value' => static function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dppProject ? '<span class="badge">' . Html::encode($model->dppProject->name) . '</span>' : '-';
-                },
-                'filter' => \common\models\Project::getList(true),
-                'format' => 'raw',
+                'relation' => 'dppProject',
             ],
             'dpp_phone_number',
             [
+                'class' => \sales\yii\grid\BooleanColumn::class,
                 'attribute' => 'dpp_redial',
-                'format' => 'boolean',
-                'filter' => [0 => 'No', 1 => 'Yes'],
             ],
             [
+                'class' => \sales\yii\grid\department\DepartmentColumn::class,
                 'attribute' => 'dpp_dep_id',
-                'value' => static function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dppDep ? $model->dppDep->dep_name : '-';
-                },
-                'filter' => \common\models\Department::getList()
+                'relation' => 'dppDep',
             ],
-            //'dpp_source_id',
-
             [
                 'label' => 'User Groups',
                 'value' => static function (\common\models\DepartmentPhoneProject $model) {
@@ -76,7 +65,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
-
             [
                 'attribute' => 'dpp_source_id',
                 'value' => static function (\common\models\DepartmentPhoneProject $model) {
@@ -84,32 +72,32 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => \common\models\Sources::getList(true)
             ],
-
             //'dpp_params',
-            'dpp_ivr_enable:boolean',
-            'dpp_enable:boolean',
-            'dpp_default:boolean',
-
             [
+                'class' => \sales\yii\grid\BooleanColumn::class,
+                'attribute' => 'dpp_ivr_enable',
+            ],
+            [
+                'class' => \sales\yii\grid\BooleanColumn::class,
+                'attribute' => 'dpp_enable',
+            ],
+            [
+                'class' => \sales\yii\grid\BooleanColumn::class,
+                'attribute' => 'dpp_default',
+            ],
+            [
+                'class' => \sales\yii\grid\BooleanColumn::class,
+                'attribute' => 'dpp_show_on_site',
+            ],
+            [
+                'class' => \sales\yii\grid\UserColumn::class,
                 'attribute' => 'dpp_updated_user_id',
-                'value' => static function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dpp_updated_user_id ? '<i class="fa fa-user"></i> ' .Html::encode($model->dppUpdatedUser->username) : $model->dpp_updated_user_id;
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Employee::getList()
+                'relation' => 'dppUpdatedUser',
             ],
-
             [
-                'attribute' => 'dep_updated_dt',
-                'value' => static function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dpp_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dpp_updated_dt)) : '-';
-                },
-                'format' => 'raw'
+                'class' => \sales\yii\grid\DateTimeColumn::class,
+                'attribute' => 'dpp_updated_dt',
             ],
-
-            //'dpp_updated_user_id',
-            //'dpp_updated_dt',
-
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

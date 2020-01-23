@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\ChartTools;
 use common\components\CommunicationService;
+use common\models\query\SmsQuery;
 use DateTime;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
@@ -440,7 +441,7 @@ class Sms extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new SmsQuery(get_called_class());
+        return new SmsQuery(static::class);
     }
 
 

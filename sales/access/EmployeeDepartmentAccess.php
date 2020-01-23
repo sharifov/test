@@ -6,7 +6,7 @@ use common\models\UserDepartment;
 use common\models\Department;
 use common\models\Employee;
 use sales\helpers\user\UserFinder;
-use common\models\UserDepartmentQuery;
+use common\models\query\UserDepartmentQuery;
 
 class EmployeeDepartmentAccess
 {
@@ -15,6 +15,9 @@ class EmployeeDepartmentAccess
     private static $defaultRolesForViewAllDepartments = [
         Employee::ROLE_SUPER_ADMIN,
         Employee::ROLE_ADMIN,
+        Employee::ROLE_SALES_SENIOR,
+        Employee::ROLE_EXCHANGE_SENIOR,
+        Employee::ROLE_SUPPORT_SENIOR,
         Employee::ROLE_QA,
         Employee::ROLE_USER_MANAGER
     ];

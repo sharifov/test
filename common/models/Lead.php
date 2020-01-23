@@ -6,10 +6,13 @@ use common\components\EmailService;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
+use common\models\query\LeadQuery;
+use DateTime;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
+use sales\events\lead\LeadCreatedByApiBOEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedByIncomingEmailEvent;
@@ -31,6 +34,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -55,58 +59,58 @@ use yii\helpers\VarDumper;
  * This is the model class for table "leads".
  *
  * @property int $id
- * @property string $gid
- * @property int $client_id
- * @property int $employee_id
- * @property int $status
- * @property string $uid
- * @property int $project_id
- * @property int $source_id
- * @property string $trip_type
- * @property string $cabin
- * @property int $adults
- * @property int $children
- * @property int $infants
- * @property string $notes_for_experts
- * @property string $request_ip
- * @property string $offset_gmt
- * @property string $request_ip_detail
- * @property int $rating
- * @property string $created
- * @property string $updated
- * @property string $snooze_for
- * @property boolean $called_expert
- * @property string $discount_id
- * @property int $bo_flight_id
- * @property string $additional_information
- * @property int $l_answered
- * @property int $clone_id
- * @property string $description
- * @property double $final_profit
- * @property double $tips
- * @property int $l_call_status_id
- * @property string $l_pending_delay_dt
- * @property string $l_client_first_name
- * @property string $l_client_last_name
- * @property string $l_client_phone
- * @property string $l_client_email
- * @property string $l_client_lang
- * @property string $l_client_ua
- * @property string $l_request_hash
- * @property int $l_duplicate_lead_id
- * @property double $l_init_price
- * @property string $l_last_action_dt
- * @property int $l_dep_id
- * @property boolean $l_delayed_charge
- * @property int $l_type_create
+ * @property int|null $client_id
+ * @property int|null $employee_id
+ * @property int|null $status
+ * @property string|null $uid
+ * @property int|null $project_id
+ * @property int|null $source_id
+ * @property string|null $trip_type
+ * @property string|null $cabin
+ * @property int|null $adults
+ * @property int|null $children
+ * @property int|null $infants
+ * @property string|null $notes_for_experts
+ * @property string|null $created
+ * @property string|null $updated
+ * @property string|null $request_ip
+ * @property string|null $request_ip_detail
+ * @property string|null $offset_gmt
+ * @property string|null $snooze_for
+ * @property int|null $rating
+ * @property int|null $called_expert
+ * @property string|null $discount_id
+ * @property int|null $bo_flight_id
+ * @property string|null $additional_information
+ * @property int|null $l_answered
+ * @property int|null $clone_id
+ * @property string|null $description
+ * @property float|null $final_profit
+ * @property float|null $tips
+ * @property string|null $gid
+ * @property float|null $agents_processing_fee
+ * @property int|null $l_call_status_id
+ * @property string|null $l_pending_delay_dt
+ * @property string|null $l_client_first_name
+ * @property string|null $l_client_last_name
+ * @property string|null $l_client_phone
+ * @property string|null $l_client_email
+ * @property string|null $l_client_lang
+ * @property string|null $l_client_ua
+ * @property string|null $l_request_hash
+ * @property int|null $l_duplicate_lead_id
+ * @property float|null $l_init_price
+ * @property string|null $l_last_action_dt
+ * @property int|null $l_dep_id
+ * @property int|null $l_delayed_charge
+ * @property int|null $l_type_create
  * @property int $l_is_test
  *
- * @property double $finalProfit
+ * @property float $finalProfit
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
  * @property int $quotesExpertCount
- * @property double $agentsProcessingFee
- * @property double $agents_processing_fee
+ * @property float $agentsProcessingFee
  * @property string $l_client_time
  * @property boolean $enableActiveRecordEvents
  * @property $totalTips
@@ -121,6 +125,9 @@ use yii\helpers\VarDumper;
  * @property Sms[] $sms
  * @property Quote[] $quotes
  * @property Note[] $notes
+ * @property Offer[] $offers
+ * @property Order[] $orders
+ * @property Product[] $products
  * @property LeadLog[] $leadLogs
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
@@ -149,6 +156,46 @@ use yii\helpers\VarDumper;
  * @property $outCallsDuration
  * @property $smsOffers
  * @property $emailOffers
+ * @property int $delayPendingTime
+ * @property null|DateTime $clientTime2
+ * @property mixed $sumPercentProfitSplit
+ * @property ActiveQuery $leadTasks
+ * @property null|string $tripType
+ * @property mixed $firstFlightSegment
+ * @property bool $answered
+ * @property null|DateTime $clientTime2Old
+ * @property mixed $bookedQuoteUid
+ * @property int $owner
+ * @property mixed $allTipsSplits
+ * @property string $taskInfo
+ * @property null|string $lastActivityByNote
+ * @property int $callStatus
+ * @property mixed $quoteSendInfo
+ * @property null|string $additionalInformationFormFirstElementPnr
+ * @property string $statusLabelClass
+ * @property array $paxTypes
+ * @property ActiveQuery $reasons
+ * @property mixed $bookedQuote
+ * @property null $departure
+ * @property ActiveQuery $tsUsers
+ * @property string $requestHash
+ * @property \common\models\local\LeadAdditionalInformation $additionalInformationFormFirstElement
+ * @property null|Quote $appliedAlternativeQuotes
+ * @property mixed $flowTransition
+ * @property mixed $sumPercentTipsSplit
+ * @property ActiveQuery $appliedQuote
+ * @property ActiveQuery $psUsers
+ * @property mixed $allProfitSplits
+ * @property null|string $lastReasonFromLeadFlow
+ * @property array|Quote[] $altQuotes
+ * @property string|mixed $cabinClassName
+ * @property array $leadInformationForExpert
+ * @property ActiveQuery $leadFlowSold
+ * @property string $communicationInfo
+ * @property int $countOutCallsLastFlow
+ * @property string $flightTypeName
+ * @property mixed $sentCount
+ * @property bool $calledExpert
  * @property $quoteType
  *
  */
@@ -180,6 +227,8 @@ class Lead extends ActiveRecord
     public const STATUS_TRASH       = 11;
     public const STATUS_BOOKED      = 12;
     public const STATUS_SNOOZE      = 13;
+    public const STATUS_BOOK_FAILED = 14;
+    public const STATUS_ALTERNATIVE = 15;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -191,6 +240,8 @@ class Lead extends ActiveRecord
         self::STATUS_TRASH          => 'Trash',
         self::STATUS_BOOKED         => 'Booked',
         self::STATUS_SNOOZE         => 'Snooze',
+        self::STATUS_BOOK_FAILED    => 'Book failed',
+        self::STATUS_ALTERNATIVE    => 'Alternative',
     ];
 
     public const STATUS_MULTIPLE_UPDATE_LIST = [
@@ -632,6 +683,35 @@ class Lead extends ActiveRecord
         $this->recordEvent(new LeadCreatedByApiEvent($this, $this->status));
     }
 
+    public static function createByApiBO(LeadCreateForm $form, Client $client): self
+    {
+        $lead = self::create();
+        $lead->client_id = $client->id;
+        $lead->l_client_first_name = $client->first_name;
+        $lead->l_client_last_name = $client->last_name;
+        $lead->l_client_phone = $form->clientForm->phone;
+        $lead->l_client_ua = $form->user_agent;
+        $lead->project_id = $form->project_id;
+        $lead->source_id = $form->source_id;
+        $lead->cabin = $form->cabin;
+        $lead->adults = $form->adults;
+        $lead->children = $form->children;
+        $lead->infants = $form->infants;
+        $lead->request_ip = $form->request_ip;
+        $lead->discount_id = $form->discount_id;
+        $lead->uid = $form->uid ?: $lead->uid;
+        $lead->status = $form->status;
+        $lead->bo_flight_id = $form->flight_id;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_type_create = self::TYPE_CREATE_API;
+        return $lead;
+    }
+
+    public function eventLeadCreatedByApiBOEvent(): void
+    {
+        $this->recordEvent(new LeadCreatedByApiBOEvent($this, $this->status));
+    }
+
     /**
      * @param array $segments
      * @return bool
@@ -647,6 +727,23 @@ class Lead extends ActiveRecord
             ];
         }
         return $segments === $originSegments;
+    }
+
+    public function originalQuoteExist(int $excludeQuoteId = null): bool
+    {
+//        return Quote::find()->originalExist($this->id);
+        foreach ($this->quotes as $quote) {
+            if ($quote->isOriginal()) {
+                if ($excludeQuoteId) {
+                    if ($quote->id !== $excludeQuoteId) {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -754,7 +851,7 @@ class Lead extends ActiveRecord
         $this->called_expert = $value;
     }
 
-    public function isGetOwner(): bool
+    public function hasOwner(): bool
     {
         return $this->employee_id ? true : false;
     }
@@ -904,7 +1001,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_SOLD);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isSold()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isSold()) {
             throw new \DomainException('Lead is already Sold without owner.');
         }
 
@@ -945,7 +1042,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_BOOKED);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isBooked()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isBooked()) {
             throw new \DomainException('Lead is already Booked without owner.');
         }
 
@@ -987,7 +1084,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_SNOOZE);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isSnooze()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isSnooze()) {
             throw new \DomainException('Lead is already Snooze without owner.');
         }
 
@@ -1037,7 +1134,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_FOLLOW_UP);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isFollowUp()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isFollowUp()) {
             throw new \DomainException('Lead is already Follow Up without owner.');
         }
 
@@ -1086,7 +1183,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_PROCESSING);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isProcessing()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isProcessing()) {
             throw new \DomainException('Lead is already Processing without owner.');
         }
 
@@ -1121,7 +1218,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_PENDING);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isPending()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isPending()) {
             throw new \DomainException('Lead is already Pending without owner.');
         }
 
@@ -1190,7 +1287,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_TRASH);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isTrash()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isTrash()) {
             throw new \DomainException('Lead is already Trash without owner.');
         }
 
@@ -1230,9 +1327,19 @@ class Lead extends ActiveRecord
         return $this->status === self::STATUS_ON_HOLD;
     }
 
-    public function isReject()
+    public function isReject(): bool
     {
         return $this->status === self::STATUS_REJECT;
+    }
+
+    public function isBookFailed(): bool
+    {
+        return $this->status === self::STATUS_BOOK_FAILED;
+    }
+
+    public function isAlternative(): bool
+    {
+        return $this->status === self::STATUS_ALTERNATIVE;
     }
 
     /**
@@ -1244,7 +1351,7 @@ class Lead extends ActiveRecord
     {
         self::guardStatus($this->status, self::STATUS_REJECT);
 
-        if ($newOwnerId === null && !$this->isGetOwner() && $this->isReject()) {
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isReject()) {
             throw new \DomainException('Lead is already Reject without owner.');
         }
 
@@ -1509,7 +1616,7 @@ class Lead extends ActiveRecord
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLDep()
     {
@@ -1517,7 +1624,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getCalls()
     {
@@ -1525,7 +1632,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getEmails()
     {
@@ -1533,7 +1640,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadCallExperts()
     {
@@ -1541,7 +1648,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadChecklists(): ActiveQuery
     {
@@ -1549,7 +1656,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLDuplicateLead(): ActiveQuery
     {
@@ -1557,7 +1664,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeads0()
     {
@@ -1565,7 +1672,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadFlows()
     {
@@ -1573,7 +1680,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadFlowSold()
     {
@@ -1582,7 +1689,7 @@ class Lead extends ActiveRecord
 
     // TODO: update LeadFlow SORT created -> id
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLastLeadFlow(): ActiveQuery
     {
@@ -1590,7 +1697,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadLogs()
     {
@@ -1599,7 +1706,7 @@ class Lead extends ActiveRecord
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getSms(): ActiveQuery
     {
@@ -1608,7 +1715,7 @@ class Lead extends ActiveRecord
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getNotes(): ActiveQuery
     {
@@ -1616,7 +1723,31 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
+     */
+    public function getOffers(): ActiveQuery
+    {
+        return $this->hasMany(Offer::class, ['of_lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOrders(): ActiveQuery
+    {
+        return $this->hasMany(Order::class, ['or_lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProducts(): ActiveQuery
+    {
+        return $this->hasMany(Product::class, ['pr_lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
      */
     public function getTipsSplits(): ActiveQuery
     {
@@ -1624,7 +1755,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getQuotes(): ActiveQuery
     {
@@ -1632,7 +1763,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getReasons()
     {
@@ -1649,7 +1780,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUserConnections(): ActiveQuery
     {
@@ -1657,7 +1788,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadFlightSegments(): ActiveQuery
     {
@@ -1665,7 +1796,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadPreferences(): ActiveQuery
     {
@@ -1673,7 +1804,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadTasks()
     {
@@ -1681,7 +1812,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeadQcall(): ActiveQuery
     {
@@ -1689,7 +1820,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getClient(): ActiveQuery
     {
@@ -1697,7 +1828,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getEmployee(): ActiveQuery
     {
@@ -1705,7 +1836,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getClone(): ActiveQuery
     {
@@ -1713,7 +1844,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getProfitSplits(): ActiveQuery
     {
@@ -1721,7 +1852,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getPsUsers()
     {
@@ -1729,7 +1860,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getSource(): ActiveQuery
     {
@@ -1737,7 +1868,7 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getProject(): ActiveQuery
     {
@@ -2023,17 +2154,17 @@ class Lead extends ActiveRecord
     public static function getSnoozeCountdown($id, $snooze_for): string
     {
         if (!empty($snooze_for)) {
-            return self::getCountdownTimer(new \DateTime($snooze_for), sprintf('snooze-countdown-%d', $id));
+            return self::getCountdownTimer(new DateTime($snooze_for), sprintf('snooze-countdown-%d', $id));
         }
         return '-';
     }
 
     /**
-     * @param \DateTime $expired
+     * @param DateTime $expired
      * @param $spanId
      * @return string
      */
-    public static function getCountdownTimer(\DateTime $expired, $spanId): string
+    public static function getCountdownTimer(DateTime $expired, $spanId): string
     {
         //var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
 
@@ -2056,8 +2187,8 @@ class Lead extends ActiveRecord
      */
     public static function getLastActivity($updated): string
     {
-        $now = new \DateTime();
-        $lastUpdate = new \DateTime($updated);
+        $now = new DateTime();
+        $lastUpdate = new DateTime($updated);
         /*if (!empty($note_created)) {
             $created = new \DateTime($note_created);
             return ($lastUpdate->getTimestamp() > $created->getTimestamp())
@@ -2095,7 +2226,11 @@ class Lead extends ActiveRecord
 
     public function permissionsView()
     {
-        if (!Yii::$app->user->identity->canRole('admin')) {
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if (!$user->isAdmin()) {
             $access = ProjectEmployeeAccess::findOne([
                 'employee_id' => Yii::$app->user->id,
                 'project_id' => $this->project_id
@@ -2113,18 +2248,18 @@ class Lead extends ActiveRecord
 
     public function getPendingAfterCreate($created = null)
     {
-        $now = new \DateTime();
+        $now = new DateTime();
         if (empty($created)) {
             $created = $this->created;
         }
-        $created = new \DateTime($created);
+        $created = new DateTime($created);
         return self::diffFormat($now->diff($created));
     }
 
-    public function getPendingInLastStatus($updated)
+    public static function getPendingInLastStatus($updated)
     {
-        $now = new \DateTime();
-        $updated = new \DateTime($updated);
+        $now = new DateTime();
+        $updated = new DateTime($updated);
         return self::diffFormat($now->diff($updated));
     }
 
@@ -2152,6 +2287,10 @@ class Lead extends ActiveRecord
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_BOOK_FAILED:
+            case self::STATUS_ALTERNATIVE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
+                break;
         }
         return $label;
     }
@@ -2178,6 +2317,10 @@ class Lead extends ActiveRecord
             case self::STATUS_TRASH:
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_BOOK_FAILED:
+            case self::STATUS_ALTERNATIVE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
         return $label;
@@ -2693,7 +2836,7 @@ Reason: {reason}
                                 $this->status,
                                 $this->getCountOutCallsLastFlow()
                             ),
-                            new FindWeightParams($this->project_id),
+                            new FindWeightParams($this->project_id, $this->status),
                             $this->offset_gmt,
                             new FindPhoneParams($this->project_id, $this->l_dep_id)
                         );
@@ -2909,10 +3052,10 @@ Reason: {reason}
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      * @throws \Exception
      */
-    public function getClientTime2():? \DateTime
+    public function getClientTime2():? DateTime
     {
         $clientDt = null;
         $offset = false;
@@ -2930,7 +3073,7 @@ Reason: {reason}
             if (is_numeric($offset) && $offset > 0) {
                 $offset = '+' . $offset;
             }
-            $clientDt = new \DateTime();
+            $clientDt = new DateTime();
             $timezoneName = timezone_name_from_abbr('', (int)$offset * 3600, date('I', time()));
             if ($timezoneName) {
                 $timezone = new \DateTimeZone($timezoneName);
@@ -2942,7 +3085,7 @@ Reason: {reason}
     }
 
     /**
-     * @return \DateTime|null
+     * @return DateTime|null
      * @throws \Exception
      */
     public function getClientTime2Old()
@@ -3039,7 +3182,7 @@ Reason: {reason}
             //-----------------------------------------------------------
 
 
-            $dt = new \DateTime();
+            $dt = new DateTime();
             if($timezoneName) {
                 $timezone = new \DateTimeZone($timezoneName);
                 $dt->setTimezone($timezone);
@@ -3695,103 +3838,59 @@ Reason: {reason}
         return $content_data;
     }
 
-    public function getEmailData($quotesUids)
+    /**
+     * @param array $offerIds
+     * @param array $projectContactInfo
+     * @return array
+     */
+    public function getOfferEmailData(array $offerIds, array $projectContactInfo): array
     {
+        $project = $this->project;
 
-        $airport = Airport::findIdentity($this->leadFlightSegments[0]->origin);
-        $origin = ($airport !== null) ? $airport->city : $this->leadFlightSegments[0]->origin;
+        $upp = null;
+        if ($project) {
+            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->one();
+        }
 
-        $airport = Airport::findIdentity($this->leadFlightSegments[0]->destination);
-        $destination = ($airport !== null) ? $airport->city : $this->leadFlightSegments[0]->destination;
-
-        $userProjectParams = UserProjectParams::findOne([
-            'upp_user_id' => $this->employee->id,
-            'upp_project_id' => $this->project_id
-        ]);
-
-        $quotesData = [];
-        foreach ($quotesUids as $uid){
-            $quote = Quote::findOne(['uid' => $uid]);
-            if($quote !== null){
-                $segmentsData = [];
-                $trips = $quote->quoteTrips;
-                foreach ($trips as $trip){
-                    $segments = $trip->quoteSegments;
-                    if( $segments ) {
-                        $segmentsCnt = count($segments);
-                        $stopCnt = $segmentsCnt - 1;
-                        $firstSegment = $segments[0];
-                        $lastSegment = end($segments);
-                        $cabins = [];
-                        $marketingAirlines = [];
-                        $airlineNames = [];
-                        foreach ($segments as $segment){
-                            if(!in_array(SearchService::getCabin($segment->qs_cabin), $cabins)){
-                                $cabins[] = SearchService::getCabin($segment->qs_cabin);
-                            }
-                            if(isset($segment->qs_stop) && $segment->qs_stop > 0){
-                                $stopCnt += $segment->qs_stop;
-                            }
-                            if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
-                                $marketingAirlines[] = $segment->qs_marketing_airline;
-                                $airline = Airline::findIdentity($segment->qs_marketing_airline);
-                                if($airline){
-                                    $airlineNames[] =  $airline->name;
-                                }else{
-                                    $airlineNames[] = $segment->qs_marketing_airline;
-                                }
-
-                            }
-                        }
-                    } else {
-                        continue;
-                    }
-
-                    $segmentsData[] = [
-                        'airlineIata' => (count($marketingAirlines) == 1)?$marketingAirlines[0]:'multiple_airlines',
-                        'airlineLogoUrl' => (count($marketingAirlines) == 1)?'//www.gstatic.com/flights/airline_logos/70px/'.$marketingAirlines[0].'.png':'/img/multiple_airlines.png',
-                        'departDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d'),
-                        'departTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a'),
-                        'originIata' => $firstSegment->qs_departure_airport_code,
-                        'originCity' => ($firstSegment->departureAirport)?$firstSegment->departureAirport->city:$firstSegment->qs_departure_airport_code,
-                        'flightDuration' => SearchService::durationInMinutes($trip->qt_duration),
-                        'stopsQuantity' => \Yii::t('search', '{n, plural, =0{Nonstop} one{# stop} other{# stops}}', ['n' => $stopCnt]),
-                        'destinationIata' => $lastSegment->qs_arrival_airport_code,
-                        'destinationCity' => ($lastSegment->arrivalAirport)?$lastSegment->arrivalAirport->city:$lastSegment->qs_arrival_airport_code,
-                        'arriveTime' => Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'h:mm a'),
-                        'arriveDate' => Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'MMM d')
-                    ];
+        if($offerIds && is_array($offerIds)) {
+            foreach ($offerIds as $ofId) {
+                $offerModel = Offer::findOne($ofId);
+                if($offerModel) {
+                    $offerItem = $offerModel->communicationData; //attributes;
+                    //$quoteItem = array_merge($quoteItem, $offerModel->getInfoForEmail2());
+                    $content_data['offers'][] = $offerItem;
                 }
-                $quotesData[] = [
-                    'currency' => 'USD',
-                    'price' => $quote->getPricePerPax(),
-                    'url' => $this->project->link.'/checkout/'.$quote->uid,
-                    'segments' => $segmentsData
-                ];
             }
         }
 
-        $emailData = [
-            'project_url' => $this->project->link,
-            'agent' => [
-                'name' => ucfirst($this->employee->username),
-                'email' => trim($userProjectParams->upp_email)
-            ],
-            'request' => [
-                'originCity' => $origin,
-                'destinationCity' => $destination,
-                'cabinType' => $this->getCabinClassName(),
-                'tripType' => strtolower($this->trip_type),
-                'pax' => ($this->adults + $this->children + $this->infants)
-            ],
-            'quotes' => $quotesData,
-            'contacts' => [
-                'phone' => $this->project->contactInfo->phone,
-                'email' => $this->project->contactInfo->email,
-            ],
+
+        $content_data['lead'] = [
+            'id'  => $this->id,
+            'uid' => $this->uid
         ];
 
-        return $emailData;
+        $content_data['project'] = [
+            'name'      => $project ? $project->name : '',
+            'url'       => $project ? $project->link : 'https://',
+            'address'   => $projectContactInfo['address'] ?? '',
+            'phone'     => $projectContactInfo['phone'] ?? '',
+            'email'     => $projectContactInfo['email'] ?? '',
+        ];
+
+        $content_data['agent'] = [
+            'name'  => Yii::$app->user->identity->full_name,
+            'username'  => Yii::$app->user->identity->username,
+            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+        ];
+
+        $content_data['client'] = [
+            'fullName'     => $this->client ? $this->client->full_name : '',
+            'firstName'    => $this->client ? $this->client->first_name : '',
+            'lastName'     => $this->client ? $this->client->last_name : '',
+        ];
+
+        return $content_data;
     }
 
 
@@ -3917,21 +4016,21 @@ Reason: {reason}
 
 
     /**
-     * @param null $role
+     * @param Employee $user
      * @return array
      */
-    public static function getStatusList($role = null): array
+    public static function getStatusList(Employee $user = null): array
     {
-
-        switch ($role) {
-            case 'admin' :
+        if ($user !== null) {
+            if ($user->isAdmin()) {
                 $list = self::STATUS_LIST;
-                break;
-            case 'supervision' :
+            } elseif ($user->isSupervision()) {
                 $list = self::STATUS_MULTIPLE_UPDATE_LIST;
-                break;
-            default :
+            } else {
                 $list = self::STATUS_LIST;
+            }
+        } else {
+            $list = self::STATUS_LIST;
         }
 
         if (isset($list[self::STATUS_ON_HOLD])) {
@@ -4187,7 +4286,12 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = Quote::find()->where(['lead_id' => $this->id]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'sort' => [
+                'defaultOrder' => [
+                    'type_id' => SORT_ASC,
+                    'id' => SORT_DESC,
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -4354,7 +4458,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public static function find(): LeadQuery
     {
-        return new LeadQuery(get_called_class());
+        return new LeadQuery(static::class);
     }
     
     /**

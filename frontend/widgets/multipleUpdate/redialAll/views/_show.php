@@ -76,7 +76,7 @@ $('body').find('#update-all-form').on('beforeSubmit', function (e) {
             {$script}
        },
        error: function (error) {
-           $('#{$modalId}}').modal('toggle');
+           $('#{$modalId}').modal('toggle');
            new PNotify({title: 'Error', text: 'Internal Server Error. Try again later.', type: 'error'});
        }
     })

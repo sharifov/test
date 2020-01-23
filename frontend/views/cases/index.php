@@ -1,14 +1,16 @@
 <?php
 
 use common\models\Employee;
+use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesCategory;
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use sales\entities\cases\Cases;
 use \sales\entities\cases\CasesStatus;
 use yii\helpers\Url;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -53,10 +55,47 @@ if ($user->isAdmin()) {
         </div>
     </div>
 
-    <?= GridView::widget([
+    <?php
+        $gridId = 'cases-grid-id';
+    ?>
+
+    <div class="card multiple-update-summary" style="margin-bottom: 10px; display: none">
+        <div class="card-header">
+            <span class="pull-right clickable close-icon"><i class="fa fa-times"></i></span>
+            Processing result log:
+        </div>
+        <div class="card-body"></div>
+    </div>
+
+    <?php
+$js = <<<JS
+$('.close-icon').on('click', function(){    
+    $('.multiple-update-summary').slideUp();
+})
+JS;
+$this->registerJs($js);
+
+    ?>
+
+    <?php if ($user->isAdmin() || $user->isExSuper() || $user->isSupSuper()): ?>
+        <?= MultipleUpdateButtonWidget::widget([
+            'modalId' => 'modal-df',
+            'showUrl' => Url::to(['/cases-multiple-update/show']),
+            'gridId' => $gridId,
+        ]) ?>
+    <?php endif;?>
+
+    <?php Pjax::begin(['id' => 'cases-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+
+        <?= GridView::widget([
+        'id' => $gridId,
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
+            [
+                'class' => '\kartik\grid\CheckboxColumn',
+                'visible' => $user->isAdmin() || $user->isExSuper() || $user->isSupSuper(),
+            ],
             [
                 'attribute' => 'cs_id',
                 'options' => [
@@ -141,11 +180,6 @@ if ($user->isAdmin()) {
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
-//                'visibleButtons' => [
-//                    'view' => function ($model, $key, $index) {
-//                        return Yii::$app->user->can('admin');
-//                    },
-//                ],
                 'buttons' => [
                     'view' => function ($url, Cases $model, $key) {
                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to([
@@ -158,4 +192,6 @@ if ($user->isAdmin()) {
 
         ],
     ]); ?>
+
+    <?php Pjax::end() ?>
 </div>

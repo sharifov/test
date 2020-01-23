@@ -2,6 +2,8 @@
 
 namespace common\bootstrap;
 
+use modules\flight\src\events\FlightCountPassengersChangedEvent;
+use modules\flight\src\listeners\FlightCountPassengersChangedEventListener;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\dispatchers\SimpleEventDispatcher;
@@ -13,6 +15,7 @@ use sales\entities\cases\events\CasesSolvedStatusEvent;
 use sales\entities\cases\events\CasesTrashStatusEvent;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
+use sales\events\lead\LeadCreatedByApiBOEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedByIncomingEmailEvent;
@@ -43,6 +46,7 @@ use sales\listeners\cases\CasesTrashStatusEventLogListener;
 use sales\listeners\lead\LeadBookedEventLogListener;
 use sales\listeners\lead\LeadBookedNotificationsListener;
 use sales\listeners\lead\LeadCallExpertRequestEventListener;
+use sales\listeners\lead\LeadCreatedByApiBOLogEventListener;
 use sales\listeners\lead\LeadCreatedByApiLogEventListener;
 use sales\listeners\lead\LeadCreatedByIncomingCallLogListener;
 use sales\listeners\lead\LeadCreatedByIncomingEmailLogListener;
@@ -94,6 +98,10 @@ class SetUp implements BootstrapInterface
                     LeadCreatedByApiLogEventListener::class,
                     LeadQcallAddListener::class,
                 ],
+                LeadCreatedByApiBOEvent::class => [
+                    LeadCreatedByApiBOLogEventListener::class,
+                    LeadQcallAddListener::class,
+                ],
                 LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
                 LeadCreatedByIncomingEmailEvent::class => [LeadCreatedByIncomingEmailLogListener::class],
 
@@ -139,6 +147,8 @@ class SetUp implements BootstrapInterface
                 SmsCreatedEvent::class => [],
                 SmsCreatedByIncomingSalesEvent::class => [SmsCreatedByIncomingSalesNotificationListener::class],
                 SmsCreatedByIncomingSupportsEvent::class => [SmsCreatedByIncomingSupportNotificationListener::class],
+
+				FlightCountPassengersChangedEvent::class => [FlightCountPassengersChangedEventListener::class]
             ]));
         });
     }

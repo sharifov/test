@@ -61,12 +61,12 @@ class QuoteController extends FController
 
                 //Yii::$app->cache->delete($keyCache);
 
-                $result = Yii::$app->cache->get($keyCache);
+                $result = Yii::$app->cacheFile->get($keyCache);
 
                 if($result === false){
                     $result = SearchService::getOnlineQuotes($lead);
                     if($result) {
-                        Yii::$app->cache->set($keyCache, $result, 600);
+                        Yii::$app->cacheFile->set($keyCache, $result, 600);
                     }
                 }
 
@@ -102,7 +102,7 @@ class QuoteController extends FController
 
             if($key && $lead){
                 $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
-                $resultSearch = Yii::$app->cache->get($keyCache);
+                $resultSearch = Yii::$app->cacheFile->get($keyCache);
 
                 if($resultSearch !== false){
                     foreach ($resultSearch['results'] as $entry){
@@ -150,6 +150,12 @@ class QuoteController extends FController
 
                                 $quote->tickets = json_encode($tickets);
                             }*/
+
+                            if ($lead->originalQuoteExist()) {
+                                $quote->alternative();
+                            } else {
+                                $quote->base();
+                            }
 
                             if (!$quote->save()) {
                                 $result['error'] = VarDumper::dumpAsString($quote->errors);
@@ -565,6 +571,15 @@ class QuoteController extends FController
                             $selling = 0;
                             $itinerary = $quote::createDump($quote->itinerary);
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
+
+                            if ($quote->isNewRecord) {
+                                if ($lead->originalQuoteExist()) {
+                                    $quote->alternative();
+                                } else {
+                                    $quote->base();
+                                }
+                            }
+
                             if($quote->save(false)) {
                                if($lead->called_expert) {
                                    $quote->sendUpdateBO();

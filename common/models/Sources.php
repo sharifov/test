@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\query\SourcesQuery;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\EventTrait;
 use yii\behaviors\TimestampBehavior;
@@ -139,7 +140,7 @@ class Sources extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new SourcesQuery(get_called_class());
+        return new SourcesQuery(static::class);
     }
 
 

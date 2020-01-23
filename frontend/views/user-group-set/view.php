@@ -32,8 +32,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'ugs_id',
             'ugs_name',
             'ugs_enabled:booleanByLabel',
-            'ugs_created_dt:dateTimeByUserDt',
-            'ugs_updated_dt:dateTimeByUserDt',
+            'ugs_created_dt:byUserDateTime',
+            'ugs_updated_dt:byUserDateTime',
             'updatedUser:userName',
         ],
     ]) ?>

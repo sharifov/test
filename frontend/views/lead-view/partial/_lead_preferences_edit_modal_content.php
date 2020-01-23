@@ -14,57 +14,60 @@ use yii\web\View;
 
 
 ?>
-<div class="edit-name-modal-content-ghj">
-	<?php $form = ActiveForm::begin([
-		'id' => 'lead-preferences-edit-form',
-		'action' => Url::to(['lead-view/ajax-edit-lead-preferences', 'gid' => $gid]),
-		'enableClientValidation' => true,
-		'enableAjaxValidation' => false,
-		'validateOnChange' => false,
-		'validateOnBlur' => false,
-		'validationUrl' => Url::to(['lead-view/ajax-edit-lead-preferences-validation'])
-	]);
-	?>
+    <div class="edit-name-modal-content-ghj">
+        <?php $form = ActiveForm::begin([
+            'id' => 'lead-preferences-edit-form',
+            'action' => Url::to(['lead-view/ajax-edit-lead-preferences', 'gid' => $gid]),
+            'enableClientValidation' => true,
+            'enableAjaxValidation' => false,
+            'validateOnChange' => false,
+            'validateOnBlur' => false,
+            'validationUrl' => Url::to(['lead-view/ajax-edit-lead-preferences-validation'])
+        ]);
+        ?>
 
-	<?= $form->errorSummary($leadPreferencesForm) ?>
+        <?= $form->errorSummary($leadPreferencesForm) ?>
 
-    <div class="row">
-    <div class="col-md-6">
-	    <?= $form->field($leadPreferencesForm, 'marketPrice')->input('number', ['min' => 0, 'max' => 99000, 'step' => 'any']) ?>
-    </div>
-    <div class="col-md-6">
-	    <?= $form->field($leadPreferencesForm, 'clientsBudget')->input('number', ['min' => 0, 'max' => 99000, 'step' => 'any']) ?>
-    </div>
-    </div>
-    <div class="row">
-    <div class="col-md-6">
-	<?= $form->field($leadPreferencesForm, 'numberStops')->dropDownList(\sales\helpers\lead\LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
-    </div>
-    </div>
+        <div class="row">
+            <div class="col-md-6">
+                <?= $form->field($leadPreferencesForm, 'marketPrice')->input('number', ['min' => 0, 'max' => 99000, 'step' => 'any']) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($leadPreferencesForm, 'clientsBudget')->input('number', ['min' => 0, 'max' => 99000, 'step' => 'any']) ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <?= $form->field($leadPreferencesForm, 'numberStops')->dropDownList(\sales\helpers\lead\LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($leadPreferencesForm, 'currency')->dropDownList(\common\models\Currency::getList(), ['prompt' => '-']) ?>
+            </div>
+        </div>
 
-    <div class="row">
-    <div class="col-md-12">
-	<?= $form->field($leadPreferencesForm, 'delayedCharge')->checkbox() ?>
-    </div>
-    </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $form->field($leadPreferencesForm, 'delayedCharge')->checkbox() ?>
+            </div>
+        </div>
 
-    <div class="row">
-    <div class="col-md-12">
-	<?= $form->field($leadPreferencesForm, 'notesForExperts')->textarea([
-        'style' => 'resize: vertical;',
-        'rows' => 8
-    ]) ?>
-    </div>
-    </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $form->field($leadPreferencesForm, 'notesForExperts')->textarea([
+                    'style' => 'resize: vertical;',
+                    'rows' => 8
+                ]) ?>
+            </div>
+        </div>
 
-	<div class="text-center">
-		<?= Html::submitButton('<i class="fa fa-check-square-o"></i> Update Lead Preferences', [
-			'class' => 'btn btn-warning'
-		])
-		?>
-	</div>
-	<?php ActiveForm::end(); ?>
-</div>
+        <div class="text-center">
+            <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Update Lead Preferences', [
+                'class' => 'btn btn-warning'
+            ])
+            ?>
+        </div>
+        <?php ActiveForm::end(); ?>
+    </div>
 
 <?php
 $js = <<<JS

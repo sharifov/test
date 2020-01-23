@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ClientQuery;
 use sales\entities\EventTrait;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
@@ -230,6 +231,6 @@ class Client extends ActiveRecord
      */
     public static function find(): ClientQuery
     {
-        return new ClientQuery(get_called_class());
+        return new ClientQuery(static::class);
     }
 }

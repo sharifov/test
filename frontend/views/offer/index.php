@@ -33,6 +33,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'of_name',
             'of_lead_id',
             'of_status_id',
+
+            'of_client_currency',
+            'of_client_currency_rate',
+            'of_app_total',
+            'of_client_total',
+
             'of_owner_user_id',
             'of_created_user_id',
             'of_updated_user_id',

@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\DepartmentPhoneProjectUserGroup;
+use common\models\Employee;
 use Yii;
 use common\models\DepartmentPhoneProject;
 use common\models\search\DepartmentPhoneProjectSearch;
@@ -37,7 +38,9 @@ class DepartmentPhoneProjectController extends FController
     public function actionIndex()
     {
         $searchModel = new DepartmentPhoneProjectSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

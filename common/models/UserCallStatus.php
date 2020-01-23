@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\jobs\AgentCallQueueJob;
+use common\models\query\UserCallStatusQuery;
 use Yii;
 
 /**
@@ -73,7 +74,7 @@ class UserCallStatus extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserCallStatusQuery(get_called_class());
+        return new UserCallStatusQuery(static::class);
     }
 
     /**

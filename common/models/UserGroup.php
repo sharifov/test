@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\UserGroupQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -113,7 +114,7 @@ class UserGroup extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserGroupQuery(get_called_class());
+        return new UserGroupQuery(static::class);
     }
 
     /**

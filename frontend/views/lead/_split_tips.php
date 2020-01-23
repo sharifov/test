@@ -6,14 +6,19 @@
  * @var $mainAgentTips float
  * @var $splitForm TipsSplitForm
  */
+
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\TipsSplit;
 
-if (Yii::$app->user->identity->canRole('admin')) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByRole('agent');
+    $userList = \common\models\Employee::getListByRole(Employee::ROLE_AGENT);
 }
 
 $js = <<<JS

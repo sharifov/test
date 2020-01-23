@@ -58,6 +58,18 @@ DB user: sales
 DB pass:
 ```
 
+
+Nginx configuration
+-------------------
+Example config file: ./nginx.conf
+```
+#for API endpoint
+location ~ \.php$ {
+    ...
+    fastcgi_read_timeout 90s;
+}
+```
+
 Migration (RBAC + LOG):
 -------------------
 ```
@@ -309,8 +321,10 @@ CRONs
 */5 * * * *         php /var/www/sale/yii logger/format-log-managed-attr
 */5 * * * *         php /var/www/sale/yii lead/return-lead-to-ready
 10   1-3  *  *  *     php /var/www/sale/yii service/update-currency
+*/1  *  *  *  *     php /var/www/sale/yii db/compress-email 
 ```
-
+Note: php /var/www/sale/yii db/compress-email - Временный скрипт. Удалить запись после дополнительного тикета по :
+ALTER TABLE "email" DROP "e_email_body_text";  
 ```
 sudo chmod 777 /var/spool/cron/crontabs/root
 ```
@@ -342,6 +356,30 @@ Paste the following code in the console
 php -r "echo geoip_time_zone_by_country_and_region('US', 'CA') . PHP_EOL;"
 
 ```
+
+CRYPTO - PgSQL 
+-------------------
+```
+CREATE EXTENSION pgcrypto;
+SELECT encode(encrypt_iv('Hello!', 'PASSWORD', 'IV-STRING-16', 'aes-cbc'), 'base64');
+SELECT convert_from(decrypt_iv(decode('a5S7B5nas5XaWibbuX45AA==','base64'), 'PASSWORD', 'IV-STRING-16', 'aes-cbc'),'SQL_ASCII') AS str;
+```
+
+
+CRYPTO - MySQL 
+-------------------
+```
+SET block_encryption_mode = 'aes-256-cbc';
+SELECT TO_BASE64(AES_ENCRYPT('Hello!','PASSWORD', 'IV-STRING-16')) AS aes
+SELECT AES_DECRYPT(FROM_BASE64('PRZKw4PIlNtSPRFuNWYmbA=='), 'PASSWORD', 'IV-STRING-16') AS aes
+```
+
+CRYPTO - PHP 
+-------------------
+```
+
+```
+
 
 Command must return the time zone of the USA - California ---> America/Los_Angeles
 

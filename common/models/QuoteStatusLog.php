@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\QuoteStatusLogQuery;
 use Yii;
 
 /**
@@ -75,7 +76,7 @@ class QuoteStatusLog extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new QuoteStatusLogQuery(get_called_class());
+        return new QuoteStatusLogQuery(static::class);
     }
 
 

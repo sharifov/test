@@ -2,44 +2,129 @@
 
 namespace sales\yii\i18n;
 
+use common\models\Department;
 use common\models\Employee;
+use common\models\Project;
+use common\models\Quote;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asQuoteType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        switch ($value) {
+            case Quote::TYPE_BASE:
+                $class = 'label label-info';
+                break;
+            case Quote::TYPE_ORIGINAL:
+                $class = 'label label-success';
+                break;
+            case Quote::TYPE_ALTERNATIVE:
+                $class = 'label label-warning';
+                break;
+            default:
+                $class = 'label label-default';
+        }
+
+        return Html::tag('span', Quote::getTypeName($value), ['class' => $class]);
+    }
+
     /**
      * @param $dateTime
      * @return string
      * @throws \yii\base\InvalidConfigException
      */
-    public function asDateTimeByUserDt($dateTime): string
+    public function asByUserDateTime($dateTime): string
     {
-        return $dateTime ? '<i class="fa fa-calendar"></i> ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]') : '-';
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]');
     }
 
     /**
-     * @param Employee|int|string|null $user
+     * @param Employee|int|string|null $value
      * @return string
      */
-    public function asUserName($user): string
+    public function asUserName($value): string
     {
-        if (!$user) {
-            return '';
+        if (!$value) {
+            return $this->nullDisplay;
         }
-        if ($user instanceof Employee) {
-            $userName = $user->username;
-        } elseif (is_int($user)) {
-            if ($findUser = Employee::findOne($user)) {
-                $userName = $findUser->username;
+
+        if (is_string($value)) {
+            $name = $value;
+        } elseif ($value instanceof Employee) {
+            $name = $value->username;
+        } elseif (is_int($value)) {
+            if ($entity = Employee::findOne($value)) {
+                $name = $entity->username;
             } else {
                 return 'not found';
             }
-        } elseif (is_string($user)) {
-            $userName = $user;
         } else {
             throw new \InvalidArgumentException('user must be Employee|int|string|null');
         }
-        return '<i class="fa fa-user"></i> ' . Html::encode($userName);
+
+        return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
+    }
+
+    /**
+     * @param Department|int|string|null $value
+     * @return string
+     */
+    public function asDepartmentName($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        if (is_string($value)) {
+            $name = $value;
+        } elseif ($value instanceof Department) {
+            $name = $value->dep_name;
+        } elseif (is_int($value)) {
+            if ($entity = Department::findOne($value)) {
+                $name = $entity->dep_name;
+            } else {
+                return 'not found';
+            }
+        } else {
+            throw new \InvalidArgumentException('value must be Department|int|string|null');
+        }
+
+        return Html::encode($name);
+    }
+
+    /**
+     * @param Project|int|string|null $value
+     * @return string
+     */
+    public function asProjectName($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        if (is_string($value)) {
+            $name = $value;
+        } elseif ($value instanceof Project) {
+            $name = $value->name;
+        } elseif (is_int($value)) {
+            if ($entity = Project::findOne($value)) {
+                $name = $entity->name;
+            } else {
+                return 'not found';
+            }
+        } else {
+            throw new \InvalidArgumentException('value must be Project|int|string|null');
+        }
+
+        return Html::tag('span', Html::encode($name), ['class' => 'badge']);
     }
 
     /**
@@ -48,9 +133,12 @@ class Formatter extends \yii\i18n\Formatter
      */
     public function asBooleanByLabel($value): string
     {
-        if ($value) {
-            return '<span class="label label-success">Yes</span>';
+        if ($value === null) {
+            return $this->nullDisplay;
         }
-        return '<span class="label label-danger">No</span>';
+        if ($value) {
+            return Html::tag('span', 'Yes', ['class' => 'label label-success']);
+        }
+        return Html::tag('span', 'No', ['class' => 'label label-danger']);
     }
 }

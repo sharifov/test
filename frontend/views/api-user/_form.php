@@ -12,30 +12,37 @@ use yii\widgets\ActiveForm;
 
     <div class="card card-default">
 
-    <div class="panel-body panel-collapse collapse in">
-        <?php $form = ActiveForm::begin(); ?>
+        <div class="card-body">
 
-        <div class="col-md-4">
+            <div class="panel-body panel-collapse collapse show">
+                <?php $form = ActiveForm::begin(); ?>
 
-            <?= $form->field($model, 'au_name')->textInput(['maxlength' => true]) ?>
+                <div class="col-md-4">
 
-            <?= $form->field($model, 'au_api_username')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'au_name')->textInput(['maxlength' => true]) ?>
 
-            <?= $form->field($model, 'au_api_password')->passwordInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'au_api_username')->textInput(['maxlength' => true]) ?>
 
-            <?= $form->field($model, 'au_email')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'au_api_password')->passwordInput(['maxlength' => true]) ?>
 
-            <?= $form->field($model, 'au_project_id')->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Project::find()->all(), 'id', 'name'), ['prompt' => '---']) ?>
+                    <?= $form->field($model, 'au_email')->textInput(['maxlength' => true]) ?>
 
-            <?= $form->field($model, 'au_enabled')->checkbox() ?>
+                    <?= $form->field($model, 'au_project_id')->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Project::find()->all(), 'id', 'name'), ['prompt' => '---']) ?>
 
-            <div class="form-group">
-                <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+                    <?= $form->field($model, 'au_enabled')->checkbox() ?>
+
+                    <?= $form->field($model, 'au_rate_limit_number')->textInput() ?>
+
+                    <?= $form->field($model, 'au_rate_limit_reset')->textInput() ?>
+
+                    <div class="form-group">
+                        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+                    </div>
+                </div>
+
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
-
-        <?php ActiveForm::end(); ?>
-    </div>
     </div>
 
 </div>

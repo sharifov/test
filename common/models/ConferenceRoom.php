@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\query\ConferenceRoomQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -212,7 +213,7 @@ class ConferenceRoom extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ConferenceRoomQuery(get_called_class());
+        return new ConferenceRoomQuery(static::class);
     }
 
     /**

@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cf_recording_duration',
                 'label' => 'Recording',
                 'value' => static function (\common\models\Conference $model) {
-                    return  $model->cf_recording_duration ? Html::button(gmdate('i:s', $model->cf_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->cf_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->cf_recording_url]) : '-';
+                    return  $model->cf_recording_duration ? Html::button(gmdate('i:s', $model->cf_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->cf_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->cf_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->cf_sid, 'cfRecord' => true ])*/ ]) : '-';
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-right'],

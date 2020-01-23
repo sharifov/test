@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\BackOffice;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
+use common\models\query\QuoteQuery;
 use sales\entities\EventTrait;
 use Yii;
 use yii\base\ErrorException;
@@ -41,7 +42,7 @@ use common\components\SearchService;
  * @property string $employee_name
  * @property string $last_ticket_date
  * @property double $service_fee_percent
- * @property boolean $alternative
+ * @property int $type_id
  * @property string $tickets
  * @property string $origin_search_data
  * @property string $gds_offer_id
@@ -124,6 +125,50 @@ class Quote extends \yii\db\ActiveRecord
     public $hasAirportChange = false;
     public $hasOvernight = false;
 
+    public const TYPE_BASE = 0;
+    public const TYPE_ORIGINAL = 1;
+    public const TYPE_ALTERNATIVE = 2;
+
+    public const TYPE_LIST = [
+        self::TYPE_BASE => 'Base',
+        self::TYPE_ORIGINAL => 'Original',
+        self::TYPE_ALTERNATIVE => 'Alternative',
+    ];
+
+    public static function getTypeName($type)
+    {
+        return self::TYPE_LIST[$type] ?? '-';
+    }
+
+    public function isBase(): bool
+    {
+        return $this->type_id === self::TYPE_BASE;
+    }
+
+    public function base(): void
+    {
+        $this->type_id = self::TYPE_BASE;
+    }
+
+    public function isOriginal(): bool
+    {
+        return $this->type_id === self::TYPE_ORIGINAL;
+    }
+
+    public function original(): void
+    {
+        $this->type_id = self::TYPE_ORIGINAL;
+    }
+
+    public function isAlternative(): bool
+    {
+        return $this->type_id === self::TYPE_ALTERNATIVE;
+    }
+
+    public function alternative(): void
+    {
+        $this->type_id = self::TYPE_ALTERNATIVE;
+    }
 
     /**
      * {@inheritdoc}
@@ -141,7 +186,7 @@ class Quote extends \yii\db\ActiveRecord
         return [
             [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
             [['lead_id', 'status' ], 'integer'],
-            [[ 'check_payment', 'alternative'], 'boolean'],
+            [[ 'check_payment'], 'boolean'],
             [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
 
@@ -151,6 +196,9 @@ class Quote extends \yii\db\ActiveRecord
 
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
+
+            ['type_id', 'integer'],
+            ['type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
         ];
     }
 
@@ -180,7 +228,7 @@ class Quote extends \yii\db\ActiveRecord
             'service_fee_percent' => 'Service Fee Percent',
             'reservation_dump' => 'Reservation Dump',
             'pricing_info' => 'Pricing info',
-            'alternative' => 'Alternative',
+            'type_id' => 'Type',
             'tickets'   => 'Tickets JSON',
             'origin_search_data' => 'Original Search JSON',
 			'gds_offer_id' => 'GDS Offer ID'
@@ -204,12 +252,18 @@ class Quote extends \yii\db\ActiveRecord
     /**
      * @param array $attributes
      * @param int $leadId
+     * @param bool $isAlternative
      * @return static
      */
-    public static function cloneByUid(array $attributes, int $leadId): self
+    public static function cloneByUid(array $attributes, int $leadId, bool $isAlternative): self
     {
         $quote = new self();
         $quote->attributes = $attributes;
+        if ($isAlternative) {
+            $quote->alternative();
+        } else {
+            $quote->base();
+        }
         $quote->lead_id = $leadId;
         $quote->uid = uniqid();
         $quote->status = self::STATUS_CREATED;
@@ -232,14 +286,6 @@ class Quote extends \yii\db\ActiveRecord
     public function decline(): void
     {
         $this->setStatus(self::STATUS_DECLINED);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAlternative(): bool
-    {
-        return (bool)$this->alternative;
     }
 
     /**
@@ -2074,7 +2120,8 @@ class Quote extends \yii\db\ActiveRecord
             'status' => $this->status,
             'check_payment' => $this->check_payment,
             'fare_type' => $this->fare_type,
-            'employee_name' => $this->employee_name
+            'employee_name' => $this->employee_name,
+            'type_id' => $this->type_id,
         ];
 
         $pQInformation = [];
@@ -2378,5 +2425,10 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return $segments;
+    }
+
+    public static function find(): QuoteQuery
+    {
+        return new QuoteQuery(get_called_class());
     }
 }

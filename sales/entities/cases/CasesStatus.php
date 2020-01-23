@@ -29,11 +29,37 @@ class CasesStatus
     ];
 
     public const STATUS_ROUTE_RULES = [
-        null                        => [self::STATUS_PENDING],
-        self::STATUS_PENDING        => [self::STATUS_PROCESSING, self::STATUS_TRASH],
-        self::STATUS_PROCESSING     => [self::STATUS_PROCESSING, self::STATUS_FOLLOW_UP, self::STATUS_TRASH, self::STATUS_SOLVED],
-        self::STATUS_FOLLOW_UP      => [self::STATUS_TRASH, self::STATUS_PROCESSING],
-        self::STATUS_TRASH          => [self::STATUS_FOLLOW_UP],
+        null => [
+            self::STATUS_PENDING,
+            self::STATUS_PROCESSING,
+            self::STATUS_FOLLOW_UP,
+            self::STATUS_TRASH,
+            self::STATUS_SOLVED,
+        ],
+        self::STATUS_PENDING => [
+            self::STATUS_PROCESSING,
+            self::STATUS_TRASH,
+        ],
+        self::STATUS_PROCESSING => [
+            self::STATUS_PROCESSING,
+            self::STATUS_FOLLOW_UP,
+            self::STATUS_TRASH,
+            self::STATUS_SOLVED,
+        ],
+        self::STATUS_FOLLOW_UP => [
+            self::STATUS_PROCESSING,
+            self::STATUS_TRASH,
+        ],
+        self::STATUS_TRASH => [
+            self::STATUS_PROCESSING,
+            self::STATUS_FOLLOW_UP,
+            self::STATUS_SOLVED,
+        ],
+        self::STATUS_SOLVED => [
+            self::STATUS_PROCESSING,
+            self::STATUS_FOLLOW_UP,
+            self::STATUS_TRASH,
+        ],
     ];
 
     public const STATUS_REASON_LIST = [
@@ -55,7 +81,7 @@ class CasesStatus
      * @param int|null $status
      * @return array
      */
-    public static function getAllowList(?int $status): array
+    public static function getAllowTransferList(?int $status): array
     {
         $list = [];
         if (!isset(self::STATUS_ROUTE_RULES[$status])) {

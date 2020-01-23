@@ -28,10 +28,10 @@ class CasesStatusLogService
      * @param int $toStatus
      * @param int|null $fromStatus
      * @param int|null $ownerId
-     * @param int|null $createdUserId
+     * @param int|null $creatorId
      * @param string|null $description
      */
-    public function log(int $caseId, int $toStatus, ?int $fromStatus, ?int $ownerId, ?int $createdUserId, ?string $description = ''): void
+    public function log(int $caseId, int $toStatus, ?int $fromStatus, ?int $ownerId, ?int $creatorId, ?string $description = ''): void
     {
         if ($previous = $this->casesStatusLogRepository->getPrevious($caseId)) {
             $previous->end();
@@ -41,7 +41,7 @@ class CasesStatusLogService
             $caseId,
             $toStatus,
             $fromStatus,
-            $createdUserId,
+            $creatorId,
             $ownerId,
             $description
         );

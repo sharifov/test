@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\CaseNoteQuery;
 use sales\entities\cases\Cases;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -105,6 +106,6 @@ class CaseNote extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new CaseNoteQuery(get_called_class());
+        return new CaseNoteQuery(static::class);
     }
 }

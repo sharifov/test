@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\OfferProductQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -74,6 +75,7 @@ class OfferProduct extends \yii\db\ActiveRecord
             'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'op_created_user_id',
+                'updatedByAttribute' => 'op_created_user_id',
             ],
         ];
     }
@@ -108,6 +110,6 @@ class OfferProduct extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new OfferProductQuery(get_called_class());
+        return new OfferProductQuery(static::class);
     }
 }

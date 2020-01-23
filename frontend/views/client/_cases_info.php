@@ -1,11 +1,15 @@
 <?php
 
+use common\models\Employee;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use yii\grid\GridView;
 use yii\helpers\Html;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 ?>
 
@@ -55,7 +59,7 @@ use yii\helpers\Html;
                     'value' => static function (Cases $model) {
                         return $model->owner ? $model->owner->username : '';
                     },
-                    'visible' => Yii::$app->user->identity->isSupSuper() || Yii::$app->user->identity->isExSuper() || Yii::$app->user->identity->isAdmin()
+                    'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
                 ],
                 [
                     'attribute' => 'cs_lead_id',

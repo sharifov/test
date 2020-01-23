@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\DepartmentPhoneProjectUserGroupQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -89,6 +90,6 @@ class DepartmentPhoneProjectUserGroup extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new DepartmentPhoneProjectUserGroupQuery(get_called_class());
+        return new DepartmentPhoneProjectUserGroupQuery(static::class);
     }
 }

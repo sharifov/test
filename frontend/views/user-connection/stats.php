@@ -5,6 +5,7 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $employees [] */
 
+use common\models\Employee;
 use sales\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
 use yii\grid\GridView;
@@ -12,16 +13,16 @@ use yii\grid\GridView;
 $this->title = 'User Stats';
 $this->params['breadcrumbs'][] = $this->title;
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }
 
-$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
-
-//Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
-
+$projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 <div class="card card-default">
@@ -130,7 +131,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                         return $groupsValue;
                     },
                     'format' => 'raw',
-                    'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                    'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                 ],
 
 

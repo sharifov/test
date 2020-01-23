@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\LeadChecklistTypeQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -111,7 +112,7 @@ class LeadChecklistType extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new LeadChecklistTypeQuery(get_called_class());
+        return new LeadChecklistTypeQuery(static::class);
     }
 
 

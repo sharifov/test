@@ -186,7 +186,7 @@ class CasesController extends FController
                 $mail->e_type_id = Email::TYPE_OUTBOX;
                 $mail->e_status_id = Email::STATUS_PENDING;
                 $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                $mail->e_email_body_html = $previewEmailForm->e_email_message;
+                $mail->body_html = $previewEmailForm->e_email_message;
                 $mail->e_email_from = $previewEmailForm->e_email_from;
 
                 $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
@@ -706,7 +706,7 @@ class CasesController extends FController
 
             $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
             if($cs) {
-                $data['error'] = 'This sale ('.$saleData['saleId'].') exist in this Case Id '.$model->cs_id;
+                $out['error'] = 'This sale ('.$saleData['saleId'].') exist in this Case Id '.$model->cs_id;
             } else {
                 $cs = new CaseSale();
                 $cs->css_cs_id = $model->cs_id;
@@ -719,7 +719,7 @@ class CasesController extends FController
                 $cs->css_sale_data_updated = $cs->css_sale_data;
 
                 if(!$cs->save()) {
-                    Yii::error(VarDumper::dumpAsString($cs->errors), 'CasesController:actionAddSale:CaseSale:save');
+                    Yii::error(VarDumper::dumpAsString($cs->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
                 } else {
                     $model->updateLastAction();
                 }
@@ -792,8 +792,8 @@ class CasesController extends FController
         $form = new CasesCreateByWebForm($user);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $case = $this->casesCreateService->createByWeb($form);
-                $this->casesManageService->processing($case->cs_id, Yii::$app->user->id);
+                $case = $this->casesCreateService->createByWeb($form, $user->id);
+                $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e){
@@ -879,7 +879,7 @@ class CasesController extends FController
         $case = $this->findModelByGid($gId);
         try {
             $user = $this->userRepository->find($userId);
-            $this->casesManageService->take($case->cs_id, $user->id);
+            $this->casesManageService->take($case->cs_id, $user->id, $user->id);
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
@@ -953,17 +953,22 @@ class CasesController extends FController
      */
     public function actionChangeStatus()
     {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        $creatorId = $user->id;
+
         $gid = (string)Yii::$app->request->get('gid');
         $case = $this->findModelByGid($gid);
 
-        $form = new CasesChangeStatusForm($case);
+        $form = new CasesChangeStatusForm($case, $user);
 
         $statusReasons = CasesStatus::STATUS_REASON_LIST;
 
         try {
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-                $isSimpleAgent = Yii::$app->user->identity->isSimpleAgent();
+                $isSimpleAgent = $user->isSimpleAgent();
 
                 if ($isSimpleAgent && empty($case->cs_category)) {
                     throw new \Exception('Status of a case without a category cannot be changed!');
@@ -971,16 +976,16 @@ class CasesController extends FController
 
                 switch ((int)$form->status) {
                     case CasesStatus::STATUS_FOLLOW_UP :
-                        $this->casesManageService->followUp($case->cs_id, $form->message);
+                        $this->casesManageService->followUp($case->cs_id, $creatorId, $form->message);
                         break;
                     case CasesStatus::STATUS_TRASH :
-                        $this->casesManageService->trash($case->cs_id, $form->message);
+                        $this->casesManageService->trash($case->cs_id, $creatorId, $form->message);
                         break;
                     case CasesStatus::STATUS_SOLVED :
-                        $this->casesManageService->solved($case->cs_id, $form->message);
+                        $this->casesManageService->solved($case->cs_id, $creatorId, $form->message);
                         break;
                     case CasesStatus::STATUS_PENDING :
-                        $this->casesManageService->pending($case->cs_id, $form->message);
+                        $this->casesManageService->pending($case->cs_id, $creatorId, $form->message);
                         break;
                     default:
                         Yii::$app->session->setFlash('error', 'Undefined status');

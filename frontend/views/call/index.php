@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Call;
+use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -14,12 +15,15 @@ use yii\bootstrap4\Modal;
 $this->title = 'Call List';
 $this->params['breadcrumbs'][] = $this->title;
 
-if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
+    $projectList = \common\models\Project::getListByUser($user->id);
 }
 
 ?>
@@ -61,12 +65,12 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
                     },*/
-                    'update' => function ($model, $key, $index) {
-                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    'update' => static function ($model, $key, $index) use ($user) {
+                        return $user->isAdmin();
                     },
 
-                    'delete' => function ($model, $key, $index) {
-                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    'delete' => static function ($model, $key, $index) use ($user) {
+                        return $user->isAdmin();
                     },
                 ],
             ],
@@ -137,7 +141,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'attribute' => 'c_recording_duration',
                 'label' => 'Recording',
                 'value' => static function (\common\models\Call $model) {
-                    return  $model->c_recording_url ? Html::button(gmdate('i:s', $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url]) : '-';
+                    return  $model->c_recording_url ? Html::button(gmdate('i:s', $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]) : '-';
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-right'],

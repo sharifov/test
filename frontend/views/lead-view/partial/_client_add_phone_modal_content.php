@@ -8,6 +8,7 @@
 
 use borales\extensions\phoneInput\PhoneInput;
 use common\models\ClientPhone;
+use common\models\Employee;
 use common\models\Lead;
 use sales\forms\lead\PhoneCreateForm;
 use yii\helpers\Html;
@@ -15,6 +16,7 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 
+/** @var Employee $user */
 $user = Yii::$app->user->identity;
 $addPhone->client_id = $lead->client_id;
 ?>
@@ -32,7 +34,7 @@ $addPhone->client_id = $lead->client_id;
 
     <?= $form->errorSummary($addPhone); ?>
 
-    <?php if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
+    <?php if ($lead->isOwner($user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
             <?= $form->field($addPhone, 'phone', [
                 'options' => [
                     'class' => 'form-group',

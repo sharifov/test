@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -16,13 +17,16 @@ $this->params['breadcrumbs'][] = $this->title;
 $userList = [];
 $projectList = [];
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }
 
-$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+$projectList = EmployeeProjectAccess::getProjects($user->id);
 
 
 ?>

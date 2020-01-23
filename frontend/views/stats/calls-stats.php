@@ -59,7 +59,7 @@ $this->title = 'Calls Stats';
 									'options' => [
 										'placeholder' => 'Select TimeZone',
 										'multiple' => false,
-										'value' => Yii::$app->user->identity->timezone
+										'value' =>  $model->timeZone ?? Yii::$app->user->identity->timezone
 									],
 									'pluginOptions' => ['allowClear' => true],
 								]) ?>

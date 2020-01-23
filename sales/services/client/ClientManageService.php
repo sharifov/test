@@ -8,6 +8,7 @@ use common\models\ClientPhone;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\model\client\ClientCodeException;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
@@ -24,7 +25,6 @@ use sales\services\ServiceFinder;
  */
 class ClientManageService
 {
-
     private $clientRepository;
     private $clientPhoneRepository;
     private $clientEmailRepository;
@@ -203,7 +203,7 @@ class ClientManageService
         $this->addPhones($client, $phones);
 
         if (!$client->clientPhones) {
-            throw new \DomainException('Cannot create client. Not added phones.');
+            throw new \DomainException('Cannot create client. Not added phones.', ClientCodeException::CLIENT_CREATE_NOT_ADD_PHONES);
         }
 
         return $client;
@@ -234,7 +234,7 @@ class ClientManageService
         $this->addEmails($client, $emails);
 
         if (!$client->clientEmails) {
-            throw new \DomainException('Cannot create client. Not added emails.');
+            throw new \DomainException('Cannot create client. Not added emails.', ClientCodeException::CLIENT_CREATE_NOT_ADD_EMAILS);
         }
 
         return $client;
@@ -288,7 +288,7 @@ class ClientManageService
         });
 
         if (!$phones) {
-            throw new \DomainException('Phones is empty');
+            throw new \DomainException('Phones is empty', ClientCodeException::CLIENT_PHONES_EMPTY);
         }
 
         return $phones;
@@ -305,10 +305,9 @@ class ClientManageService
         });
 
         if (!$emails) {
-            throw new \DomainException('Emails is empty');
+            throw new \DomainException('Emails is empty', ClientCodeException::CLIENT_EMAILS_EMPTY);
         }
 
         return $emails;
     }
-
 }

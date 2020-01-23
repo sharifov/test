@@ -2,6 +2,7 @@
 
 namespace sales\forms\lead;
 
+use common\models\Currency;
 use sales\helpers\lead\LeadPreferencesHelper;
 use yii\base\Model;
 
@@ -10,6 +11,7 @@ use yii\base\Model;
  * @property integer $clientsBudget
  * @property integer $marketPrice
  * @property integer $numberStops
+ * @property string $currency
  */
 class PreferencesCreateForm extends Model
 {
@@ -17,6 +19,7 @@ class PreferencesCreateForm extends Model
     public $marketPrice;
     public $clientsBudget;
     public $numberStops;
+    public $currency;
 
     /**
      * @return array
@@ -28,6 +31,9 @@ class PreferencesCreateForm extends Model
             [['marketPrice', 'clientsBudget'], 'number', 'min' => 500, 'max' => 99000],
 
             ['numberStops', 'integer'],
+            [['currency'], 'string', 'max' => 3],
+            [['currency'], 'default', 'value' => null],
+            [['currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['currency' => 'cur_code']],
             ['numberStops', 'in', 'range' => array_keys(LeadPreferencesHelper::listNumberStops())],
 
         ];
@@ -42,6 +48,7 @@ class PreferencesCreateForm extends Model
             'marketPrice' => 'Market, $',
             'clientsBudget' => 'Budget, $',
             'numberStops' => 'Stops',
+            'currency' => 'Currency'
         ];
     }
 

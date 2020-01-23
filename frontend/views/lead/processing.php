@@ -501,8 +501,8 @@ $js = <<<JS
         e.preventDefault();
         var url = $(this).attr('href');
         if ($.inArray($(this).data('status'), [2, 8]) != -1) {
-            let modal = $('#modal-lg');
-            $('#modal-lg-label').html('Take processing');
+            let modal = $('#modal-df');
+            $('#modal-df-label').html('Take processing');
             modal.find('.modal-body').html('');
             modal.find('.modal-body').load(url, function( response, status, xhr ) {
                 modal.modal('show');

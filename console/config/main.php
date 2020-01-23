@@ -26,6 +26,7 @@ return [
             'migrationNamespaces' => [
                 //'app\migrations',
                 'modules\hotel\migrations',
+                'modules\flight\migrations',
             ],
         ],
 
@@ -52,7 +53,7 @@ return [
                     'logVars' => [],
                     'prefix' => function () {
                         //$ip = $_SERVER['REMOTE_ADDR'];
-                        return "[console]";
+                        return '[console]';
                     },
                 ],
                 [
@@ -64,7 +65,7 @@ return [
                     'logVars' => [],
                     'categories' => ['info\*'],
                     'prefix' => function () {
-                        return "[console]";
+                        return '[console]';
                     },
                 ],
                 [
@@ -108,7 +109,7 @@ return [
             'class'                     => 'lajax\translatemanager\Module',
             'root'                      => '@frontend',               // The root directory of the project scan.
             'scanRootParentDirectory'   => true,
-            'layout'                    => '@backend/themes/gentelella/views/layouts/main',         // Name of the used layout. If using own layout use 'null'.
+            'layout'                    => '@frontend/themes/gentelella_v2/views/layouts/main',         // Name of the used layout. If using own layout use 'null'.
             'allowedIPs'                => ['*'],               // 127.0.0.1 IP addresses from which the translation interface is accessible.
             //'roles'                     => ['@'],               // For setting access levels to the translating interface.
             'tmpDir'                    => '@runtime',         // Writable directory for the client-side temporary language files.

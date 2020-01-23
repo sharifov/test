@@ -6,6 +6,7 @@ use common\components\CommunicationService;
 use common\models\Employee;
 use common\models\UserProjectParams;
 use http\Url;
+use sales\helpers\email\TextConvertingHelper;
 use Yii;
 use common\models\Email;
 use common\models\search\EmailSearch;
@@ -86,6 +87,8 @@ class EmailController extends FController
                     $modelNewEmail->e_project_id = $upp->upp_project_id;
                 }
             }
+
+
 
             if(!$modelNewEmail->e_project_id) {
                 $modelNewEmail->addError('e_subject', 'Error! Project ID not detected');
@@ -188,21 +191,15 @@ class EmailController extends FController
                             $errorJson = @json_decode($mailPreview['error'], true);
                             $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
                             Yii::error($mailPreview['error'], 'EmailController:inbox:mailPreview');
-
-                            //$modelNewEmail->e_email_body_html = ($errorJson['message'] ?? $mailPreview['error']);
-
                         } else {
-                            $modelNewEmail->e_email_body_html = $mailPreview['data']['email_body_html'];
+                            $modelNewEmail->body_html = $mailPreview['data']['email_body_html'];
                         }
                     }
 
                     $modelNewEmail->e_email_subject = '✈️ ' . ($project ? $project->name : ''). ' - ' . Yii::$app->user->identity->username; //$mailPreview['data']['email_subject'];
 
                 }
-
             }
-
-
         }
 
         $params = Yii::$app->request->queryParams;
@@ -219,6 +216,7 @@ class EmailController extends FController
 
         if($e_id = Yii::$app->request->get('id')) {
             $modelEmailView = Email::findOne($e_id);
+
             if($modelEmailView && $modelEmailView->e_is_new) {
                 $modelEmailView->e_is_new = 0;
                 $modelEmailView->save();
@@ -228,7 +226,7 @@ class EmailController extends FController
         if($e_id = Yii::$app->request->get('edit_id')) {
 
             $modelNewEmail = Email::findOne($e_id);
-
+            $modelNewEmail->body_html = $modelNewEmail->emailBodyHtml;
             /*if($mail) {
                 $modelEmailView = new Email();
                 $modelEmailView->attributes = 0;
@@ -256,9 +254,8 @@ class EmailController extends FController
                 $modelNewEmail->e_email_subject = Email::reSubject($mail->e_email_subject);
 
                 //$modelNewEmail->e_message_id = $modelNewEmail->generateMessageId();
-                // $modelNewEmail->e_email_body_html = '<p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p>';
 
-                $modelNewEmail->e_email_body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p></body></html>';
+                $modelNewEmail->body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->getEmailBodyHtml())).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p></body></html>';
 
                 $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
                 /*if($modelNewEmail->save()) {
@@ -308,7 +305,6 @@ class EmailController extends FController
      */
     public function actionView($id): string
     {
-
         $model =$this->findModel($id);
 
         /** @var Employee $user */
@@ -316,14 +312,14 @@ class EmailController extends FController
         $roleAccess = ($user->isAdmin() || $user->isSupervision() || $user->isExSuper() || $user->isSupSuper() || $user->isQa());
 
         if(!$roleAccess) {
-            $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => Yii::$app->user->id])->exists();
+            $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => $user->id])->exists();
             if(!$userAccess) {
                 throw new ForbiddenHttpException('Access Denied. Email ID:'.$model->e_id);
             }
         }
 
         if(Yii::$app->request->get('preview')) {
-           return $model->e_email_body_html ?: '';
+           return $model->getEmailBodyHtml() ?: '';
         }
 
         return $this->render('view', [
@@ -360,8 +356,13 @@ class EmailController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->e_id]);
+        if ($model->load(Yii::$app->request->post())) {
+
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->e_id]);
+            }
+        } else {
+            $model->body_html = $model->emailBodyHtml;
         }
 
         return $this->render('update', [

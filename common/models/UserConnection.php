@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\UserConnectionQuery;
 use sales\entities\cases\Cases;
 use Yii;
 
@@ -103,6 +104,6 @@ class UserConnection extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserConnectionQuery(get_called_class());
+        return new UserConnectionQuery(static::class);
     }
 }

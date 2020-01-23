@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -18,7 +19,9 @@ $this->title = 'Dashboard - Supervision';
 JS;
 //$this->registerJs($js, \yii\web\View::POS_READY);*/
 
-$userId = Yii::$app->user->id;
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 
 <div class="site-index">
@@ -50,18 +53,18 @@ $userId = Yii::$app->user->id;
                 <table class="table table-bordered">
                     <tr>
                         <th>My Username:</th>
-                        <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
+                        <td><i class="fa fa-user"></i> <?= $user->username?> (<?=$user->id?>)</td>
                     </tr>
                     <tr>
                         <th>My Role:</th>
-                        <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
+                        <td><?=implode(', ', $user->getRoles())?></td>
                     </tr>
                     <tr>
                         <th>My User Groups:</th>
                         <td><i class="fa fa-users"></i>
                             <?php
                             $groupsValue = '';
-                            if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                            if( $groupsModel =  $user->ugsGroups) {
                                 $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
                                 $groupsValueArr = [];
@@ -80,7 +83,7 @@ $userId = Yii::$app->user->id;
                             <?php
                             $projectsValue = '';
 
-                            $projectList = Yii::$app->user->identity->projects;
+                            $projectList = $user->projects;
 
                             if($projectList) {
 
@@ -302,7 +305,7 @@ JS;
                             return $groupsValue;
                         },
                         'format' => 'raw',
-                        'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                        'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                     ],
 
                     [
@@ -418,8 +421,8 @@ JS;
                         'class' => 'yii\grid\ActionColumn',
                         'template' => '{update}',
                         'visibleButtons' => [
-                            'update' => function (\common\models\Employee $model, $key, $index) {
-                                return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                            'update' => function (\common\models\Employee $model, $key, $index) use ($user) {
+                                return $user->isAdmin() || !$model->isAdmin();
                             },
                         ],
 

@@ -11,13 +11,16 @@ use common\models\Project;
 use common\models\Employee;
 use yii\helpers\ArrayHelper;
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 $disabled = '';
-if ($isProfile || $model->id == Yii::$app->user->id) {
+if ($isProfile || $model->id == $user->id) {
     $disabled = 'disabled';
 }
 ?>
 
-<?php if ($model->canRoles(['agent', 'coach']) && $model->id == Yii::$app->user->id) : ?>
+<?php if ($model->isAgent() && $model->id == $user->id) : ?>
 <?php else : ?>
     <div class="card card-default">
         <div class="panel-heading collapsing-heading">
@@ -33,11 +36,11 @@ if ($isProfile || $model->id == Yii::$app->user->id) {
              */
             $employeeAccess = ArrayHelper::map($model->projectEmployeeAccesses, 'project_id', 'project_id');
             $availableProjects = $employeeAccess;
-            if (Yii::$app->user->identity->canRole('admin')) {
+            if ($user->isAdmin()) {
                 $projects = Project::find()->all();
             } else {
-                if (Yii::$app->user->identity->canRole('supervision')) {
-                    $availableProjects = ArrayHelper::map(Yii::$app->user->identity->projectEmployeeAccesses, 'project_id', 'project_id');
+                if ($user->isSupervision()) {
+                    $availableProjects = ArrayHelper::map($user->projectEmployeeAccesses, 'project_id', 'project_id');
                 }
                 $projects = Project::find()
                     ->where(['id' => $availableProjects])

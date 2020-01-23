@@ -29,14 +29,13 @@ class CasesProcessingStatusEventLogListener
      */
     public function handle(CasesProcessingStatusEvent $event): void
     {
-        $createdUserId = Yii::$app->user->id ?? null;
         try {
             $this->casesStatusLogService->log(
                 $event->case->cs_id,
                 CasesStatus::STATUS_PROCESSING,
                 $event->oldStatus,
                 $event->newOwnerId,
-                $createdUserId,
+                $event->creatorId,
                 $event->description
             );
         } catch (\Throwable $e) {

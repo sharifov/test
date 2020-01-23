@@ -87,7 +87,7 @@ $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadMode
     'data-pjax' => 0
 ]);
 
-$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && $user->canRoles(['admin', 'supervision']));
+$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
 $buttonsSubAction = [];
 $takeConditions = false;
 if (!$leadModel->isNewRecord) {
@@ -96,7 +96,7 @@ if (!$leadModel->isNewRecord) {
     $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
     if($processingConditions){
-        if ($user->canRoles(['admin', 'supervision'])) {
+        if ($user->isAdmin() || $user->isSupervision()) {
             $buttonsSubAction[] = $buttonAnswer;
         }
         //$buttonsSubAction[] = $buttonHoldOn;
@@ -164,7 +164,27 @@ if($project){
 ?>
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
-    <?php if (!$user->canRole('qa')) : ?>
+
+
+    <?php if(!$leadModel->isNewRecord && ($user->isAdmin() || $user->isSupervision())):
+
+        $productTypes = \common\models\ProductType::find()->/*where(['pt_enabled' => true])*/all();
+
+        ?>
+        <div class="dropdown">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                <i class="fa fa-plus"></i> Product
+            </button>
+            <div class="dropdown-menu">
+                <?php foreach ($productTypes as $productType):?>
+                    <a class="dropdown-item add-product <?=$productType->pt_enabled ? '' : 'disabled'?>" href="#" data-product-type-id="<?=Html::encode($productType->pt_id)?>">add <?=Html::encode($productType->pt_name)?></a>
+                <?php endforeach; ?>
+            </div>
+        </div> &nbsp;
+    <?php endif; ?>
+
+
+    <?php if (!$user->isQa()) : ?>
 
             <div class="panel-main__actions">
     	<?php if ($takeConditions){
@@ -214,15 +234,10 @@ if($project){
 
 
 
-        <?php
 
-            if(!$leadModel->isNewRecord && $user->canRoles(['admin', 'supervision'])) {
 
-            }
 
-        ?>
-
-        <?php if(!$leadModel->isNewRecord && $user->canRoles(['admin', 'supervision'])): ?>
+        <?php if(!$leadModel->isNewRecord && ($user->isAdmin() || $user->isSupervision())): ?>
             <?= Html::a('<i class="fa fa-bars"></i> Status Logs', null, [
                 'id' => 'view-flow-transition',
                 'class' => 'btn btn-default',
@@ -249,7 +264,7 @@ if($project){
         <?php endif; ?>
 
 
-        <?php if($leadModel->isSold() && $user->canRoles(['admin', 'supervision'])):?>
+        <?php if($leadModel->isSold() && ($user->isAdmin() || $user->isSupervision())):?>
         	<?= Html::button('<i class="fa fa-money"></i> Split profit', [
                     'class' => 'btn btn-default',
                     'id' => 'split-profit',
@@ -340,7 +355,7 @@ if($project){
 
 <?php
 
-if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && $user->canRoles(['admin', 'supervision']))) {
+if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()))) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
     $formLeadId = sprintf('%s-form', $leadModel->formName());
     $formClientId = sprintf('%s-form', $leadForm->getClient()->formName());
@@ -349,6 +364,8 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
     //\yii\helpers\VarDumper::dump($leadForm->getLeadPreferences(), true); exit;
 
     $formPreferenceId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
+
+    $addProductUrl = Url::to(['product/create-ajax', 'id' => $leadModel->id]);
 
     $js = <<<JS
 
@@ -507,6 +524,58 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
             //$('#lead-notes_for_experts').parent().addClass('has-error');
         }
     });
+    
+    let addProductUrl = '$addProductUrl';
+    
+    $(document).on('click', '.add-product', function (e) {
+        e.preventDefault();
+        
+        //let url = $('#quick-search-quotes-btn').data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-sm');
+        $('#modal-sm-label').html('Add new product');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(addProductUrl, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+        
+        /* $.ajax({
+            type: 'post',
+            data: {'gds': $('#gds-selector').val()},
+            url: url,
+            success: function (data) {
+                $('#preloader').addClass('d-none');
+                modal.find('.modal-body').html(data);
+                modal.modal('show');
+            },
+            error: function (error) {
+               // var obj = JSON.parse(error.data); // $.parseJSON( e.data );
+                $('#preloader').addClass('d-none');
+                console.error(error.responseText);
+                
+                alert('Server Error: ' + error.statusText);
+            }
+        });
+            
+        new PNotify({
+            title: 'Error: notes',
+            type: 'error',
+            text: 'Notes for Expert cannot be blank',
+            hide: true
+        });*/
+            
+        
+        
+    });
+    
+    
+    
+    
     
 JS;
     $this->registerJs($js);

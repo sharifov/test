@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use common\models\query\ProductTypeQuery;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "product_type".
@@ -74,6 +76,20 @@ class ProductType extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ProductTypeQuery(get_called_class());
+        return new ProductTypeQuery(static::class);
+    }
+
+    /**
+     * @param bool $enabled
+     * @return array
+     */
+    public static function getList(bool $enabled = true) : array
+    {
+        $query = self::find()->orderBy(['pt_id' => SORT_ASC]);
+        if ($enabled) {
+            $query->andWhere(['pt_enabled' => true]);
+        }
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'pt_id', 'pt_name');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ProfitBonusQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -95,6 +96,6 @@ class ProfitBonus extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ProfitBonusQuery(get_called_class());
+        return new ProfitBonusQuery(static::class);
     }
 }

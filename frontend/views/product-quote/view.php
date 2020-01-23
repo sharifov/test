@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'pq_id',
             'pq_gid',
-            'pr_name',
+            'pq_name',
             'pq_product_id',
             'pq_order_id',
             'pq_description:ntext',

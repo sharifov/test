@@ -7,5 +7,8 @@ return [
     'api'   => [
         'username'  => 'apiuser',
         'password'  => 'zeitstyle2018',
+    ],
+    'bo' => [
+        'url' => 'https://dev-backoffice.travel-dev.com/api/v2/',
     ]
 ];

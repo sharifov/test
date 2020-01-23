@@ -2,10 +2,12 @@
 
 namespace common\models;
 
+use common\models\query\InvoiceQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "invoice".
@@ -28,9 +30,12 @@ use yii\db\ActiveRecord;
  * @property Currency $invClientCurrency
  * @property Employee $invCreatedUser
  * @property Order $invOrder
+ * @property string $statusName
+ * @property string $statusLabel
+ * @property string $statusClassName
  * @property Employee $invUpdatedUser
  */
-class Invoice extends \yii\db\ActiveRecord
+class Invoice extends ActiveRecord
 {
 
     public const STATUS_NOT_PAID        = 1;
@@ -41,6 +46,12 @@ class Invoice extends \yii\db\ActiveRecord
         self::STATUS_NOT_PAID           => 'Not paid',
         self::STATUS_PAID               => 'Paid',
         self::STATUS_PARTIAL_PAID       => 'Partial paid',
+    ];
+
+    public const STATUS_CLASS_LIST        = [
+        self::STATUS_NOT_PAID           => 'warning',
+        self::STATUS_PAID               => 'success',
+        self::STATUS_PARTIAL_PAID       => 'info',
     ];
 
     /**
@@ -120,6 +131,16 @@ class Invoice extends \yii\db\ActiveRecord
     }
 
     /**
+     * Invoice init create
+     */
+    public function initCreate(): void
+    {
+        $this->inv_gid = self::generateGid();
+        $this->inv_uid = self::generateUid();
+        $this->inv_status_id = self::STATUS_NOT_PAID;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getInvClientCurrency()
@@ -157,7 +178,7 @@ class Invoice extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new InvoiceQuery(get_called_class());
+        return new InvoiceQuery(static::class);
     }
 
     /**
@@ -174,5 +195,62 @@ class Invoice extends \yii\db\ActiveRecord
     public function getStatusName(): string
     {
         return self::STATUS_LIST[$this->inv_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusClassName(): string
+    {
+        return self::STATUS_CLASS_LIST[$this->inv_status_id] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return Html::tag('span', $this->getStatusName(), ['class' => 'badge badge-' . $this->getStatusClassName()]);
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateGid(): string
+    {
+        return md5(uniqid('in', true));
+    }
+
+    /**
+     * @return string
+     */
+    public static function generateUid(): string
+    {
+        return uniqid('in');
+    }
+
+    /**
+     * @return string
+     */
+    public function generateDescription(): string
+    {
+        $count = self::find()->where(['inv_order_id' => $this->inv_order_id])->count();
+        return 'Invoice ' . ($count + 1);
+    }
+
+    /**
+     * @return float
+     */
+    public function calculateClientAmount(): float
+    {
+        $amount = 0;
+        if (is_numeric($this->inv_sum)) {
+            if ($this->invClientCurrency && $this->invClientCurrency->cur_app_rate) {
+                $this->inv_currency_rate = $this->invClientCurrency->cur_app_rate;
+                $amount = $this->inv_sum * $this->inv_currency_rate;
+            }
+        }
+        $this->inv_client_sum = round($amount, 2);
+        return $this->inv_client_sum;
     }
 }

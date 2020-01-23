@@ -76,23 +76,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {update} {sources} {settings}',
-                'visibleButtons' => [
-                    /*'view' => function ($model, $key, $index) {
-                        return User::hasPermission('viewOrder');
-                    },*/
-                    /*'update' => function (\common\models\Employee $model, $key, $index) {
-                        return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                    },
-                    'projects' => function (\common\models\Employee $model, $key, $index) {
-                        return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                    },
-                    'groups' => function (\common\models\Employee $model, $key, $index) {
-                        return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                    },
-                    'switch' => function (\common\models\Employee $model, $key, $index) {
-                        return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                    },*/
-                ],
                 'buttons' => [
                     'sources' => function ($url, \common\models\Project $model, $key) {
                         return Html::a('<span class="fa fa-list"></span>', ['sources/index', 'SourcesSearch[project_id]' => $model->id], ['title' => 'Sources'/*, 'target' => '_blank'*/]);

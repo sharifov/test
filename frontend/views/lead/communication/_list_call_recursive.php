@@ -1,15 +1,21 @@
 <?php
+
+use common\models\Employee;
 use yii\helpers\Html;
 use \common\models\Call;
 
 /* @var $callList Call[] */
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 <?php if ($callList):?>
     <table class="table table-condensed" style="background-color: rgba(255, 255,255, .7)">
         <?php foreach ($callList as $callItem):?>
             <tr>
                 <td style="width:80px">
-                    <?php if (Yii::$app->user->identity->isAdmin()):?>
+                    <?php if ($user->isAdmin()):?>
                         <u title="SID: <?=Html::encode($callItem->c_call_sid)?>"><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u>
                     <?php endif; ?>
 
@@ -29,7 +35,7 @@ use \common\models\Call;
                 <td>
                     <?php if ($callItem->c_recording_url):?>
                         <?=Html::button(gmdate('i:s', $callItem->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                            ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->c_recording_url]) ?>
+                            ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ])*/ ]) ?>
                     <?php endif;?>
                 </td>
                 <td class="text-center">

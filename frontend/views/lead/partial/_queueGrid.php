@@ -17,10 +17,11 @@ use common\models\Employee;
 $actionButtonTemplate = '{action}';
 $queueType = Yii::$app->request->get('type');
 
-$userId = Yii::$app->user->id;
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 $is_manager = false;
-if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
+if($user->isAdmin() || $user->isSupervision()) {
     $is_manager = true;
 }
 

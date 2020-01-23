@@ -152,10 +152,10 @@ $MENU_TOGGLE.on('click', function() {
 
 // Panel toolbox
 $(document).ready(function() {
-    $('.collapse-link').on('click', function() {
-        var $BOX_PANEL = $(this).closest('.x_panel'),
+    $('body').on('click', '.collapse-link', function() {
+        let $BOX_PANEL = $(this).closest('.x_panel'),
             $ICON = $(this).find('i'),
-            $BOX_CONTENT = $BOX_PANEL.find('.x_content');
+            $BOX_CONTENT = $BOX_PANEL.find('.x_content').first();
         
         // fix for some div with hardcoded fix class
         if ($BOX_PANEL.attr('style')) {
@@ -170,7 +170,7 @@ $(document).ready(function() {
         $ICON.toggleClass('fa-chevron-up fa-chevron-down');
     });
 
-    $('.close-link').click(function () {
+    $('body').on('click', '.close-link', function () {
         var $BOX_PANEL = $(this).closest('.x_panel');
 
         $BOX_PANEL.remove();

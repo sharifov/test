@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use common\models\query\LeadQcallQuery;
+use Faker\Provider\DateTime;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use sales\services\lead\qcall\Interval;
 use yii\db\ActiveQuery;
@@ -242,6 +244,6 @@ class LeadQcall extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new LeadQcallQuery(get_called_class());
+        return new LeadQcallQuery(static::class);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use common\models\SettingCategory;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -61,6 +63,8 @@ use yii\widgets\ActiveForm;
         <?//= $form->field($model, 's_updated_dt')->textInput() ?>
 
         <?//= $form->field($model, 's_updated_user_id')->textInput() ?>
+
+        <?= $form->field($model, 's_category_id')->dropDownList(SettingCategory::getList(), ['prompt' => 'Select category', 'style'=>'width: 320px']) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save Value', ['class' => 'btn btn-success']) ?>
