@@ -58,7 +58,6 @@ use yii\widgets\ActiveForm;
             <p><?php if($model->eProject):?>
                 <span class="label label-info"><?=Html::encode($model->eProject->name)?></span>
                 <?php endif;?><?=Html::encode($model->e_email_subject)?></p>
-            <?/*php echo (\yii\helpers\StringHelper::truncate(\common\models\Email::strip_html_tags($model->e_email_body_html), 150, '...', null, true))*/?>
         </div>
     </div>
 <?php if($modelEmailView && $modelEmailView->e_id == $model->e_id):?>
