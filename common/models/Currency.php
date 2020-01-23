@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\CurrencyQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -98,7 +99,7 @@ class Currency extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new CurrencyQuery(get_called_class());
+        return new CurrencyQuery(static::class);
     }
 
 	/**

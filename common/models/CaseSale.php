@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\CaseSaleQuery;
 use sales\entities\cases\Cases;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -184,6 +185,6 @@ class CaseSale extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new CaseSaleQuery(get_called_class());
+        return new CaseSaleQuery(static::class);
     }
 }

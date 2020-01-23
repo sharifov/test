@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ProjectWeightQuery;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -66,6 +67,6 @@ class ProjectWeight extends ActiveRecord
      */
     public static function find(): ProjectWeightQuery
     {
-        return new ProjectWeightQuery(get_called_class());
+        return new ProjectWeightQuery(static::class);
     }
 }

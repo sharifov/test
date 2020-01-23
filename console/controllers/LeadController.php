@@ -63,7 +63,7 @@ class LeadController extends Controller
             $message = count($report) .' leads returned to call ready. [' . implode(', ', array_keys($report)) . ']';
         }
 
-        Yii::info($message, 'info\CronReturnLead');
+        //Yii::info($message, 'info\CronReturnLead');
 
         //**********
 

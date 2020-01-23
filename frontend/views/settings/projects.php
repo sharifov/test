@@ -1,4 +1,5 @@
-<?php use yii\grid\ActionColumn;
+<?php use common\models\Employee;
+use yii\grid\ActionColumn;
 /**
  * @var $this \yii\web\View
  * @var $dataProvider ActiveDataProvider
@@ -11,6 +12,9 @@ use yii\grid\GridView;
 use common\models\Project;
 use yii\helpers\Url;
 use yii\bootstrap4\Modal;
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
 $template = <<<HTML
 <div class="pagination-container row" style="margin-bottom: 10px;">
@@ -47,7 +51,7 @@ $this->registerJs($js);
 <div class="card card-default">
     <div class="card-header">Projects</div>
     <div class="card-body">
-        <?php if (Yii::$app->user->identity->canRole('admin')) : ?>
+        <?php if ($user->isAdmin()) : ?>
             <div class="mb-20">
 
                 <?= Html::a('Sync Project', '#', [

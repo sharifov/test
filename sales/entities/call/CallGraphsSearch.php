@@ -3,12 +3,12 @@
 namespace sales\entities\call;
 
 use common\models\Call;
-use common\models\CallQuery;
 use common\models\Employee;
+use common\models\query\CallQuery;
 use common\models\search\CallSearch;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
-use yii\data\ActiveDataProvider;
+use Yii;
 use yii\data\SqlDataProvider;
 use yii\db\ActiveRecord;
 use DateTime;
@@ -154,6 +154,7 @@ class CallGraphsSearch extends CallSearch
 		$this->betweenHoursFrom = 0;
 		$this->betweenHoursTo = 24;
 		$this->recordingDurationFrom = 30;
+		$this->timeZone = $this->timeZone ?? Yii::$app->user->identity->timezone;
 	}
 
 	/**
@@ -261,7 +262,9 @@ class CallGraphsSearch extends CallSearch
 			'sum(tbl.incoming_duration_sum + tbl.outgoing_duration_sum) as total_rec_duration',
 			'coalesce(sum(incoming_duration_sum) / sum(incoming), 0) as incoming_duration_avg',
 			'coalesce(sum(outgoing_duration_sum) / sum(outgoing), 0) as outgoing_duration_avg',
-			'coalesce(sum(tbl.incoming_duration_sum + tbl.outgoing_duration_sum) / sum(incoming + outgoing),0) as total_rec_duration_avg'
+			'coalesce(sum(tbl.incoming_duration_sum + tbl.outgoing_duration_sum) / sum(incoming + outgoing),0) as total_rec_duration_avg',
+			'sum(case when incoming_duration_sum > 0 then 1 else 0 end) as \'inc_dur_count\'',
+			'sum(case when outgoing_duration_sum > 0 then 1 else 0 end) as \'out_dur_count\''
 		]);
 
 		if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {

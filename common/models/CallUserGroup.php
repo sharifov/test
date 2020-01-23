@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\CallUserGroupQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -89,6 +90,6 @@ class CallUserGroup extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new CallUserGroupQuery(get_called_class());
+        return new CallUserGroupQuery(static::class);
     }
 }

@@ -99,7 +99,7 @@ class AgentActivitySearch extends Call
      * @param $user Employee
      * @return SqlDataProvider
      */
-    public function searchAgentLeads($params, $user)
+    public function searchAgentLeads($params, $user):SqlDataProvider
     {
         $this->load($params);
 
@@ -148,12 +148,6 @@ class AgentActivitySearch extends Call
 
         $query->from('employees AS e');
 
-        /*if ($this->supervision_id > 0) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'e.id', $subQuery]);
-        }*/
-
         if ($user->isSupervision()) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
@@ -168,20 +162,54 @@ class AgentActivitySearch extends Call
             $query->andWhere(['IN', 'e.id', $subQuery]);
         }
 
-        //$totalCount = 20;
-
         // grid filtering conditions
         $query->andFilterWhere(['like', 'username', $this->username]);
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
 
-        //var_dump($sql);die;
+        $qCountEmployees = Employee::find();
+        if ($this->username) {
+            $qCountEmployees->andFilterWhere(['like', 'username', $this->username]);
+
+            if ($user->isSupervision()) {
+                $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
+                    ->leftJoin('auth_assignment', 'auth_assignment.user_id = ugs_user_id')
+                    ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT])
+                    ->orWhere(['auth_assignment.user_id' => $user->id]);
+                $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
+            }
+
+            if (!empty($this->user_groups)){
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
+                $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
+            }
+
+            $totalEmployees = $qCountEmployees->count();
+        } else {
+
+            if ($user->isSupervision()) {
+                $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
+                    ->leftJoin('auth_assignment', 'auth_assignment.user_id = ugs_user_id')
+                    ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT])
+                    ->orWhere(['auth_assignment.user_id' => $user->id]);
+                $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
+            }
+
+            if (!empty($this->user_groups)){
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
+                $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
+            }
+
+            $totalEmployees = $qCountEmployees->count();
+        }
 
         $paramsData = [
             'sql' => $sql,
             //'params' => [':publish' => 1],
-            //'totalCount' => $totalCount,
+            'totalCount' => $totalEmployees,
             'sort' => [
                 'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
@@ -280,8 +308,7 @@ class AgentActivitySearch extends Call
             ],
         ];
 
-        $dataProvider = new SqlDataProvider($paramsData);
-        return $dataProvider;
+        return $dataProvider = new SqlDataProvider($paramsData);
     }
 
     public function searchCalls($params)

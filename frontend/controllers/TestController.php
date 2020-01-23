@@ -6,6 +6,7 @@ use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientPhone;
+use common\models\CreditCard;
 use common\models\Currency;
 use common\models\CurrencyHistory;
 use common\models\Department;
@@ -30,6 +31,7 @@ use common\models\UserGroupAssign;
 use common\models\UserGroupSet;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use console\migrations\RbacMigrationService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -54,8 +56,13 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
+use sales\helpers\app\AppHelper;
+use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
+use sales\model\lead\useCase\lead\api\create\Handler;
+use sales\model\lead\useCase\lead\api\create\LeadForm;
+use sales\model\lead\useCases\lead\api\create\SegmentForm;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
@@ -134,7 +141,10 @@ class TestController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'roles' => ['admin', 'agent'],
+                        'roles' => [
+                            Employee::ROLE_ADMIN,
+                            Employee::ROLE_AGENT,
+                        ],
                         'allow' => true,
                     ],
                 ],
@@ -153,33 +163,53 @@ class TestController extends FController
     public function actionTest()
     {
 
+        $serv = Yii::createObject(RbacMigrationService::class);
+        $t = $serv->getAllRoutesByGroup('/user-group-set/*');
+       foreach ($t as $value) {
+           echo "'" . $value . "', ";
+       }
+       echo PHP_EOL;
+       VarDumper::dump($t);
 
-        $idsCommongroups = EmployeeGroupAccess::getUsersIdsInCommonGroups(503);
+        die;
 
-        $userId = 503;
-        $ids = Employee::find()->select('id')
-            ->andWhere(['or',
+        $data = [
+            'client' => [
+                'phone' => '+37369636963',
+            ],
+            'uid' => '346g6142wdg22rhdf',
+            'status' => Lead::STATUS_BOOK_FAILED,
+            'sub_sources_code' => 'JIVOCH',
+            'cabin' => 'E',
+            'adults' => 2,
+            'children' => 2,
+            'infants' => 2,
+            'segments' => [
                 [
-                    'id' => EmployeeGroupAccess::getUsersIdsInCommonGroups($userId)
+                    'origin' => 'NYC',
+                    'destination' => 'LON',
+                    'departure' => '2019-12-16',
                 ],
                 [
-                    'id' => UserGroupAssign::find()->select(['ugs_user_id'])->andWhere([
-                        'ugs_group_id' =>
-                            UserGroup::find()->select('ug_id')->andWhere([
-                                'ug_user_group_set_id' =>
-                                    UserGroup::find()->select(['ug_user_group_set_id'])->andWhere([
-                                        'ug_id' =>
-                                            UserGroupAssign::find()->select(['ugs_group_id'])->andWhere([
-                                                'ugs_user_id' => $userId
-                                            ])
-                                    ])->andWhere(['IS NOT', 'ug_user_group_set_id', null])->andWhere(['ug_disable' => false])
-                            ])
-                    ])
-                ]
-            ])
-            ->asArray()->indexBy('id')->all();
+                    'origin' => 'LON',
+                    'destination' => 'NYC',
+                    'departure' => '2019-12-17',
+                ],
+                [
+                    'origin' => 'LON',
+                    'destination' => 'NYC',
+                    'departure' => '2019-12-18',
+                ],
+            ],
+        ];
 
-        VarDumper::dump($ids);
+        $form = new LeadForm();
+        if ($form->load($data, '') && $form->validate()) {
+            $handler = Yii::createObject(Handler::class);
+            $handler->handle($form);
+        } else {
+            VarDumper::dump($form->errors);
+        }
 
 die;
 
@@ -193,746 +223,6 @@ die;
 
         die;
         return $this->render('blank');
-
-    }
-
-    public function actionT()
-    {
-die;
-
-//        $case->processing(294);
-//        $case->followUp();
-        $case = Cases::createSystem();
-
-
-//        $case = Cases::findOne(17);
-
-        $case->followUp();
-
-        $case->processing(16);
-
-        $case->followUp();
-
-        $case->processing(45);
-
-        $case->trash();
-
-        $case->processing(64);
-
-        $case->solved();
-
-        $case->processing(23);
-
-//        VarDumper::dump($case->releaseEvents());die;
-
-        $this->repository->save($case);
-
-        //return $this->render('blank'); die;
-
-        $post = [
-            'type' => 'voip_incoming',
-            'call_id' => '1256',
-            'call' => [
-                'Called' => '+16692011812',
-                'ToState' => 'CA',
-                'CallerCountry' => 'LS',
-                'Direction' => 'inbound',
-                'CallerState' => '',
-                'ToZip' => '',
-                'CallSid' => 'CA4f67c57472019afe38aa48cf6dd7c22f',
-                'To' => '+16692011812',
-                'CallerZip' => '',
-                'ToCountry' => 'US',
-                'ApiVersion' => '2010-04-01',
-                'CalledZip' => '',
-                'CalledCity' => '',
-                'CallStatus' => 'ringing',
-                'From' => '+266696687',
-                'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c',
-                'CalledCountry' => 'US',
-                'CallerCity' => '',
-                'ApplicationSid' => 'APd65ba6826de6314e0780220d89fc6cde',
-                'Caller' => '+266696687',
-                'FromCountry' => 'LS',
-                'ToCity' => '',
-                'FromCity' => '',
-                'CalledState' => 'CA',
-                'FromZip' => '',
-                'FromState' => '',
-            ]
-        ];
-
-        echo json_encode($post); exit;
-
-        /** @var CommunicationService $service */
-        $service = Yii::createObject(CommunicationService::class);
-        $service->voiceIncoming('1', $post);
-
-
-        die;
-        $roles = [];
-
-        $array = [
-            [
-                'controller' => 'AgentReportController',
-                'rules' => [
-                    [
-                        'actions' => ['index','calls','sms','email','cloned','created','sold','from-to-leads'],
-                        'allow' => true,
-                        'roles' => ['supervision','admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'ApiLogController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'create', 'delete', 'delete-all'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'ApiUserController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'create', 'delete'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'CallController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete', 'list', 'user-map', 'all-read'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin', 'qa'],
-                    ],
-
-                    [
-                        'actions' => ['delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list', 'auto-redial'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'CleanController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'cache', 'assets', 'runtime'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-
-                ],
-            ],
-            [
-                'controller' => 'ClientController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'test', 'ajax-get-info'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index', 'view', 'ajax-get-info'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'ClientPhoneController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'EmailController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-
-                    [
-                        'actions' => ['delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => ['inbox', 'view', 'soft-delete'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'EmailTemplateTypeController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'synchronization'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'EmployeeController',
-                'rules' => [
-                    [
-                        'actions' => ['switch'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                    [
-                        'actions' => ['list', 'update', 'create', 'acl-rule'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'userManager'],
-                    ],
-                    [
-                        'actions' => ['seller-contact-info'],
-                        'allow' => true,
-                        'roles' => ['agent', 'supervision'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'KpiController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'details'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index','details'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'LeadCallExpertController',
-                'rules' => [
-                    [
-                        // 'actions' => ['index'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'LeadController',
-                'rules' => [
-                    [
-                        'actions' => [
-                            'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
-                            'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
-                            'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
-                            'test', 'view'
-                        ],
-                        'allow' => true,
-                        'roles' => ['agent', 'admin', 'supervision'],
-                    ],
-
-                    [
-                        'actions' => ['inbox'],
-                        'allow' => true,
-                        'roles' => ['agent', 'admin', 'supervision'],
-                    ],
-
-                    [
-                        'actions' => [
-                            'pending', 'duplicate'
-                        ],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => [
-                            'duplicate'
-                        ],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => [
-                            'view', 'trash', 'sold', 'flow-transition'
-                        ],
-                        'allow' => true,
-                        'roles' => ['qa'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'LeadFlightSegmentController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'LeadFlowController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'view'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'LeadsController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view', 'ajax-activity-logs'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                    [
-                        'actions' => ['ajax-activity-logs'],
-                        'allow' => true,
-                        'roles' => ['qa'],
-                    ],
-                    [
-                        'actions' => ['index', 'ajax-reason-list'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'LeadTaskController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                    [
-                        'actions' => ['view', 'index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'LogController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'clear', 'view', 'create', 'delete'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'NotificationsController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
-                        'allow' => true,
-                        'roles' => ['agent', 'qa'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'PhoneController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call', 'ajax-call-redirect'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call', 'ajax-call-redirect'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'ProfitBonusController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'ProjectController',
-                'rules' => [
-                    [
-                        //'actions' => ['index', 'update', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'QuoteController',
-                'rules' => [
-                    [
-                        'actions' => [
-                            'create', 'save', 'decline', 'calc-price', 'extra-price', 'clone',
-                            'send-quotes', 'get-online-quotes','get-online-quotes-old','status-log','preview-send-quotes',
-                            'create-quote-from-search','preview-send-quotes-new',
-                        ],
-
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'QuotePriceController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'QuotesController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'ajax-details'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['ajax-details'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'QuoteStatusLogController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin']
-                    ],
-                    [
-                        'actions' => ['view', 'index', 'ajax-reason-list'],
-                        'allow' => true,
-                        'roles' => ['agent']
-                    ]
-                ]
-            ],
-            [
-                'controller' => 'ReportController',
-                'rules' => [
-                    [
-                        'actions' => [
-                            'sold', 'view-sold'
-                        ],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                    [
-                        'actions' => [
-                            'agents'
-                        ],
-                        'allow' => true,
-                        'roles' => ['admin', 'supervision'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'SettingController',
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'SettingsController',
-                'rules' => [
-                    [
-                        'actions' => [
-                            'projects', 'airlines', 'airports', 'logging', 'acl', 'email-template',
-                            'sync', 'view-log', 'acl-rule', 'project-data', 'synchronization'
-                        ],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
-            ],
-//            [
-//                'controller' => 'SiteController',
-//                'rules' => [
-//                    [
-//                        'actions' => ['login', 'error'],
-//                        'allow' => true,
-//                    ],
-//                    [
-//                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank'],
-//                        'allow' => true,
-//                        'roles' => ['@'],
-//                    ],
-//                ],
-//            ],
-            [
-                'controller' => 'SmsController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'], //'delete', 'create',
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-
-                    [
-                        'actions' => ['index', 'view', 'inbox'], //'delete', 'create',
-                        'allow' => true,
-                        'roles' => ['qa'],
-                    ],
-
-                    [
-                        'actions' => ['delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'SmsTemplateTypeController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'synchronization'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'SourcesController',
-                'rules' => [
-                    [
-                        //'actions' => ['index', 'update', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'StatsController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph', 'emails-graph'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'TaskController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                    [
-                        'actions' => ['view', 'index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'ToolsController',
-                'rules' => [
-                    [
-                        'actions' => ['clear-cache', 'supervisor'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ]
-                ],
-            ],
-            [
-                'controller' => 'UserCallStatusController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'update-status'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                    [
-                        'actions' => ['index', 'update-status'],
-                        'allow' => true,
-                        'roles' => ['agent', 'supervision'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'UserConnectionController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'stats'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'UserGroupAssignController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'view'],
-                        'allow' => true,
-                        'roles' => ['admin','userManager'], //'supervision',
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'UserGroupController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'view'],
-                        'allow' => true,
-                        'roles' => ['admin','userManager'], //'supervision',
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'UserParamsController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            [
-                'controller' => 'UserProjectParamsController',
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'view', 'create-ajax', 'update-ajax'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin','userManager'],
-                    ],
-                ],
-            ],
-
-        ];
-
-//        VarDumper::dump($array);die;
-
-        foreach ($array as $arrayItem) {
-            foreach ($arrayItem['rules'] as $key => $item) {
-                if ($item['allow']) {
-                    foreach ($item['roles'] as $role) {
-                        $roles[$role][] = [
-                            'controller' => $arrayItem['controller'],
-                            'actions' => $item['actions']??['*']
-                        ];
-                    }
-                }
-            }
-        }
-
-//        VarDumper::dump($roles);
-
-        $batchTmpTableItem = [];
-        $batchTmpTableItemChild = [];
-
-        $str = '<table border="3" cellpadding="10" cellspacing="5">';
-        $str .= '<tr><td>Role</td><td>Controller</td><td>Actions</td><td>Path</td></tr>';
-        foreach ($roles as $role => $item) {
-            foreach ($item as $element) {
-                $actions = $element['actions'];
-                $controller = $element['controller'];
-                $str .= '<tr>';
-                $str .= '<td>' . $role . '</td>';
-                $str .= '<td>' .$controller . '</td>';
-                $str .= '<td>' . ($actions ? implode('<br>', $actions) : '') . '</td>';
-                $str .= '<td>' . ($actions ? implode('<br>', $this->getPathForTable($actions, $controller, $batchTmpTableItem, $batchTmpTableItemChild, $role)) : ''). '</td>';
-                $str .= '</tr>';
-            }
-        }
-        $str .= '</table>';
-
-        ksort($batchTmpTableItem);
-        ksort($batchTmpTableItemChild);
-
-//        echo count($batchTmpTableItem);
-//        echo count($batchTmpTableItemChild);
-
-//        VarDumper::dump($batchTmpTableItem);
-//        VarDumper::dump($batchTmpTableItemChild);
-//        die;
-
-        $batchTableItem = [];
-        $batchTableItemChild = [];
-        foreach ($batchTmpTableItem as $key => $item) {
-            $batchTableItem[] = [$key, $batchTmpTableItem[$key]];
-        }
-        foreach ($batchTmpTableItemChild as $key => $item) {
-            $batchTableItemChild[] = $batchTmpTableItemChild[$key];
-        }
-//        VarDumper::dump($batchTableItem);
-//        VarDumper::dump($batchTableItemChild);die;
-        Yii::$app->db->createCommand()->batchInsert('{{%auth_item}}', ['name', 'type'], $batchTableItem)->execute();
-        Yii::$app->db->createCommand()->batchInsert('{{%auth_item_child}}', ['child', 'parent'], $batchTableItemChild)->execute();
-        return $str;
 
     }
 
@@ -1619,7 +909,7 @@ die;
 
 
         $rooms[] = ['rooms' => 1, 'adults' => 1];
-        $rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
+        $rooms[] = ['rooms' => 2, 'adults' => 2, 'children' => 2, 'paxes' => [
             ['paxType' => 1, 'age' => 6],
             ['paxType' => 1, 'age' => 14],
         ]];
@@ -1697,5 +987,58 @@ die;
 
 		echo 'Successful';
 	}
+
+	public function actionEncrypt()
+    {
+
+        $text = 'Hello!';
+        $encryptData = CreditCard::encrypt($text);
+        $decryptData = CreditCard::decrypt($encryptData);
+
+        VarDumper::dump($encryptData, 10, true);
+        echo '<br><hr>';
+        VarDumper::dump($decryptData, 10, true);
+    }
+
+    public function actionMask()
+    {
+
+        $number = '41112222333344445';
+        //echo  substr_replace($number, str_repeat('*', strlen( $number ) - 4), 0, strlen( $number ) - 4);
+
+        $creditCard[] = '5362267121053405'; // Mastercard
+        $creditCard[] = '4556189015881361'; // Visa 16
+        $creditCard[] = '4716904617062'; // Visa 13
+        $creditCard[] = '372348371455844'; // American Express
+        $creditCard[] = '6011757892594291'; // Discover
+        $creditCard[] = '30329445722959'; // Diners Club
+        $creditCard[] = '214927124363421'; // enRoute
+        $creditCard[] = '180012855304868'; // JCB 15
+        $creditCard[] = '3528066275370961'; // JCB 16
+        $creditCard[] = '8699775919'; // Voyager
+
+        for($i=0;$i < count($creditCard);$i++)
+        {
+            echo CreditCardHelper::formatCreditCard(CreditCardHelper::maskCreditCard($creditCard[$i])).'<br>'; //FormatCreditCard(MaskCreditCard(($creditCard[$i])))."\n";
+        }
+    }
+
+
+    public function actionFilter()
+    {
+
+        $array[] = ['price' => 1, 'gds' => 'A', 'data' => []];
+        $array[] = ['price' => 2, 'gds' => 'B', 'data' => []];
+        $array[] = ['price' => 3.5, 'gds' => 'C', 'data' => []];
+        $array[] = ['price' => 1.3, 'gds' => 'A', 'data' => []];
+
+        $result = AppHelper::filterByValue($array, 'gds', 'A');
+        $result = AppHelper::filterByRange($array, 'price', null, 3);
+        $result = AppHelper::filterByRange($array, 'price', 2, 3);
+        $result = AppHelper::filterByArray($array, 'gds', ['A', 'B']);
+
+        VarDumper::dump($result, 10, true);
+    }
+
 
 }

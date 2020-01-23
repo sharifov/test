@@ -39,17 +39,15 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'ugs_created_dt',
-                'searchModel' => $searchModel,
             ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'ugs_updated_dt',
-                'searchModel' => $searchModel,
             ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 'ugs_updated_user_id',
-                'value' => static function(UserGroupSet $model) {return $model->updatedUser;},
+                'relation' => 'updatedUser',
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

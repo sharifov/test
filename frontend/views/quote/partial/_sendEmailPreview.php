@@ -4,6 +4,7 @@
  * @var $errors []
  */
 
+use dosamigos\ckeditor\CKEditor;
 use yii\bootstrap\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
@@ -52,8 +53,9 @@ if (empty($errors)) :
     <div class="form-group">
     	<?= $form->field($email,'e_email_subject')?>
     </div>
+
     <div class="form-group">
-		<?= $form->field($email, 'e_email_body_html')->widget(\dosamigos\ckeditor\CKEditor::class, [
+        <?= $form->field($email, 'body_html')->widget(CKEditor::class, [
             'options' => [
                 'rows' => 6,
                 'readonly' => false
@@ -61,10 +63,10 @@ if (empty($errors)) :
             'preset' => 'custom',
             'clientOptions' => [
                 'height' => 500,
+                'fullPage' => true,
                 'allowedContent' => true,
                 'resize_enabled' => false,
                 'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                'removePlugins' => 'elementspath',
             ]
         ]) ?>
     </div>

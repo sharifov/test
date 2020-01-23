@@ -4,7 +4,7 @@ use Yii;
 use yii\i18n\PhpMessageSource;
 /**
  * Class Bootstrap
- * @package modules\main
+ * @package modules\hotel
  */
 class Bootstrap
 {
@@ -19,15 +19,14 @@ class Bootstrap
             'basePath' => '@modules/hotel/messages',
             'fileMap' => [
                 'modules/hotel/module' => 'module.php',
-                'modules/hotel/frontend' => 'frontend.php'
             ]
         ];
         $urlManager = Yii::$app->urlManager;
         $urlManager->addRules(
             [
                 // Declaration of rules here
-                '' => 'main/default/index',
-                '<_a:(about|contact|captcha)>' => 'main/default/<_a>'
+                '' => 'hotel/default/index',
+                '<_a:(act1|act2)>' => 'hotel/default/<_a>'
             ]
         );
     }

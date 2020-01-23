@@ -5,6 +5,7 @@ use common\models\Airline;
 use common\models\ClientPhone;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use common\models\Email;
 use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\LeadFlow;
@@ -16,6 +17,7 @@ use common\models\Quote;
 use common\models\UserProjectParams;
 use frontend\models\UserSiteActivity;
 use sales\entities\cases\Cases;
+use sales\helpers\email\TextConvertingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -25,6 +27,7 @@ use yii\console\Controller;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Exception;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
@@ -47,6 +50,19 @@ class DbController extends Controller
 	 * @var GlobalLogFormatAttrService
 	 */
 	private $globalLogFormatAttrService;
+
+    /**
+     * DbController constructor.
+     * @param $id
+     * @param $module
+     * @param GlobalLogFormatAttrService $globalLogFormatAttrService
+     * @param array $config
+     */
+    public function __construct($id, $module, GlobalLogFormatAttrService $globalLogFormatAttrService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->globalLogFormatAttrService = $globalLogFormatAttrService;
+    }
 
     public function actionUpdateCaseLastAction()
     {
@@ -79,19 +95,6 @@ class DbController extends Controller
     {
         $leads = Lead::updateAll(['l_dep_id' => Department::DEPARTMENT_SALES], ['IS', 'l_dep_id', null]);
         printf("\n --- Sent %s Leads ---\n", $this->ansiFormat($leads, Console::FG_YELLOW));
-	}
-
-	/**
-	 * DbController constructor.
-	 * @param $id
-	 * @param $module
-	 * @param GlobalLogFormatAttrService $globalLogFormatAttrService
-	 * @param array $config
-	 */
-	public function __construct($id, $module, GlobalLogFormatAttrService $globalLogFormatAttrService, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->globalLogFormatAttrService = $globalLogFormatAttrService;
 	}
 
     public function actionRemoveClientSystemPhones()
@@ -482,6 +485,62 @@ ORDER BY lf.lead_id, id';
 		}
 	}
 
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @param int $level
+     * @throws \Soundasleep\Html2TextException
+     */
+    public function actionCompressEmail(int $limit = 1000, int $offset = 0): void
+    {
+        $this->printInfo('Start', $this->action->id);
+        $timeStart = microtime(true);
+        $processed = 0;
+
+        foreach ($this->findEmailBodyTextEmpty($limit, $offset) as $email) {
+            $email->updateAttributes([
+                'e_email_body_text' => TextConvertingHelper::htmlToText($email->e_email_body_html),
+                'e_email_body_blob' => TextConvertingHelper::compress($email->e_email_body_html)
+            ]);
+            $processed++;
+        }
+
+        $resultInfo = 'Processed: ' . $processed .
+            ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+
+        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
+        $this->printInfo($resultInfo, $this->action->id);
+    }
+
+    /**
+     * @param int $limit
+     * @param int $offset
+     */
+    public function actionCleanBodyHtml(int $limit = 1000, int $offset = 0): void
+    {
+        $this->printInfo('Start', $this->action->id, Console::FG_GREEN);
+        $timeStart = microtime(true);
+        $processed = $failed = 0;
+
+        foreach ($this->findEmailBodyHtml($limit, $offset) as $email) {
+            try {
+                $email->updateAttributes([
+                    'e_email_body_html' => null
+                ]);
+                $processed++;
+            } catch (\Throwable $e) {
+                $failed++;
+                Yii::error(VarDumper::dumpAsString($e), self::class . ':' . $this->action->id . ':Clean failed' );
+            }
+        }
+
+        $resultInfo = 'Processed: ' . $processed . ' Failed: ' . $failed .
+            ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+
+        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
+        $this->printInfo($resultInfo, $this->action->id, Console::FG_GREEN);
+    }
+
 	/**
 	 * @param string $modelPath
 	 * @param int $leadId
@@ -554,4 +613,46 @@ ORDER BY lf.lead_id, id';
 			}
 		}
 	}
+
+    /**
+     * @param string $info
+     * @param string $action
+     * @param int $color
+     */
+    private function printInfo(string $info, string $action = '', $color = Console::FG_YELLOW)
+    {
+        printf("\n --- %s %s ---\n", $info, $this->ansiFormat(self::class . '/' . $action, $color));
+    }
+
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @return array|Email[]
+     */
+    private function findEmailBodyTextEmpty(int $limit, int $offset)
+    {
+        return Email::find()
+            ->where(['e_email_body_text' => null])
+            ->andWhere(['not', ['e_email_body_html' => null]])
+            ->limit($limit)
+            ->offset($offset)
+            ->orderBy(['e_id' => SORT_ASC])
+            ->all();
+    }
+
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @return array|Email[]
+     */
+    private function findEmailBodyHtml(int $limit, int $offset)
+    {
+        return Email::find()
+            ->where(['not', ['e_email_body_html' => null]])
+            ->andWhere(['not', ['e_email_body_blob' => null]])
+            ->limit($limit)
+            ->offset($offset)
+            ->orderBy(['e_id' => SORT_ASC])
+            ->all();
+    }
 }

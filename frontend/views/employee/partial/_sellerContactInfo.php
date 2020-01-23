@@ -15,14 +15,17 @@ use common\models\Project;
 use borales\extensions\phoneInput\PhoneInput;
 //use frontend\extensions\PhoneInput;
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 $employeeAccess = ArrayHelper::map($model->projectEmployeeAccesses, 'project_id', 'project_id');
 $availableProjects = $employeeAccess;
 
-if ($model->canRole('admin')) {
+if ($model->isAdmin()) {
     $projectIds = ArrayHelper::map(Project::find()->asArray()->all(), 'name', 'id');
 } else {
-    if (Yii::$app->user->identity->canRole('supervision')) {
-        $availableProjects = ArrayHelper::map(Yii::$app->user->identity->projectEmployeeAccesses, 'project_id', 'project_id');
+    if ($user->isSupervision()) {
+        $availableProjects = ArrayHelper::map($user->projectEmployeeAccesses, 'project_id', 'project_id');
     }
     $projectIds = ArrayHelper::map(Project::find()
         ->where(['id' => $availableProjects])

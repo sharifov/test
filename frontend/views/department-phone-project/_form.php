@@ -51,6 +51,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'dpp_default')->checkbox() ?>
 
+        <?= $form->field($model, 'dpp_show_on_site')->checkbox() ?>
+
 
 
         <?//= $form->field($model, 'dpp_updated_user_id')->textInput() ?>

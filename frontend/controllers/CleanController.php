@@ -16,13 +16,11 @@ class CleanController extends FController
 {
 
     public $assetPaths = [
-        '@backend/web/assets',
         '@frontend/web/assets',
         '@webapi/web/assets'
     ];
 
     public $runtimePaths = [
-        '@backend/runtime',
         '@frontend/runtime',
         '@console/runtime',
         '@webapi/runtime'

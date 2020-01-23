@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\query\UserProjectParamsQuery;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -143,6 +144,6 @@ class UserProjectParams extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new UserProjectParamsQuery(get_called_class());
+        return new UserProjectParamsQuery(static::class);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use sales\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -35,7 +36,9 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
 
 //$date = date('Y-m-d H:i', strtotime("+1 days"));
 
-$userId = Yii::$app->user->id;
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
     <div class="site-index">
         <h1><?=$this->title?></h1>
@@ -625,7 +628,7 @@ JS;
                                 return $groupsValue;
                             },
                             'format' => 'raw',
-                            'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                            'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                         ],*/
 
                         [
@@ -732,17 +735,6 @@ JS;
                             'format' => 'raw',
                             'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px']
                         ]
-
-                        /*[
-                            'class' => 'yii\grid\ActionColumn',
-                            'template' => '{update}',
-                            'visibleButtons' => [
-                                'update' => function (\common\models\Employee $model, $key, $index) {
-                                    return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                                },
-                            ],
-
-                        ],*/
                     ]
                 ])
                 ?>

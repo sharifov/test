@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\UserDepartmentQuery;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
@@ -92,6 +93,6 @@ class UserDepartment extends ActiveRecord
      */
     public static function find(): UserDepartmentQuery
     {
-        return new UserDepartmentQuery(get_called_class());
+        return new UserDepartmentQuery(static::class);
     }
 }

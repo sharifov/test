@@ -11,7 +11,6 @@ use \common\widgets\Alert;
  * @var $this yii\web\View
  * @var $form ActiveForm
  * @var $itineraryForm sales\forms\lead\ItineraryEditForm
- * @var $leadForm frontend\models\LeadForm
  */
 
 
@@ -150,7 +149,13 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                         <div class="separator"></div>
 
                         <div id="modeFlightSegments" data-value="edit" style="display: none"></div>
-
+						<?php
+						$js = <<<JS
+    pjaxOffFormSubmit('#product-accordion');
+    pjaxOffFormSubmit('#pjax-lead-products-wrap');
+JS;
+						$this->registerJs($js, View::POS_HEAD);
+						?>
                         <div class="sl-itinerary-form2">
                             <?php $form = ActiveForm::begin([
                                 'action' => ['/lead-itinerary/edit'],

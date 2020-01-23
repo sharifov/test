@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ConferenceQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -117,7 +118,7 @@ class Conference extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ConferenceQuery(get_called_class());
+        return new ConferenceQuery(static::class);
     }
 
     /**

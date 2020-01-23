@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\CallQuery;
 use sales\access\EmployeeDepartmentAccess;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
@@ -537,7 +538,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new CallQuery(get_called_class());
+        return new CallQuery(static::class);
     }
 
     /**
@@ -621,6 +622,7 @@ class Call extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         $leadRepository = Yii::createObject(LeadRepository::class);
+        $qCallService = Yii::createObject(QCallService::class);
 
         $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
@@ -671,6 +673,14 @@ class Call extends \yii\db\ActiveRecord
                         try {
                             $lead->followUp(null, null, 'Redial Pending max attempts reached');
                             $leadRepository->save($lead);
+                            $qCallService->remove($lead->id);
+                            $qCallService->create(
+                                $lead->id,
+                                new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                                new FindWeightParams($lead->project_id, $lead->status),
+                                $lead->offset_gmt,
+                                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                            );
                         } catch (\Throwable $e) {
                             Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead follow up');
                         }
@@ -683,7 +693,6 @@ class Call extends \yii\db\ActiveRecord
                             && ($departure = $lead->getDeparture())
                             && strtotime($departure) < time()
                         ) {
-                            $qCallService = Yii::createObject(QCallService::class);
                             $qCallService->remove($lead->id);
                             $lead->trash($lead->employee_id, null, 'Travel Dates Passed');
                             $leadRepository->save($lead);
@@ -696,13 +705,12 @@ class Call extends \yii\db\ActiveRecord
 
             if ($lead->leadQcall) {
                 try {
-                    $qCallService = Yii::createObject(QCallService::class);
                     $qCallService->updateInterval(
                         $lead->leadQcall,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
                         $lead->offset_gmt,
                         new FindPhoneParams($lead->project_id, $lead->l_dep_id),
-                        new FindWeightParams($lead->project_id)
+                        new FindWeightParams($lead->project_id, $lead->status)
                     );
                 } catch (\Throwable $e) {
                     Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:QCallService:updateInterval');
@@ -753,7 +761,7 @@ class Call extends \yii\db\ActiveRecord
                 if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
                         $casesManageService = Yii::createObject(CasesManageService::class);
-                        $casesManageService->take($this->c_case_id, $this->c_created_user_id);
+                        $casesManageService->take($this->c_case_id, $this->c_created_user_id, null);
                     } catch (\Throwable $exception) {
                         Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
                     }
@@ -772,14 +780,13 @@ class Call extends \yii\db\ActiveRecord
                     $lead = $this->cLead;
 
                     if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->isPending()) {
-                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
+                        //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
                         try {
 
                             $lead->answered();
                             $lead->processing($this->c_created_user_id, null, LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD);
                             $leadRepository->save($lead);
 
-                            $qCallService = Yii::createObject(QCallService::class);
                             $qCallService->remove($lead->id);
 
                             Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
@@ -827,7 +834,7 @@ class Call extends \yii\db\ActiveRecord
 
                         try {
                             $caseRepo = Yii::createObject(CasesRepository::class);
-                            $case->processing((int)$this->c_created_user_id);
+                            $case->processing((int)$this->c_created_user_id, null);
                             $caseRepo->save($case);
 
                             Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
@@ -888,7 +895,6 @@ class Call extends \yii\db\ActiveRecord
             && ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy())
             && ($lead = $this->cLead)
         ) {
-            $qCallService = Yii::createObject(QCallService::class);
 
             if ($lead->isFollowUp()) {
                 try {
@@ -898,7 +904,7 @@ class Call extends \yii\db\ActiveRecord
                     $qCallService->create(
                         $lead->id,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                        new FindWeightParams($lead->project_id),
+                        new FindWeightParams($lead->project_id, $lead->status),
                         $lead->offset_gmt,
                         new FindPhoneParams($lead->project_id, $lead->l_dep_id)
                     );
@@ -912,7 +918,7 @@ class Call extends \yii\db\ActiveRecord
                     $qCallService->create(
                         $lead->id,
                         new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                        new FindWeightParams($lead->project_id),
+                        new FindWeightParams($lead->project_id, $lead->status),
                         $lead->offset_gmt,
                         new FindPhoneParams($lead->project_id, $lead->l_dep_id)
                     );

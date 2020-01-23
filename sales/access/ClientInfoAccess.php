@@ -1,26 +1,24 @@
 <?php
 
-
 namespace sales\access;
 
-use Yii;
+use common\models\Employee;
 use common\models\Lead;
 
 class ClientInfoAccess
 {
 	/**
 	 * @param Lead $lead
-	 * @param int $userId
+	 * @param Employee $user
 	 * @return bool
 	 */
-	public static function isUserCanManageLeadClientInfo(Lead $lead, int $userId): bool
+	public static function isUserCanManageLeadClientInfo(Lead $lead, Employee $user): bool
 	{
 		return (
-			$lead->isOwner(Yii::$app->user->id) ||
-			!Yii::$app->user->identity->isSimpleAgent() ||
-			(Yii::$app->user->identity->isSupervision() && $lead->isGetOwner() &&
-			EmployeeGroupAccess::isUserInCommonGroup(Yii::$app->user->id, $lead->employee_id))
+			$lead->isOwner($user->id) ||
+			!$user->isSimpleAgent() ||
+			($user->isSupervision() && $lead->hasOwner() &&
+			EmployeeGroupAccess::isUserInCommonGroup($user->id, $lead->employee_id))
 		);
 	}
-
 }

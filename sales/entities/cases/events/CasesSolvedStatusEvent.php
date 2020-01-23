@@ -9,7 +9,8 @@ use sales\entities\cases\Cases;
  *
  * @property Cases $case
  * @property int $oldStatus
- * @property int $ownerId
+ * @property int|null $ownerId
+ * @property int|null $creatorId
  * @property string|null $description
  */
 class CasesSolvedStatusEvent
@@ -17,20 +18,15 @@ class CasesSolvedStatusEvent
     public $case;
     public $oldStatus;
     public $ownerId;
+    public $creatorId;
     public $description;
 
-    /**
-     * CasesSolvedStatusEvent constructor.
-     * @param Cases $case
-     * @param int $oldStatus
-     * @param int $ownerId
-     * @param string|null $description
-     */
-    public function __construct(Cases $case, int $oldStatus, int $ownerId, ?string $description)
+    public function __construct(Cases $case, ?int $oldStatus, ?int $ownerId, ?int $creatorId, ?string $description)
     {
         $this->case = $case;
         $this->oldStatus = $oldStatus;
         $this->ownerId = $ownerId;
+        $this->creatorId = $creatorId;
         $this->description = $description;
     }
 }

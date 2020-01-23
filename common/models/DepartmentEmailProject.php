@@ -157,6 +157,6 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
      */
     public static function find(): DepartmentEmailProjectQuery
     {
-        return new DepartmentEmailProjectQuery(get_called_class());
+        return new DepartmentEmailProjectQuery(static::class);
     }
 }

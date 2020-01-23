@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use frontend\models\search\AirlineForm;
 use frontend\models\search\AirportForm;
 use frontend\models\search\GlobalAclForm;
@@ -178,8 +179,11 @@ class SettingsController extends FController
     {
         $this->view->title = sprintf('Projects - List');
 
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
         $availableProjects = [];
-        if (Yii::$app->user->identity->canRole('admin')) {
+        if ($user->isAdmin()) {
             $query = Project::find();
         } else {
             $availableProjects = ArrayHelper::map(Yii::$app->user->identity->projectEmployeeAccesses, 'project_id', 'project_id');
@@ -190,7 +194,7 @@ class SettingsController extends FController
         if ($projectId !== null) {
             $project = Project::findOne(['id' => $projectId]);
             if ($project !== null) {
-                if (!Yii::$app->user->identity->canRole('admin') && !in_array($project->id, $availableProjects)) {
+                if (!$user->isAdmin() && !in_array($project->id, $availableProjects)) {
                     throw new ForbiddenHttpException();
                 }
                 return $this->render('item/project', [

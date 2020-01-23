@@ -31,7 +31,7 @@ $addEmail->client_id = $lead->client_id;
 
 	<?= $form->errorSummary($addEmail) ?>
 
-	<?php if ($lead->isOwner(Yii::$app->user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
+	<?php if ($lead->isOwner($user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
         <?=
         $form->field($addEmail, 'email', [
             'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',

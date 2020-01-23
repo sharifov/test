@@ -223,7 +223,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'c_recording_duration',
                 'label' => 'Recording',
                 'value' => static function (\common\models\Call $model) {
-                    return  $model->c_recording_url ? Html::button(gmdate('i:s', $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url]) : '-';
+                    return  $model->c_recording_url ? Html::button(gmdate('i:s', $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]) : '-';
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-right'],

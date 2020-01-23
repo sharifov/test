@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\SettingQuery;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -18,8 +19,10 @@ use yii\db\Expression;
  * @property string $s_value
  * @property string $s_updated_dt
  * @property int $s_updated_user_id
+ * @property int $s_category_id
  *
  * @property Employee $sUpdatedUser
+ * @property SettingCategory $sCategory
  */
 class Setting extends \yii\db\ActiveRecord
 {
@@ -58,11 +61,12 @@ class Setting extends \yii\db\ActiveRecord
         return [
             [['s_key', 's_type', 's_value'], 'required'],
             [['s_updated_dt'], 'safe'],
-            [['s_updated_user_id'], 'integer'],
+            [['s_updated_user_id', 's_category_id'], 'integer'],
             [['s_key', 's_name', 's_value'], 'string', 'max' => 255],
             [['s_type'], 'string', 'max' => 10],
             [['s_key'], 'unique'],
             [['s_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['s_updated_user_id' => 'id']],
+            [['s_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => SettingCategory::class, 'targetAttribute' => ['s_category_id' => 'sc_id']],
         ];
     }
 
@@ -103,6 +107,7 @@ class Setting extends \yii\db\ActiveRecord
             's_value' => 'Value',
             's_updated_dt' => 'Updated Dt',
             's_updated_user_id' => 'Updated User ID',
+            's_category_id' => 'Category',
         ];
     }
 
@@ -114,12 +119,17 @@ class Setting extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 's_updated_user_id']);
     }
 
+    public function getSCategory()
+    {
+        return $this->hasOne(SettingCategory::class, ['sc_id' => 's_category_id']);
+    }
+
     /**
      * {@inheritdoc}
      * @return SettingQuery the active query used by this AR class.
      */
     public static function find()
     {
-        return new SettingQuery(get_called_class());
+        return new SettingQuery(static::class);
     }
 }

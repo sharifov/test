@@ -4057,7 +4057,7 @@ input[disabled] + .radio-tab__text {
 
 .quote__airline-logo {
   margin-right: 20px;
-  width: 26px;
+  width: auto;
   height: 26px;
   margin-top: 5px;
 }
@@ -5748,9 +5748,40 @@ input[disabled] + .radio-tab__text {
 .notifications-list table tr.warning {
     background-color: #fff3cd;
 }
+#update_hotel_request_dest_type_wrap input.select2-search__field {
+    width: initial !important;
+}
+.select2 input.select2-search__field {
+    width: initial !important;
+}
+.form-control.is-invalid {
+    background-position: right calc(0.775em + 0.1875rem) center;
+}
 .kv-editable-form-inline .input-group {
     display: flex;
     margin: 0;
+}
+.search-results__wrapper {
+    position: relative;
+    z-index: 1;
+}
+.search-results__wrapper.loading:after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    background-color: rgba(255,255,255,.5);
+}
+.list-view nav:last-child {
+    margin-top: 20px;
 }
 /****** END OTHER ******/
 
@@ -5764,6 +5795,11 @@ input[disabled] + .radio-tab__text {
 @media only screen and (max-width: 1299px) {
     .create-lead-main-sidebars {
         flex-direction: column;
+    }
+}
+@media only screen and (min-width: 992px) {
+    .modal-md {
+        max-width: 800px !important;
     }
 }
 @media only screen and (max-width: 580px) {
@@ -5819,4 +5855,30 @@ input[disabled] + .radio-tab__text {
 }
 .close-icon {
   cursor: pointer;
+}
+
+/*
+*
+* ==========================================
+* dropdown-submenu
+* ==========================================
+*
+*/
+
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu>a:after {
+  content: "\f0da";
+  float: right;
+  border: none;
+  font-family: 'FontAwesome';
+}
+
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: 0px;
+  margin-left: 0px;
 }

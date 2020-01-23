@@ -169,6 +169,7 @@ class QuoteController extends ApiBaseController
      * "uid": "5b7424e858e91",
      * "lead_id": 123456,
      * "lead_uid": "00jhk0017",
+     * "client_id": 1034,
      * "lead_delayed_charge": 0,
      * "lead_status": "sold",
      * "booked_quote_uid": "5b8ddfc56a15c",
@@ -246,6 +247,7 @@ class QuoteController extends ApiBaseController
             $response['uid'] = $uid;
             $response['lead_id'] = $model->lead->id;
             $response['lead_uid'] = $model->lead->uid;
+            $response['client_id'] = $model->lead->client_id;
             $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;
@@ -350,9 +352,12 @@ class QuoteController extends ApiBaseController
         }
 
         $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
+
         if (!$model) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $quoteAttributes['uid'], 2);
         }
+
+        $oldQuoteType = $model->type_id;
 
         $response = [
             'status' => 'Failed',
@@ -443,6 +448,15 @@ class QuoteController extends ApiBaseController
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 $model->attributes = $quoteAttributes;
+
+                $type = $quoteAttributes['type_id'] ?? null;
+                if ($lead = $model->lead) {
+                    $this->setTypeQuoteUpdate($type, $model, $lead);
+                } else {
+                    $model->type_id = $oldQuoteType;
+                    Yii::error('Not found Lead for Quote Id: ' . $model->id, 'API:Quote:update:Lead Not found');
+                }
+
                 $model->save();
 
                 $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
@@ -649,6 +663,10 @@ class QuoteController extends ApiBaseController
             $model->attributes = $quoteAttributes;
             $model->lead_id = $lead->id;
             $model->employee_id = null;
+
+            $type = $quoteAttributes['type_id'] ?? null;
+            $this->setTypeQuoteInsert($type, $model, $lead);
+
             $model->save();
             $model->createQuoteTrips();
 
@@ -771,5 +789,56 @@ class QuoteController extends ApiBaseController
         }
 
         return $responseData;
+    }
+
+    private function setTypeQuoteInsert($type, Quote $quote, Lead $lead): void
+    {
+        if ($type !== null) {
+            $type = (int)$type;
+        }
+
+        $this->setTypeQuote($type, $quote, $lead);
+    }
+
+    private function setTypeQuoteUpdate($type, Quote $quote, Lead $lead): void
+    {
+        if ($type === null) {
+            return;
+        }
+
+        $type = (int)$type;
+
+        if ($quote->type_id === $type) {
+            return;
+        }
+
+        $this->setTypeQuote($type, $quote, $lead);
+    }
+
+    private function setTypeQuote($type, Quote $quote, Lead $lead): void
+    {
+        if ($type === Quote::TYPE_ORIGINAL) {
+            if ($lead->originalQuoteExist()) {
+                throw new \DomainException('Original quote already exist. Lead uid: ' . $lead->uid);
+            }
+            $quote->original();
+            return;
+        }
+
+        if ($type === Quote::TYPE_ALTERNATIVE) {
+            $quote->alternative();
+            return;
+        }
+
+        if ($type === Quote::TYPE_BASE) {
+            $quote->base();
+            return;
+        }
+
+        if ($lead->originalQuoteExist()) {
+            $quote->alternative();
+        } else {
+            $quote->base();
+        }
     }
 }

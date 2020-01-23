@@ -2,7 +2,7 @@
 
 namespace sales\access;
 
-use common\models\ProjectQuery;
+use common\models\query\ProjectQuery;
 use common\models\ProjectEmployeeAccess;
 use common\models\Employee;
 use common\models\Project;
@@ -15,6 +15,9 @@ class EmployeeProjectAccess
     private static $defaultRolesForViewAllProjects = [
         Employee::ROLE_SUPER_ADMIN,
         Employee::ROLE_ADMIN,
+        Employee::ROLE_SALES_SENIOR,
+        Employee::ROLE_EXCHANGE_SENIOR,
+        Employee::ROLE_SUPPORT_SENIOR,
         Employee::ROLE_QA,
         Employee::ROLE_USER_MANAGER
     ];

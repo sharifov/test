@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\CallUserAccessQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -108,7 +109,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new CallUserAccessQuery(get_called_class());
+        return new CallUserAccessQuery(static::class);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\DepartmentQuery;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -174,7 +175,7 @@ class Department extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new DepartmentQuery(get_called_class());
+        return new DepartmentQuery(static::class);
     }
 
     /**

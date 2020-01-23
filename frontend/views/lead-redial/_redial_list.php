@@ -7,6 +7,7 @@ use common\models\search\LeadQcallSearch;
 use dosamigos\datepicker\DatePicker;
 use sales\formatters\client\ClientTimeFormatter;
 use kartik\grid\GridView;
+use sales\yii\grid\client\ClientPhonesColumn;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -112,25 +113,9 @@ use yii\helpers\Url;
             'visible' => $user->isAdmin(),
         ],
         [
-            'label' => 'Client / Phones',
-            'format' => 'raw',
-            'value' => static function (LeadQcall $model) {
-                $lead = $model->lqcLead;
-
-                if (!$lead->client) {
-                    return '-';
-                }
-                $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
-                if ($clientName === 'Client Name') {
-                    $clientName = '- - - ';
-                } else {
-                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
-                }
-
-                $str = $clientName . '<br>';
-                $str .= $lead->client->clientPhones ? '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
-
-                return $str;
+            'class' => ClientPhonesColumn::class,
+            'client' => static function (LeadQcall $model) {
+                return $model->lqcLead->client ?? null;
             },
             'visible' => !$user->isAgent(),
         ],

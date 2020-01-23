@@ -7,12 +7,12 @@ use \yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
 
-$isAdmin = $user->canRole('admin') || $user->canRole('superadmin');
-$isSupervision = $user->canRole('supervision');
-$isAgent = $user->canRole('agent');
-$isQA = $user->canRole('qa');
-$isUM = $user->canRole('userManager');
-$isSuperAdmin = $user->canRole('superadmin');
+$isAdmin = $user->isAdmin() || $user->isSuperAdmin();
+$isSupervision = $user->isSupervision();
+$isAgent = $user->isAgent();
+$isQA = $user->isQa();
+$isUM = $user->isUserManager();
+$isSuperAdmin = $user->isSuperAdmin();
 
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
@@ -109,6 +109,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index'], 'icon' => 'list'],
                 ['label' => 'QCall Config', 'url' => ['/qcall-config/index'], 'icon' => 'list'],
                 ['label' => 'Project Weight', 'url' => ['/project-weight/index'], 'icon' => 'list'],
+                ['label' => 'Status Weight', 'url' => ['/status-weight/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -129,6 +130,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklist')],
                 ['label' => 'LF Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
+                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
             ]
         ];
 
@@ -221,7 +223,6 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
                 ['label' => 'Department Emails', 'url' => ['/department-email-project/index'], 'icon' => 'envelope'],
                 ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
-                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
                 ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
@@ -239,6 +240,24 @@ $isSuperAdmin = $user->canRole('superadmin');
             ]
         ];
 
+        if (class_exists('\modules\flight\FlightModule')) {
+            $menuItems[] = [
+                'label' => 'Flight module',
+                'url' => 'javascript:',
+                'icon' => 'plane',
+                'items' => \modules\flight\FlightModule::getListMenu()
+            ];
+        }
+
+        if (class_exists('\modules\hotel\HotelModule')) {
+            $menuItems[] = [
+                'label' => 'Hotel module',
+                'url' => 'javascript:',
+                'icon' => 'hotel',
+                'items' => \modules\hotel\HotelModule::getListMenu()
+            ];
+        }
+
         $menuItems[] = [
             'label' => 'New Data',
             'url' => 'javascript:',
@@ -248,11 +267,19 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Currency History', 'url' => ['/currency-history/index']],
                 ['label' => 'Product Types', 'url' => ['/product-type/index']],
                 ['label' => 'Products', 'url' => ['/product/index']],
+                ['label' => 'Product Options', 'url' => ['/product-option/index']],
                 ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],
+                ['label' => 'Product Quote Options', 'url' => ['/product-quote-option/index']],
                 ['label' => 'Orders', 'url' => ['/order/index']],
                 ['label' => 'Offers', 'url' => ['/offer/index']],
                 ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
+                ['label' => 'Order Products', 'url' => ['/order-product/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/index']],
+                ['label' => 'Billing Info', 'url' => ['/billing-info/index']],
+                ['label' => 'Credit Cards', 'url' => ['/credit-card/index']],
+                ['label' => 'Payments', 'url' => ['/payment/index']],
+                ['label' => 'Payment Methods', 'url' => ['/payment-method/index']],
+                ['label' => 'Transactions', 'url' => ['/transaction/index']],
             ]
         ];
 
@@ -291,6 +318,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Action Logs', 'url' => ['/log/action'], 'icon' => 'bars'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+                ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'cogs'],
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
 				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],

@@ -11,11 +11,14 @@ use yii\widgets\ActiveForm;
 /* @var $searchModel common\models\search\ApiLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $isAgent bool */
+/** @var Employee $user */
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
-    $userList = \common\models\Employee::getListByRole('agent');
+$user = Yii::$app->user->identity;
+
+if ($user->isAdmin()) {
+    $userList = \common\models\Employee::getListByRole(Employee::ROLE_AGENT);
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByUserId($user->id);
 }
 
 $this->title = 'KPI History';

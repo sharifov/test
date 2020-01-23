@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'pq_gid') ?>
 
-    <?= $form->field($model, 'pr_name') ?>
+    <?= $form->field($model, 'pq_name') ?>
 
     <?= $form->field($model, 'pq_product_id') ?>
 

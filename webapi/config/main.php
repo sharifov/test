@@ -1,5 +1,7 @@
 <?php
 
+use webapi\bootstrap\SetUp;
+
 $params = array_merge(
     require(__DIR__ . '/../../common/config/params.php'),
     require(__DIR__ . '/../../common/config/params-local.php'),
@@ -13,7 +15,10 @@ return [
     //'timeZone' => 'Europe/Chisinau',
     'homeUrl'   =>  '/',
     'controllerNamespace' => 'webapi\controllers',
-    'bootstrap' => ['log'],
+    'bootstrap' => [
+        'log',
+        SetUp::class,
+    ],
     'language' => 'en',
 
     'modules' => [
@@ -84,8 +89,8 @@ return [
                     'except' => [
                         'yii\web\HttpException:404',
                     ],
-                    //'logVars' => [],
-                    'logVars' => ['_POST', '_GET'],
+                    'logVars' => [],
+//                    'logVars' => ['_POST', '_GET'],
                     'prefix' => function () {
                         $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
                         $ip = $_SERVER['REMOTE_ADDR'];

@@ -1,5 +1,6 @@
 <?php
 
+use dosamigos\ckeditor\CKEditor;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -101,32 +102,7 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="clearfix"></div>
 
-
-
-        <?//= $form->field($model, 'e_email_body_html')->textarea(['rows' => 6]) ?>
-
-        <?php
-           /* echo $form->field($model, 'e_email_body_html')->widget(\vova07\imperavi\Widget::class, [
-                'settings' => [
-                    'lang' => 'en',
-                    'minHeight' => 400,
-                    'plugins' => [
-                        'clips',
-                        'fullscreen',
-                    ],
-                    'clips' => [
-                        ['Lorem ipsum...', 'Lorem...'],
-                        ['red', '<span class="label-red">red</span>'],
-                        ['green', '<span class="label-green">green</span>'],
-                        ['blue', '<span class="label-blue">blue</span>'],
-                    ],
-                ],
-            ]);*/
-
-        ?>
-
-
-        <?= $form->field($model, 'e_email_body_html')->widget(\dosamigos\ckeditor\CKEditor::class, [
+        <?= $form->field($model, 'body_html')->widget(CKEditor::class, [
             'options' => [
                 'rows' => 6,
                 'readonly' => false
@@ -135,14 +111,11 @@ use yii\widgets\ActiveForm;
             'clientOptions' => [
                 'height' => 500,
                 'fullPage' => true,
-
                 'allowedContent' => true,
                 'resize_enabled' => false,
                 'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                //'removePlugins' => 'elementspath',
             ]
         ]) ?>
-
 
         <?//= $form->field($model, 'e_email_body_text')->textarea(['rows' => 6]) ?>
 

@@ -31,21 +31,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'dpp_id',
-            [
-                'attribute' => 'dpp_dep_id',
-                'value' => static function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dppDep ? $model->dppDep->dep_name : '-';
-                },
-            ],
-
-            [
-                'attribute' => 'dpp_project_id',
-                'value' => static function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dppProject ? $model->dppProject->name : '-';
-                },
-            ],
+            'dpp_dep_id:departmentName',
+            'dpp_project_id:projectName',
             'dpp_phone_number',
-            'dpp_redial:boolean',
+            'dpp_redial:booleanByLabel',
             //'dpp_source_id',
             [
                 'attribute' => 'dpp_source_id',
@@ -69,25 +58,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             //'dpp_params',
-            'dpp_ivr_enable:boolean',
-            'dpp_enable:boolean',
-            'dpp_default:boolean',
+            'dpp_ivr_enable:booleanByLabel',
+            'dpp_enable:booleanByLabel',
+            'dpp_default:booleanByLabel',
+            'dpp_show_on_site:booleanByLabel',
             'dpp_description:text',
-            [
-                'attribute' => 'dpp_updated_user_id',
-                'value' => static function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dpp_updated_user_id ? '<i class="fa fa-user"></i> ' .Html::encode($model->dppUpdatedUser->username) : $model->dpp_updated_user_id;
-                },
-                'format' => 'raw',
-            ],
-
-            [
-                'attribute' => 'dep_updated_dt',
-                'value' => static function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dpp_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dpp_updated_dt)) : '-';
-                },
-                'format' => 'raw'
-            ],
+            'dpp_updated_user_id:userName',
+            'dpp_updated_dt:byUserDateTime',
         ],
     ]) ?>
 

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\jobs\TelegramSendMessageJob;
+use common\models\query\NotificationsQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -110,7 +111,7 @@ class Notifications extends ActiveRecord
      */
     public static function find()
     {
-        return new NotificationsQuery(get_called_class());
+        return new NotificationsQuery(static::class);
     }
 
     /**

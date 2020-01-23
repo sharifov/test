@@ -37,6 +37,8 @@ abstract class BaseApplication extends yii\base\Application
  * @property \common\components\CommunicationService $communication The CommunicationService component. This property is read-only. Extended component.
  * @property \common\components\CurrencyService $currency The CurrencyService component.
  * @property \yii\queue\beanstalk\Queue $queue_job The beanstalk Queue. This property is read-only. Extended component.
+ * @property \yii\caching\Cache $cacheFile FileCache.
+ *
  *
  *
  *

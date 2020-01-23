@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 use \common\models\Email;
 use \common\models\Sms;
@@ -11,7 +12,12 @@ use \common\models\Call;
 ?>
 
 <?php
-    $fromType = 'client';
+
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
+$fromType = 'client';
+
 ?>
 
 <?//php \yii\helpers\VarDumper::dump($model, 10, true) ?>
@@ -60,7 +66,7 @@ use \common\models\Call;
             <?php endif;?>
 
             <div class="chat__date">
-                <?php if(Yii::$app->user->identity->isAdmin()):?>
+                <?php if($user->isAdmin()):?>
                     Id: <u title="SID: <?=Html::encode($call->c_call_sid)?>"><?=Html::a($call->c_id, ['call/view', 'id' => $call->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u>,
                 <?php endif; ?>
                 <i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt))?></div>
@@ -68,13 +74,9 @@ use \common\models\Call;
         <div class="card-body">
             <?php if($call->c_recording_url):?>
 
-
                 <?=Html::button(gmdate('i:s', $call->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                    ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $call->c_recording_url]) ?>
+                    ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $call->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $call->c_call_sid ])*/ ]) ?>
 
-                <?/*<audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
-                    <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
-                </audio>*/?>
             <?php else: ?>
                 <div><?=$call->getStatusIcon()?>  <?=$call->getStatusName()?></div>
             <?php endif;?>
@@ -83,7 +85,6 @@ use \common\models\Call;
             <?php if ($call->calls):?>
                 <?php \sales\helpers\communication\CommunicationHelper::renderChildCallsRecursive($call->calls)?>
             <?php endif;?>
-
 
         </div>
     </div>
@@ -122,7 +123,7 @@ use \common\models\Call;
             <div class="card-body">
                 <h5 class="chat__subtitle"><?=Html::encode($mail->e_email_subject)?></h5>
                 <div class="">
-                    <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->e_email_body_html), 300, '...', null, true)?>
+                    <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
                 <div class="chat__message-footer">
                     <?=Html::a('<i class="fa fa-search-plus"></i> Details', '#', ['class' => 'chat__details', 'data-id' => $mail->e_id])?>

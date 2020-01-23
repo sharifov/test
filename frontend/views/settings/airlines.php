@@ -5,6 +5,7 @@
  * @var $searchModel AirlineForm
  */
 
+use common\models\Employee;
 use yii\bootstrap\Html;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
@@ -26,12 +27,15 @@ $template = <<<HTML
 </div>
 HTML;
 
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
+
 ?>
 
 <div class="card card-default">
     <div class="card-header">Airlines</div>
     <div class="card-body">
-        <?php if (Yii::$app->user->identity->canRole('admin')) : ?>
+        <?php if ($user->isAdmin()) : ?>
             <div class="mb-20">
                 <?= Html::a('Sync Airlines', '#', [
                     'class' => 'btn-success btn sync',

@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\query\ConferenceParticipantQuery;
 use Yii;
 
 /**
@@ -91,7 +92,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-        return new ConferenceParticipantQuery(get_called_class());
+        return new ConferenceParticipantQuery(static::class);
     }
 
     /**
