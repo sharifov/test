@@ -77,7 +77,7 @@ use yii\helpers\Html;
                         'data-url' => \yii\helpers\Url::to(['product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
                     ]) ?>
-                    <?php if ($model->hqProductQuote->availableForBooking()): ?>
+                    <?php if ($model->hqProductQuote->isPending()): ?>
                         <?php
                             /* TODO:
                                 1) to ajax
@@ -86,10 +86,11 @@ use yii\helpers\Html;
                         ?>
                         <?= Html::a(
                             '<i class="fa fa-share-square"></i> Book',
-                            \yii\helpers\Url::to(['/hotel/hotel-quote/ajax-book', 'id' => $model->hq_id]),
+                             \yii\helpers\Url::to(['/hotel/hotel-quote/ajax-book', 'id' => $model->hq_id]), /* TODO: to null */
                             [
                                 'class' => 'dropdown-item btn-book-quote',
-                                'data-url' => '',
+                                'data-url' => \yii\helpers\Url::to('/hotel/hotel-quote/ajax-book'),
+                                'data-id' => $model->hq_id,
                             ]
                         ) ?>
                     <? endif; ?>

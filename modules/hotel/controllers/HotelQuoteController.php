@@ -2,10 +2,12 @@
 
 namespace modules\hotel\controllers;
 
+use common\models\Employee;
 use frontend\controllers\FController;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
+use modules\hotel\models\HotelRoomPax;
 use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
@@ -13,9 +15,11 @@ use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -54,6 +58,17 @@ class HotelQuoteController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [ /* TODO: add migrate to access hotel/hotel-quote/ajax-book */
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'roles' => [
+                            Employee::ROLE_ADMIN,
+                        ],
+                        'allow' => true,
+                    ],
                 ],
             ],
         ];
@@ -143,7 +158,6 @@ class HotelQuoteController extends FController
             }
 
             $productId = $modelHotel->ph_product_id;
-
 
             $result = $modelHotel->getSearchData();
 
@@ -249,22 +263,98 @@ class HotelQuoteController extends FController
         return $this->redirect(['index']);
     }
 
-    public function actionBook($id) /* TODO:  */
+    public function actionAjaxBook($id)
     {
-        $result = [
-            'status' => 0,
-            'message' => '',
-        ];
-
+        $result = ['status' => 0, 'message' => ''];
         /* TODO: to post  */
         $id = (int) Yii::$app->request->get('id', 0);
 
-        if (!$id) {
+        try {
 
+            if (!$id) {
+                throw new Exception('Hotel Quote ID not found', 1);
+            }
+
+            $childrenAges = explode(',', '10,9');
+            sort($childrenAges);
+            $childrenAges = implode(',', $childrenAges);
+
+            \yii\helpers\VarDumper::dump($childrenAges, 10, true); exit();  /* TODO: to remove */
+
+            $paxSummary = (new HotelRoomPax())->getSummaryByRoom(3);
+
+            $model = $this->findModel($id); /* TODO: add check by status new/pending */
+            $client = $model->hqProductQuote->pqProduct->prLead->client;
+            $name = $client->first_name;
+            $surname = $client->last_name ?: $client->full_name;
+            $rooms = [];
+
+            /*if (!$hotelRooms = $model->hqHotel->hotelRooms) {
+                throw new Exception('Hotel Rooms not found', 2);
+            }*/
+
+            if (!$hotelQuoteRooms = $model->hotelQuoteRooms) {
+                throw new Exception('Hotel Quote Rooms not found', 2);
+            }
+
+            //$items = $model->hqHotel->hotelRooms[0];
+
+            $hotelRoomPax = HotelRoomPax::find()
+                ->select([
+                    'hotel_room_pax.hrp_type_id AS paxType',
+                    'hotel_room_pax.hrp_first_name AS name',
+                    'hotel_room_pax.hrp_last_name AS surname',
+                    'hotel_room_pax.hrp_hotel_room_id AS roomId',
+                ])
+                ->innerJoin('hotel_room', 'hotel_room.hr_id = hotel_room_pax.hrp_hotel_room_id')
+                ->where(['hotel_room.hr_hotel_id' => $model->hqHotel->ph_id])
+                ->orderBy([
+                    'hotel_room_pax.hrp_hotel_room_id' => SORT_ASC,
+                    'hotel_room_pax.hrp_type_id' => SORT_ASC,
+                ])
+                ->asArray()
+                ->all();
+
+            $paxes = [];
+            foreach ($hotelRoomPax as $key => $value) {
+                $paxes[$key] = $value;
+                $paxes[$key]['paxType'] = strtoupper(HotelRoomPax::PAX_TYPE_LIST[$value['paxType']]);
+            }
+
+            foreach ($hotelQuoteRooms as $quoteRoom) {
+
+                $rooms[] = [
+                    'key' => $quoteRoom->hqr_key,
+                    'paxes' => $paxes
+                ];
+            }
+
+            //$paxes = $hotelRooms[0]->hotelRoomPaxes;
+
+            /*foreach ($model->hotelQuoteRooms as $room) {
+                $rooms[] = [
+                    'key' => $room->hqr_key,
+                    'paxes' => $room->preparePaxes($name, $surname)
+                ];
+            }*/
+
+            $params = [
+                'name' => $name,
+                'surname' => $surname,
+                'rooms' => $rooms,
+            ];
+
+            $apiHotelService = Yii::$app->getModule('hotel')->apiService;
+
+            $apiResponse = $apiHotelService->book($params);
+
+            \yii\helpers\VarDumper::dump($apiResponse, 10, true); exit();  /* TODO: to remove */
+
+
+        } catch (\Throwable $throwable) {
+            $result['message'] = 'Error: ' . $throwable->getMessage();
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . $this->action->id . ':Exception');
         }
-
-
-
 
         return $this->asJson($result);
     }

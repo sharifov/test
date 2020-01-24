@@ -3,6 +3,8 @@
 namespace modules\hotel\models;
 
 use Yii;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "hotel_room_pax".
@@ -135,5 +137,60 @@ class HotelRoomPax extends \yii\db\ActiveRecord
     public function getPaxAgeRangeByPaxId(int $paxId): ?array
 	{
 		return self::PAX_AGE_RANGE[$paxId] ?? null;
+	}
+
+    /**
+     * @param int $roomId
+     * @return array|bool
+     */
+    public function getChildrenAgesByRoom(int $roomId)
+    {
+        $childrenAges = (new Query())
+            ->select(['GROUP_CONCAT(hrp_age ORDER BY hrp_age ASC SEPARATOR ",") AS childrenAges'])
+            ->from('hotel_room_pax')
+            ->where([
+                'hrp_hotel_room_id' => $roomId,
+                'hrp_type_id' => 2,
+            ])
+            ->one();
+
+        return $childrenAges ? $childrenAges : ['childrenAges' => ''];
+    }
+
+    /**
+     * @param int $roomId
+     * @return array|bool
+     */
+    public function getQtyByRoom(int $roomId)
+    {
+        return (new Query())
+            ->select([
+                'SUM(
+                    CASE 
+                        WHEN hotel_room_pax.hrp_type_id = 1
+                        THEN 1 
+                        ELSE 0  
+                    END
+                ) AS adults',
+                'SUM(
+                    CASE 
+                        WHEN hotel_room_pax.hrp_type_id = 2
+                        THEN 1 
+                        ELSE 0  
+                    END
+                ) AS children',
+            ])
+            ->from('hotel_room_pax')
+            ->where(['hotel_room_pax.hrp_hotel_room_id' => $roomId])
+            ->one();
+    }
+
+    /**
+     * @param int $roomId
+     * @return array
+     */
+    public function getSummaryByRoom(int $roomId)
+    {
+        return (ArrayHelper::merge($this->getQtyByRoom($roomId), $this->getChildrenAgesByRoom($roomId)));
 	}
 }

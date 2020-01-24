@@ -31,19 +31,6 @@ use yii\helpers\VarDumper;
  */
 class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 {
-    public const
-        STATUS_NEW = 1,
-        STATUS_PENDING = 2,
-        STATUS_BOOKED = 3,
-        STATUS_CANCELED = 4;
-
-    public const STATUS_LIST = [
-        self::STATUS_NEW => 'New',
-        self::STATUS_PENDING => 'Pending',
-        self::STATUS_BOOKED => 'Booked',
-        self::STATUS_CANCELED => 'Canceled',
-    ];
-
     /**
      * @return string
      */
@@ -202,11 +189,19 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 
             if ($hQuote && !$hQuote->hotelQuoteRooms) {
                 foreach ($rooms as $room) {
+
+                    $childrenAges = '';
+                    if (array_key_exists('childrenAges', $room) && !empty($room['childrenAges'])) {
+                        $childrenAges = explode(',', $room['childrenAges']);
+                        sort($childrenAges);
+                        $childrenAges = implode(',', $childrenAges);
+                    }
+
                     $qRoom = new HotelQuoteRoom();
                     $qRoom->hqr_hotel_quote_id = $hQuote->hq_id;
                     $qRoom->hqr_adults = $room['adults'] ?? null;
                     $qRoom->hqr_children = $room['children'] ?? null;
-                    //childrenAges
+                    $qRoom->hqr_children_ages = $childrenAges;
 
                     $qRoom->hqr_rooms = $room['rooms'] ?? null;
                     $qRoom->hqr_code = $room['code'] ?? null;

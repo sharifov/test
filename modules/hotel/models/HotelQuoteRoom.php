@@ -26,6 +26,7 @@ use yii\db\ActiveRecord;
  * @property int|null $hqr_rooms
  * @property int|null $hqr_adults
  * @property int|null $hqr_children
+ * @property string|null $hqr_children_ages
  *
  * @property Currency $hqrCurrency
  * @property array $extraData
@@ -58,6 +59,7 @@ class HotelQuoteRoom extends ActiveRecord
             [['hqr_payment_type', 'hqr_code'], 'string', 'max' => 10],
             [['hqr_board_code'], 'string', 'max' => 2],
             [['hqr_board_name'], 'string', 'max' => 100],
+            [['hqr_children_ages'], 'string', 'max' => 50],
             [['hqr_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['hqr_currency' => 'cur_code']],
             [['hqr_hotel_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelQuote::class, 'targetAttribute' => ['hqr_hotel_quote_id' => 'hq_id']],
         ];

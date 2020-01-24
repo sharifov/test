@@ -325,14 +325,6 @@ class ProductQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return bool
-     */
-    public function availableForBooking(): bool /* TODO: confirmation A.C. */
-    {
-        return $this->isPending();
-    }
-
-    /**
      * @return array
      */
     public static function getStatusList(): array
