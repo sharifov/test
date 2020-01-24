@@ -59,6 +59,7 @@ class FlightQuoteSearchHelper
 
 		foreach ($quotes['results'] as $key => $quote) {
 			$quotes['results'][$key]['price'] = self::getQuotePrice($quote);
+			$quotes['results'][$key]['originRate'] = self::getOriginRate($quote);
 
 			$preSegment = null;
 			$baggagePerSegment = [];
@@ -118,6 +119,7 @@ class FlightQuoteSearchHelper
 			$quotes['results'][$key]['airportChange'] = $airportChange;
 			$quotes['results'][$key]['technicalStopCnt'] = $technicalStopCnt;
 			$quotes['results'][$key]['duration'] = $totalDuration;
+			$quotes['results'][$key]['totalDuration'] = array_sum($totalDuration);
 		}
 
 		return $quotes;
@@ -165,6 +167,23 @@ class FlightQuoteSearchHelper
 			$price = $quote['passengers']['INF']['price'];
 		}
 		return $price;
+	}
+
+	/**
+	 * @param array $quote
+	 * @return mixed|null
+	 */
+	public static function getOriginRate(array $quote)
+	{
+		$rate = null;
+		if (!empty($quote['currencies']) && !empty($quote['currencyRates'])) {
+			foreach ($quote['currencies'] as $currency) {
+				if (!empty($quote['currencyRates'][$currency.$currency])) {
+					$rate = $quote['currencyRates'][$currency.$currency]['rate'] ?? null;
+				}
+			}
+		}
+		return $rate;
 	}
 
 }

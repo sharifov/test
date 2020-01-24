@@ -26,8 +26,8 @@ use yii\helpers\VarDumper;
  * @property string $e_email_bc
  * @property string $e_email_subject
  * @property string $e_email_body_text
- * @property string $e_email_body_html // Please use $model->getEmailBodyHtml()
- * @property string $e_email_body_blob
+ * @property string $e_email_body_html // please don't use.
+ * @property string $e_email_body_blob // If get uncompressed html - please use getEmailBodyHtml()
  * @property string $e_attach
  * @property string $e_email_data
  * @property int $e_type_id
@@ -793,7 +793,7 @@ class Email extends \yii\db\ActiveRecord
         if (!empty($this->e_email_body_blob)) {
             $value = TextConvertingHelper::unCompress($this->e_email_body_blob);
         } else {
-            $value = $this->e_email_body_html;
+            $value = '';
         }
         return $value;
     }

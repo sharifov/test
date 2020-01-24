@@ -17,8 +17,8 @@ class FlightQuoteSearch extends FlightQuote
     public function rules()
     {
         return [
-            [['fq_id', 'fq_flight_id', 'fq_source_id', 'fq_product_quote_id', 'fq_gds_offer_id', 'fq_type_id', 'fq_trip_type_id', 'fq_fare_type_id', 'fq_created_user_id', 'fq_created_expert_id'], 'integer'],
-            [['fq_hash_key', 'fq_record_locator', 'fq_gds', 'fq_gds_pcc', 'fq_cabin_class', 'fq_main_airline', 'fq_created_expert_name', 'fq_reservation_dump', 'fq_pricing_info', 'fq_origin_search_data', 'fq_last_ticket_date', 'fq_request_hash'], 'safe'],
+            [['fq_id', 'fq_flight_id', 'fq_source_id', 'fq_product_quote_id', 'fq_type_id', 'fq_trip_type_id', 'fq_fare_type_id', 'fq_created_user_id', 'fq_created_expert_id'], 'integer'],
+            [['fq_hash_key', 'fq_record_locator', 'fq_gds_offer_id', 'fq_gds', 'fq_gds_pcc', 'fq_cabin_class', 'fq_main_airline', 'fq_created_expert_name', 'fq_reservation_dump', 'fq_pricing_info', 'fq_origin_search_data', 'fq_last_ticket_date', 'fq_request_hash'], 'safe'],
             [['fq_service_fee_percent'], 'number'],
         ];
     }

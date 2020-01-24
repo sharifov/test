@@ -284,4 +284,24 @@ class Flight extends \yii\db\ActiveRecord implements Productable
 		return 1;
 //		return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
 	}
+
+	/**
+	 * @param int|null $excludeQuoteId
+	 * @return bool
+	 */
+	public function originalQuoteExist(int $excludeQuoteId = null): bool
+	{
+		foreach ($this->flightQuotes as $quote) {
+			if ($quote->isOriginal()) {
+				if ($excludeQuoteId) {
+					if ($quote->fq_id !== $excludeQuoteId) {
+						return true;
+					}
+				} else {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use Yii;
 
 /**
@@ -76,4 +77,22 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
     {
         return new \modules\flight\models\query\FlightQuoteSegmentStopQuery(static::class);
     }
+
+	/**
+	 * @param FlightQuoteSegmentStopDTO $dto
+	 * @return FlightQuoteSegmentStop
+	 */
+    public static function create(FlightQuoteSegmentStopDTO $dto): self
+	{
+		$stop = new self();
+
+		$stop->qss_quote_segment_id = $dto->quoteSegmentId;
+		$stop->qss_location_iata = $dto->locationIata;
+		$stop->qss_elapsed_time = $dto->elapsedTime;
+		$stop->qss_duration = $dto->duration;
+		$stop->qss_departure_dt = $dto->departureDt;
+		$stop->qss_arrival_dt = $dto->arrivalDt;
+
+		return $stop;
+	}
 }
