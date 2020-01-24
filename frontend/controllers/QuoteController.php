@@ -102,7 +102,7 @@ class QuoteController extends FController
 
             if($key && $lead){
                 $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
-                $resultSearch = Yii::$app->cache->get($keyCache);
+                $resultSearch = Yii::$app->cacheFile->get($keyCache);
 
                 if($resultSearch !== false){
                     foreach ($resultSearch['results'] as $entry){

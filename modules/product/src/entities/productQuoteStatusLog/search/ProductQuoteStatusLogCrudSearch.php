@@ -9,7 +9,7 @@ use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
 
-class ProductQuoteStatusLogSearch extends ProductQuoteStatusLog
+class ProductQuoteStatusLogCrudSearch extends ProductQuoteStatusLog
 {
     public function rules(): array
     {

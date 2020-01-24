@@ -6,7 +6,7 @@ use frontend\controllers\FController;
 use sales\auth\Auth;
 use Yii;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
-use modules\product\src\entities\productQuoteStatusLog\search\ProductQuoteStatusLogSearch;
+use modules\product\src\entities\productQuoteStatusLog\search\ProductQuoteStatusLogCrudSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -35,7 +35,7 @@ class ProductQuoteStatusLogCrudController extends FController
      */
     public function actionIndex()
     {
-        $searchModel = new ProductQuoteStatusLogSearch();
+        $searchModel = new ProductQuoteStatusLogCrudSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
