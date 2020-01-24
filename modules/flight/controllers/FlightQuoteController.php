@@ -237,7 +237,7 @@ class FlightQuoteController extends FController
 				throw new \DomainException('Key is empty!');
 			}
 
-			$quotes = \Yii::$app->cache->get($flight->fl_request_hash_key);
+			$quotes = \Yii::$app->cacheFile->get($flight->fl_request_hash_key);
 
 			if ($quotes === false && empty($quotes['results'])) {
 				throw new \DomainException('Not found Quote from Search result from Cache. Please update search request!');
