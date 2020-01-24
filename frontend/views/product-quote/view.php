@@ -24,6 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
+        <?= Html::a('Status Log', ['product/product-quote-status-log-crud/index', 'ProductQuoteStatusLogSearch[pqsl_product_quote_id]' => $model->pq_id], ['class' => 'btn btn-warning']) ?>
     </p>
 
     <?= DetailView::widget([

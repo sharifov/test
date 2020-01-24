@@ -7,10 +7,16 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
 use common\models\Quote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asProductQuoteStatus($value): string
+    {
+        return ProductQuoteStatus::asFormat($value);
+    }
+
     public function asLead(?Lead $lead): string
     {
         if ($lead === null) {
@@ -26,7 +32,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \modules\product\src\helpers\formatters\productType\Formatter::asProductType($value);
+        return \modules\product\src\helpers\formatters\ProductTypeFormatter::asProductType($value);
     }
 
     public function asQuoteType($value): string

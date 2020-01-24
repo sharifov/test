@@ -6,7 +6,7 @@ use common\models\query\ProductQuery;
 use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
 use modules\product\src\entities\product\events\ProductCreateEvent;
-use modules\product\src\useCases\create\ProductCreateForm;
+use modules\product\src\useCases\product\create\ProductCreateForm;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;

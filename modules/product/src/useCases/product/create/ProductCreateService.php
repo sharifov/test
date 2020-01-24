@@ -1,10 +1,10 @@
 <?php
 
-namespace modules\product\src\useCases\create;
+namespace modules\product\src\useCases\product\create;
 
 use common\models\Product;
 use modules\product\src\guards\ProductAvailableGuard;
-use modules\product\src\repositories\product\ProductRepository;
+use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\repositories\ProductableRepository;
 use modules\product\src\services\ProductFactory;
 use sales\repositories\lead\LeadRepository;

@@ -365,7 +365,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
 
     $formPreferenceId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
 
-    $addProductUrl = Url::to(['product-manage/create-ajax', 'id' => $leadModel->id]);
+    $addProductUrl = Url::to(['/product/product-manage/create-ajax', 'id' => $leadModel->id]);
 
     $js = <<<JS
 

@@ -1,23 +1,21 @@
 <?php
 
-namespace frontend\controllers;
+namespace modules\product\controllers;
 
+use frontend\controllers\FController;
 use sales\auth\Auth;
 use Yii;
-use common\models\Product;
-use common\models\search\ProductSearch;
+use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
+use modules\product\src\entities\productQuoteStatusLog\search\ProductQuoteStatusLogSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * ProductController implements the CRUD actions for Product model.
+ * ProductQuoteStatusLogCrudController implements the CRUD actions for ProductQuoteStatusLog model.
  */
-class ProductController extends FController
+class ProductQuoteStatusLogCrudController extends FController
 {
-    /**
-     * @return array
-     */
     public function behaviors(): array
     {
         $behaviors = [
@@ -25,7 +23,6 @@ class ProductController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
-                    'delete-ajax' => ['POST'],
                 ],
             ],
         ];
@@ -33,12 +30,12 @@ class ProductController extends FController
     }
 
     /**
-     * Lists all Product models.
+     * Lists all ProductQuoteStatusLog models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new ProductSearch();
+        $searchModel = new ProductQuoteStatusLogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
@@ -48,7 +45,7 @@ class ProductController extends FController
     }
 
     /**
-     * Displays a single Product model.
+     * Displays a single ProductQuoteStatusLog model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -61,16 +58,16 @@ class ProductController extends FController
     }
 
     /**
-     * Creates a new Product model.
+     * Creates a new ProductQuoteStatusLog model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Product();
+        $model = new ProductQuoteStatusLog();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->pr_id]);
+            return $this->redirect(['view', 'id' => $model->pqsl_id]);
         }
 
         return $this->render('create', [
@@ -79,7 +76,7 @@ class ProductController extends FController
     }
 
     /**
-     * Updates an existing Product model.
+     * Updates an existing ProductQuoteStatusLog model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -90,7 +87,7 @@ class ProductController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->pr_id]);
+            return $this->redirect(['view', 'id' => $model->pqsl_id]);
         }
 
         return $this->render('update', [
@@ -99,7 +96,7 @@ class ProductController extends FController
     }
 
     /**
-     * Deletes an existing Product model.
+     * Deletes an existing ProductQuoteStatusLog model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -113,18 +110,18 @@ class ProductController extends FController
     }
 
     /**
-     * Finds the Product model based on its primary key value.
+     * Finds the ProductQuoteStatusLog model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Product the loaded model
+     * @return ProductQuoteStatusLog the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Product::findOne($id)) !== null) {
+        if (($model = ProductQuoteStatusLog::findOne($id)) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested product does not exist.', 1);
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

@@ -1,9 +1,10 @@
 <?php
 
-namespace frontend\controllers;
+namespace modules\product\controllers;
 
-use modules\product\src\useCases\create\ProductCreateForm;
-use modules\product\src\useCases\create\ProductCreateService;
+use frontend\controllers\FController;
+use modules\product\src\useCases\product\create\ProductCreateForm;
+use modules\product\src\useCases\product\create\ProductCreateService;
 use Yii;
 use common\models\Lead;
 use common\models\Product;

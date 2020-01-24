@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\product\src\useCases\create;
+namespace modules\product\src\useCases\product\create;
 
 use common\models\Lead;
 use common\models\ProductType;

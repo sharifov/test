@@ -4,6 +4,7 @@
 /* @var $index integer */
 
 use common\models\Offer;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\bootstrap4\Html;
 
 ?>
@@ -87,7 +88,7 @@ use yii\bootstrap4\Html;
     <!--                    <td>--><?//=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
 
                         <td><?=Html::encode($quote->pq_name)?></td>
-                        <td><?=$quote->getStatusLabel()?></td>
+                        <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
                         <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
                         <td class="text-right"><?=number_format($quote->optionAmountSum, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_service_fee_sum, 2)?></td>

@@ -1,6 +1,6 @@
 <?php
 
-use modules\product\src\useCases\create\ProductCreateForm;
+use modules\product\src\useCases\product\create\ProductCreateForm;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
 
@@ -20,7 +20,7 @@ $pjaxId = 'add-product-pjax'; // . uniqid();
         $form = ActiveForm::begin([
                 'id' => 'product-form',
                 //'options' => ['data-pjax' => true],
-            'action' => ['product-manage/create-ajax'],
+            'action' => ['/product/product-manage/create-ajax'],
             'method' => 'POST'
         ]);
     ?>

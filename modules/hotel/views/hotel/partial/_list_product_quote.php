@@ -7,6 +7,7 @@
 
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\data\ArrayDataProvider;
 use yii\web\View;
 use yii\helpers\Html;
@@ -24,7 +25,7 @@ use yii\helpers\Html;
             <?=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
              <?//=\yii\helpers\Html::encode($model->hqProductQuote->pq_gid)?>
 
-        | <?=$model->hqProductQuote->getStatusLabel()?>
+        | <?=ProductQuoteStatus::asFormat($model->hqProductQuote->pq_status_id)?>
 
         <ul class="nav navbar-right panel_toolbox">
 <!--            <li>-->

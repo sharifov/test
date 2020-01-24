@@ -89,7 +89,7 @@ JS;
 
 <?php
 
-$ajaxDeleteProductUrl = \yii\helpers\Url::to(['product-manage/delete-ajax']);
+$ajaxDeleteProductUrl = \yii\helpers\Url::to(['/product/product-manage/delete-ajax']);
 $ajaxDeleteProductQuoteUrl = \yii\helpers\Url::to(['product-quote/delete-ajax']);
 
 

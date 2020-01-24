@@ -1,25 +1,25 @@
 <?php
 
-namespace modules\product\src\helpers\formatters\productType;
+namespace modules\product\src\helpers\formatters;
 
 use common\models\ProductType;
 use yii\bootstrap4\Html;
 
-class Formatter
+class ProductTypeFormatter
 {
     public static function asProductType(int $value): string
     {
         switch ($value) {
             case ProductType::PRODUCT_FLIGHT:
-                $class = 'label label-info';
+                $class = 'info';
                 break;
             case ProductType::PRODUCT_HOTEL:
-                $class = 'label label-warning';
+                $class = 'warning';
                 break;
             default:
-                $class = 'label label-default';
+                $class = 'default';
         }
 
-        return Html::tag('span', ProductType::getListAll()[$value] ?? 'Undefined', ['class' => $class]);
+        return Html::tag('span', ProductType::getListAll()[$value] ?? 'Undefined', ['class' => 'label label-' . $class]);
     }
 }

@@ -251,6 +251,10 @@ return [
             'class' => \modules\hotel\HotelModule::class,
         ],
 
+        'product' => [
+            'class' => \modules\product\ProductModule::class,
+        ],
+
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,

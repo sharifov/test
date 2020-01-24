@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\product\src\repositories\product;
+namespace modules\product\src\entities\product;
 
 use common\models\Product;
 use modules\product\src\exceptions\ProductCodeException;
