@@ -1,5 +1,6 @@
 <?php
 
+use modules\product\src\grid\columns\ProductQuoteColumn;
 use modules\product\src\grid\columns\ProductQuoteStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
@@ -32,7 +33,11 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'pqsl_id',
-            'pqsl_product_quote_id',
+            [
+                'class' => ProductQuoteColumn::class,
+                'attribute' => 'pqsl_product_quote_id',
+                'relation' => 'productQuote',
+            ],
             [
                 'class' => ProductQuoteStatusColumn::class,
                 'attribute' => 'pqsl_start_status_id',

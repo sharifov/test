@@ -1,5 +1,6 @@
 <?php
 
+use modules\product\src\grid\columns\ProductColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -30,7 +31,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'pq_id',
             'pq_gid',
             'pq_name',
-            'pq_product_id',
+            [
+                'class' => ProductColumn::class,
+                'attribute' => 'pq_product_id',
+                'relation' => 'pqProduct',
+            ],
             'pq_order_id',
             'pq_description:ntext',
             'pq_status_id',

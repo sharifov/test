@@ -5,9 +5,13 @@ namespace sales\yii\i18n;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Product;
+use common\models\ProductQuote;
 use common\models\Project;
 use common\models\Quote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\helpers\formatters\ProductFormatter;
+use modules\product\src\helpers\formatters\ProductQuoteFormatter;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
@@ -15,6 +19,24 @@ class Formatter extends \yii\i18n\Formatter
     public function asProductQuoteStatus($value): string
     {
         return ProductQuoteStatus::asFormat($value);
+    }
+
+    public function asProductQuote(?ProductQuote $productQuote): string
+    {
+        if ($productQuote === null) {
+            return $this->nullDisplay;
+        }
+
+        return ProductQuoteFormatter::asProductQuote($productQuote);
+    }
+
+    public function asProduct(?Product $product): string
+    {
+        if ($product === null) {
+            return $this->nullDisplay;
+        }
+
+        return ProductFormatter::asProduct($product);
     }
 
     public function asLead(?Lead $lead): string

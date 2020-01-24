@@ -4,20 +4,21 @@ namespace modules\product\src\grid\columns;
 
 use yii\grid\DataColumn;
 
+
 /**
- * Class ProductColumn
+ * Class ProductQuoteColumn
  *
  * @property $relation
  *
  *  Ex.
         [
-            'class' => modules\product\src\grid\columns\ProductColumn::class,
-            'attribute' => 'product_id',
-            'relation' => 'product',
+            'class' => modules\product\src\grid\columns\ProductQuoteColumn::class,
+            'attribute' => 'product_quote_id',
+            'relation' => 'productQuote',
         ],
  *
  */
-class ProductColumn extends DataColumn
+class ProductQuoteColumn extends DataColumn
 {
     public $relation;
 
@@ -32,7 +33,7 @@ class ProductColumn extends DataColumn
     protected function renderDataCellContent($model, $key, $index): string
     {
         if ($model->{$this->attribute}) {
-            return $this->grid->formatter->format($model->{$this->relation}, 'product');
+            return $this->grid->formatter->format($model->{$this->relation}, 'productQuote');
         }
         return $this->grid->formatter->format(null, $this->format);
     }
