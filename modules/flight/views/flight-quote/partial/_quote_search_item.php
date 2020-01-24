@@ -1,5 +1,6 @@
 <?php
 use common\components\SearchService;
+use modules\flight\src\helpers\FlightQuoteHelper;
 use yii\bootstrap\Html;
 
 /**
@@ -7,6 +8,7 @@ use yii\bootstrap\Html;
  * @var $result []
  * @var $airlines []
  * @var $locations []
+ * @var $flightQuotes array
  */
 
 $user = Yii::$app->user->identity;
@@ -21,8 +23,9 @@ $airportChange = $result['airportChange'];
 $technicalStopCnt = $result['technicalStopCnt'];
 $bagFilter = $result['bagFilter'];
 
+$isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuotes, $result['key']);
 ?>
-<div class="quote search-result__quote" data-price="<?= $result['price']?>"
+<div class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>" data-price="<?= $result['price']?>"
      data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>"
      data-stop="<?= json_encode($stops)?>" data-time='<?= json_encode($time)?>' data-fareType="<?= (isset($result['fareType']))?$result['fareType']:''?>"
      data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $resultKey?>" data-changeairport="<?= $airportChange ?>" data-baggage="<?= isset($bagFilter)?$bagFilter:'' ?>">
@@ -228,6 +231,7 @@ $bagFilter = $result['bagFilter'];
         </div>
     </div>
     <div class="quote__details" id="result_<?= $resultKey?>" style="display:none;">
+        <?php if (!$isQuoteAssignedToFlight): ?>
         <div class="text-right">
 			<?= Html::button('<i class="fa fa-check"></i>&nbsp; <span>Select</span>', [
 				'class' => 'btn btn-success flight_create_quote__btn',
@@ -237,6 +241,7 @@ $bagFilter = $result['bagFilter'];
 				'data-result' => 'search-result__quote-'.$resultKey,
 			]) ?>
         </div>
+        <?php endif; ?>
         <div class="trip">
             <div class="trip__item">
                 <!-- Depart -->
@@ -364,13 +369,15 @@ $bagFilter = $result['bagFilter'];
 				'data-title' => implode(', ',$tripsInfo),
 				'data-target' => '#result_'.$resultKey,
 			]) ?>
-			<?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
-				'class' => 'btn btn-success flight_create_quote__btn',
-				'data-title' => implode(', ',$tripsInfo),
-				'data-key' => $result['key'],
-				'data-gds' => $result['gds'],
-				'data-result' => 'search-result__quote-'.$resultKey,
-			]) ?>
+            <?php if (!$isQuoteAssignedToFlight): ?>
+                <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
+                    'class' => 'btn btn-success flight_create_quote__btn',
+                    'data-title' => implode(', ',$tripsInfo),
+                    'data-key' => $result['key'],
+                    'data-gds' => $result['gds'],
+                    'data-result' => 'search-result__quote-'.$resultKey,
+                ]) ?>
+            <?php endif; ?>
         </div>
     </div>
 </div>

@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use Yii;
 
 /**
@@ -21,6 +22,16 @@ use Yii;
  */
 class FlightPax extends \yii\db\ActiveRecord
 {
+	public const PAX_ADULT = 'ADT';
+	public const PAX_CHILD = 'CHD';
+	public const PAX_INFANT = 'INF';
+
+	public const PAX_LIST_ID = [
+		self::PAX_ADULT => 1,
+		self::PAX_CHILD => 2,
+		self::PAX_INFANT => 3
+	];
+
     /**
      * {@inheritdoc}
      */
@@ -70,14 +81,6 @@ class FlightPax extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getFlightQuoteSegmentPaxBaggageCharges()
-    {
-        return $this->hasMany(FlightQuoteSegmentPaxBaggageCharge::class, ['qsbc_flight_pax_id' => 'fp_id']);
-    }
-
-    /**
      * {@inheritdoc}
      * @return \modules\flight\models\query\FlightPaxQuery the active query used by this AR class.
      */
@@ -85,4 +88,40 @@ class FlightPax extends \yii\db\ActiveRecord
     {
         return new \modules\flight\models\query\FlightPaxQuery(static::class);
     }
+
+	/**
+	 * @param FlightPaxDTO $dto
+	 * @return FlightPax
+	 */
+    public static function create(FlightPaxDTO $dto): self
+	{
+		$flightPax = new self();
+
+		$flightPax->fp_flight_id = $dto->flightId;
+		$flightPax->fp_pax_id = $dto->paxId;
+		$flightPax->fp_pax_type = $dto->paxType;
+		$flightPax->fp_first_name = $dto->firstName;
+		$flightPax->fp_last_name = $dto->lastName;
+		$flightPax->fp_middle_name = $dto->middleName;
+		$flightPax->fp_dob = $dto->dob;
+
+		return $flightPax;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getPaxListId(): array
+	{
+		return self::PAX_LIST_ID;
+	}
+
+	/**
+	 * @param string $type
+	 * @return int|null
+	 */
+	public static function getPaxId(string $type): ?int
+	{
+		return self::getPaxListId()[$type] ?? null;
+	}
 }

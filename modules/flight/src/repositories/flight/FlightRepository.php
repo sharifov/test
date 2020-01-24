@@ -41,8 +41,6 @@ class FlightRepository extends Repository
 	 */
 	public function save(Flight $flight): int
 	{
-		$flight->disableAREvents();
-
 		if (!$flight->save(false)) {
 			throw new \RuntimeException('Saving error', FlightCodeException::FLIGHT_SAVE);
 		}

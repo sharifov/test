@@ -157,9 +157,9 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                     $prQuote->pq_client_currency = $currency;
 
                     $prQuote->pq_owner_user_id = Yii::$app->user->id;
-                    $prQuote->pq_price = floatval($totalAmount);
-                    $prQuote->pq_origin_price = floatval($totalAmount);
-                    $prQuote->pq_client_price = floatval($totalAmount);
+                    $prQuote->pq_price = (float)$totalAmount;
+                    $prQuote->pq_origin_price = (float)$totalAmount;
+                    $prQuote->pq_client_price = (float)$totalAmount;
                     $prQuote->pq_status_id = ProductQuote::STATUS_PENDING;
                     $prQuote->pq_gid = self::generateGid();
                     $prQuote->pq_service_fee_sum = 0;

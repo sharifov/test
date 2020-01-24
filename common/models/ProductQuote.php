@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\query\ProductQuoteQuery;
 use modules\flight\models\FlightQuote;
+use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\hotel\models\HotelQuote;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -409,5 +410,40 @@ class ProductQuote extends \yii\db\ActiveRecord
         return $quoteData;
     }
 
+	/**
+	 * @param ProductQuoteCreateDTO $dto
+	 * @return ProductQuote
+	 */
+    public static function create(ProductQuoteCreateDTO $dto): ProductQuote
+	{
+		$quote = new self();
 
+		$quote->pq_gid = self::generateGid();
+		$quote->pq_name = $dto->name;
+		$quote->pq_product_id = $dto->productId;
+		$quote->pq_order_id = $dto->orderId;
+		$quote->pq_description = $dto->description;
+		$quote->pq_status_id = self::STATUS_PENDING;
+		$quote->pq_price = $dto->price;
+		$quote->pq_origin_price = $dto->originPrice;
+		$quote->pq_client_price = $dto->clientPrice;
+		$quote->pq_service_fee_sum = $dto->serviceFeeSum;
+		$quote->pq_origin_currency = $dto->originCurrency;
+		$quote->pq_client_currency = $dto->clientCurrency;
+		$quote->pq_origin_currency_rate = $dto->originCurrencyRate;
+		$quote->pq_client_currency_rate = $dto->clientCurrencyRate;
+		$quote->pq_owner_user_id = $dto->ownerUserId;
+		$quote->pq_created_user_id = $dto->createdUserId;
+		$quote->pq_updated_user_id = $dto->updatedUserId;
+
+		return $quote;
+	}
+
+	/**
+	 * @return string
+	 */
+	private static function generateGid()
+	{
+		return md5(uniqid('fq', true));
+	}
 }

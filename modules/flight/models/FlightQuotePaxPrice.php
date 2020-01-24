@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use common\models\Currency;
+use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use Yii;
 
 /**
@@ -111,4 +112,28 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
     {
         return new \modules\flight\models\query\FlightQuotePaxPriceQuery(static::class);
     }
+
+	/**
+	 * @param FlightQuotePaxPriceDTO $dto
+	 * @return FlightQuotePaxPrice
+	 */
+    public static function create(FlightQuotePaxPriceDTO $dto): self
+	{
+		$paxPrice = new self();
+
+		$paxPrice->qpp_flight_quote_id = $dto->flightQuoteId;
+		$paxPrice->qpp_flight_pax_code_id = $dto->flightPaxCodeId;
+		$paxPrice->qpp_fare = $dto->fare;
+		$paxPrice->qpp_tax = $dto->tax;
+		$paxPrice->qpp_system_mark_up = $dto->systemMarkUp;
+		$paxPrice->qpp_agent_mark_up = $dto->agentMarkUp;
+		$paxPrice->qpp_origin_fare = $dto->originFare;
+		$paxPrice->qpp_origin_currency = $dto->originCurrency;
+		$paxPrice->qpp_origin_tax = $dto->originTax;
+		$paxPrice->qpp_client_fare = $dto->clientFare;
+		$paxPrice->qpp_client_currency = $dto->clientCurrency;
+		$paxPrice->qpp_client_tax = $dto->clientTax;
+
+		return $paxPrice;
+	}
 }
