@@ -3,7 +3,7 @@
 namespace modules\product\src\useCases\product\create;
 
 use common\models\Lead;
-use common\models\ProductType;
+use modules\product\src\entities\productType\ProductType;
 use modules\product\src\guards\ProductAvailableGuard;
 use yii\base\Model;
 

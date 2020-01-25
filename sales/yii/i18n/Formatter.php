@@ -5,19 +5,43 @@ namespace sales\yii\i18n;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
-use common\models\Product;
-use common\models\ProductQuote;
+use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productOption\ProductOptionPriceType;
+use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Project;
 use common\models\Quote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asProductQuoteOptionStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return ProductQuoteOptionStatus::asFormat($value);
+    }
+
+    public function asProductOptionPriceType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return ProductOptionPriceType::asFormat($value);
+    }
+
     public function asProductQuoteStatus($value): string
     {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
         return ProductQuoteStatus::asFormat($value);
     }
 
@@ -184,8 +208,8 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
         if ($value) {
-            return Html::tag('span', 'Yes', ['class' => 'label label-success']);
+            return Html::tag('span', 'Yes', ['class' => 'badge badge-success']);
         }
-        return Html::tag('span', 'No', ['class' => 'label label-danger']);
+        return Html::tag('span', 'No', ['class' => 'badge badge-danger']);
     }
 }

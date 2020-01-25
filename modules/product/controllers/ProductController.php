@@ -3,29 +3,41 @@
 namespace modules\product\controllers;
 
 use frontend\controllers\FController;
-use sales\auth\Auth;
+use modules\product\src\useCases\product\create\ProductCreateForm;
+use modules\product\src\useCases\product\create\ProductCreateService;
 use Yii;
-use common\models\Product;
-use common\models\search\ProductSearch;
-use yii\helpers\ArrayHelper;
-use yii\web\NotFoundHttpException;
+use common\models\Lead;
+use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productType\ProductType;
+use modules\hotel\models\Hotel;
+use yii\base\Exception;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
- * ProductController implements the CRUD actions for Product model.
+ * Class ProductController
+ *
+ * @property ProductCreateService $productCreateService
  */
 class ProductController extends FController
 {
-    /**
-     * @return array
-     */
+    private $productCreateService;
+
+    public function __construct($id, $module, ProductCreateService $productCreateService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->productCreateService = $productCreateService;
+    }
+
     public function behaviors(): array
     {
         $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'delete' => ['POST'],
                     'delete-ajax' => ['POST'],
                 ],
             ],
@@ -34,93 +46,85 @@ class ProductController extends FController
     }
 
     /**
-     * Lists all Product models.
-     * @return mixed
+     * @return array|string
+     * @throws BadRequestHttpException
      */
-    public function actionIndex()
+    public function actionCreateAjax()
     {
-        $searchModel = new ProductSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $form = new ProductCreateForm();
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
+        if ($form->load(Yii::$app->request->post())) {
 
-    /**
-     * Displays a single Product model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
+            Yii::$app->response->format = Response::FORMAT_JSON;
 
-    /**
-     * Creates a new Product model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new Product();
+            if (!$form->validate()) {
+                return ['errors' => \yii\widgets\ActiveForm::validate($form)];
+            }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->pr_id]);
+            try {
+                $this->productCreateService->create($form);
+                return ['message' => 'Successfully added a new product'];
+            } catch (\DomainException $e) {
+                Yii::error($e, 'ProductController:actionCreateAjax:DomainException');
+                return ['errors' => $e->getMessage()];
+            } catch (\Throwable $e) {
+                Yii::error($e, 'ProductController:actionCreateAjax:Throwable');
+                return ['errors' => 'Server error'];
+            }
+
+        } else {
+
+            $leadId = (int)Yii::$app->request->get('id');
+
+            if (!$leadId) {
+                throw new BadRequestHttpException('Not found lead identity.');
+            }
+
+            $lead = Lead::findOne($leadId);
+            if (!$lead) {
+                throw new BadRequestHttpException('Not found this lead');
+            }
+
+            $form->pr_lead_id = $leadId;
         }
 
-        return $this->render('create', [
-            'model' => $model,
+        return $this->renderAjax('_ajax_form', [
+            'model' => $form,
         ]);
     }
 
     /**
-     * Updates an existing Product model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @return array
      */
-    public function actionUpdate($id)
+    public function actionDeleteAjax(): array
     {
-        $model = $this->findModel($id);
+        $id = Yii::$app->request->post('id');
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->pr_id]);
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+            $model = $this->findModel($id);
+            if (!$model->delete()) {
+                throw new Exception('Product (' . $id . ') not deleted', 2);
+            }
+
+            if ((int)$model->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
+                $modelHotel = Hotel::findOne(['ph_product_id' => $model->pr_id]);
+                if ($modelHotel) {
+                    if (!$modelHotel->delete()) {
+                        throw new Exception('Hotel (' . $modelHotel->ph_id . ') not deleted', 3);
+                    }
+                }
+            }
+
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return ['message' => 'Successfully removed product (' . $model->pr_id . ')'];
     }
 
-    /**
-     * Deletes an existing Product model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the Product model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Product the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
+    protected function findModel($id): Product
     {
         if (($model = Product::findOne($id)) !== null) {
             return $model;

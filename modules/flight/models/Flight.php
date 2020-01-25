@@ -2,7 +2,7 @@
 
 namespace modules\flight\models;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use modules\flight\models\query\FlightQuery;
 use modules\flight\src\events\FlightCountPassengersChangedEvent;
 use modules\product\src\interfaces\Productable;

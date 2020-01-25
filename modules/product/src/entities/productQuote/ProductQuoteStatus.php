@@ -13,7 +13,7 @@ class ProductQuoteStatus
     public const DECLINED        = 5;
     public const CANCELED        = 6;
 
-    public const STATUS_LIST        = [
+    private const LIST        = [
         self::PENDING        => 'Pending',
         self::IN_PROGRESS    => 'In progress',
         self::DONE           => 'Done',
@@ -22,7 +22,7 @@ class ProductQuoteStatus
         self::CANCELED       => 'Canceled',
     ];
 
-    public const CLASS_LIST        = [
+    private const CLASS_LIST        = [
         self::PENDING        => 'warning',
         self::IN_PROGRESS    => 'info',
         self::DONE           => 'success',
@@ -30,6 +30,11 @@ class ProductQuoteStatus
         self::DECLINED       => 'danger',
         self::CANCELED       => 'danger',
     ];
+
+    public static function getList(): array
+    {
+        return self::LIST;
+    }
 
     public static function asFormat(?int $value): string
     {
@@ -42,7 +47,7 @@ class ProductQuoteStatus
 
     public static function getName(?int $value)
     {
-        return self::STATUS_LIST[$value] ?? 'Undefined';
+        return self::LIST[$value] ?? 'Undefined';
     }
 
     private static function getClassName(?int $value): string

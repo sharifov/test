@@ -4,6 +4,9 @@ namespace modules\product\src\entities\productQuoteStatusLog;
 
 use modules\product\src\exceptions\ProductCodeException;
 
+/**
+ * Class ProductQuoteStatusLogRepository
+ */
 class ProductQuoteStatusLogRepository
 {
     public function getPrevious(int $productQuoteId): ?ProductQuoteStatusLog

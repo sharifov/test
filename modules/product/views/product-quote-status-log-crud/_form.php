@@ -17,30 +17,34 @@ $list = new ListsAccess(Auth::id());
 
 <div class="product-quote-status-log-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <div class="col-md-4">
 
-    <?= $form->field($model, 'pqsl_product_quote_id')->textInput() ?>
+        <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'pqsl_start_status_id')->dropDownList(ProductQuoteStatus::STATUS_LIST, ['prompt' => 'Select status']) ?>
+        <?= $form->field($model, 'pqsl_product_quote_id')->textInput() ?>
 
-    <?= $form->field($model, 'pqsl_end_status_id')->dropDownList(ProductQuoteStatus::STATUS_LIST, ['prompt' => 'Select status']) ?>
+        <?= $form->field($model, 'pqsl_start_status_id')->dropDownList(ProductQuoteStatus::getList(), ['prompt' => 'Select status']) ?>
 
-    <?= $form->field($model, 'pqsl_start_dt')->widget(DateTimePicker::class)?>
+        <?= $form->field($model, 'pqsl_end_status_id')->dropDownList(ProductQuoteStatus::getList(), ['prompt' => 'Select status']) ?>
 
-    <?= $form->field($model, 'pqsl_end_dt')->widget(DateTimePicker::class)?>
+        <?= $form->field($model, 'pqsl_start_dt')->widget(DateTimePicker::class) ?>
 
-    <?= $form->field($model, 'pqsl_duration')->textInput() ?>
+        <?= $form->field($model, 'pqsl_end_dt')->widget(DateTimePicker::class) ?>
 
-    <?= $form->field($model, 'pqsl_description')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'pqsl_duration')->textInput() ?>
 
-    <?= $form->field($model, 'pqsl_owner_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
+        <?= $form->field($model, 'pqsl_description')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'pqsl_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
+        <?= $form->field($model, 'pqsl_owner_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
 
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= $form->field($model, 'pqsl_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
+
+        <div class="form-group">
+            <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        </div>
+
+        <?php ActiveForm::end(); ?>
+
     </div>
-
-    <?php ActiveForm::end(); ?>
 
 </div>

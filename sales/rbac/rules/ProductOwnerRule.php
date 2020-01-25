@@ -2,7 +2,7 @@
 
 namespace sales\rbac\rules;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 
 class ProductOwnerRule extends ProductRule
 {

@@ -5,6 +5,15 @@ namespace modules\product\src\grid\columns;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\grid\DataColumn;
 
+/**
+ * Class ProductQuoteStatusColumn
+ *
+ * Ex.
+        [
+            'class' => \modules\product\src\grid\columns\ProductQuoteStatusColumn::class,
+            'attribute' => 'pqsl_start_status_id',
+        ],
+ */
 class ProductQuoteStatusColumn extends DataColumn
 {
     public $format = 'productQuoteStatus';
@@ -14,7 +23,7 @@ class ProductQuoteStatusColumn extends DataColumn
         parent::init();
 
         if ($this->filter === null) {
-            $this->filter = ProductQuoteStatus::STATUS_LIST;
+            $this->filter = ProductQuoteStatus::getList();
         }
     }
 }

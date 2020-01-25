@@ -3,7 +3,7 @@
 namespace modules\product\src\entities\productQuoteStatusLog;
 
 use common\models\Employee;
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\db\ActiveQuery;
 
@@ -59,11 +59,11 @@ class ProductQuoteStatusLog extends \yii\db\ActiveRecord
             ['pqsl_product_quote_id', 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqsl_product_quote_id' => 'pq_id']],
 
             ['pqsl_start_status_id', 'integer'],
-            ['pqsl_start_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::STATUS_LIST)],
+            ['pqsl_start_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
 
             ['pqsl_end_status_id', 'required'],
             ['pqsl_end_status_id', 'integer'],
-            ['pqsl_end_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::STATUS_LIST)],
+            ['pqsl_end_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
 
             ['pqsl_start_dt', 'required'],
             ['pqsl_start_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
@@ -113,8 +113,8 @@ class ProductQuoteStatusLog extends \yii\db\ActiveRecord
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqsl_product_quote_id']);
     }
 
-    public static function find(): Query
+    public static function find(): Scopes
     {
-        return new Query(static::class);
+        return new Scopes(static::class);
     }
 }

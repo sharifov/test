@@ -2,7 +2,7 @@
 
 namespace sales\rbac\rules;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use modules\product\src\entities\product\ProductRepository;
 use Yii;
 use yii\rbac\Rule;

@@ -2,7 +2,7 @@
 
 namespace modules\product\src\repositories;
 
-use common\models\ProductType;
+use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\Flight;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\hotel\models\Hotel;

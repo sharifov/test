@@ -168,7 +168,7 @@ if($project){
 
     <?php if(!$leadModel->isNewRecord && ($user->isAdmin() || $user->isSupervision())):
 
-        $productTypes = \common\models\ProductType::find()->/*where(['pt_enabled' => true])*/all();
+        $productTypes = \modules\product\src\entities\productType\ProductType::find()->/*where(['pt_enabled' => true])*/all();
 
         ?>
         <div class="dropdown">
@@ -365,7 +365,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
 
     $formPreferenceId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
 
-    $addProductUrl = Url::to(['/product/product-manage/create-ajax', 'id' => $leadModel->id]);
+    $addProductUrl = Url::to(['/product/product/create-ajax', 'id' => $leadModel->id]);
 
     $js = <<<JS
 

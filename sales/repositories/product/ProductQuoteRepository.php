@@ -2,7 +2,7 @@
 
 namespace sales\repositories\product;
 
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use sales\repositories\Repository;
 
 class ProductQuoteRepository extends Repository

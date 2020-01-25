@@ -2,7 +2,8 @@
 
 namespace modules\product\src\helpers\formatters;
 
-use common\models\ProductType;
+use modules\product\src\entities\productType\ProductType;
+use modules\product\src\entities\productType\ProductTypeQuery;
 use yii\bootstrap4\Html;
 
 class ProductTypeFormatter
@@ -20,6 +21,6 @@ class ProductTypeFormatter
                 $class = 'default';
         }
 
-        return Html::tag('span', ProductType::getListAll()[$value] ?? 'Undefined', ['class' => 'label label-' . $class]);
+        return Html::tag('span', ProductTypeQuery::getListAll()[$value] ?? 'Undefined', ['class' => 'badge badge-' . $class]);
     }
 }

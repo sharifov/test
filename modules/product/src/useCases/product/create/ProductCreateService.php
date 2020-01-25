@@ -2,7 +2,7 @@
 
 namespace modules\product\src\useCases\product\create;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use modules\product\src\guards\ProductAvailableGuard;
 use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\repositories\ProductableRepository;

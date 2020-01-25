@@ -2,7 +2,6 @@
 
 namespace modules\product\src\entities\product;
 
-use common\models\Product;
 use modules\product\src\exceptions\ProductCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;

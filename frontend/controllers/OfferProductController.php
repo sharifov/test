@@ -3,7 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Offer;
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use Yii;
 use common\models\OfferProduct;
 use common\models\search\OfferProductSearch;

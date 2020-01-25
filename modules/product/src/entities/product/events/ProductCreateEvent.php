@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\product\events;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 
 /**
  * Class ProductCreateEvent

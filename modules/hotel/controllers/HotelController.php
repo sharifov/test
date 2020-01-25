@@ -2,7 +2,7 @@
 
 namespace modules\hotel\controllers;
 
-use common\models\ProductType;
+use modules\product\src\entities\productType\ProductType;
 use modules\hotel\models\forms\HotelForm;
 use modules\hotel\src\helpers\HotelFormatHelper;
 use Yii;

@@ -2,7 +2,7 @@
 
 namespace modules\flight\src\useCases\flightQuote\create;
 
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;

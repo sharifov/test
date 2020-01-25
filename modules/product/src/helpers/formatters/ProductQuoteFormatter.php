@@ -2,7 +2,7 @@
 
 namespace modules\product\src\helpers\formatters;
 
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use yii\bootstrap4\Html;
 
 class ProductQuoteFormatter
@@ -11,7 +11,7 @@ class ProductQuoteFormatter
     {
         return Html::a(
             'quote: ' . $productQuote->pq_id,
-            ['/product-quote/view', 'id' => $productQuote->pq_id],
+            ['/product/product-quote-crud/view', 'id' => $productQuote->pq_id],
             ['target' => '_blank', 'data-pjax' => 0]
         );
     }

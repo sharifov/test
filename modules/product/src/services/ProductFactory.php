@@ -2,7 +2,7 @@
 
 namespace modules\product\src\services;
 
-use common\models\ProductType;
+use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
 use modules\product\src\exceptions\ProductCodeException;

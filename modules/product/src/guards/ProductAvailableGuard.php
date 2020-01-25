@@ -2,7 +2,7 @@
 
 namespace modules\product\src\guards;
 
-use common\models\ProductType;
+use modules\product\src\entities\productType\ProductType;
 use modules\flight\FlightModule;
 use modules\hotel\HotelModule;
 use modules\product\src\exceptions\ProductCodeException;

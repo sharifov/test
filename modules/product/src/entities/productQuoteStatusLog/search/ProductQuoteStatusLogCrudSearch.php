@@ -3,7 +3,7 @@
 namespace modules\product\src\entities\productQuoteStatusLog\search;
 
 use common\models\Employee;
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
@@ -21,10 +21,10 @@ class ProductQuoteStatusLogCrudSearch extends ProductQuoteStatusLog
             ['pqsl_product_quote_id', 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqsl_product_quote_id' => 'pq_id']],
 
             ['pqsl_start_status_id', 'integer'],
-            ['pqsl_start_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::STATUS_LIST)],
+            ['pqsl_start_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
 
             ['pqsl_end_status_id', 'integer'],
-            ['pqsl_end_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::STATUS_LIST)],
+            ['pqsl_end_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
 
             ['pqsl_start_dt', 'date', 'format' => 'php:Y-m-d'],
 

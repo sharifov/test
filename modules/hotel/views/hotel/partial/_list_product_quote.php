@@ -8,6 +8,7 @@
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use yii\data\ArrayDataProvider;
 use yii\web\View;
 use yii\helpers\Html;
@@ -77,7 +78,7 @@ use yii\helpers\Html;
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
                         //'data-product-quote-id' => $model->hq_product_quote_id,
-                        'data-url' => \yii\helpers\Url::to(['product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
+                        'data-url' => \yii\helpers\Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
                     ]) ?>
 
@@ -211,7 +212,7 @@ use yii\helpers\Html;
                         <b><?=Html::encode($quoteOption->pqo_name)?></b>
                         <?=$quoteOption->pqo_description ? '<br>'. Html::encode($quoteOption->pqo_description) . '' : ''?>
                     </td>
-                    <td class="text-center" style="width: 120px"><?=$quoteOption->statusLabel?></td>
+                    <td class="text-center" style="width: 120px"><?= ProductQuoteOptionStatus::asFormat($quoteOption->pqo_status_id)?></td>
                     <td class="text-right" title="Extra Markup"><?=number_format($quoteOption->pqo_extra_markup, 2)?> USD</td>
                     <td class="text-right"><?=number_format($quoteOption->pqo_price, 2)?> USD</td>
 <!--                    <td class="text-right">--><?//=number_format($quoteOption->pqo_client_price, 2)?><!-- --><?//=Html::encode($model->hqProductQuote->pq_client_currency)?><!--</td>-->
@@ -219,7 +220,7 @@ use yii\helpers\Html;
                         <?php
                         echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i>', null, [
                             'class' => 'btn-update-product-quote-option',
-                            'data-url' => \yii\helpers\Url::to(['/product-quote-option/update-ajax', 'id' => $quoteOption->pqo_id])
+                            'data-url' => \yii\helpers\Url::to(['/product/product-quote-option/update-ajax', 'id' => $quoteOption->pqo_id])
                         ]);
                         ?>
 
@@ -228,7 +229,7 @@ use yii\helpers\Html;
                             'data-pqo-id' => $quoteOption->pqo_id,
                             'data-product-id' => $model->hqProductQuote->pq_product_id,
                             'class' => 'btn-delete-product-quote-option',
-                            'data-url' => \yii\helpers\Url::to(['/product-quote-option/delete-ajax'])
+                            'data-url' => \yii\helpers\Url::to(['/product/product-quote-option/delete-ajax'])
                         ]);
                         ?>
                     </td>

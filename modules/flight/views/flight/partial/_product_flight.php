@@ -1,6 +1,6 @@
 <?php
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use common\widgets\Alert;
 use modules\flight\models\Flight;
 use modules\flight\models\forms\ItineraryEditForm;

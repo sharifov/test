@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\OrderQuery;
+use modules\product\src\entities\productQuote\ProductQuote;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

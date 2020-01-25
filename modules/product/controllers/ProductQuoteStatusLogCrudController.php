@@ -10,6 +10,7 @@ use modules\product\src\entities\productQuoteStatusLog\search\ProductQuoteStatus
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * ProductQuoteStatusLogCrudController implements the CRUD actions for ProductQuoteStatusLog model.
@@ -30,10 +31,9 @@ class ProductQuoteStatusLogCrudController extends FController
     }
 
     /**
-     * Lists all ProductQuoteStatusLog models.
-     * @return mixed
+     * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new ProductQuoteStatusLogCrudSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
@@ -45,12 +45,11 @@ class ProductQuoteStatusLogCrudController extends FController
     }
 
     /**
-     * Displays a single ProductQuoteStatusLog model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
      */
-    public function actionView($id)
+    public function actionView($id): string
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -58,9 +57,7 @@ class ProductQuoteStatusLogCrudController extends FController
     }
 
     /**
-     * Creates a new ProductQuoteStatusLog model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
@@ -76,11 +73,9 @@ class ProductQuoteStatusLogCrudController extends FController
     }
 
     /**
-     * Updates an existing ProductQuoteStatusLog model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
@@ -96,13 +91,13 @@ class ProductQuoteStatusLogCrudController extends FController
     }
 
     /**
-     * Deletes an existing ProductQuoteStatusLog model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
-    public function actionDelete($id)
+    public function actionDelete($id): Response
     {
         $this->findModel($id)->delete();
 
@@ -110,13 +105,11 @@ class ProductQuoteStatusLogCrudController extends FController
     }
 
     /**
-     * Finds the ProductQuoteStatusLog model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return ProductQuoteStatusLog the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return ProductQuoteStatusLog
+     * @throws NotFoundHttpException
      */
-    protected function findModel($id)
+    protected function findModel($id): ProductQuoteStatusLog
     {
         if (($model = ProductQuoteStatusLog::findOne($id)) !== null) {
             return $model;
