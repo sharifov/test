@@ -148,10 +148,6 @@ class FlightController extends FController
 			throw new NotFoundHttpException();
 		}
 
-		if (!Yii::$app->user->can('updateProduct', ['product' => $flight->flProduct])) {
-			throw new ForbiddenHttpException();
-		}
-
 		$form = new ItineraryEditForm($flight);
 		return $this->renderAjax('update_ajax', [
 			'itineraryForm' => $form,
@@ -169,10 +165,6 @@ class FlightController extends FController
 		$id = Yii::$app->request->post('flightId');
 		$pjaxIdWrap = Yii::$app->request->post('pjaxIdWrap');
 		$flight = $this->findModel($id);
-
-		if (!Yii::$app->user->can('updateProduct', ['product' => $flight->flProduct])) {
-			throw new ForbiddenHttpException();
-		}
 
 		$data = CompositeFormHelper::prepareDataForMultiInput(
 			Yii::$app->request->post(),

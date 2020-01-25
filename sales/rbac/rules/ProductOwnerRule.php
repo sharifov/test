@@ -10,6 +10,6 @@ class ProductOwnerRule extends ProductRule
 
 	public function getData(int $userId, Product $product)
 	{
-		return $product->canAgentEdit($userId);
+		return true;
 	}
 }
