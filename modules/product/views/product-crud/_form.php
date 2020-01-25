@@ -9,6 +9,7 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="product-form">
+
     <div class="col-md-4">
 
         <?php $form = ActiveForm::begin(); ?>
@@ -38,4 +39,5 @@ use yii\widgets\ActiveForm;
         <?php ActiveForm::end(); ?>
 
     </div>
+
 </div>

@@ -1,9 +1,10 @@
 <?php
 /* @var $this yii\web\View */
-/* @var $offer Offer */
+/* @var $offer \modules\offer\src\entities\offer\Offer */
 /* @var $index integer */
 
-use common\models\Offer;
+use modules\offer\src\entities\offer\Offer;
+use modules\offer\src\entities\offer\OfferStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\bootstrap4\Html;
 
@@ -16,7 +17,7 @@ use yii\bootstrap4\Html;
             <small><span class="badge badge-white">OF<?=($offer->of_id)?></span></small>
             "<b><?=\yii\helpers\Html::encode($offer->of_name)?></b>"
             (<span title="UID"><?=\yii\helpers\Html::encode($offer->of_uid)?></span>)
-             <?=$offer->getStatusLabel()?>
+             <?= OfferStatus::asFormat($offer->of_status_id) ?>
 
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
@@ -24,7 +25,7 @@ use yii\bootstrap4\Html;
             <!--            </li>-->
             <li>
                 <?= Html::a('<i class="fa fa-edit warning"></i> Update offer', null, [
-                    'data-url' => \yii\helpers\Url::to(['/offer/update-ajax', 'id' => $offer->of_id]),
+                    'data-url' => \yii\helpers\Url::to(['/offer/offer/update-ajax', 'id' => $offer->of_id]),
                     'class' => 'btn-update-offer'
                 ])?>
             </li>
@@ -40,7 +41,7 @@ use yii\bootstrap4\Html;
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete offer', null, [
                         'class' => 'dropdown-item text-danger btn-delete-offer',
                         'data-offer-id' => $offer->of_id,
-                        'data-url' => \yii\helpers\Url::to(['offer/delete-ajax']),
+                        'data-url' => \yii\helpers\Url::to(['/offer/offer/delete-ajax']),
                     ]) ?>
                 </div>
             </li>
@@ -100,7 +101,7 @@ use yii\bootstrap4\Html;
                                     'data-offer-id' => $offer->of_id,
                                     'data-product-quote-id' => $quote->pq_id,
                                     'class' => 'btn-delete-quote-from-offer',
-                                    'data-url' => \yii\helpers\Url::to(['offer-product/delete-ajax'])
+                                    'data-url' => \yii\helpers\Url::to(['/offer/offer-product/delete-ajax'])
                                 ]);
                             ?>
                         </td>

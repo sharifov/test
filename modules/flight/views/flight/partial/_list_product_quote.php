@@ -32,7 +32,7 @@ use yii\helpers\Html;
 <!--            <li>-->
 <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
 <!--            </li>-->
-            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['offer/list-menu-ajax'])?>">
+            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/offer/offer/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                 <div class="dropdown-menu" role="menu">
                     <?php // ajax loaded content ?>

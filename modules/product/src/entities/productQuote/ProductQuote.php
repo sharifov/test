@@ -4,8 +4,8 @@ namespace modules\product\src\entities\productQuote;
 
 use common\models\Currency;
 use common\models\Employee;
-use common\models\Offer;
-use common\models\OfferProduct;
+use modules\offer\src\entities\offer\Offer;
+use modules\offer\src\entities\offerProduct\OfferProduct;
 use common\models\Order;
 use common\models\OrderProduct;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;

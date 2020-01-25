@@ -22,7 +22,7 @@ use yii\bootstrap4\Html;
         <ul class="nav navbar-right panel_toolbox">
             <li>
                 <?= Html::a('<i class="fa fa-plus-circle success"></i> add Offer', null, [
-                    'data-url' => \yii\helpers\Url::to(['/offer/create-ajax', 'id' => $lead->id]),
+                    'data-url' => \yii\helpers\Url::to(['/offer/offer/create-ajax', 'id' => $lead->id]),
                     'class' => 'btn btn-light btn-create-offer'
                 ])?>
             </li>

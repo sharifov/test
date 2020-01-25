@@ -5,6 +5,7 @@ namespace sales\yii\i18n;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
+use modules\offer\src\entities\offer\OfferStatus;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productOption\ProductOptionPriceType;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -18,6 +19,15 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asOfferStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OfferStatus::asFormat($value);
+    }
+
     public function asProductQuoteOptionStatus($value): string
     {
         if ($value === null) {

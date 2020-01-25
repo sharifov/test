@@ -45,7 +45,10 @@ class OfferForm extends Model
         return [
             [['of_lead_id'], 'required'],
             [['of_lead_id', 'of_status_id', 'of_owner_user_id'], 'integer'],
-            [['of_client_currency_rate', 'of_app_total', 'of_client_total'], 'number'],
+            [['of_client_currency_rate', 'of_client_total'], 'number'],
+
+            ['of_app_total', 'number'],
+            ['of_app_total', 'filter', 'filter' => 'floatval'],
 
 //            [['of_gid'], 'string', 'max' => 32],
 //            [['of_uid'], 'string', 'max' => 15],

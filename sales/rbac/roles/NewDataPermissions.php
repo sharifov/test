@@ -29,8 +29,16 @@ class NewDataPermissions
         '/product/product-quote-option/create-ajax', '/product/product-quote-option/delete-ajax', '/product/product-quote-option/update-ajax',
 
         '/order/create', '/order/create-ajax', '/order/delete', '/order/delete-ajax', '/order/index', '/order/list-menu-ajax', '/order/update', '/order/update-ajax', '/order/view',
-        '/offer/create', '/offer/create-ajax', '/offer/delete', '/offer/delete-ajax', '/offer/index', '/offer/list-menu-ajax', '/offer/update', '/offer/update-ajax', '/offer/view',
-        '/offer-product/create', '/offer-product/create-ajax', '/offer-product/delete', '/offer-product/delete-ajax', '/offer-product/index', '/offer-product/update', '/offer-product/view',
+
+//        '/offer/create', '/offer/create-ajax', '/offer/delete', '/offer/delete-ajax', '/offer/index', '/offer/list-menu-ajax', '/offer/update', '/offer/update-ajax', '/offer/view',
+        '/offer/offer-crud/index', '/offer/offer-crud/create', '/offer/offer-crud/view', '/offer/offer-crud/delete', '/offer/offer-crud/update',
+        '/offer/offer/create-ajax', '/offer/offer/delete-ajax', '/offer/offer/list-menu-ajax', '/offer/offer/update-ajax',
+
+
+//        '/offer-product/create', '/offer-product/create-ajax', '/offer-product/delete', '/offer-product/delete-ajax', '/offer-product/index', '/offer-product/update', '/offer-product/view',
+        '/offer/offer-product-crud/create', '/offer/offer-product-crud/delete', '/offer/offer-product-crud/index', '/offer/offer-product-crud/update', '/offer/offer-product-crud/view',
+        '/offer/offer-product/create-ajax', '/offer/offer-product/delete-ajax',
+
         '/order-product/create', '/order-product/create-ajax', '/order-product/delete', '/order-product/delete-ajax', '/order-product/index', '/order-product/update', '/order-product/view',
         '/invoice/create', '/invoice/create-ajax', '/invoice/delete', '/invoice/delete-ajax', '/invoice/index', '/invoice/update', '/invoice/update-ajax', '/invoice/view',
         '/billing-info/create', '/billing-info/delete', '/billing-info/index', '/billing-info/update', '/billing-info/view',

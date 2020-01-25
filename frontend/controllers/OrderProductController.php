@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use common\models\Offer;
-use common\models\OfferProduct;
+use modules\offer\src\entities\offer\Offer;
+use modules\offer\src\entities\offerProduct\OfferProduct;
 use common\models\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use Yii;

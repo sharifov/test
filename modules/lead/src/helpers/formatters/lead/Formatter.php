@@ -13,7 +13,7 @@ class Formatter
             . ' '
             . Html::a(
                 'lead: ' . $lead->id,
-                ['lead/view', 'gid' => $lead->gid],
+                ['/lead/view', 'gid' => $lead->gid],
                 ['target' => '_blank', 'data-pjax' => 0]
             );
     }

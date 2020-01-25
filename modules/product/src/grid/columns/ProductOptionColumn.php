@@ -6,6 +6,16 @@ use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productOption\ProductOptionQuery;
 use yii\grid\DataColumn;
 
+/**
+ * Class ProductOptionColumn
+ *
+ * Ex.
+        [
+            'class' => \modules\product\src\grid\columns\ProductOptionColumn::class,
+            'attribute' => 'pqo_product_option_id',
+            'relation' => 'pqoProductOption',
+        ],
+ */
 class ProductOptionColumn extends DataColumn
 {
     public $relation;

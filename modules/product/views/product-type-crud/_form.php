@@ -10,9 +10,10 @@ use yii\widgets\ActiveForm;
 
 <div class="product-type-form">
 
-    <?php $form = ActiveForm::begin(); ?>
-
     <div class="col-md-4">
+
+        <?php $form = ActiveForm::begin(); ?>
+
         <?= $form->field($model, 'pt_id')->textInput() ?>
 
         <?= $form->field($model, 'pt_key')->textInput(['maxlength' => true]) ?>
@@ -48,15 +49,16 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pt_enabled')->checkbox() ?>
 
-        <?//= $form->field($model, 'pt_created_dt')->textInput() ?>
+        <? //= $form->field($model, 'pt_created_dt')->textInput() ?>
 
-        <?//= $form->field($model, 'pt_updated_dt')->textInput() ?>
+        <? //= $form->field($model, 'pt_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-    </div>
-    </div>
+        </div>
 
-    <?php ActiveForm::end(); ?>
+        <?php ActiveForm::end(); ?>
+
+    </div>
 
 </div>

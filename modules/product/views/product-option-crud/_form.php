@@ -12,9 +12,10 @@ use yii\widgets\ActiveForm;
 
 <div class="product-option-form">
 
-    <?php $form = ActiveForm::begin(); ?>
-
     <div class="col-md-4">
+
+        <?php $form = ActiveForm::begin(); ?>
+
         <?= $form->field($model, 'po_key')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'po_product_type_id')->dropDownList(ProductTypeQuery::getListAll(), ['prompt' => '---']) ?>
@@ -33,19 +34,21 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'po_enabled')->checkbox() ?>
 
-    <!--    --><?//= $form->field($model, 'po_created_user_id')->textInput() ?>
-    <!---->
-    <!--    --><?//= $form->field($model, 'po_updated_user_id')->textInput() ?>
-    <!---->
-    <!--    --><?//= $form->field($model, 'po_created_dt')->textInput() ?>
-    <!---->
-    <!--    --><?//= $form->field($model, 'po_updated_dt')->textInput() ?>
+        <!--    --><? //= $form->field($model, 'po_created_user_id')->textInput() ?>
+        <!---->
+        <!--    --><? //= $form->field($model, 'po_updated_user_id')->textInput() ?>
+        <!---->
+        <!--    --><? //= $form->field($model, 'po_created_dt')->textInput() ?>
+        <!---->
+        <!--    --><? //= $form->field($model, 'po_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
-    </div>
 
-    <?php ActiveForm::end(); ?>
+
+        <?php ActiveForm::end(); ?>
+
+    </div>
 
 </div>
