@@ -2,6 +2,8 @@
 
 namespace modules\product\src\entities\productType;
 
+use sales\entities\EventTrait;
+
 /**
  * This is the model class for table "product_type".
  *
@@ -17,6 +19,8 @@ namespace modules\product\src\entities\productType;
  */
 class ProductType extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public const PRODUCT_FLIGHT = 1;
     public const PRODUCT_HOTEL  = 2;
 

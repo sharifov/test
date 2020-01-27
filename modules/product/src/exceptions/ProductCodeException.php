@@ -19,4 +19,20 @@ class ProductCodeException
 
     public const PRODUCT_QUOTE_STATUS_LOG_SAVE = Module::PRODUCT . 400;
     public const PRODUCT_QUOTE_STATUS_LOG_REMOVE = Module::PRODUCT . 401;
+
+    public const PRODUCT_QUOTE_NOT_FOUND = Module::PRODUCT . 410;
+    public const PRODUCT_QUOTE_SAVE = Module::PRODUCT . 411;
+    public const PRODUCT_QUOTE_REMOVE = Module::PRODUCT . 412;
+
+    public const PRODUCT_OPTION_NOT_FOUND = Module::PRODUCT . 500;
+    public const PRODUCT_OPTION_SAVE = Module::PRODUCT . 501;
+    public const PRODUCT_OPTION_REMOVE = Module::PRODUCT . 502;
+
+    public const PRODUCT_QUOTE_OPTION_NOT_FOUND = Module::PRODUCT . 600;
+    public const PRODUCT_QUOTE_OPTION_SAVE = Module::PRODUCT . 601;
+    public const PRODUCT_QUOTE_OPTION_REMOVE = Module::PRODUCT . 602;
+
+    public const PRODUCT_TYPE_NOT_FOUND = Module::PRODUCT . 700;
+    public const PRODUCT_TYPE_SAVE = Module::PRODUCT . 701;
+    public const PRODUCT_TYPE_REMOVE = Module::PRODUCT . 702;
 }

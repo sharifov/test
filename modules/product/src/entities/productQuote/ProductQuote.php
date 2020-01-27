@@ -14,6 +14,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\product\Product;
+use sales\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -61,6 +62,8 @@ use yii\db\ActiveRecord;
  */
 class ProductQuote extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public static function tableName(): string
     {
         return 'product_quote';

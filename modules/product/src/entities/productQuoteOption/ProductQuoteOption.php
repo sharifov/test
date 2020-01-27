@@ -5,6 +5,7 @@ namespace modules\product\src\entities\productQuoteOption;
 use common\models\Employee;
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -35,6 +36,8 @@ use yii\db\ActiveRecord;
  */
 class ProductQuoteOption extends ActiveRecord
 {
+    use EventTrait;
+
     /**
      * @return string
      */

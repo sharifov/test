@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\Lead;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -44,6 +45,8 @@ use yii\helpers\VarDumper;
  */
 class Offer extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public static function tableName(): string
     {
         return 'offer';

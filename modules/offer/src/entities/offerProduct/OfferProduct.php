@@ -5,6 +5,7 @@ namespace modules\offer\src\entities\offerProduct;
 use common\models\Employee;
 use modules\offer\src\entities\offer\Offer;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -24,6 +25,8 @@ use yii\db\ActiveQuery;
  */
 class OfferProduct extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public static function tableName(): string
     {
         return 'offer_product';
