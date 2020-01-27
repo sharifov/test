@@ -253,17 +253,29 @@ class HotelQuoteController extends FController
         return $this->redirect(['index']);
     }
 
-    public function actionAjaxBook($id)
+    /**
+     * @param int $id
+     * @param bool $preCheck
+     * @return Response
+     */
+    public function actionAjaxBook(int $id, bool $preCheck = true)
     {
         $id = (int) Yii::$app->request->get('id', 0); /* TODO: to post  */
 
         try {
-            if (!$id) {
+            if (!$id) { /* TODO: guard */
                 throw new Exception('Hotel Quote ID not found', 1);
             }
+            if (!$model = $this->findModel($id)) { /* TODO: add logic check by status new/pending */
+                throw new Exception('Hotel Quote not found', 1);
+            }
 
+            if ($preCheck) {
+                $chekResult = HotelQuote::checkRate($model);
 
-            $result = HotelQuote::book($id);
+            }
+
+            $result = HotelQuote::book($model);
         } catch (\Throwable $throwable) {
             $result = [
                 'message' => 'Error: ' . $throwable->getMessage(),

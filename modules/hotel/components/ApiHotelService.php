@@ -229,12 +229,34 @@ class ApiHotelService extends Component
 		return $result;
 	}
 
-	public function cancelBook() /* TODO:  */
+    /**
+     * @param $params
+     * @return array
+     */
+    public function checkRate($params)
     {
+        $result = ['status' => false, 'error' => '', 'data' => []];
 
+        try {
+            $response = $this->sendRequest('booking/checkrate', $params);
+
+            if ($response->isOk) {
+                /* TODO:  */
+            } else {
+                $result['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable), 'Component:ApiHotelService:book:Throwable' );
+        }
+
+		if (strlen($result['error'])) {
+		    \Yii::error($result['error'], 'Component:ApiHotelService:book');
+		}
+
+		return $result;
 	}
 
-	public function checkRate() /* TODO:  */
+	public function cancelBook() /* TODO:  */
     {
 
 	}

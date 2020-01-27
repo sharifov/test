@@ -334,23 +334,19 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
     }
 
     /**
-     * @param int $id (hotel_quote/hq_id)
+     * @param HotelQuote $model
      * @return array [bool status, string message]
      */
-    public static function book(int $id)
+    public static function book(HotelQuote $model)
     {
         $result = ['status' => false, 'message' => ''];
 
         try {
-            $model = self::findOne($id); /* TODO: add check by status new/pending */
-
             $rooms = [];
             $client = self::getClient($model);
 
             if (!$hotelQuoteRooms = $model->hotelQuoteRooms) {
-                $message = 'Error: Hotel Quote (ID:' . $id . ') Rooms not found';
-                Yii::error($message, self::class . ':book:Exception');
-                throw new Exception($message, 1);
+                throw new Exception('Error: Hotel Quote (ID:' . $model->hq_id . ') Rooms not found', 1);
             }
 
             foreach ($hotelQuoteRooms as $quoteRoom) {
@@ -369,12 +365,13 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             $apiHotelService = Yii::$app->getModule('hotel')->apiService;
             $apiResponse = $apiHotelService->book($params);
 
-            $hqProductQuote = $model->hqProductQuote;
-
             if ($apiResponse['status']) {
                 $result['status'] = true;
                 $result['message'] = 'Booking confirmed';
 
+                /* TODO: save full booking json response ? */
+
+                $hqProductQuote = $model->hqProductQuote;
                 $hqProductQuote->pq_status_id = $hqProductQuote::STATUS_IN_PROGRESS;  /* TODO: booking status */
             } else {
                 $result['message'] = $apiResponse['error'];
@@ -387,11 +384,43 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
         return $result;
     }
 
-
-
-    /* TODO: */
-    public static function cancelBook()
+    public static function checkRate(HotelQuote $model)
     {
-        return true;
+        try {
+            /* TODO: to guard */
+            if (!$hotel = $model->hqHotel) {
+                throw new Exception('Error: Hotel Quote (ID:' . $model->hq_id . ') Rooms not found', 1);
+            }
+            if (!$hotelQuoteRooms = $model->hotelQuoteRooms) {
+                throw new Exception('Error: Hotel Quote (ID:' . $model->hq_id . ') Rooms not found', 1);
+            }
+
+            $params = [
+                'checkIn' => $hotel->ph_check_in_date,
+                'rooms' => function($hotelQuoteRooms) {
+                    $rooms = [];
+                    foreach ($hotelQuoteRooms as $quoteRoom) {
+                        $rooms[] = [
+                        'key' => $quoteRoom->hqr_key,
+                        'type' => 'RECHECK',
+                        ];
+                    }
+                    return $rooms;
+                },
+            ];
+
+            $apiHotelService = Yii::$app->getModule('hotel')->apiService;
+            $apiResponse = $apiHotelService->checkRate($params);
+
+            
+
+        } catch (\Throwable $throwable) {
+            Yii::error(VarDumper::dumpAsString($throwable), self::class . ':checkRate:Throwable' );
+        }
+    }
+
+    public static function cancelBook(int $id)
+    {
+
     }
 }
