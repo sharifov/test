@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'pqsl_id',
-            'pqsl_product_quote_id',
+            'productQuote:productQuote',
             'pqsl_start_status_id:productQuoteStatus',
             'pqsl_end_status_id:productQuoteStatus',
             'pqsl_start_dt:byUserDateTime',

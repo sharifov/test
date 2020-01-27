@@ -273,6 +273,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
                 ['label' => 'Orders', 'url' => ['/order/index']],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
+                ['label' => 'Offers Status Log', 'url' => ['/offer/offer-status-log-crud/index']],
                 ['label' => 'Offer Products', 'url' => ['/offer/offer-product-crud/index']],
                 ['label' => 'Order Products', 'url' => ['/order-product/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/index']],

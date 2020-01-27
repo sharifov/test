@@ -1,0 +1,79 @@
+<?php
+
+use modules\offer\src\grid\columns\OfferColumn;
+use modules\offer\src\grid\columns\OfferStatusColumn;
+use sales\yii\grid\DateTimeColumn;
+use sales\yii\grid\DurationColumn;
+use sales\yii\grid\UserColumn;
+use yii\grid\ActionColumn;
+use yii\helpers\Html;
+use yii\grid\GridView;
+use yii\widgets\Pjax;
+
+/* @var $this yii\web\View */
+/* @var $searchModel modules\offer\src\entities\offerStatusLog\search\OfferStatusLogCrudSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = 'Offer Status Logs';
+$this->params['breadcrumbs'][] = $this->title;
+?>
+<div class="product-quote-status-log-index">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+
+    <p>
+        <?= Html::a('Create Offer Status Log', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
+
+    <?php Pjax::begin(); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            'osl_id',
+            [
+                'class' => OfferColumn::class,
+                'attribute' => 'osl_offer_id',
+                'relation' => 'offer',
+            ],
+            [
+                'class' => OfferStatusColumn::class,
+                'attribute' => 'osl_start_status_id',
+            ],
+            [
+                'class' => OfferStatusColumn::class,
+                'attribute' => 'osl_end_status_id',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'osl_start_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'osl_end_dt',
+            ],
+            [
+                'class' => DurationColumn::class,
+                'attribute' => 'osl_duration',
+                'startAttribute' => 'osl_start_dt',
+            ],
+            'osl_description',
+            [
+                'class' => UserColumn::class,
+                'attribute' => 'osl_owner_user_id',
+                'relation' => 'ownerUser',
+            ],
+            [
+                'class' => UserColumn::class,
+                'attribute' => 'osl_created_user_id',
+                'relation' => 'createdUser',
+            ],
+            ['class' => ActionColumn::class],
+        ],
+    ]) ?>
+
+    <?php Pjax::end(); ?>
+
+</div>

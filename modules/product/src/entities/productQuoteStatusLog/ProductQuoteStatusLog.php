@@ -87,6 +87,7 @@ class ProductQuoteStatusLog extends \yii\db\ActiveRecord
         return [
             'pqsl_id' => 'ID',
             'pqsl_product_quote_id' => 'Product Quote ID',
+            'productQuote' => 'Product Quote',
             'pqsl_start_status_id' => 'Start Status',
             'pqsl_end_status_id' => 'End Status',
             'pqsl_start_dt' => 'Start Dt',
