@@ -1,6 +1,7 @@
 <?php
 
 use modules\offer\src\grid\columns\OfferColumn;
+use modules\offer\src\grid\columns\OfferStatusActionColumn;
 use modules\offer\src\grid\columns\OfferStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
@@ -60,6 +61,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'startAttribute' => 'osl_start_dt',
             ],
             'osl_description',
+            [
+                'class' => OfferStatusActionColumn::class,
+                'attribute' => 'osl_action_id'
+            ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 'osl_owner_user_id',

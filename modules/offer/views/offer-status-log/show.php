@@ -1,6 +1,7 @@
 <?php
 
 use modules\offer\src\entities\offerStatusLog\search\OfferStatusLogSearch;
+use modules\offer\src\grid\columns\OfferStatusActionColumn;
 use modules\offer\src\grid\columns\OfferStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
@@ -51,6 +52,10 @@ use yii\widgets\Pjax;
                 'attribute' => 'osl_description',
                 'format' => 'ntext',
                 'options' => ['style' => 'width:280px'],
+            ],
+            [
+                'class' => OfferStatusActionColumn::class,
+                'attribute' => 'osl_action_id'
             ],
             [
                 'class' => UserColumn::class,

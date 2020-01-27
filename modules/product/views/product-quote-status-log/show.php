@@ -1,6 +1,7 @@
 <?php
 
 use modules\product\src\entities\productQuoteStatusLog\search\ProductQuoteStatusLogSearch;
+use modules\product\src\grid\columns\ProductQuoteStatusActionColumn;
 use modules\product\src\grid\columns\ProductQuoteStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
@@ -58,6 +59,10 @@ $this->title = 'Status log';
                 'options' => ['style' => 'width:280px'],
             ],
             [
+                'class' => ProductQuoteStatusActionColumn::class,
+                'attribute' => 'pqsl_action_id',
+            ],
+            [
                 'class' => UserColumn::class,
                 'relation' => 'ownerUser',
                 'attribute' => 'pqsl_owner_user_id',
@@ -68,7 +73,7 @@ $this->title = 'Status log';
                 'attribute' => 'pqsl_created_user_id',
             ],
         ],
-    ]); ?>
+    ]) ?>
 
     <?php Pjax::end(); ?>
 </div>

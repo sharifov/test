@@ -5,6 +5,7 @@ namespace modules\product\src\entities\productQuoteStatusLog\search;
 use common\models\Employee;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
@@ -33,6 +34,10 @@ class ProductQuoteStatusLogCrudSearch extends ProductQuoteStatusLog
             ['pqsl_duration', 'integer'],
 
             ['pqsl_description', 'string', 'max' => 255],
+
+            ['pqsl_action_id', 'integer'],
+            ['pqsl_action_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['pqsl_action_id', 'in', 'range' => array_keys(ProductQuoteStatusAction::getList())],
 
             ['pqsl_owner_user_id', 'integer'],
             ['pqsl_owner_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqsl_owner_user_id' => 'id']],
@@ -72,6 +77,7 @@ class ProductQuoteStatusLogCrudSearch extends ProductQuoteStatusLog
             'pqsl_start_status_id' => $this->pqsl_start_status_id,
             'pqsl_end_status_id' => $this->pqsl_end_status_id,
             'pqsl_duration' => $this->pqsl_duration,
+            'pqsl_action_id' => $this->pqsl_action_id,
             'pqsl_owner_user_id' => $this->pqsl_owner_user_id,
             'pqsl_created_user_id' => $this->pqsl_created_user_id,
         ]);

@@ -5,6 +5,7 @@ namespace modules\offer\src\entities\offerStatusLog\search;
 use common\models\Employee;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
+use modules\offer\src\entities\offer\OfferStatusAction;
 use modules\offer\src\entities\offerStatusLog\OfferStatusLog;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
@@ -33,6 +34,9 @@ class OfferStatusLogCrudSearch extends OfferStatusLog
             ['osl_duration', 'integer'],
 
             ['osl_description', 'string', 'max' => 255],
+
+            ['osl_action_id', 'integer'],
+            ['osl_action_id', 'in', 'range' => array_keys(OfferStatusAction::getList())],
 
             ['osl_owner_user_id', 'integer'],
             ['osl_owner_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['osl_owner_user_id' => 'id']],
@@ -72,6 +76,7 @@ class OfferStatusLogCrudSearch extends OfferStatusLog
             'osl_start_status_id' => $this->osl_start_status_id,
             'osl_end_status_id' => $this->osl_end_status_id,
             'osl_duration' => $this->osl_duration,
+            'osl_action_id' => $this->osl_action_id,
             'osl_owner_user_id' => $this->osl_owner_user_id,
             'osl_created_user_id' => $this->osl_created_user_id,
         ]);

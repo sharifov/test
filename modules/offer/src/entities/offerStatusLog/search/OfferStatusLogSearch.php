@@ -3,8 +3,8 @@
 namespace modules\offer\src\entities\offerStatusLog\search;
 
 use common\models\Employee;
-use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
+use modules\offer\src\entities\offer\OfferStatusAction;
 use modules\offer\src\entities\offerStatusLog\OfferStatusLog;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
@@ -16,9 +16,6 @@ class OfferStatusLogSearch extends OfferStatusLog
         return [
             ['osl_id', 'integer'],
             ['osl_id', 'exist', 'skipOnError' => true, 'targetClass' => static::class, 'targetAttribute' => ['osl_id' => 'osl_id']],
-
-            ['osl_offer_id', 'integer'],
-            ['osl_offer_id', 'exist', 'skipOnError' => true, 'targetClass' => Offer::class, 'targetAttribute' => ['osl_offer_id' => 'of_id']],
 
             ['osl_start_status_id', 'integer'],
             ['osl_start_status_id', 'in', 'range' => array_keys(OfferStatus::getList())],
@@ -34,6 +31,9 @@ class OfferStatusLogSearch extends OfferStatusLog
 
             ['osl_description', 'string', 'max' => 255],
 
+            ['osl_action_id', 'integer'],
+            ['osl_action_id', 'in', 'range' => array_keys(OfferStatusAction::getList())],
+
             ['osl_owner_user_id', 'integer'],
             ['osl_owner_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['osl_owner_user_id' => 'id']],
 
@@ -42,9 +42,11 @@ class OfferStatusLogSearch extends OfferStatusLog
         ];
     }
 
-    public function search($params, Employee $user): ActiveDataProvider
+    public function search($params, Employee $user, int $offerId): ActiveDataProvider
     {
         $query = self::find()->with(['createdUser', 'ownerUser', 'offer']);
+
+        $query->andWhere(['osl_offer_id' => $offerId]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -68,10 +70,10 @@ class OfferStatusLogSearch extends OfferStatusLog
 
         $query->andFilterWhere([
             'osl_id' => $this->osl_id,
-            'osl_offer_id' => $this->osl_offer_id,
             'osl_start_status_id' => $this->osl_start_status_id,
             'osl_end_status_id' => $this->osl_end_status_id,
             'osl_duration' => $this->osl_duration,
+            'osl_action_id' => $this->osl_action_id,
             'osl_owner_user_id' => $this->osl_owner_user_id,
             'osl_created_user_id' => $this->osl_created_user_id,
         ]);

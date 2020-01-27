@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\Lead;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
+use modules\offer\src\entities\offer\OfferStatusAction;
 use modules\offer\src\helpers\formatters\OfferFormatter;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productOption\ProductOptionPriceType;
@@ -14,6 +15,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Project;
 use common\models\Quote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
@@ -21,6 +23,24 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asProductQuoteStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return ProductQuoteStatusAction::asFormat($value);
+    }
+
+    public function asOfferStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OfferStatusAction::asFormat($value);
+    }
+
     public function asOffer(?Offer $offer): string
     {
         if ($offer === null) {

@@ -17,10 +17,7 @@ class OfferStatusLogController extends FController
 
         $searchModel = new OfferStatusLogSearch();
 
-        $params = Yii::$app->request->queryParams;
-        $params['OfferStatusLogSearch']['osl_offer_id'] = $offer->of_id;
-
-        $dataProvider = $searchModel->search($params, Auth::user());
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user(), $offer->of_id);
 
         return $this->renderAjax('show', [
             'searchModel' => $searchModel,

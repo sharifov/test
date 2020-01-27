@@ -5,6 +5,7 @@ namespace modules\offer\src\entities\offerStatusLog;
 use common\models\Employee;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
+use modules\offer\src\entities\offer\OfferStatusAction;
 use yii\db\ActiveQuery;
 
 /**
@@ -18,6 +19,7 @@ use yii\db\ActiveQuery;
  * @property string|null $osl_description
  * @property int|null $osl_owner_user_id
  * @property int|null $osl_created_user_id
+ * @property int|null $osl_action_id
  *
  * @property Employee $createdUser
  * @property Employee $ownerUser
@@ -33,6 +35,7 @@ class OfferStatusLog extends \yii\db\ActiveRecord
         $log->osl_end_status_id = $dto->endStatusId;
         $log->osl_start_dt = date('Y-m-d H:i:s');
         $log->osl_description = $dto->description;
+        $log->osl_action_id = $dto->actionId;
         $log->osl_owner_user_id = $dto->ownerId;
         $log->osl_created_user_id = $dto->creatorId;
         return $log;
@@ -72,6 +75,10 @@ class OfferStatusLog extends \yii\db\ActiveRecord
 
             ['osl_description', 'string', 'max' => 255],
 
+            ['osl_action_id', 'integer'],
+            ['osl_action_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['osl_action_id', 'in', 'range' => array_keys(OfferStatusAction::getList())],
+
             ['osl_owner_user_id', 'integer'],
             ['osl_owner_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['osl_owner_user_id' => 'id']],
 
@@ -92,6 +99,7 @@ class OfferStatusLog extends \yii\db\ActiveRecord
             'osl_end_dt' => 'End Dt',
             'osl_duration' => 'Duration',
             'osl_description' => 'Description',
+            'osl_action_id' => 'Action',
             'osl_owner_user_id' => 'Owner User',
             'osl_created_user_id' => 'Created User',
         ];

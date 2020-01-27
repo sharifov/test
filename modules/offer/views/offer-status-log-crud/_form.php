@@ -1,6 +1,7 @@
 <?php
 
 use modules\offer\src\entities\offer\OfferStatus;
+use modules\offer\src\entities\offer\OfferStatusAction;
 use sales\access\ListsAccess;
 use sales\auth\Auth;
 use sales\widgets\DateTimePicker;
@@ -34,6 +35,8 @@ $list = new ListsAccess(Auth::id());
         <?= $form->field($model, 'osl_duration')->textInput() ?>
 
         <?= $form->field($model, 'osl_description')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'osl_action_id')->dropDownList(OfferStatusAction::getList(), ['prompt' => 'Select action']) ?>
 
         <?= $form->field($model, 'osl_owner_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
 
