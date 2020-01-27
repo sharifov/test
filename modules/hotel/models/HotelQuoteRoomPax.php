@@ -83,5 +83,31 @@ class HotelQuoteRoomPax extends ActiveRecord
         return new \modules\hotel\models\query\HotelQuoteRoomPaxQuery(get_called_class());
     }
 
+    /**
+     * @param int $roomId
+     * @return array
+     */
+    public static function preparePaxesForBook(int $roomId)
+    {
+        $hotelQuoteRoomPax = self::find()
+            ->select([
+                'hqrp_type_id AS paxType',
+                'hqrp_first_name AS name',
+                'hqrp_last_name AS surname',
+            ])
+            ->where(['hqrp_hotel_quote_room_id' => $roomId])
+            ->orderBy(['hqrp_type_id' => SORT_ASC])
+            ->asArray()
+            ->all();
+
+        $paxes = [];
+        foreach ($hotelQuoteRoomPax as $key => $value) {
+            $paxes[$key] = $value;
+            $paxes[$key]['paxType'] = strtoupper(self::PAX_TYPE_LIST[$value['paxType']]);
+            $paxes[$key]['roomId'] = "1";
+        }
+
+        return $paxes;
+    }
 
 }

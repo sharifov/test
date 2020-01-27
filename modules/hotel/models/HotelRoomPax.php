@@ -164,14 +164,14 @@ class HotelRoomPax extends \yii\db\ActiveRecord
             ->select([
                 'SUM(
                     CASE 
-                        WHEN hotel_room_pax.hrp_type_id = '. (int) self::PAX_TYPE_ADL .'
+                        WHEN hotel_room_pax.hrp_type_id = ' . (int) self::PAX_TYPE_ADL . '
                         THEN 1 
                         ELSE 0  
                     END
                 ) AS adults',
                 'SUM(
                     CASE 
-                        WHEN hotel_room_pax.hrp_type_id = '. (int) self::PAX_TYPE_CHD .'
+                        WHEN hotel_room_pax.hrp_type_id = ' . (int) self::PAX_TYPE_CHD . '
                         THEN 1 
                         ELSE 0  
                     END
@@ -184,7 +184,7 @@ class HotelRoomPax extends \yii\db\ActiveRecord
 
     /**
      * @param int $roomId
-     * @return array [adults, children, childrenAges]
+     * @return array [int adults, int children, string childrenAges]
      */
     public function getSummaryByRoom(int $roomId)
     {

@@ -194,32 +194,39 @@ class ApiHotelService extends Component
 		return $out;
 	}
 
-    public function book(array $params) /* TODO:  */
+    /**
+     * @param array $params
+     * @return array
+     */
+    public function book(array $params)
     {
-        $out = ['error' => false, 'data' => []];
+        $result = ['status' => false, 'error' => '', 'data' => []];
 
         try {
-			$response = $this->sendRequest('booking/book', $params);
+            $response = $this->sendRequest('booking/book', $params);
 
-            \yii\helpers\VarDumper::dump($response->data, 10, true); exit();  /* TODO: to remove */
+            if ($response->isOk) {
+                if (isset($response->data['booking']) && !isset($response->data['error'])) {
+                    $result['data'] = $response->data;
+                    $result['status'] = true;
+                } elseif (isset($response->data['error'])) {
+                    $result['error'] = 'Code : ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
+                        ' Message : ' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' ;
+                } else {
+                    $result['error'] = 'Unknown error';
+                }
+            } else {
+                $result['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable), 'Component:ApiHotelService:book:Throwable' );
+        }
 
-			if ($response->isOk) {
-				if (isset($response->data['destinations'])) {
-					$out['data'] = $response->data;
-				} else {
-					$out['error'] = 'Not found destination';
-				}
-			} else {
-				$out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
-				\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService:searchDestination:');
-			}
-
-		} catch (\Throwable $throwable) {
-			\Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiHotelService:searchDestination:throwable');
-			$out['error'] = 'ApiHotelService error: ' . $throwable->getMessage();
+		if (strlen($result['error'])) {
+		    \Yii::error($result['error'], 'Component:ApiHotelService:book');
 		}
 
-		return $out;
+		return $result;
 	}
 
 	public function cancelBook() /* TODO:  */

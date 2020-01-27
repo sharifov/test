@@ -6,6 +6,7 @@ use common\models\ProductQuote;
 use modules\hotel\models\query\HotelQuoteQuery;
 use sales\interfaces\QuoteCommunicationInterface;
 use Yii;
+use yii\base\Exception;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
@@ -228,7 +229,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                         ->from(HotelRoom::tableName())
                         ->where(['hr_hotel_id' => $hotelRequest->ph_id]);
                     if (count($importedHotelRoomIds)) {
-                        $hotelRoomsQuery->andWhere(['not in', 'hr_id', $importedHotelRoomIds]);
+                        $hotelRoomsQuery->andWhere(['NOT IN', 'hr_id', $importedHotelRoomIds]);
                     }
                     $hotelRooms = $hotelRoomsQuery->all();
 
@@ -323,11 +324,70 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
         return $data;
     }
 
-    /* TODO: */
-    public static function book()
+    /**
+     * @param HotelQuote $model
+     * @return \common\models\Client
+     */
+    public static function getClient(HotelQuote $model)
     {
-        return true;
+        return $model->hqProductQuote->pqProduct->prLead->client;
     }
+
+    /**
+     * @param int $id (hotel_quote/hq_id)
+     * @return array [bool status, string message]
+     */
+    public static function book(int $id)
+    {
+        $result = ['status' => false, 'message' => ''];
+
+        try {
+            $model = self::findOne($id); /* TODO: add check by status new/pending */
+
+            $rooms = [];
+            $client = self::getClient($model);
+
+            if (!$hotelQuoteRooms = $model->hotelQuoteRooms) {
+                $message = 'Error: Hotel Quote (ID:' . $id . ') Rooms not found';
+                Yii::error($message, self::class . ':book:Exception');
+                throw new Exception($message, 1);
+            }
+
+            foreach ($hotelQuoteRooms as $quoteRoom) {
+                $rooms[] = [
+                    'key' => $quoteRoom->hqr_key,
+                    'paxes' => HotelQuoteRoomPax::preparePaxesForBook($quoteRoom->hqr_id)
+                ];
+            }
+
+            $params = [
+                'name' => $client->first_name,
+                'surname' => $client->last_name ?: $client->full_name,
+                'rooms' => $rooms,
+            ];
+
+            $apiHotelService = Yii::$app->getModule('hotel')->apiService;
+            $apiResponse = $apiHotelService->book($params);
+
+            $hqProductQuote = $model->hqProductQuote;
+
+            if ($apiResponse['status']) {
+                $result['status'] = true;
+                $result['message'] = 'Booking confirmed';
+
+                $hqProductQuote->pq_status_id = $hqProductQuote::STATUS_IN_PROGRESS;  /* TODO: booking status */
+            } else {
+                $result['message'] = $apiResponse['error'];
+            }
+
+        } catch (\Throwable $throwable) {
+            Yii::error(VarDumper::dumpAsString($throwable), self::class . ':book:Throwable' );
+        }
+
+        return $result;
+    }
+
+
 
     /* TODO: */
     public static function cancelBook()

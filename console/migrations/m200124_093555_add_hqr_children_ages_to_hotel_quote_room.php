@@ -11,6 +11,7 @@ class m200124_093555_add_hqr_children_ages_to_hotel_quote_room extends Migration
 {
     public $routes = [
         '/hotel/hotel-quote-room-pax-crud/*',
+        '/hotel/hotel-quote/ajax-book'
     ];
 
     public $roles = [
