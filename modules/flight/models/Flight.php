@@ -2,9 +2,10 @@
 
 namespace modules\flight\models;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use modules\flight\models\query\FlightQuery;
 use modules\flight\src\events\FlightCountPassengersChangedEvent;
+use modules\product\src\interfaces\Productable;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
 
@@ -19,9 +20,7 @@ use yii\db\ActiveQuery;
  * @property int|null $fl_children
  * @property int|null $fl_infants
  * @property string|null $fl_request_hash_key
- *
- * @property bool $enableActiveRecordEvents
- *
+ * *
  * @property Product $flProduct
  * @property FlightPax[] $flightPaxes
  * @property FlightQuote[] $flightQuotes
@@ -29,7 +28,7 @@ use yii\db\ActiveQuery;
  * @property string $tripTypeName
  * @property FlightSegment[] $flightSegments
  */
-class Flight extends \yii\db\ActiveRecord
+class Flight extends \yii\db\ActiveRecord implements Productable
 {
 	use EventTrait;
 
@@ -68,6 +67,13 @@ class Flight extends \yii\db\ActiveRecord
 		self::CABIN_CLASS_BUSINESS => self::CABIN_BUSINESS ,
 		self::CABIN_CLASS_FIRST => self::CABIN_FIRST,
 	];
+
+    public static function create(int $productId): self
+    {
+        $flight = new static();
+        $flight->fl_product_id = $productId;
+        return $flight;
+    }
 
     /**
      * @return string

@@ -2,8 +2,9 @@
 
 namespace modules\hotel\models;
 
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuoteQuery;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\interfaces\QuoteCommunicationInterface;
 use Yii;
 use yii\db\ActiveQuery;
@@ -160,7 +161,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                     $prQuote->pq_price = (float)$totalAmount;
                     $prQuote->pq_origin_price = (float)$totalAmount;
                     $prQuote->pq_client_price = (float)$totalAmount;
-                    $prQuote->pq_status_id = ProductQuote::STATUS_PENDING;
+                    $prQuote->pq_status_id = ProductQuoteStatus::PENDING;
                     $prQuote->pq_gid = self::generateGid();
                     $prQuote->pq_service_fee_sum = 0;
                     $prQuote->pq_client_currency_rate = 1;

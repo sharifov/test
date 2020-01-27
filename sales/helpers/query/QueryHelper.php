@@ -7,10 +7,15 @@ use yii\db\ActiveQuery;
 class QueryHelper
 {
     /**
+     *
+     * Ex. rules:
+         ['created_dt', 'date', 'format' => 'php:Y-m-d'],
+     *
      * Ex.
             if ($this->from) {
                 \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'from', $this->from, $user->timezone);
             }
+     *
      */
     public static function dayEqualByUserTZ(ActiveQuery $query, string $dateFieldName, string $value, ?string $userTimeZone): void
     {

@@ -1,6 +1,6 @@
 <?php
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use modules\hotel\models\search\HotelQuoteSearch;
 use yii\helpers\Html;
 use yii\widgets\DetailView;

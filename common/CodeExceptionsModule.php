@@ -11,4 +11,6 @@ class CodeExceptionsModule
     public const DEPARTMENT = 14;
     public const FLIGHT = 15;
     public const HOTEL = 16;
+    public const PRODUCT = 17;
+    public const OFFER = 18;
 }

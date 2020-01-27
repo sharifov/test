@@ -2,8 +2,8 @@
 
 namespace frontend\models\form;
 
-use common\models\ProductOption;
-use common\models\ProductQuote;
+use modules\product\src\entities\productOption\ProductOption;
+use modules\product\src\entities\productQuote\ProductQuote;
 use yii\base\Model;
 
 /**

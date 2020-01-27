@@ -21,7 +21,7 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
-use common\models\search\OfferSearch;
+use modules\offer\src\entities\offer\search\OfferSearch;
 use common\models\search\OrderSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
@@ -1037,7 +1037,7 @@ class LeadController extends FController
         $searchModelOffer = new OfferSearch();
         $params = Yii::$app->request->queryParams;
         $params['OfferSearch']['of_lead_id'] = $lead->id;
-        $dataProviderOffers = $searchModelOffer->searchByLead($params);
+        $dataProviderOffers = $searchModelOffer->searchByLead($params, $user);
 
 
         $searchModelOrder = new OrderSearch();

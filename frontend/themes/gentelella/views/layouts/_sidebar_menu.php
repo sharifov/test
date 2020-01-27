@@ -242,12 +242,12 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'list',
             'items' => [
                 ['label' => 'Currency List', 'url' => ['/currency/index']],
-                ['label' => 'Product Types', 'url' => ['/product-type/index']],
+                ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
                 ['label' => 'Products', 'url' => ['/product/index']],
-                ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],
+                ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
                 ['label' => 'Orders', 'url' => ['/order/index']],
-                ['label' => 'Offers', 'url' => ['/offer/index']],
-                ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
+                ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
+                ['label' => 'Offer Products', 'url' => ['/offer/offer-product-crud/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/index']],
             ]
         ];

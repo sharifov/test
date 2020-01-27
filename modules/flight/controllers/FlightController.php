@@ -2,8 +2,8 @@
 
 namespace modules\flight\controllers;
 
-use common\models\Product;
-use common\models\ProductType;
+use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\services\flight\FlightManageService;

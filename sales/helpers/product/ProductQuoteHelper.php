@@ -3,7 +3,7 @@
 namespace sales\helpers\product;
 
 use common\models\Currency;
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 
 class ProductQuoteHelper
 {

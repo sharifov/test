@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use common\models\Offer;
-use common\models\OfferProduct;
+use modules\offer\src\entities\offer\Offer;
+use modules\offer\src\entities\offerProduct\OfferProduct;
 use common\models\Order;
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use Yii;
 use common\models\OrderProduct;
 use common\models\search\OrderProductSearch;

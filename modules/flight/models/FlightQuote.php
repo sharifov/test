@@ -3,7 +3,7 @@
 namespace modules\flight\models;
 
 use common\models\Employee;
-use common\models\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use sales\entities\EventTrait;
 use sales\interfaces\QuoteCommunicationInterface;
