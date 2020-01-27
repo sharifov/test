@@ -43,6 +43,11 @@ use yii\bootstrap4\Html;
                         'data-offer-id' => $offer->of_id,
                         'data-url' => \yii\helpers\Url::to(['/offer/offer/delete-ajax']),
                     ]) ?>
+
+                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> Status log', null, [
+                        'class' => 'dropdown-item text-success btn-offer-status-history',
+                        'data-url' => \yii\helpers\Url::to(['/offer/offer-status-log/show', 'gid' => $offer->of_gid]),
+                    ]) ?>
                 </div>
             </li>
         </ul>

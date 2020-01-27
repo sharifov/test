@@ -6,6 +6,7 @@
  */
 
 use common\models\Lead;
+use yii\helpers\Url;
 use yii\web\View;
 use yii\bootstrap4\Html;
 
@@ -56,8 +57,6 @@ use yii\bootstrap4\Html;
     </div>
 </div>
 <?php yii\widgets\Pjax::end() ?>
-
-
 
 <?php
 
@@ -153,6 +152,22 @@ $js = <<<JS
       // return false;
     });
     
+     $(document).on('click', '.btn-offer-status-history', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Offer status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+     });
+     
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY, 'lead-offer-js');

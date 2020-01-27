@@ -5,20 +5,15 @@ use modules\offer\src\grid\columns\OfferStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
 use sales\yii\grid\UserColumn;
-use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $searchModel OfferStatusLogSearch */
 
-$this->title = 'Status log';
-
 ?>
 
 <div class="product-quote-status-log">
-
-    <h1><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(['enablePushState' => false, 'enableReplaceState' => false]); ?>
 
