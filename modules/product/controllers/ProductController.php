@@ -75,6 +75,7 @@ class ProductController extends FController
         } else {
 
             $leadId = (int)Yii::$app->request->get('id');
+            $typeId = (int)Yii::$app->request->get('typeId');
 
             if (!$leadId) {
                 throw new BadRequestHttpException('Not found lead identity.');
@@ -86,6 +87,7 @@ class ProductController extends FController
             }
 
             $form->pr_lead_id = $leadId;
+            $form->pr_type_id = $typeId;
         }
 
         return $this->renderAjax('_ajax_form', [
