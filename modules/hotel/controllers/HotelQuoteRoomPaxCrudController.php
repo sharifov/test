@@ -2,17 +2,18 @@
 
 namespace modules\hotel\controllers;
 
+
 use Yii;
 use modules\hotel\models\HotelQuoteRoomPax;
 use modules\hotel\models\search\HotelQuoteRoomPaxSearch;
-use yii\web\Controller;
+use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * HotelQuoteRoomPaxCrudController implements the CRUD actions for HotelQuoteRoomPax model.
  */
-class HotelQuoteRoomPaxCrudController extends Controller
+class HotelQuoteRoomPaxCrudController extends FController
 {
     /**
      * {@inheritdoc}
@@ -21,7 +22,7 @@ class HotelQuoteRoomPaxCrudController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],

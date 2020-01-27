@@ -8,6 +8,8 @@ use sales\interfaces\QuoteCommunicationInterface;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -189,12 +191,13 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 
             if ($hQuote && !$hQuote->hotelQuoteRooms) {
                 foreach ($rooms as $room) {
-
+                    $importedHotelRoomIds = [];
+                    $importHotelRoomStatus = false;
                     $childrenAges = '';
                     if (array_key_exists('childrenAges', $room) && !empty($room['childrenAges'])) {
-                        $childrenAges = explode(',', $room['childrenAges']);
-                        sort($childrenAges);
-                        $childrenAges = implode(',', $childrenAges);
+                        $childrenAgesArr = explode(',', $room['childrenAges']);
+                        sort($childrenAgesArr);
+                        $childrenAges = implode(',', $childrenAgesArr);
                     }
 
                     $qRoom = new HotelQuoteRoom();
@@ -220,6 +223,73 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                             'Model:HotelQuote:findOrCreateByData:HotelQuoteRoom:save');
                     }
 
+                    $hotelRoomsQuery = (new Query())
+                        ->select(['hr_id'])
+                        ->from(HotelRoom::tableName())
+                        ->where(['hr_hotel_id' => $hotelRequest->ph_id]);
+                    if (count($importedHotelRoomIds)) {
+                        $hotelRoomsQuery->andWhere(['not in', 'hr_id', $importedHotelRoomIds]);
+                    }
+                    $hotelRooms = $hotelRoomsQuery->all();
+
+                    if (count($hotelRooms)) { // trying to find in hotel_room_pax
+                        $hotelRoomPax = new HotelRoomPax();
+                        foreach ($hotelRooms as $hotelRoom) {
+                            $summaryRoom = $hotelRoomPax->getSummaryByRoom($hotelRoom['hr_id']);
+                            if (
+                                (int) $summaryRoom['adults'] === (int) $qRoom->hqr_adults &&
+                                (int) $summaryRoom['children'] === (int) $qRoom->hqr_children &&
+                                $summaryRoom['childrenAges'] == $childrenAges
+                            ) { // port info from hotel_room_pax
+                                $hotelRoomPaxes = $hotelRoomPax::find()
+                                    ->where(['hrp_hotel_room_id' => $hotelRoom['hr_id']])
+                                    ->all();
+
+                                foreach ($hotelRoomPaxes as $pax) {
+                                    $hotelQuoteRoomPax = new HotelQuoteRoomPax();
+                                    $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
+                                    $hotelQuoteRoomPax->hqrp_type_id = $pax->hrp_type_id;
+                                    $hotelQuoteRoomPax->hqrp_age = $pax->hrp_age;
+                                    $hotelQuoteRoomPax->hqrp_first_name = $pax->hrp_first_name;
+                                    $hotelQuoteRoomPax->hqrp_last_name = $pax->hrp_last_name;
+                                    $hotelQuoteRoomPax->hqrp_dob = $pax->hrp_dob;
+                                    $hotelQuoteRoomPax->save();
+                                }
+                                array_push($importedHotelRoomIds, $hotelRoom['hr_id']);
+                                $importHotelRoomStatus = true;
+                            }
+                        }
+                    }
+
+                    if (!$importHotelRoomStatus) { // if not found in hotel_room_pax
+                        if (!empty($qRoom->hqr_adults) && $qRoom->hqr_adults) {
+                            for ($i = 0; $i <= $qRoom->hqr_adults; $i++) {
+                                $hotelQuoteRoomPax = new HotelQuoteRoomPax();
+                                $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
+                                $hotelQuoteRoomPax->hqrp_type_id = $hotelQuoteRoomPax::PAX_TYPE_ADL;
+                                $hotelQuoteRoomPax->save();
+                            }
+                        }
+
+                        if (!empty($qRoom->hqr_children) && $qRoom->hqr_children) {
+                            if (isset($childrenAgesArr) && count($childrenAgesArr) === $qRoom->hqr_children) {  // trying to fill age
+                                foreach ($childrenAgesArr as $age) {
+                                    $hotelQuoteRoomPax = new HotelQuoteRoomPax();
+                                    $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
+                                    $hotelQuoteRoomPax->hqrp_type_id = $hotelQuoteRoomPax::PAX_TYPE_CHD;
+                                    $hotelQuoteRoomPax->hqrp_age = intval($age);
+                                    $hotelQuoteRoomPax->save();
+                                }
+                            } else { // without age
+                                for ($i = 0; $i <= $qRoom->hqr_children; $i++) {
+                                    $hotelQuoteRoomPax = new HotelQuoteRoomPax();
+                                    $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
+                                    $hotelQuoteRoomPax->hqrp_type_id = $hotelQuoteRoomPax::PAX_TYPE_CHD;
+                                    $hotelQuoteRoomPax->save();
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

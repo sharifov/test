@@ -9,7 +9,7 @@ use yii\db\ActiveRecord;
  * This is the model class for table "hotel_quote_room_pax".
  *
  * @property int $hqrp_id
- * @property int $hqrp_hotel_room_id
+ * @property int $hqrp_hotel_quote_room_id
  * @property int $hqrp_type_id
  * @property int|null $hqrp_age
  * @property string|null $hqrp_first_name
@@ -20,6 +20,14 @@ use yii\db\ActiveRecord;
  */
 class HotelQuoteRoomPax extends ActiveRecord
 {
+    public const PAX_TYPE_ADL = 1;
+    public const PAX_TYPE_CHD = 2;
+
+    public const PAX_TYPE_LIST = [
+        self::PAX_TYPE_ADL => 'Adult',
+        self::PAX_TYPE_CHD => 'Child',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -34,11 +42,11 @@ class HotelQuoteRoomPax extends ActiveRecord
     public function rules()
     {
         return [
-            [['hqrp_hotel_room_id', 'hqrp_type_id'], 'required'],
-            [['hqrp_hotel_room_id', 'hqrp_type_id', 'hqrp_age'], 'integer'],
+            [['hqrp_hotel_quote_room_id', 'hqrp_type_id'], 'required'],
+            [['hqrp_hotel_quote_room_id', 'hqrp_type_id', 'hqrp_age'], 'integer'],
             [['hqrp_dob'], 'safe'],
             [['hqrp_first_name', 'hqrp_last_name'], 'string', 'max' => 40],
-            [['hqrp_hotel_room_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelQuoteRoom::class, 'targetAttribute' => ['hqrp_hotel_room_id' => 'hqr_id']],
+            [['hqrp_hotel_quote_room_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelQuoteRoom::class, 'targetAttribute' => ['hqrp_hotel_quote_room_id' => 'hqr_id']],
         ];
     }
 
@@ -49,7 +57,7 @@ class HotelQuoteRoomPax extends ActiveRecord
     {
         return [
             'hqrp_id' => 'ID',
-            'hqrp_hotel_room_id' => 'Hotel Room ID',
+            'hqrp_hotel_quote_room_id' => 'Hotel Room ID',
             'hqrp_type_id' => 'Type ID',
             'hqrp_age' => 'Age',
             'hqrp_first_name' => 'First Name',
@@ -63,7 +71,7 @@ class HotelQuoteRoomPax extends ActiveRecord
      */
     public function getHqrpHotelRoom()
     {
-        return $this->hasOne(HotelQuoteRoom::class, ['hqr_id' => 'hqrp_hotel_room_id']);
+        return $this->hasOne(HotelQuoteRoom::class, ['hqr_id' => 'hqrp_hotel_quote_room_id']);
     }
 
     /**
@@ -74,4 +82,6 @@ class HotelQuoteRoomPax extends ActiveRecord
     {
         return new \modules\hotel\models\query\HotelQuoteRoomPaxQuery(get_called_class());
     }
+
+
 }

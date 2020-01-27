@@ -21,7 +21,6 @@ use yii\helpers\ArrayHelper;
  */
 class HotelRoomPax extends \yii\db\ActiveRecord
 {
-
     public const PAX_TYPE_ADL = 1;
     public const PAX_TYPE_CHD = 2;
 
@@ -145,16 +144,14 @@ class HotelRoomPax extends \yii\db\ActiveRecord
      */
     public function getChildrenAgesByRoom(int $roomId)
     {
-        $childrenAges = (new Query())
-            ->select(['GROUP_CONCAT(hrp_age ORDER BY hrp_age ASC SEPARATOR ",") AS childrenAges'])
+        return (new Query())
+            ->select(['IFNULL(GROUP_CONCAT(hrp_age ORDER BY hrp_age ASC SEPARATOR ","), "") AS childrenAges'])
             ->from('hotel_room_pax')
             ->where([
                 'hrp_hotel_room_id' => $roomId,
-                'hrp_type_id' => 2,
+                'hrp_type_id' => self::PAX_TYPE_CHD,
             ])
             ->one();
-
-        return $childrenAges ? $childrenAges : ['childrenAges' => ''];
     }
 
     /**
@@ -167,14 +164,14 @@ class HotelRoomPax extends \yii\db\ActiveRecord
             ->select([
                 'SUM(
                     CASE 
-                        WHEN hotel_room_pax.hrp_type_id = 1
+                        WHEN hotel_room_pax.hrp_type_id = '. (int) self::PAX_TYPE_ADL .'
                         THEN 1 
                         ELSE 0  
                     END
                 ) AS adults',
                 'SUM(
                     CASE 
-                        WHEN hotel_room_pax.hrp_type_id = 2
+                        WHEN hotel_room_pax.hrp_type_id = '. (int) self::PAX_TYPE_CHD .'
                         THEN 1 
                         ELSE 0  
                     END
@@ -187,7 +184,7 @@ class HotelRoomPax extends \yii\db\ActiveRecord
 
     /**
      * @param int $roomId
-     * @return array
+     * @return array [adults, children, childrenAges]
      */
     public function getSummaryByRoom(int $roomId)
     {
