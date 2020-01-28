@@ -164,7 +164,7 @@ class CasesSaleService
 	private function formatFFNumbersByAirline(array &$passenger, array $saleDataDiff, string $key): void
 	{
 		if (empty($passenger['ff_numbers']) && !empty($passenger['ff_airline'])) {
-			throw new \RuntimeException('Cant send data to B/O, Frequent Flyer is not provided;');
+			throw new \RuntimeException('Cant send data to B/O, Frequent Flyer is not provided;', -1);
 		}
 
 		if (array_key_first($passenger) === 'ff_numbers' && !empty($saleDataDiff['passengers'][$key]['ff_airline'])) {
