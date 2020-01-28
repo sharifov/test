@@ -88,7 +88,9 @@ class ApiHotelService extends Component
             ->setUrl($url)
             ->setData($data);
 
-        if (strtolower($method) === 'post') {
+        $method = strtolower($method);
+
+        if ($method === 'post' || $method === 'delete') {
 			$this->request->setFormat(Client::FORMAT_JSON);
 		}
 
@@ -241,10 +243,10 @@ class ApiHotelService extends Component
             $response = $this->sendRequest('booking/checkrate', $params);
 
             if ($response->isOk) {
-                if (isset($response->data['hotel']['rooms']) && !isset($response->data['error'])) {
+                if (isset($response->data['hotel']['rooms']) || isset($response->data['rateComments'])) {
                     $result['data'] = $response->data;
                     $result['status'] = 1; // success
-                } elseif (isset($response->data['error'])) {
+                } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
                     $result['message'] = 'Code : ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
                         ' Message : ' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' ;
                 } else {
@@ -293,7 +295,7 @@ class ApiHotelService extends Component
         }
 
 		if ($result['status'] == 0) {
-		    \Yii::error($result['message'], 'Component:ApiHotelService:checkRate');
+		    \Yii::error($result['message'], 'Component:ApiHotelService:cancelBook');
 		}
 
 		return $result;

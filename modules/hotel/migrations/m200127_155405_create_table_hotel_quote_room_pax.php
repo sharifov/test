@@ -12,7 +12,8 @@ class m200127_155405_create_table_hotel_quote_room_pax extends Migration
 {
     public $routes = [
         '/hotel/hotel-quote-room-pax-crud/*',
-        '/hotel/hotel-quote/ajax-book'
+        '/hotel/hotel-quote/ajax-book',
+        '/hotel/hotel-quote/ajax-cancel-book',
     ];
 
     public $roles = [

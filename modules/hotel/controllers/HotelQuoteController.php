@@ -266,17 +266,21 @@ class HotelQuoteController extends FController
             if (!$id) { /* TODO: guard */
                 throw new Exception('Hotel Quote ID not found', 1);
             }
-            if (!$model = $this->findModel($id)) { /* TODO: add logic check by status new/pending */
+            if (!$model = $this->findModel($id)) {
                 throw new Exception('Hotel Quote not found', 2);
             }
             if (!empty($model->hq_booking_id)) {
                 throw new Exception('Hotel Quote already booked. (BookingId:' . $model->hq_booking_id . ')', 3);
             }
+            $hqProductQuote = $model->hqProductQuote;
+            if ($hqProductQuote->pq_status_id != $hqProductQuote::STATUS_PENDING) { /* TODO: add logic check by status new/pending or group status */
+                throw new Exception('Product Quote not in allowed status ', 4);
+            }
 
             if ($preCheck) {
                 $checkResult = HotelQuote::checkRate($model);
 
-                if ($checkResult['status'] !== 0) { // 1 warning(not all rooms is TYPE_BOOKABLE), 2 success
+                if ($checkResult['status'] !== 0) { // 1 warning(not all rooms is TYPE_BOOKABLE), 2 success (all rooms is TYPE_BOOKABLE)
                     $result = HotelQuote::book($model);
                 } else {
                     $result = $checkResult;
@@ -295,7 +299,7 @@ class HotelQuoteController extends FController
         return $this->asJson($result);
     }
 
-    public function cancelBook(int $id)
+    public function actionAjaxCancelBook(int $id)
     {
         $id = (int) Yii::$app->request->get('id', 0); /* TODO: to post  */
 
