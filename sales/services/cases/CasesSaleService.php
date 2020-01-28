@@ -14,7 +14,7 @@ class CasesSaleService
 	private const FORMAT_PASSENGERS_DATA = [
 		'meal' => 'formatByCountSegments',
 		'wheelchair' => 'formatByCountSegments',
-		'ff_numbers' => 'formatByAirline',
+		'ff_numbers' => 'formatByFFAirline',
 		'kt_numbers' => 'formatByAirline',
 	];
 
@@ -27,6 +27,11 @@ class CasesSaleService
 	 * @var array
 	 */
 	private $segments = [];
+
+	/**
+	 * @var string
+	 */
+	private $validatingCarrier;
 
 	/**
 	 * @var array
@@ -95,6 +100,19 @@ class CasesSaleService
 
 	/**
 	 * @param CaseSale $caseSale
+	 * @return CasesSaleService
+	 */
+	public function setValidatingCarrier(CaseSale $caseSale): CasesSaleService
+	{
+		$updatedData = json_decode((string)$caseSale->css_sale_data_updated, true);
+
+		$this->validatingCarrier = $updatedData['validatingCarrier'];
+
+		return $this;
+	}
+
+	/**
+	 * @param CaseSale $caseSale
 	 * @return bool
 	 */
 	public function isDataBackedUpToOriginal(CaseSale $caseSale): bool
@@ -128,13 +146,32 @@ class CasesSaleService
 	{
 		if (isset($saleDataDiff['passengers']) && !empty($this->namref)) {
 			foreach ($saleDataDiff['passengers'] as $key => $passenger) {
-//				$this->formatPassengersData($passenger);
+				$this->formatFFNumbersByAirline($passenger, $saleDataDiff, $key);
 
 				unset($saleDataDiff['passengers'][$key]);
 				$saleDataDiff['passengers'][$this->namref[$key]] = $passenger;
 			}
 		} else {
 			throw new \RuntimeException('Sale info doesnt have passengers or passengers nameref');
+		}
+	}
+
+	/**
+	 * @param array $passenger
+	 * @param array $saleDataDiff
+	 * @param string $key
+	 */
+	private function formatFFNumbersByAirline(array &$passenger, array $saleDataDiff, string $key): void
+	{
+		if (empty($passenger['ff_numbers']) && !empty($passenger['ff_airline'])) {
+			throw new \RuntimeException('Cant send data to B/O, Frequent Flyer is not provided;');
+		}
+
+		if (array_key_first($passenger) === 'ff_numbers' && !empty($saleDataDiff['passengers'][$key]['ff_airline'])) {
+			$passenger['ff_numbers'] = [
+				$passenger['ff_airline'] => array_shift($passenger['ff_numbers'])
+			];
+			unset($passenger['ff_airline']);
 		}
 	}
 
@@ -161,6 +198,17 @@ class CasesSaleService
 		foreach ($this->segments as $segmentKey => $segment) {
 			$passenger[$key][$segmentKey+1] = $value;
 		}
+	}
+
+	/**
+	 * @param array $passenger
+	 * @param string $key
+	 */
+	private function formatByFFAirline(array &$passenger, string $key): void
+	{
+		$value = $passenger[$key];
+		$passenger = [];
+		$passenger[$key][$this->validatingCarrier] = $value;
 	}
 
 	/**

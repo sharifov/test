@@ -1302,8 +1302,7 @@ class CasesController extends FController
 				$form = new CasesSaleForm($caseSale, $this->casesSaleService);
 
 				if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
-
-					$decodedSaleData = json_decode( (string)$caseSale->css_sale_data_updated, true );
+					$decodedSaleData = json_decode( (string)($form->caseSale->css_sale_data_updated), true );
 
 					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
 					if (!$difference) {

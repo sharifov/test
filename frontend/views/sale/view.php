@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Airline;
 use common\models\CaseSale;
 use kartik\editable\Editable;
 use kartik\popover\PopoverX;
@@ -230,6 +231,7 @@ if (!empty($caseSaleModel)) {
         <div class="col-md-12">
             <h2>Passengers</h2>
 			<?php if( !empty($data['passengers']) ): ?>
+<!--            --><?php //echo '<pre>';print_r($data);die; ?>
                 <table class="table table-bordered table-hover" id="passengers">
                     <thead>
                     <tr>
@@ -243,6 +245,7 @@ if (!empty($caseSaleModel)) {
                         <th>Gender</th>
                         <th>Meal</th>
                         <th>Wheelchair</th>
+                        <th>Frequent Flyer Airline</th>
                         <th>Frequent Flyer</th>
                         <th>KTN</th>
                     </tr>
@@ -387,7 +390,31 @@ if (!empty($caseSaleModel)) {
 								?>
                             </td>
                             <td>
-                                <?php if(!$canManageSaleInfo) {
+								<?php if(!$canManageSaleInfo && empty($passenger['ff_numbers'])) {
+									echo Editable::widget([
+										'name' => 'cssSaleData[passengers][' . $key . '][ff_airline]',
+										'header' => 'Frequent Flyer Airline',
+										'asPopover' => false,
+										'inputType' => Editable::INPUT_DROPDOWN_LIST,
+										'data' => Airline::getAirlinesMapping(true),
+										'value' => Html::encode(!empty($passenger['ff_airline']) ? $passenger['ff_airline'] : $data['validatingCarrier']),
+										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
+										'options' => [],
+										'pluginEvents' => [
+											'editableSuccess' => 'function (event, val, form, data) {
+										        document.activateButtonSync(data);
+										    }',
+										],
+//										'placement' => PopoverX::ALIGN_TOP_LEFT,
+										'pjaxContainerId' => 'pjax-sale-list'
+									]);
+								} else {
+								    echo !empty($passenger['ff_numbers']) ? array_key_first($passenger['ff_numbers']) : '(not set)';
+                                }
+								?>
+                            </td>
+                            <td>
+                                <?php if(!$canManageSaleInfo && empty($passenger['ff_numbers'])) {
 									echo Editable::widget([
 										'name' => 'cssSaleData[passengers][' . $key . '][ff_numbers]',
 										'header' => 'Frequent Flyer',
@@ -558,6 +585,10 @@ if (!empty($caseSaleModel)) {
                                     obj.attr('disabled', true);
                                 }
                                 obj.find('i').toggleClass('fa-spin').removeClass('fa-refresh').addClass('fa-upload');
+                                
+                                if (!json.error) {
+                                    $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
+                                }
                             },
                             error: function (text) {
                                 new PNotify({
