@@ -332,15 +332,6 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 
     /**
      * @param HotelQuote $model
-     * @return \common\models\Client
-     */
-    public static function getClient(HotelQuote $model)
-    {
-        return $model->hqProductQuote->pqProduct->prLead->client;
-    }
-
-    /**
-     * @param HotelQuote $model
      * @return array [bool status, string message]
      */
     public static function book(HotelQuote $model)
@@ -349,7 +340,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 
         try {
             $rooms = [];
-            $client = self::getClient($model);
+            $client = $model->hqProductQuote->pqProduct->prLead->client;
             if (!empty($model->hq_booking_id)) {
                 throw new Exception('Hotel Quote already booked. (BookingId:' . $model->hq_booking_id . ')', 1);
             }
@@ -495,13 +486,24 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             $apiResponse = $apiHotelService->cancelBook(['bookingId' => $model->hq_booking_id]);
 
             if ($apiResponse['status']) {
-                /* TODO: ? */
+
+                /* TODO: log ? additional logic */
 
                 $hqProductQuote = $model->hqProductQuote;
                 $hqProductQuote->pq_status_id = $hqProductQuote::STATUS_CANCELED;
 
                 $model->hq_booking_id = null;
+                $model->hq_json_booking = null;
                 $model->save();
+
+                HotelQuoteRoom::updateAll(
+                    [
+                        'hqr_rate_comments' => null,
+                        'hqr_rate_comments_id' => null,
+                        'hqr_type' => HotelQuoteRoom::TYPE_RECHECK,
+                    ],
+                    ['hqr_hotel_quote_id' => $model->hq_id]
+                );
 
                 $result['status'] = 1; // success
                 $result['message'] = 'Booking canceled.';
@@ -517,4 +519,13 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 
         return $result;
     }
+
+    /**
+     * @return bool
+     */
+    public function isBookable() /* TODO: add new  */
+    {
+        return $this->hqProductQuote->pq_status_id === productQuote::STATUS_PENDING;
+    }
+
 }

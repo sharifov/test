@@ -254,19 +254,18 @@ class HotelQuoteController extends FController
     }
 
     /**
-     * @param int $id
-     * @param bool $preCheck
      * @return Response
      */
-    public function actionAjaxBook(int $id, bool $preCheck = true)
+    public function actionAjaxBook()
     {
-        $id = (int) Yii::$app->request->get('id', 0); /* TODO: to post  */
+        $id = (int) Yii::$app->request->post('id', 0);
+        $preCheck = Yii::$app->request->post('pre_check', true);
 
         try {
             if (!$id) { /* TODO: guard */
                 throw new Exception('Hotel Quote ID not found', 1);
             }
-            if (!$model = $this->findModel($id)) {
+            if (!$model = HotelQuote::findOne($id)) {
                 throw new Exception('Hotel Quote not found', 2);
             }
             if (!empty($model->hq_booking_id)) {
@@ -299,7 +298,7 @@ class HotelQuoteController extends FController
         return $this->asJson($result);
     }
 
-    public function actionAjaxCancelBook(int $id)
+    public function actionAjaxCancelBook()
     {
         $id = (int) Yii::$app->request->get('id', 0); /* TODO: to post  */
 
@@ -307,7 +306,7 @@ class HotelQuoteController extends FController
             if (!$id) { /* TODO: guard */
                 throw new Exception('Hotel Quote ID not found', 1);
             }
-            if (!$model = $this->findModel($id)) {
+            if (!$model = HotelQuote::findOne($id)) {
                 throw new Exception('Hotel Quote not found', 2);
             }
             if (empty($model->hq_booking_id)) {

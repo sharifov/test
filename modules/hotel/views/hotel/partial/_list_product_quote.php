@@ -13,6 +13,42 @@ use yii\helpers\Html;
 
 <?php if ($model->hqProductQuote): ?>
 
+<?php
+$js = <<<JS
+    $('body').off('click', '.btn-book-quote').on('click', '.btn-book-quote', function (e) {
+
+        if(!confirm('Are you sure you want to book this quote?')) {
+            return '';
+        }
+
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let productId = $(this).data('product-id');
+
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': $(this).data('id')},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                alert('Success: ' + data.message);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
+
 <div class="x_panel">
     <div class="x_title">
 
@@ -77,7 +113,7 @@ use yii\helpers\Html;
                         'data-url' => \yii\helpers\Url::to(['product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
                     ]) ?>
-                    <?php if ($model->hqProductQuote->isPending()): ?>
+                    <?php if ($model->isBookable()): ?>
                         <?php
                             /* TODO:
                                 1) to ajax
@@ -86,7 +122,7 @@ use yii\helpers\Html;
                         ?>
                         <?= Html::a(
                             '<i class="fa fa-share-square"></i> Book',
-                             \yii\helpers\Url::to(['/hotel/hotel-quote/ajax-book', 'id' => $model->hq_id]), /* TODO: to null */
+                             null,
                             [
                                 'class' => 'dropdown-item btn-book-quote',
                                 'data-url' => \yii\helpers\Url::to('/hotel/hotel-quote/ajax-book'),
