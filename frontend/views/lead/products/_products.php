@@ -95,6 +95,23 @@ $ajaxDeleteProductQuoteUrl = \yii\helpers\Url::to(['/product/product-quote/delet
 
 $js = <<<JS
 
+     $(document).on('click', '.btn-product-quote-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Product quote [' + gid + '] status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+     });
+
     $('body').on('click', '.btn-delete-product', function(e) {
         
         if(!confirm('Are you sure you want to delete this product?')) {

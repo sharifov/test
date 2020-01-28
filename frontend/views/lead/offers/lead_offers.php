@@ -152,14 +152,14 @@ $js = <<<JS
       // return false;
     });
     
-     $(document).on('click', '.btn-offer-status-history', function(e){        
+     $(document).on('click', '.btn-offer-status-log', function(e){        
         e.preventDefault();
         let url = $(this).data('url');
         let gid = $(this).data('gid');
         let modal = $('#modal-lg');
           
         modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Offer (' + gid + ') status history');
+        modal.find('.modal-title').html('Offer [' + gid + '] status history');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
             modal.modal({

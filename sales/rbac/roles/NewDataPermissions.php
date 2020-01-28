@@ -23,6 +23,7 @@ class NewDataPermissions
         '/product/product-quote/delete-ajax',
 
         '/product/product-quote-status-log-crud/index', '/product/product-quote-status-log-crud/view', '/product/product-quote-status-log-crud/create', '/product/product-quote-status-log-crud/update', '/product/product-quote-status-log-crud/delete',
+        '/product/product-quote-status-log/show',
 
 //        '/product-quote-option/create', '/product-quote-option/create-ajax', '/product-quote-option/delete', '/product-quote-option/delete-ajax', '/product-quote-option/index', '/product-quote-option/update', '/product-quote-option/update-ajax', '/product-quote-option/view',
         '/product/product-quote-option-crud/create', '/product/product-quote-option-crud/delete', '/product/product-quote-option-crud/index', '/product/product-quote-option-crud/update', '/product/product-quote-option-crud/view',

@@ -82,6 +82,12 @@ use yii\helpers\Html;
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
                     ]) ?>
 
+                    <?= Html::a('<i class="fa fa-plus-circle"></i> Status log', null, [
+                        'class' => 'dropdown-item text-success btn-product-quote-status-log',
+                        'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $model->hqProductQuote->pq_gid]),
+                        'data-gid' => $model->hqProductQuote->pq_gid,
+                    ]) ?>
+
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                         'class' => 'dropdown-item text-danger btn-delete-product-quote',
