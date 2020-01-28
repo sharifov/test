@@ -20,7 +20,7 @@ $pjaxId = 'pjax-invoice-form';
     <?php
     $form = ActiveForm::begin([
         'options' => ['data-pjax' => true],
-        'action' => ['/invoice/update-ajax', 'id' => $model->inv_id],
+        'action' => ['/invoice/invoice/update-ajax', 'id' => $model->inv_id],
         'method' => 'post'
     ]);
     ?>
@@ -33,7 +33,7 @@ $pjaxId = 'pjax-invoice-form';
 
     <?= $form->field($model, 'inv_sum')->input('number', ['min' => -10000, 'max' => 20000, 'step' => 0.01]) ?>
 
-    <?= $form->field($model, 'inv_status_id')->dropDownList(\common\models\Invoice::getStatusList(), ['prompt' => '---']) ?>
+    <?= $form->field($model, 'inv_status_id')->dropDownList(\modules\invoice\src\entities\invoice\InvoiceStatus::getList(), ['prompt' => '---']) ?>
 
     <?= $form->field($model, 'inv_description')->textarea(['rows' => 2]) ?>
 

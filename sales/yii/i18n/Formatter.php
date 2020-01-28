@@ -5,6 +5,10 @@ namespace sales\yii\i18n;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
+use modules\invoice\src\entities\invoice\Invoice;
+use modules\invoice\src\entities\invoice\InvoiceStatus;
+use modules\invoice\src\entities\invoice\InvoiceStatusAction;
+use modules\invoice\src\helpers\formatters\InvoiceFormatter;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
 use modules\offer\src\entities\offer\OfferStatusAction;
@@ -28,6 +32,33 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asInvoice(?Invoice $invoice): string
+    {
+        if ($invoice === null) {
+            return $this->nullDisplay;
+        }
+
+        return InvoiceFormatter::asInvoice($invoice);
+    }
+
+    public function asInvoiceStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return InvoiceStatus::asFormat($value);
+    }
+
+    public function asInvoiceStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return InvoiceStatusAction::asFormat($value);
+    }
+
     public function asOrder(?Order $order): string
     {
         if ($order === null) {

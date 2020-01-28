@@ -20,7 +20,7 @@ $pjaxId = 'pjax-invoice-form';
         <?php
         $form = ActiveForm::begin([
             'options' => ['data-pjax' => true],
-            'action' => ['/invoice/create-ajax', 'id' => $model->inv_order_id],
+            'action' => ['/invoice/invoice/create-ajax', 'id' => $model->inv_order_id],
             'method' => 'post'
         ]);
         ?>

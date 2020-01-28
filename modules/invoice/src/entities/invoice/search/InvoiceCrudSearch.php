@@ -1,49 +1,29 @@
 <?php
 
-namespace common\models\search;
+namespace modules\invoice\src\entities\invoice\search;
 
-use yii\base\Model;
+use common\models\Employee;
+use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
-use common\models\Invoice;
+use modules\invoice\src\entities\invoice\Invoice;
 
-/**
- * InvoiceSearch represents the model behind the search form of `common\models\Invoice`.
- */
-class InvoiceSearch extends Invoice
+class InvoiceCrudSearch extends Invoice
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['inv_id', 'inv_order_id', 'inv_status_id', 'inv_created_user_id', 'inv_updated_user_id'], 'integer'],
-            [['inv_gid', 'inv_uid', 'inv_client_currency', 'inv_description', 'inv_created_dt', 'inv_updated_dt'], 'safe'],
+            [['inv_gid', 'inv_uid', 'inv_client_currency', 'inv_description'], 'safe'],
             [['inv_sum', 'inv_client_sum', 'inv_currency_rate'], 'number'],
+
+            ['inv_created_dt', 'date', 'format' => 'php:Y-m-d'],
+            ['inv_updated_dt', 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
+    public function search($params, Employee $user): ActiveDataProvider
     {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
-    }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
-    {
-        $query = Invoice::find();
-
-        // add conditions that should always apply here
+        $query = Invoice::find()->with(['invOrder', 'invCreatedUser', 'invUpdatedUser']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -57,6 +37,14 @@ class InvoiceSearch extends Invoice
             return $dataProvider;
         }
 
+        if ($this->inv_created_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'inv_created_dt', $this->inv_created_dt, $user->timezone);
+        }
+
+        if ($this->inv_updated_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'inv_updated_dt', $this->inv_updated_dt, $user->timezone);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'inv_id' => $this->inv_id,
@@ -67,8 +55,6 @@ class InvoiceSearch extends Invoice
             'inv_currency_rate' => $this->inv_currency_rate,
             'inv_created_user_id' => $this->inv_created_user_id,
             'inv_updated_user_id' => $this->inv_updated_user_id,
-            'inv_created_dt' => $this->inv_created_dt,
-            'inv_updated_dt' => $this->inv_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'inv_gid', $this->inv_gid])

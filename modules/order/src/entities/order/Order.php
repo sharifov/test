@@ -4,7 +4,7 @@ namespace modules\order\src\entities\order;
 
 use common\models\Currency;
 use common\models\Employee;
-use common\models\Invoice;
+use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\product\src\entities\productQuote\ProductQuote;

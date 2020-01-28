@@ -3,6 +3,7 @@
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
 
+use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
@@ -185,7 +186,7 @@ use yii\bootstrap4\Html;
                         ?>
                         <tr>
                             <td title="Invoice ID"><?=Html::encode($invoice->inv_id)?></td>
-                            <td><?=$invoice->getStatusLabel()?></td>
+                            <td><?= InvoiceStatus::asFormat($invoice->inv_status_id) ?></td>
                             <td>
                                 <?=Html::encode($invoice->inv_description)?>
                             </td>
@@ -197,7 +198,7 @@ use yii\bootstrap4\Html;
                                 <?php
                                 echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i>', null, [
                                     'class' => 'btn-update-invoice',
-                                    'data-url' => \yii\helpers\Url::to(['/invoice/update-ajax', 'id' => $invoice->inv_id])
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice/update-ajax', 'id' => $invoice->inv_id])
                                 ]);
                                 ?>
 
@@ -206,7 +207,7 @@ use yii\bootstrap4\Html;
                                     'data-invoice-id' => $invoice->inv_id,
                                     'data-order-id' => $invoice->inv_order_id,
                                     'class' => 'btn-delete-invoice',
-                                    'data-url' => \yii\helpers\Url::to(['/invoice/delete-ajax'])
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice/delete-ajax'])
                                 ]);
                                 ?>
                             </td>
@@ -245,7 +246,7 @@ use yii\bootstrap4\Html;
                                 echo Html::a('<i class="fa fa-plus-circle" title="Add new invoice"></i> create', null, [
                                     'data-order-id' => $order->or_id,
                                     'class' => 'btn btn-success btn-create-invoice',
-                                    'data-url' => \yii\helpers\Url::to(['invoice/create-ajax', 'id' => $order->or_id, 'amount' => $newInvoiceAmount])
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice/create-ajax', 'id' => $order->or_id, 'amount' => $newInvoiceAmount])
                                 ]);
                                 ?>
                             </th>

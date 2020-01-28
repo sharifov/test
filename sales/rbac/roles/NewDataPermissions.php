@@ -46,7 +46,10 @@ class NewDataPermissions
         '/order/order-product-crud/create', '/order/order-product-crud/delete', '/order/order-product-crud/index', '/order/order-product-crud/update', '/order/order-product-crud/view',
         '/order/order-product/create-ajax', '/order/order-product/delete-ajax',
 
-        '/invoice/create', '/invoice/create-ajax', '/invoice/delete', '/invoice/delete-ajax', '/invoice/index', '/invoice/update', '/invoice/update-ajax', '/invoice/view',
+//        '/invoice/create', '/invoice/create-ajax', '/invoice/delete', '/invoice/delete-ajax', '/invoice/index', '/invoice/update', '/invoice/update-ajax', '/invoice/view',
+        '/invoice/invoice-crud/create', '/invoice/invoice-crud/delete', '/invoice/invoice-crud/index', '/invoice/invoice-crud/update', '/invoice/invoice-crud/view',
+        '/invoice/invoice/create-ajax', '/invoice/invoice/delete-ajax', '/invoice/invoice/update-ajax',
+
         '/billing-info/create', '/billing-info/delete', '/billing-info/index', '/billing-info/update', '/billing-info/view',
         '/credit-card/create', '/credit-card/delete', '/credit-card/index', '/credit-card/update', '/credit-card/view',
         '/payment/create', '/payment/delete', '/payment/index', '/payment/update', '/payment/view',

@@ -13,4 +13,5 @@ class CodeExceptionsModule
     public const HOTEL = 16;
     public const PRODUCT = 17;
     public const OFFER = 18;
+    public const INVOICE = 19;
 }

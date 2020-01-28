@@ -1,14 +1,15 @@
 <?php
 
-namespace common\models;
+namespace modules\invoice\src\entities\invoice;
 
-use common\models\query\InvoiceQuery;
+use common\models\Currency;
+use common\models\Employee;
 use modules\order\src\entities\order\Order;
-use Yii;
+use sales\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\Html;
 
 /**
  * This is the model class for table "invoice".
@@ -31,42 +32,18 @@ use yii\helpers\Html;
  * @property Currency $invClientCurrency
  * @property Employee $invCreatedUser
  * @property Order $invOrder
- * @property string $statusName
- * @property string $statusLabel
- * @property string $statusClassName
  * @property Employee $invUpdatedUser
  */
 class Invoice extends ActiveRecord
 {
+    use EventTrait;
 
-    public const STATUS_NOT_PAID        = 1;
-    public const STATUS_PAID            = 2;
-    public const STATUS_PARTIAL_PAID    = 3;
-
-    public const STATUS_LIST        = [
-        self::STATUS_NOT_PAID           => 'Not paid',
-        self::STATUS_PAID               => 'Paid',
-        self::STATUS_PARTIAL_PAID       => 'Partial paid',
-    ];
-
-    public const STATUS_CLASS_LIST        = [
-        self::STATUS_NOT_PAID           => 'warning',
-        self::STATUS_PAID               => 'success',
-        self::STATUS_PARTIAL_PAID       => 'info',
-    ];
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'invoice';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['inv_gid', 'inv_order_id', 'inv_sum', 'inv_client_sum'], 'required'],
@@ -86,24 +63,24 @@ class Invoice extends ActiveRecord
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'inv_id' => 'ID',
             'inv_gid' => 'GID',
             'inv_uid' => 'UID',
             'inv_order_id' => 'Order ID',
-            'inv_status_id' => 'Status ID',
+            'invOrder' => 'Order',
+            'inv_status_id' => 'Status',
             'inv_sum' => 'Sum',
             'inv_client_sum' => 'Client Sum',
             'inv_client_currency' => 'Client Currency',
             'inv_currency_rate' => 'Currency Rate',
             'inv_description' => 'Description',
-            'inv_created_user_id' => 'Created User ID',
-            'inv_updated_user_id' => 'Updated User ID',
+            'inv_created_user_id' => 'Created User',
+            'invCreatedUser' => 'Created User',
+            'inv_updated_user_id' => 'Updated User',
+            'invUpdatedUser' => 'Updated User',
             'inv_created_dt' => 'Created Dt',
             'inv_updated_dt' => 'Updated Dt',
         ];
@@ -138,80 +115,44 @@ class Invoice extends ActiveRecord
     {
         $this->inv_gid = self::generateGid();
         $this->inv_uid = self::generateUid();
-        $this->inv_status_id = self::STATUS_NOT_PAID;
+        $this->inv_status_id = InvoiceStatus::NOT_PAID;
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getInvClientCurrency()
+    public function getInvClientCurrency(): ActiveQuery
     {
         return $this->hasOne(Currency::class, ['cur_code' => 'inv_client_currency']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getInvCreatedUser()
+    public function getInvCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'inv_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getInvOrder()
+    public function getInvOrder(): ActiveQuery
     {
         return $this->hasOne(Order::class, ['or_id' => 'inv_order_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getInvUpdatedUser()
+    public function getInvUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'inv_updated_user_id']);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return InvoiceQuery the active query used by this AR class.
-     */
     public static function find()
     {
-        return new InvoiceQuery(static::class);
-    }
-
-    /**
-     * @return array
-     */
-    public static function getStatusList(): array
-    {
-        return self::STATUS_LIST;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatusName(): string
-    {
-        return self::STATUS_LIST[$this->inv_status_id] ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatusClassName(): string
-    {
-        return self::STATUS_CLASS_LIST[$this->inv_status_id] ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatusLabel(): string
-    {
-        return Html::tag('span', $this->getStatusName(), ['class' => 'badge badge-' . $this->getStatusClassName()]);
+        return new Scopes(static::class);
     }
 
     /**
