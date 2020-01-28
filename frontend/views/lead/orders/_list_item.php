@@ -39,6 +39,12 @@ use yii\bootstrap4\Html;
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
 
+                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> Status log', null, [
+                        'class' => 'dropdown-item text-success btn-order-status-log',
+                        'data-url' => \yii\helpers\Url::to(['/order/order-status-log/show', 'gid' => $order->or_gid]),
+                        'data-gid' => $order->or_gid,
+                    ]) ?>
+
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
                         'class' => 'dropdown-item text-danger btn-delete-order',
                         'data-order-id' => $order->or_id,

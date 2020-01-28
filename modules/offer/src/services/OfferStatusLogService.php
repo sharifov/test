@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\product\src\services;
+namespace modules\offer\src\services;
 
 use modules\offer\src\entities\offerStatusLog\CreateDto;
 use modules\offer\src\entities\offerStatusLog\OfferStatusLog;

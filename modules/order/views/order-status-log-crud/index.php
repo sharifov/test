@@ -1,8 +1,8 @@
 <?php
 
-use modules\offer\src\grid\columns\OfferColumn;
-use modules\offer\src\grid\columns\OfferStatusActionColumn;
-use modules\offer\src\grid\columns\OfferStatusColumn;
+use modules\order\src\grid\columns\OrderColumn;
+use modules\order\src\grid\columns\OrderStatusActionColumn;
+use modules\order\src\grid\columns\OrderStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
 use sales\yii\grid\UserColumn;
@@ -12,18 +12,18 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\offer\src\entities\offerStatusLog\search\OfferStatusLogCrudSearch */
+/* @var $searchModel modules\order\src\entities\orderStatusLog\search\OrderStatusLogCrudSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Offer Status Logs';
+$this->title = 'Order Status Logs';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="offer-status-log-index">
+<div class="order-status-log-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Offer Status Log', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create order Status Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php Pjax::begin(); ?>
@@ -33,46 +33,46 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'osl_id',
+            'orsl_id',
             [
-                'class' => OfferColumn::class,
-                'attribute' => 'osl_offer_id',
-                'relation' => 'offer',
+                'class' => OrderColumn::class,
+                'attribute' => 'orsl_order_id',
+                'relation' => 'order',
             ],
             [
-                'class' => OfferStatusColumn::class,
-                'attribute' => 'osl_start_status_id',
+                'class' => OrderStatusColumn::class,
+                'attribute' => 'orsl_start_status_id',
             ],
             [
-                'class' => OfferStatusColumn::class,
-                'attribute' => 'osl_end_status_id',
-            ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'osl_start_dt',
+                'class' => OrderStatusColumn::class,
+                'attribute' => 'orsl_end_status_id',
             ],
             [
                 'class' => DateTimeColumn::class,
-                'attribute' => 'osl_end_dt',
+                'attribute' => 'orsl_start_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'orsl_end_dt',
             ],
             [
                 'class' => DurationColumn::class,
-                'attribute' => 'osl_duration',
-                'startAttribute' => 'osl_start_dt',
+                'attribute' => 'orsl_duration',
+                'startAttribute' => 'orsl_start_dt',
             ],
-            'osl_description',
+            'orsl_description',
             [
-                'class' => OfferStatusActionColumn::class,
-                'attribute' => 'osl_action_id'
+                'class' => OrderStatusActionColumn::class,
+                'attribute' => 'orsl_action_id'
             ],
             [
                 'class' => UserColumn::class,
-                'attribute' => 'osl_owner_user_id',
+                'attribute' => 'orsl_owner_user_id',
                 'relation' => 'ownerUser',
             ],
             [
                 'class' => UserColumn::class,
-                'attribute' => 'osl_created_user_id',
+                'attribute' => 'orsl_created_user_id',
                 'relation' => 'createdUser',
             ],
             ['class' => ActionColumn::class],
