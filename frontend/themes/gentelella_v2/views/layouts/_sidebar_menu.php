@@ -278,6 +278,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Offer Products', 'url' => ['/offer/offer-product-crud/index']],
                 ['label' => 'Order Products', 'url' => ['/order/order-product-crud/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/invoice-crud/index']],
+                ['label' => 'Invoices Status Log', 'url' => ['/invoice/invoice-status-log-crud/index']],
                 ['label' => 'Billing Info', 'url' => ['/billing-info/index']],
                 ['label' => 'Credit Cards', 'url' => ['/credit-card/index']],
                 ['label' => 'Payments', 'url' => ['/payment/index']],
