@@ -1,13 +1,14 @@
 <?php
 
+namespace modules\hotel\migrations;
+
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
 use yii\db\Migration;
-
 /**
- * Class m200124_093555_add_hqr_children_ages_to_hotel_quote_room
+ * Class m200127_155405_create_table_hotel_quote_room_pax
  */
-class m200124_093555_add_hqr_children_ages_to_hotel_quote_room extends Migration
+class m200127_155405_create_table_hotel_quote_room_pax extends Migration
 {
     public $routes = [
         '/hotel/hotel-quote-room-pax-crud/*',
@@ -28,7 +29,7 @@ class m200124_093555_add_hqr_children_ages_to_hotel_quote_room extends Migration
         if ($this->db->driverName === 'mysql') {
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
-
+        // table hotel_quote_room_pax
         $this->createTable(
             '{{%hotel_quote_room_pax}}',
             [
@@ -52,8 +53,22 @@ class m200124_093555_add_hqr_children_ages_to_hotel_quote_room extends Migration
 
         $this->createIndex('IDX-hotel_quote_room_pax-hqrp_type_id', '{{%hotel_quote_room_pax}}', ['hqrp_type_id']);
 
+        // table hotel_quote_room
         $this->addColumn('{{%hotel_quote_room}}', 'hqr_children_ages', $this->string(50));
+        $this->addColumn('{{%hotel_quote_room}}', 'hqr_rate_comments_id', $this->string(50));
+        $this->addColumn('{{%hotel_quote_room}}', 'hqr_rate_comments', $this->string(255));
+        $this->addColumn(
+            '{{%hotel_quote_room}}',
+            'hqr_type',
+            $this->tinyInteger(2)->notNull()->defaultValue(0) // property in in model (0 RECHECK/ 1 BOOKABLE)
+        );
+        $this->createIndex('IDX-hotel_quote_room-hqr_type', '{{%hotel_quote_room}}', ['hqr_type']);
 
+        // table hotel_quote
+        $this->addColumn('{{%hotel_quote}}', 'hq_booking_id', $this->string(100)); // field "reference" from response
+        $this->addColumn('{{%hotel_quote}}', 'hq_json_booking', $this->json());
+
+        // RBAC
         (new RbacMigrationService())->up($this->routes, $this->roles);
     }
 
@@ -62,13 +77,24 @@ class m200124_093555_add_hqr_children_ages_to_hotel_quote_room extends Migration
      */
     public function safeDown()
     {
+        // table hotel_quote_room_pax
         $this->dropForeignKey('FK-hotel_quote_room_pax-hqrp_hotel_quote_room_id', '{{%hotel_quote_room_pax}}');
         $this->dropIndex('IDX-hotel_quote_room_pax-hqrp_type_id', '{{%hotel_quote_room_pax}}');
-
         $this->dropTable('{{%hotel_quote_room_pax}}');
 
-        $this->dropColumn('{{%hotel_quote_room}}', 'hqr_children_ages');
+        // table hotel_quote_room
+        $this->dropIndex('IDX-hotel_quote_room-hqr_type', '{{%hotel_quote_room}}');
 
+        $this->dropColumn('{{%hotel_quote_room}}', 'hqr_children_ages');
+        $this->dropColumn('{{%hotel_quote_room}}', 'hqr_rate_comments_id');
+        $this->dropColumn('{{%hotel_quote_room}}', 'hqr_rate_comments');
+        $this->dropColumn('{{%hotel_quote_room}}', 'hqr_type');
+
+        // table hotel_quote
+        $this->dropColumn('{{%hotel_quote}}', 'hq_booking_id');
+        $this->dropColumn('{{%hotel_quote}}', 'hq_json_booking');
+
+        // RBAC
         (new RbacMigrationService())->down($this->routes, $this->roles);
     }
 }

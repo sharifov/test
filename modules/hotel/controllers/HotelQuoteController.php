@@ -267,19 +267,55 @@ class HotelQuoteController extends FController
                 throw new Exception('Hotel Quote ID not found', 1);
             }
             if (!$model = $this->findModel($id)) { /* TODO: add logic check by status new/pending */
-                throw new Exception('Hotel Quote not found', 1);
+                throw new Exception('Hotel Quote not found', 2);
+            }
+            if (!empty($model->hq_booking_id)) {
+                throw new Exception('Hotel Quote already booked. (BookingId:' . $model->hq_booking_id . ')', 3);
             }
 
             if ($preCheck) {
-                $chekResult = HotelQuote::checkRate($model);
+                $checkResult = HotelQuote::checkRate($model);
 
+                if ($checkResult['status'] !== 0) { // 1 warning(not all rooms is TYPE_BOOKABLE), 2 success
+                    $result = HotelQuote::book($model);
+                } else {
+                    $result = $checkResult;
+                }
+            } else {
+                $result = HotelQuote::book($model);
             }
-
-            $result = HotelQuote::book($model);
         } catch (\Throwable $throwable) {
             $result = [
-                'message' => 'Error: ' . $throwable->getMessage(),
-                'status' => false,
+                'message' => $throwable->getMessage(),
+                'status' => 0,
+            ];
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . $this->action->id . ':Throwable');
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function cancelBook(int $id)
+    {
+        $id = (int) Yii::$app->request->get('id', 0); /* TODO: to post  */
+
+        try {
+            if (!$id) { /* TODO: guard */
+                throw new Exception('Hotel Quote ID not found', 1);
+            }
+            if (!$model = $this->findModel($id)) {
+                throw new Exception('Hotel Quote not found', 2);
+            }
+            if (empty($model->hq_booking_id)) {
+                throw new Exception('Hotel Quote not booked.', 3);
+            }
+
+            $result = HotelQuote::cancelBook($model);
+
+        } catch (\Throwable $throwable) {
+            $result = [
+                'message' => $throwable->getMessage(),
+                'status' => 0,
             ];
             \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . $this->action->id . ':Throwable');
         }

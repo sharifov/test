@@ -200,30 +200,30 @@ class ApiHotelService extends Component
      */
     public function book(array $params)
     {
-        $result = ['status' => false, 'error' => '', 'data' => []];
+        $result = ['status' => 0, 'message' => '', 'data' => []];
 
         try {
             $response = $this->sendRequest('booking/book', $params);
 
             if ($response->isOk) {
-                if (isset($response->data['booking']) && !isset($response->data['error'])) {
+                if (isset($response->data['booking']['reference']) && !isset($response->data['error'])) {
                     $result['data'] = $response->data;
-                    $result['status'] = true;
+                    $result['status'] = 1; // success
                 } elseif (isset($response->data['error'])) {
-                    $result['error'] = 'Code : ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
+                    $result['message'] = 'Code : ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
                         ' Message : ' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' ;
                 } else {
-                    $result['error'] = 'Unknown error';
+                    $result['message'] = 'Unknown error';
                 }
             } else {
-                $result['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+                $result['message'] = 'Error (' . $response->statusCode . '): ' . $response->content;
             }
         } catch (\Throwable $throwable) {
             \Yii::error(VarDumper::dumpAsString($throwable), 'Component:ApiHotelService:book:Throwable' );
         }
 
-		if (strlen($result['error'])) {
-		    \Yii::error($result['error'], 'Component:ApiHotelService:book');
+		if ($result['status'] == 0) {
+		    \Yii::error($result['message'], 'Component:ApiHotelService:book');
 		}
 
 		return $result;
@@ -233,32 +233,70 @@ class ApiHotelService extends Component
      * @param $params
      * @return array
      */
-    public function checkRate($params)
+    public function checkRate(array $params)
     {
-        $result = ['status' => false, 'error' => '', 'data' => []];
+        $result = ['status' => 0, 'message' => '', 'data' => []];
 
         try {
             $response = $this->sendRequest('booking/checkrate', $params);
 
             if ($response->isOk) {
-                /* TODO:  */
+                if (isset($response->data['hotel']['rooms']) && !isset($response->data['error'])) {
+                    $result['data'] = $response->data;
+                    $result['status'] = 1; // success
+                } elseif (isset($response->data['error'])) {
+                    $result['message'] = 'Code : ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
+                        ' Message : ' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' ;
+                } else {
+                    $result['message'] = 'Unknown error';
+                }
             } else {
-                $result['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+                $result['message'] = 'Error (' . $response->statusCode . '): ' . $response->content;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable), 'Component:ApiHotelService:book:Throwable' );
+            \Yii::error(VarDumper::dumpAsString($throwable), 'Component:ApiHotelService:checkRate:Throwable' );
         }
 
-		if (strlen($result['error'])) {
-		    \Yii::error($result['error'], 'Component:ApiHotelService:book');
+		if ($result['status'] == 0) {
+		    \Yii::error($result['message'], 'Component:ApiHotelService:checkRate');
 		}
 
 		return $result;
 	}
 
-	public function cancelBook() /* TODO:  */
+    /**
+     * @param array $params
+     * @return array
+     */
+    public function cancelBook(array $params)
     {
+        $result = ['status' => 0, 'message' => '', 'data' => []];
 
+        try {
+            $response = $this->sendRequest('booking/book', $params, 'delete');
+
+            if ($response->isOk) {
+                if (isset($response->data['booking']) && !isset($response->data['error'])) {
+                    $result['data'] = $response->data;
+                    $result['status'] = 1; // success
+                } elseif (isset($response->data['error'])) {
+                    $result['message'] = 'Code : ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
+                        ' Message : ' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' ;
+                } else {
+                    $result['message'] = 'Unknown error';
+                }
+            } else {
+                $result['message'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable), 'Component:ApiHotelService:checkRate:Throwable' );
+        }
+
+		if ($result['status'] == 0) {
+		    \Yii::error($result['message'], 'Component:ApiHotelService:checkRate');
+		}
+
+		return $result;
 	}
 
 	/**

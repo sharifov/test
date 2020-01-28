@@ -27,6 +27,9 @@ use yii\db\ActiveRecord;
  * @property int|null $hqr_adults
  * @property int|null $hqr_children
  * @property string|null $hqr_children_ages
+ * @property string|null $hqr_rate_comments_id
+ * @property string|null $hqr_rate_comments
+ * @property int $hqr_type
  *
  * @property Currency $hqrCurrency
  * @property array $extraData
@@ -34,6 +37,14 @@ use yii\db\ActiveRecord;
  */
 class HotelQuoteRoom extends ActiveRecord
 {
+    public const TYPE_RECHECK = 0;
+    public const TYPE_BOOKABLE = 1;
+
+    public const TYPE_LIST = [
+        self::TYPE_RECHECK => 'RECHECK',
+        self::TYPE_BOOKABLE => 'BOOKABLE',
+    ];
+
     /**
      * @return string
      */
@@ -48,8 +59,8 @@ class HotelQuoteRoom extends ActiveRecord
     public function rules()
     {
         return [
-            [['hqr_hotel_quote_id'], 'required'],
-            [['hqr_hotel_quote_id', 'hqr_rooms', 'hqr_adults', 'hqr_children'], 'integer'],
+            [['hqr_hotel_quote_id', 'hqr_type'], 'required'],
+            [['hqr_hotel_quote_id', 'hqr_rooms', 'hqr_adults', 'hqr_children', 'hqr_type'], 'integer'],
             [['hqr_amount', 'hqr_cancel_amount'], 'number'],
             [['hqr_cancel_from_dt'], 'safe'],
             [['hqr_room_name'], 'string', 'max' => 150],
@@ -59,7 +70,8 @@ class HotelQuoteRoom extends ActiveRecord
             [['hqr_payment_type', 'hqr_code'], 'string', 'max' => 10],
             [['hqr_board_code'], 'string', 'max' => 2],
             [['hqr_board_name'], 'string', 'max' => 100],
-            [['hqr_children_ages'], 'string', 'max' => 50],
+            [['hqr_children_ages', 'hqr_rate_comments_id'], 'string', 'max' => 50],
+            [['hqr_rate_comments'], 'string', 'max' => 255],
             [['hqr_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['hqr_currency' => 'cur_code']],
             [['hqr_hotel_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelQuote::class, 'targetAttribute' => ['hqr_hotel_quote_id' => 'hq_id']],
         ];
@@ -151,5 +163,19 @@ class HotelQuoteRoom extends ActiveRecord
     public function getExtraData(): array
     {
         return array_intersect_key($this->attributes, array_flip($this->extraFields()));
+    }
+
+    /**
+     * @param int $hotelQuoteId
+     * @param int $type
+     * @return array|HotelQuoteRoom[]
+     */
+    public static function getRoomsByType(int $hotelQuoteId, int $type = self::TYPE_RECHECK)
+    {
+        return self::find()
+            ->where(['hqr_hotel_quote_id' => $hotelQuoteId])
+            ->andWhere(['hqr_type' => $type])
+            ->asArray()
+            ->all();
     }
 }
