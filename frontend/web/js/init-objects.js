@@ -8,7 +8,7 @@ PNotify.prototype.options.styling = "bootstrap3";
 
 PNotify.desktop.permission();
 
-ion.sound({
+/*ion.sound({
     sounds: [
         {name: "bell_ring", volume: 0.2},
         {name: "door_bell", volume: 0.05},
@@ -19,7 +19,7 @@ ion.sound({
     preload: true,
     multiplay: true,
     volume: 0.8
-})
+})*/
 
 $("document").ready(function(){
     $(document).on('click', '.btn-recording_url', function() {

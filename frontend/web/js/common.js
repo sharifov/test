@@ -22,3 +22,9 @@
         }
     };
 })(window);
+
+function soundNotification(fileName) {
+    let audio = new Audio('/js/sounds/'+ fileName +'.mp3');
+    audio.volume = 0.2;
+    audio.play();
+}
