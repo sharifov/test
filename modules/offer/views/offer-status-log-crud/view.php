@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'osl_end_status_id:offerStatus',
             'osl_start_dt:byUserDateTime',
             'osl_end_dt:byUserDateTime',
-            'osl_duration',
+            'osl_duration:duration',
             'osl_description',
             'osl_action_id:offerStatusAction',
             'osl_owner_user_id:userName',

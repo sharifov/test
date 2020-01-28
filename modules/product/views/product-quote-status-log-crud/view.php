@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqsl_end_status_id:productQuoteStatus',
             'pqsl_start_dt:byUserDateTime',
             'pqsl_end_dt:byUserDateTime',
-            'pqsl_duration',
+            'pqsl_duration:duration',
             'pqsl_description',
             'pqsl_action_id:productQuoteStatusAction',
             'pqsl_owner_user_id:userName',

@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\invoice\exceptions;
+namespace modules\invoice\src\exceptions;
 
 use common\CodeExceptionsModule as Module;
 

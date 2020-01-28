@@ -1,8 +1,8 @@
 <?php
 
-use modules\offer\src\entities\offerStatusLog\search\OfferStatusLogSearch;
-use modules\offer\src\grid\columns\OfferStatusActionColumn;
-use modules\offer\src\grid\columns\OfferStatusColumn;
+use modules\invoice\src\entities\invoiceStatusLog\search\InvoiceStatusLogSearch;
+use modules\invoice\src\grid\columns\InvoiceStatusActionColumn;
+use modules\invoice\src\grid\columns\InvoiceStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
 use sales\yii\grid\UserColumn;
@@ -10,11 +10,11 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $searchModel OfferStatusLogSearch */
+/* @var $searchModel InvoiceStatusLogSearch */
 
 ?>
 
-<div class="offer-status-log">
+<div class="invoice-status-log">
 
     <?php Pjax::begin(['enablePushState' => false, 'enableReplaceState' => false]); ?>
 
@@ -23,49 +23,44 @@ use yii\widgets\Pjax;
         'filterModel' => false, //$searchModel,
         'columns' => [
             [
-                'attribute' => 'osl_id',
+                'attribute' => 'invsl_id',
                 'options' => ['style' => 'width:80px'],
             ],
             [
-                'class' => OfferStatusColumn::class,
-                'attribute' => 'osl_start_status_id',
+                'class' => InvoiceStatusColumn::class,
+                'attribute' => 'invsl_start_status_id',
             ],
             [
-                'class' => OfferStatusColumn::class,
-                'attribute' => 'osl_end_status_id',
-            ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'osl_start_dt',
+                'class' => InvoiceStatusColumn::class,
+                'attribute' => 'invsl_end_status_id',
             ],
             [
                 'class' => DateTimeColumn::class,
-                'attribute' => 'osl_end_dt',
+                'attribute' => 'invsl_start_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'invsl_end_dt',
             ],
             [
                 'class' => DurationColumn::class,
-                'attribute' => 'osl_duration',
-                'startAttribute' => 'osl_start_dt',
+                'attribute' => 'invsl_duration',
+                'startAttribute' => 'invsl_start_dt',
                 'options' => ['style' => 'width:180px'],
             ],
             [
-                'attribute' => 'osl_description',
+                'attribute' => 'invsl_description',
                 'format' => 'ntext',
                 'options' => ['style' => 'width:280px'],
             ],
             [
-                'class' => OfferStatusActionColumn::class,
-                'attribute' => 'osl_action_id'
-            ],
-            [
-                'class' => UserColumn::class,
-                'relation' => 'ownerUser',
-                'attribute' => 'osl_owner_user_id',
+                'class' => InvoiceStatusActionColumn::class,
+                'attribute' => 'invsl_action_id'
             ],
             [
                 'class' => UserColumn::class,
                 'relation' => 'createdUser',
-                'attribute' => 'osl_created_user_id',
+                'attribute' => 'invsl_created_user_id',
             ],
         ],
     ]) ?>

@@ -14,7 +14,7 @@ use yii\widgets\Pjax;
 
 ?>
 
-<div class="product-quote-status-log">
+<div class="order-status-log">
 
     <?php Pjax::begin(['enablePushState' => false, 'enableReplaceState' => false]); ?>
 

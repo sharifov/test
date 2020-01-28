@@ -210,6 +210,14 @@ use yii\bootstrap4\Html;
                                     'data-url' => \yii\helpers\Url::to(['/invoice/invoice/delete-ajax'])
                                 ]);
                                 ?>
+
+                                <?php
+                                echo Html::a('<i class="glyphicon glyphicon-remove-circle text-success" title="Status log"></i>', null, [
+                                    'class' => 'btn-invoice-status-log',
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice-status-log/show', 'gid' => $invoice->inv_gid]),
+                                    'data-gid' => $invoice->inv_gid,
+                                ]);
+                                ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

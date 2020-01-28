@@ -52,11 +52,7 @@ $list = (new ListsAccess(Auth::id()));
 
         <?= $form->field($model, 'or_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
 
-        <?= $form->field($model, 'or_updated_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
-
         <?= $form->field($model, 'or_created_dt')->widget(DateTimePicker::class) ?>
-
-        <?= $form->field($model, 'or_updated_dt')->widget(DateTimePicker::class) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

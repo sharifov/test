@@ -2,7 +2,7 @@
 
 namespace modules\invoice\src\entities\invoice;
 
-use modules\invoice\exceptions\InvoiceCodeException;
+use modules\invoice\src\exceptions\InvoiceCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
