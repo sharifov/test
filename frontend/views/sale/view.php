@@ -408,8 +408,12 @@ if (!empty($caseSaleModel)) {
 //										'placement' => PopoverX::ALIGN_TOP_LEFT,
 										'pjaxContainerId' => 'pjax-sale-list'
 									]);
-								} else {
-								    echo !empty($passenger['ff_numbers']) ? array_key_first($passenger['ff_numbers']) : '(not set)';
+								} else if (!empty($passenger['ff_airline'])) {
+								    echo $passenger['ff_airline'];
+                                } else if (!empty($passenger['ff_numbers'])) {
+								    echo array_key_first($passenger['ff_numbers']);
+                                } else {
+								    echo '(not set)';
                                 }
 								?>
                             </td>
