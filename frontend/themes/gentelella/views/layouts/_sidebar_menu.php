@@ -245,7 +245,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
                 ['label' => 'Products', 'url' => ['/product/index']],
                 ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
-                ['label' => 'Orders', 'url' => ['/order/index']],
+                ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offer Products', 'url' => ['/offer/offer-product-crud/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/index']],

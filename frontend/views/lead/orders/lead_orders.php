@@ -23,7 +23,7 @@ use yii\web\View;
             <ul class="nav navbar-right panel_toolbox">
                 <li>
                     <?= Html::a('<i class="fa fa-plus-circle success"></i> add Order', null, [
-                        'data-url' => \yii\helpers\Url::to(['/order/create-ajax', 'id' => $lead->id]),
+                        'data-url' => \yii\helpers\Url::to(['/order/order/create-ajax', 'id' => $lead->id]),
                         'class' => 'btn btn-light btn-create-order'
                     ])?>
                 </li>

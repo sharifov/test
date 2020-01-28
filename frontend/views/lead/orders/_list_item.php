@@ -1,9 +1,11 @@
 <?php
 /* @var $this yii\web\View */
-/* @var $order Order */
+/* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
 
-use common\models\Order;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderPayStatus;
+use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\bootstrap4\Html;
 
@@ -15,8 +17,8 @@ use yii\bootstrap4\Html;
         <small><span class="badge badge-white">OR<?=($order->or_id)?></span></small>
         "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
         (<span title="UID"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
-        <?=$order->getStatusLabel()?>
-        <?=$order->getPayStatusLabel()?>
+        <?= OrderStatus::asFormat($order->or_status_id) ?>
+        <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
 
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
@@ -24,7 +26,7 @@ use yii\bootstrap4\Html;
             <!--            </li>-->
             <li>
                 <?= Html::a('<i class="fa fa-edit warning"></i> Update order', null, [
-                    'data-url' => \yii\helpers\Url::to(['/order/update-ajax', 'id' => $order->or_id]),
+                    'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
                     'class' => 'btn-update-order'
                 ])?>
             </li>
@@ -40,7 +42,7 @@ use yii\bootstrap4\Html;
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
                         'class' => 'dropdown-item text-danger btn-delete-order',
                         'data-order-id' => $order->or_id,
-                        'data-url' => \yii\helpers\Url::to(['/order/delete-ajax']),
+                        'data-url' => \yii\helpers\Url::to(['/order/order/delete-ajax']),
                     ]) ?>
                 </div>
             </li>
@@ -102,7 +104,7 @@ use yii\bootstrap4\Html;
                                 'data-order-id' => $order->or_id,
                                 'data-product-quote-id' => $quote->pq_id,
                                 'class' => 'btn-delete-quote-from-order',
-                                'data-url' => \yii\helpers\Url::to(['order-product/delete-ajax'])
+                                'data-url' => \yii\helpers\Url::to(['/order/order-product/delete-ajax'])
                             ]);
                             ?>
                         </td>

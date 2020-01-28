@@ -48,8 +48,10 @@ class OfferProduct extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'op_offer_id' => 'Offer ID',
-            'op_product_quote_id' => 'Product Quote ID',
+            'op_offer_id' => 'Offer Id',
+            'opOffer' => 'Offer',
+            'op_product_quote_id' => 'Product Quote Id',
+            'opProductQuote' => 'Product Quote',
             'op_created_user_id' => 'Created User',
             'opCreatedUser' => 'Created User',
             'op_created_dt' => 'Created Dt',

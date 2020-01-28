@@ -3,7 +3,7 @@
 namespace frontend\models\form;
 
 use common\models\Currency;
-use common\models\Order;
+use modules\order\src\entities\order\Order;
 use Yii;
 use yii\base\Model;
 

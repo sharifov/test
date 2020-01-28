@@ -29,7 +29,9 @@ class NewDataPermissions
         '/product/product-quote-option-crud/create', '/product/product-quote-option-crud/delete', '/product/product-quote-option-crud/index', '/product/product-quote-option-crud/update', '/product/product-quote-option-crud/view',
         '/product/product-quote-option/create-ajax', '/product/product-quote-option/delete-ajax', '/product/product-quote-option/update-ajax',
 
-        '/order/create', '/order/create-ajax', '/order/delete', '/order/delete-ajax', '/order/index', '/order/list-menu-ajax', '/order/update', '/order/update-ajax', '/order/view',
+//        '/order/create', '/order/create-ajax', '/order/delete', '/order/delete-ajax', '/order/index', '/order/list-menu-ajax', '/order/update', '/order/update-ajax', '/order/view',
+        '/order/order-crud/create', '/order/order-crud/index', '/order/order-crud/update', '/order/order-crud/delete', '/order/order-crud/view',
+        '/order/order/delete-ajax',  '/order/order/list-menu-ajax',  '/order/order/update-ajax', '/order/order/create-ajax',
 
 //        '/offer/create', '/offer/create-ajax', '/offer/delete', '/offer/delete-ajax', '/offer/index', '/offer/list-menu-ajax', '/offer/update', '/offer/update-ajax', '/offer/view',
         '/offer/offer-crud/index', '/offer/offer-crud/create', '/offer/offer-crud/view', '/offer/offer-crud/delete', '/offer/offer-crud/update',
@@ -40,7 +42,10 @@ class NewDataPermissions
         '/offer/offer-product-crud/create', '/offer/offer-product-crud/delete', '/offer/offer-product-crud/index', '/offer/offer-product-crud/update', '/offer/offer-product-crud/view',
         '/offer/offer-product/create-ajax', '/offer/offer-product/delete-ajax',
 
-        '/order-product/create', '/order-product/create-ajax', '/order-product/delete', '/order-product/delete-ajax', '/order-product/index', '/order-product/update', '/order-product/view',
+//        '/order-product/create', '/order-product/create-ajax', '/order-product/delete', '/order-product/delete-ajax', '/order-product/index', '/order-product/update', '/order-product/view',
+        '/order/order-product-crud/create', '/order/order-product-crud/delete', '/order/order-product-crud/index', '/order/order-product-crud/update', '/order/order-product-crud/view',
+        '/order/order-product/create-ajax', '/order/order-product/delete-ajax',
+
         '/invoice/create', '/invoice/create-ajax', '/invoice/delete', '/invoice/delete-ajax', '/invoice/index', '/invoice/update', '/invoice/update-ajax', '/invoice/view',
         '/billing-info/create', '/billing-info/delete', '/billing-info/index', '/billing-info/update', '/billing-info/view',
         '/credit-card/create', '/credit-card/delete', '/credit-card/index', '/credit-card/update', '/credit-card/view',

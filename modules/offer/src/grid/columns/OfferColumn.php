@@ -11,7 +11,7 @@ use yii\grid\DataColumn;
  *
  * Ex.
         [
-            'class' => OfferColumn::class,
+            'class' => \modules\offer\src\grid\columns\OfferColumn::class,
             'attribute' => 'osl_offer_id',
             'relation' => 'offer',
         ],

@@ -9,6 +9,11 @@ use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
 use modules\offer\src\entities\offer\OfferStatusAction;
 use modules\offer\src\helpers\formatters\OfferFormatter;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderPayStatus;
+use modules\order\src\entities\order\OrderStatus;
+use modules\order\src\entities\order\OrderStatusAction;
+use modules\order\src\helpers\formatters\OrderFormatter;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productOption\ProductOptionPriceType;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -23,6 +28,42 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asOrder(?Order $order): string
+    {
+        if ($order === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderFormatter::asOrder($order);
+    }
+
+    public function asOrderPayStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderPayStatus::asFormat($value);
+    }
+
+    public function asOrderStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderStatus::asFormat($value);
+    }
+
+    public function asOrderStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderStatusAction::asFormat($value);
+    }
+
     public function asProductQuoteStatusAction($value): string
     {
         if ($value === null) {

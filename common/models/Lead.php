@@ -9,6 +9,7 @@ use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
 use DateTime;
 use modules\offer\src\entities\offer\Offer;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\InvoiceQuery;
+use modules\order\src\entities\order\Order;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

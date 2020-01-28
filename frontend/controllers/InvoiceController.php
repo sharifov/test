@@ -2,7 +2,7 @@
 
 namespace frontend\controllers;
 
-use common\models\Order;
+use modules\order\src\entities\order\Order;
 use frontend\models\form\InvoiceForm;
 use Yii;
 use common\models\Invoice;

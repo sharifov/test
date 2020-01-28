@@ -4,7 +4,7 @@ namespace frontend\models\form;
 
 use common\models\Employee;
 use common\models\Lead;
-use common\models\query\OrderQuery;
+use modules\order\src\entities\order\Scopes;
 use Yii;
 use yii\base\Model;
 use yii\behaviors\BlameableBehavior;

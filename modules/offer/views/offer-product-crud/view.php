@@ -29,8 +29,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'op_offer_id',
-            'op_product_quote_id',
+            'opOffer:offer',
+            'opProductQuote:productQuote',
             'opCreatedUser:userName',
             'op_created_dt:byUserDateTime',
         ],

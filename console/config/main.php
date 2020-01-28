@@ -29,6 +29,7 @@ return [
                 'modules\flight\migrations',
                 'modules\product\migrations',
                 'modules\offer\migrations',
+                'modules\order\migrations',
             ],
         ],
 

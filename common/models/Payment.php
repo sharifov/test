@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use modules\order\src\entities\order\Order;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
