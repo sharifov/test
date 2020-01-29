@@ -142,13 +142,13 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 <!---->
 <!--					--><?php //if(!$model->isDeclined()):?>
 <!---->
-<!--						--><?php // echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
-//							'class' => 'dropdown-item',
-//							'target'    => '_blank',
-//							'title'     => 'View checkout',
-//							'data-pjax' => 0
-//						]);
-//						?>
+						<?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
+							'class' => 'dropdown-item',
+							'target'    => '_blank',
+							'title'     => 'View checkout',
+							'data-pjax' => 0
+						]);
+						?>
 <!---->
 <!--					--><?php //endif; ?>
 				</div>
