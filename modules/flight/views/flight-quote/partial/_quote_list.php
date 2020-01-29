@@ -49,11 +49,11 @@ $dataProvider = FlightQuoteHelper::generateDataProviderForQuoteList($product);
 <?php Pjax::end() ?>
 
 <?php
-
+$statusLogUrl = \yii\helpers\Url::to(['/flight/flight-quote/quote-status-log']);
 // Menu details
 
 $js = <<<JS
-$(document).on('click','.btn-flight-quote-details', function (e) {
+$('.flight_quote_drop_down_menu').on('click','.btn-flight-quote-details', function (e) {
         e.preventDefault();
         let url = $(this).data('url');
         let modal = $('#modal-lg');
@@ -63,6 +63,22 @@ $(document).on('click','.btn-flight-quote-details', function (e) {
         modal.find('.modal-body').html('');
         $('#preloader').removeClass('hidden');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            $('#preloader').addClass('hidden');
+            modal.modal('show');
+        });
+    });
+JS;
+$this->registerJs($js);
+
+$js = <<<JS
+ $('.flight_quote_drop_down_menu').on('click', '.flight-quote-view-status-log', function(e){
+        e.preventDefault();
+        $('#preloader').removeClass('hidden');
+        let modal = $('#modal-df');
+        $('#modal-df-label').html('Quote Status Log');
+        modal.find('.modal-body').html('');
+        let id = $(this).attr('data-id');
+        modal.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
             $('#preloader').addClass('hidden');
             modal.modal('show');
         });

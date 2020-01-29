@@ -4,6 +4,8 @@
 namespace modules\flight\src\useCases\flightQuote;
 
 
+use modules\flight\models\FlightQuoteStatusLog;
+use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -46,6 +48,7 @@ use sales\services\TransactionManager;
  * @property FlightPaxRepository $flightPaxRepository
  * @property FlightQuoteSegmentPaxBaggageChargeRepository $baggageChargeRepository
  * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
+ * @property FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
  */
 class FlightQuoteManageService
 {
@@ -89,6 +92,10 @@ class FlightQuoteManageService
 	 * @var FlightQuotePaxPriceRepository
 	 */
 	private $flightQuotePaxPriceRepository;
+	/**
+	 * @var FlightQuoteStatusLogRepository
+	 */
+	private $flightQuoteStatusLogRepository;
 
 	/**
 	 * FlightQuoteService constructor.
@@ -101,6 +108,7 @@ class FlightQuoteManageService
 	 * @param FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository
 	 * @param FlightQuoteSegmentPaxBaggageChargeRepository $baggageChargeRepository
 	 * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
+	 * @param FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
 	 * @param TransactionManager $transactionManager
 	 */
 	public function __construct(
@@ -113,18 +121,20 @@ class FlightQuoteManageService
 		FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository,
 		FlightQuoteSegmentPaxBaggageChargeRepository $baggageChargeRepository,
 		FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository,
+		FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository,
 		TransactionManager $transactionManager)
 	{
 		$this->flightQuoteRepository = $flightQuoteRepository;
-		$this->transactionManager = $transactionManager;
 		$this->productQuoteRepository = $productQuoteRepository;
+		$this->flightPaxRepository = $flightPaxRepository;
 		$this->flightQuoteTripRepository = $flightQuoteTripRepository;
 		$this->flightQuoteSegmentRepository = $flightQuoteSegmentRepository;
 		$this->flightQuoteSegmentStopRepository = $flightQuoteSegmentStopRepository;
 		$this->flightQuoteSegmentPaxBaggageRepository = $flightQuoteSegmentPaxBaggageRepository;
-		$this->flightPaxRepository = $flightPaxRepository;
 		$this->baggageChargeRepository = $baggageChargeRepository;
 		$this->flightQuotePaxPriceRepository = $flightQuotePaxPriceRepository;
+		$this->flightQuoteStatusLogRepository = $flightQuoteStatusLogRepository;
+		$this->transactionManager = $transactionManager;
 	}
 
 	/**
@@ -141,6 +151,9 @@ class FlightQuoteManageService
 
 			$flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
 			$this->flightQuoteRepository->save($flightQuote);
+
+			$flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
+			$this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
 			$this->createQuotePaxPrice($flightQuote, $productQuote, $quote);
 

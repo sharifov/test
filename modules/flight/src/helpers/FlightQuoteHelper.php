@@ -369,27 +369,16 @@ class FlightQuoteHelper
 	public static function generateDataProviderForQuoteList(Product $product): ActiveDataProvider
 	{
 		$query = ProductQuote::find()->where(['pq_product_id' => $product->pr_id]);
-		$dataProvider = new ActiveDataProvider([
+		return new ActiveDataProvider([
 			'query' => $query,
 			'sort' => [
-//				'defaultOrder' => [
-//					'type_id' => SORT_ASC,
-//					'id' => SORT_DESC,
-//				]
+				'defaultOrder' => [
+					'pq_created_dt' => SORT_DESC,
+				]
 			],
 			'pagination' => [
 				'pageSize' => 30,
 			],
 		]);
-//
-//		$this->load($params);
-//
-//		if (!$this->validate()) {
-//			return $dataProvider;
-//		}
-//
-		$query->with([]);
-
-		return $dataProvider;
 	}
 }

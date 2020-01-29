@@ -191,7 +191,7 @@ $js = <<<JS
         e.preventDefault();
         $('#preloader').removeClass('d-none');          
         let url = $(this).data('url');
-        let pjaxId = '$pjaxId';
+        let pjaxId = $(this).data('pjax-id');;
         let modal = $('#modal-lg');
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Search flight Quotes');

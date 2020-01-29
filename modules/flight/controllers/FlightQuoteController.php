@@ -2,6 +2,7 @@
 
 namespace modules\flight\controllers;
 
+use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
@@ -308,6 +309,17 @@ class FlightQuoteController extends FController
 		return $this->renderPartial('partial/_quote_view_details', [
 			'productQuote' => $productQuote,
 			'flightQuote' => FlightQuote::findByProductQuote($productQuote)
+		]);
+	}
+
+	public function actionQuoteStatusLog()
+	{
+		$productQuoteId = Yii::$app->request->get('quoteId');
+		$quote = $this->productQuoteRepository->find($productQuoteId);
+		$flightQuote = FlightQuote::findByProductQuote($quote);
+
+		return $this->renderAjax('partial/_quote_status_log', [
+			'flightQuote' => $flightQuote,
 		]);
 	}
 

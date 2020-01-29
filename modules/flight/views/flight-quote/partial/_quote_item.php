@@ -104,7 +104,7 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 					<span class="fas fa-list-ul"></span>
 					<span class="caret"></span>
 				</button>
-				<div class="dropdown-menu">
+				<div class="dropdown-menu flight_quote_drop_down_menu">
 
 					<?= Html::a('<i class="fa fa-search"></i> Details', null, [
 						'class' => 'btn-flight-quote-details dropdown-item',
@@ -114,12 +114,12 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 						//'data-target' => '#quote_detail_'.$model->uid,
 						'title' => 'Details'
 					]) ?>
-<!---->
-<!--					--><?//= Html::a('<i class="fa fa-list"></i> Status logs', null, [
-//						'class' => 'view-status-log sl-quote__status-log dropdown-item',
-//						'data-id' => $model->id,
-//						'title' => 'View status log'
-//					]) ?>
+
+					<?= Html::a('<i class="fa fa-list"></i> Status logs', null, [
+						'class' => 'flight-quote-view-status-log sl-quote__status-log dropdown-item',
+						'data-id' => $model->pq_id,
+						'title' => 'View status log'
+					]) ?>
 <!---->
 <!--					--><?//= Html::a('<i class="fa fa-list-alt"></i> Reserv. dump', null, [
 //						'class' => 'btn-reservation-dump dropdown-item',
