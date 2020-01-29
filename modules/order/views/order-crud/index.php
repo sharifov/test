@@ -55,6 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'or_client_total',
             'or_client_currency',
             'or_client_currency_rate',
+            'or_profit_amount',
             [
                 'class' => UserColumn::class,
                 'attribute' => 'or_owner_user_id',

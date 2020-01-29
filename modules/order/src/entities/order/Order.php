@@ -9,6 +9,7 @@ use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\EventTrait;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -36,6 +37,7 @@ use yii\db\ActiveRecord;
  * @property int|null $or_updated_user_id
  * @property string|null $or_created_dt
  * @property string|null $or_updated_dt
+ * @property float|null $or_profit_amount
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -268,5 +270,13 @@ class Order extends ActiveRecord
         }
 
         $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
+    }
+
+    /**
+     * @return float
+     */
+    public function profitCalc(): float
+    {
+        return ProductQuoteHelper::roundPrice(0); /* TODO:  */
     }
 }

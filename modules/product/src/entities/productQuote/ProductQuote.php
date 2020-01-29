@@ -19,8 +19,8 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
-use sales\entities\serializer\Serializable;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -49,6 +49,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pq_updated_user_id
  * @property string|null $pq_created_dt
  * @property string|null $pq_updated_dt
+ * @property float|null $pq_profit_amount
  * @property int|null $pq_clone_id
  *
  * @property OfferProduct[] $offerProducts
@@ -63,6 +64,7 @@ use yii\db\ActiveRecord;
  * @property Product $pqProduct
  * @property Employee $pqUpdatedUser
  * @property float $optionAmountSum
+ * @property float $optionExtraMarkupSum
  * @property float $totalCalcSum
  * @property ProductQuoteOption[] $productQuoteOptions
  * @property ProductQuote|null $clone
@@ -166,6 +168,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
                 'createdByAttribute' => 'pq_created_user_id', //'pq_owner_user_id',
                 'updatedByAttribute' => 'pq_updated_user_id',
             ],
+            'pg_profit_amount' => [
+                /* TODO:  */
+            ]
         ];
     }
 
@@ -324,6 +329,33 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return round($this->optionAmountSum + $this->pq_price, 2);
     }
 
+    /**
+     * @return float
+     */
+    public function getOptionExtraMarkupSum(): float
+    {
+        $sum = 0;
+        if ($options = $this->productQuoteOptions) {
+            foreach ($options as $option) {
+                $sum += $option->pqo_extra_markup;
+            }
+        }
+        return ProductQuoteHelper::roundPrice($sum);
+    }
+
+    /**
+     * @return float
+     */
+    public function profitCalc(): float
+    {
+        $extraMarkupAmount = $this->optionExtraMarkupSum; // EMA
+        $markupAmount = 0; /* TODO: MA calc algorithm ? */
+
+        /* TODO: Quote::SERVICE_FEE OR $this->pq_service_fee_sum ? */
+
+        $result = ($markupAmount + $extraMarkupAmount) - (float) $this->pq_service_fee_sum;
+        return ProductQuoteHelper::roundPrice($result);
+    }
 
 //    public function getQuoteItem()
 //    {

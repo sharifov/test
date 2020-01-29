@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'or_client_total',
             'or_client_currency',
             'or_client_currency_rate',
+            'or_profit_amount',
             'orOwnerUser:userName',
             'orCreatedUser:userName',
             'orUpdatedUser:userName',

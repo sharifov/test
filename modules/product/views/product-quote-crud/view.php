@@ -46,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pq_client_currency',
             'pq_origin_currency_rate',
             'pq_client_currency_rate',
+            'pq_profit_amount',
             'pqOwnerUser:userName',
             'pqCreatedUser:userName',
             'pqUpdatedUser:userName',

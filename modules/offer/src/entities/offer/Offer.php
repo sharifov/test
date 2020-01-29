@@ -11,6 +11,7 @@ use modules\offer\src\entities\offerSendLog\OfferSendLog;
 use modules\offer\src\entities\offerViewLog\OfferViewLog;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\EventTrait;
+use sales\helpers\product\ProductQuoteHelper;
 use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -35,6 +36,7 @@ use yii\db\ActiveRecord;
  * @property float|null $of_client_currency_rate
  * @property float|null $of_app_total
  * @property float|null $of_client_total
+ * @property float|null $of_profit_amount
  *
  * @property Currency $ofClientCurrency
  * @property Employee $ofCreatedUser
@@ -292,5 +294,13 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new OfferSerializer($this))->getData();
+    }
+
+    /**
+     * @return float
+     */
+    public function profitCalc(): float
+    {
+        return ProductQuoteHelper::roundPrice(0); /* TODO:  */
     }
 }

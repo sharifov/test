@@ -49,6 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'of_client_currency_rate',
             'of_app_total',
             'of_client_total',
+            'of_profit_amount',
             [
                 'class' => UserColumn::class,
                 'attribute' => 'of_owner_user_id',

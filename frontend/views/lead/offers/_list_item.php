@@ -146,6 +146,10 @@ use yii\bootstrap4\Html;
         <?php endif; ?>
         </table>
 
+        <?php
+            $offer->of_profit_amount; /* TODO:  */
+        ?>
+
         <i class="fa fa-user"></i> <?=$offer->ofCreatedUser ? Html::encode($offer->ofCreatedUser->username) : '-'?>,
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($offer->of_created_dt)) ?>,
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($offer->of_client_currency)?> <span title="Rate: <?=$offer->of_client_currency_rate?>">(<?=round($offer->of_client_currency_rate, 3)?>)</span>
