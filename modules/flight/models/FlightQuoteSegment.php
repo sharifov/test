@@ -46,6 +46,13 @@ use Yii;
  */
 class FlightQuoteSegment extends \yii\db\ActiveRecord
 {
+	public const TICKET_COLOR_LIST = [
+		0   => '#FFFFFF',
+		1   => '#fbe5e1',
+		2   => '#fafbe1',
+		3   => '#e1fbec',
+	];
+
     /**
      * {@inheritdoc}
      */
@@ -213,5 +220,13 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
 		$segment->fqs_mileage = $dto->mileage;
 
 		return $segment;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getTicketColor(): string
+	{
+		return self::TICKET_COLOR_LIST[$this->fqs_ticket_id] ?? '#FFFFFF';
 	}
 }

@@ -8,6 +8,8 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use yii\bootstrap4\Html;
+use yii\helpers\Url;
 
 $flightQuote = FlightQuote::findByProductQuote($model);
 
@@ -104,14 +106,14 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 				</button>
 				<div class="dropdown-menu">
 
-<!--					--><?//= Html::a('<i class="fa fa-search"></i> Details', null, [
-//						'class' => 'btn-quote-details dropdown-item',
-//						'data-id' => $model->id,
-//						'data-title' => implode(', ',$tripsInfo),
-//						'data-url' => Url::to(['quotes/ajax-details', 'id' => $model->id]),
-//						//'data-target' => '#quote_detail_'.$model->uid,
-//						'title' => 'Details'
-//					]) ?>
+					<?= Html::a('<i class="fa fa-search"></i> Details', null, [
+						'class' => 'btn-flight-quote-details dropdown-item',
+						'data-id' => $model->pq_id,
+						'data-title' => implode(', ',$tripsInfo),
+						'data-url' => Url::to(['/flight/flight-quote/ajax-quote-details', 'id' => $model->pq_id]),
+						//'data-target' => '#quote_detail_'.$model->uid,
+						'title' => 'Details'
+					]) ?>
 <!---->
 <!--					--><?//= Html::a('<i class="fa fa-list"></i> Status logs', null, [
 //						'class' => 'view-status-log sl-quote__status-log dropdown-item',

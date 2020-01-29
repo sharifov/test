@@ -4476,4 +4476,12 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $str;
     }
 
+	/**
+	 * @return bool
+	 */
+    public function isInTrash(): bool
+	{
+		return $this->status === self::STATUS_TRASH;
+	}
+
 }
