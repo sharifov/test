@@ -119,7 +119,7 @@
     </ul>
     <?php
         if($soundPlay) {
-            $this->registerJs('ion.sound.play("button_tiny");', \yii\web\View::POS_READY);
+            $this->registerJs("soundNotification();", \yii\web\View::POS_READY);
         }
     ?>
 

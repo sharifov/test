@@ -2,8 +2,8 @@
 
 namespace modules\flight\controllers;
 
-use common\models\Product;
-use common\models\ProductType;
+use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\services\flight\FlightManageService;
@@ -148,10 +148,6 @@ class FlightController extends FController
 			throw new NotFoundHttpException();
 		}
 
-		if (!Yii::$app->user->can('updateProduct', ['product' => $flight->flProduct])) {
-			throw new ForbiddenHttpException();
-		}
-
 		$form = new ItineraryEditForm($flight);
 		return $this->renderAjax('update_ajax', [
 			'itineraryForm' => $form,
@@ -169,10 +165,6 @@ class FlightController extends FController
 		$id = Yii::$app->request->post('flightId');
 		$pjaxIdWrap = Yii::$app->request->post('pjaxIdWrap');
 		$flight = $this->findModel($id);
-
-		if (!Yii::$app->user->can('updateProduct', ['product' => $flight->flProduct])) {
-			throw new ForbiddenHttpException();
-		}
 
 		$data = CompositeFormHelper::prepareDataForMultiInput(
 			Yii::$app->request->post(),

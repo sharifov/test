@@ -844,7 +844,8 @@ $js = <<<JS
         let num = ($(this).clone().children().remove().end().text());
         $("#output").append('<span>' + num.trim() + '</span>');
         sendNumberToCall(num.trim());
-        ion.sound.play("button_tiny");
+        //ion.sound.play("button_tiny");        
+        soundNotification();
     });
 
     $('.reset-digit').on('click', function() {

@@ -11,6 +11,9 @@ use Exception;
 /**
  * Class CasesSaleForm
  * @package sales\forms\cases
+ *
+ * @property CaseSale $caseSale
+ * @property CasesSaleService $caseSaleService
  */
 class CasesSaleForm extends Model
 {
@@ -58,7 +61,7 @@ class CasesSaleForm extends Model
 	/**
 	 * @var CaseSale
 	 */
-	private $caseSale;
+	public $caseSale;
 
 	/**
 	 * @var array
@@ -117,7 +120,9 @@ class CasesSaleForm extends Model
 	{
 		parent::afterValidate();
 
-		$this->caseSaleService->setSegments($this->caseSale);
+		$this->caseSaleService
+			->setSegments($this->caseSale)
+			->setValidatingCarrier($this->caseSale);
 
 		foreach ($this->passengers as $key => $passenger) {
 			$this->caseSaleService->formatPassengersData($this->passengers[$key]);

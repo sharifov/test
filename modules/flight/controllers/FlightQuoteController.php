@@ -7,12 +7,14 @@ use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use sales\auth\Auth;
 use sales\repositories\NotFoundException;
 use Yii;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\search\FlightQuoteSearch;
 use frontend\controllers\FController;
 use yii\data\ArrayDataProvider;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -216,6 +218,7 @@ class FlightQuoteController extends FController
 
 	/**
 	 * @return \yii\web\Response
+	 * @throws \Throwable
 	 */
 	public function actionAjaxAddQuote(): \yii\web\Response
 	{
@@ -228,31 +231,39 @@ class FlightQuoteController extends FController
 		];
 
 		try {
-			$flight = $this->flightRepository->find($flightId);
+			$flight = $this->flightRepository->find((int)$flightId);
 
 			if (!$key) {
 				throw new \DomainException('Key is empty!');
 			}
 
-			$quotes = \Yii::$app->cache->get($flight->fl_request_hash_key);
+			$quotes = \Yii::$app->cacheFile->get($flight->fl_request_hash_key);
 
 			if ($quotes === false && empty($quotes['results'])) {
 				throw new \DomainException('Not found Quote from Search result from Cache. Please update search request!');
 			}
 
-			$selectedQuote = array_filter($quotes['results'], static function ($item) use ($key) {
-				return $item['key'] === $key;
-			})[0] ?? [];
-
-			if (!$selectedQuote) {
-				throw new \DomainException('Not found Quote from Search result from Cache. Please update search request!');
+			$selectedQuote = [];
+			foreach ($quotes['results'] as $quote) {
+				if ($quote['key'] === $key) {
+					$selectedQuote = $quote;
+					break;
+				}
 			}
 
-			$this->flightQuoteManageService->create($flight, $selectedQuote);
+			if (!$selectedQuote) {
+				throw new \DomainException('Quote Key not equal to key from Cache');
+			}
 
-		} catch (\DomainException | NotFoundException $e) {
-			Yii::error($e->getMessage(), 'Flight::FlightQuoteController::actionAjaxAddQuote::DomainException|NotFoundException');
+			$this->flightQuoteManageService->create($flight, $selectedQuote, Auth::id());
+
+			$result['status'] = true;
+
+		} catch (\DomainException | NotFoundException | \RuntimeException $e) {
 			$result['error'] = $e->getMessage();
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'Flight::FlightQuoteController::actionAjaxAddQuote::Throwable');
+			$result['error'] = 'Server internal error; Try again letter';
 		}
 
 		return $this->asJson($result);

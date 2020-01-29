@@ -27,6 +27,10 @@ return [
                 //'app\migrations',
                 'modules\hotel\migrations',
                 'modules\flight\migrations',
+                'modules\product\migrations',
+                'modules\offer\migrations',
+                'modules\order\migrations',
+                'modules\invoice\migrations',
             ],
         ],
 

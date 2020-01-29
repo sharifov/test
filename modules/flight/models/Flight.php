@@ -2,9 +2,10 @@
 
 namespace modules\flight\models;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use modules\flight\models\query\FlightQuery;
 use modules\flight\src\events\FlightCountPassengersChangedEvent;
+use modules\product\src\interfaces\Productable;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
 
@@ -19,9 +20,7 @@ use yii\db\ActiveQuery;
  * @property int|null $fl_children
  * @property int|null $fl_infants
  * @property string|null $fl_request_hash_key
- *
- * @property bool $enableActiveRecordEvents
- *
+ * *
  * @property Product $flProduct
  * @property FlightPax[] $flightPaxes
  * @property FlightQuote[] $flightQuotes
@@ -29,7 +28,7 @@ use yii\db\ActiveQuery;
  * @property string $tripTypeName
  * @property FlightSegment[] $flightSegments
  */
-class Flight extends \yii\db\ActiveRecord
+class Flight extends \yii\db\ActiveRecord implements Productable
 {
 	use EventTrait;
 
@@ -69,7 +68,12 @@ class Flight extends \yii\db\ActiveRecord
 		self::CABIN_CLASS_FIRST => self::CABIN_FIRST,
 	];
 
-    public $enableActiveRecordEvents = true;
+    public static function create(int $productId): self
+    {
+        $flight = new static();
+        $flight->fl_product_id = $productId;
+        return $flight;
+    }
 
     /**
      * @return string
@@ -256,14 +260,6 @@ class Flight extends \yii\db\ActiveRecord
 	}
 
 	/**
-	 * @return void
-	 */
-	public function disableAREvents(): void
-	{
-		$this->enableActiveRecordEvents = false;
-	}
-
-	/**
 	 * @return array
 	 */
 	public static function getCabinClassRealList(): array
@@ -287,5 +283,25 @@ class Flight extends \yii\db\ActiveRecord
 	{
 		return 1;
 //		return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+	}
+
+	/**
+	 * @param int|null $excludeQuoteId
+	 * @return bool
+	 */
+	public function originalQuoteExist(int $excludeQuoteId = null): bool
+	{
+		foreach ($this->flightQuotes as $quote) {
+			if ($quote->isOriginal()) {
+				if ($excludeQuoteId) {
+					if ($quote->fq_id !== $excludeQuoteId) {
+						return true;
+					}
+				} else {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

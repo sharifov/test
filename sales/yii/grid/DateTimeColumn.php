@@ -23,7 +23,7 @@ class DateTimeColumn extends DataColumn
     {
         parent::init();
 
-        if ($this->filter === null) {
+        if ($this->filter === null && $this->grid->filterModel !== false) {
             $this->filter = DatePicker::widget([
                 'model' => $this->grid->filterModel,
                 'attribute' => $this->attribute,

@@ -21,8 +21,8 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
-use common\models\search\OfferSearch;
-use common\models\search\OrderSearch;
+use modules\offer\src\entities\offer\search\OfferSearch;
+use modules\order\src\entities\order\search\OrderCrudSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\UserProjectParams;
@@ -31,6 +31,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
+use modules\order\src\entities\order\search\OrderSearch;
 use PHPUnit\Framework\Warning;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
@@ -1037,14 +1038,9 @@ class LeadController extends FController
         $searchModelOffer = new OfferSearch();
         $params = Yii::$app->request->queryParams;
         $params['OfferSearch']['of_lead_id'] = $lead->id;
-        $dataProviderOffers = $searchModelOffer->searchByLead($params);
+        $dataProviderOffers = $searchModelOffer->searchByLead($params, $user);
 
-
-        $searchModelOrder = new OrderSearch();
-        $params = Yii::$app->request->queryParams;
-        $params['OrderSearch']['or_lead_id'] = $lead->id;
-        $dataProviderOrders = $searchModelOrder->searchByLead($params);
-
+        $dataProviderOrders = (new OrderSearch())->searchByLead($lead->id);
 
         $modelLeadChecklist = new LeadChecklist();
 

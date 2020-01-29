@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageDTO;
 use Yii;
 
 /**
@@ -78,4 +79,24 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
     {
         return new \modules\flight\models\query\FlightQuoteSegmentPaxBaggageQuery(static::class);
     }
+
+	/**
+	 * @param FlightQuoteSegmentPaxBaggageDTO $dto
+	 * @return FlightQuoteSegmentPaxBaggage
+	 */
+    public static function create(FlightQuoteSegmentPaxBaggageDTO $dto): self
+	{
+		$baggage = new self();
+
+		$baggage->qsb_flight_pax_code_id = $dto->flightPaxCodeId;
+		$baggage->qsb_flight_quote_segment_id = $dto->flightQuoteSegmentId;
+		$baggage->qsb_airline_code = $dto->airlineCode;
+		$baggage->qsb_allow_pieces = $dto->allowPieces;
+		$baggage->qsb_allow_weight = $dto->allowWeight;
+		$baggage->qsb_allow_unit = $dto->allowUnit;
+		$baggage->qsb_allow_max_weight = $dto->allowMaxWeight;
+		$baggage->qsb_allow_max_size = $dto->allowMaxSize;
+
+		return $baggage;
+	}
 }

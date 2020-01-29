@@ -45,6 +45,7 @@ $user = Yii::$app->user->identity;
 			'jsOptions' => [
 				'nationalMode' => false,
 				'preferredCountries' => ['us'],
+                'customContainer' => 'intl-tel-input'
 			]
 		]) ?>
 	<?php endif; ?>

@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'qsbc_id',
-            'qsbc_flight_pax_id',
+            'qsbc_flight_pax_code_id',
             'qsbc_flight_quote_segment_id',
             'qsbc_first_piece',
             'qsbc_last_piece',
