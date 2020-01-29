@@ -15,4 +15,15 @@ class OfferFormatter
             ['target' => '_blank', 'data-pjax' => 0]
         );
     }
+
+    public static function asSentView(Offer $offer): string
+    {
+        if ($offer->isViewed()) {
+            return Html::tag('span', 'Viewed', ['class' => 'badge badge-success']);
+        }
+        if ($offer->isSent()) {
+            return Html::tag('span', 'Sent', ['class' => 'badge badge-warning']);
+        }
+        return '';
+    }
 }

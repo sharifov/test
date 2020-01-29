@@ -46,6 +46,18 @@ class Offer extends \yii\db\ActiveRecord
 {
     use EventTrait;
 
+    public function isSent(): bool
+    {
+        //todo add logic
+        return false;
+    }
+
+    public function isViewed(): bool
+    {
+        //todo add logic
+        return false;
+    }
+
     public static function tableName(): string
     {
         return 'offer';

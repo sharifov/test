@@ -274,6 +274,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
                 ['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
+                ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],
                 ['label' => 'Offers Status Log', 'url' => ['/offer/offer-status-log-crud/index']],
                 ['label' => 'Offer Products', 'url' => ['/offer/offer-product-crud/index']],
                 ['label' => 'Order Products', 'url' => ['/order/order-product-crud/index']],

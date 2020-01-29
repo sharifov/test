@@ -168,6 +168,23 @@ $js = <<<JS
             });
         });
      });
+    
+     $(document).on('click', '.btn-offer-send-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-md');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Offer [' + gid + '] send history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+     });
      
 JS;
 
