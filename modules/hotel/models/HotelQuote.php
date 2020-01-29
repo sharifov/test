@@ -363,23 +363,21 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             $apiResponse = $apiHotelService->book($params);
 
             if ($apiResponse['status']) {
-                $model->hq_booking_id = $apiResponse['data']['booking']['reference'];
-                $model->hq_json_booking = $apiResponse['data'];
+                $model->hq_booking_id = $apiResponse['data']['reference'];
+                $model->hq_json_booking = $apiResponse['data']['source'];
                 $model->save();
 
                 $result['status'] = 1; // success
                 $result['message'] = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';
 
                 $hqProductQuote = $model->hqProductQuote;
-                $hqProductQuote->pq_status_id = $hqProductQuote::STATUS_IN_PROGRESS;  /* TODO: booking status */
+                $hqProductQuote->pq_status_id = ProductQuoteStatus::IN_PROGRESS;  /* TODO: booking status */
                 $hqProductQuote->save();
 
-                if (isset($apiResponse['data']['booking']['rooms'])) {
-                    foreach ($apiResponse['data']['booking']['rooms'] as $item) {
-                        foreach ($item['rates'] as $room) {
-                            if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])){
-                                $hotelQuoteRoom->setAdditionalInfo($room);
-                            }
+                if (count($apiResponse['data']['rooms'])) {
+                    foreach ($apiResponse['data']['rooms'] as $room) {
+                        if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])){
+                            $hotelQuoteRoom->setAdditionalInfo($room);
                         }
                     }
                 }
@@ -436,15 +434,13 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             $apiResponse = $apiHotelService->checkRate($params);
 
             if ($apiResponse['status']) {
-                if (isset($apiResponse['data']['hotel']['rooms'])) {
-                    foreach ($apiResponse['data']['hotel']['rooms'] as $item) {
-                        foreach ($item['rates'] as $room) {
-                            if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])){
-                                $hotelQuoteRoom->setAdditionalInfo($room);
-                            }
+                if (count($apiResponse['data']['rooms'])) {
+                    foreach ($apiResponse['data']['rooms'] as $room) {
+                        if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])){
+                            $hotelQuoteRoom->setAdditionalInfo($room);
                         }
                     }
-                } elseif (isset($apiResponse['data']['rateComments']) && !empty($apiResponse['data']['rateComments'])) {
+                } elseif (!empty($apiResponse['data']['rateComments'])) {
                     HotelQuoteRoom::updateAll(
                         ['hqr_rate_comments' => strip_tags($apiResponse['data']['rateComments'])],
                         ['hqr_hotel_quote_id' => $model->hq_id]
@@ -479,7 +475,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                 /* TODO: log ? additional logic ? */
 
                 $hqProductQuote = $model->hqProductQuote;
-                $hqProductQuote->pq_status_id = $hqProductQuote::STATUS_CANCELED;
+                $hqProductQuote->pq_status_id = ProductQuoteStatus::CANCELED;
                 $hqProductQuote->save();
 
                 $model->hq_booking_id = null;
@@ -512,9 +508,13 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
     /**
      * @return bool
      */
-    public function isBookable() /* TODO: add logic check by status new/pending or group status */
+    public function isBookable()
     {
-        return $this->hqProductQuote->pq_status_id == productQuote::STATUS_PENDING;
+        $currentStatus = $this->hqProductQuote->pq_status_id;
+        $allowedStatuses = [
+            ProductQuoteStatus::PENDING, /* TODO: new status? */
+        ];
+        return in_array($currentStatus, $allowedStatuses);
     }
 
     /**

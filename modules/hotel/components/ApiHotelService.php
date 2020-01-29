@@ -208,8 +208,12 @@ class ApiHotelService extends Component
             $response = $this->sendRequest('booking/book', $params);
 
             if ($response->isOk) {
-                if (isset($response->data['booking']['reference']) && !isset($response->data['error'])) {
-                    $result['data'] = $response->data;
+                if (isset($response->data['booking']['reference'])) {
+                    $result['data'] = [
+                        'source' => $response->data,
+                        'reference' => $response->data['booking']['reference'],
+                        'rooms' => ((isset($response->data['booking']['rooms']))) ? $this->prepareRooms($response->data['booking']['rooms']) : [],
+                    ];
                     $result['status'] = 1; // success
                 } elseif (isset($response->data['error'])) {
                     $result['message'] = 'Api error. Code: ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
@@ -244,7 +248,11 @@ class ApiHotelService extends Component
 
             if ($response->isOk) {
                 if (isset($response->data['hotel']['rooms']) || isset($response->data['rateComments'])) {
-                    $result['data'] = $response->data;
+                    $result['data'] = [
+                        'source' => $response->data,
+                        'rateComments' => (isset($response->data['rateComments'])) ?: '',
+                        'rooms' => ((isset($response->data['hotel']['rooms']))) ? $this->prepareRooms($response->data['hotel']['rooms']) : [],
+                    ];
                     $result['status'] = 1; // success
                 } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
                     $result['message'] = 'Api error. Code: ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
@@ -309,6 +317,16 @@ class ApiHotelService extends Component
 		return self::DESTINATION_AVAILABLE_TYPE;
 	}
 
+    private function prepareRooms(array $responseRooms)
+    {
+        $result = [];
+        foreach ($responseRooms as $item) {
+            foreach ($item['rates'] as $room) {
+                $result[] = $room;
+            }
+        }
+        return $result;
+    }
 
 
 }
