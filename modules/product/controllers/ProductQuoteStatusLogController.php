@@ -17,10 +17,7 @@ class ProductQuoteStatusLogController extends FController
 
         $searchModel = new ProductQuoteStatusLogSearch();
 
-        $params = Yii::$app->request->queryParams;
-        $params['ProductQuoteStatusLogSearch']['pqsl_product_quote_id'] = $productQuote->pq_id;
-
-        $dataProvider = $searchModel->search($params, Auth::user());
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user(), $productQuote->pq_id);
 
         return $this->renderAjax('show', [
             'searchModel' => $searchModel,

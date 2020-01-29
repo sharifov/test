@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use modules\invoice\src\entities\invoice\Invoice;
+use modules\order\src\entities\order\Order;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

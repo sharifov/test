@@ -4,7 +4,7 @@ namespace modules\product\controllers;
 
 use Yii;
 use frontend\controllers\FController;
-use frontend\models\form\ProductQuoteOptionForm;
+use modules\product\src\forms\ProductQuoteOptionForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;

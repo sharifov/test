@@ -1,5 +1,7 @@
 <?php
 
+use modules\offer\src\grid\columns\OfferColumn;
+use modules\product\src\grid\columns\ProductQuoteColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\UserColumn;
 use yii\grid\ActionColumn;
@@ -29,8 +31,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'op_offer_id',
-            'op_product_quote_id',
+            [
+                'class' => OfferColumn::class,
+                'attribute' => 'op_offer_id',
+                'relation' => 'opOffer',
+            ],
+            [
+                'class' => ProductQuoteColumn::class,
+                'attribute' => 'op_product_quote_id',
+                'relation' => 'opProductQuote',
+            ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 'op_created_user_id',

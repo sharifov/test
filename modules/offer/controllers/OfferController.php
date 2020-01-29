@@ -6,7 +6,7 @@ use modules\offer\src\entities\offerProduct\OfferProduct;
 use Yii;
 use common\models\Lead;
 use frontend\controllers\FController;
-use frontend\models\form\OfferForm;
+use modules\offer\src\forms\OfferForm;
 use modules\offer\src\entities\offer\Offer;
 use yii\bootstrap4\Html;
 use yii\db\Exception;

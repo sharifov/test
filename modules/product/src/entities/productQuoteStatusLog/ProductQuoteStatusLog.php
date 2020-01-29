@@ -5,6 +5,7 @@ namespace modules\product\src\entities\productQuoteStatusLog;
 use common\models\Employee;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use yii\db\ActiveQuery;
 
 /**
@@ -20,6 +21,7 @@ use yii\db\ActiveQuery;
  * @property string|null $pqsl_description
  * @property int|null $pqsl_owner_user_id
  * @property int|null $pqsl_created_user_id
+ * @property int|null $pqsl_action_id
  *
  * @property Employee $createdUser
  * @property Employee $ownerUser
@@ -35,6 +37,7 @@ class ProductQuoteStatusLog extends \yii\db\ActiveRecord
         $log->pqsl_end_status_id = $dto->endStatusId;
         $log->pqsl_start_dt = date('Y-m-d H:i:s');
         $log->pqsl_description = $dto->description;
+        $log->pqsl_action_id = $dto->actionId;
         $log->pqsl_owner_user_id = $dto->ownerId;
         $log->pqsl_created_user_id = $dto->creatorId;
         return $log;
@@ -74,6 +77,10 @@ class ProductQuoteStatusLog extends \yii\db\ActiveRecord
 
             ['pqsl_description', 'string', 'max' => 255],
 
+            ['pqsl_action_id', 'integer'],
+            ['pqsl_action_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['pqsl_action_id', 'in', 'range' => array_keys(ProductQuoteStatusAction::getList())],
+
             ['pqsl_owner_user_id', 'integer'],
             ['pqsl_owner_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqsl_owner_user_id' => 'id']],
 
@@ -87,12 +94,14 @@ class ProductQuoteStatusLog extends \yii\db\ActiveRecord
         return [
             'pqsl_id' => 'ID',
             'pqsl_product_quote_id' => 'Product Quote ID',
+            'productQuote' => 'Product Quote',
             'pqsl_start_status_id' => 'Start Status',
             'pqsl_end_status_id' => 'End Status',
             'pqsl_start_dt' => 'Start Dt',
             'pqsl_end_dt' => 'End Dt',
             'pqsl_duration' => 'Duration',
             'pqsl_description' => 'Description',
+            'pqsl_action_id' => 'Action',
             'pqsl_owner_user_id' => 'Owner User',
             'pqsl_created_user_id' => 'Created User',
         ];

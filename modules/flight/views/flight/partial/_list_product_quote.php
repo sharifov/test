@@ -39,7 +39,7 @@ use yii\helpers\Html;
                 </div>
             </li>
 
-            <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['order/list-menu-ajax'])?>">
+            <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/order/order/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                 <div class="dropdown-menu" role="menu">
                     <?php // ajax loaded content ?>

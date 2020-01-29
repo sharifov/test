@@ -1,6 +1,7 @@
 <?php
 
 use modules\product\src\grid\columns\ProductQuoteColumn;
+use modules\product\src\grid\columns\ProductQuoteStatusActionColumn;
 use modules\product\src\grid\columns\ProductQuoteStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
@@ -61,6 +62,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'pqsl_description',
             [
+                'class' => ProductQuoteStatusActionColumn::class,
+                'attribute' => 'pqsl_action_id',
+            ],
+            [
                 'class' => UserColumn::class,
                 'attribute' => 'pqsl_owner_user_id',
                 'relation' => 'ownerUser',
@@ -72,7 +77,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             ['class' => ActionColumn::class],
         ],
-    ]); ?>
+    ]) ?>
 
     <?php Pjax::end(); ?>
 

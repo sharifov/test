@@ -1,6 +1,6 @@
 <?php
 
-use frontend\models\form\OfferForm;
+use modules\offer\src\forms\OfferForm;
 use modules\offer\src\entities\offer\OfferStatus;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;

@@ -1,24 +1,20 @@
 <?php
 
 use modules\product\src\entities\productQuoteStatusLog\search\ProductQuoteStatusLogSearch;
+use modules\product\src\grid\columns\ProductQuoteStatusActionColumn;
 use modules\product\src\grid\columns\ProductQuoteStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
 use sales\yii\grid\UserColumn;
-use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $searchModel ProductQuoteStatusLogSearch */
 
-$this->title = 'Status log';
-
 ?>
 
 <div class="product-quote-status-log">
-
-    <h1><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(['enablePushState' => false, 'enableReplaceState' => false]); ?>
 
@@ -58,6 +54,10 @@ $this->title = 'Status log';
                 'options' => ['style' => 'width:280px'],
             ],
             [
+                'class' => ProductQuoteStatusActionColumn::class,
+                'attribute' => 'pqsl_action_id',
+            ],
+            [
                 'class' => UserColumn::class,
                 'relation' => 'ownerUser',
                 'attribute' => 'pqsl_owner_user_id',
@@ -68,7 +68,7 @@ $this->title = 'Status log';
                 'attribute' => 'pqsl_created_user_id',
             ],
         ],
-    ]); ?>
+    ]) ?>
 
     <?php Pjax::end(); ?>
 </div>

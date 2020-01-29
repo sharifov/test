@@ -1,6 +1,7 @@
 <?php
 
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use sales\access\ListsAccess;
 use sales\auth\Auth;
 use sales\widgets\DateTimePicker;
@@ -34,6 +35,8 @@ $list = new ListsAccess(Auth::id());
         <?= $form->field($model, 'pqsl_duration')->textInput() ?>
 
         <?= $form->field($model, 'pqsl_description')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'pqsl_action_id')->dropDownList(ProductQuoteStatusAction::getList(), ['prompt' => 'Select action']) ?>
 
         <?= $form->field($model, 'pqsl_owner_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
 

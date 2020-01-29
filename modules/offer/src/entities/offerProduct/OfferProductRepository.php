@@ -20,21 +20,20 @@ class OfferProductRepository
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function find(int $id): OfferProduct
+    public function find(int $offerId, int $productQuoteId): OfferProduct
     {
-        if ($offerProduct = OfferProduct::findOne($id)) {
+        if ($offerProduct = OfferProduct::findOne(['op_offer_id' => $offerId, 'op_product_quote_id' => $productQuoteId])) {
             return $offerProduct;
         }
         throw new NotFoundException('Offer Product is not found', OfferCodeException::OFFER_PRODUCT_NOT_FOUND);
     }
 
-    public function save(OfferProduct $offerProduct): int
+    public function save(OfferProduct $offerProduct): void
     {
         if (!$offerProduct->save(false)) {
             throw new \RuntimeException('Saving error', OfferCodeException::OFFER_PRODUCT_SAVE);
         }
         $this->eventDispatcher->dispatchAll($offerProduct->releaseEvents());
-        return $offerProduct->op_offer_id;
     }
 
     public function remove(OfferProduct $offerProduct): void

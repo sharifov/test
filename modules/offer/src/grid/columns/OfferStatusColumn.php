@@ -9,7 +9,10 @@ use yii\grid\DataColumn;
  * Class OfferStatusColumn
  *
  * Ex.
-
+        [
+            'class' => \modules\offer\src\grid\columns\OfferStatusColumn::class,
+            'attribute' => 'status_id',
+        ],
  */
 class OfferStatusColumn extends DataColumn
 {

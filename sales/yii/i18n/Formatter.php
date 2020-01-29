@@ -5,13 +5,26 @@ namespace sales\yii\i18n;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
+use modules\invoice\src\entities\invoice\Invoice;
+use modules\invoice\src\entities\invoice\InvoiceStatus;
+use modules\invoice\src\entities\invoice\InvoiceStatusAction;
+use modules\invoice\src\helpers\formatters\InvoiceFormatter;
+use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
+use modules\offer\src\entities\offer\OfferStatusAction;
+use modules\offer\src\helpers\formatters\OfferFormatter;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderPayStatus;
+use modules\order\src\entities\order\OrderStatus;
+use modules\order\src\entities\order\OrderStatusAction;
+use modules\order\src\helpers\formatters\OrderFormatter;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productOption\ProductOptionPriceType;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Project;
 use common\models\Quote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
@@ -19,6 +32,96 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asInvoice(?Invoice $invoice): string
+    {
+        if ($invoice === null) {
+            return $this->nullDisplay;
+        }
+
+        return InvoiceFormatter::asInvoice($invoice);
+    }
+
+    public function asInvoiceStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return InvoiceStatus::asFormat($value);
+    }
+
+    public function asInvoiceStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return InvoiceStatusAction::asFormat($value);
+    }
+
+    public function asOrder(?Order $order): string
+    {
+        if ($order === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderFormatter::asOrder($order);
+    }
+
+    public function asOrderPayStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderPayStatus::asFormat($value);
+    }
+
+    public function asOrderStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderStatus::asFormat($value);
+    }
+
+    public function asOrderStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderStatusAction::asFormat($value);
+    }
+
+    public function asProductQuoteStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return ProductQuoteStatusAction::asFormat($value);
+    }
+
+    public function asOfferStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OfferStatusAction::asFormat($value);
+    }
+
+    public function asOffer(?Offer $offer): string
+    {
+        if ($offer === null) {
+            return $this->nullDisplay;
+        }
+
+        return OfferFormatter::asOffer($offer);
+    }
+
     public function asOfferStatus($value): string
     {
         if ($value === null) {
