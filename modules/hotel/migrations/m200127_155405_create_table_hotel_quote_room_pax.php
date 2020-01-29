@@ -57,7 +57,7 @@ class m200127_155405_create_table_hotel_quote_room_pax extends Migration
         // table hotel_quote_room
         $this->addColumn('{{%hotel_quote_room}}', 'hqr_children_ages', $this->string(50));
         $this->addColumn('{{%hotel_quote_room}}', 'hqr_rate_comments_id', $this->string(50));
-        $this->addColumn('{{%hotel_quote_room}}', 'hqr_rate_comments', $this->string(255));
+        $this->addColumn('{{%hotel_quote_room}}', 'hqr_rate_comments', $this->string(500));
         $this->addColumn(
             '{{%hotel_quote_room}}',
             'hqr_type',

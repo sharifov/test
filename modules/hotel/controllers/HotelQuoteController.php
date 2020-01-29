@@ -7,6 +7,7 @@ use frontend\controllers\FController;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
+use modules\hotel\models\HotelQuoteRoom;
 use modules\hotel\models\HotelQuoteRoomPax;
 use modules\hotel\models\HotelRoomPax;
 use modules\hotel\models\search\HotelQuoteSearch;
@@ -259,71 +260,84 @@ class HotelQuoteController extends FController
     public function actionAjaxBook()
     {
         $id = (int) Yii::$app->request->post('id', 0);
-        $preCheck = Yii::$app->request->post('pre_check', true);
+        $checkRate = Yii::$app->request->post('check_rate', true);
+        $result = ['status' => 0, 'message' => '', 'data' => []];
 
         try {
-            if (!$id) { /* TODO: guard */
-                throw new Exception('Hotel Quote ID not found', 1);
-            }
-            if (!$model = HotelQuote::findOne($id)) {
-                throw new Exception('Hotel Quote not found', 2);
-            }
-            if (!empty($model->hq_booking_id)) {
-                throw new Exception('Hotel Quote already booked. (BookingId:' . $model->hq_booking_id . ')', 3);
-            }
-            $hqProductQuote = $model->hqProductQuote;
-            if ($hqProductQuote->pq_status_id != $hqProductQuote::STATUS_PENDING) { /* TODO: add logic check by status new/pending or group status */
-                throw new Exception('Product Quote not in allowed status ', 4);
+            $checkAfterBook = $this->checkBeforeBook($id);
+            if ($checkAfterBook['status']) {
+                $model = $checkAfterBook['model'];
+            } else {
+                throw new Exception($checkAfterBook['message'], 1);
             }
 
-            if ($preCheck) {
+            if ($checkRate) {
                 $checkResult = HotelQuote::checkRate($model);
 
-                if ($checkResult['status'] !== 0) { // 1 warning(not all rooms is TYPE_BOOKABLE), 2 success (all rooms is TYPE_BOOKABLE)
-                    $result = HotelQuote::book($model);
+                if ($checkResult['status']) {
+                    $resultBook = HotelQuote::book($model);
+                    $result['status'] = $resultBook['status'];
+                    $result['message'] = $resultBook['message'];
+                    $result['data'] = $model->hotelQuoteRooms;
                 } else {
-                    $result = $checkResult;
+                    $result['status'] = $checkResult['status'];
+                    $result['message'] = $checkResult['message'];
                 }
             } else {
-                $result = HotelQuote::book($model);
+                $resultBook = HotelQuote::book($model);
+                $result['status'] = $resultBook['status'];
+                $result['message'] = $resultBook['message'];
+                $result['data'] = $model->hotelQuoteRooms;
             }
         } catch (\Throwable $throwable) {
-            $result = [
-                'message' => $throwable->getMessage(),
-                'status' => 0,
-            ];
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . $this->action->id . ':Throwable');
+            $result['message'] = $throwable->getMessage();
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . __FUNCTION__ . ':Throwable');
         }
-
         return $this->asJson($result);
     }
 
+    /**
+     * @return Response
+     */
     public function actionAjaxCancelBook()
     {
-        $id = (int) Yii::$app->request->get('id', 0); /* TODO: to post  */
+        $id = (int) Yii::$app->request->post('id', 0);
 
         try {
-            if (!$id) { /* TODO: guard */
-                throw new Exception('Hotel Quote ID not found', 1);
+            if (!$model = HotelQuote::findOne($id)) { /* TODO: add check status logic */
+                throw new Exception('Hotel Quote not found', 1);
             }
-            if (!$model = HotelQuote::findOne($id)) {
-                throw new Exception('Hotel Quote not found', 2);
-            }
-            if (empty($model->hq_booking_id)) {
-                throw new Exception('Hotel Quote not booked.', 3);
+            if (!$model->isBooking()) {
+                throw new Exception('Hotel Quote not booked.', 2);
             }
 
             $result = HotelQuote::cancelBook($model);
-
         } catch (\Throwable $throwable) {
             $result = [
                 'message' => $throwable->getMessage(),
                 'status' => 0,
             ];
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . $this->action->id . ':Throwable');
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . __FUNCTION__ . ':Throwable');
         }
-
         return $this->asJson($result);
+    }
+
+    /**
+     * @param $id
+     * @return array [int status, string message, obj/null model]
+     */
+    protected function checkBeforeBook($id)
+    {
+        if (!$model = HotelQuote::findOne($id)) {
+            return ['status' => 0, 'message' => 'Hotel Quote not found', 'model' => null];
+        }
+        if ($model->isBooking()) {
+            return ['status' => 0, 'message' => 'Hotel Quote already booked. (BookingId:' . $model->hq_booking_id . ')', 'model' => null];
+        }
+        if (!$model->isBookable()) {
+            return ['status' => 0, 'message' => 'Product Quote not in allowed status', 'model' => null];
+        }
+        return ['status' => 1, 'message' => 'Success', 'model' => $model];
     }
 
     /**

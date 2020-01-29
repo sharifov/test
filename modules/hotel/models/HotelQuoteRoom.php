@@ -166,16 +166,20 @@ class HotelQuoteRoom extends ActiveRecord
     }
 
     /**
-     * @param int $hotelQuoteId
-     * @param int $type
-     * @return array|HotelQuoteRoom[]
+     * @param array $room
+     * @return bool
      */
-    public static function getRoomsByType(int $hotelQuoteId, int $type = self::TYPE_RECHECK)
+    public function setAdditionalInfo(array $room)
     {
-        return self::find()
-            ->where(['hqr_hotel_quote_id' => $hotelQuoteId])
-            ->andWhere(['hqr_type' => $type])
-            ->asArray()
-            ->all();
+        $this->hqr_rate_comments_id = $room['rateCommentsId'] ?? null;
+        $this->hqr_rate_comments = strip_tags($room['rateComments']) ?? null;
+        $this->hqr_type = ($room['type'] == self::TYPE_LIST[self::TYPE_BOOKABLE]) ?
+            self::TYPE_BOOKABLE : self::TYPE_RECHECK;
+        $this->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
+        $this->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
+
+        return $this->save();
     }
+
+
 }

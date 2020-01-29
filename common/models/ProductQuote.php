@@ -317,14 +317,6 @@ class ProductQuote extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return bool
-     */
-    public function isPending(): bool
-    {
-        return $this->pq_status_id === self::STATUS_PENDING;
-    }
-
-    /**
      * @return array
      */
     public static function getStatusList(): array

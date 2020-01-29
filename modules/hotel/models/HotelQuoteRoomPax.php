@@ -2,6 +2,7 @@
 
 namespace modules\hotel\models;
 
+use common\models\Client;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -87,7 +88,7 @@ class HotelQuoteRoomPax extends ActiveRecord
      * @param int $roomId
      * @return array
      */
-    public static function preparePaxesForBook(int $roomId)
+    public static function preparePaxesForBook(int $roomId, Client $client)
     {
         $hotelQuoteRoomPax = self::find()
             ->select([
@@ -102,7 +103,8 @@ class HotelQuoteRoomPax extends ActiveRecord
 
         $paxes = [];
         foreach ($hotelQuoteRoomPax as $key => $value) {
-            $paxes[$key] = $value;
+            $paxes[$key]['name'] = (!empty($value['name'])) ? $value['name'] : $client->first_name;
+            $paxes[$key]['surname'] = (!empty($value['surname'])) ? $value['surname'] : $client->full_name;
             $paxes[$key]['paxType'] = strtoupper(self::PAX_TYPE_LIST[$value['paxType']]);
             $paxes[$key]['roomId'] = "1";
         }
