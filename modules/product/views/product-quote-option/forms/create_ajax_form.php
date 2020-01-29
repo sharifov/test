@@ -1,6 +1,6 @@
 <?php
 
-use frontend\models\form\ProductQuoteOptionForm;
+use modules\product\src\forms\ProductQuoteOptionForm;
 use modules\product\src\entities\productOption\ProductOptionQuery;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;

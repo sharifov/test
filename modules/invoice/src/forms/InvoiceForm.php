@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models\form;
+namespace modules\invoice\src\forms;
 
 use common\models\Currency;
 use modules\order\src\entities\order\Order;

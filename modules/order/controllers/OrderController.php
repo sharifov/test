@@ -4,7 +4,7 @@ namespace modules\order\controllers;
 
 use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
-use frontend\models\form\OrderForm;
+use modules\order\src\forms\OrderForm;
 use Yii;
 use modules\order\src\entities\order\Order;
 use frontend\controllers\FController;

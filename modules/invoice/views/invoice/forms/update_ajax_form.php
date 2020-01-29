@@ -1,6 +1,6 @@
 <?php
 
-use frontend\models\form\InvoiceForm;
+use modules\invoice\src\forms\InvoiceForm;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
 

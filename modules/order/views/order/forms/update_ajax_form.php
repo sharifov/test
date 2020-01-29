@@ -1,6 +1,6 @@
 <?php
 
-use frontend\models\form\OrderForm;
+use modules\order\src\forms\OrderForm;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
 

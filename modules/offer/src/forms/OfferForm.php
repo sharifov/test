@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models\form;
+namespace modules\offer\src\forms;
 
 use common\models\Currency;
 use common\models\Employee;

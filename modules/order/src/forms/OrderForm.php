@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models\form;
+namespace modules\order\src\forms;
 
 use common\models\Employee;
 use common\models\Lead;

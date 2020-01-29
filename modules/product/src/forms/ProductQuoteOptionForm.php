@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models\form;
+namespace modules\product\src\forms;
 
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productQuote\ProductQuote;

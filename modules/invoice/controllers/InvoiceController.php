@@ -3,7 +3,7 @@
 namespace modules\invoice\controllers;
 
 use modules\order\src\entities\order\Order;
-use frontend\models\form\InvoiceForm;
+use modules\invoice\src\forms\InvoiceForm;
 use Yii;
 use modules\invoice\src\entities\invoice\Invoice;
 use frontend\controllers\FController;
