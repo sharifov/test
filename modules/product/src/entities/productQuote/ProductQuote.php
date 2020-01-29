@@ -364,7 +364,7 @@ class ProductQuote extends \yii\db\ActiveRecord
 		$quote->pq_product_id = $dto->productId;
 		$quote->pq_order_id = $dto->orderId;
 		$quote->pq_description = $dto->description;
-		$quote->pq_status_id = ProductQuoteStatus::PENDING;
+		$quote->pq_status_id = ProductQuoteStatus::NEW;
 		$quote->pq_price = $dto->price;
 		$quote->pq_origin_price = $dto->originPrice;
 		$quote->pq_client_price = $dto->clientPrice;

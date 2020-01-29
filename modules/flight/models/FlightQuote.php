@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use common\models\Airline;
 use common\models\Employee;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
@@ -46,6 +47,7 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property FlightQuoteStatusLog[] $flightQuoteStatusLogs
  * @property array $extraData
  * @property FlightQuoteTrip[] $flightQuoteTrips
+ * @property Airline $mainAirline
  */
 class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 {
@@ -134,7 +136,9 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 		self::TYPE_ALTERNATIVE => 'Alternative',
 	];
 
-    /**
+	public const SERVICE_FEE = 0.035;
+
+	/**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -221,6 +225,14 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'fq_product_quote_id']);
     }
+
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getMainAirline(): ActiveQuery
+	{
+		return $this->hasOne(Airline::class, ['iata' => 'fq_main_airline']);
+	}
 
     /**
      * @return ActiveQuery
@@ -438,5 +450,36 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 	public function alternative(): void
 	{
 		$this->fq_type_id = self::TYPE_ALTERNATIVE;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function createdByExpert(): bool
+	{
+		return $this->fq_created_expert_id ? true : false;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getEmployeeName(): string
+	{
+		$createdByExpert = $this->createdByExpert();
+
+		if ($createdByExpert) {
+			return $this->fq_created_expert_name;
+		}
+
+		return $this->fqCreatedUser->username;
+	}
+
+	/**
+	 * @param ProductQuote $productQuote
+	 * @return FlightQuote|null
+	 */
+	public static function findByProductQuote(ProductQuote $productQuote): FlightQuote
+	{
+		return self::findOne(['fq_product_quote_id' => $productQuote->pq_id]);
 	}
 }

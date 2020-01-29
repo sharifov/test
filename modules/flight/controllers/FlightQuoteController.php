@@ -162,6 +162,7 @@ class FlightQuoteController extends FController
 	{
 		$flightId = Yii::$app->request->get('id');
 		$gds = Yii::$app->request->post('gds', '');
+		$pjaxId = Yii::$app->request->post('pjaxId', '');
 
 		$form = new FlightQuoteSearchForm();
 		$form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
@@ -212,6 +213,7 @@ class FlightQuoteController extends FController
 		$viewData['flight'] = $flight;
 		$viewData['searchForm'] = $form;
 		$viewData['errorMessage'] = $errorMessage ?? '';
+		$viewData['pjaxId'] = $pjaxId;
 
 		return $this->renderAjax('partial/_quote_search', $viewData);
 	}
@@ -258,6 +260,8 @@ class FlightQuoteController extends FController
 			$this->flightQuoteManageService->create($flight, $selectedQuote, Auth::id());
 
 			$result['status'] = true;
+
+			Yii::$app->session->setFlash('success', 'Quote added.');
 
 		} catch (\DomainException | NotFoundException | \RuntimeException $e) {
 			$result['error'] = $e->getMessage();
