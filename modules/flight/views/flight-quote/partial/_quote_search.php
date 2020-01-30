@@ -19,6 +19,7 @@ use yii\widgets\Pjax;
  * @var $flight Flight
  * @var $dataProvider ArrayDataProvider
  * @var $searchForm FlightQuoteSearchForm
+ * @var $pjaxId string
  */
 
 if($quotes && (isset($quotes['count']) && $quotes['count'] > 0)):
@@ -140,6 +141,7 @@ $js = <<<JS
                         hide: true
                     });
                     
+                    $.pjax.reload({container: '#$pjaxId', url: "/flight/flight/pjax-flight-request-view?pr_id=$flight->fl_product_id",  push: false, replace: false, timeout: 2000});
                 } else {
                     if(data.error) {
                         error = data.error;    

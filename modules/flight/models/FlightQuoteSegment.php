@@ -2,6 +2,8 @@
 
 namespace modules\flight\models;
 
+use common\models\Airline;
+use common\models\Airport;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use Yii;
 
@@ -38,9 +40,19 @@ use Yii;
  * @property FlightQuoteSegmentPaxBaggage[] $flightQuoteSegmentPaxBaggages
  * @property FlightQuoteSegmentPaxBaggageCharge[] $flightQuoteSegmentPaxBaggageCharges
  * @property FlightQuoteSegmentStop[] $flightQuoteSegmentStops
+ * @property Airline $marketingAirline
+ * @property Airport $departureAirport
+ * @property Airport $arrivalAirport
  */
 class FlightQuoteSegment extends \yii\db\ActiveRecord
 {
+	public const TICKET_COLOR_LIST = [
+		0   => '#FFFFFF',
+		1   => '#fbe5e1',
+		2   => '#fafbe1',
+		3   => '#e1fbec',
+	];
+
     /**
      * {@inheritdoc}
      */
@@ -121,6 +133,30 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getMarketingAirline()
+    {
+        return $this->hasOne(Airline::class, ['iata' => 'fqs_marketing_airline']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDepartureAirport()
+    {
+        return $this->hasOne(Airport::class, ['iata' => 'fqs_departure_airport_iata']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getArrivalAirport()
+    {
+        return $this->hasOne(Airport::class, ['iata' => 'fqs_arrival_airport_iata']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getFlightQuoteSegmentPaxBaggages()
     {
         return $this->hasMany(FlightQuoteSegmentPaxBaggage::class, ['qsb_flight_quote_segment_id' => 'fqs_id']);
@@ -184,5 +220,13 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
 		$segment->fqs_mileage = $dto->mileage;
 
 		return $segment;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getTicketColor(): string
+	{
+		return self::TICKET_COLOR_LIST[$this->fqs_ticket_id] ?? '#FFFFFF';
 	}
 }

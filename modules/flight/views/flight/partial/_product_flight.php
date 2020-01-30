@@ -89,8 +89,8 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                                     '/flight/flight-quote/ajax-search-quote',
                                     'id' => $product->flight->fl_id
                                 ]),
-                                'data-hotel-id' => $product->flight->fl_id,
-                                'class' => 'dropdown-item text-success btn-search-flight-quotes'
+								'data-pjax-id' => $pjaxId,
+								'class' => 'dropdown-item text-success btn-search-flight-quotes'
                             ]) ?>
 
                             <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
@@ -125,6 +125,8 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                 </div>
             </div>
             <?= $this->render('_view_flight_request', [ 'itineraryForm' => (new ItineraryEditForm($product->flight)) ]) ?>
+
+            <?= $this->render('../../flight-quote/partial/_quote_list', ['product' => $product]) ?>
         </div>
     </div>
 <?php \yii\widgets\Pjax::end()?>
@@ -189,10 +191,11 @@ $js = <<<JS
         e.preventDefault();
         $('#preloader').removeClass('d-none');          
         let url = $(this).data('url');
+        let pjaxId = $(this).data('pjax-id');;
         let modal = $('#modal-lg');
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Search flight Quotes');
-        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        modal.find('.modal-body').load(url, {pjaxId: pjaxId}, function( response, status, xhr ) {
             $('#preloader').addClass('d-none');
             modal.modal({
               backdrop: 'static',

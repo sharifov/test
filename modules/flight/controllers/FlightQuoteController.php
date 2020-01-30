@@ -2,11 +2,13 @@
 
 namespace modules\flight\controllers;
 
+use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\auth\Auth;
 use sales\repositories\NotFoundException;
 use Yii;
@@ -15,6 +17,7 @@ use modules\flight\models\search\FlightQuoteSearch;
 use frontend\controllers\FController;
 use yii\data\ArrayDataProvider;
 use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -24,6 +27,7 @@ use yii\filters\VerbFilter;
  * @property FlightRepository $flightRepository
  * @property FlightQuoteSearchService $quoteSearchService
  * @property FlightQuoteManageService $flightQuoteManageService
+ * @property ProductQuoteRepository $productQuoteRepository
  */
 class FlightQuoteController extends FController
 {
@@ -39,6 +43,10 @@ class FlightQuoteController extends FController
 	 * @var FlightQuoteManageService
 	 */
 	private $flightQuoteManageService;
+	/**
+	 * @var ProductQuoteRepository
+	 */
+	private $productQuoteRepository;
 
 	/**
 	 * FlightQuoteController constructor.
@@ -47,14 +55,24 @@ class FlightQuoteController extends FController
 	 * @param FlightRepository $flightRepository
 	 * @param FlightQuoteSearchService $quoteSearchService
 	 * @param FlightQuoteManageService $flightQuoteManageService
+	 * @param ProductQuoteRepository $productQuoteRepository
 	 * @param array $config
 	 */
-	public function __construct($id, $module, FlightRepository $flightRepository, FlightQuoteSearchService $quoteSearchService, FlightQuoteManageService $flightQuoteManageService, $config = [])
+	public function __construct(
+		$id,
+		$module,
+		FlightRepository $flightRepository,
+		FlightQuoteSearchService $quoteSearchService,
+		FlightQuoteManageService $flightQuoteManageService,
+		ProductQuoteRepository $productQuoteRepository,
+		$config = []
+	)
 	{
 		parent::__construct($id, $module, $config);
 		$this->flightRepository = $flightRepository;
 		$this->quoteSearchService = $quoteSearchService;
 		$this->flightQuoteManageService = $flightQuoteManageService;
+		$this->productQuoteRepository = $productQuoteRepository;
 	}
 
 	/**
@@ -162,6 +180,7 @@ class FlightQuoteController extends FController
 	{
 		$flightId = Yii::$app->request->get('id');
 		$gds = Yii::$app->request->post('gds', '');
+		$pjaxId = Yii::$app->request->post('pjaxId', '');
 
 		$form = new FlightQuoteSearchForm();
 		$form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
@@ -212,6 +231,7 @@ class FlightQuoteController extends FController
 		$viewData['flight'] = $flight;
 		$viewData['searchForm'] = $form;
 		$viewData['errorMessage'] = $errorMessage ?? '';
+		$viewData['pjaxId'] = $pjaxId;
 
 		return $this->renderAjax('partial/_quote_search', $viewData);
 	}
@@ -259,6 +279,8 @@ class FlightQuoteController extends FController
 
 			$result['status'] = true;
 
+			Yii::$app->session->setFlash('success', 'Quote added.');
+
 		} catch (\DomainException | NotFoundException | \RuntimeException $e) {
 			$result['error'] = $e->getMessage();
 		} catch (\Throwable $e) {
@@ -267,6 +289,38 @@ class FlightQuoteController extends FController
 		}
 
 		return $this->asJson($result);
+	}
+
+	/**
+	 * @return string
+	 * @throws ForbiddenHttpException
+	 */
+	public function actionAjaxQuoteDetails(): string
+	{
+		$productQuoteId = Yii::$app->request->get('id');
+
+		$productQuote = $this->productQuoteRepository->find($productQuoteId);
+		$lead = $productQuote->pqProduct->prLead;
+
+		if($lead->isInTrash() && Yii::$app->user->identity->canRole('agent')) {
+			throw new ForbiddenHttpException('Access Denied for Agent');
+		}
+
+		return $this->renderPartial('partial/_quote_view_details', [
+			'productQuote' => $productQuote,
+			'flightQuote' => FlightQuote::findByProductQuote($productQuote)
+		]);
+	}
+
+	public function actionQuoteStatusLog()
+	{
+		$productQuoteId = Yii::$app->request->get('quoteId');
+		$quote = $this->productQuoteRepository->find($productQuoteId);
+		$flightQuote = FlightQuote::findByProductQuote($quote);
+
+		return $this->renderAjax('partial/_quote_status_log', [
+			'flightQuote' => $flightQuote,
+		]);
 	}
 
     /**

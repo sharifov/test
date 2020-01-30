@@ -2,8 +2,13 @@
 
 namespace modules\flight\src\helpers;
 
+use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productQuote\ProductQuote;
+use sales\helpers\product\ProductQuoteHelper;
+use yii\data\ActiveDataProvider;
 
 class FlightQuoteHelper
 {
@@ -24,6 +29,200 @@ class FlightQuoteHelper
 	public static function isQuoteAssignedToFlight(array $flightQuote, $quoteKey): bool
 	{
 		return in_array(self::generateHashQuoteKey($quoteKey), $flightQuote, false);
+	}
+
+	/**
+	 * @param FlightQuote $flightQuote
+	 * @return array
+	 */
+	public static function getPricesData(FlightQuote $flightQuote): array
+	{
+		$prices = [];
+		$service_fee_percent = self::getServiceFeePercent($flightQuote);
+		$defData = [
+			'fare' => 0,
+			'taxes' => 0,
+			'net' => 0, // fare + taxes
+			'tickets' => 0,
+			'mark_up' => 0,
+			'extra_mark_up' => 0,
+			'service_fee' => 0,
+			'selling' => 0, //net + mark_up + extra_mark_up + service_fee
+		];
+		$total = $defData;
+
+		$paxCodeId = null;
+		foreach ($flightQuote->flightQuotePaxPrices as $price){
+			if($paxCodeId != $price->qpp_flight_pax_code_id) {
+				$prices[$price->qpp_flight_pax_code_id] = $defData;
+				$paxCodeId = $price->qpp_flight_pax_code_id;
+			}
+			$prices[$price->qpp_flight_pax_code_id]['fare'] += $price->qpp_fare;
+			$prices[$price->qpp_flight_pax_code_id]['taxes'] += $price->qpp_tax;
+			$prices[$price->qpp_flight_pax_code_id]['net'] = $prices[$price->qpp_flight_pax_code_id]['fare'] + $prices[$price->qpp_flight_pax_code_id]['taxes'];
+			$prices[$price->qpp_flight_pax_code_id]['tickets'] += 1;
+			$prices[$price->qpp_flight_pax_code_id]['mark_up'] += $price->qpp_system_mark_up;
+			$prices[$price->qpp_flight_pax_code_id]['extra_mark_up'] += $price->qpp_agent_mark_up;
+			$prices[$price->qpp_flight_pax_code_id]['selling'] = ($prices[$price->qpp_flight_pax_code_id]['net'] + $prices[$price->qpp_flight_pax_code_id]['mark_up'] + $prices[$price->qpp_flight_pax_code_id]['extra_mark_up']);
+			if($service_fee_percent > 0){
+				$prices[$price->qpp_flight_pax_code_id]['service_fee'] = $prices[$price->qpp_flight_pax_code_id]['selling'] * $service_fee_percent / 100;
+				$prices[$price->qpp_flight_pax_code_id]['selling'] += $prices[$price->qpp_flight_pax_code_id]['service_fee'];
+			}
+			$prices[$price->qpp_flight_pax_code_id]['selling'] = ProductQuoteHelper::roundPrice($prices[$price->qpp_flight_pax_code_id]['selling']);
+		}
+
+		foreach ($prices as $key => $price){
+			$total['tickets'] += $price['tickets'];
+			$total['net'] += $price['net'];
+			$total['mark_up'] += $price['mark_up'];
+			$total['extra_mark_up'] += $price['extra_mark_up'];
+			$total['selling'] += $price['selling'];
+
+			$prices[$key]['selling'] = ProductQuoteHelper::roundPrice($price['selling']);
+			$prices[$key]['net'] = ProductQuoteHelper::roundPrice($price['net']);
+		}
+
+		return [
+			'prices' => $prices,
+			'total' => $total,
+			'service_fee_percent' => $service_fee_percent,
+			'service_fee' => ($service_fee_percent > 0)?$total['selling'] * $service_fee_percent / 100:0,
+			'processing_fee' => self::getProcessingFee($flightQuote)
+		];
+	}
+
+	/**
+	 * @param FlightQuote $flightQuote
+	 * @return float|int
+	 */
+	public static function getProcessingFee(FlightQuote $flightQuote)
+	{
+		$lead = $flightQuote->fqProductQuote->pqProduct->prLead;
+		if($lead->getAgentsProcessingFee())
+			return $lead->getAgentsProcessingFee();
+
+		if(!$lead->employee){
+			$employee = $lead->employee;
+			if(!$employee) return 0;
+
+			$groups = $employee->ugsGroups;
+			return ($groups)?$groups[0]->ug_processing_fee:0;
+		}
+
+		$groups = $lead->employee->ugsGroups;
+		return ($groups)?$groups[0]->ug_processing_fee:0;
+	}
+
+	/**
+	 * @param FlightQuote $flightQuote
+	 * @return float|int
+	 */
+	public static function getServiceFeePercent(FlightQuote $flightQuote)
+	{
+		return $flightQuote->fq_service_fee_percent ?? 0;
+	}
+
+	/**
+	 * @param array $priceData
+	 * @return string
+	 */
+	public static function getEstimationProfitText(array $priceData): string
+	{
+		$data = [];
+		/* if(isset($priceData['service_fee']) && $priceData['service_fee'] > 0){
+			$data[] = '<span class="text-danger">Merchant fee: -'.round($priceData['service_fee'],2).'$</span>';
+		} */
+		if(isset($priceData['processing_fee']) && $priceData['processing_fee'] > 0){
+			$data[] = '<span class="text-danger">Processing fee: -'.ProductQuoteHelper::roundPrice($priceData['processing_fee']).'$</span>';
+		}
+
+		return (empty($data))?'-':implode('<br/>', $data);
+	}
+
+	/**
+	 * @param array $priceData
+	 * @param FlightQuote $flightQuote
+	 * @return false|float
+	 */
+	public static function getEstimationProfit(array $priceData, FlightQuote $flightQuote)
+	{
+		$profit = 0;
+		$markUp = $priceData['total']['mark_up'] + $priceData['total']['extra_mark_up'];
+		$processingFee = $priceData['processing_fee'];
+
+		$profit += $markUp;
+		$profit -= $processingFee;
+
+		return ProductQuoteHelper::roundPrice($profit);
+	}
+
+	/**
+	 * @param FlightQuote $flightQuote
+	 * @return float|int|null
+	 */
+	public function getFinalProfit(FlightQuote $flightQuote)
+	{
+		$lead = $flightQuote->fqProductQuote->pqProduct->prLead;
+		$final = $lead->final_profit;
+		if($lead->getAgentsProcessingFee()){
+			$final -= $lead->getAgentsProcessingFee();
+		}else{
+			$final -= ($lead->adults + $lead->children)*Flight::AGENT_PROCESSING_FEE_PER_PAX;
+		}
+		return $final;
+	}
+
+	/**
+	 * @param FlightQuote $flightQuote
+	 * @return array
+	 */
+	public static function getBaggageInfo(FlightQuote $flightQuote): array
+	{
+		//if one segment has baggage -> quote has baggage
+		if(!empty($flightQuote->flightQuoteTrips)){
+			foreach ($flightQuote->flightQuoteTrips as $trip){
+				if(!empty($trip->flightQuoteSegments)){
+					foreach ($trip->flightQuoteSegments as $segment){
+						if(!empty($segment->flightQuoteSegmentPaxBaggages)){
+							foreach ($segment->flightQuoteSegmentPaxBaggages as $baggage){
+								if(($baggage->qsb_allow_pieces && $baggage->qsb_allow_pieces > 0)){
+									$info = $baggage->qsb_allow_pieces.' pcs';
+								} else if ($baggage->qsb_allow_weight){
+									$info = $baggage->qsb_allow_weight.$baggage->qsb_allow_unit;
+								}
+
+								return ['hasFreeBaggage' => true, 'freeBaggageInfo' => $info ?? null];
+							}
+						}
+					}
+				}
+			}
+		}
+		return ['hasFreeBaggage' => false, 'freeBaggageInfo' => $info ?? null];
+	}
+
+	/**
+	 * @param FlightQuote $flightQuote
+	 * @return bool
+	 */
+	public static function hasAirportChange(FlightQuote $flightQuote): bool
+	{
+		$result = false;
+		if(!empty($flightQuote->flightQuoteTrips)){
+			foreach ($flightQuote->flightQuoteTrips as $trip){
+				if(!empty($trip->flightQuoteSegments) && count($trip->flightQuoteSegments) > 1){
+					$previousSegment = null;
+					foreach ($trip->flightQuoteSegments as $segment){
+						if($previousSegment !== null && $segment->fqs_departure_airport_iata !== $previousSegment->fqs_arrival_airport_iata){
+							$result = true;
+							break;
+						}
+						$previousSegment = $segment;
+					}
+				}
+			}
+		}
+		return $result;
 	}
 
 	/**
@@ -161,5 +360,25 @@ class FlightQuoteHelper
 			$space .= '&nbsp; ';
 		}
 		return $space;
+	}
+
+	/**
+	 * @param Product $product
+	 * @return ActiveDataProvider
+	 */
+	public static function generateDataProviderForQuoteList(Product $product): ActiveDataProvider
+	{
+		$query = ProductQuote::find()->where(['pq_product_id' => $product->pr_id]);
+		return new ActiveDataProvider([
+			'query' => $query,
+			'sort' => [
+				'defaultOrder' => [
+					'pq_created_dt' => SORT_DESC,
+				]
+			],
+			'pagination' => [
+				'pageSize' => 30,
+			],
+		]);
 	}
 }

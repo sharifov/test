@@ -29,11 +29,12 @@ class ProductQuoteHelper
 
 	/**
 	 * @param float $price
+	 * @param int $precision
 	 * @return false|float
 	 */
-	public static function roundPrice(float $price)
+	public static function roundPrice(float $price, int $precision = 2)
 	{
-		return round($price, 2);
+		return round($price, $precision);
 	}
 
 	/**

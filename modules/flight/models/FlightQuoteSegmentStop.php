@@ -2,8 +2,10 @@
 
 namespace modules\flight\models;
 
+use common\models\Airport;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "flight_quote_segment_stop".
@@ -18,6 +20,7 @@ use Yii;
  * @property string|null $qss_arrival_dt
  *
  * @property FlightQuoteSegment $qssQuoteSegment
+ * @property Airport $locationAirport
  */
 class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
 {
@@ -94,5 +97,13 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
 		$stop->qss_arrival_dt = $dto->arrivalDt;
 
 		return $stop;
+	}
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getLocationAirport(): ActiveQuery
+	{
+		return $this->hasOne(Airport::class, ['iata' => 'qss_location_iata']);
 	}
 }

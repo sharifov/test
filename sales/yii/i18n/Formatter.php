@@ -12,6 +12,7 @@ use modules\invoice\src\helpers\formatters\InvoiceFormatter;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
 use modules\offer\src\entities\offer\OfferStatusAction;
+use modules\offer\src\entities\offerSendLog\OfferSendLogType;
 use modules\offer\src\helpers\formatters\OfferFormatter;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderPayStatus;
@@ -32,6 +33,15 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asOfferSendLogType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return OfferSendLogType::asFormat($value);
+    }
+
     public function asInvoice(?Invoice $invoice): string
     {
         if ($invoice === null) {

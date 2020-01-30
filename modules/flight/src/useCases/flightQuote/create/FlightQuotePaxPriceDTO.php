@@ -36,7 +36,7 @@ class FlightQuotePaxPriceDTO
 		$this->fare = (float)($pax['baseFare'] ?? null);
 		$this->tax = (float)($pax['tax'] ?? null);
 		$this->systemMarkUp = (float)($pax['markup'] ?? 0);
-		$this->agentMarkUp = (float)($pax['markup'] ?? 0);
+		$this->agentMarkUp = 0;
 		$this->originFare = $pax['oBaseFare']['amount'] ?? null;
 		$this->originCurrency = $productQuote->pq_origin_currency;
 		$this->originTax = $pax['baseTax'] ?? null;

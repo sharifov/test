@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use common\models\Employee;
+use sales\entities\EventTrait;
 use Yii;
 use yii\base\InvalidArgumentException;
 
@@ -20,6 +21,8 @@ use yii\base\InvalidArgumentException;
  */
 class FlightQuoteStatusLog extends \yii\db\ActiveRecord
 {
+	use EventTrait;
+
 	public const STATUS_CREATED = 1;
 	public const STATUS_APPLIED = 2;
 	public const STATUS_DECLINED = 3;
@@ -121,5 +124,30 @@ class FlightQuoteStatusLog extends \yii\db\ActiveRecord
 			throw new InvalidArgumentException('Invalid Status');
 		}
 		$this->qsl_status_id = $status;
+	}
+
+	/**
+	 * @param int $userId
+	 * @param int $flightQuoteId
+	 * @param int $statusId
+	 * @return FlightQuoteStatusLog
+	 */
+	public static function create(int $userId, int $flightQuoteId, int $statusId): FlightQuoteStatusLog
+	{
+		$log = new self();
+		$log->qsl_created_user_id = $userId;
+		$log->qsl_flight_quote_id = $flightQuoteId;
+		$log->qsl_status_id = $statusId;
+		$log->qsl_created_dt = date('Y-m-d H:i:s');
+		return $log;
+	}
+
+	/**
+	 * @param int $statusId
+	 * @return mixed|string
+	 */
+	public static function getStatusText(int $statusId)
+	{
+		return self::STATUS_LIST[$statusId] ?? '';
 	}
 }

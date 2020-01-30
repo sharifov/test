@@ -5,6 +5,7 @@
 
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
+use modules\offer\src\helpers\formatters\OfferFormatter;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\bootstrap4\Html;
 
@@ -18,6 +19,7 @@ use yii\bootstrap4\Html;
             "<b><?=\yii\helpers\Html::encode($offer->of_name)?></b>"
             (<span title="UID"><?=\yii\helpers\Html::encode($offer->of_uid)?></span>)
              <?= OfferStatus::asFormat($offer->of_status_id) ?>
+             <?= OfferFormatter::asSentView($offer) ?>
 
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
@@ -47,6 +49,18 @@ use yii\bootstrap4\Html;
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> Status log', null, [
                         'class' => 'dropdown-item text-success btn-offer-status-log',
                         'data-url' => \yii\helpers\Url::to(['/offer/offer-status-log/show', 'gid' => $offer->of_gid]),
+                        'data-gid' => $offer->of_gid,
+                    ]) ?>
+
+                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> Send log', null, [
+                        'class' => 'dropdown-item text-success btn-offer-send-log',
+                        'data-url' => \yii\helpers\Url::to(['/offer/offer-send-log/show', 'gid' => $offer->of_gid]),
+                        'data-gid' => $offer->of_gid,
+                    ]) ?>
+
+                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> View log', null, [
+                        'class' => 'dropdown-item text-success btn-offer-send-log',
+                        'data-url' => \yii\helpers\Url::to(['/offer/offer-view-log/show', 'gid' => $offer->of_gid]),
                         'data-gid' => $offer->of_gid,
                     ]) ?>
                 </div>

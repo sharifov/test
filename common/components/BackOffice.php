@@ -37,14 +37,15 @@ class BackOffice
     }
 
 
-    /**
-     * @param string $endpoint
-     * @param array $fields
-     * @param string $type
-     * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     */
-    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST'): \yii\httpclient\Response
+	/**
+	 * @param string $endpoint
+	 * @param array $fields
+	 * @param string $type
+	 * @param int $curlTimeOut
+	 * @return \yii\httpclient\Response
+	 * @throws \yii\base\InvalidConfigException
+	 */
+    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30): \yii\httpclient\Response
     {
 
         $uri = Yii::$app->params['backOffice']['serverUrl'] . '/' . $endpoint;
@@ -83,7 +84,7 @@ class BackOffice
             ->setData($fields)
             ->setOptions([
                 CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_TIMEOUT => 30,
+                CURLOPT_TIMEOUT => $curlTimeOut > 0 ? $curlTimeOut : 30,
             ])
             ->send();
 

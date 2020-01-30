@@ -1366,7 +1366,7 @@ class CasesController extends FController
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
 			$updatedData['sale_id'] = $caseSaleId;
 
-			$response = BackOffice::sendRequest2('cs/update-passengers', $updatedData);
+			$response = BackOffice::sendRequest2('cs/update-passengers', $updatedData, 'POST', 90);
 			if ($response->isOk) {
 
 				$responseResult = json_decode($response->content, true)['results'];

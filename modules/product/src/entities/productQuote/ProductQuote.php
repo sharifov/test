@@ -64,7 +64,9 @@ class ProductQuote extends \yii\db\ActiveRecord
 {
     use EventTrait;
 
-    public static function tableName(): string
+	public const CHECKOUT_URL_PAGE = 'checkout/quote';
+
+	public static function tableName(): string
     {
         return 'product_quote';
     }
@@ -364,7 +366,7 @@ class ProductQuote extends \yii\db\ActiveRecord
 		$quote->pq_product_id = $dto->productId;
 		$quote->pq_order_id = $dto->orderId;
 		$quote->pq_description = $dto->description;
-		$quote->pq_status_id = ProductQuoteStatus::PENDING;
+		$quote->pq_status_id = ProductQuoteStatus::NEW;
 		$quote->pq_price = $dto->price;
 		$quote->pq_origin_price = $dto->originPrice;
 		$quote->pq_client_price = $dto->clientPrice;
@@ -386,5 +388,18 @@ class ProductQuote extends \yii\db\ActiveRecord
 	private static function generateGid(): string
 	{
 		return md5(uniqid('fq', true));
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCheckoutUrlPage(): string
+	{
+		$url = '#';
+		$lead = $this->pqProduct->prLead;
+		if($lead && $lead->project && $lead->project->link) {
+			$url = $lead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->pq_gid;
+		}
+		return $url;
 	}
 }

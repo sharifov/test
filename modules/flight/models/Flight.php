@@ -32,6 +32,8 @@ class Flight extends \yii\db\ActiveRecord implements Productable
 {
 	use EventTrait;
 
+	public const AGENT_PROCESSING_FEE_PER_PAX = 25.00;
+
     public const TRIP_TYPE_ONE_WAY           = 1;
     public const TRIP_TYPE_ROUND_TRIP        = 2;
     public const TRIP_TYPE_MULTI_DESTINATION = 3;
