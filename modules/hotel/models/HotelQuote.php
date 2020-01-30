@@ -349,7 +349,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             foreach ($model->hotelQuoteRooms as $quoteRoom) {
                 $rooms[] = [
                     'key' => $quoteRoom->hqr_key,
-                    'paxes' => HotelQuoteRoomPax::preparePaxesForBook($quoteRoom->hqr_id, $client)
+                    'paxes' => HotelQuoteRoomPax::preparePaxesForBook($quoteRoom->hqr_id)
                 ];
             }
 
@@ -360,7 +360,8 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             ];
 
             $apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            $apiResponse = $apiHotelService->book($params);
+            //$apiResponse = $apiHotelService->book($params);
+            $apiResponse = $apiHotelService->requestBookingHandler('booking/book', $params);
 
             if ($apiResponse['status']) {
                 $model->hq_booking_id = $apiResponse['data']['reference'];
@@ -371,7 +372,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                 $result['message'] = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';
 
                 $hqProductQuote = $model->hqProductQuote;
-                $hqProductQuote->pq_status_id = ProductQuoteStatus::IN_PROGRESS;  /* TODO: booking status */
+                $hqProductQuote->pq_status_id = ProductQuoteStatus::BOOKED;  /* TODO: custom logic */
                 $hqProductQuote->save();
 
                 if (count($apiResponse['data']['rooms'])) {
@@ -431,7 +432,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             ];
 
             $apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            $apiResponse = $apiHotelService->checkRate($params);
+            $apiResponse = $apiHotelService->requestBookingHandler('booking/checkrate', $params);
 
             if ($apiResponse['status']) {
                 if (count($apiResponse['data']['rooms'])) {
@@ -468,11 +469,12 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
 
         try {
             $apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            $apiResponse = $apiHotelService->cancelBook(['bookingId' => $model->hq_booking_id]);
+            $params = ['bookingId' => $model->hq_booking_id];
+            $apiResponse = $apiHotelService->requestBookingHandler('booking/book', $params, 'delete');
 
             if ($apiResponse['status']) {
 
-                /* TODO: log ? additional logic ? */
+                /* TODO: log ? */
 
                 $hqProductQuote = $model->hqProductQuote;
                 $hqProductQuote->pq_status_id = ProductQuoteStatus::CANCELED;
@@ -508,19 +510,15 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
     /**
      * @return bool
      */
-    public function isBookable()
+    public function isBookable(): bool
     {
-        $currentStatus = $this->hqProductQuote->pq_status_id;
-        $allowedStatuses = [
-            ProductQuoteStatus::PENDING, /* TODO: new status? */
-        ];
-        return in_array($currentStatus, $allowedStatuses);
+        return (ProductQuoteStatus::isBookable($this->hqProductQuote->pq_status_id) && !$this->isBooking());
     }
 
     /**
      * @return bool
      */
-    public function isBooking()
+    public function isBooking(): bool
     {
         return (!empty($this->hq_booking_id));
     }

@@ -44,6 +44,9 @@ $js = <<<JS
                     text: data.message,
                     hide: true
                 });
+                $.pjax.reload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
             } else {
                 new PNotify({
                     title: 'Booking failed',
@@ -84,6 +87,9 @@ $js = <<<JS
                     type: 'success',
                     text: data.message,
                     hide: true
+                });
+                $.pjax.reload({
+                    container: '#pjax-product-quote-list-' + productId
                 });
             } else {
                 new PNotify({

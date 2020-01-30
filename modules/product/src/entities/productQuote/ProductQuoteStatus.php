@@ -37,7 +37,7 @@ class ProductQuoteStatus
         self::PENDING        => 'warning',
         self::APPLIED        => 'warning',
         self::IN_PROGRESS    => 'warning',
-        self::BOOKED    	 => 'warning',
+        self::BOOKED    	 => 'info',
         self::SOLD           => 'success',
         self::DELIVERED      => 'success',
         self::ERROR          => 'danger',
@@ -108,4 +108,16 @@ class ProductQuoteStatus
 	{
 		return $status === self::NEW;
 	}
+
+    /**
+     * @param int $status
+     * @return bool
+     */
+    public static function isBookable(int $status)
+    {
+        return in_array($status, [
+            self::NEW,
+            self::PENDING,
+        ]);
+    }
 }

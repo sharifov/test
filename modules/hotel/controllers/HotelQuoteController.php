@@ -278,7 +278,6 @@ class HotelQuoteController extends FController
                     $resultBook = HotelQuote::book($model);
                     $result['status'] = $resultBook['status'];
                     $result['message'] = $resultBook['message'];
-                    $result['data'] = $model->hotelQuoteRooms;
                 } else {
                     $result['status'] = $checkResult['status'];
                     $result['message'] = $checkResult['message'];
@@ -287,7 +286,6 @@ class HotelQuoteController extends FController
                 $resultBook = HotelQuote::book($model);
                 $result['status'] = $resultBook['status'];
                 $result['message'] = $resultBook['message'];
-                $result['data'] = $model->hotelQuoteRooms;
             }
         } catch (\Throwable $throwable) {
             $result['message'] = $throwable->getMessage();

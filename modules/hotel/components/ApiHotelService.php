@@ -8,12 +8,16 @@
 
 namespace modules\hotel\components;
 
+use sales\helpers\app\AppHelper;
+use sales\helpers\app\HttpStatusCodeHelper;
 use yii\base\Component;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
+use sales\helpers\email\TextConvertingHelper;
 
 /**
  * Class ApiHotelService
@@ -30,6 +34,7 @@ class ApiHotelService extends Component
     public $url;
     public $username;
     public $password;
+    public $options = [CURLOPT_ENCODING => 'gzip'];
 
     private $request;
 
@@ -81,32 +86,29 @@ class ApiHotelService extends Component
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
     {
         $url = $this->url . $action;
-
-        //$options = ['RETURNTRANSFER' => 1];
-
+        /* @var $this->request Client */
         $this->request->setMethod($method)
             ->setUrl($url)
             ->setData($data);
 
-        $method = strtolower($method);
-
-        if ($method === 'post' || $method === 'delete') {
-			$this->request->setFormat(Client::FORMAT_JSON);
-		}
-
+        $this->setFormatJson($method);
+        $this->request->setOptions(ArrayHelper::merge($this->options, $options));
         if ($headers) {
             $this->request->addHeaders($headers);
         }
-
-        $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
-
-        if ($options) {
-            $this->request->setOptions($options);
-        }
-
         return $this->request->send();
     }
 
+    /**
+     * @param string $method
+     */
+    protected function setFormatJson(string $method): void
+    {
+        $method = strtolower($method);
+        if ($method === 'post' || $method === 'delete') {
+			$this->request->setFormat(Client::FORMAT_JSON);
+		}
+    }
 
     /**
      * @param string $checkIn
@@ -196,119 +198,6 @@ class ApiHotelService extends Component
 		return $out;
 	}
 
-    /**
-     * @param array $params
-     * @return array
-     */
-    public function book(array $params)
-    {
-        $result = ['status' => 0, 'message' => '', 'data' => []];
-
-        try {
-            $response = $this->sendRequest('booking/book', $params);
-
-            if ($response->isOk) {
-                if (isset($response->data['booking']['reference'])) {
-                    $result['data'] = [
-                        'source' => $response->data,
-                        'reference' => $response->data['booking']['reference'],
-                        'rooms' => ((isset($response->data['booking']['rooms']))) ? $this->prepareRooms($response->data['booking']['rooms']) : [],
-                    ];
-                    $result['status'] = 1; // success
-                } elseif (isset($response->data['error'])) {
-                    $result['message'] = 'Api error. Code: ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
-                        ' Message: ' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' ;
-                } else {
-                    $result['message'] = 'Unknown error. Code: ' . $response->statusCode . '. Message: ' . $response->content;
-                }
-            } else {
-                $result['message'] = 'Response error. Code: ' . $response->statusCode . '. Message: ' . $response->content;
-            }
-        } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable), 'Component:' . self::class . ':' . __FUNCTION__  . ':Throwable' );
-        }
-
-		if ($result['status'] == 0) {
-		    \Yii::error($result['message'], 'Component:' . self::class . ':' . __FUNCTION__);
-		}
-
-		return $result;
-	}
-
-    /**
-     * @param $params
-     * @return array
-     */
-    public function checkRate(array $params)
-    {
-        $result = ['status' => 0, 'message' => '', 'data' => []];
-
-        try {
-            $response = $this->sendRequest('booking/checkrate', $params);
-
-            if ($response->isOk) {
-                if (isset($response->data['hotel']['rooms']) || isset($response->data['rateComments'])) {
-                    $result['data'] = [
-                        'source' => $response->data,
-                        'rateComments' => (isset($response->data['rateComments'])) ?: '',
-                        'rooms' => ((isset($response->data['hotel']['rooms']))) ? $this->prepareRooms($response->data['hotel']['rooms']) : [],
-                    ];
-                    $result['status'] = 1; // success
-                } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
-                    $result['message'] = 'Api error. Code: ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
-                        ' Message: ' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' ;
-                } else {
-                    $result['message'] = 'Unknown error. Status Code: ' . $response->statusCode . '. Message: ' . $response->content;
-                }
-            } else {
-                $result['message'] = 'Response error. Status Code: ' . $response->statusCode . '. Message: ' . $response->content;
-            }
-        } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable), 'Component:' . self::class . ':' . __FUNCTION__  . ':Throwable' );
-        }
-
-		if ($result['status'] == 0) {
-		    \Yii::error($result['message'], 'Component:' . self::class . ':' . __FUNCTION__);
-		}
-
-		return $result;
-	}
-
-    /**
-     * @param array $params
-     * @return array
-     */
-    public function cancelBook(array $params)
-    {
-        $result = ['status' => 0, 'message' => '', 'data' => []];
-
-        try {
-            $response = $this->sendRequest('booking/book', $params, 'delete');
-
-            if ($response->isOk) {
-                if (isset($response->data['booking']) && !isset($response->data['error'])) {
-                    $result['data'] = $response->data;
-                    $result['status'] = 1; // success
-                } elseif (isset($response->data['error'])) {
-                    $result['message'] = 'Api error. Code: ' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' .
-                        ' Message: ' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' ;
-                } else {
-                    $result['message'] = 'Unknown error. Status Code: ' . $response->statusCode . '. Message: ' . $response->content;
-                }
-            } else {
-                $result['message'] = 'Response Error. Status Code: ' . $response->statusCode . '. Message: ' . $response->content;
-            }
-        } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable), 'Component:' . self::class . ':' . __FUNCTION__  . ':Throwable' );
-        }
-
-		if ($result['status'] == 0) {
-		    \Yii::error($result['message'], 'Component:' . self::class . ':' . __FUNCTION__);
-		}
-
-		return $result;
-	}
-
 	/**
 	 * @return array
 	 */
@@ -317,6 +206,147 @@ class ApiHotelService extends Component
 		return self::DESTINATION_AVAILABLE_TYPE;
 	}
 
+    /**
+     * @param array $params
+     * @param string $urlAction
+     * @param string $method
+     * @return array [int status, string message, array data]
+     */
+    public function requestBookingHandler(string $urlAction, array $params, string $method = 'post')
+    {
+        $result = ['status' => 0, 'message' => '', 'data' => []];
+        $actionCase = $urlAction . '_' . $method;
+
+        try {
+            $response = $this->sendRequest($urlAction, $params, $method);
+
+            if ($response->isOk) {
+                if ($this->checkDataResponse($actionCase, $response->data)) {
+                    $result['data'] = $this->prepareDataResponse($actionCase, $response->data);
+                    $result['status'] = 1;
+                    $result['message'] = 'Process completed successfully';
+                } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
+                    $result['message'] = 'Hotel booking api error. TravelServices responded with an error.
+                        Status Code (' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' . '):  
+                        Message (' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' . ')';
+                } else {
+                    $result['message'] = 'Hotel booking api error. TravelServices did not send expected data.
+                        Status Code (' . $response->statusCode . '): 
+                        Message (' . $this->getErrorMessageByCode($response->statusCode, $urlAction, $method) . '. For additional info please see log.)';
+                        $responseContent = TextConvertingHelper::htmlToText($response->content);
+                }
+            } else {
+                $result['message'] = 'TravelServices response error.
+                    Status Code (' . $response->statusCode . '): 
+                    Message (' . $this->getErrorMessageByCode($response->statusCode, $urlAction, $method) . '. For additional info please see log.)';
+                    $responseContent = TextConvertingHelper::htmlToText($response->content);
+            }
+        } catch (\Throwable $throwable) {
+            $result['message'] = 'Hotel booking request api throwable error.
+                    Status Code (' . $throwable->getCode() . '): 
+                    Message (' . TextConvertingHelper::htmlToText($throwable->getMessage()) . ')';
+            \Yii::error(AppHelper::throwableFormatter($throwable),self::class . ':' . __FUNCTION__ . ':' . $actionCase . ':Throwable');
+        }
+
+		if (!$result['status']) {
+		    $log = [
+		        'arguments' => func_get_args(),
+		        'message' => $result['message'] . (isset($responseContent) ? ': Response Content (' . $responseContent . ')' : ''),
+            ];
+		    \Yii::error(VarDumper::dumpAsString($log),self::class . ':' . __FUNCTION__ . ':' . $actionCase);
+		}
+
+		return $result;
+	}
+
+    /**
+     * @param int $code
+     * @param string $urlAction
+     * @param string $method
+     * @return string
+     */
+    private function getErrorMessageByCode(int $code, string $urlAction, string $method)
+    {
+        $url = $this->url . $urlAction;
+        $errorMessage = HttpStatusCodeHelper::getName($code);
+        switch ($code) {
+            case '404':
+                $info = 'Please recheck url(' . $url . ')';
+                break;
+            case '405':
+                $info = 'Host(' . $url . ') does not work correctly with this method('. $method .')';
+                break;
+            case '401':
+                $info = 'Please recheck in config(username and password)';
+                break;
+            default:
+                $info = '';
+        }
+        return $errorMessage . '. ' . $info;
+    }
+
+    /**
+     * @param string $actionCase
+     * @param array $responseData
+     * @return bool
+     */
+    private function checkDataResponse(string $actionCase, array $responseData)
+    {
+        $result = false;
+        switch ($actionCase) {
+            case 'booking/checkrate_post':
+                if (isset($responseData['hotel']['rooms']) || isset($responseData['rateComments'])) {
+                    $result = true;
+                }
+                break;
+            case 'booking/book_post':
+                if (isset($responseData['booking']['reference'])) {
+                    $result = true;
+                }
+                break;
+            case 'booking/book_delete':
+                if (isset($responseData['booking'])) {
+                    $result = true;
+                }
+                break;
+        }
+        return $result;
+	}
+
+    /**
+     * @param string $actionCase
+     * @param array $responseData
+     * @return array
+     */
+    private function prepareDataResponse(string $actionCase, array $responseData)
+    {
+        $result = [];
+        switch ($actionCase) {
+            case 'booking/checkrate_post':
+                $result = [
+                    'source' => $responseData,
+                    'rateComments' => (isset($responseData['rateComments'])) ?: '',
+                    'rooms' => ((isset($responseData['hotel']['rooms']))) ? $this->prepareRooms($responseData['hotel']['rooms']) : [],
+                ];
+                break;
+            case 'booking/book_post':
+                $result = [
+                    'source' => $responseData,
+                    'reference' => $responseData['booking']['reference'],
+                    'rooms' => ((isset($responseData['booking']['rooms']))) ? $this->prepareRooms($responseData['booking']['rooms']) : [],
+                ];
+                break;
+            case 'booking/book_delete':
+                $result = [];
+                break;
+        }
+        return $result;
+    }
+
+    /**
+     * @param array $responseRooms
+     * @return array
+     */
     private function prepareRooms(array $responseRooms)
     {
         $result = [];
@@ -327,6 +357,4 @@ class ApiHotelService extends Component
         }
         return $result;
     }
-
-
 }
