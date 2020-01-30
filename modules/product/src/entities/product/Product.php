@@ -4,6 +4,7 @@ namespace modules\product\src\entities\product;
 
 use common\models\Employee;
 use common\models\Lead;
+use modules\product\src\entities\product\serializer\ProductSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\Flight;
@@ -11,6 +12,7 @@ use modules\hotel\models\Hotel;
 use modules\product\src\entities\product\events\ProductCreateEvent;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use sales\entities\EventTrait;
+use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -39,10 +41,9 @@ use yii\db\ActiveRecord;
  * @property Lead $prLead
  * @property ProductType $prType
  * @property Employee $prUpdatedUser
- * @property array $extraData
  * @property ProductQuote[] $productQuotes
  */
-class Product extends \yii\db\ActiveRecord
+class Product extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
 
@@ -89,23 +90,6 @@ class Product extends \yii\db\ActiveRecord
 
             ['pr_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             ['pr_updated_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-        ];
-    }
-
-    public function extraFields(): array
-    {
-        return [
-            //'pr_id',
-            'pr_type_id',
-            'pr_name',
-            'pr_lead_id',
-            'pr_description',
-            'pr_status_id',
-            'pr_service_fee_percent',
-//            'pr_created_user_id',
-//            'pr_updated_user_id',
-//            'pr_created_dt',
-//            'pr_updated_dt',
         ];
     }
 
@@ -226,14 +210,6 @@ class Product extends \yii\db\ActiveRecord
         return new Scopes(static::class);
     }
 
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
-    {
-        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
-    }
-
 	/**
 	 * @param int $employeeId
 	 * @return bool
@@ -242,4 +218,9 @@ class Product extends \yii\db\ActiveRecord
 	{
 		return ($this->prLead->employee_id && $this->prLead->employee_id === $employeeId);
 	}
+
+	public function serialize(): array
+    {
+        return (new ProductSerializer($this))->getData();
+    }
 }

@@ -30,6 +30,7 @@ class OfferViewLogSearch extends OfferViewLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['ofvwl_created_dt' => SORT_DESC]]
         ]);
 
         $this->load($params);

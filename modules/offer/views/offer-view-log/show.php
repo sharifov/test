@@ -3,6 +3,7 @@
 use modules\offer\src\entities\offerViewLog\search\OfferViewLogSearch;
 use sales\yii\grid\DateTimeColumn;
 use yii\grid\GridView;
+use yii\grid\SerialColumn;
 use yii\widgets\Pjax;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -18,10 +19,11 @@ use yii\widgets\Pjax;
         'dataProvider' => $dataProvider,
         'filterModel' => false, //$searchModel,
         'columns' => [
-            [
-                'attribute' => 'ofvwl_id',
-                'options' => ['style' => 'width:80px'],
-            ],
+//            [
+//                'attribute' => 'ofvwl_id',
+//                'options' => ['style' => 'width:80px'],
+//            ],
+            ['class' => SerialColumn::class],
             'ofvwl_visitor_id',
             'ofvwl_ip_address',
             'ofvwl_user_agent',

@@ -20,16 +20,16 @@ class CreateDto
     public $ofvwl_created_dt;
 
     public function __construct(
-        int $ofvwl_offer_id,
-        ?string $ofvwl_visitor_id,
-        ?string $ofvwl_ip_address,
-        ?string $ofvwl_user_agent
+        int $offerId,
+        ?string $visitorId,
+        ?string $ipAddress,
+        ?string $userAgent
     )
     {
-        $this->ofvwl_offer_id = $ofvwl_offer_id;
-        $this->ofvwl_visitor_id = $ofvwl_visitor_id;
-        $this->ofvwl_ip_address = $ofvwl_ip_address;
-        $this->ofvwl_user_agent = $ofvwl_user_agent;
+        $this->ofvwl_offer_id = $offerId;
+        $this->ofvwl_visitor_id = $visitorId;
+        $this->ofvwl_ip_address = $ipAddress;
+        $this->ofvwl_user_agent = $userAgent;
         $this->ofvwl_created_dt = date('Y-m-d H:i:s');
     }
 }

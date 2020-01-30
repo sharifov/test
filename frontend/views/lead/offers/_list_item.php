@@ -59,7 +59,7 @@ use yii\bootstrap4\Html;
                     ]) ?>
 
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> View log', null, [
-                        'class' => 'dropdown-item text-success btn-offer-send-log',
+                        'class' => 'dropdown-item text-success btn-offer-view-log',
                         'data-url' => \yii\helpers\Url::to(['/offer/offer-view-log/show', 'gid' => $offer->of_gid]),
                         'data-gid' => $offer->of_gid,
                     ]) ?>
