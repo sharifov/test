@@ -45,7 +45,9 @@ use yii\db\ActiveRecord;
  * @property float $offerTotalCalcSum
  * @property ProductQuote[] $opProductQuotes
  * @property OfferSendLog[] $sendLogs
+ * @property OfferSendLog $lastSendLog
  * @property OfferViewLog[] $viewLogs
+ * @property OfferViewLog $lastViewLog
  */
 class Offer extends \yii\db\ActiveRecord implements Serializable
 {
@@ -53,12 +55,12 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
 
     public function isSent(): bool
     {
-        return $this->sendLogs ? true : false;
+        return $this->lastSendLog ? true : false;
     }
 
     public function isViewed(): bool
     {
-        return $this->viewLogs ? true : false;
+        return $this->lastViewLog ? true : false;
     }
 
     public static function tableName(): string
@@ -215,9 +217,19 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
         return $this->hasMany(OfferSendLog::class, ['ofsndl_offer_id' => 'of_id']);
     }
 
+    public function getLastSendLog(): ActiveQuery
+    {
+        return $this->hasOne(OfferSendLog::class, ['ofsndl_offer_id' => 'of_id'])->orderBy(['ofsndl_id' => SORT_DESC])->limit(1);
+    }
+
     public function getViewLogs(): ActiveQuery
     {
         return $this->hasMany(OfferViewLog::class, ['ofvwl_offer_id' => 'of_id']);
+    }
+
+    public function getLastViewLog(): ActiveQuery
+    {
+        return $this->hasOne(OfferViewLog::class, ['ofvwl_offer_id' => 'of_id'])->orderBy(['ofvwl_id' => SORT_DESC])->limit(1);
     }
 
     public static function find(): Scopes
