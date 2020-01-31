@@ -50,19 +50,17 @@ class ProductQuoteSerializer extends Serializer
     {
         $quoteData = $this->toArray();
 
-        if ($this->model->pqProduct->pr_type_id === ProductType::PRODUCT_FLIGHT) {
+        if ($this->model->pqProduct->isFlight()) {
             $quote = FlightQuote::find()->where(['fq_product_quote_id' => $this->model->pq_id])->one();
             if ($quote) {
                 $quoteData['data'] = $quote->serialize();
             }
-        } elseif ($this->model->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL) {
+        } elseif ($this->model->pqProduct->isHotel()) {
             $quote = HotelQuote::find()->where(['hq_product_quote_id' => $this->model->pq_id])->one();
             if ($quote) {
                 $quoteData['data'] = $quote->serialize();
             }
         }
-
-        //$quoteData['attr'] = array_intersect_key($this->attributes, array_flip($this->extraFields()));
 
         return $quoteData;
     }

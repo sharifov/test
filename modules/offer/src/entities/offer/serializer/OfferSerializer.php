@@ -42,19 +42,18 @@ class OfferSerializer extends Serializer
     {
         $data = $this->toArray();
 
-        $offerProducts = $this->model->offerProducts;
+        if ($offerProducts = $this->model->offerProducts) {
 
-        if ($offerProducts) {
             foreach ($offerProducts as $offerProduct) {
+
                 if ($quote = $offerProduct->opProductQuote) {
 
                     $quoteData = $quote->serialize();
                     $quoteData['product'] = $quote->pqProduct->serialize();
 
-                    $productQuoteOptions = $quote->productQuoteOptions;
                     $productQuoteOptionsData = [];
 
-                    if ($productQuoteOptions) {
+                    if ($productQuoteOptions = $quote->productQuoteOptions) {
                         foreach ($productQuoteOptions as $productQuoteOption) {
                             $productQuoteOptionsData[] = $productQuoteOption->serialize();
                         }

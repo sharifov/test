@@ -58,9 +58,19 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         return $product;
     }
 
+    public function isFlight(): bool
+    {
+        return $this->pr_type_id === ProductType::PRODUCT_FLIGHT;
+    }
+
+    public function isHotel(): bool
+    {
+        return $this->pr_type_id === ProductType::PRODUCT_HOTEL;
+    }
+
     public static function tableName(): string
     {
-        return 'product';
+        return '{{%product}}';
     }
 
     public function rules(): array
