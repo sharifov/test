@@ -257,8 +257,8 @@ class HotelList extends \yii\db\ActiveRecord implements Serializable
             $hotel->hl_longitude = $data['longitude'] ?? null;
 
             $hotel->hl_last_update = isset($data['lastUpdate']) && $data['lastUpdate'] ? date('Y-m-d', strtotime($data['lastUpdate'])) : null;
-            $hotel->hl_star = $data['s2C'] ?? null;
-            $hotel->hl_ranking = $data['ranking'] ?? null;
+            $hotel->hl_star = isset($data['s2C']) ? substr($data['s2C'], 2) : null;
+            $hotel->hl_ranking = null;
             $hotel->hl_service_type = $data['serviceType'] ?? null;
 
             if (!$hotel->save()) {
