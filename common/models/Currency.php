@@ -265,12 +265,17 @@ class Currency extends \yii\db\ActiveRecord
         return ArrayHelper::map($data, 'cur_code', 'cur_code');
     }
 
+    public static function getDefaultCurrency()
+	{
+		return self::find()->where(['cur_default' => 1])->one();
+	}
+
 	/**
 	 * @return string
 	 */
     public static function getDefaultCurrencyCode(): string
 	{
-		return self::find()->where(['cur_default' => 1])->one()->cur_code ?? self::DEFAULT_CURRENCY;
+		return self::getDefaultCurrency()->cur_code ?? self::DEFAULT_CURRENCY;
 	}
 
 	/**
@@ -278,7 +283,7 @@ class Currency extends \yii\db\ActiveRecord
 	 */
 	public static function getDefaultClientCurrencyRate(): float
 	{
-		return self::find()->where(['cur_default' => 1])->one()->cur_app_rate ?? self::DEFAULT_CURRENCY_CLIENT_RATE;
+		return self::getDefaultCurrency()->cur_app_rate ?? self::DEFAULT_CURRENCY_CLIENT_RATE;
 	}
 
 	/**
@@ -286,6 +291,15 @@ class Currency extends \yii\db\ActiveRecord
 	 */
 	public static function getDefaultBaseCurrencyRate(): float
 	{
-		return self::find()->where(['cur_default' => 1])->one()->cur_base_rate ?? self::DEFAULT_CURRENCY_BASE_RATE;
+		return self::getDefaultCurrency()->cur_base_rate ?? self::DEFAULT_CURRENCY_BASE_RATE;
+	}
+
+	/**
+	 * @param string $code
+	 * @return float|null
+	 */
+	public static function getBaseRateByCurrencyCode(string $code): ?float
+	{
+		return self::find()->where(['cur_code' => $code])->one()->cur_base_rate ?? null;
 	}
 }

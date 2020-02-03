@@ -3,6 +3,7 @@
 namespace modules\flight\src\repositories\flightQuotePaxPriceRepository;
 
 use modules\flight\models\FlightQuotePaxPrice;
+use modules\flight\src\entities\flightQuotePaxPrice\FlightQuotePaxPriceQuery;
 use sales\repositories\Repository;
 
 /**
@@ -21,5 +22,19 @@ class FlightQuotePaxPriceRepository extends Repository
 			throw new \RuntimeException($flightQuotePaxPrice->getErrorSummary(false)[0]);
 		}
 		return $flightQuotePaxPrice->qpp_id;
+	}
+
+	/**
+	 * @param int $fqId
+	 * @param int $paxCode
+	 * @return array|FlightQuotePaxPrice|null
+	 */
+	public function findByIdAndCode(int $fqId, int $paxCode)
+	{
+		$flightQuotePaxPrice = FlightQuotePaxPriceQuery::findByFlightIdAndPaxCodeId($fqId, $paxCode);
+		if (!$flightQuotePaxPrice) {
+			throw new \RuntimeException('Pax Price not found');
+		}
+		return $flightQuotePaxPrice;
 	}
 }

@@ -80,15 +80,6 @@ class ProductQuoteStatus
 
 	/**
 	 * @param ProductQuote $productQuote
-	 * @return bool
-	 */
-    public static function isApplied(ProductQuote $productQuote): bool
-	{
-		return $productQuote->pq_status_id === self::APPLIED;
-	}
-
-	/**
-	 * @param ProductQuote $productQuote
 	 * @return string
 	 * @throws \yii\base\InvalidConfigException
 	 */
@@ -98,14 +89,5 @@ class ProductQuoteStatus
 		$label = self::LIST[$productQuote->pq_status_id] ?? '-';
 
 		return '<span id="q-status-' . $productQuote->pq_id . '" class="quote__status '.$class.'" title="' . \Yii::$app->formatter->asDatetime($productQuote->pq_updated_dt) . '" data-toggle="tooltip"><i class="fa fa-circle"></i> <span>'.$label.'</span></span>';
-	}
-
-	/**
-	 * @param int $status
-	 * @return bool
-	 */
-	public static function isNews(int $status): bool
-	{
-		return $status === self::NEW;
 	}
 }

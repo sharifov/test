@@ -49,7 +49,7 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  */
-class FlightQuote extends ActiveRecord implements Serializable
+class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 {
 	use EventTrait;
 
@@ -479,4 +479,24 @@ class FlightQuote extends ActiveRecord implements Serializable
         return (new FlightQuoteSerializer($this))->getData();
     }
 
+
+	/**
+	 * @return float
+	 */
+	public function getServiceFeePercent(): float
+	{
+		return $this->fq_service_fee_percent ?? 0.00;
+	}
+
+	/**
+	 * @return float|int
+	 */
+	public function getProcessingFee()
+	{
+		$processingFeeAmount = $this->fqProductQuote->pqProduct->prType->getProcessingFeeAmount();
+
+		$flight = $this->fqFlight;
+
+		return ($flight->fl_adults + $flight->fl_children) * $processingFeeAmount;
+	}
 }

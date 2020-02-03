@@ -338,7 +338,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 		return md5(uniqid('fq', true));
 	}
 
-
 	/**
 	 * @return string
 	 */
@@ -356,4 +355,20 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return (new ProductQuoteSerializer($this))->getData();
     }
+
+	/**
+	 * @return bool
+	 */
+	public function isApplied(): bool
+	{
+		return $this->pq_status_id === ProductQuoteStatus::APPLIED;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isNew(): bool
+	{
+		return $this->pq_status_id === ProductQuoteStatus::NEW;
+	}
 }

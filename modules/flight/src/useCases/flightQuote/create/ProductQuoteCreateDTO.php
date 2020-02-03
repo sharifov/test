@@ -2,11 +2,7 @@
 
 namespace modules\flight\src\useCases\flightQuote\create;
 
-use common\models\Currency;
-use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
-use modules\flight\src\helpers\FlightQuoteHelper;
-use sales\auth\Auth;
 use sales\dto\product\ProductQuoteDTO;
 use sales\helpers\product\ProductQuoteHelper;
 
@@ -31,9 +27,9 @@ class ProductQuoteCreateDTO extends ProductQuoteDTO
 		$this->productId = $flight->fl_product_id;
 		$this->orderId = null;
 		$this->description = null;
-		$this->price = ProductQuoteHelper::calcSystemPrice((float)$quote['price'], $flight->flProduct);
-		$this->originPrice = ProductQuoteHelper::roundPrice($quote['price']);
-		$this->clientPrice = ProductQuoteHelper::calcClientPrice((float)$quote['price'], $flight->flProduct);
+		$this->price = null;
+		$this->originPrice = null;
+		$this->clientPrice = null;
 		$this->serviceFeeSum = null;
 		$this->originCurrency = $quote['currency'] ?? null;
 		$this->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($flight->flProduct);
