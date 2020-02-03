@@ -9,6 +9,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
+use sales\interfaces\QuoteCommunicationInterface;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\flight\models\query\FlightQuoteQuery;
@@ -49,7 +50,7 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  */
-class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
+class FlightQuote extends ActiveRecord implements Serializable
 {
 	use EventTrait;
 
