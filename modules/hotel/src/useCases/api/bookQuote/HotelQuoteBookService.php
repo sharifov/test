@@ -89,7 +89,6 @@ class HotelQuoteBookService
                 $this->status = 1; // success
                 $this->message = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';
             });
-
         } else {
             $this->message = $apiResponse['message'];
             $this->transactionManager->wrap(function () use ($model, $apiResponse, $userId) {

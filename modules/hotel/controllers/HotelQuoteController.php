@@ -270,23 +270,23 @@ class HotelQuoteController extends FController
 
         try {
             $model = HotelQuoteBookGuard::guard($id);
-            $bookResult =  Yii::createObject(HotelQuoteBookService::class);
+            $bookService = Yii::$container->get(HotelQuoteBookService::class);
 
             if ($checkRate) {
                 $checkResult = (new HotelQuoteCheckRateService)->checkRate($model);
 
                 if ($checkResult->status) {
-                    $bookResult->book($model);
-                    $result['status'] = $bookResult->status;
-                    $result['message'] = $bookResult->message;
+                    $bookService->book($model);
+                    $result['status'] = $bookService->status;
+                    $result['message'] = $bookService->message;
                 } else {
                     $result['status'] = $checkResult->status;
                     $result['message'] = $checkResult->message;
                 }
             } else {
-                $bookResult->book($model);
-                $result['status'] = $bookResult->status;
-                $result['message'] = $bookResult->message;
+                $bookService->book($model);
+                $result['status'] = $bookService->status;
+                $result['message'] = $bookService->message;
             }
         } catch (\Throwable $throwable) {
             $result['message'] = $throwable->getMessage();
@@ -304,8 +304,8 @@ class HotelQuoteController extends FController
 
         try {
             $model = HotelQuoteCancelBookGuard::guard($id);
-            $resultCancel = (new HotelQuoteCancelBookService)->cancelBook($model);
-
+            $cancelBookService = Yii::$container->get(HotelQuoteCancelBookService::class);
+            $resultCancel = $cancelBookService->cancelBook($model);
             $result = [
                 'message' => $resultCancel->message,
                 'status' => $resultCancel->status,
@@ -315,7 +315,7 @@ class HotelQuoteController extends FController
                 'message' => $throwable->getMessage(),
                 'status' => 0,
             ];
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . __FUNCTION__ . ':Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Throwable');
         }
         return $this->asJson($result);
     }
