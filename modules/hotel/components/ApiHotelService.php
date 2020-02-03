@@ -8,6 +8,8 @@
 
 namespace modules\hotel\components;
 
+use modules\hotel\src\helpers\HotelApiDataHelper;
+use modules\hotel\src\helpers\HotelApiMessageHelper;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\HttpStatusCodeHelper;
 use yii\base\Component;
@@ -47,12 +49,6 @@ class ApiHotelService extends Component
 		self::DESTINATION_CITY_ZONE,
 		self::DESTINATION_HOTEL
 	];
-
-	private $urlMethodMap = [
-        'booking/book_post' => 'Booking Confirm',
-        'booking/checkrate_post' => 'Booking CheckRate',
-        'booking/book_delete' => 'Booking Cancel',
-    ];
 
     private $apiServiceName = 'TravelServices Api';
 
@@ -224,155 +220,45 @@ class ApiHotelService extends Component
     {
         $result = ['status' => 0, 'message' => '', 'data' => []];
         $urlMethod = $urlAction . '_' . $method;
-
-        /* TODO:
-            1) add custom logging from add SL-988
-            2) rewrote "set message", diff to human/system
-         */
+        $url = $this->url . $urlAction;
+        $resultMessage = new HotelApiMessageHelper;
+        $resultMessage->urlMethod = $urlMethod;
+        $resultMessage->arguments = func_get_args();
 
         try {
             $response = $this->sendRequest($urlAction, $params, $method);
 
             if ($response->isOk) {
-                if ($this->checkDataResponse($urlMethod, $response->data)) {
-                    $result['data'] = $this->prepareDataResponse($urlMethod, $response->data);
+                if ((new HotelApiDataHelper)->checkDataResponse($urlMethod, $response->data)) {
+                    $result['data'] = (new HotelApiDataHelper)->prepareDataResponse($urlMethod, $response->data);
                     $result['status'] = 1;
                     $result['message'] = 'Process('. $urlMethod .') completed successfully';
                 } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
-                    $errorCode = (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '';
-                    $errorMessage = (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '';
-                    $result['message'] = 'TravelServices api responded with an error. ';
-                    $result['message'] .= 'Status Code (' . $errorCode . '): ';
-                    $result['message'] .= 'Message (' . $errorMessage . ')';
+                    $resultMessage->title = $this->apiServiceName . ' responded with an error.';
+                    $resultMessage->message = (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '';
+                    $resultMessage->code = (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '';
                 } else {
-                    $result['message'] = 'TravelServices api did not send expected data.
-                        Status Code (' . $response->statusCode . '): 
-                        Message (' . $this->getErrorMessageByCode($response->statusCode, $urlAction, $method) . ')';
-                        $responseContent = TextConvertingHelper::htmlToText($response->content);
+                    $resultMessage->title = $this->apiServiceName . ' did not send expected data.';
+                    $resultMessage->message = (new HotelApiMessageHelper())->getErrorMessageByCode($response->statusCode, $url, $method);
+                    $resultMessage->code = $response->statusCode;
+                    $resultMessage->additional = $response->content;
                 }
             } else {
-                $result['message'] = 'TravelServices api response error.
-                    Status Code (' . $response->statusCode . '): 
-                    Message (' . $this->getErrorMessageByCode($response->statusCode, $urlAction, $method) . ')';
-                    $responseContent = TextConvertingHelper::htmlToText($response->content);
+                $resultMessage->title = $this->apiServiceName . ' api response error.';
+                $resultMessage->message = (new HotelApiMessageHelper())->getErrorMessageByCode($response->statusCode, $url, $method);
+                $resultMessage->code = $response->statusCode;
+                $resultMessage->additional = $response->content;
             }
         } catch (\Throwable $throwable) {
-            $result['message'] = 'Hotel booking request api throwable error.
-                    Status Code (' . $throwable->getCode() . '): 
-                    Message (' . TextConvertingHelper::htmlToText($throwable->getMessage()) . ')';
-            \Yii::error(AppHelper::throwableFormatter($throwable),self::class . ':' . __FUNCTION__ . ':' . $urlMethod . ':Throwable');
+            $resultMessage->title = 'Hotel booking request api throwable error.';
+            $resultMessage->message = $throwable->getMessage();
+            $resultMessage->code = $throwable->getCode();
         }
 
 		if (!$result['status']) {
-		    $additionalContent = (isset($responseContent) ? ': Response Content (' . $responseContent . ')' : '');
-		    $log = [
-		        'arguments' => func_get_args(),
-		        'message' => $result['message'] . ' ' . $additionalContent,
-            ];
-		    \Yii::error(VarDumper::dumpAsString($log),self::class . ':' . __FUNCTION__ . ':' . $urlMethod);
+		    \Yii::error(VarDumper::dumpAsString($resultMessage->forLog),self::class . ':' . __FUNCTION__ . ':' . $urlMethod);
+		    $result['message'] = $resultMessage->forHuman;
 		}
 		return $result;
 	}
-
-
-
-    /**
-     * @param int $code
-     * @param string $urlAction
-     * @param string $method
-     * @return string
-     */
-    private function getErrorMessageByCode(int $code, string $urlAction, string $method)
-    {
-        $url = $this->url . $urlAction;
-        $errorMessage = HttpStatusCodeHelper::getName($code);
-        switch ($code) {
-            case '404':
-                $info = 'Please recheck url(' . $url . ')';
-                break;
-            case '405':
-                $info = 'Host(' . $url . ') does not work correctly with this method('. $method .')';
-                break;
-            case '401':
-                $info = 'Please recheck in config(username and password)';
-                break;
-            default:
-                $info = '';
-        }
-        return $errorMessage . '. ' . $info;
-    }
-
-    /**
-     * @param string $urlMethod
-     * @param array $responseData
-     * @return bool
-     */
-    private function checkDataResponse(string $urlMethod, array $responseData)
-    {
-        $result = false;
-        switch ($urlMethod) {
-            case 'booking/checkrate_post':
-                if (isset($responseData['hotel']['rooms']) || isset($responseData['rateComments'])) {
-                    $result = true;
-                }
-                break;
-            case 'booking/book_post':
-                if (isset($responseData['booking']['reference'])) {
-                    $result = true;
-                }
-                break;
-            case 'booking/book_delete':
-                if (isset($responseData['booking'])) {
-                    $result = true;
-                }
-                break;
-        }
-        return $result;
-	}
-
-    /**
-     * @param string $urlMethod
-     * @param array $responseData
-     * @return array
-     */
-    private function prepareDataResponse(string $urlMethod, array $responseData)
-    {
-        switch ($urlMethod) {
-            case 'booking/checkrate_post':
-                $result = [
-                    'source' => $responseData,
-                    'rateComments' => (isset($responseData['rateComments'])) ?: '',
-                    'rooms' => ((isset($responseData['hotel']['rooms']))) ? $this->prepareRooms($responseData['hotel']['rooms']) : [],
-                ];
-                break;
-            case 'booking/book_post':
-                $result = [
-                    'source' => $responseData,
-                    'reference' => $responseData['booking']['reference'],
-                    'rooms' => ((isset($responseData['booking']['rooms']))) ? $this->prepareRooms($responseData['booking']['rooms']) : [],
-                ];
-                break;
-            case 'booking/book_delete':
-                $result = [];
-                break;
-            default:
-                $result = [];
-        }
-        return $result;
-    }
-
-    /**
-     * @param array $responseRooms
-     * @return array
-     */
-    private function prepareRooms(array $responseRooms)
-    {
-        $result = [];
-        foreach ($responseRooms as $item) {
-            foreach ($item['rates'] as $room) {
-                $result[] = $room;
-            }
-        }
-        return $result;
-    }
 }

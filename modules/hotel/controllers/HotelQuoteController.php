@@ -265,7 +265,7 @@ class HotelQuoteController extends FController
     public function actionAjaxBook()
     {
         $id = (int) Yii::$app->request->post('id', 0);
-        $checkRate = Yii::$app->request->post('check_rate', true);
+        $checkRate = Yii::$app->request->post('check_rate', 1);
         $result = ['status' => 0, 'message' => '', 'data' => []];
 
         try {
