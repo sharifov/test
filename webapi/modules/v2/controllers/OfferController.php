@@ -43,7 +43,6 @@ class OfferController extends BaseController
     }
 
     /**
-    /**
      * @api {post} /v2/offer/view View Offer
      * @apiVersion 0.2.0
      * @apiName ViewOffer
@@ -299,80 +298,80 @@ class OfferController extends BaseController
      * @apiErrorExample {json} Error-Response (422):
      *
      * HTTP/1.1 422 Unprocessable entity
-     *   {
-     *       "status": 422,
-     *       "message": "Error",
-     *       "errors": [
-     *           "Not found Offer"
-     *       ],
-     *       "code": "18302",
-     *       "technical": {
-     *           "action": "v2/offer/view",
-     *           "response_id": 11933860,
-     *           "request_dt": "2020-02-03 13:07:10",
-     *           "response_dt": "2020-02-03 13:07:10",
-     *           "execution_time": 0.015,
-     *           "memory_usage": 151792
-     *       },
-     *       "request": {
-     *           "offerGid": "04d3fe3fc74d0514ee93e208a5x2bcf90",
-     *           "visitor": {
-     *               "id": "hdsjfghsd5489tertwhf289hfgkewr",
-     *               "ipAddress": "12.12.12.12",
-     *               "userAgent": "mozilea/asdfsdf/ as/dfgsdf gsdf gsdgf/ds"
-     *           }
-     *       }
-     *   }
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": [
+     *         "Not found Offer"
+     *     ],
+     *     "code": "18302",
+     *     "technical": {
+     *         "action": "v2/offer/view",
+     *         "response_id": 11933860,
+     *         "request_dt": "2020-02-03 13:07:10",
+     *         "response_dt": "2020-02-03 13:07:10",
+     *         "execution_time": 0.015,
+     *         "memory_usage": 151792
+     *     },
+     *     "request": {
+     *         "offerGid": "04d3fe3fc74d0514ee93e208a5x2bcf90",
+     *         "visitor": {
+     *             "id": "hdsjfghsd5489tertwhf289hfgkewr",
+     *             "ipAddress": "12.12.12.12",
+     *             "userAgent": "mozilea/asdfsdf/ as/dfgsdf gsdf gsdgf/ds"
+     *         }
+     *     }
+     * }
      *
      * @apiErrorExample {json} Error-Response (422):
      *
      * HTTP/1.1 422 Unprocessable entity
      * {
-     *      "status": 422,
-     *      "message": "Validation error",
-     *      "errors": {
-     *         "visitor.ipAddress": [
-     *              "Ip Address cant be array."
-     *          ]
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *        "visitor.ipAddress": [
+     *             "Ip Address cant be array."
+     *         ]
      *     },
      *     "code": "18301",
-     *      "technical": {
+     *     "technical": {
      *          "action": "v2/offer/view",
      *          "response_id": 11933854,
      *          "request_dt": "2020-02-03 12:44:13",
      *          "response_dt": "2020-02-03 12:44:13",
      *          "execution_time": 0.013,
      *          "memory_usage": 127680
-     *      },
-     *      "request": {
+     *     },
+     *     "request": {
      *          "offerGid": "04d3fe3fc74d0514ee93e208a52bcf90",
      *          "visitor": {
      *              "id": "hdsjfghsd5489tertwhf289hfgkewr",
      *              "ipAddress": [],
      *              "userAgent": "mozilea/asdfsdf/ as/dfgsdf gsdf gsdgf/ds"
      *          }
-     *      }
+     *     }
      * }
      *
      * @apiErrorExample {json} Error-Response (400):
      *
      * HTTP/1.1 400 Bad Request
      * {
-     *      "status": 400,
-     *      "message": "Load data error",
-     *      "errors": [
-     *          "Not found Offer data on POST request"
-     *      ],
-     *      "code": "18300",
-     *      "technical": {
-     *          "action": "v2/offer/view",
-     *          "response_id": 11933856,
-     *          "request_dt": "2020-02-03 12:49:20",
-     *          "response_dt": "2020-02-03 12:49:20",
-     *          "execution_time": 0.017,
-     *          "memory_usage": 114232
-     *      },
-     *      "request": []
+     *     "status": 400,
+     *     "message": "Load data error",
+     *     "errors": [
+     *         "Not found Offer data on POST request"
+     *     ],
+     *     "code": "18300",
+     *     "technical": {
+     *         "action": "v2/offer/view",
+     *         "response_id": 11933856,
+     *         "request_dt": "2020-02-03 12:49:20",
+     *         "response_dt": "2020-02-03 12:49:20",
+     *         "execution_time": 0.017,
+     *         "memory_usage": 114232
+     *     },
+     *     "request": []
      * }
      */
     public function actionView()
