@@ -9,6 +9,7 @@ use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
@@ -445,6 +446,20 @@ class ProductQuote extends \yii\db\ActiveRecord
         );
        if ($this->pq_status_id !== ProductQuoteStatus::ERROR) {
             $this->setStatus(ProductQuoteStatus::ERROR);
+       }
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function cancelled(?int $creatorId, ?string $description = ''): void
+    {
+       $this->recordEvent(
+            new ProductQuoteCanceledEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+        );
+       if ($this->pq_status_id !== ProductQuoteStatus::CANCELED) {
+            $this->setStatus(ProductQuoteStatus::CANCELED);
        }
     }
 

@@ -12,6 +12,11 @@ use modules\hotel\models\HotelQuoteRoomPax;
 use modules\hotel\models\HotelRoomPax;
 use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\repositories\hotel\HotelRepository;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
+use modules\hotel\src\useCases\api\searchQuote\HotelQuoteBookService;
+use modules\hotel\src\useCases\api\searchQuote\HotelQuoteCancelBookService;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use Yii;
@@ -264,30 +269,26 @@ class HotelQuoteController extends FController
         $result = ['status' => 0, 'message' => '', 'data' => []];
 
         try {
-            $checkAfterBook = $this->checkBeforeBook($id);
-            if ($checkAfterBook['status']) {
-                $model = $checkAfterBook['model'];
-            } else {
-                throw new Exception($checkAfterBook['message'], 1);
-            }
+            $model = HotelQuoteBookGuard::guard($id);
 
             if ($checkRate) {
-                $checkResult = HotelQuote::checkRate($model);
+                $checkResult = (new HotelQuoteCheckRateService)->checkRate($model);
 
-                if ($checkResult['status']) {
-                    $resultBook = HotelQuote::book($model);
-                    $result['status'] = $resultBook['status'];
-                    $result['message'] = $resultBook['message'];
+                if ($checkResult->status) {
+                    $bookResult =  (new HotelQuoteBookService)->book($model);
+                    $result['status'] = $bookResult->status;
+                    $result['message'] = $bookResult->message;
                 } else {
-                    $result['status'] = $checkResult['status'];
-                    $result['message'] = $checkResult['message'];
+                    $result['status'] = $checkResult->status;
+                    $result['message'] = $checkResult->message;
                 }
             } else {
-                $resultBook = HotelQuote::book($model);
-                $result['status'] = $resultBook['status'];
-                $result['message'] = $resultBook['message'];
+                $bookResult =  (new HotelQuoteBookService)->book($model);
+                $result['status'] = $bookResult->status;
+                $result['message'] = $bookResult->message;
             }
         } catch (\Throwable $throwable) {
+            /* TODO: add message formatting (for human/for log)  */
             $result['message'] = $throwable->getMessage();
             \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . __FUNCTION__ . ':Throwable');
         }
@@ -302,14 +303,13 @@ class HotelQuoteController extends FController
         $id = (int) Yii::$app->request->post('id', 0);
 
         try {
-            if (!$model = HotelQuote::findOne($id)) { /* TODO: add check status logic */
-                throw new Exception('Hotel Quote not found', 1);
-            }
-            if (!$model->isBooking()) {
-                throw new Exception('Hotel Quote not booked.', 2);
-            }
+            $model = HotelQuoteCancelBookGuard::guard($id);
+            $resultCancel = (new HotelQuoteCancelBookService)->cancelBook($model);
 
-            $result = HotelQuote::cancelBook($model);
+            $result = [
+                'message' => $resultCancel->message,
+                'status' => $resultCancel->status,
+            ];
         } catch (\Throwable $throwable) {
             $result = [
                 'message' => $throwable->getMessage(),
@@ -318,24 +318,6 @@ class HotelQuoteController extends FController
             \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . __FUNCTION__ . ':Throwable');
         }
         return $this->asJson($result);
-    }
-
-    /**
-     * @param $id
-     * @return array [int status, string message, obj/null model]
-     */
-    protected function checkBeforeBook($id)
-    {
-        if (!$model = HotelQuote::findOne($id)) {
-            return ['status' => 0, 'message' => 'Hotel Quote not found', 'model' => null];
-        }
-        if ($model->isBooking()) {
-            return ['status' => 0, 'message' => 'Hotel Quote already booked. (BookingId:' . $model->hq_booking_id . ')', 'model' => null];
-        }
-        if (!$model->isBookable()) {
-            return ['status' => 0, 'message' => 'Product Quote not in allowed status', 'model' => null];
-        }
-        return ['status' => 1, 'message' => 'Success', 'model' => $model];
     }
 
     /**

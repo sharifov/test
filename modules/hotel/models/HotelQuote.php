@@ -380,7 +380,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                  */
 
                 $model->hq_booking_id = $apiResponse['data']['reference'];
-                $model->hq_json_booking = $apiResponse['data']['source'];
+                $model->hq_json_booking = $apiResponse['data']['source']; /* TODO: remove this - port logic to SL-988 */
                 $model->save();
 
                 $result['status'] = 1; // success

@@ -48,6 +48,14 @@ class ApiHotelService extends Component
 		self::DESTINATION_HOTEL
 	];
 
+	private $urlMethodMap = [
+        'booking/book_post' => 'Booking Confirm',
+        'booking/checkrate_post' => 'Booking CheckRate',
+        'booking/book_delete' => 'Booking Cancel',
+    ];
+
+    private $apiServiceName = 'TravelServices Api';
+
     public function init() : void
     {
         parent::init();
@@ -215,7 +223,7 @@ class ApiHotelService extends Component
     public function requestBookingHandler(string $urlAction, array $params, string $method = 'post')
     {
         $result = ['status' => 0, 'message' => '', 'data' => []];
-        $actionCase = $urlAction . '_' . $method;
+        $urlMethod = $urlAction . '_' . $method;
 
         /* TODO:
             1) add custom logging from add SL-988
@@ -226,10 +234,10 @@ class ApiHotelService extends Component
             $response = $this->sendRequest($urlAction, $params, $method);
 
             if ($response->isOk) {
-                if ($this->checkDataResponse($actionCase, $response->data)) {
-                    $result['data'] = $this->prepareDataResponse($actionCase, $response->data);
+                if ($this->checkDataResponse($urlMethod, $response->data)) {
+                    $result['data'] = $this->prepareDataResponse($urlMethod, $response->data);
                     $result['status'] = 1;
-                    $result['message'] = 'Process('. $actionCase .') completed successfully';
+                    $result['message'] = 'Process('. $urlMethod .') completed successfully';
                 } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
                     $errorCode = (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '';
                     $errorMessage = (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '';
@@ -252,7 +260,7 @@ class ApiHotelService extends Component
             $result['message'] = 'Hotel booking request api throwable error.
                     Status Code (' . $throwable->getCode() . '): 
                     Message (' . TextConvertingHelper::htmlToText($throwable->getMessage()) . ')';
-            \Yii::error(AppHelper::throwableFormatter($throwable),self::class . ':' . __FUNCTION__ . ':' . $actionCase . ':Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable),self::class . ':' . __FUNCTION__ . ':' . $urlMethod . ':Throwable');
         }
 
 		if (!$result['status']) {
@@ -261,11 +269,12 @@ class ApiHotelService extends Component
 		        'arguments' => func_get_args(),
 		        'message' => $result['message'] . ' ' . $additionalContent,
             ];
-		    \Yii::error(VarDumper::dumpAsString($log),self::class . ':' . __FUNCTION__ . ':' . $actionCase);
+		    \Yii::error(VarDumper::dumpAsString($log),self::class . ':' . __FUNCTION__ . ':' . $urlMethod);
 		}
-
 		return $result;
 	}
+
+
 
     /**
      * @param int $code
@@ -294,14 +303,14 @@ class ApiHotelService extends Component
     }
 
     /**
-     * @param string $actionCase
+     * @param string $urlMethod
      * @param array $responseData
      * @return bool
      */
-    private function checkDataResponse(string $actionCase, array $responseData)
+    private function checkDataResponse(string $urlMethod, array $responseData)
     {
         $result = false;
-        switch ($actionCase) {
+        switch ($urlMethod) {
             case 'booking/checkrate_post':
                 if (isset($responseData['hotel']['rooms']) || isset($responseData['rateComments'])) {
                     $result = true;
@@ -322,14 +331,13 @@ class ApiHotelService extends Component
 	}
 
     /**
-     * @param string $actionCase
+     * @param string $urlMethod
      * @param array $responseData
      * @return array
      */
-    private function prepareDataResponse(string $actionCase, array $responseData)
+    private function prepareDataResponse(string $urlMethod, array $responseData)
     {
-        $result = [];
-        switch ($actionCase) {
+        switch ($urlMethod) {
             case 'booking/checkrate_post':
                 $result = [
                     'source' => $responseData,
@@ -347,6 +355,8 @@ class ApiHotelService extends Component
             case 'booking/book_delete':
                 $result = [];
                 break;
+            default:
+                $result = [];
         }
         return $result;
     }
