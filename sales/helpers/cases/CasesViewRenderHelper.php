@@ -12,6 +12,9 @@ class CasesViewRenderHelper
 {
     public static function renderTakeButton(Cases $model, Employee $user): string
     {
+        if ($model->isSolved()) {
+            return '';
+        }
         $allowActionsList = CasesStatusTransferList::getAllowTransferListByUser($model->cs_status, $user);
         if (isset($allowActionsList[CasesStatus::STATUS_PROCESSING]) && !$model->isOwner($user->id)) {
             if ($model->isProcessing()) {
