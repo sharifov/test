@@ -51,7 +51,6 @@ class HotelApiDataHelper
                 $result = [
                     'source' => $responseData,
                     'reference' => $responseData['booking']['reference'],
-                    'rooms' => ((isset($responseData['booking']['rooms']))) ? $this->prepareRooms($responseData['booking']['rooms']) : [],
                 ];
                 break;
             case 'booking/book_delete':

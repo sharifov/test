@@ -36,21 +36,21 @@ class HotelApiMessageHelper
             $this->forHuman .= 'Message (' . TextConvertingHelper::htmlToText($this->message) . ')' . $this->separator;
         }
 
-        $this->forLog['title'] = 'Title (' . $this->title . ')';
+        $this->forLog['title'] = $this->title;
         if ($this->arguments) {
             $this->forLog['arguments'] = $this->arguments;
         }
         if ($this->urlMethod && array_key_exists($this->urlMethod, $this->urlMethodMap)) {
-            $this->forLog['case'] = 'Case (' . $this->urlMethodMap[$this->urlMethod] . ')';
+            $this->forLog['case'] = $this->urlMethodMap[$this->urlMethod];
         }
         if ($this->code) {
-            $this->forLog['code'] = 'Status Code (' . $this->code . ')';
+            $this->forLog['code'] = $this->code;
         }
         if ($this->message) {
-            $this->forLog['message'] = 'Message (' . TextConvertingHelper::htmlToText($this->message) . ')';
+            $this->forLog['message'] = TextConvertingHelper::htmlToText($this->message);
         }
         if ($this->additional) {
-            $this->forLog['additional'] = 'Additional content (' . TextConvertingHelper::htmlToText($this->additional) . ')';
+            $this->forLog['additional'] = TextConvertingHelper::htmlToText($this->additional);
         }
         return $this;
     }

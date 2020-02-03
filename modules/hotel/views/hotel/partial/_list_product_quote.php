@@ -274,7 +274,12 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
 
 <!--                    <td>--><?//=Html::encode($room->hqr_payment_type)?><!--</td>-->
-                    <td title="code: <?=Html::encode($room->hqr_board_code)?>"><?=Html::encode($room->hqr_board_name)?></td>
+                    <td title="code: <?=Html::encode($room->hqr_board_code)?>">
+                        <?=Html::encode($room->hqr_board_name)?>
+                        <?php if ($room->hqr_rate_comments):?>
+                            <i class="fa fa-info-circle" title="<?=$room->hqr_rate_comments?>"></i>
+                        <?endif;?>
+                    </td>
                     <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
                     <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
                     <td>

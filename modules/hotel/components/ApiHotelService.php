@@ -256,8 +256,9 @@ class ApiHotelService extends Component
         }
 
 		if (!$result['status']) {
-		    \Yii::error(VarDumper::dumpAsString($resultMessage->forLog),self::class . ':' . __FUNCTION__ . ':' . $urlMethod);
-		    $result['message'] = $resultMessage->forHuman;
+		    $message = $resultMessage->prepareMessage();
+		    \Yii::error(VarDumper::dumpAsString($message->forLog),self::class . ':' . __FUNCTION__ . ':' . $urlMethod);
+		    $result['message'] = $message->forHuman;
 		}
 		return $result;
 	}

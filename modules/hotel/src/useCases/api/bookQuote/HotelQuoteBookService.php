@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\hotel\src\useCases\api\searchQuote;
+namespace modules\hotel\src\useCases\api\bookQuote;
 
 use common\models\Client;
 use modules\hotel\components\ApiHotelService;
@@ -10,10 +10,10 @@ use modules\hotel\models\HotelQuoteRoomPax;
 use sales\auth\Auth;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
+use yii\base\Component;
 
 /**
  * Class HotelQuoteBookService
- * @package modules\hotel\src\useCases\api\bookQuote
  *
  * @property  ApiHotelService $apiService
  * @property ProductQuoteRepository $productQuoteRepository
@@ -80,19 +80,11 @@ class HotelQuoteBookService
         if ($apiResponse['status']) {
             $this->transactionManager->wrap(function () use ($model, $apiResponse, $productQuote, $userId) {
                 $model->hq_booking_id = $apiResponse['data']['reference'];
-                $model->hq_json_booking = $apiResponse['data']['source']; /* TODO: remove this - port logic to SL-988 */
+                $model->hq_json_booking = $apiResponse['data']['source'];
                 $model->save();
 
                 $productQuote->booked($userId);
                 $this->productQuoteRepository->save($productQuote);
-
-                if (count($apiResponse['data']['rooms'])) {
-                    foreach ($apiResponse['data']['rooms'] as $room) {
-                        if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])){
-                            $hotelQuoteRoom->setAdditionalInfo($room);
-                        }
-                    }
-                }
 
                 $this->status = 1; // success
                 $this->message = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';

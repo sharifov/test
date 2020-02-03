@@ -2,23 +2,23 @@
 
 namespace modules\hotel\controllers;
 
-use common\models\Employee;
 use frontend\controllers\FController;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
-use modules\hotel\models\HotelQuoteRoom;
-use modules\hotel\models\HotelQuoteRoomPax;
-use modules\hotel\models\HotelRoomPax;
 use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
-use modules\hotel\src\useCases\api\searchQuote\HotelQuoteBookService;
-use modules\hotel\src\useCases\api\searchQuote\HotelQuoteCancelBookService;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
+
+use sales\helpers\app\AppHelper;
+use sales\repositories\product\ProductQuoteRepository;
+use sales\services\TransactionManager;
 use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
@@ -270,12 +270,13 @@ class HotelQuoteController extends FController
 
         try {
             $model = HotelQuoteBookGuard::guard($id);
+            $bookResult =  Yii::createObject(HotelQuoteBookService::class);
 
             if ($checkRate) {
                 $checkResult = (new HotelQuoteCheckRateService)->checkRate($model);
 
                 if ($checkResult->status) {
-                    $bookResult =  (new HotelQuoteBookService)->book($model);
+                    $bookResult->book($model);
                     $result['status'] = $bookResult->status;
                     $result['message'] = $bookResult->message;
                 } else {
@@ -283,14 +284,13 @@ class HotelQuoteController extends FController
                     $result['message'] = $checkResult->message;
                 }
             } else {
-                $bookResult =  (new HotelQuoteBookService)->book($model);
+                $bookResult->book($model);
                 $result['status'] = $bookResult->status;
                 $result['message'] = $bookResult->message;
             }
         } catch (\Throwable $throwable) {
-            /* TODO: add message formatting (for human/for log)  */
             $result['message'] = $throwable->getMessage();
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), self::class . ':' . __FUNCTION__ . ':Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Throwable');
         }
         return $this->asJson($result);
     }

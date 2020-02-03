@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\hotel\src\useCases\api\searchQuote;
+namespace modules\hotel\src\useCases\api\bookQuote;
 
 use common\models\Client;
 use modules\hotel\components\ApiHotelService;
