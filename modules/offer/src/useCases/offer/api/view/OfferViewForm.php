@@ -2,43 +2,43 @@
 
 namespace modules\offer\src\useCases\offer\api\view;
 
+use sales\forms\api\VisitorForm;
+use sales\forms\CompositeForm;
 use sales\yii\validators\IsNotArrayValidator;
-use yii\base\Model;
 
 /**
  * Class OfferViewForm
  *
  * @property string $offerGid
- * @property string $visitorId
- * @property string $ipAddress
- * @property string $userAgent
+ *@property VisitorForm $visitor
  */
-class OfferViewForm extends Model
+class OfferViewForm extends CompositeForm
 {
     public $offerGid;
-    public $visitorId;
-    public $ipAddress;
-    public $userAgent;
+
+    public function __construct($config = [])
+    {
+        $this->visitor = new VisitorForm();
+
+        parent::__construct($config);
+    }
 
     public function rules(): array
     {
         return [
             ['offerGid', 'required'],
             ['offerGid', 'string'],
-
-            ['visitorId', 'string', 'max' => '32'],
-            ['visitorId', IsNotArrayValidator::class],
-
-            ['ipAddress', 'string', 'max' => 40],
-            ['ipAddress', IsNotArrayValidator::class],
-
-            ['userAgent', 'string', 'max' => 255],
-            ['userAgent', IsNotArrayValidator::class],
+            ['offerGid', IsNotArrayValidator::class],
         ];
     }
 
     public function formName(): string
     {
         return '';
+    }
+
+    protected function internalForms(): array
+    {
+        return ['visitor'];
     }
 }

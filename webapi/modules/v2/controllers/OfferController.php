@@ -46,6 +46,8 @@ class OfferController extends BaseController
     {
         $form = new OfferViewForm();
 
+        $form->load(\Yii::$app->request->post());
+
         if (!$form->load(\Yii::$app->request->post())) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -73,9 +75,9 @@ class OfferController extends BaseController
         $this->offerViewLogService->log(
             new CreateDto(
                 $offer->of_id,
-                $form->visitorId,
-                $form->ipAddress,
-                $form->userAgent
+                $form->visitor->id,
+                $form->visitor->ipAddress,
+                $form->visitor->userAgent
             )
         );
 
