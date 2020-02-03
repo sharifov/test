@@ -4,6 +4,7 @@ namespace modules\hotel\models;
 
 use common\models\Currency;
 use modules\hotel\models\query\HotelQuoteRoomQuery;
+use sales\helpers\email\TextConvertingHelper;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -168,18 +169,24 @@ class HotelQuoteRoom extends ActiveRecord
     /**
      * @param array $room
      * @return bool
+     * @throws \yii\base\InvalidConfigException
      */
     public function setAdditionalInfo(array $room)
     {
         $this->hqr_rate_comments_id = $room['rateCommentsId'] ?? null;
-        $this->hqr_rate_comments = strip_tags($room['rateComments']) ?? null;
         $this->hqr_type = ($room['type'] == self::TYPE_LIST[self::TYPE_BOOKABLE]) ?
             self::TYPE_BOOKABLE : self::TYPE_RECHECK;
-        $this->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
-        $this->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
+
+        $rateComments = ($room['rateComments']) ? TextConvertingHelper::htmlToText($room['rateComments']) : '';
+        if (isset($room['cancellationPolicies']) && count($room['cancellationPolicies'])) {
+            $rateComments .= '  Cancellation Policies:';
+            foreach ($room['cancellationPolicies'] as $policy) {
+                $rateComments .= ' From: ' . \Yii::$app->formatter->asDatetime(strtotime($policy['from']));
+                $rateComments .= ' Amount: ' . $policy['amount'];
+            }
+        }
+        $this->hqr_rate_comments = $rateComments;
 
         return $this->save();
     }
-
-
 }
