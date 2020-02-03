@@ -5,6 +5,7 @@ namespace modules\offer\src\services;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLog;
 use modules\offer\src\entities\offerSendLog\OfferSendLogRepository;
+use yii\helpers\VarDumper;
 
 /**
  * Class OfferSendLogService
@@ -23,6 +24,10 @@ class OfferSendLogService
     public function log(CreateDto $dto): void
     {
         $log = OfferSendLog::create($dto);
-        $this->repository->save($log);
+        try {
+            $this->repository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e . ' Dto: ' .  VarDumper::dumpAsString($dto), 'OfferSendLogService:save');
+        }
     }
 }

@@ -27,7 +27,7 @@ class OfferViewLogService
         try {
             $this->repository->save($log);
         } catch (\Throwable $e) {
-            \Yii::error($e . VarDumper::dumpAsString($dto), 'OfferViewLogService:log');
+            \Yii::error($e . ' Dto: ' .  VarDumper::dumpAsString($dto), 'OfferViewLogService:save');
         }
     }
 }

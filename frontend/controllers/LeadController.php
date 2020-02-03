@@ -605,12 +605,7 @@ class LeadController extends FController
                                 if ($comForm->offerList) {
                                     $service = Yii::createObject(OfferSendLogService::class);
                                     foreach ($comForm->offerList as $offerId) {
-                                        try {
-                                            $logDto = new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $comForm->c_email_to);
-                                            $service->log($logDto);
-                                        } catch (\Throwable $e) {
-                                            Yii::error($e . ' Dto: ' . VarDumper::dumpAsString($logDto), 'OfferSendLogService:log');
-                                        }
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $comForm->c_email_to));
                                     }
                                 }
 
@@ -713,12 +708,7 @@ class LeadController extends FController
                                     if ($comForm->offerList) {
                                         $service = Yii::createObject(OfferSendLogService::class);
                                         foreach ($comForm->offerList as $offerId) {
-                                            try {
-                                                $logDto = new CreateDto($offerId, OfferSendLogType::SMS, $user->id, $comForm->c_phone_number);
-                                                $service->log($logDto);
-                                            } catch (\Throwable $e) {
-                                                Yii::error($e . ' Dto: ' . VarDumper::dumpAsString($logDto), 'OfferSendLogService:log');
-                                            }
+                                            $service->log(new CreateDto($offerId, OfferSendLogType::SMS, $user->id, $comForm->c_phone_number));
                                         }
                                     }
 
