@@ -5,9 +5,13 @@ namespace modules\offer\src\entities\offer;
 use common\models\Currency;
 use common\models\Employee;
 use common\models\Lead;
+use modules\offer\src\entities\offer\serializer\OfferSerializer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\offer\src\entities\offerSendLog\OfferSendLog;
+use modules\offer\src\entities\offerViewLog\OfferViewLog;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\EventTrait;
+use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -39,28 +43,29 @@ use yii\db\ActiveRecord;
  * @property Employee $ofUpdatedUser
  * @property OfferProduct[] $offerProducts
  * @property float $offerTotalCalcSum
- * @property array $communicationData
  * @property ProductQuote[] $opProductQuotes
+ * @property OfferSendLog[] $sendLogs
+ * @property OfferSendLog $lastSendLog
+ * @property OfferViewLog[] $viewLogs
+ * @property OfferViewLog $lastViewLog
  */
-class Offer extends \yii\db\ActiveRecord
+class Offer extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
 
     public function isSent(): bool
     {
-        //todo add logic
-        return false;
+        return $this->lastSendLog ? true : false;
     }
 
     public function isViewed(): bool
     {
-        //todo add logic
-        return false;
+        return $this->lastViewLog ? true : false;
     }
 
     public static function tableName(): string
     {
-        return 'offer';
+        return '{{%offer}}';
     }
 
     public function rules(): array
@@ -81,30 +86,6 @@ class Offer extends \yii\db\ActiveRecord
             [['of_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['of_lead_id' => 'id']],
             [['of_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['of_owner_user_id' => 'id']],
             [['of_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['of_updated_user_id' => 'id']],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function extraFields(): array
-    {
-        return [
-            //'of_id',
-            'of_gid',
-            'of_uid',
-            'of_name',
-            'of_lead_id',
-            'of_status_id',
-//            'of_owner_user_id',
-//            'of_created_user_id',
-//            'of_updated_user_id',
-//            'of_created_dt',
-//            'of_updated_dt',
-            'of_client_currency',
-            'of_client_currency_rate',
-            'of_app_total',
-            'of_client_total',
         ];
     }
 
@@ -231,6 +212,26 @@ class Offer extends \yii\db\ActiveRecord
         return $this->hasMany(ProductQuote::class, ['of_id' => 'op_product_quote_id'])->viaTable('offer_product', ['op_offer_id' => 'of_id']);
     }
 
+    public function getSendLogs(): ActiveQuery
+    {
+        return $this->hasMany(OfferSendLog::class, ['ofsndl_offer_id' => 'of_id']);
+    }
+
+    public function getLastSendLog(): ActiveQuery
+    {
+        return $this->hasOne(OfferSendLog::class, ['ofsndl_offer_id' => 'of_id'])->orderBy(['ofsndl_id' => SORT_DESC])->limit(1);
+    }
+
+    public function getViewLogs(): ActiveQuery
+    {
+        return $this->hasMany(OfferViewLog::class, ['ofvwl_offer_id' => 'of_id']);
+    }
+
+    public function getLastViewLog(): ActiveQuery
+    {
+        return $this->hasOne(OfferViewLog::class, ['ofvwl_offer_id' => 'of_id'])->orderBy(['ofvwl_id' => SORT_DESC])->limit(1);
+    }
+
     public static function find(): Scopes
     {
         return new Scopes(static::class);
@@ -288,48 +289,8 @@ class Offer extends \yii\db\ActiveRecord
         $this->of_client_total = round($this->of_app_total * $this->of_client_currency_rate, 2);
     }
 
-    /**
-     * @return array
-     */
-    public function getCommunicationData(): array
+    public function serialize(): array
     {
-        $data = $this->extraData;
-
-        $offerProducts = $this->offerProducts;
-        if ($offerProducts) {
-            foreach ($offerProducts as $offerProduct) {
-                if ($quote = $offerProduct->opProductQuote) {
-
-                    $quoteData = $quote->extraData;
-                    $quoteData['product'] = $quote->pqProduct->extraData;
-
-                    $productQuoteOptions = $quote->productQuoteOptions;
-                    $productQuoteOptionsData = [];
-
-                    if ($productQuoteOptions) {
-                        foreach ($productQuoteOptions as $productQuoteOption) {
-                            $productQuoteOptionsData[] = $productQuoteOption->extraData;
-                        }
-                    }
-
-                    //$quoteData['productQuoteData'] = $quote->extraData;
-                    $quoteData['productQuoteOptions'] = $productQuoteOptionsData;
-
-                    $data['quotes'][] = $quoteData;
-                    //$sum += $quote->totalCalcSum + $quote->pq_service_fee_sum;
-                }
-            }
-            //$sum = round($sum, 2);
-        }
-
-        return $data;
-    }
-
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
-    {
-        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
+        return (new OfferSerializer($this))->getData();
     }
 }

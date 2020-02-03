@@ -3,6 +3,7 @@
 namespace modules\offer\src\helpers\formatters;
 
 use modules\offer\src\entities\offer\Offer;
+use modules\offer\src\entities\offerSendLog\OfferSendLogType;
 use yii\bootstrap4\Html;
 
 class OfferFormatter
@@ -19,10 +20,21 @@ class OfferFormatter
     public static function asSentView(Offer $offer): string
     {
         if ($offer->isViewed()) {
-            return Html::tag('span', 'Viewed', ['class' => 'badge badge-success']);
+            $log = $offer->lastViewLog;
+            return Html::tag('span', 'Viewed', [
+                'class' => 'badge badge-success',
+                'title' => \Yii::$app->formatter->asDatetime(strtotime($log->ofvwl_created_dt)),
+            ]);
         }
         if ($offer->isSent()) {
-            return Html::tag('span', 'Sent', ['class' => 'badge badge-warning']);
+            $log = $offer->lastSendLog;
+            return Html::tag('span', 'Sent', [
+                'class' => 'badge badge-warning',
+                'title' =>
+                    OfferSendLogType::getName($log->ofsndl_type_id) . ', '
+                    . ($log->ofsndl_created_user_id ? $log->createdUser->username . ', ' : '')
+                    . \Yii::$app->formatter->asDatetime(strtotime($log->ofsndl_created_dt)),
+            ]);
         }
         return '';
     }

@@ -4,10 +4,11 @@ namespace modules\flight\models;
 
 use common\models\Airline;
 use common\models\Employee;
+use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use sales\entities\EventTrait;
-use sales\interfaces\QuoteCommunicationInterface;
+use sales\entities\serializer\Serializable;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\flight\models\query\FlightQuoteQuery;
@@ -45,11 +46,10 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @property FlightQuoteSegment[] $flightQuoteSegments
  * @property FlightQuoteStatusLog[] $flightQuoteStatusLogs
- * @property array $extraData
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  */
-class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
+class FlightQuote extends ActiveRecord implements Serializable
 {
 	use EventTrait;
 
@@ -275,15 +275,6 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
         return new FlightQuoteQuery(static::class);
     }
 
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
-    {
-        return []; // TODO: Implement getExtraData() method.
-    }
-
-
 	/**
 	 * @return array
 	 */
@@ -482,4 +473,10 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 	{
 		return self::findOne(['fq_product_quote_id' => $productQuote->pq_id]);
 	}
+
+	public function serialize(): array
+    {
+        return (new FlightQuoteSerializer($this))->getData();
+    }
+
 }

@@ -5,7 +5,10 @@ namespace modules\product\src\entities\productQuoteOption;
 use common\models\Employee;
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
+use modules\product\src\entities\productQuoteOption\serializer\ProductQuoteOptionSerializer;
 use sales\entities\EventTrait;
+use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -31,10 +34,9 @@ use yii\db\ActiveRecord;
  * @property Employee $pqoCreatedUser
  * @property ProductOption $pqoProductOption
  * @property ProductQuote $pqoProductQuote
- * @property array $extraData
  * @property Employee $pqoUpdatedUser
  */
-class ProductQuoteOption extends ActiveRecord
+class ProductQuoteOption extends ActiveRecord implements Serializable
 {
     use EventTrait;
 
@@ -62,28 +64,6 @@ class ProductQuoteOption extends ActiveRecord
             [['pqo_product_option_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductOption::class, 'targetAttribute' => ['pqo_product_option_id' => 'po_id']],
             [['pqo_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqo_product_quote_id' => 'pq_id']],
             [['pqo_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqo_updated_user_id' => 'id']],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function extraFields(): array
-    {
-        return [
-            //'pqo_id',
-            //'pqo_product_quote_id',
-            //'pqo_product_option_id',
-            'pqo_name',
-            'pqo_description',
-            'pqo_status_id',
-            'pqo_price',
-            'pqo_client_price',
-            'pqo_extra_markup',
-            //'pqo_created_user_id',
-            //'pqo_updated_user_id',
-            //'pqo_created_dt',
-            //'pqo_updated_dt',
         ];
     }
 
@@ -177,11 +157,8 @@ class ProductQuoteOption extends ActiveRecord
         return new Scopes(static::class);
     }
 
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
+    public function serialize(): array
     {
-        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
+        return (new ProductQuoteOptionSerializer($this))->getData();
     }
 }

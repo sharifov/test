@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use common\models\Currency;
+use modules\flight\src\entities\flightQuoteSegmentPaxBaggageCharge\serializer\FlightQuoteSegmentPaxBaggageChargeSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageChargeDTO;
 use Yii;
 
@@ -130,4 +131,9 @@ class FlightQuoteSegmentPaxBaggageCharge extends \yii\db\ActiveRecord
 
 		return $baggageCharge;
 	}
+
+	public function serialize(): array
+    {
+        return (new FlightQuoteSegmentPaxBaggageChargeSerializer($this))->getData();
+    }
 }

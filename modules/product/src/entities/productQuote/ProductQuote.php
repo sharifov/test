@@ -8,6 +8,7 @@ use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\FlightQuote;
@@ -15,6 +16,7 @@ use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\product\Product;
 use sales\entities\EventTrait;
+use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -57,10 +59,9 @@ use yii\db\ActiveRecord;
  * @property Employee $pqUpdatedUser
  * @property float $optionAmountSum
  * @property float $totalCalcSum
- * @property array $extraData
  * @property ProductQuoteOption[] $productQuoteOptions
  */
-class ProductQuote extends \yii\db\ActiveRecord
+class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
 
@@ -90,35 +91,6 @@ class ProductQuote extends \yii\db\ActiveRecord
             [['pq_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pq_owner_user_id' => 'id']],
             [['pq_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['pq_product_id' => 'pr_id']],
             [['pq_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pq_updated_user_id' => 'id']],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function extraFields(): array
-    {
-        return [
-//            'pq_id',
-            'pq_gid',
-            'pq_name',
-//            'pq_product_id',
-            'pq_order_id',
-            'pq_description',
-            'pq_status_id',
-            'pq_price',
-            'pq_origin_price',
-            'pq_client_price',
-            'pq_service_fee_sum',
-            'pq_origin_currency',
-            'pq_client_currency',
-//            'pq_origin_currency_rate',
-//            'pq_client_currency_rate',
-//            'pq_owner_user_id',
-//            'pq_created_user_id',
-//            'pq_updated_user_id',
-//            'pq_created_dt',
-//            'pq_updated_dt',
         ];
     }
 
@@ -329,30 +301,6 @@ class ProductQuote extends \yii\db\ActiveRecord
 //        return $quote;
 //    }
 
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
-    {
-        $quoteData = array_intersect_key($this->attributes, array_flip($this->extraFields()));
-
-        if ($this->pqProduct->pr_type_id === ProductType::PRODUCT_FLIGHT) {
-            $quote = FlightQuote::find()->where(['fq_product_quote_id' => $this->pq_id])->one();
-            if ($quote) {
-                $quoteData['data'] = $quote->extraData;
-            }
-        } elseif ($this->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL) {
-            $quote = HotelQuote::find()->where(['hq_product_quote_id' => $this->pq_id])->one();
-            if ($quote) {
-                $quoteData['data'] = $quote->extraData;
-            }
-        }
-
-        //$quoteData['attr'] = array_intersect_key($this->attributes, array_flip($this->extraFields()));
-
-        return $quoteData;
-    }
-
 	/**
 	 * @param ProductQuoteCreateDTO $dto
 	 * @return ProductQuote
@@ -390,6 +338,7 @@ class ProductQuote extends \yii\db\ActiveRecord
 		return md5(uniqid('fq', true));
 	}
 
+
 	/**
 	 * @return string
 	 */
@@ -402,4 +351,9 @@ class ProductQuote extends \yii\db\ActiveRecord
 		}
 		return $url;
 	}
+
+	public function serialize(): array
+    {
+        return (new ProductQuoteSerializer($this))->getData();
+    }
 }

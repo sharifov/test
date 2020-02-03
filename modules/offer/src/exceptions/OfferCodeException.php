@@ -22,4 +22,10 @@ class OfferCodeException
     public const OFFER_PRODUCT_NOT_FOUND = Module::OFFER . 200;
     public const OFFER_PRODUCT_SAVE = Module::OFFER . 201;
     public const OFFER_PRODUCT_REMOVE = Module::OFFER . 202;
+
+    public const API_OFFER_VIEW_NOT_FOUND_DATA_ON_REQUEST = Module::OFFER . 300;
+    public const API_OFFER_VIEW_VALIDATE = Module::OFFER . 301;
+    public const API_OFFER_VIEW_NOT_FOUND = Module::OFFER . 302;
+
+
 }
