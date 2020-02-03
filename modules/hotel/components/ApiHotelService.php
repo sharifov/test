@@ -217,6 +217,11 @@ class ApiHotelService extends Component
         $result = ['status' => 0, 'message' => '', 'data' => []];
         $actionCase = $urlAction . '_' . $method;
 
+        /* TODO:
+            1) add custom logging from add SL-988
+            2) rewrote "set message", diff to human/system
+         */
+
         try {
             $response = $this->sendRequest($urlAction, $params, $method);
 
@@ -224,21 +229,23 @@ class ApiHotelService extends Component
                 if ($this->checkDataResponse($actionCase, $response->data)) {
                     $result['data'] = $this->prepareDataResponse($actionCase, $response->data);
                     $result['status'] = 1;
-                    $result['message'] = 'Process completed successfully';
+                    $result['message'] = 'Process('. $actionCase .') completed successfully';
                 } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
-                    $result['message'] = 'Hotel booking api error. TravelServices responded with an error.
-                        Status Code (' . (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '' . '):  
-                        Message (' . (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '' . ')';
+                    $errorCode = (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '';
+                    $errorMessage = (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '';
+                    $result['message'] = 'TravelServices api responded with an error. ';
+                    $result['message'] .= 'Status Code (' . $errorCode . '): ';
+                    $result['message'] .= 'Message (' . $errorMessage . ')';
                 } else {
-                    $result['message'] = 'Hotel booking api error. TravelServices did not send expected data.
+                    $result['message'] = 'TravelServices api did not send expected data.
                         Status Code (' . $response->statusCode . '): 
-                        Message (' . $this->getErrorMessageByCode($response->statusCode, $urlAction, $method) . '. For additional info please see log.)';
+                        Message (' . $this->getErrorMessageByCode($response->statusCode, $urlAction, $method) . ')';
                         $responseContent = TextConvertingHelper::htmlToText($response->content);
                 }
             } else {
-                $result['message'] = 'TravelServices response error.
+                $result['message'] = 'TravelServices api response error.
                     Status Code (' . $response->statusCode . '): 
-                    Message (' . $this->getErrorMessageByCode($response->statusCode, $urlAction, $method) . '. For additional info please see log.)';
+                    Message (' . $this->getErrorMessageByCode($response->statusCode, $urlAction, $method) . ')';
                     $responseContent = TextConvertingHelper::htmlToText($response->content);
             }
         } catch (\Throwable $throwable) {
@@ -249,9 +256,10 @@ class ApiHotelService extends Component
         }
 
 		if (!$result['status']) {
+		    $additionalContent = (isset($responseContent) ? ': Response Content (' . $responseContent . ')' : '');
 		    $log = [
 		        'arguments' => func_get_args(),
-		        'message' => $result['message'] . (isset($responseContent) ? ': Response Content (' . $responseContent . ')' : ''),
+		        'message' => $result['message'] . ' ' . $additionalContent,
             ];
 		    \Yii::error(VarDumper::dumpAsString($log),self::class . ':' . __FUNCTION__ . ':' . $actionCase);
 		}

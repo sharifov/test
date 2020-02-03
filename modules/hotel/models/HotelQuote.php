@@ -5,6 +5,8 @@ namespace modules\hotel\models;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\interfaces\QuoteCommunicationInterface;
 use Yii;
 use yii\base\Exception;
@@ -342,6 +344,10 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
         try {
             $rooms = [];
             $client = $model->hqProductQuote->pqProduct->prLead->client;
+            $hqProductQuote = $model->hqProductQuote;
+            $userId = Auth::id();
+            $hqProductQuote->inProgress($userId);
+
             if ($model->isBooking()) {
                 throw new Exception('Hotel Quote already booked. (BookingId:' . $model->hq_booking_id . ')', 1);
             }
@@ -360,10 +366,19 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
             ];
 
             $apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            //$apiResponse = $apiHotelService->book($params);
             $apiResponse = $apiHotelService->requestBookingHandler('booking/book', $params);
 
             if ($apiResponse['status']) {
+
+                /* TODO:
+                    1) add custom check (example Cases)
+                    2) add to log -
+                    3) to transaction
+                    4) add info icon in rooms (Lead view)
+                    5) change "hard delete" product quote (if decline - cancel booking) etc.
+                    6) add "human message" in this catch
+                 */
+
                 $model->hq_booking_id = $apiResponse['data']['reference'];
                 $model->hq_json_booking = $apiResponse['data']['source'];
                 $model->save();
@@ -371,9 +386,10 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                 $result['status'] = 1; // success
                 $result['message'] = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';
 
-                $hqProductQuote = $model->hqProductQuote;
-                $hqProductQuote->pq_status_id = ProductQuoteStatus::BOOKED;  /* TODO: custom logic */
-                $hqProductQuote->save();
+                /* TODO:  */
+
+                /*$hqProductQuote->booked();
+                $hqProductQuote->save();*/
 
                 if (count($apiResponse['data']['rooms'])) {
                     foreach ($apiResponse['data']['rooms'] as $room) {
@@ -382,12 +398,13 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                         }
                     }
                 }
+
             } else {
                 $result['message'] = $apiResponse['message'];
             }
 
         } catch (\Throwable $throwable) {
-            Yii::error(VarDumper::dumpAsString($throwable), self::class . ':' . __FUNCTION__ . ':Throwable' );
+            Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Throwable' );
         }
 
         return $result;

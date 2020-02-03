@@ -8,6 +8,9 @@ use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\FlightQuote;
@@ -402,4 +405,59 @@ class ProductQuote extends \yii\db\ActiveRecord
 		}
 		return $url;
 	}
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function inProgress(?int $creatorId, ?string $description = ''): void
+    {
+        $this->recordEvent(
+            new ProductQuoteInProgressEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+        );
+        if ($this->pq_status_id !== ProductQuoteStatus::IN_PROGRESS) {
+            $this->setStatus(ProductQuoteStatus::IN_PROGRESS);
+        }
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function booked(?int $creatorId, ?string $description = ''): void
+    {
+        $this->recordEvent(
+            new ProductQuoteBookedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+        );
+        if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
+            $this->setStatus(ProductQuoteStatus::BOOKED);
+        }
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function error(?int $creatorId, ?string $description = ''): void
+    {
+       $this->recordEvent(
+            new ProductQuoteErrorEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+        );
+       if ($this->pq_status_id !== ProductQuoteStatus::ERROR) {
+            $this->setStatus(ProductQuoteStatus::ERROR);
+       }
+    }
+
+    /**
+     * @param int|null $status
+     */
+    private function setStatus(?int $status): void
+    {
+        if (!array_key_exists($status, ProductQuoteStatus::LIST)) {
+            throw new \InvalidArgumentException('Invalid Status');
+        }
+        ProductQuoteStatus::guard($this->pq_status_id, $status);
+
+        $this->pq_status_id = $status;
+    }
 }
