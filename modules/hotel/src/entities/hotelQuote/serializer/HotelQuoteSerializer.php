@@ -25,15 +25,16 @@ class HotelQuoteSerializer extends Serializer
     public function getData(): array
     {
         $data = [];
-        $hotelQuoteRoomData = [];
+
+        $data['hotel'] = $this->model->hqHotelList ? $this->model->hqHotelList->serialize() : [];
+
         if ($this->model->hotelQuoteRooms) {
+            $data['rooms'] = [];
             foreach ($this->model->hotelQuoteRooms as $hotelQuoteRoom) {
-                $hotelQuoteRoomData[] = $hotelQuoteRoom->serialize();
+                $data['rooms'][] = $hotelQuoteRoom->serialize();
             }
         }
 
-        $data['hotel'] = $this->model->hqHotelList ? $this->model->hqHotelList->serialize() : [];
-        $data['rooms'] = $hotelQuoteRoomData;
         return $data;
     }
 }

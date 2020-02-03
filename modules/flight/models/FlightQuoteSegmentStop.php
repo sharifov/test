@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\entities\flightQuoteSegmentStop\serializer\FlightQuoteSegmentStopSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use Yii;
 
@@ -94,5 +95,10 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
 		$stop->qss_arrival_dt = $dto->arrivalDt;
 
 		return $stop;
+	}
+
+    public function serialize(): array
+    {
+        return (new FlightQuoteSegmentStopSerializer($this))->getData();
 	}
 }

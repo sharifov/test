@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\entities\flightQuoteSegment\serializer\FlightQuoteSegmentSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use Yii;
 
@@ -184,5 +185,10 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
 		$segment->fqs_mileage = $dto->mileage;
 
 		return $segment;
+	}
+
+    public function serialize(): array
+    {
+        return (new FlightQuoteSegmentSerializer($this))->getData();
 	}
 }

@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use common\models\Currency;
+use modules\flight\src\entities\flightQuotePaxPrice\serializer\FlightQuotePaxPriceSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use Yii;
 
@@ -135,5 +136,10 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
 		$paxPrice->qpp_client_tax = $dto->clientTax;
 
 		return $paxPrice;
+	}
+
+    public function serialize(): array
+    {
+        return (new FlightQuotePaxPriceSerializer($this))->getData();
 	}
 }

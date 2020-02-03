@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\entities\flightQuoteSegmentPaxBaggage\serializer\FlightQuoteSegmentPaxBaggageSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageDTO;
 use Yii;
 
@@ -98,5 +99,10 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
 		$baggage->qsb_allow_max_size = $dto->allowMaxSize;
 
 		return $baggage;
+	}
+
+    public function serialize(): array
+    {
+        return (new FlightQuoteSegmentPaxBaggageSerializer($this))->getData();
 	}
 }
