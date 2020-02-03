@@ -25,6 +25,7 @@ class VisitorForm extends Model
             ['id', IsNotArrayValidator::class],
 
             ['ipAddress', 'ip'],
+            ['ipAddress', IsNotArrayValidator::class],
 
             ['userAgent', 'string', 'max' => 255],
             ['userAgent', IsNotArrayValidator::class],
