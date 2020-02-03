@@ -54,6 +54,9 @@ $js = <<<JS
                     text: data.message,
                     hide: true
                 });
+                $.pjax.reload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
             }
         })
         .fail(function( jqXHR, textStatus ) {
@@ -97,6 +100,9 @@ $js = <<<JS
                     type: 'error',
                     text: data.message,
                     hide: true
+                });
+                $.pjax.reload({
+                    container: '#pjax-product-quote-list-' + productId
                 });
             }
         })

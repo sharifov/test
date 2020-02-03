@@ -10,8 +10,6 @@ namespace modules\hotel\components;
 
 use modules\hotel\src\helpers\HotelApiDataHelper;
 use modules\hotel\src\helpers\HotelApiMessageHelper;
-use sales\helpers\app\AppHelper;
-use sales\helpers\app\HttpStatusCodeHelper;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -19,7 +17,6 @@ use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
-use sales\helpers\email\TextConvertingHelper;
 
 /**
  * Class ApiHotelService
@@ -221,9 +218,7 @@ class ApiHotelService extends Component
         $result = ['status' => 0, 'message' => '', 'data' => []];
         $urlMethod = $urlAction . '_' . $method;
         $url = $this->url . $urlAction;
-        $resultMessage = new HotelApiMessageHelper;
-        $resultMessage->urlMethod = $urlMethod;
-        $resultMessage->arguments = func_get_args();
+        $resultMessage = new HotelApiMessageHelper($urlMethod, func_get_args());
 
         try {
             $response = $this->sendRequest($urlAction, $params, $method);
@@ -239,13 +234,13 @@ class ApiHotelService extends Component
                     $resultMessage->code = (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '';
                 } else {
                     $resultMessage->title = $this->apiServiceName . ' did not send expected data.';
-                    $resultMessage->message = (new HotelApiMessageHelper())->getErrorMessageByCode($response->statusCode, $url, $method);
+                    $resultMessage->message = $resultMessage->getErrorMessageByCode($response->statusCode, $url, $method);
                     $resultMessage->code = $response->statusCode;
                     $resultMessage->additional = $response->content;
                 }
             } else {
                 $resultMessage->title = $this->apiServiceName . ' api response error.';
-                $resultMessage->message = (new HotelApiMessageHelper())->getErrorMessageByCode($response->statusCode, $url, $method);
+                $resultMessage->message = $resultMessage->getErrorMessageByCode($response->statusCode, $url, $method);
                 $resultMessage->code = $response->statusCode;
                 $resultMessage->additional = $response->content;
             }

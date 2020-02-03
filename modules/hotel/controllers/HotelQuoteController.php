@@ -17,8 +17,6 @@ use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 
 use sales\helpers\app\AppHelper;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
 use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;

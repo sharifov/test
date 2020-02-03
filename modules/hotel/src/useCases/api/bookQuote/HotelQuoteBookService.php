@@ -5,12 +5,10 @@ namespace modules\hotel\src\useCases\api\bookQuote;
 use common\models\Client;
 use modules\hotel\components\ApiHotelService;
 use modules\hotel\models\HotelQuote;
-use modules\hotel\models\HotelQuoteRoom;
 use modules\hotel\models\HotelQuoteRoomPax;
 use sales\auth\Auth;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
-use yii\base\Component;
 
 /**
  * Class HotelQuoteBookService

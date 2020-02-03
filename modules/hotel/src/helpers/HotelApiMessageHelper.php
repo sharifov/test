@@ -13,7 +13,7 @@ class HotelApiMessageHelper
 	public $message;
 	public $code;
 	public $additional;
-	public $separator = ' <br />';
+	public $separator = ' ';
 	public $forHuman = '';
 	public $forLog = [];
 
@@ -24,12 +24,23 @@ class HotelApiMessageHelper
     ];
 
     /**
+     * HotelApiMessageHelper constructor.
+     * @param $urlMethod
+     * @param $arguments
+     */
+    public function __construct(string $urlMethod, array $arguments)
+	{
+		$this->urlMethod = $urlMethod;
+		$this->arguments = $arguments;
+	}
+
+    /**
      * @return $this
      */
     public function prepareMessage()
     {
         $this->forHuman = 'Title (' . $this->title . '):' . $this->separator;
-        if ($this->urlMethod && array_key_exists($this->urlMethod, $this->urlMethodMap)) {
+        if (array_key_exists($this->urlMethod, $this->urlMethodMap)) {
             $this->forHuman .= 'Case (' . $this->urlMethodMap[$this->urlMethod] . '):' . $this->separator;
         }
         if (strlen($this->message)) {
