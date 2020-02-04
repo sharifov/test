@@ -188,7 +188,7 @@ class HotelQuoteRoom extends ActiveRecord
      */
     public function prepareRateComments(array $room): string
     {
-        $rateComments = ($room['rateComments']) ? TextConvertingHelper::htmlToText($room['rateComments']) : '';
+        $rateComments = (isset($room['rateComments'])) ? TextConvertingHelper::htmlToText($room['rateComments']) : '';
         if (isset($room['cancellationPolicies']) && count($room['cancellationPolicies'])) {
             $rateComments .= '  Cancellation Policies:';
             foreach ($room['cancellationPolicies'] as $policy) {

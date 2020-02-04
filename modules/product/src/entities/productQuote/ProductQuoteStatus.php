@@ -74,6 +74,7 @@ class ProductQuoteStatus
             self::CANCELED,
             self::EXPIRED,
             self::DECLINED,
+            self::ERROR,
         ],
         self::APPLIED => [
             self::IN_PROGRESS,
