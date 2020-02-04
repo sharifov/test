@@ -47,6 +47,11 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 			<?= ProductQuoteStatus::getStatusSpan($model)?>
 
 			<span class="quote__id">QUID: <strong><?= $model->pq_id ?></strong></span>
+
+            <?php if ($model->pq_clone_id): ?>
+                <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
+            <?php endif;?>
+
 			<span class="quote__vc" title="Main Airline">
 				<span class="quote__vc-logo">
                     <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $flightQuote->fq_main_airline ?>.png" alt="" class="quote__vc-img">
