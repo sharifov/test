@@ -6,6 +6,7 @@ use common\models\Employee;
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
+use modules\product\src\entities\productQuoteOption\events\ProductQuoteOptionCloneCreatedEvent;
 use modules\product\src\entities\productQuoteOption\serializer\ProductQuoteOptionSerializer;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
@@ -39,6 +40,20 @@ use yii\db\ActiveRecord;
 class ProductQuoteOption extends ActiveRecord implements Serializable
 {
     use EventTrait;
+
+    public static function clone(ProductQuoteOption $option, int $productQuoteId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $option->attributes;
+
+        $clone->pqo_id = null;
+        $clone->pqo_product_quote_id = $productQuoteId;
+        $clone->pqo_status_id = ProductQuoteOptionStatus::PENDING;
+        $clone->recordEvent(new ProductQuoteOptionCloneCreatedEvent($clone));
+
+        return $clone;
+    }
 
     /**
      * @return string
