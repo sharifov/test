@@ -6,6 +6,7 @@ use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use Yii;
 use yii\db\ActiveQuery;
@@ -32,6 +33,8 @@ use yii\helpers\VarDumper;
  */
 class HotelQuote extends ActiveRecord implements Serializable
 {
+    use EventTrait;
+
     /**
      * @return string
      */

@@ -5,6 +5,7 @@ namespace modules\hotel\models;
 use common\models\Currency;
 use modules\hotel\models\query\HotelQuoteRoomQuery;
 use modules\hotel\src\entities\hotelQuoteRoom\serializer\HotelQuoteRoomSerializer;
+use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -34,6 +35,8 @@ use yii\db\ActiveRecord;
  */
 class HotelQuoteRoom extends ActiveRecord implements Serializable
 {
+    use EventTrait;
+
     /**
      * @return string
      */
