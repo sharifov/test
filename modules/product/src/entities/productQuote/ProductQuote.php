@@ -8,6 +8,7 @@ use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productType\ProductType;
@@ -346,6 +347,27 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
 		return $quote;
 	}
+
+    public static function clone(
+        ProductQuote $quote,
+        int $productId,
+        ?int $ownerId
+    ): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $quote->attributes;
+
+        $clone->pq_id = null;
+        $clone->pq_gid = self::generateGid();
+        $clone->pq_product_id = $productId;
+        $clone->pq_order_id = null;
+        $clone->pq_status_id = ProductQuoteStatus::NEW;
+        $clone->pq_owner_user_id = $ownerId;
+        $clone->recordEvent(new ProductQuoteCloneCreatedEvent($clone));
+
+        return $clone;
+    }
 
 	/**
 	 * @return string
