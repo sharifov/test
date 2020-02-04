@@ -208,12 +208,13 @@ class ApiHotelService extends Component
 	}
 
     /**
-     * @param array $params
      * @param string $urlAction
+     * @param array $params
      * @param string $method
+     * @param int|null $hotelQuoteId
      * @return array [int status, string message, array data]
      */
-    public function requestBookingHandler(string $urlAction, array $params, string $method = 'post')
+    public function requestBookingHandler(string $urlAction, array $params, string $method = 'post', ?int $hotelQuoteId = null)
     {
         $result = ['status' => 0, 'message' => '', 'data' => []];
         $urlMethod = $urlAction . '_' . $method;

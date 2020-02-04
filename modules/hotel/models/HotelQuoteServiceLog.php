@@ -4,8 +4,10 @@ namespace modules\hotel\models;
 
 use common\models\Employee;
 use modules\hotel\models\query\HotelQuoteServiceLogQuery;
-use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  *
@@ -42,6 +44,9 @@ class HotelQuoteServiceLog extends ActiveRecord
         self::ACTION_TYPE_CHECK => 'Check',
 		self::ACTION_TYPE_CANCEL => 'Cancel',
     ];
+
+    public const EVENT_CREATE_LOG = 'eventCreateLog';
+
     /**
      * @return string
      */
@@ -83,6 +88,28 @@ class HotelQuoteServiceLog extends ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['hqsl_created_dt', 'hqsl_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['hqsl_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'hqsl_created_user_id',
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getCreatedUser()
@@ -105,4 +132,5 @@ class HotelQuoteServiceLog extends ActiveRecord
     {
         return new HotelQuoteServiceLogQuery(get_called_class());
     }
+
 }
