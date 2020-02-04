@@ -1,7 +1,12 @@
 <?php
 
+use common\models\Employee;
 use common\models\PaymentMethod;
+use modules\product\src\entities\productType\ProductTypeQuery;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethod;
+use sales\yii\grid\BooleanColumn;
+use sales\yii\grid\DateTimeColumn;
+use sales\yii\grid\UserColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -33,21 +38,49 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'ptpm_produt_type_id',
                 'value' => static function (ProductTypePaymentMethod $model) {
                     return $model->ptpmProdutType->pt_name;
-                }
+                },
+                'filter' => ProductTypeQuery::getListAll()
             ],
             [
                 'attribute' => 'ptpm_payment_method_id',
                 'value' => static function (ProductTypePaymentMethod $model) {
                     return $model->ptpmPaymentMethod->pm_name;
+                },
+                'filter' => PaymentMethod::getList()
+            ],
+            [
+                'attribute' => 'ptpm_payment_fee_percent',
+                'value' => static function (ProductTypePaymentMethod $model) {
+                    return $model->ptpm_payment_fee_percent . ' %';
                 }
             ],
-            'ptpm_payment_fee_percent',
             'ptpm_payment_fee_amount',
-            'ptpm_enabled:boolean',
-            'ptpm_default:boolean',
-            'ptpm_updated_user_id',
-            'ptpm_created_dt',
-            'ptpm_updated_dt',
+			[
+				'class' => BooleanColumn::class,
+				'attribute' => 'ptpm_enabled',
+			],
+			[
+				'class' => BooleanColumn::class,
+				'attribute' => 'ptpm_default',
+			],
+            [
+                'class' => UserColumn::class,
+                'attribute' => 'ptpm_created_user_id',
+                'relation' => 'ptpmCreatedUser'
+            ],
+			[
+				'class' => UserColumn::class,
+				'attribute' => 'ptpm_updated_user_id',
+				'relation' => 'ptpmUpdatedUser'
+			],
+			[
+				'class' => DateTimeColumn::class,
+				'attribute' => 'ptpm_created_dt',
+			],
+            [
+				'class' => DateTimeColumn::class,
+				'attribute' => 'ptpm_updated_dt',
+			],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

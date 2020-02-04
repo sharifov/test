@@ -6,18 +6,19 @@ use common\models\Employee;
 use common\models\PaymentMethod;
 use modules\product\src\entities\productType\ProductType;
 use Yii;
+use yii\validators\InlineValidator;
 
 /**
  * This is the model class for table "product_type_payment_method".
  *
  * @property int $ptpm_produt_type_id
  * @property int $ptpm_payment_method_id
- * @property int|null $ptpm_payment_fee_percent
+ * @property float|null $ptpm_payment_fee_percent
  * @property float|null $ptpm_payment_fee_amount
  * @property int|null $ptpm_enabled
  * @property int|null $ptpm_default
- * @property int $ptpm_created_user_id
- * @property int $ptpm_updated_user_id
+ * @property int|null $ptpm_created_user_id
+ * @property int|null $ptpm_updated_user_id
  * @property string|null $ptpm_created_dt
  * @property string|null $ptpm_updated_dt
  *
@@ -28,21 +29,15 @@ use Yii;
  */
 class ProductTypePaymentMethod extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
     public static function tableName()
     {
         return 'product_type_payment_method';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
-            [['ptpm_produt_type_id', 'ptpm_payment_method_id', 'ptpm_created_user_id', 'ptpm_updated_user_id'], 'required'],
+            [['ptpm_produt_type_id', 'ptpm_payment_method_id'], 'required'],
             [['ptpm_produt_type_id', 'ptpm_payment_method_id', 'ptpm_enabled', 'ptpm_default', 'ptpm_created_user_id', 'ptpm_updated_user_id'], 'integer'],
             [['ptpm_payment_fee_amount', 'ptpm_payment_fee_percent'], 'number'],
             [['ptpm_created_dt', 'ptpm_updated_dt'], 'safe'],
@@ -53,6 +48,11 @@ class ProductTypePaymentMethod extends \yii\db\ActiveRecord
             [['ptpm_payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['ptpm_payment_method_id' => 'pm_id']],
             [['ptpm_produt_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductType::class, 'targetAttribute' => ['ptpm_produt_type_id' => 'pt_id']],
             [['ptpm_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ptpm_updated_user_id' => 'id']],
+            ['ptpm_default', function ($attribute, $params, InlineValidator $validator) {
+        		if ($this->ptpm_default && $default = self::findOne(['ptpm_produt_type_id' => $this->ptpm_produt_type_id, 'ptpm_default' => true])) {
+					$this->addError($attribute, 'Already exist default Product type payment method: Product - ' . $default->ptpmProdutType->pt_name . '; Payment Method: ' . $default->ptpmPaymentMethod->pm_name);
+				}
+			}],
         ];
     }
 

@@ -5,6 +5,7 @@ namespace sales\helpers\product;
 use common\models\Currency;
 use common\models\CurrencyHistory;
 use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 
 class ProductQuoteHelper
 {

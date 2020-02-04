@@ -24,11 +24,11 @@ class m200204_081415_create_tbl_product_type_payment_method extends Migration
 			'ptpm_payment_fee_percent' => $this->decimal(5,2),
 			'ptpm_payment_fee_amount' => $this->decimal(8,2),
 			'ptpm_enabled' => $this->boolean()->defaultValue(false),
-			'ptpm_default' => $this->boolean()->defaultValue(0),
-			'ptpm_created_user_id' => $this->integer()->notNull(),
-			'ptpm_updated_user_id' => $this->integer()->notNull(),
-			'ptpm_created_dt' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP'),
-			'ptpm_updated_dt' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP'),
+			'ptpm_default' => $this->boolean()->defaultValue(false),
+			'ptpm_created_user_id' => $this->integer(),
+			'ptpm_updated_user_id' => $this->integer(),
+			'ptpm_created_dt' => $this->dateTime(),
+			'ptpm_updated_dt' => $this->dateTime(),
 		], $tableOptions);
 
 		$this->addPrimaryKey('pk-product_type_payment_method', '{{%product_type_payment_method}}', ['ptpm_produt_type_id', 'ptpm_payment_method_id']);
@@ -54,6 +54,7 @@ class m200204_081415_create_tbl_product_type_payment_method extends Migration
 			'ptpm_created_user_id',
 			'{{%employees}}',
 			'id',
+			'SET NULL',
 			'CASCADE'
 		);
 
@@ -62,6 +63,7 @@ class m200204_081415_create_tbl_product_type_payment_method extends Migration
 			'ptpm_updated_user_id',
 			'{{%employees}}',
 			'id',
+			'SET NULL',
 			'CASCADE'
 		);
 

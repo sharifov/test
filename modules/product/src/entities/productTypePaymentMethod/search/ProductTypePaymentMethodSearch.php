@@ -17,8 +17,9 @@ class ProductTypePaymentMethodSearch extends ProductTypePaymentMethod
     public function rules()
     {
         return [
-            [['ptpm_produt_type_id', 'ptpm_payment_method_id', 'ptpm_payment_fee_percent', 'ptpm_enabled', 'ptpm_default', 'ptpm_created_user_id', 'ptpm_updated_user_id'], 'integer'],
-            [['ptpm_payment_fee_amount'], 'number'],
+            [['ptpm_produt_type_id', 'ptpm_payment_method_id', 'ptpm_enabled', 'ptpm_default', 'ptpm_created_user_id', 'ptpm_updated_user_id'], 'integer'],
+            [['ptpm_payment_fee_amount', 'ptpm_payment_fee_percent'], 'number'],
+            [['ptpm_payment_fee_percent'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
             [['ptpm_created_dt', 'ptpm_updated_dt'], 'safe'],
         ];
     }
