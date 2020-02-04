@@ -28,8 +28,10 @@ class CasesViewRenderHelper
     public static function renderChangeStatusButton(int $status, Employee $user): string
     {
         $list =  CasesStatusTransferList::getAllowTransferListByUser($status, $user);
-        if (isset($list[CasesStatus::STATUS_PROCESSING])) {
-            unset($list[CasesStatus::STATUS_PROCESSING]);
+        if (!$user->isAdmin()) {
+            if (isset($list[CasesStatus::STATUS_PROCESSING])) {
+                unset($list[CasesStatus::STATUS_PROCESSING]);
+            }
         }
         return $list ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) : '';
     }
