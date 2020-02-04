@@ -176,17 +176,26 @@ class HotelQuoteRoom extends ActiveRecord
         $this->hqr_rate_comments_id = $room['rateCommentsId'] ?? null;
         $this->hqr_type = ($room['type'] == self::TYPE_LIST[self::TYPE_BOOKABLE]) ?
             self::TYPE_BOOKABLE : self::TYPE_RECHECK;
+        $this->hqr_rate_comments = $this->prepareRateComments($room);
 
+        return $this->save();
+    }
+
+    /**
+     * @param array $room
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function prepareRateComments(array $room): string
+    {
         $rateComments = ($room['rateComments']) ? TextConvertingHelper::htmlToText($room['rateComments']) : '';
         if (isset($room['cancellationPolicies']) && count($room['cancellationPolicies'])) {
             $rateComments .= '  Cancellation Policies:';
             foreach ($room['cancellationPolicies'] as $policy) {
                 $rateComments .= ' From: ' . \Yii::$app->formatter->asDatetime(strtotime($policy['from']));
-                $rateComments .= ' Amount: ' . $policy['amount'];
+                $rateComments .= ' Amount: ' . \Yii::$app->db->quoteValue($policy['amount']);
             }
         }
-        $this->hqr_rate_comments = $rateComments;
-
-        return $this->save();
+        return $rateComments;
     }
 }

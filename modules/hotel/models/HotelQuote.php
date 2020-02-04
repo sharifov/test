@@ -135,6 +135,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
      * @param Hotel $hotelRequest
      * @param string $currency
      * @return array|HotelQuote|null
+     * @throws \yii\base\InvalidConfigException
      */
     public static function findOrCreateByData(array $quoteData, HotelList $hotelModel, Hotel $hotelRequest, string $currency = 'USD')
     {
@@ -212,8 +213,8 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                     $qRoom->hqr_children = $room['children'] ?? null;
                     $qRoom->hqr_children_ages = $childrenAges;
                     $qRoom->hqr_rate_comments_id = $room['rateCommentsId'] ?? null;
-                    $qRoom->hqr_rate_comments = $room['rateComments'] ?? null;
-                    $qRoom->hqr_type = ($room['type'] == HotelQuoteRoom::TYPE_LIST[HotelQuoteRoom::TYPE_BOOKABLE]) ? HotelQuoteRoom::TYPE_BOOKABLE : HotelQuoteRoom::TYPE_RECHECK;
+                    $qRoom->hqr_type = ($room['type'] == HotelQuoteRoom::TYPE_LIST[HotelQuoteRoom::TYPE_BOOKABLE])
+                        ? HotelQuoteRoom::TYPE_BOOKABLE : HotelQuoteRoom::TYPE_RECHECK;
 
                     $qRoom->hqr_rooms = $room['rooms'] ?? null;
                     $qRoom->hqr_code = $room['code'] ?? null;
@@ -224,9 +225,19 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                     $qRoom->hqr_board_code = $room['boardCode'] ?? null;
                     $qRoom->hqr_board_name = $room['boardName'] ?? null;
                     $qRoom->hqr_amount = $room['amount'] ?? null;
-                    $qRoom->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
-                    $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
+                    $qRoom->hqr_rate_comments = $qRoom->prepareRateComments($room);
                     $qRoom->hqr_currency = $currency;
+
+                    if (isset($room['cancellationPolicies'][0]['amount'])) {
+                        $qRoom->hqr_cancel_amount = $room['cancellationPolicies'][0]['amount'];
+                    } else {
+                        $qRoom->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
+                    }
+                    if ($room['cancellationPolicies'][0]['from']) {
+                        $qRoom->hqr_cancel_from_dt = date ("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
+                    } else {
+                        $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
+                    }
 
                     if (!$qRoom->save()) {
                         Yii::error(VarDumper::dumpAsString($qRoom->errors),
@@ -272,7 +283,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                     }
 
                     if (!$importHotelRoomStatus) { // if not found in hotel_room_pax
-                        if (!empty($qRoom->hqr_adults) && $qRoom->hqr_adults) {
+                        if (!empty($qRoom->hqr_adults) && $qRoom->hqr_adults) { // adults
                             for ($i = 0; $i <= $qRoom->hqr_adults; $i++) {
                                 $hotelQuoteRoomPax = new HotelQuoteRoomPax();
                                 $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
@@ -280,8 +291,7 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                                 $hotelQuoteRoomPax->save();
                             }
                         }
-
-                        if (!empty($qRoom->hqr_children) && $qRoom->hqr_children) {
+                        if (!empty($qRoom->hqr_children) && $qRoom->hqr_children) { // children
                             if (isset($childrenAgesArr) && count($childrenAgesArr) === $qRoom->hqr_children) {  // trying to fill age
                                 foreach ($childrenAgesArr as $age) {
                                     $hotelQuoteRoomPax = new HotelQuoteRoomPax();
