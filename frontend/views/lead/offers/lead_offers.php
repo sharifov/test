@@ -72,10 +72,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Add offer');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -88,10 +92,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Update offer');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -161,11 +169,15 @@ $js = <<<JS
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Offer [' + gid + '] status history');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
      });
     
@@ -179,10 +191,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Offer [' + gid + '] send history');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
      });
     
@@ -196,10 +212,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Offer [' + gid + '] view history');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
      });
      

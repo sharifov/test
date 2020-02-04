@@ -63,8 +63,12 @@ $('.flight_quote_drop_down_menu').on('click','.btn-flight-quote-details', functi
         modal.find('.modal-body').html('');
         $('#preloader').removeClass('hidden');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            $('#preloader').addClass('hidden');
-            modal.modal('show');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
         });
     });
 JS;
@@ -79,8 +83,12 @@ $js = <<<JS
         modal.find('.modal-body').html('');
         let id = $(this).attr('data-id');
         modal.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
-            $('#preloader').addClass('hidden');
-            modal.modal('show');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
         });
     });
 JS;

@@ -446,10 +446,14 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         var editBlock = $('#split-profit-modal');
         editBlock.find('.modal-body').html('');
         editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                editBlock.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
 
@@ -461,10 +465,14 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         var editBlock = $('#split-tips-modal');
         editBlock.find('.modal-body').html('');
         editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                editBlock.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
 
@@ -476,10 +484,14 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         $('#modal-lg-label').html('Quick search quotes');
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
 
@@ -548,10 +560,19 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(addProductUrl + "&typeId=" + productType, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            
+            /*console.log(status);
+            console.log(response);
+            console.log(xhr);*/
+            
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });         
         
         /* $.ajax({
@@ -778,6 +799,13 @@ $js = <<<JS
         e.clearSelection();
     });
     //});
+    
+    // $(document).on('pjax:error', function(xhr, textStatus, error, options) {
+    //     alert(textStatus);
+    //     console.error(error);
+    //     console.log(options);
+    // });
+    
 JS;
 $this->registerJs($js);
 

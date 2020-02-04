@@ -14,6 +14,8 @@ use yii\base\Exception;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
+use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
