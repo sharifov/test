@@ -196,11 +196,15 @@ $js = <<<JS
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Search flight Quotes');
         modal.find('.modal-body').load(url, {pjaxId: pjaxId}, function( response, status, xhr ) {
-            $('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('d-none');
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
 //    

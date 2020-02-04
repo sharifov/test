@@ -119,7 +119,7 @@
     </ul>
     <?php
         if($soundPlay) {
-            $this->registerJs("soundNotification();", \yii\web\View::POS_READY);
+            $this->registerJs('$(function() {soundNotification();});', \yii\web\View::POS_READY);
         }
     ?>
 

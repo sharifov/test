@@ -73,10 +73,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Add order');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                    backdrop: 'static',
+                    show: true
+                });
+            }
         });
     });
     
@@ -89,10 +93,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Update order');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -163,10 +171,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Order [' + gid + '] status history');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -180,10 +192,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Invoice [' + gid + '] status history');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
 JS;

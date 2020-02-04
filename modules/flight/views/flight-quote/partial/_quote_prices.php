@@ -29,17 +29,18 @@ use yii\web\View;
 	</thead>
 	<tbody>
 	<?php foreach ($priceData['prices'] as $paxCode => $price):?>
+        <?php $count = $price['tickets'] ?: 1; ?>
 		<tr>
 			<th><?= $paxCode?></th>
-			<td>x <?= $price['tickets']?></td>
-			<td><?= number_format($price['net'] / $price['tickets'], 2) ?></td>
-			<td><?= number_format($price['mark_up'] / $price['tickets'], 2) ?></td>
+			<td>x <?= $count?></td>
+			<td><?= number_format($price['net'] / $count, 2) ?></td>
+			<td><?= number_format($price['mark_up'] / $count, 2) ?></td>
 			<td><?php if($quote->isNew()):?>
 					<?= Editable::widget([
 						'name'=>'extra_markup['.strtoupper($paxCode).']['.$flightQuote->fq_id.']',
 						'asPopover' => false,
 						'pjaxContainerId' => 'pjax-quote_prices-'.$quote->pq_id,
-						'value' => number_format($price['extra_mark_up'] / $price['tickets'], 2),
+						'value' => number_format($price['extra_mark_up'] / $count, 2),
 						'header' => 'Extra markup',
 						'size'=>'sm',
 						'inputType' => Editable::INPUT_TEXT,
@@ -54,13 +55,13 @@ use yii\web\View;
                         ]
 					]) ?>
 				<?php else:?>
-					<?= number_format($price['extra_mark_up'] / $price['tickets'], 2)?>
+					<?= number_format($price['extra_mark_up'] / $count, 2)?>
 				<?php endif;?>
 			</td>
 			<td><?= number_format($priceData['service_fee_percent'], 2) ?> %</td>
-			<td><?= number_format($price['service_fee'] / $price['tickets'], 2) ?> </td>
-			<td><?= number_format($price['selling'] / $price['tickets'], 2) ?></td>
-			<td><?= number_format($price['client_selling'] / $price['tickets'], 2) ?></td>
+			<td><?= number_format($price['service_fee'] / $count, 2) ?> </td>
+			<td><?= number_format($price['selling'] / $count, 2) ?></td>
+			<td><?= number_format($price['client_selling'] / $count, 2) ?></td>
 		</tr>
 	<?php endforeach;?>
 	</tbody>

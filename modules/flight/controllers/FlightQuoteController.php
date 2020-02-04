@@ -354,11 +354,22 @@ class FlightQuoteController extends FController
 		throw new BadRequestHttpException();
 	}
 
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 */
 	public function actionQuoteStatusLog()
 	{
 		$productQuoteId = Yii::$app->request->get('quoteId');
-		$quote = $this->productQuoteRepository->find($productQuoteId);
-		$flightQuote = FlightQuote::findByProductQuote($quote);
+		if (!$productQuoteId) {
+			throw new BadRequestHttpException('Product quote id is not provided');
+		}
+		try {
+			$quote = $this->productQuoteRepository->find($productQuoteId);
+			$flightQuote = FlightQuote::findByProductQuote($quote);
+		} catch (\Throwable $e) {
+			throw new BadRequestHttpException($e->getMessage());
+		}
 
 		return $this->renderAjax('partial/_quote_status_log', [
 			'flightQuote' => $flightQuote,

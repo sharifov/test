@@ -91,7 +91,7 @@ class CasesChangeStatusForm extends Model
     {
         $list = CasesStatusTransferList::getAllowTransferListByUser($this->case->cs_status, $this->user);
 
-        if (!$this->user->isAdmin()) {
+        if (!$this->user->isAdmin() && !$this->user->isExSuper() && !$this->user->isSupSuper()) {
             if (isset($list[CasesStatus::STATUS_PROCESSING])) {
                 unset($list[CasesStatus::STATUS_PROCESSING]);
             }

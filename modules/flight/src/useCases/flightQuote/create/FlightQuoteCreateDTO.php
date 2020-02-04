@@ -6,7 +6,9 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;
+use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use sales\auth\Auth;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -50,7 +52,7 @@ class FlightQuoteCreateDTO
 		$this->sourceId = null;
 		$this->productQuoteId = $productQuote->pq_id;
 		$this->hashKey = FlightQuoteHelper::generateHashQuoteKey($quote['key']);
-		$this->serviceFeePercent = FlightQuote::SERVICE_FEE * 100;
+		$this->serviceFeePercent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id) ?? (FlightQuote::SERVICE_FEE * 100);
 		$this->recordLocator = null;
 		$this->gds = $quote['gds'];
 		$this->gdsPcc = $quote['pcc'];

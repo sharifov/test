@@ -9,7 +9,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteStatusLog;
 
 
-$quoteStatusLog = $flightQuote->flightQuoteStatusLogs;
+$quoteStatusLog = $flightQuote->flightQuoteStatusLogs ?? null;
 ?>
 
 

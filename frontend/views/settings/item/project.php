@@ -15,7 +15,11 @@ $js = <<<JS
         editBlock.find('.modal-body').html('');
         editBlock.find('.modal-title').html(title);
         editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal('show');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                editBlock.modal('show');
+            }
         });
     });
 JS;

@@ -28,7 +28,7 @@ class CasesViewRenderHelper
     public static function renderChangeStatusButton(int $status, Employee $user): string
     {
         $list =  CasesStatusTransferList::getAllowTransferListByUser($status, $user);
-        if (!$user->isAdmin()) {
+        if (!$user->isAdmin() && !$user->isExSuper() && !$user->isSupSuper()) {
             if (isset($list[CasesStatus::STATUS_PROCESSING])) {
                 unset($list[CasesStatus::STATUS_PROCESSING]);
             }
