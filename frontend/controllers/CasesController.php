@@ -35,6 +35,7 @@ use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\forms\cases\CasesUpdateForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
+use sales\guards\cases\CaseTakeGuard;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -75,6 +76,7 @@ use yii\widgets\ActiveForm;
  * @property CasesSaleRepository $casesSaleRepository
  * @property CasesSaleService $casesSaleService
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
+ * @property CaseTakeGuard $caseTakeGuard
  */
 class CasesController extends FController
 {
@@ -88,6 +90,7 @@ class CasesController extends FController
     private $casesSaleRepository;
     private $casesSaleService;
     private $clientUpdateFromEntityService;
+    private $caseTakeGuard;
 
 	/**
 	 * CasesController constructor.
@@ -102,6 +105,7 @@ class CasesController extends FController
 	 * @param CasesSaleRepository $casesSaleRepository
 	 * @param CasesSaleService $casesSaleService
 	 * @param ClientUpdateFromEntityService $clientUpdateFromEntityService
+	 * @param CaseTakeGuard $caseTakeGuard
 	 * @param array $config
 	 */
     public function __construct(
@@ -116,6 +120,7 @@ class CasesController extends FController
 		CasesSaleRepository $casesSaleRepository,
 		CasesSaleService $casesSaleService,
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
+		CaseTakeGuard $caseTakeGuard,
 		$config = []
     )
     {
@@ -129,6 +134,7 @@ class CasesController extends FController
         $this->casesSaleRepository = $casesSaleRepository;
         $this->casesSaleService = $casesSaleService;
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
+        $this->caseTakeGuard = $caseTakeGuard;
     }
 
     /**
@@ -878,6 +884,7 @@ class CasesController extends FController
         $userId = Yii::$app->user->id;
         $case = $this->findModelByGid($gId);
         try {
+            $this->caseTakeGuard->guard($case);
             $user = $this->userRepository->find($userId);
             $this->casesManageService->take($case->cs_id, $user->id, $user->id);
             Yii::$app->session->setFlash('success', 'Success');

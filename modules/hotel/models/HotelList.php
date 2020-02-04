@@ -3,6 +3,8 @@
 namespace modules\hotel\models;
 
 use modules\hotel\models\query\HotelListQuery;
+use modules\hotel\src\entities\hotelList\serializer\HotelListSerializer;
+use sales\entities\serializer\Serializable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -43,10 +45,9 @@ use yii\helpers\VarDumper;
  * @property string|null $hl_created_dt
  * @property string|null $hl_updated_dt
  *
- * @property array $extraData
  * @property HotelQuote[] $hotelQuotes
  */
-class HotelList extends \yii\db\ActiveRecord
+class HotelList extends \yii\db\ActiveRecord implements Serializable
 {
 
     /**
@@ -78,42 +79,6 @@ class HotelList extends \yii\db\ActiveRecord
             [['hl_service_type'], 'string', 'max' => 30],
             [['hl_code'], 'unique'],
             [['hl_hash_key'], 'unique'],
-        ];
-    }
-
-
-    /**
-     * @return array
-     */
-    public function extraFields(): array
-    {
-        return [
-            //'hl_id',
-            //'hl_code',
-            //'hl_hash_key',
-            'hl_name',
-            'hl_star',
-            'hl_category_name',
-            //'hl_destination_code',
-            'hl_destination_name',
-            'hl_zone_name',
-            //'hl_zone_code',
-            'hl_country_code',
-            'hl_state_code',
-            'hl_description',
-            'hl_address',
-            'hl_postal_code',
-            'hl_city',
-            'hl_email',
-            'hl_web',
-            'hl_phone_list',
-            'hl_image_list',
-            'hl_image_base_url',
-            //'hl_board_codes',
-            //'hl_segment_codes',
-            //'hl_latitude',
-            //'hl_longitude',
-            //'hl_ranking',
         ];
     }
 
@@ -292,8 +257,8 @@ class HotelList extends \yii\db\ActiveRecord
             $hotel->hl_longitude = $data['longitude'] ?? null;
 
             $hotel->hl_last_update = isset($data['lastUpdate']) && $data['lastUpdate'] ? date('Y-m-d', strtotime($data['lastUpdate'])) : null;
-            $hotel->hl_star = $data['s2C'] ?? null;
-            $hotel->hl_ranking = $data['ranking'] ?? null;
+            $hotel->hl_star = isset($data['s2C']) ? substr($data['s2C'], 2) : null;
+            $hotel->hl_ranking = null;
             $hotel->hl_service_type = $data['serviceType'] ?? null;
 
             if (!$hotel->save()) {
@@ -303,34 +268,8 @@ class HotelList extends \yii\db\ActiveRecord
         return $hotel;
     }
 
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
+    public function serialize(): array
     {
-
-        $attr = $this->attributes;
-
-        $imgList = isset($attr['hl_image_list']) ? @json_decode($attr['hl_image_list'], true) : [];
-        $attr['hl_image_list'] = [];
-
-        if ($imgList) {
-            $i = 0;
-            foreach ($imgList as $item) {
-                $attr['hl_image_list'][] = $item;
-                if (++ $i > 2) {
-                    break;
-                }
-            }
-        }
-
-        //$attr['hl_image_list'] = isset($attr['hl_image_list']) ? @json_decode($attr['hl_image_list'], true) : [];
-        $attr['hl_phone_list'] = isset($attr['hl_phone_list']) ? @json_decode($attr['hl_phone_list'], true) : [];
-
-
-        //$attr['hl_image_base_url'] = 'https://dev-hotels.travel-dev.com/hotel/img/';
-
-
-        return array_intersect_key($attr, array_flip($this->extraFields()));
+        return (new HotelListSerializer($this))->getData();
     }
 }

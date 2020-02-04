@@ -22,6 +22,9 @@ use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
 use modules\offer\src\entities\offer\search\OfferSearch;
+use modules\offer\src\entities\offerSendLog\CreateDto;
+use modules\offer\src\entities\offerSendLog\OfferSendLogType;
+use modules\offer\src\services\OfferSendLogService;
 use modules\order\src\entities\order\search\OrderCrudSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
@@ -599,6 +602,13 @@ class LeadController extends FController
                                 $comForm->c_preview_email = 0;
                             } else {
 
+                                if ($comForm->offerList) {
+                                    $service = Yii::createObject(OfferSendLogService::class);
+                                    foreach ($comForm->offerList as $offerId) {
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $comForm->c_email_to));
+                                    }
+                                }
+
                                 $previewEmailForm->e_email_message = $mailPreview['data']['email_body_html'];
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
@@ -694,6 +704,14 @@ class LeadController extends FController
                                     Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'LeadController:view:smsPreview');
                                     $comForm->c_preview_sms = 0;
                                 } else {
+
+                                    if ($comForm->offerList) {
+                                        $service = Yii::createObject(OfferSendLogService::class);
+                                        foreach ($comForm->offerList as $offerId) {
+                                            $service->log(new CreateDto($offerId, OfferSendLogType::SMS, $user->id, $comForm->c_phone_number));
+                                        }
+                                    }
+
                                     //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
                                     $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
                                     $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);

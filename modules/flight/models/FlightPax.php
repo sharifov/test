@@ -32,6 +32,12 @@ class FlightPax extends \yii\db\ActiveRecord
 		self::PAX_INFANT => 3
 	];
 
+	public const PAX_LIST = [
+		self::PAX_LIST_ID[self::PAX_ADULT] => self::PAX_ADULT,
+		self::PAX_LIST_ID[self::PAX_CHILD] => self::PAX_CHILD,
+		self::PAX_LIST_ID[self::PAX_INFANT] => self::PAX_INFANT,
+	];
+
     /**
      * {@inheritdoc}
      */
@@ -123,5 +129,14 @@ class FlightPax extends \yii\db\ActiveRecord
 	public static function getPaxId(string $type): ?int
 	{
 		return self::getPaxListId()[$type] ?? null;
+	}
+
+	/**
+	 * @param int $id
+	 * @return string|null
+	 */
+	public static function getPaxTypeById(int $id):? string
+	{
+		return self::PAX_LIST[$id] ?? null;
 	}
 }

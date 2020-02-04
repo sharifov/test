@@ -79,7 +79,7 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 			<?php $priceData = FlightQuoteHelper::getPricesData($flightQuote);	?>
 
-			<?php if(ProductQuoteStatus::isApplied($model) && $model->pqProduct->prLead->final_profit !== null):?>
+			<?php if($model->isApplied() && $model->pqProduct->prLead->final_profit !== null):?>
 				<button id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
 						data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData);?>'>
 					<?= '$'.FlightQuoteHelper::getFinalProfit($flightQuote);?>
@@ -89,7 +89,7 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 				<a id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
 				   data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData);?>'>
 					<?php if(isset($priceData['total'])):?>
-						<?=number_format(FlightQuoteHelper::getEstimationProfit($priceData, $flightQuote),2);?>$
+						<?=number_format(FlightQuoteHelper::getEstimationProfit($priceData),2);?>$
 					<?php endif;?>
 				</a>
 			<?php endif;?>

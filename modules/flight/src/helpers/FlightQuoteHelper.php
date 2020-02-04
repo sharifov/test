@@ -3,6 +3,7 @@
 namespace modules\flight\src\helpers;
 
 use modules\flight\models\Flight;
+use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\product\src\entities\product\Product;
@@ -38,7 +39,7 @@ class FlightQuoteHelper
 	public static function getPricesData(FlightQuote $flightQuote): array
 	{
 		$prices = [];
-		$service_fee_percent = self::getServiceFeePercent($flightQuote);
+		$service_fee_percent = $flightQuote->getServiceFeePercent();
 		$defData = [
 			'fare' => 0,
 			'taxes' => 0,
@@ -48,27 +49,29 @@ class FlightQuoteHelper
 			'extra_mark_up' => 0,
 			'service_fee' => 0,
 			'selling' => 0, //net + mark_up + extra_mark_up + service_fee
+			'service_fee_sum' => 0,
+			'client_selling' => 0
 		];
 		$total = $defData;
 
 		$paxCodeId = null;
 		foreach ($flightQuote->flightQuotePaxPrices as $price){
-			if($paxCodeId != $price->qpp_flight_pax_code_id) {
-				$prices[$price->qpp_flight_pax_code_id] = $defData;
+			$paxCode = FlightPax::getPaxTypeById($price->qpp_flight_pax_code_id);
+			if($paxCodeId !== $price->qpp_flight_pax_code_id) {
+				$prices[$paxCode] = $defData;
 				$paxCodeId = $price->qpp_flight_pax_code_id;
 			}
-			$prices[$price->qpp_flight_pax_code_id]['fare'] += $price->qpp_fare;
-			$prices[$price->qpp_flight_pax_code_id]['taxes'] += $price->qpp_tax;
-			$prices[$price->qpp_flight_pax_code_id]['net'] = $prices[$price->qpp_flight_pax_code_id]['fare'] + $prices[$price->qpp_flight_pax_code_id]['taxes'];
-			$prices[$price->qpp_flight_pax_code_id]['tickets'] += 1;
-			$prices[$price->qpp_flight_pax_code_id]['mark_up'] += $price->qpp_system_mark_up;
-			$prices[$price->qpp_flight_pax_code_id]['extra_mark_up'] += $price->qpp_agent_mark_up;
-			$prices[$price->qpp_flight_pax_code_id]['selling'] = ($prices[$price->qpp_flight_pax_code_id]['net'] + $prices[$price->qpp_flight_pax_code_id]['mark_up'] + $prices[$price->qpp_flight_pax_code_id]['extra_mark_up']);
-			if($service_fee_percent > 0){
-				$prices[$price->qpp_flight_pax_code_id]['service_fee'] = $prices[$price->qpp_flight_pax_code_id]['selling'] * $service_fee_percent / 100;
-				$prices[$price->qpp_flight_pax_code_id]['selling'] += $prices[$price->qpp_flight_pax_code_id]['service_fee'];
-			}
-			$prices[$price->qpp_flight_pax_code_id]['selling'] = ProductQuoteHelper::roundPrice($prices[$price->qpp_flight_pax_code_id]['selling']);
+			$prices[$paxCode]['fare'] += $price->qpp_fare;
+			$prices[$paxCode]['taxes'] += $price->qpp_tax;
+			$prices[$paxCode]['net'] = (float)(($prices[$paxCode]['fare'] + $prices[$paxCode]['taxes']) * $price->qpp_cnt);
+			$prices[$paxCode]['tickets'] += $price->qpp_cnt;
+			$prices[$paxCode]['mark_up'] += $price->qpp_system_mark_up * $price->qpp_cnt;
+			$prices[$paxCode]['extra_mark_up'] += $price->qpp_agent_mark_up * $price->qpp_cnt;
+			$prices[$paxCode]['selling'] = ($prices[$paxCode]['net'] + $prices[$paxCode]['mark_up'] + $prices[$paxCode]['extra_mark_up']);
+			$prices[$paxCode]['service_fee'] = ($prices[$paxCode]['selling'] * $service_fee_percent / 100);
+			$prices[$paxCode]['selling'] += $prices[$paxCode]['service_fee'];
+			$prices[$paxCode]['selling'] = ProductQuoteHelper::roundPrice($prices[$paxCode]['selling']);
+			$prices[$paxCode]['client_selling'] = ProductQuoteHelper::roundPrice($prices[$paxCode]['selling'] * $flightQuote->fqProductQuote->pq_client_currency_rate);
 		}
 
 		foreach ($prices as $key => $price){
@@ -77,9 +80,8 @@ class FlightQuoteHelper
 			$total['mark_up'] += $price['mark_up'];
 			$total['extra_mark_up'] += $price['extra_mark_up'];
 			$total['selling'] += $price['selling'];
-
-			$prices[$key]['selling'] = ProductQuoteHelper::roundPrice($price['selling']);
-			$prices[$key]['net'] = ProductQuoteHelper::roundPrice($price['net']);
+			$total['service_fee_sum'] += ProductQuoteHelper::roundPrice($price['service_fee']);
+			$total['client_selling'] += $price['client_selling'];
 		}
 
 		return [
@@ -87,39 +89,8 @@ class FlightQuoteHelper
 			'total' => $total,
 			'service_fee_percent' => $service_fee_percent,
 			'service_fee' => ($service_fee_percent > 0)?$total['selling'] * $service_fee_percent / 100:0,
-			'processing_fee' => self::getProcessingFee($flightQuote)
+			'processing_fee' => $flightQuote->getProcessingFee()
 		];
-	}
-
-	/**
-	 * @param FlightQuote $flightQuote
-	 * @return float|int
-	 */
-	public static function getProcessingFee(FlightQuote $flightQuote)
-	{
-		$lead = $flightQuote->fqProductQuote->pqProduct->prLead;
-		if($lead->getAgentsProcessingFee())
-			return $lead->getAgentsProcessingFee();
-
-		if(!$lead->employee){
-			$employee = $lead->employee;
-			if(!$employee) return 0;
-
-			$groups = $employee->ugsGroups;
-			return ($groups)?$groups[0]->ug_processing_fee:0;
-		}
-
-		$groups = $lead->employee->ugsGroups;
-		return ($groups)?$groups[0]->ug_processing_fee:0;
-	}
-
-	/**
-	 * @param FlightQuote $flightQuote
-	 * @return float|int
-	 */
-	public static function getServiceFeePercent(FlightQuote $flightQuote)
-	{
-		return $flightQuote->fq_service_fee_percent ?? 0;
 	}
 
 	/**
@@ -141,10 +112,9 @@ class FlightQuoteHelper
 
 	/**
 	 * @param array $priceData
-	 * @param FlightQuote $flightQuote
 	 * @return false|float
 	 */
-	public static function getEstimationProfit(array $priceData, FlightQuote $flightQuote)
+	public static function getEstimationProfit(array $priceData)
 	{
 		$profit = 0;
 		$markUp = $priceData['total']['mark_up'] + $priceData['total']['extra_mark_up'];

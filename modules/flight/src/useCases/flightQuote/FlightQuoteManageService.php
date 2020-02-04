@@ -4,8 +4,10 @@
 namespace modules\flight\src\useCases\flightQuote;
 
 
+use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuoteStatusLog;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
+use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -31,6 +33,7 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageC
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
+use sales\helpers\product\ProductQuoteHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 
@@ -157,8 +160,44 @@ class FlightQuoteManageService
 
 			$this->createQuotePaxPrice($flightQuote, $productQuote, $quote);
 
+			$this->calcProductQuotePrice($productQuote, $flightQuote);
+
 			$this->createFlightTrip($flightQuote, $quote);
 		});
+	}
+
+	/**
+	 * @param FlightQuotePaxPrice $flightQuotePaxPrice
+	 * @param float $markup
+	 * @throws \Throwable
+	 */
+	public function updateAgentMarkup(FlightQuotePaxPrice $flightQuotePaxPrice, float $markup): void
+	{
+		$this->transactionManager->wrap(function () use ($flightQuotePaxPrice, $markup) {
+			$flightQuotePaxPrice->qpp_agent_mark_up = $markup;
+			$this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
+
+			$flightQuote = $flightQuotePaxPrice->qppFlightQuote;
+			$productQuote = $flightQuote->fqProductQuote;
+
+			$this->calcProductQuotePrice($productQuote, $flightQuote);
+		});
+	}
+
+	/**
+	 * @param ProductQuote $productQuote
+	 * @param FlightQuote $flightQuote
+	 */
+	private function calcProductQuotePrice(ProductQuote $productQuote, FlightQuote $flightQuote): void
+	{
+		$priceData = FlightQuoteHelper::getPricesData($flightQuote);
+
+		$productQuote->pq_origin_price = ProductQuoteHelper::roundPrice((float)$priceData['total']['net']);
+		$productQuote->pq_price = ProductQuoteHelper::calcSystemPrice($priceData['total']['selling'], $productQuote->pq_origin_currency);
+		$productQuote->pq_client_price = ProductQuoteHelper::roundPrice($productQuote->pq_price * $productQuote->pq_client_currency_rate);
+		$productQuote->pq_service_fee_sum = ProductQuoteHelper::roundPrice((float)$priceData['total']['service_fee_sum']);
+
+		$this->productQuoteRepository->save($productQuote);
 	}
 
 	/**
@@ -171,6 +210,11 @@ class FlightQuoteManageService
 		foreach ($quote['passengers'] as $passengerType => $passenger) {
 			$flightQuotePaxPrice = FlightQuotePaxPrice::create((new FlightQuotePaxPriceDTO($flightQuote, $productQuote, $passenger, $passengerType, $quote)));
 			$this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
+
+			for($i = 0; $i < $passenger['cnt']; $i++) {
+				$flightPax = FlightPax::create(new FlightPaxDTO($flightQuote->fqFlight, $passengerType));
+				$this->flightPaxRepository->save($flightPax);
+			}
 		}
 	}
 

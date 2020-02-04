@@ -2,8 +2,11 @@
 
 namespace modules\flight\controllers;
 
+use modules\flight\models\FlightPax;
+use modules\flight\src\entities\flightQuotePaxPrice\FlightQuotePaxPriceQuery;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
+use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
@@ -17,6 +20,7 @@ use modules\flight\models\search\FlightQuoteSearch;
 use frontend\controllers\FController;
 use yii\data\ArrayDataProvider;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -28,6 +32,7 @@ use yii\filters\VerbFilter;
  * @property FlightQuoteSearchService $quoteSearchService
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
  */
 class FlightQuoteController extends FController
 {
@@ -47,6 +52,10 @@ class FlightQuoteController extends FController
 	 * @var ProductQuoteRepository
 	 */
 	private $productQuoteRepository;
+	/**
+	 * @var FlightQuotePaxPriceRepository
+	 */
+	private $flightQuotePaxPriceRepository;
 
 	/**
 	 * FlightQuoteController constructor.
@@ -56,6 +65,7 @@ class FlightQuoteController extends FController
 	 * @param FlightQuoteSearchService $quoteSearchService
 	 * @param FlightQuoteManageService $flightQuoteManageService
 	 * @param ProductQuoteRepository $productQuoteRepository
+	 * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
 	 * @param array $config
 	 */
 	public function __construct(
@@ -65,6 +75,7 @@ class FlightQuoteController extends FController
 		FlightQuoteSearchService $quoteSearchService,
 		FlightQuoteManageService $flightQuoteManageService,
 		ProductQuoteRepository $productQuoteRepository,
+		FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository,
 		$config = []
 	)
 	{
@@ -73,6 +84,7 @@ class FlightQuoteController extends FController
 		$this->quoteSearchService = $quoteSearchService;
 		$this->flightQuoteManageService = $flightQuoteManageService;
 		$this->productQuoteRepository = $productQuoteRepository;
+		$this->flightQuotePaxPriceRepository = $flightQuotePaxPriceRepository;
 	}
 
 	/**
@@ -310,6 +322,36 @@ class FlightQuoteController extends FController
 			'productQuote' => $productQuote,
 			'flightQuote' => FlightQuote::findByProductQuote($productQuote)
 		]);
+	}
+
+	/**
+	 * @throws BadRequestHttpException
+	 * @throws \Throwable
+	 */
+	public function actionAjaxUpdateAgentMarkup()
+	{
+		$extraMarkup = Yii::$app->request->post('extra_markup');
+
+		$paxCode = array_key_first($extraMarkup);
+		$fqId = array_key_first($extraMarkup[$paxCode]);
+		$value = $extraMarkup[$paxCode][$fqId];
+
+		if ($paxCode && $fqId && $value !== null) {
+			try {
+
+				$paxCodeId = FlightPax::getPaxId($paxCode);
+
+				$flightQuotePaxPrice = $this->flightQuotePaxPriceRepository->findByIdAndCode($fqId, $paxCodeId);
+
+				$this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, $value);
+			} catch (\RuntimeException $e) {
+				return $this->asJson(['message' => $e->getMessage()]);
+			}
+
+			return $this->asJson(['output' => $value]);
+		}
+
+		throw new BadRequestHttpException();
 	}
 
 	public function actionQuoteStatusLog()

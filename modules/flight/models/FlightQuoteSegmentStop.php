@@ -1,8 +1,8 @@
 <?php
 
 namespace modules\flight\models;
-
 use common\models\Airport;
+use modules\flight\src\entities\flightQuoteSegmentStop\serializer\FlightQuoteSegmentStopSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use Yii;
 use yii\db\ActiveQuery;
@@ -105,5 +105,10 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
 	public function getLocationAirport(): ActiveQuery
 	{
 		return $this->hasOne(Airport::class, ['iata' => 'qss_location_iata']);
+	}
+	
+    public function serialize(): array
+    {
+        return (new FlightQuoteSegmentStopSerializer($this))->getData();
 	}
 }

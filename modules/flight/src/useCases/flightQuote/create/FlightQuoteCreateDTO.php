@@ -50,7 +50,7 @@ class FlightQuoteCreateDTO
 		$this->sourceId = null;
 		$this->productQuoteId = $productQuote->pq_id;
 		$this->hashKey = FlightQuoteHelper::generateHashQuoteKey($quote['key']);
-		$this->serviceFeePercent = null;
+		$this->serviceFeePercent = FlightQuote::SERVICE_FEE * 100;
 		$this->recordLocator = null;
 		$this->gds = $quote['gds'];
 		$this->gdsPcc = $quote['pcc'];

@@ -138,15 +138,6 @@ class ProductQuoteStatus
 
 	/**
 	 * @param ProductQuote $productQuote
-	 * @return bool
-	 */
-    public static function isApplied(ProductQuote $productQuote): bool
-	{
-		return $productQuote->pq_status_id === self::APPLIED;
-	}
-
-	/**
-	 * @param ProductQuote $productQuote
 	 * @return string
 	 * @throws \yii\base\InvalidConfigException
 	 */

@@ -3,18 +3,25 @@
 namespace sales\helpers\product;
 
 use common\models\Currency;
+use common\models\CurrencyHistory;
 use modules\product\src\entities\product\Product;
 
 class ProductQuoteHelper
 {
 	/**
 	 * @param float $price
-	 * @param Product $product
+	 * @param string $currencyCode
 	 * @return false|float
 	 */
-	public static function calcSystemPrice(float $price, Product $product)
+	public static function calcSystemPrice(float $price, string $currencyCode)
 	{
-		return self::roundPrice($price * self::getBaseCurrencyRate($product));
+		$rate = Currency::getBaseRateByCurrencyCode($currencyCode) ?? CurrencyHistory::getBaseRateByCurrencyCode($currencyCode);
+
+		if ($rate === null) {
+			throw new \DomainException('Cant find rate for the currency: ' . $currencyCode);
+		}
+
+		return self::roundPrice($price * $rate);
 	}
 
 	/**
@@ -48,19 +55,6 @@ class ProductQuoteHelper
 				return $currency->cur_code ?? Currency::getDefaultCurrencyCode();
 		}
 		return Currency::getDefaultCurrencyCode();
-	}
-
-	/**
-	 * @param Product $product
-	 * @return float
-	 */
-	public static function getBaseCurrencyRate(Product $product): float
-	{
-		$leadPreferences = $product->prLead->leadPreferences;
-		if ($leadPreferences && $currency = $leadPreferences->prefCurrency) {
-			return $currency->cur_base_rate ?? Currency::getDefaultBaseCurrencyRate();
-		}
-		return Currency::getDefaultBaseCurrencyRate();
 	}
 
 	/**

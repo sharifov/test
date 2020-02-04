@@ -3,6 +3,7 @@
 namespace modules\product\src\entities\productType;
 
 use sales\entities\EventTrait;
+use sales\helpers\product\ProductQuoteHelper;
 
 /**
  * This is the model class for table "product_type".
@@ -23,6 +24,8 @@ class ProductType extends \yii\db\ActiveRecord
 
     public const PRODUCT_FLIGHT = 1;
     public const PRODUCT_HOTEL  = 2;
+
+    public const PROCESSING_FEE_AMOUNT = 25.00;
 
     public static function tableName(): string
     {
@@ -64,4 +67,14 @@ class ProductType extends \yii\db\ActiveRecord
     {
         return new Scopes(static::class);
     }
+
+	/**
+	 * @return float
+	 */
+    public function getProcessingFeeAmount(): float
+	{
+		$setting = json_decode((string)$this->pt_settings, true);
+
+		return ProductQuoteHelper::roundPrice($setting['processing_fee_amount'] ? (float)$setting['processing_fee_amount'] : self::PROCESSING_FEE_AMOUNT);
+	}
 }

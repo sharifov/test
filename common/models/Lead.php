@@ -3859,7 +3859,7 @@ Reason: {reason}
             foreach ($offerIds as $ofId) {
                 $offerModel = Offer::findOne($ofId);
                 if($offerModel) {
-                    $offerItem = $offerModel->communicationData; //attributes;
+                    $offerItem = $offerModel->serialize(); //attributes;
                     //$quoteItem = array_merge($quoteItem, $offerModel->getInfoForEmail2());
                     $content_data['offers'][] = $offerItem;
                 }

@@ -5,6 +5,7 @@ namespace modules\flight\src\useCases\flightQuote\create;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
+use sales\helpers\product\ProductQuoteHelper;
 
 class FlightQuotePaxPriceDTO
 {
@@ -20,6 +21,7 @@ class FlightQuotePaxPriceDTO
 	public $clientCurrency;
 	public $clientFare;
 	public $clientTax;
+	public $cnt;
 
 	/**
 	 * FlightQuotePaxPriceDTO constructor.
@@ -33,16 +35,21 @@ class FlightQuotePaxPriceDTO
 	{
 		$this->flightQuoteId = $flightQuote->fq_id;
 		$this->flightPaxCodeId = FlightPax::getPaxId($paxType);
-		$this->fare = (float)($pax['baseFare'] ?? null);
-		$this->tax = (float)($pax['tax'] ?? null);
-		$this->systemMarkUp = (float)($pax['markup'] ?? 0);
-		$this->agentMarkUp = 0;
-		$this->originFare = $pax['oBaseFare']['amount'] ?? null;
-		$this->originCurrency = $productQuote->pq_origin_currency;
+
+		$this->originFare = $pax['baseFare'] ?? null;
 		$this->originTax = $pax['baseTax'] ?? null;
+		$this->originCurrency = $productQuote->pq_origin_currency;
+
+		$this->fare = ProductQuoteHelper::calcSystemPrice((float) $this->originFare, $pax['oBaseFare']['currency'] ?? $quote['currency']);
+		$this->tax =  ProductQuoteHelper::calcSystemPrice((float) $this->originTax, $pax['oBaseTax']['currency'] ?? $quote['currency']);
+
+		$this->clientFare = ProductQuoteHelper::calcClientPrice($this->fare, $productQuote->pqProduct);
+		$this->clientTax = ProductQuoteHelper::calcClientPrice($this->tax, $productQuote->pqProduct);
 		$this->clientCurrency = $productQuote->pq_client_currency;
-		$this->clientFare = null;
-		$this->clientTax = null;
+
+		$this->systemMarkUp = (ProductQuoteHelper::calcSystemPrice($pax['markup'], $pax['oMarkup']['currency'] ?? $quote['currency']));
+		$this->agentMarkUp = 0;
+		$this->cnt = $pax['cnt'];
 	}
 
 }

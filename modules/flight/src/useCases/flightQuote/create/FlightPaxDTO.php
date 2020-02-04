@@ -17,13 +17,13 @@ class FlightPaxDTO
 	/**
 	 * FlightPaxDTO constructor.
 	 * @param Flight $flight
-	 * @param array $pax
+	 * @param string $paxType
 	 */
-	public function __construct(Flight $flight, array $pax)
+	public function __construct(Flight $flight, string $paxType)
 	{
 		$this->flightId = $flight->fl_id;
 		$this->paxId = null;
-		$this->paxType = null;
+		$this->paxType = $paxType;
 		$this->firstName = null;
 		$this->lastName = null;
 		$this->middleName = null;

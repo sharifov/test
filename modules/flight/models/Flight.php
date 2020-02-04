@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\entities\flight\serializer\FlightSerializer;
 use modules\product\src\entities\product\Product;
 use modules\flight\models\query\FlightQuery;
 use modules\flight\src\events\FlightCountPassengersChangedEvent;
@@ -305,5 +306,10 @@ class Flight extends \yii\db\ActiveRecord implements Productable
 			}
 		}
 		return false;
+	}
+
+    public function serialize(): array
+    {
+        return (new FlightSerializer($this))->getData();
 	}
 }

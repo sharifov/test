@@ -190,7 +190,7 @@ $js = <<<JS
         e.preventDefault();
         let url = $(this).data('url');
         let gid = $(this).data('gid');
-        let modal = $('#modal-md');
+        let modal = $('#modal-lg');
           
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Offer [' + gid + '] view history');

@@ -4,6 +4,7 @@ namespace modules\flight\models;
 
 use common\models\Airline;
 use common\models\Airport;
+use modules\flight\src\entities\flightQuoteSegment\serializer\FlightQuoteSegmentSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use Yii;
 
@@ -228,5 +229,10 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
 	public function getTicketColor(): string
 	{
 		return self::TICKET_COLOR_LIST[$this->fqs_ticket_id] ?? '#FFFFFF';
+	}
+	
+    public function serialize(): array
+    {
+        return (new FlightQuoteSegmentSerializer($this))->getData();
 	}
 }

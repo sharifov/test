@@ -35,6 +35,7 @@ class OfferViewLogCrudSearch extends OfferViewLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['ofvwl_id' => SORT_DESC]]
         ]);
 
         $this->load($params);

@@ -1471,6 +1471,119 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v2/offer/view",
+    "title": "View Offer",
+    "version": "0.2.0",
+    "name": "ViewOffer",
+    "group": "Offer",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "offerGid",
+            "description": "<p>Offer gid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "visitor",
+            "description": "<p>Visitor</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "visitor.id",
+            "description": "<p>Visitor Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "visitor.ipAddress",
+            "description": "<p>Visitor Ip Address</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "255",
+            "optional": false,
+            "field": "visitor.userAgent",
+            "description": "<p>Visitor User Agent</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n    \"offerGid\": \"04d3fe3fc74d0514ee93e208a52bcf90\",\n    \"visitor\": {\n        \"id\": \"hdsjfghsd5489tertwhf289hfgkewr\",\n        \"ipAddress\": \"12.12.13.22\",\n        \"userAgent\": \"mozilea/asdfsdf/ as/dfgsdf gsdf gsdgf/ds\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"offer\": {\n          \"of_gid\": \"04d3fe3fc74d0514ee93e208a52bcf90\",\n          \"of_uid\": \"of5e2c5ea22b0f1\",\n          \"of_name\": \"Offer 2\",\n          \"of_lead_id\": 371096,\n          \"of_status_id\": 1,\n          \"of_client_currency\": \"EUR\",\n          \"of_client_currency_rate\": 1,\n          \"of_app_total\": 0,\n          \"of_client_total\": 0,\n          \"quotes\": [\n              {\n                  \"pq_gid\": \"6fcfc43e977dabffe6a979ebda22a281\",\n                  \"pq_name\": \"\",\n                  \"pq_order_id\": null,\n                  \"pq_description\": null,\n                  \"pq_status_id\": 1,\n                  \"pq_price\": 92.3,\n                  \"pq_origin_price\": 92.3,\n                  \"pq_client_price\": 92.3,\n                  \"pq_service_fee_sum\": null,\n                  \"pq_origin_currency\": \"USD\",\n                  \"pq_client_currency\": \"USD\",\n                  \"data\": {\n                      \"fq_flight_id\": 21,\n                      \"fq_source_id\": null,\n                      \"fq_product_quote_id\": 6,\n                      \"fq_gds\": \"A\",\n                      \"fq_gds_pcc\": \"DFWG32100\",\n                      \"fq_gds_offer_id\": null,\n                      \"fq_type_id\": 0,\n                      \"fq_cabin_class\": \"E\",\n                      \"fq_trip_type_id\": 1,\n                      \"fq_main_airline\": \"SU\",\n                      \"fq_fare_type_id\": 1,\n                      \"fq_last_ticket_date\": \"2020-01-25\",\n                      \"flight\": {\n                          \"fl_product_id\": 33,\n                          \"fl_trip_type_id\": 1,\n                          \"fl_cabin_class\": \"E\",\n                          \"fl_adults\": 2,\n                          \"fl_children\": 0,\n                          \"fl_infants\": 0\n                      },\n                      \"segments\": [\n                          {\n                              \"fqs_departure_dt\": \"2020-01-30 01:35:00\",\n                              \"fqs_arrival_dt\": \"2020-01-30 05:45:00\",\n                              \"fqs_stop\": 0,\n                              \"fqs_flight_number\": 1845,\n                              \"fqs_booking_class\": \"R\",\n                              \"fqs_duration\": 190,\n                              \"fqs_departure_airport_iata\": \"KIV\",\n                              \"fqs_departure_airport_terminal\": \"\",\n                              \"fqs_arrival_airport_iata\": \"SVO\",\n                              \"fqs_arrival_airport_terminal\": \"D\",\n                              \"fqs_operating_airline\": \"SU\",\n                              \"fqs_marketing_airline\": \"SU\",\n                              \"fqs_air_equip_type\": \"32A\",\n                              \"fqs_marriage_group\": \"\",\n                              \"fqs_cabin_class\": \"Y\",\n                              \"fqs_meal\": \"\",\n                              \"fqs_fare_code\": \"RNO\",\n                              \"fqs_ticket_id\": null,\n                              \"fqs_recheck_baggage\": 0,\n                              \"fqs_mileage\": null,\n                              \"baggages\": [\n                                  {\n                                      \"qsb_flight_pax_code_id\": 1,\n                                      \"qsb_flight_quote_segment_id\": 2,\n                                      \"qsb_airline_code\": null,\n                                      \"qsb_allow_pieces\": 0,\n                                      \"qsb_allow_weight\": null,\n                                      \"qsb_allow_unit\": null,\n                                      \"qsb_allow_max_weight\": null,\n                                      \"qsb_allow_max_size\": null\n                                  }\n                              ]\n                          }\n                      ],\n                      \"pax_prices\": [\n                         {\n                              \"qpp_fare\": \"43.00\",\n                              \"qpp_tax\": \"49.30\",\n                              \"qpp_system_mark_up\": \"0.00\",\n                              \"qpp_agent_mark_up\": \"0.00\",\n                              \"qpp_origin_fare\": \"43.00\",\n                              \"qpp_origin_currency\": \"USD\",\n                              \"qpp_origin_tax\": \"49.30\",\n                              \"qpp_client_currency\": \"USD\",\n                              \"qpp_client_fare\": null,\n                              \"qpp_client_tax\": null\n                          }\n                      ]\n                  },\n                  \"product\": {\n                      \"pr_type_id\": 1,\n                      \"pr_name\": \"\",\n                      \"pr_lead_id\": 371096,\n                      \"pr_description\": \"\",\n                      \"pr_status_id\": null,\n                      \"pr_service_fee_percent\": null\n                  },\n                  \"productQuoteOptions\": []\n              },\n              {\n                  \"pq_gid\": \"16fb0f9565b9cb87280a348c75c05128\",\n                  \"pq_name\": \"DBL.ST\",\n                  \"pq_order_id\": null,\n                  \"pq_description\": null,\n                  \"pq_status_id\": 1,\n                  \"pq_price\": 349.99,\n                  \"pq_origin_price\": 349.99,\n                  \"pq_client_price\": 349.99,\n                  \"pq_service_fee_sum\": 0,\n                  \"pq_origin_currency\": \"USD\",\n                  \"pq_client_currency\": \"USD\",\n                  \"data\": {\n                      \"hotel\": {\n                          \"hl_name\": \"Manzil Hotel\",\n                          \"hl_star\": null,\n                          \"hl_category_name\": \"2 STARS\",\n                          \"hl_destination_name\": \"Casablanca\",\n                          \"hl_zone_name\": \"Casablanca\",\n                          \"hl_country_code\": \"MA\",\n                          \"hl_state_code\": \"07\",\n                          \"hl_description\": \"The Hotel is ideally located in the neighborhood of Roches Noires district and close to the activity area of ​​Ain Sebaa...\",\n                          \"hl_address\": \"RUE DES FRANCAIS, ROCHES NOIRES,38  \",\n                          \"hl_postal_code\": \"20000\",\n                          \"hl_city\": \"CASABLANCA\",\n                          \"hl_email\": \"resa@manzilhotels.com\",\n                          \"hl_web\": null,\n                          \"hl_phone_list\": [\n                             {\n                                  \"type\": \"PHONEBOOKING\",\n                                  \"number\": \"00212522242020\"\n                              },\n                              {\n                                  \"type\": \"PHONEHOTEL\",\n                                  \"number\": \"00212522242020\"\n                              },\n                              {\n                                  \"type\": \"FAXNUMBER\",\n                                  \"number\": \"00212522242020\"\n                              }\n                          ],\n                          \"hl_image_list\": [\n                              {\n                                  \"url\": \"59/590133/590133a_hb_a_001.jpg\",\n                                  \"type\": \"GEN\"\n                              }\n                          ],\n                          \"hl_image_base_url\": null\n                      },\n                      \"rooms\": [\n                          {\n                              \"hqr_room_name\": \"DOUBLE STANDARD\",\n                              \"hqr_class\": \"NOR\",\n                              \"hqr_amount\": 349.99,\n                              \"hqr_currency\": \"USD\",\n                              \"hqr_cancel_amount\": null,\n                              \"hqr_cancel_from_dt\": null,\n                              \"hqr_board_name\": \"ROOM ONLY\",\n                              \"hqr_rooms\": 1,\n                              \"hqr_adults\": 1,\n                              \"hqr_children\": null\n                          }\n                      ]\n                  },\n                  \"product\": {\n                      \"pr_type_id\": 2,\n                      \"pr_name\": \"ee\",\n                      \"pr_lead_id\": 371096,\n                      \"pr_description\": \"rrr\",\n                      \"pr_status_id\": 1,\n                      \"pr_service_fee_percent\": null\n                  },\n                  \"productQuoteOptions\": [\n                      {\n                          \"pqo_name\": \"1323\",\n                          \"pqo_description\": \"\",\n                          \"pqo_status_id\": 1,\n                          \"pqo_price\": null,\n                          \"pqo_client_price\": null,\n                          \"pqo_extra_markup\": null\n                      },\n                      {\n                          \"pqo_name\": \"tests\",\n                          \"pqo_description\": \"swe we \",\n                          \"pqo_status_id\": 1,\n                          \"pqo_price\": 12,\n                          \"pqo_client_price\": null,\n                          \"pqo_extra_markup\": 1\n                      }\n                  ]\n              }\n          ]\n      },\n      \"technical\": {\n          \"action\": \"v2/offer/view\",\n          \"response_id\": 11933859,\n          \"request_dt\": \"2020-02-03 12:53:50\",\n          \"response_dt\": \"2020-02-03 12:53:50\",\n          \"execution_time\": 0.034,\n          \"memory_usage\": 1255920\n      },\n      \"request\": {\n          \"offerGid\": \"04d3fe3fc74d0514ee93e208a52bcf90\",\n          \"visitor\": {\n              \"id\": \"hdsjfghsd5489tertwhf289hfgkewr\",\n              \"ipAddress\": \"12.12.12.12\",\n              \"userAgent\": \"mozilea/asdfsdf/ as/dfgsdf gsdf gsdgf/ds\"\n          }\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Error\",\n    \"errors\": [\n        \"Not found Offer\"\n    ],\n    \"code\": \"18302\",\n    \"technical\": {\n        \"action\": \"v2/offer/view\",\n        \"response_id\": 11933860,\n        \"request_dt\": \"2020-02-03 13:07:10\",\n        \"response_dt\": \"2020-02-03 13:07:10\",\n        \"execution_time\": 0.015,\n        \"memory_usage\": 151792\n    },\n    \"request\": {\n        \"offerGid\": \"04d3fe3fc74d0514ee93e208a5x2bcf90\",\n        \"visitor\": {\n            \"id\": \"hdsjfghsd5489tertwhf289hfgkewr\",\n            \"ipAddress\": \"12.12.12.12\",\n            \"userAgent\": \"mozilea/asdfsdf/ as/dfgsdf gsdf gsdgf/ds\"\n        }\n    }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n       \"visitor.ipAddress\": [\n            \"Ip Address cant be array.\"\n        ]\n    },\n    \"code\": \"18301\",\n    \"technical\": {\n         \"action\": \"v2/offer/view\",\n         \"response_id\": 11933854,\n         \"request_dt\": \"2020-02-03 12:44:13\",\n         \"response_dt\": \"2020-02-03 12:44:13\",\n         \"execution_time\": 0.013,\n         \"memory_usage\": 127680\n    },\n    \"request\": {\n         \"offerGid\": \"04d3fe3fc74d0514ee93e208a52bcf90\",\n         \"visitor\": {\n             \"id\": \"hdsjfghsd5489tertwhf289hfgkewr\",\n             \"ipAddress\": [],\n             \"userAgent\": \"mozilea/asdfsdf/ as/dfgsdf gsdf gsdgf/ds\"\n         }\n    }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n    \"status\": 400,\n    \"message\": \"Load data error\",\n    \"errors\": [\n        \"Not found Offer data on POST request\"\n    ],\n    \"code\": \"18300\",\n    \"technical\": {\n        \"action\": \"v2/offer/view\",\n        \"response_id\": 11933856,\n        \"request_dt\": \"2020-02-03 12:49:20\",\n        \"response_dt\": \"2020-02-03 12:49:20\",\n        \"execution_time\": 0.017,\n        \"memory_usage\": 114232\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/OfferController.php",
+    "groupTitle": "Offer"
+  },
+  {
+    "type": "post",
     "url": "/v2/order/create",
     "title": "Create Order",
     "version": "0.2.0",

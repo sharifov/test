@@ -5,6 +5,8 @@ namespace modules\hotel\models;
 use common\models\Currency;
 use modules\hotel\models\query\HotelQuoteRoomQuery;
 use sales\helpers\email\TextConvertingHelper;
+use modules\hotel\src\entities\hotelQuoteRoom\serializer\HotelQuoteRoomSerializer;
+use sales\entities\serializer\Serializable;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -33,10 +35,9 @@ use yii\db\ActiveRecord;
  * @property int $hqr_type
  *
  * @property Currency $hqrCurrency
- * @property array $extraData
  * @property HotelQuote $hqrHotelQuote
  */
-class HotelQuoteRoom extends ActiveRecord
+class HotelQuoteRoom extends ActiveRecord implements Serializable
 {
     public const TYPE_RECHECK = 0;
     public const TYPE_BOOKABLE = 1;
@@ -75,30 +76,6 @@ class HotelQuoteRoom extends ActiveRecord
             [['hqr_rate_comments'], 'string', 'max' => 255],
             [['hqr_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['hqr_currency' => 'cur_code']],
             [['hqr_hotel_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelQuote::class, 'targetAttribute' => ['hqr_hotel_quote_id' => 'hq_id']],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function extraFields(): array
-    {
-        return [
-            //'hqr_id',
-            'hqr_room_name',
-            //'hqr_key',
-            //'hqr_code',
-            'hqr_class',
-            'hqr_amount',
-            'hqr_currency',
-            'hqr_cancel_amount',
-            'hqr_cancel_from_dt',
-            // 'hqr_payment_type',
-            //'hqr_board_code',
-            'hqr_board_name',
-            'hqr_rooms',
-            'hqr_adults',
-            'hqr_children',
         ];
     }
 
@@ -158,12 +135,9 @@ class HotelQuoteRoom extends ActiveRecord
         return new HotelQuoteRoomQuery(static::class);
     }
 
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
+    public function serialize(): array
     {
-        return array_intersect_key($this->attributes, array_flip($this->extraFields()));
+        return (new HotelQuoteRoomSerializer($this))->getData();
     }
 
     /**

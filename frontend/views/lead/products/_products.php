@@ -70,14 +70,13 @@ JS;
 
 <?php foreach ($products as $product):?>
 
-
-    <?php if ((int) $product->pr_type_id === \modules\product\src\entities\productType\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
+    <?php if ((int) $product->isHotel() && $product->hotel): ?>
         <?= $this->render('@modules/hotel/views/hotel/partial/_product_hotel', [
             'product' => $product,
         ]) ?>
     <?php endif; ?>
 
-    <?php if ((int) $product->pr_type_id === \modules\product\src\entities\productType\ProductType::PRODUCT_FLIGHT && $product->flight): ?>
+    <?php if ((int) $product->isFlight() && $product->flight): ?>
         <?= $this->render('@modules/flight/views/flight/partial/_product_flight', [
             'product' => $product,
         ]) ?>
