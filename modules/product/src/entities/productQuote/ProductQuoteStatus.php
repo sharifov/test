@@ -33,7 +33,7 @@ class ProductQuoteStatus
     ];
 
     private const CLASS_LIST        = [
-    	self::NEW			 => 'default',
+    	self::NEW			 => 'info',
         self::PENDING        => 'warning',
         self::APPLIED        => 'warning',
         self::IN_PROGRESS    => 'warning',
