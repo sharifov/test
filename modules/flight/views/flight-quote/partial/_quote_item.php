@@ -273,6 +273,33 @@ $flightQuote = FlightQuote::findByProductQuote($model);
                             <?php // ajax loaded content ?>
                         </span>
                     </span>
+
+                    <span style="margin: 20px 0;" class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i> Options</a>
+                        <div class="dropdown-menu" role="menu">
+                            <h6 class="dropdown-header">Quote Q<?=($model->pq_id)?></h6>
+							<?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+								'class' => 'dropdown-item text-success btn-add-product-quote-option',
+								//'data-product-quote-id' => $model->hq_product_quote_id,
+								'data-url' => \yii\helpers\Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->pq_id]),
+								//'data-product-id' => $model->hqProductQuote->pq_product_id,
+							]) ?>
+
+							<?= Html::a('<i class="fa fa-plus-circle"></i> Status log', null, [
+								'class' => 'dropdown-item text-success btn-product-quote-status-log',
+								'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $model->pq_gid]),
+								'data-gid' => $model->pq_gid,
+							]) ?>
+
+                            <div class="dropdown-divider"></div>
+							<?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+								'class' => 'dropdown-item text-danger btn-delete-product-quote',
+								'data-product-quote-id' => $model->pq_id,
+								'data-hotel-quote-id' => $flightQuote->fq_id,
+								'data-product-id' => $model->pq_product_id,
+							]) ?>
+                        </div>
+                    </span>
                 </div>
             </div>
         </div>
