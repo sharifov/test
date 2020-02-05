@@ -49,6 +49,8 @@ class m200204_113105_create_table_hotel_quote_service_log extends Migration
             '{{%employees}}','id','SET NULL','CASCADE'
         );
 
+        $this->dropColumn('{{%hotel_quote}}', 'hq_json_response');
+
         (new RbacMigrationService())->up($this->routes, $this->roles);
 
         $this->_flush();
@@ -65,6 +67,8 @@ class m200204_113105_create_table_hotel_quote_service_log extends Migration
         $this->dropForeignKey('FK-hotel-quote-service-log_employees', $this->tableName);
 
         $this->dropTable($this->tableName);
+
+        $this->addColumn('{{%hotel_quote}}', 'hq_json_response', $this->json());
 
         $this->_flush();
     }

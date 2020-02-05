@@ -25,7 +25,6 @@ use yii\helpers\VarDumper;
  * @property int $hq_hotel_id
  * @property string|null $hq_hash_key
  * @property int|null $hq_product_quote_id
- * @property string|null $hq_json_response
  * @property string|null $hq_destination_name
  * @property string $hq_hotel_name
  * @property int|null $hq_hotel_list_id
@@ -56,7 +55,6 @@ class HotelQuote extends ActiveRecord implements Serializable
         return [
             [['hq_hotel_id', 'hq_hotel_name'], 'required'],
             [['hq_hotel_id', 'hq_product_quote_id', 'hq_hotel_list_id'], 'integer'],
-            [['hq_json_response'], 'safe'],
             [['hq_hash_key', 'hq_request_hash'], 'string', 'max' => 32],
             [['hq_destination_name'], 'string', 'max' => 255],
             [['hq_hotel_name'], 'string', 'max' => 200],
@@ -77,7 +75,6 @@ class HotelQuote extends ActiveRecord implements Serializable
             'hq_hotel_id' => 'Hotel ID',
             'hq_hash_key' => 'Hash Key',
             'hq_product_quote_id' => 'Product Quote ID',
-            'hq_json_response' => 'Json Response',
             'hq_destination_name' => 'Destination Name',
             'hq_hotel_name' => 'Hotel Name',
             'hq_hotel_list_id' => 'Hotel List ID',
@@ -183,7 +180,6 @@ class HotelQuote extends ActiveRecord implements Serializable
                         $hQuote->hq_hash_key = $hashKey;
                         $hQuote->hq_hotel_id = $hotelRequest->ph_id;
                         $hQuote->hq_hotel_list_id = $hotelModel->hl_id;
-                        $hQuote->hq_json_response = json_encode($quoteData);
                         $hQuote->hq_product_quote_id = $prQuote->pq_id;
                         $hQuote->hq_hotel_name = $hotelModel->hl_name;
                         $hQuote->hq_destination_name = $hotelModel->hl_destination_name;
