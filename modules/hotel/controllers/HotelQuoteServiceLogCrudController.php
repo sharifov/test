@@ -2,9 +2,9 @@
 
 namespace modules\hotel\controllers;
 
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
+use modules\hotel\src\entities\hotelQuoteServiceLog\search\HotelQuoteServiceLogCrudSearch;
 use Yii;
-use modules\hotel\models\HotelQuoteServiceLog;
-use modules\hotel\models\search\HotelQuoteServiceLogSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -21,7 +21,7 @@ class HotelQuoteServiceLogCrudController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
@@ -35,7 +35,7 @@ class HotelQuoteServiceLogCrudController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new HotelQuoteServiceLogSearch();
+        $searchModel = new HotelQuoteServiceLogCrudSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

@@ -2,16 +2,13 @@
 
 namespace modules\hotel\src\useCases\api\bookQuote;
 
-use common\models\Client;
 use modules\hotel\components\ApiHotelService;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\HotelQuoteRoom;
-use modules\hotel\models\HotelQuoteRoomPax;
-use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
-use yii\helpers\VarDumper;
+
 
 /**
  * Class HotelQuoteBookService
@@ -58,7 +55,7 @@ class HotelQuoteCancelBookService
     public function cancelBook(HotelQuote $model)
     {
         $params = ['bookingId' => $model->hq_booking_id];
-        $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params, 'delete');
+        $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params, $model->hq_id,'delete');
         $userId = Auth::id();
 
         if ($apiResponse['status']) {
@@ -91,6 +88,7 @@ class HotelQuoteCancelBookService
                 $this->productQuoteRepository->save($productQuote);
             });
         }
+
         return $this;
     }
 }

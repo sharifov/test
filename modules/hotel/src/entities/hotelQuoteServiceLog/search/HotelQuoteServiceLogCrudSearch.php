@@ -1,15 +1,15 @@
 <?php
 
-namespace modules\hotel\models\search;
+namespace modules\hotel\src\entities\hotelQuoteServiceLog\search;
 
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use modules\hotel\models\HotelQuoteServiceLog;
 
 /**
- * HotelQuoteServiceLogSearch represents the model behind the search form of `modules\hotel\models\HotelQuoteServiceLog`.
+ * HotelQuoteServiceLogCrudSearch represents the model behind the search form of `modules\hotel\models\HotelQuoteServiceLog`.
  */
-class HotelQuoteServiceLogSearch extends HotelQuoteServiceLog
+class HotelQuoteServiceLogCrudSearch extends HotelQuoteServiceLog
 {
     /**
      * {@inheritdoc}
@@ -35,13 +35,16 @@ class HotelQuoteServiceLogSearch extends HotelQuoteServiceLog
      *
      * @param array $params
      *
+     * @param int $hotelQuoteId
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, int $hotelQuoteId = 0)
     {
         $query = HotelQuoteServiceLog::find();
 
-        // add conditions that should always apply here
+        if ($hotelQuoteId) {
+            $query->andWhere(['hqsl_hotel_quote_id' => $hotelQuoteId]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -53,7 +56,6 @@ class HotelQuoteServiceLogSearch extends HotelQuoteServiceLog
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'hqsl_id' => $this->hqsl_id,
             'hqsl_hotel_quote_id' => $this->hqsl_hotel_quote_id,

@@ -78,7 +78,7 @@ class HotelQuoteCheckRateService
             'rooms' => $rooms,
         ];
 
-        $apiResponse = $this->apiService->requestBookingHandler('booking/checkrate', $params);
+        $apiResponse = $this->apiService->requestBookingHandler('booking/checkrate', $params, $model->hq_id);
 
         if ($apiResponse['status']) {
             if (count($apiResponse['data']['rooms'])) {

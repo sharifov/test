@@ -73,7 +73,7 @@ class HotelQuoteBookService
             'rooms' => $rooms,
         ];
 
-        $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params);
+        $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params, $model->hq_id);
 
         if ($apiResponse['status']) {
             $this->transactionManager->wrap(function () use ($model, $apiResponse, $productQuote, $userId) {
@@ -95,6 +95,7 @@ class HotelQuoteBookService
                 $this->productQuoteRepository->save($productQuote);
             });
         }
+
         return $this;
     }
 

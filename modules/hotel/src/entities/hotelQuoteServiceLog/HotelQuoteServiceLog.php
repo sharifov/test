@@ -1,9 +1,10 @@
 <?php
 
-namespace modules\hotel\models;
+namespace modules\hotel\src\entities\hotelQuoteServiceLog;
 
 use common\models\Employee;
-use modules\hotel\models\query\HotelQuoteServiceLogQuery;
+use modules\hotel\models\HotelQuote;
+use modules\hotel\src\entities\hotelQuoteServiceLog\Scopes;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -43,6 +44,12 @@ class HotelQuoteServiceLog extends ActiveRecord
     	self::ACTION_TYPE_BOOK => 'Book',
         self::ACTION_TYPE_CHECK => 'Check',
 		self::ACTION_TYPE_CANCEL => 'Cancel',
+    ];
+
+    public const URL_METHOD_ACTION_TYPE_MAP = [
+        'booking/book_post' => self::ACTION_TYPE_BOOK,
+        'booking/checkrate_post' => self::ACTION_TYPE_CHECK,
+        'booking/book_delete' => self::ACTION_TYPE_CANCEL,
     ];
 
     public const EVENT_CREATE_LOG = 'eventCreateLog';
@@ -104,6 +111,7 @@ class HotelQuoteServiceLog extends ActiveRecord
             'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'hqsl_created_user_id',
+                'updatedByAttribute' => false
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -126,11 +134,11 @@ class HotelQuoteServiceLog extends ActiveRecord
     }
 
     /**
-     * @return HotelQuoteServiceLogQuery|\yii\db\ActiveQuery
+     * @return Scopes|\yii\db\ActiveQuery
      */
     public static function find()
     {
-        return new HotelQuoteServiceLogQuery(get_called_class());
+        return new Scopes(get_called_class());
     }
 
 }

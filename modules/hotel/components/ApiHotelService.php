@@ -8,6 +8,8 @@
 
 namespace modules\hotel\components;
 
+use modules\hotel\src\entities\hotelQuoteServiceLog\events\HotelQuoteServiceLogCreateEvent;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\helpers\HotelApiDataHelper;
 use modules\hotel\src\helpers\HotelApiMessageHelper;
 use yii\base\Component;
@@ -210,11 +212,11 @@ class ApiHotelService extends Component
     /**
      * @param string $urlAction
      * @param array $params
+     * @param int $hotelQuoteId
      * @param string $method
-     * @param int|null $hotelQuoteId
-     * @return array [int status, string message, array data]
+     * @return array
      */
-    public function requestBookingHandler(string $urlAction, array $params, string $method = 'post', ?int $hotelQuoteId = null)
+    public function requestBookingHandler(string $urlAction, array $params, int $hotelQuoteId, string $method = 'post')
     {
         $result = ['status' => 0, 'message' => '', 'data' => []];
         $urlMethod = $urlAction . '_' . $method;
@@ -228,16 +230,29 @@ class ApiHotelService extends Component
                 if ((new HotelApiDataHelper)->checkDataResponse($urlMethod, $response->data)) {
                     $result['data'] = (new HotelApiDataHelper)->prepareDataResponse($urlMethod, $response->data);
                     $result['status'] = 1;
-                    $result['message'] = 'Process('. $urlMethod .') completed successfully';
+
+                    $resultMessage->title = 'Process completed successfully';
+                    $resultMessage->message = 'Process('. $urlMethod .') completed successfully';
+
+                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_SUCCESS;
+                    $serviceLogMessage = serialize($response->data);
+
                 } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
                     $resultMessage->title = $this->apiServiceName . ' responded with an error.';
                     $resultMessage->message = (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '';
                     $resultMessage->code = (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '';
+
+                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_ERROR;
+                    $serviceLogMessage = serialize($response->data);
+
                 } else {
                     $resultMessage->title = $this->apiServiceName . ' did not send expected data.';
                     $resultMessage->message = $resultMessage->getErrorMessageByCode($response->statusCode, $url, $method);
                     $resultMessage->code = $response->statusCode;
                     $resultMessage->additional = $response->content;
+
+                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_ERROR;
+                    $serviceLogMessage = serialize($response->data);
                 }
             } else {
                 $resultMessage->title = $this->apiServiceName . ' api response error.';
@@ -251,11 +266,22 @@ class ApiHotelService extends Component
             $resultMessage->code = $throwable->getCode();
         }
 
+        $message = $resultMessage->prepareMessage();
+        $result['message'] = $message->forHuman;
+
 		if (!$result['status']) {
-		    $message = $resultMessage->prepareMessage();
 		    \Yii::error(VarDumper::dumpAsString($message->forLog),self::class . ':' . __FUNCTION__ . ':' . $urlMethod);
-		    $result['message'] = $message->forHuman;
 		}
+
+        if (isset($serviceLogStatusId)) {
+            $hotelQuoteServiceLog = new HotelQuoteServiceLog;
+            $hotelQuoteServiceLog->hqsl_hotel_quote_id = $hotelQuoteId;
+            $hotelQuoteServiceLog->hqsl_status_id = $serviceLogStatusId;
+            $hotelQuoteServiceLog->hqsl_message = $serviceLogMessage;
+            $hotelQuoteServiceLog->hqsl_action_type_id = HotelQuoteServiceLog::URL_METHOD_ACTION_TYPE_MAP[$urlMethod];
+            $hotelQuoteServiceLog->save();
+        }
+
 		return $result;
 	}
 }

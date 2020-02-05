@@ -112,6 +112,23 @@ $js = <<<JS
             $('#preloader').addClass('d-none');
         });
     });
+    
+    $(document).on('click', '.btn-product-api-service-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let quoteId = $(this).data('hotel-quote-id');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Api service log [' + quoteId + ']');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+     });
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY);
@@ -195,9 +212,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         ) ?>
                     <? endif; ?>
                     <?php if ($model->isBooking()): ?>
-                        <?= Html::a(
-                            '<i class="fa fa-share-square"></i> Cancel Book',
-                             null,
+                        <?= Html::a('<i class="fa fa-share-square"></i> Cancel Book',null,
                             [
                                 'class' => 'dropdown-item text-danger btn-cancel-book-quote',
                                 'data-url' => \yii\helpers\Url::to('/hotel/hotel-quote/ajax-cancel-book'),
@@ -206,6 +221,16 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             ]
                         ) ?>
                     <? endif; ?>
+
+                    <? /* TODO: add RBAC permission */ ?>
+                    <?= Html::a('<i class="fa fa-plus-circle"></i> API Service Log', null,
+                        [
+                            'class' => 'dropdown-item text-success btn-product-api-service-log',
+                            'data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
+                            'data-hotel-quote-id' => $model->hq_id,
+                            'data-product-id' => $model->hqProductQuote->pq_product_id,
+                        ]
+                    )?>
 
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Status log', null, [
                         'class' => 'dropdown-item text-success btn-product-quote-status-log',
