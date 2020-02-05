@@ -11,7 +11,7 @@ use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 
-$flightQuote = null;
+$flightQuote = FlightQuote::findByProductQuote($model);
 
 ?>
 
