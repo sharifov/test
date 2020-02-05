@@ -30,16 +30,6 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'ptpm_default')->checkbox() ?>
         </div>
-        <div class="col-md-3">
-
-            <?= $form->field($model, 'ptpm_created_user_id')->dropDownList(Employee::getList(), ['prompt' => '--']) ?>
-
-            <?= $form->field($model, 'ptpm_updated_user_id')->dropDownList(Employee::getList(), ['prompt' => '--']) ?>
-
-            <?= $form->field($model, 'ptpm_created_dt')->widget(DateTimePicker::class) ?>
-
-            <?= $form->field($model, 'ptpm_updated_dt')->widget(DateTimePicker::class) ?>
-        </div>
     </div>
 
 
