@@ -78,7 +78,6 @@ class HotelQuoteBookService
         if ($apiResponse['status']) {
             $this->transactionManager->wrap(function () use ($model, $apiResponse, $productQuote, $userId) {
                 $model->hq_booking_id = $apiResponse['data']['reference'];
-                $model->hq_json_booking = $apiResponse['data']['source'];
                 $model->save();
 
                 $productQuote->booked($userId);

@@ -84,13 +84,13 @@ class HotelQuoteServiceLog extends ActiveRecord
     {
         return [
             'hqsl_id' => 'ID',
-            'hqsl_hotel_quote_id' => 'Hotel Quote ID',
+            'hqsl_hotel_quote_id' => 'Hotel Quote',
             'hqsl_action_type_id' => 'Action Type',
             'hqsl_status_id' => 'Status',
             'hqsl_message' => 'Message',
-            'hqsl_created_user_id' => 'Created User ID',
-            'hqsl_created_dt' => 'Created Dt',
-            'hqsl_updated_dt' => 'Updated Dt',
+            'hqsl_created_user_id' => 'Created User',
+            'hqsl_created_dt' => 'Created',
+            'hqsl_updated_dt' => 'Updated',
         ];
     }
 

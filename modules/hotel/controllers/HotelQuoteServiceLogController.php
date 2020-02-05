@@ -37,6 +37,7 @@ class HotelQuoteServiceLogController extends FController
         return $this->renderAjax('hotel_quote_log', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'filterModel' => false,
         ]);
     }
 }

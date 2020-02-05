@@ -2,11 +2,13 @@
 
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use yii\grid\GridView;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use dosamigos\datepicker\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\hotel\src\entities\hotelQuoteServiceLog\search\HotelQuoteServiceLogCrudSearch */
+/* @var $filterModel modules\hotel\src\entities\hotelQuoteServiceLog\search\HotelQuoteServiceLogCrudSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 ?>
@@ -14,10 +16,6 @@ use dosamigos\datepicker\DatePicker;
 
     <?php
         $gridColumns = [
-            [
-                'attribute' => 'hqsl_id',
-                'format' => 'raw'
-            ],
             [
                 'attribute' => 'hqsl_hotel_quote_id',
                 'format' => 'raw'
@@ -44,15 +42,14 @@ use dosamigos\datepicker\DatePicker;
                     $message = VarDumper::dumpAsString(unserialize($model->hqsl_message), 10);
 
                     if (strlen($message) < 500) {
-                        return '<pre>' . $message . '</pre>';
+                        return '<pre><small>' . $message . '</small></pre>';
                     } else {
                         $out = '<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#item_'. $model->hqsl_id .'" aria-expanded="false" aria-controls="item_'. $model->hqsl_id .'">
-                                    Api Response
+                                    <i class="fas fa-eye"></i>  Api Response
                                 </button>';
                         $out .= '<div class="collapse" id="item_'. $model->hqsl_id .'">';
-                        $out .= '<pre>' . $message . '</pre>';
+                        $out .= '<pre><small>' . $message . '</small></pre>';
                         $out .= '</div>';
-
                         return $out;
                     }
                 },
@@ -60,6 +57,18 @@ use dosamigos\datepicker\DatePicker;
                 'options' => [
                     'style' => 'width:800px'
                 ],
+            ],
+            [
+                'attribute' => 'hqsl_created_user_id',
+                'value' => static function (HotelQuoteServiceLog $model) {
+                    if ($model->hqsl_created_user_id) {
+                        return Html::tag('i', '', ['class' => 'fa fa-user']).' '. Html::encode($model->createdUser->username);
+                    } else {
+                        return '';
+                    }
+                },
+                'format' => 'raw',
+                'filter' => \common\models\Employee::getList()
             ],
             [
                 'attribute' => 'hqsl_created_dt',
@@ -84,7 +93,7 @@ use dosamigos\datepicker\DatePicker;
     ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
+        'filterModel' => $filterModel,
         'columns' => $gridColumns,
     ]); ?>
 

@@ -65,7 +65,6 @@ class HotelQuoteCancelBookService
                 $this->productQuoteRepository->save($productQuote);
 
                 $model->hq_booking_id = null;
-                $model->hq_json_booking = null;
                 $model->save();
 
                 HotelQuoteRoom::updateAll(
