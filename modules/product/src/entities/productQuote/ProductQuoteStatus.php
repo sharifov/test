@@ -162,7 +162,7 @@ class ProductQuoteStatus
      * @param int $status
      * @return bool
      */
-    public static function isBookable(int $status): bool /* TODO: change logic to in process */
+    public static function isBookable(int $status): bool
     {
         return in_array($status, [
             self::NEW,
