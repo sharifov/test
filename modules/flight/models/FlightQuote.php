@@ -7,12 +7,11 @@ use common\models\Employee;
 use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
+use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
-use sales\entities\serializer\Serializable;
-use sales\interfaces\QuoteCommunicationInterface;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use modules\flight\models\query\FlightQuoteQuery;
+use modules\flight\src\entities\flightQuote\Scopes;
 
 /**
  * This is the model class for table "flight_quote".
@@ -50,7 +49,7 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  */
-class FlightQuote extends ActiveRecord implements Serializable
+class FlightQuote extends ActiveRecord implements Quotable
 {
 	use EventTrait;
 
@@ -267,13 +266,9 @@ class FlightQuote extends ActiveRecord implements Serializable
         return $this->hasMany(FlightQuoteTrip::class, ['fqt_flight_quote_id' => 'fq_id']);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return FlightQuoteQuery the active query used by this AR class.
-     */
-    public static function find()
+    public static function find(): Scopes
     {
-        return new FlightQuoteQuery(static::class);
+        return new Scopes(static::class);
     }
 
 	/**
@@ -470,7 +465,7 @@ class FlightQuote extends ActiveRecord implements Serializable
 	 * @param ProductQuote $productQuote
 	 * @return FlightQuote|null
 	 */
-	public static function findByProductQuote(ProductQuote $productQuote): ?FlightQuote
+	public static function findByProductQuoteId(ProductQuote $productQuote): ?FlightQuote
 	{
 		return self::findOne(['fq_product_quote_id' => $productQuote->pq_id]);
 	}
@@ -480,8 +475,12 @@ class FlightQuote extends ActiveRecord implements Serializable
         return (new FlightQuoteSerializer($this))->getData();
     }
 
+    public static function findByProductQuote(int $productQuoteId): ?Quotable
+    {
+        return self::find()->byProductQuote($productQuoteId)->limit(1)->one();
+    }
 
-	/**
+    /**
 	 * @return float
 	 */
 	public function getServiceFeePercent(): float

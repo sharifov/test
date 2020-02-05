@@ -169,9 +169,10 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $original = ProductQuote::findOne(8);
-        $service = Yii::createObject(ProductQuoteCloneService::class);
-        $service->clone($original->pq_id, $original->pq_product_id, Auth::id());
+        $quote = ProductQuote::findOne(8);
+        if ($q = $quote->getChildQuote()) {
+            VarDumper::dump($q->serialize());
+        }
 
         die;
         return $this->render('blank');

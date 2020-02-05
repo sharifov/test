@@ -320,7 +320,7 @@ class FlightQuoteController extends FController
 
 		return $this->renderPartial('partial/_quote_view_details', [
 			'productQuote' => $productQuote,
-			'flightQuote' => FlightQuote::findByProductQuote($productQuote)
+			'flightQuote' => FlightQuote::findByProductQuoteId($productQuote)
 		]);
 	}
 
@@ -366,7 +366,7 @@ class FlightQuoteController extends FController
 		}
 		try {
 			$quote = $this->productQuoteRepository->find($productQuoteId);
-			$flightQuote = FlightQuote::findByProductQuote($quote);
+			$flightQuote = FlightQuote::findByProductQuoteId($quote);
 		} catch (\Throwable $e) {
 			throw new BadRequestHttpException($e->getMessage());
 		}

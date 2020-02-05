@@ -4,10 +4,10 @@ namespace modules\hotel\models;
 
 use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\hotel\models\query\HotelQuoteQuery;
+use modules\hotel\src\entities\hotelQuote\Scopes;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
-use sales\entities\serializer\Serializable;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -31,7 +31,7 @@ use yii\helpers\VarDumper;
  * @property ProductQuote $hqProductQuote
  * @property HotelQuoteRoom[] $hotelQuoteRooms
  */
-class HotelQuote extends ActiveRecord implements Serializable
+class HotelQuote extends ActiveRecord implements Quotable
 {
     use EventTrait;
 
@@ -113,11 +113,11 @@ class HotelQuote extends ActiveRecord implements Serializable
     }
 
     /**
-     * @return HotelQuoteQuery the active query used by this AR class.
+     * @return Scopes the active query used by this AR class.
      */
     public static function find()
     {
-        return new HotelQuoteQuery(static::class);
+        return new Scopes(static::class);
     }
 
     public static function getHashKey(string $roomKey): string
@@ -234,5 +234,10 @@ class HotelQuote extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new HotelQuoteSerializer($this))->getData();
+    }
+
+    public static function findByProductQuote(int $productQuoteId): ?Quotable
+    {
+        return self::find()->byProductQuote($productQuoteId)->limit(1)->one();
     }
 }

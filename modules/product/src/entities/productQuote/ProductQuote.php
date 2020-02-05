@@ -11,8 +11,8 @@ use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
-use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\product\src\entities\product\Product;
+use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
@@ -61,10 +61,14 @@ use yii\db\ActiveRecord;
  * @property float $totalCalcSum
  * @property ProductQuoteOption[] $productQuoteOptions
  * @property ProductQuote|null $clone
+ *
+ * @property Quotable|null $childQuote
  */
 class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
+
+    private $childQuote;
 
 	public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
@@ -169,6 +173,17 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->pq_service_fee_sum           = $this->pq_service_fee_sum === null ? null : (float) $this->pq_service_fee_sum;
         $this->pq_origin_currency_rate      = $this->pq_origin_currency_rate === null ? null : (float) $this->pq_origin_currency_rate;
         $this->pq_client_currency_rate      = $this->pq_client_currency_rate === null ? null : (float) $this->pq_client_currency_rate;
+    }
+
+    public function getChildQuote(): ?Quotable
+    {
+        if ($this->childQuote !== null) {
+            return $this->childQuote;
+        }
+
+        $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'findByProductQuote'];
+        $this->childQuote =  $finder($this->pq_id);
+        return $this->childQuote;
     }
 
     public function getClone(): ActiveQuery
