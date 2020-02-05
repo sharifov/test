@@ -470,7 +470,7 @@ class FlightQuote extends ActiveRecord implements Serializable
 	 * @param ProductQuote $productQuote
 	 * @return FlightQuote|null
 	 */
-	public static function findByProductQuote(ProductQuote $productQuote): FlightQuote
+	public static function findByProductQuote(ProductQuote $productQuote): ?FlightQuote
 	{
 		return self::findOne(['fq_product_quote_id' => $productQuote->pq_id]);
 	}

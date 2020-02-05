@@ -278,6 +278,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Currency List', 'url' => ['/currency/index']],
                 ['label' => 'Currency History', 'url' => ['/currency-history/index']],
                 ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
+                ['label' => 'Product Type Payment Method', 'url' => ['/product/product-type-payment-method/index']],
                 ['label' => 'Products', 'url' => ['/product/product-crud/index']],
                 ['label' => 'Product Options', 'url' => ['/product/product-option-crud/index']],
                 ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],

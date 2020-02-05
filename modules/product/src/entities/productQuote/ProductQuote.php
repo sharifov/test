@@ -14,11 +14,9 @@ use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
-use modules\product\src\entities\productType\ProductType;
-use modules\flight\models\FlightQuote;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
-use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\product\Product;
+use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
@@ -306,10 +304,10 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 //    }
 
 	/**
-	 * @param ProductQuoteCreateDTO $dto
+	 * @param ProductQuoteDTO $dto
 	 * @return ProductQuote
 	 */
-    public static function create(ProductQuoteCreateDTO $dto): ProductQuote
+    public static function create(ProductQuoteDTO $dto): ProductQuote
 	{
 		$quote = new self();
 

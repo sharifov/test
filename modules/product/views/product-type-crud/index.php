@@ -1,9 +1,15 @@
 <?php
 
+use modules\product\src\entities\productType\ProductType;
+use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
+use modules\product\src\entities\productTypePaymentMethod\search\ProductTypePaymentMethodSearch;
+use modules\product\src\grid\columns\ProductTypeCountPaymentMethodsColumn;
+use modules\product\src\grid\columns\ProductTypeDefaultPaymentMethodServiceFeeColumn;
 use sales\yii\grid\BooleanColumn;
 use sales\yii\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -32,8 +38,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'pt_id',
             'pt_key',
             'pt_name',
-            'pt_service_fee_percent',
+//            'pt_service_fee_percent',
             'pt_description:ntext',
+            [
+                'class' => ProductTypeCountPaymentMethodsColumn::class,
+            ],
+            [
+				'class' => ProductTypeDefaultPaymentMethodServiceFeeColumn::class,
+            ],
             [
                 'class' => BooleanColumn::class,
                 'attribute' => 'pt_enabled',

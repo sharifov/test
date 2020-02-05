@@ -2,6 +2,8 @@
 
 namespace modules\product\src\entities\productType;
 
+use common\models\PaymentMethod;
+use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethod;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 
@@ -17,6 +19,8 @@ use sales\helpers\product\ProductQuoteHelper;
  * @property bool $pt_enabled
  * @property string $pt_created_dt
  * @property string $pt_updated_dt
+ *
+ * @property ProductTypePaymentMethod[] $productTypePaymentMethod
  */
 class ProductType extends \yii\db\ActiveRecord
 {
@@ -67,6 +71,14 @@ class ProductType extends \yii\db\ActiveRecord
     {
         return new Scopes(static::class);
     }
+
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getProductTypePaymentMethod(): \yii\db\ActiveQuery
+	{
+		return $this->hasMany(ProductTypePaymentMethod::class, ['ptpm_produt_type_id' => 'pt_id']);
+	}
 
 	/**
 	 * @return float

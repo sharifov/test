@@ -16,8 +16,10 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 ?>
 
 
+
 <div class="quote quote--highlight" id="quote-<?=$model->pq_id?>">
 
+    <?php if($flightQuote): ?>
 	<?php $tripsInfo = []?>
 	<?php foreach ($flightQuote->flightQuoteTrips as $trip):?>
 		<?php
@@ -283,4 +285,9 @@ $flightQuote = FlightQuote::findByProductQuote($model);
 			<?php \yii\widgets\Pjax::end(); ?>
 		</div>
 	</div>
+    <?php else: ?>
+        <div class="d-flex justify-content-center align-items-center">
+            <p style="margin: 20px 0;">Not found quote data</p>
+        </div>
+    <?php endif; ?>
 </div>

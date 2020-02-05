@@ -376,7 +376,11 @@ $js = <<<JS
             $('#modal-df-label').html('Attention!');
             modal.find('.modal-body').html('');
             modal.find('.modal-body').load(url, function( response, status, xhr ) {
-                modal.modal('show');
+                if (status == 'error') {
+                    alert(response);
+                } else {
+                    modal.modal('show');
+                }
             });
         } else {
             window.location = url;

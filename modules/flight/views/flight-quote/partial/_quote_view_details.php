@@ -15,6 +15,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 <div class="quote__details">
 	<div class="trip">
 		<div class="trip__item">
+            <?php if($flightQuote): ?>
 			<?php foreach ($flightQuote->flightQuoteTrips as $tripKey => $trip):?>
 				<?php $segments = $trip->flightQuoteSegments;?>
 				<div class="trip__leg">
@@ -134,6 +135,9 @@ use modules\product\src\entities\productQuote\ProductQuote;
 					</div>
 				</div>
 			<?php endforeach;?>
+            <?php else: ?>
+                <p>Not found details</p>
+            <?php endif; ?>
 		</div>
 	</div>
 </div>

@@ -148,4 +148,12 @@ class PaymentMethod extends \yii\db\ActiveRecord
     {
         return self::CAT_LIST[$this->pm_category_id] ?? '';
     }
+
+	/**
+	 * @return array
+	 */
+    public static function getList(): array
+	{
+		return self::find()->select(['pm_name', 'pm_id'])->orderBy(['pm_name' => SORT_ASC])->indexBy('pm_id')->asArray()->column();
+	}
 }

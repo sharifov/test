@@ -5,6 +5,7 @@ namespace sales\yii\i18n;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\PaymentMethod;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\invoice\src\entities\invoice\InvoiceStatusAction;
@@ -29,6 +30,7 @@ use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
+use Mpdf\Tag\P;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
@@ -203,6 +205,21 @@ class Formatter extends \yii\i18n\Formatter
 
         return \modules\product\src\helpers\formatters\ProductTypeFormatter::asProductType($value);
     }
+
+    public function asPaymentMethod($value): string
+	{
+		if ($value === null) {
+			return $this->nullDisplay;
+		}
+
+		$paymentMethod = PaymentMethod::findOne($value);
+
+		if ($paymentMethod) {
+			return $paymentMethod->pm_name;
+		}
+
+		return $this->nullDisplay;
+	}
 
     public function asQuoteType($value): string
     {
