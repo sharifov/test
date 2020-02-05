@@ -51,14 +51,12 @@ class HotelModule extends \yii\base\Module
         return \Yii::t('modules/hotel/' . $category, $message, $params, $language);
     }
 
-
     /**
      * @param string $modulePath
      * @return array
      */
     public static function getListMenu(string $modulePath = 'hotel'): array
     {
-
         $items = [
             ['label' => 'Main', 'url' => ['/'. $modulePath .'/default/index']],
             ['label' => 'Hotel Request', 'url' => ['/'. $modulePath .'/hotel/index']],
@@ -66,6 +64,7 @@ class HotelModule extends \yii\base\Module
             ['label' => 'Hotel Request Rooms Pax', 'url' => ['/'. $modulePath .'/hotel-room-pax/index']],
             ['label' => 'Hotel Quote', 'url' => ['/'. $modulePath .'/hotel-quote/index']],
             ['label' => 'Hotel Quote Rooms', 'url' => ['/'. $modulePath .'/hotel-quote-room/index']],
+            ['label' => 'Hotel Quote Service log', 'url' => ['/'. $modulePath .'/hotel-quote-service-log-crud/index']],
             ['label' => 'Hotel List', 'url' => ['/'. $modulePath .'/hotel-list/index']],
         ];
         return $items;

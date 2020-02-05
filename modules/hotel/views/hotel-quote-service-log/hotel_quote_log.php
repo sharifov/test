@@ -17,15 +17,16 @@ use dosamigos\datepicker\DatePicker;
     <?php
         $gridColumns = [
             [
+                'attribute' => 'hqsl_id',
+            ],
+            [
                 'attribute' => 'hqsl_hotel_quote_id',
-                'format' => 'raw'
             ],
             [
                 'attribute' => 'hqsl_action_type_id',
                 'value' => static function (HotelQuoteServiceLog $model) {
                     return HotelQuoteServiceLog::ACTION_TYPE_LIST[$model->hqsl_action_type_id];
                 },
-                'format' => 'raw',
                 'filter' => HotelQuoteServiceLog::ACTION_TYPE_LIST,
             ],
             [
@@ -33,7 +34,6 @@ use dosamigos\datepicker\DatePicker;
                 'value' => static function (HotelQuoteServiceLog $model) {
                     return HotelQuoteServiceLog::STATUS_LIST[$model->hqsl_status_id];
                 },
-                'format' => 'raw',
                 'filter' => HotelQuoteServiceLog::STATUS_LIST,
             ],
             [
@@ -41,7 +41,7 @@ use dosamigos\datepicker\DatePicker;
                 'value' => static function (HotelQuoteServiceLog $model) {
                     $message = VarDumper::dumpAsString(unserialize($model->hqsl_message), 10);
 
-                    if (strlen($message) < 500) {
+                    if (strlen($message) < 600) {
                         return '<pre><small>' . $message . '</small></pre>';
                     } else {
                         $out = '<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#item_'. $model->hqsl_id .'" aria-expanded="false" aria-controls="item_'. $model->hqsl_id .'">
@@ -77,8 +77,8 @@ use dosamigos\datepicker\DatePicker;
                         '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->hqsl_created_dt)) : $model->hqsl_created_dt;
                 },
                 'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
+                'filter' => $filterModel ? DatePicker::widget([
+                    'model' => $filterModel,
                     'attribute' => 'hqsl_created_dt',
                     'clientOptions' => [
                         'autoclose' => true,
@@ -87,7 +87,7 @@ use dosamigos\datepicker\DatePicker;
                     'options' => [
                         'autocomplete' => 'off'
                     ],
-                ]),
+                ]) : null,
             ],
         ];
     ?>

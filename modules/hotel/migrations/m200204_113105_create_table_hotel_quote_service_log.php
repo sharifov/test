@@ -13,8 +13,8 @@ use yii\db\Migration;
 class m200204_113105_create_table_hotel_quote_service_log extends Migration
 {
     public $routes = [
-        '/hotel/hotel-quote-service-log/*',
         '/hotel/hotel-quote-service-log-crud/*',
+        '/hotel/hotel-quote-service-log/*',
     ];
 
     public $roles = [

@@ -223,6 +223,13 @@ class ApiHotelService extends Component
         $url = $this->url . $urlAction;
         $resultMessage = new HotelApiMessageHelper($urlMethod, func_get_args());
 
+        $hotelQuoteServiceLog = new HotelQuoteServiceLog;
+        $hotelQuoteServiceLog->hqsl_hotel_quote_id = $hotelQuoteId;
+        $hotelQuoteServiceLog->hqsl_message = serialize($params);
+        $hotelQuoteServiceLog->hqsl_status_id = HotelQuoteServiceLog::STATUS_SEND_REQUEST;
+        $hotelQuoteServiceLog->hqsl_action_type_id = HotelQuoteServiceLog::URL_METHOD_ACTION_TYPE_MAP[$urlMethod];
+        $hotelQuoteServiceLog->save();
+
         try {
             $response = $this->sendRequest($urlAction, $params, $method);
 
@@ -242,7 +249,7 @@ class ApiHotelService extends Component
                     $resultMessage->message = (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '';
                     $resultMessage->code = (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '';
 
-                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_ERROR;
+                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_FAIL;
                     $serviceLogMessage = serialize($response->data);
 
                 } else {
@@ -251,7 +258,7 @@ class ApiHotelService extends Component
                     $resultMessage->code = $response->statusCode;
                     $resultMessage->additional = $response->content;
 
-                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_ERROR;
+                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_FAIL;
                     $serviceLogMessage = serialize($response->data);
                 }
             } else {
@@ -259,11 +266,17 @@ class ApiHotelService extends Component
                 $resultMessage->message = $resultMessage->getErrorMessageByCode($response->statusCode, $url, $method);
                 $resultMessage->code = $response->statusCode;
                 $resultMessage->additional = $response->content;
+
+                $serviceLogStatusId = HotelQuoteServiceLog::STATUS_ERROR;
+                $serviceLogMessage = serialize($response);
             }
         } catch (\Throwable $throwable) {
             $resultMessage->title = 'Hotel booking request api throwable error.';
             $resultMessage->message = $throwable->getMessage();
             $resultMessage->code = $throwable->getCode();
+
+            $serviceLogStatusId = HotelQuoteServiceLog::STATUS_ERROR;
+            $serviceLogMessage = serialize($throwable);
         }
 
         $message = $resultMessage->prepareMessage();
@@ -273,14 +286,9 @@ class ApiHotelService extends Component
 		    \Yii::error(VarDumper::dumpAsString($message->forLog),self::class . ':' . __FUNCTION__ . ':' . $urlMethod);
 		}
 
-        if (isset($serviceLogStatusId)) {
-            $hotelQuoteServiceLog = new HotelQuoteServiceLog;
-            $hotelQuoteServiceLog->hqsl_hotel_quote_id = $hotelQuoteId;
-            $hotelQuoteServiceLog->hqsl_status_id = $serviceLogStatusId;
-            $hotelQuoteServiceLog->hqsl_message = $serviceLogMessage;
-            $hotelQuoteServiceLog->hqsl_action_type_id = HotelQuoteServiceLog::URL_METHOD_ACTION_TYPE_MAP[$urlMethod];
-            $hotelQuoteServiceLog->save();
-        }
+        $hotelQuoteServiceLog->hqsl_status_id = $serviceLogStatusId;
+        $hotelQuoteServiceLog->hqsl_message = $serviceLogMessage;
+        $hotelQuoteServiceLog->save();
 
 		return $result;
 	}

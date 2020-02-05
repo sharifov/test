@@ -24,7 +24,7 @@ class HotelApiDataHelper
                 }
                 break;
             case 'booking/book_delete':
-                if (isset($responseData['booking'])) {
+                if (isset($responseData['booking']['status']) && strtoupper($responseData['booking']['status']) == 'CANCELLED') {
                     $result = true;
                 }
                 break;

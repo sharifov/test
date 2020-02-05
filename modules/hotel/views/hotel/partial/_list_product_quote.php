@@ -222,18 +222,17 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         ) ?>
                     <? endif; ?>
 
-                    <? /* TODO: add RBAC permission */ ?>
-                    <?= Html::a('<i class="fa fa-plus-circle"></i> API Service Log', null,
+                    <?= Html::a('<i class="fa fa-list-alt"></i> API Service Log', null,
                         [
-                            'class' => 'dropdown-item text-success btn-product-api-service-log',
+                            'class' => 'dropdown-item text-secondary btn-product-api-service-log',
                             'data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
                             'data-hotel-quote-id' => $model->hq_id,
                             'data-product-id' => $model->hqProductQuote->pq_product_id,
                         ]
                     )?>
 
-                    <?= Html::a('<i class="fa fa-plus-circle"></i> Status log', null, [
-                        'class' => 'dropdown-item text-success btn-product-quote-status-log',
+                    <?= Html::a('<i class="fa fa-list-alt"></i> Status log', null, [
+                        'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
                         'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $model->hqProductQuote->pq_gid]),
                         'data-gid' => $model->hqProductQuote->pq_gid,
                     ]) ?>

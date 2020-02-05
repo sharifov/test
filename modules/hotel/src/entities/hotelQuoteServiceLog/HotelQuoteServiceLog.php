@@ -4,7 +4,6 @@ namespace modules\hotel\src\entities\hotelQuoteServiceLog;
 
 use common\models\Employee;
 use modules\hotel\models\HotelQuote;
-use modules\hotel\src\entities\hotelQuoteServiceLog\Scopes;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -26,17 +25,19 @@ use yii\helpers\ArrayHelper;
  */
 class HotelQuoteServiceLog extends ActiveRecord
 {
-    public const STATUS_SEND = 1;
+    public const STATUS_SEND_REQUEST = 1;
     public const STATUS_SUCCESS = 2;
-    public const STATUS_ERROR = 3;
+    public const STATUS_FAIL = 3; // Api response with error
+    public const STATUS_ERROR = 4; // System request error (404 etc.)
 
     public const ACTION_TYPE_BOOK = 1;
     public const ACTION_TYPE_CHECK = 2;
     public const ACTION_TYPE_CANCEL = 3;
 
     public const STATUS_LIST = [
-    	self::STATUS_SEND => 'Send',
+    	self::STATUS_SEND_REQUEST => 'Send request',
         self::STATUS_SUCCESS => 'Success',
+        self::STATUS_FAIL => 'Fail',
 		self::STATUS_ERROR => 'Error',
     ];
 
@@ -51,8 +52,6 @@ class HotelQuoteServiceLog extends ActiveRecord
         'booking/checkrate_post' => self::ACTION_TYPE_CHECK,
         'booking/book_delete' => self::ACTION_TYPE_CANCEL,
     ];
-
-    public const EVENT_CREATE_LOG = 'eventCreateLog';
 
     /**
      * @return string

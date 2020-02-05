@@ -40,7 +40,7 @@ class HotelQuoteServiceLogCrudSearch extends HotelQuoteServiceLog
      */
     public function search($params, int $hotelQuoteId = 0)
     {
-        $query = HotelQuoteServiceLog::find();
+        $query = HotelQuoteServiceLog::find()->orderBy(['hqsl_id' => SORT_DESC]);
 
         if ($hotelQuoteId) {
             $query->andWhere(['hqsl_hotel_quote_id' => $hotelQuoteId]);
