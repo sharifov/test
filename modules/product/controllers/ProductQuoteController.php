@@ -3,6 +3,8 @@
 namespace modules\product\controllers;
 
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\services\productQuote\ProductQuoteCloneService;
+use sales\auth\Auth;
 use Yii;
 use frontend\controllers\FController;
 use modules\hotel\models\HotelQuote;
@@ -13,8 +15,21 @@ use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
+/**
+ * Class ProductQuoteController
+ *
+ * @property ProductQuoteCloneService $productQuoteCloneService
+ */
 class ProductQuoteController extends FController
 {
+    private $productQuoteCloneService;
+
+    public function __construct($id, $module, ProductQuoteCloneService $productQuoteCloneService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->productQuoteCloneService = $productQuoteCloneService;
+    }
+
     /**
      * @return array
      */
@@ -25,10 +40,31 @@ class ProductQuoteController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete-ajax' => ['POST'],
+                    'clone' => ['POST'],
                 ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function actionClone(): Response
+    {
+        $productQuoteId = (int)Yii::$app->request->post('id');
+        $productQuote = $this->findModel($productQuoteId);
+
+        if (!$productQuote->pqProduct) {
+            return $this->asJson(['error' => 'Error: not found relation Product']);
+        }
+
+        try {
+            $clone = $this->productQuoteCloneService->clone($productQuote->pq_id, $productQuote->pqProduct->pr_id, Auth::id(), Auth::id());
+            return $this->asJson(['message' => 'Successfully cloned product quote. New product quote (' . $clone->pq_id . ')']);
+        } catch (\DomainException $e) {
+            return $this->asJson(['error' => 'Error: ' . $e->getMessage()]);
+        } catch (\Throwable $e) {
+            Yii::error($e, 'ProductQuoteController:actionClone');
+            return $this->asJson(['error' => 'Server error']);
+        }
     }
 
     /**
