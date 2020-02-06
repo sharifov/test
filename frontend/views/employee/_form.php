@@ -1,5 +1,6 @@
 <?php
 
+use modules\product\src\entities\productType\ProductType;
 use yii\web\View;
 use yii\grid\ActionColumn;
 
@@ -10,6 +11,7 @@ use yii\grid\ActionColumn;
  */
 /* @var $searchModel common\models\search\UserProjectParamsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $dataUserProductType yii\data\ActiveDataProvider */
 /* @var $model common\models\Employee */
 
 use sales\access\EmployeeProjectAccess;
@@ -500,6 +502,59 @@ JS;
         </div>
 
 
+        <?
+            /* TODO:
+                *) create RBAC permission
+                *) add to this template and main menu
+             */
+        ?>
+
+        <div class="user-project-type">
+            <h4>Product Type</h4>
+            <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-product-type']); ?>
+
+            <p>
+                <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Add Product Type',null,
+                    [
+                        'class' => 'btn btn-success btn-xs add-product-type',
+                        'title' => 'Add Product Type',
+                        'data-user_id' => $model->id,
+                        'data-user_name' => $model->username,
+                        'data-pjax' => '0',
+                    ]
+                )?>
+            </p>
+
+            <?= \yii\grid\GridView::widget([
+                'dataProvider' => $dataUserProductType,
+                'columns' => [
+                    [
+                        'attribute' => 'upt_product_type_id',
+                        'value' => function(\common\models\UserProductType $model) {
+                            return $model->productType->pt_name;
+                        },
+                    ],
+                    'upt_commission_percent',
+                    'upt_product_enabled:booleanByLabel',
+                    [
+                        'class' => ActionColumn::class,
+                        'template' => '{update} {delete}',
+                        'controller' => 'user-product-type',
+                        'buttons' => [
+                            'update' => function ($url, $model, $key) {
+                                return Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
+                                    'class' => 'update-product-type',
+                                    'title' => 'Update Product Type',
+                                    'data-id' => $key,
+                                    'data-pjax' => '0',
+                                ]);
+                            },
+                        ],
+                    ],
+                ],
+            ]); ?>
+            <?php \yii\widgets\Pjax::end(); ?>
+        </div>
 
         <?php /*
         <div class="card card-default">
@@ -539,6 +594,7 @@ $js = <<<JS
 
     $('#modal-df').on('hidden.bs.modal', function () {
         $.pjax.reload({container:'#pjax-grid-upp'});
+        $.pjax.reload({container: "#pjax-grid-product-type"});
         
         /*new PNotify({
             title: 'Params successfully updated',
@@ -595,6 +651,31 @@ $js = <<<JS
             }
         );
     });
-
+    
+    $(document).on('click', '.add-product-type', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-df');
+        let userName = $(this).data('user_name');
+        $.get('/user-product-type/create-ajax', {user_id: $(this).data('user_id')},
+            function (data) {
+                modal.find('.modal-title').html('Add Product Type for ' + userName);
+                modal.find('.modal-body').html(data);
+                modal.modal();
+            }
+        );
+    });
+    
+    $(document).on('click', '.update-product-type', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-df');
+        
+        $.get('/user-product-type/update-ajax', {data : $(this).closest('tr').data('key')},
+            function (data) {
+                modal.find('.modal-title').html('Update Product Type');
+                modal.find('.modal-body').html(data);
+                modal.modal();
+            }
+        );
+    });
 JS;
 $this->registerJs($js);

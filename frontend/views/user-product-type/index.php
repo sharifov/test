@@ -1,5 +1,7 @@
 <?php
 
+use common\models\UserProductType;
+use modules\product\src\entities\productType\ProductType;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -24,17 +26,33 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'upt_user_id',
-            'upt_product_type_id',
+            [
+				'attribute' => 'upt_user_id',
+				'value' => static function (UserProductType $model) {
+					return '<i class="fa fa-user"></i> ' . Html::encode($model->user->username);
+				},
+				'format' => 'raw',
+				'filter' => \common\models\Employee::getList()
+			],
+            [
+				'attribute' => 'upt_product_type_id',
+				'value' => static function (UserProductType $model) {
+					return '<i class="fa fa-list"></i> ' . Html::encode($model->productType->pt_name);
+				},
+				'format' => 'raw',
+				'filter' => ProductType::getList()
+			],
             'upt_commission_percent',
-            'upt_product_enabled',
-            'upt_created_user_id',
-            //'upt_updated_user_id',
-            //'upt_created_dt',
-            //'upt_updated_dt',
-
+            'upt_product_enabled:booleanByLabel',
+            [
+                'attribute' => 'upt_created_dt',
+                'value' => static function (UserProductType $model) {
+                    return $model->upt_created_dt ?
+                        '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->upt_created_dt)) : '-';
+                },
+                'format' => 'raw',
+                'enableSorting' => false
+            ],
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

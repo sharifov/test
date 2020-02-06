@@ -2,9 +2,13 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
+use modules\product\src\entities\productType\ProductType;
 use Yii;
 use common\models\UserProductType;
 use common\models\search\UserProductTypeSearch;
+use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,21 +16,22 @@ use yii\filters\VerbFilter;
 /**
  * UserProductTypeController implements the CRUD actions for UserProductType model.
  */
-class UserProductTypeController extends Controller
+class UserProductTypeController extends FController
 {
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -98,18 +103,18 @@ class UserProductTypeController extends Controller
     }
 
     /**
-     * Deletes an existing UserProductType model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $upt_user_id
-     * @param integer $upt_product_type_id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $upt_user_id
+     * @param $upt_product_type_id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($upt_user_id, $upt_product_type_id)
     {
         $this->findModel($upt_user_id, $upt_product_type_id)->delete();
 
-        return $this->redirect(['index']);
+        return $this->redirect(Yii::$app->request->referrer);
     }
 
     /**
@@ -127,5 +132,54 @@ class UserProductTypeController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionCreateAjax()
+    {
+        $userId = (int) Yii::$app->request->get('user_id', 0);
+        if (!$user = Employee::findOne($userId)) {
+            throw new BadRequestHttpException('Invalid User Id: ' . $userId, 1);
+        }
+
+        $model = new UserProductType;
+        $model->upt_user_id = $userId;
+
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->save()) {
+                return 'Success <script>$("#modal-df").modal("hide")</script>';
+            }
+        }
+        return $this->renderAjax('create_ajax', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdateAjax()
+    {
+        $data = Yii::$app->request->get('data');
+
+        $upp_user_id = $data['upt_user_id'] ?? 0;
+        $upp_project_id = $data['upt_product_type_id'] ?? 0;
+
+        $model = $this->findModel($upp_user_id, $upp_project_id);
+
+        if ($model->load(Yii::$app->request->post())) {
+            if($model->save()) {
+                return 'Success <script>$("#modal-df").modal("hide")</script>';
+            }
+        }
+
+        return $this->renderAjax('update_ajax', [
+            'model' => $model,
+        ]);
+
     }
 }

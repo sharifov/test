@@ -12,7 +12,7 @@ use common\models\UserProductType;
 class UserProductTypeSearch extends UserProductType
 {
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -24,26 +24,20 @@ class UserProductTypeSearch extends UserProductType
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function scenarios()
     {
-        // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
 
     /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
+     * @param $params
      * @return ActiveDataProvider
      */
     public function search($params)
     {
         $query = UserProductType::find();
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -52,12 +46,9 @@ class UserProductTypeSearch extends UserProductType
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'upt_user_id' => $this->upt_user_id,
             'upt_product_type_id' => $this->upt_product_type_id,

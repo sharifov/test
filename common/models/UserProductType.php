@@ -3,6 +3,8 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use modules\product\src\entities\productType\ProductType;
 
@@ -57,14 +59,33 @@ class UserProductType extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'upt_user_id' => 'Upt User ID',
-            'upt_product_type_id' => 'Upt Product Type ID',
-            'upt_commission_percent' => 'Upt Commission Percent',
-            'upt_product_enabled' => 'Upt Product Enabled',
-            'upt_created_user_id' => 'Upt Created User ID',
-            'upt_updated_user_id' => 'Upt Updated User ID',
-            'upt_created_dt' => 'Upt Created Dt',
-            'upt_updated_dt' => 'Upt Updated Dt',
+            'upt_user_id' => 'User',
+            'upt_product_type_id' => 'Product Type',
+            'upt_commission_percent' => 'Commission Percent',
+            'upt_product_enabled' => 'Product Enabled',
+            'upt_created_user_id' => 'Created User',
+            'upt_updated_user_id' => 'Updated User',
+            'upt_created_dt' => 'Created',
+            'upt_updated_dt' => 'Updated',
+        ];
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['upt_created_dt', 'upt_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['upt_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'upt_created_user_id',
+                'updatedByAttribute' => 'upt_updated_user_id',
+            ],
         ];
     }
 

@@ -8,14 +8,17 @@ use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\ProjectEmployeeAccess;
 use common\models\search\EmployeeSearch;
+use common\models\search\UserProductTypeSearch;
 use common\models\search\UserProjectParamsSearch;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserParams;
+use common\models\UserProductType;
 use common\models\UserProfile;
 use frontend\models\UserMultipleForm;
 use Yii;
 use yii\bootstrap4\Html;
+use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -635,23 +638,14 @@ class EmployeeController extends FController
             $model->user_projects = ArrayHelper::map($model->projects, 'id', 'id');
             $model->user_departments = ArrayHelper::map($model->userDepartments, 'ud_dep_id', 'ud_dep_id');
 
-            //VarDumper::dump($model->user_projects, 10, true); exit;
-
-
-
             $searchModel = new UserProjectParamsSearch();
             $params = Yii::$app->request->queryParams;
-
-
 
             $params['UserProjectParamsSearch']['upp_user_id'] = $model->id;
 
             $dataProvider = $searchModel->search($params);
 
-
             if ($modelUserParams->load(Yii::$app->request->post())) {
-
-                //VarDumper::dump(Yii::$app->request->post()); exit;
 
                 $modelUserParams->up_user_id = $model->id;
                 $modelUserParams->up_updated_user_id = Yii::$app->user->id;
@@ -661,20 +655,15 @@ class EmployeeController extends FController
                 }
             }
 
-
-
-
-            //VarDumper::dump($model->roles, 10, true); exit;
-
-
-            return $this->render('_form', [
-                'model' => $model,
-                'modelUserParams' => $modelUserParams,
-                //'searchModel' => $searchModel,
-                'dataProvider' => $dataProvider,
-                'modelProfile' => $modelProfile
-            ]);
-
+        return $this->render('_form', [
+            'model' => $model,
+            'modelUserParams' => $modelUserParams,
+            'dataProvider' => $dataProvider,
+            'modelProfile' => $modelProfile,
+            'dataUserProductType' => new ActiveDataProvider([
+                'query' => UserProductType::find()->andFilterWhere(['upt_user_id' => $model->id])
+            ]),
+        ]);
     }
 
     public function actionSwitch()
