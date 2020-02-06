@@ -2,11 +2,13 @@
 
 namespace modules\hotel\models;
 
+use modules\hotel\src\entities\hotelQuote\events\HotelQuoteCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\hotel\models\query\HotelQuoteQuery;
+use modules\hotel\src\entities\hotelQuote\Scopes;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use sales\entities\serializer\Serializable;
+use modules\product\src\interfaces\Quotable;
+use sales\entities\EventTrait;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -30,8 +32,24 @@ use yii\helpers\VarDumper;
  * @property ProductQuote $hqProductQuote
  * @property HotelQuoteRoom[] $hotelQuoteRooms
  */
-class HotelQuote extends ActiveRecord implements Serializable
+class HotelQuote extends ActiveRecord implements Quotable
 {
+    use EventTrait;
+
+    public static function clone(HotelQuote $quote, int $hotelId, int $productQuoteId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $quote->attributes;
+        $clone->hq_id = null;
+        $clone->hq_hash_key = null;
+        $clone->hq_hotel_id = $hotelId;
+        $clone->hq_product_quote_id = $productQuoteId;
+        $clone->recordEvent(new HotelQuoteCloneCreatedEvent($clone));
+
+        return $clone;
+    }
+
     /**
      * @return string
      */
@@ -109,12 +127,9 @@ class HotelQuote extends ActiveRecord implements Serializable
         return $this->hasMany(HotelQuoteRoom::class, ['hqr_hotel_quote_id' => 'hq_id']);
     }
 
-    /**
-     * @return HotelQuoteQuery the active query used by this AR class.
-     */
-    public static function find()
+    public static function find(): Scopes
     {
-        return new HotelQuoteQuery(static::class);
+        return new Scopes(static::class);
     }
 
     public static function getHashKey(string $roomKey): string
@@ -231,5 +246,15 @@ class HotelQuote extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new HotelQuoteSerializer($this))->getData();
+    }
+
+    public static function findByProductQuote(int $productQuoteId): ?Quotable
+    {
+        return self::find()->byProductQuote($productQuoteId)->limit(1)->one();
+    }
+
+    public function getId(): int
+    {
+        return $this->hq_id;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace modules\hotel\models;
 
+use sales\entities\EventTrait;
 use Yii;
 
 /**
@@ -19,6 +20,7 @@ use Yii;
  */
 class HotelRoomPax extends \yii\db\ActiveRecord
 {
+    use EventTrait;
 
     public const PAX_TYPE_ADL = 1;
     public const PAX_TYPE_CHD = 2;

@@ -9,26 +9,8 @@ namespace modules\flight\models\query;
  */
 class FlightQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
+    public function byProduct(int $productId): self
     {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
-    /**
-     * {@inheritdoc}
-     * @return \modules\flight\models\Flight[]|array
-     */
-    public function all($db = null)
-    {
-        return parent::all($db);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return \modules\flight\models\Flight|array|null
-     */
-    public function one($db = null)
-    {
-        return parent::one($db);
+        return $this->andWhere(['fl_product_id' => $productId]);
     }
 }

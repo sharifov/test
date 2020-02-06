@@ -32,6 +32,11 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'pq_id',
             'pq_gid',
+            [
+                'class' => modules\product\src\grid\columns\ProductQuoteColumn::class,
+                'attribute' => 'pq_clone_id',
+                'relation' => 'clone',
+            ],
             'pq_name',
             [
                 'class' => ProductColumn::class,
@@ -40,7 +45,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'pq_order_id',
             'pq_description:ntext',
-            'pq_status_id',
+            [
+                'class' => \modules\product\src\grid\columns\ProductQuoteStatusColumn::class,
+                'attribute' => 'pq_status_id',
+            ],
+
             'pq_price',
             'pq_origin_price',
             'pq_client_price',
