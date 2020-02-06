@@ -168,9 +168,16 @@ if($project){
 
     <?php if(!$leadModel->isNewRecord && ($user->isAdmin() || $user->isSupervision())):
 
-        $productTypes = \common\models\ProductType::find()->/*where(['pt_enabled' => true])*/all();
+        $productTypes = \modules\product\src\entities\productType\ProductType::find()->/*where(['pt_enabled' => true])*/all();
 
         ?>
+
+        <!--<div class="">
+            <button id="add_product_scenario_one" type="button" class="btn btn-primary" >
+                <i class="fa fa-plus"></i> Product
+            </button>
+        </div>-->
+
         <div class="dropdown">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-plus"></i> Product
@@ -181,7 +188,9 @@ if($project){
                 <?php endforeach; ?>
             </div>
         </div> &nbsp;
+
     <?php endif; ?>
+
 
 
     <?php if (!$user->isQa()) : ?>
@@ -365,7 +374,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
 
     $formPreferenceId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
 
-    $addProductUrl = Url::to(['product/create-ajax', 'id' => $leadModel->id]);
+    $addProductUrl = Url::to(['/product/product/create-ajax', 'id' => $leadModel->id]);
 
     $js = <<<JS
 
@@ -437,10 +446,14 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         var editBlock = $('#split-profit-modal');
         editBlock.find('.modal-body').html('');
         editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                editBlock.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
 
@@ -452,10 +465,14 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         var editBlock = $('#split-tips-modal');
         editBlock.find('.modal-body').html('');
         editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                editBlock.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
 
@@ -467,10 +484,14 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         $('#modal-lg-label').html('Quick search quotes');
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
 
@@ -531,18 +552,28 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         e.preventDefault();
         
         //let url = $('#quick-search-quotes-btn').data('url');
-        //$('#preloader').removeClass('d-none');
+        //$('#preloader').removeClass('d-none');   
         
+        let productType = $(this).data('product-type-id'); 
         let modal = $('#modal-sm');
         $('#modal-sm-label').html('Add new product');
         modal.find('.modal-body').html('');
-        modal.find('.modal-body').load(addProductUrl, function( response, status, xhr ) {
+        modal.find('.modal-body').load(addProductUrl + "&typeId=" + productType, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
-        });
+            
+            /*console.log(status);
+            console.log(response);
+            console.log(xhr);*/
+            
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });         
         
         /* $.ajax({
             type: 'post',
@@ -567,14 +598,25 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
             type: 'error',
             text: 'Notes for Expert cannot be blank',
             hide: true
-        });*/
-            
+        });*/            
         
         
     });
     
-    
-    
+    $(document).on('click', '#add_product_scenario_one', function (e) {
+        e.preventDefault(); 
+        
+        let modal = $('#modal-sm');
+        $('#modal-sm-label').html('Add new product');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(addProductUrl, function( response, status, xhr ) {            
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+        
+    });  
     
     
 JS;
@@ -757,6 +799,13 @@ $js = <<<JS
         e.clearSelection();
     });
     //});
+    
+    // $(document).on('pjax:error', function(xhr, textStatus, error, options) {
+    //     alert(textStatus);
+    //     console.error(error);
+    //     console.log(options);
+    // });
+    
 JS;
 $this->registerJs($js);
 

@@ -29,6 +29,7 @@ use yii\widgets\Pjax;
         'jsOptions' => [
             'nationalMode' => false,
             'preferredCountries' => ['us'],
+            'customContainer' => 'intl-tel-input'
         ]
     ])->label(false); ?>
 

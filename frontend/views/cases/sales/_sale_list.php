@@ -188,9 +188,9 @@ $this->registerJs($jsCode, \yii\web\View::POS_READY);
 $js = <<<JS
 document.activateButtonSync = function(data) {
     if (data.output === '' && data.message === '' && data.sync) {
-        $('#update-to-bo-'+data.caseSaleId).removeAttr('disabled').removeClass('btn-warning').addClass('btn-success');
+        $('#update-to-bo-'+data.caseSaleId).removeAttr('disabled').removeClass('btn-default').addClass('btn-success');
     }else {
-        $('#update-to-bo-'+data.caseSaleId).attr('disabled', true).removeClass('btn-success').addClass('btn-warning');
+        $('#update-to-bo-'+data.caseSaleId).attr('disabled', true).removeClass('btn-success').addClass('btn-default');
     }
     
     if (data.success_message !== '') {

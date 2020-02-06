@@ -1,81 +1,135 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
-use yii\widgets\Pjax;
+use yii\bootstrap4\ActiveForm;
+use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\forms\cases\CasesChangeStatusForm */
+/* @var $statusForm sales\forms\cases\CasesChangeStatusForm */
 /* @var $form yii\widgets\ActiveForm */
 
-$pjaxId = 'pjax-cases-change-status-form';
+$formId = 'change-status-form-id';
+
 ?>
-    <script>
-        pjaxOffFormSubmit('#<?=$pjaxId?>');
-    </script>
-<?php Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
-<div class="cases-change-status">
 
-    <?php $form = ActiveForm::begin([
-        'action' => ['cases/change-status', 'gid' => $model->caseGid],
-        'method' => 'post',
-        'options' => ['data-pjax' => true]
-    ]); ?>
+    <div class="cases-change-status">
 
-    <?php
-        echo $form->errorSummary($model);
-    ?>
-    <?php
-        $reasonCollapse = empty($model->hasErrors('reason')) && empty($model->hasErrors('message'))  ? 'collapse' : '';
-        $messageCollapse = empty($model->hasErrors('message')) ? 'collapse' : '';
-    ?>
-    <?= $form->field($model, 'status')->dropDownList($model->getStatusList(), ['prompt' => '-']) ?>
+        <?php $form = ActiveForm::begin([
+            'id' => $formId,
+            'action' => ['cases/change-status', 'gid' => $statusForm->caseGid],
+            'validateOnChange' => false,
+            'validateOnBlur' => false,
+            'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+        ]); ?>
 
-    <?= $form->field($model, 'reason', ['options' => ['class' => "form-group required {$reasonCollapse}"]])->dropDownList($model->getReasonsList(),['prompt' => '-','id' => 'reason',]) ?>
+        <?= $form->errorSummary($statusForm) ?>
 
-    <?= $form->field($model, 'message', ['options' => ['class' => "form-group required {$messageCollapse}"]])->textarea(['rows' => 3]) ?>
+        <?= $form->field($statusForm, 'statusId')->dropDownList($statusForm->statusList(), ['prompt' => '-']) ?>
 
-    <div class="form-group text-center">
-        <?= Html::submitButton('Change Status', ['class' => 'btn btn-warning']) ?>
+        <div class="reason-wrapper d-none">
+
+            <?= $form->field($statusForm, 'reason')->dropDownList([]) ?>
+
+            <div class="message-wrapper d-none">
+                <?= $form->field($statusForm, 'message')->textarea(['rows' => 3]) ?>
+            </div>
+
+        </div>
+
+        <div class="user-wrapper d-none">
+            <?= $form->field($statusForm, 'userId')->dropDownList($statusForm->userList(), ['prompt' => 'Select employee']) ?>
+        </div>
+
+        <div class="form-group text-center">
+            <?= Html::submitButton('Change Status', ['class' => 'btn btn-warning']) ?>
+        </div>
+
+        <?php ActiveForm::end(); ?>
+
     </div>
 
-    <?php ActiveForm::end(); ?>
-</div>
 <?php
-$statusReasons = json_encode($statusReasons);
+
+$statusId = Html::getInputId($statusForm, 'statusId');
+$reasonId = Html::getInputId($statusForm, 'reason');
+$messageId = Html::getInputId($statusForm, 'message');
+$userId = Html::getInputId($statusForm, 'userId');
+$reasons = $statusForm->reasons();
+
 $js = <<<JS
- var statusReasons = $statusReasons,
-     reasonField = $('#reason'),
-     messageField = $('#caseschangestatusform-message');
- 
- $('#caseschangestatusform-status').on('change', function () {
-     var val = $(this).val() || null;
-     
-     reasonField.html('');
-        
-     if (val in statusReasons) {
-          $(reasonField).append('<option value="">-</select>');
-         $.each(statusReasons[val], function (i, elem) {
-             $(reasonField).append('<option value="'+i+'">' + elem +'</select>');
-         });
-         reasonField.parent().show();
-     } else {
-         reasonField.parent().hide();
-     }
-     messageField.val('').parent().hide();
- });
- 
- reasonField.on('change', function () {
-     var val = $(this).val() || null;
-     
-     if (val == 'Other') {
-         messageField.parent().show();
-     } else {
-         messageField.val('').parent().hide();
-     }
- });
+
+var reason = $('#{$reasonId}'); 
+var reasons = {$reasons};
+var message = $('#{$messageId}');
+var user = $('#{$userId}');
+var reasonWrapper = $('.reason-wrapper');
+var messageWrapper = $('.message-wrapper');
+var userWrapper = $('.user-wrapper');
+
+reason.parent().addClass('required');
+message.parent().addClass('required');
+user.parent().addClass('required');
     
+$('body').find('#{$statusId}').on('change', function () {
+    var val = $(this).val() || null;
+    resetStatusForm();
+    $(this).val(val);
+    if (val in reasons) {
+         reason.append('<option value="">Select reason</select>');
+         $.each(reasons[val], function (i, elem) {
+             reason.append('<option value="'+i+'">' + elem +'</select>');
+         });
+         reasonWrapper.removeClass('d-none');
+         return;
+    }
+    if (val == '{$statusForm->statusProcessingId()}') {
+        userWrapper.removeClass('d-none');
+        return;
+    }
+})
+
+reason.on('change', function () {
+    removeStatusFormErrors();
+    var val = $(this).val() || null;
+    if (val == '{$statusForm->reasonOther()}') {
+        message.val('');
+        messageWrapper.removeClass('d-none');
+    } else {
+        messageWrapper.addClass('d-none');
+    }
+});
+
+user.on('change', function () {
+    removeStatusFormErrors();
+});
+
+message.on('input',function(e){
+    removeStatusFormErrors();
+});
+
+function removeStatusFormErrors() {
+    $("#{$formId}").find(".alert.alert-danger").hide();
+            
+    $("#{$statusId}").parent().find('.invalid-feedback').html('');
+    $("#{$statusId}").removeClass('is-invalid');
+    
+    reason.parent().find('.invalid-feedback').html('');
+    reason.removeClass('is-invalid');
+    
+    message.parent().find('.invalid-feedback').html('');
+    message.removeClass('is-invalid');
+    
+    user.parent().find('.invalid-feedback').html('');
+    user.removeClass('is-invalid');
+}
+
+function resetStatusForm() {
+    $("#{$formId}").get(0).reset();
+    reason.html('');
+    reasonWrapper.addClass('d-none');
+    messageWrapper.addClass('d-none');
+    userWrapper.addClass('d-none');
+}
+
 JS;
 $this->registerJs($js);
-?>
-<?php Pjax::end();

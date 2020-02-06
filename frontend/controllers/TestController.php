@@ -37,6 +37,9 @@ use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
+use modules\product\src\entities\productQuoteStatusLog\CreateDto;
+use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
+use modules\product\src\services\ProductQuoteStatusLogService;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\EmployeeAccessHelper;
@@ -163,13 +166,8 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $serv = Yii::createObject(RbacMigrationService::class);
-        $t = $serv->getAllRoutesByGroup('/user-group-set/*');
-       foreach ($t as $value) {
-           echo "'" . $value . "', ";
-       }
-       echo PHP_EOL;
-       VarDumper::dump($t);
+        $service = Yii::createObject(ProductQuoteStatusLogService::class);
+        $service->log(new CreateDto(4, 3,  5, 'etr', 295, 295));
 
         die;
 

@@ -98,6 +98,7 @@ $this->registerJs($js);
                             'jsOptions' => [
                                 'nationalMode' => false,
                                 'preferredCountries' => ['us'],
+                                'customContainer' => 'intl-tel-input'
                             ],
                             'options' => [
                                 'onkeydown' => '

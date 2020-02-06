@@ -2,7 +2,7 @@
 
 namespace modules\flight\models\forms;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use Yii;
 use yii\base\Model;
 

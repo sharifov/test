@@ -17,7 +17,7 @@ class FlightQuoteSegmentPaxBaggageChargeSearch extends FlightQuoteSegmentPaxBagg
     public function rules()
     {
         return [
-            [['qsbc_id', 'qsbc_flight_pax_id', 'qsbc_flight_quote_segment_id', 'qsbc_first_piece', 'qsbc_last_piece'], 'integer'],
+            [['qsbc_id', 'qsbc_flight_pax_code_id', 'qsbc_flight_quote_segment_id', 'qsbc_first_piece', 'qsbc_last_piece'], 'integer'],
             [['qsbc_origin_price', 'qsbc_price', 'qsbc_client_price'], 'number'],
             [['qsbc_origin_currency', 'qsbc_client_currency', 'qsbc_max_weight', 'qsbc_max_size'], 'safe'],
         ];
@@ -64,7 +64,7 @@ class FlightQuoteSegmentPaxBaggageChargeSearch extends FlightQuoteSegmentPaxBagg
         // grid filtering conditions
         $query->andFilterWhere([
             'qsbc_id' => $this->qsbc_id,
-            'qsbc_flight_pax_id' => $this->qsbc_flight_pax_id,
+            'qsbc_flight_pax_code_id' => $this->qsbc_flight_pax_code_id,
             'qsbc_flight_quote_segment_id' => $this->qsbc_flight_quote_segment_id,
             'qsbc_first_piece' => $this->qsbc_first_piece,
             'qsbc_last_piece' => $this->qsbc_last_piece,

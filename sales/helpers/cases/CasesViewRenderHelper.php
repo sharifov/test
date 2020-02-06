@@ -12,6 +12,9 @@ class CasesViewRenderHelper
 {
     public static function renderTakeButton(Cases $model, Employee $user): string
     {
+        if ($model->isSolved()) {
+            return '';
+        }
         $allowActionsList = CasesStatusTransferList::getAllowTransferListByUser($model->cs_status, $user);
         if (isset($allowActionsList[CasesStatus::STATUS_PROCESSING]) && !$model->isOwner($user->id)) {
             if ($model->isProcessing()) {
@@ -25,8 +28,10 @@ class CasesViewRenderHelper
     public static function renderChangeStatusButton(int $status, Employee $user): string
     {
         $list =  CasesStatusTransferList::getAllowTransferListByUser($status, $user);
-        if (isset($list[CasesStatus::STATUS_PROCESSING])) {
-            unset($list[CasesStatus::STATUS_PROCESSING]);
+        if (!$user->isAdmin() && !$user->isExSuper() && !$user->isSupSuper()) {
+            if (isset($list[CasesStatus::STATUS_PROCESSING])) {
+                unset($list[CasesStatus::STATUS_PROCESSING]);
+            }
         }
         return $list ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) : '';
     }

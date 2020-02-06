@@ -2,7 +2,7 @@
 
 namespace modules\flight\models\forms;
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightSegment;
 use modules\flight\src\helpers\FlightFormatHelper;

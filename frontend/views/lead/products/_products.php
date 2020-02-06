@@ -70,14 +70,13 @@ JS;
 
 <?php foreach ($products as $product):?>
 
-
-    <?php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
+    <?php if ((int) $product->isHotel() && $product->hotel): ?>
         <?= $this->render('@modules/hotel/views/hotel/partial/_product_hotel', [
             'product' => $product,
         ]) ?>
     <?php endif; ?>
 
-    <?php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_FLIGHT && $product->flight): ?>
+    <?php if ((int) $product->isFlight() && $product->flight): ?>
         <?= $this->render('@modules/flight/views/flight/partial/_product_flight', [
             'product' => $product,
         ]) ?>
@@ -89,11 +88,32 @@ JS;
 
 <?php
 
-$ajaxDeleteProductUrl = \yii\helpers\Url::to(['product/delete-ajax']);
-$ajaxDeleteProductQuoteUrl = \yii\helpers\Url::to(['product-quote/delete-ajax']);
+$ajaxDeleteProductUrl = \yii\helpers\Url::to(['/product/product/delete-ajax']);
+$ajaxDeleteProductQuoteUrl = \yii\helpers\Url::to(['/product/product-quote/delete-ajax']);
 
 
 $js = <<<JS
+
+     $(document).on('click', '.btn-product-quote-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Product quote [' + gid + '] status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+     });
 
     $('body').on('click', '.btn-delete-product', function(e) {
         
@@ -245,10 +265,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Update quote option');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     

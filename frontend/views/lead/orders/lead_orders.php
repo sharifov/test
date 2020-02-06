@@ -23,7 +23,7 @@ use yii\web\View;
             <ul class="nav navbar-right panel_toolbox">
                 <li>
                     <?= Html::a('<i class="fa fa-plus-circle success"></i> add Order', null, [
-                        'data-url' => \yii\helpers\Url::to(['/order/create-ajax', 'id' => $lead->id]),
+                        'data-url' => \yii\helpers\Url::to(['/order/order/create-ajax', 'id' => $lead->id]),
                         'class' => 'btn btn-light btn-create-order'
                     ])?>
                 </li>
@@ -73,10 +73,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Add order');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                    backdrop: 'static',
+                    show: true
+                });
+            }
         });
     });
     
@@ -89,10 +93,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Update order');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -153,6 +161,47 @@ $js = <<<JS
       // return false;
     });
     
+    $(document).on('click', '.btn-order-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Order [' + gid + '] status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });
+    
+    $(document).on('click', '.btn-invoice-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Invoice [' + gid + '] status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });
 JS;
 
 $this->registerJs($js, View::POS_READY, 'lead-order-js');

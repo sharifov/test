@@ -114,4 +114,14 @@ class CurrencyHistory extends \yii\db\ActiveRecord
 
 		return (new static());
 	}
+
+	/**
+	 * @param string $code
+	 * @return float|null
+	 */
+	public static function getBaseRateByCurrencyCode(string $code): ?float
+	{
+		return self::find()->where(['ch_code' => $code])->orderBy(['ch_main_updated_dt' => SORT_DESC])->one()->ch_base_rate ?? null;
+	}
+
 }

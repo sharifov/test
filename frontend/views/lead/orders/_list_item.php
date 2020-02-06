@@ -1,9 +1,13 @@
 <?php
 /* @var $this yii\web\View */
-/* @var $order Order */
+/* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
 
-use common\models\Order;
+use modules\invoice\src\entities\invoice\InvoiceStatus;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderPayStatus;
+use modules\order\src\entities\order\OrderStatus;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\bootstrap4\Html;
 
 ?>
@@ -14,8 +18,8 @@ use yii\bootstrap4\Html;
         <small><span class="badge badge-white">OR<?=($order->or_id)?></span></small>
         "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
         (<span title="UID"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
-        <?=$order->getStatusLabel()?>
-        <?=$order->getPayStatusLabel()?>
+        <?= OrderStatus::asFormat($order->or_status_id) ?>
+        <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
 
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
@@ -23,7 +27,7 @@ use yii\bootstrap4\Html;
             <!--            </li>-->
             <li>
                 <?= Html::a('<i class="fa fa-edit warning"></i> Update order', null, [
-                    'data-url' => \yii\helpers\Url::to(['/order/update-ajax', 'id' => $order->or_id]),
+                    'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
                     'class' => 'btn-update-order'
                 ])?>
             </li>
@@ -36,10 +40,16 @@ use yii\bootstrap4\Html;
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
 
+                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> Status log', null, [
+                        'class' => 'dropdown-item text-success btn-order-status-log',
+                        'data-url' => \yii\helpers\Url::to(['/order/order-status-log/show', 'gid' => $order->or_gid]),
+                        'data-gid' => $order->or_gid,
+                    ]) ?>
+
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
                         'class' => 'dropdown-item text-danger btn-delete-order',
                         'data-order-id' => $order->or_id,
-                        'data-url' => \yii\helpers\Url::to(['/order/delete-ajax']),
+                        'data-url' => \yii\helpers\Url::to(['/order/order/delete-ajax']),
                     ]) ?>
                 </div>
             </li>
@@ -89,7 +99,7 @@ use yii\bootstrap4\Html;
                         <!--                    <td>--><?//=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
 
                         <td><?=Html::encode($quote->pq_name)?></td>
-                        <td><?=$quote->getStatusLabel()?></td>
+                        <td><?=ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
                         <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>
                         <td class="text-right"><?=number_format($quote->optionAmountSum, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_service_fee_sum, 2)?></td>
@@ -101,7 +111,7 @@ use yii\bootstrap4\Html;
                                 'data-order-id' => $order->or_id,
                                 'data-product-quote-id' => $quote->pq_id,
                                 'class' => 'btn-delete-quote-from-order',
-                                'data-url' => \yii\helpers\Url::to(['order-product/delete-ajax'])
+                                'data-url' => \yii\helpers\Url::to(['/order/order-product/delete-ajax'])
                             ]);
                             ?>
                         </td>
@@ -176,7 +186,7 @@ use yii\bootstrap4\Html;
                         ?>
                         <tr>
                             <td title="Invoice ID"><?=Html::encode($invoice->inv_id)?></td>
-                            <td><?=$invoice->getStatusLabel()?></td>
+                            <td><?= InvoiceStatus::asFormat($invoice->inv_status_id) ?></td>
                             <td>
                                 <?=Html::encode($invoice->inv_description)?>
                             </td>
@@ -188,7 +198,7 @@ use yii\bootstrap4\Html;
                                 <?php
                                 echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i>', null, [
                                     'class' => 'btn-update-invoice',
-                                    'data-url' => \yii\helpers\Url::to(['/invoice/update-ajax', 'id' => $invoice->inv_id])
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice/update-ajax', 'id' => $invoice->inv_id])
                                 ]);
                                 ?>
 
@@ -197,7 +207,15 @@ use yii\bootstrap4\Html;
                                     'data-invoice-id' => $invoice->inv_id,
                                     'data-order-id' => $invoice->inv_order_id,
                                     'class' => 'btn-delete-invoice',
-                                    'data-url' => \yii\helpers\Url::to(['/invoice/delete-ajax'])
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice/delete-ajax'])
+                                ]);
+                                ?>
+
+                                <?php
+                                echo Html::a('<i class="glyphicon glyphicon-remove-circle text-success" title="Status log"></i>', null, [
+                                    'class' => 'btn-invoice-status-log',
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice-status-log/show', 'gid' => $invoice->inv_gid]),
+                                    'data-gid' => $invoice->inv_gid,
                                 ]);
                                 ?>
                             </td>
@@ -236,7 +254,7 @@ use yii\bootstrap4\Html;
                                 echo Html::a('<i class="fa fa-plus-circle" title="Add new invoice"></i> create', null, [
                                     'data-order-id' => $order->or_id,
                                     'class' => 'btn btn-success btn-create-invoice',
-                                    'data-url' => \yii\helpers\Url::to(['invoice/create-ajax', 'id' => $order->or_id, 'amount' => $newInvoiceAmount])
+                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice/create-ajax', 'id' => $order->or_id, 'amount' => $newInvoiceAmount])
                                 ]);
                                 ?>
                             </th>

@@ -2,7 +2,7 @@
 
 namespace modules\flight;
 
-use modules\flight\components\ApiFlightService;
+use modules\flight\components\api\ApiFlightService;
 use yii\helpers\ArrayHelper;
 
 /**

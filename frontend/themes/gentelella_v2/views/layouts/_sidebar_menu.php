@@ -24,18 +24,81 @@ $isSuperAdmin = $user->isSuperAdmin();
 
         $menuItems = [];
 
-        $menuItems[] = ['label' => 'Create new Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
-        $menuItems[] = ['label' => 'Create new Case', 'url' => ['/cases/create'], 'icon' => 'plus'];
+
+
 
         if ($user->canCall()) {
             $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
         }
 
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/dashboard/index'], 'icon' => 'area-chart'];
-        $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
-        $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
-        $menuItems[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
 
+
+
+
+        $menuLItems = [];
+
+        $menuLItems[] = ['label' => 'Create new Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
+        $menuLItems[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase text-info'];
+
+        if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
+            $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
+        }
+
+        if (($profile = $user->userProfile) && $profile->up_auto_redial) {
+            $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
+        }
+
+        $menuLItems[] = ['label' => 'Lead Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
+        $menuLItems[] = ['label' => 'Lead Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
+        $menuLItems[] = ['label' => 'Lead Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
+        $menuLItems[] = ['label' => 'Lead Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
+        $menuLItems[] = ['label' => 'Lead Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
+        $menuLItems[] = ['label' => 'Lead Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
+
+
+        if($isAdmin) {
+            $menuItems[] = [
+                'label' => 'Leads',
+                'url' => 'javascript:',
+                'icon' => 'cubes',
+                'items' => $menuLItems
+            ];
+        } else {
+            $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuLItems);
+        }
+
+        $menuCases = [];
+        $menuCases[] = ['label' => 'Create new Case', 'url' => ['/cases/create'], 'icon' => 'plus'];
+        $menuCases[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
+        $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
+        $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-follow-up" data-type="follow-up" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/follow-up'], 'icon' => 'recycle'];
+        $menuCases[] = ['label' => 'Case Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
+        $menuCases[] = ['label' => 'Case Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
+
+        if ($isAdmin) {
+            $menuItems[] = [
+                'label' => 'Cases',
+                'url' => 'javascript:',
+                'icon' => 'cubes',
+                'items' => $menuCases
+            ];
+        } else {
+            $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuCases);
+        }
+
+
+
+        $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
+        //$menuItems[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
+
+
+        if ($isAdmin || $user->isKpiEnable()) {
+            $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
+        }
 
         if (!$isUM) {
             $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -134,58 +197,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             ]
         ];
 
-        if ($isAdmin || $user->isKpiEnable()) {
-            $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
-        }
 
-        $menuLItems = [];
-        $menuLItems[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase text-info'];
-
-        if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
-            $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
-        }
-
-        if (($profile = $user->userProfile) && $profile->up_auto_redial) {
-            $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
-        }
-
-        $menuLItems[] = ['label' => 'Lead Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
-        $menuLItems[] = ['label' => 'Lead Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
-        $menuLItems[] = ['label' => 'Lead Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
-        $menuLItems[] = ['label' => 'Lead Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
-        $menuLItems[] = ['label' => 'Lead Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
-        $menuLItems[] = ['label' => 'Lead Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
-
-
-        if($isAdmin) {
-            $menuItems[] = [
-                'label' => 'Leads',
-                'url' => 'javascript:',
-                'icon' => 'cubes',
-                'items' => $menuLItems
-            ];
-        } else {
-            $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuLItems);
-        }
-
-        $menuCases = [];
-        $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
-        $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-follow-up" data-type="follow-up" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/follow-up'], 'icon' => 'recycle'];
-        $menuCases[] = ['label' => 'Case Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
-        $menuCases[] = ['label' => 'Case Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
-
-        if ($isAdmin) {
-            $menuItems[] = [
-                'label' => 'Cases',
-                'url' => 'javascript:',
-                'icon' => 'cubes',
-                'items' => $menuCases
-            ];
-        } else {
-            $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuCases);
-        }
 
         $menuItems[] = [
             'label' => 'Users',
@@ -265,16 +277,23 @@ $isSuperAdmin = $user->isSuperAdmin();
             'items' => [
                 ['label' => 'Currency List', 'url' => ['/currency/index']],
                 ['label' => 'Currency History', 'url' => ['/currency-history/index']],
-                ['label' => 'Product Types', 'url' => ['/product-type/index']],
-                ['label' => 'Products', 'url' => ['/product/index']],
-                ['label' => 'Product Options', 'url' => ['/product-option/index']],
-                ['label' => 'Product Quotes', 'url' => ['/product-quote/index']],
-                ['label' => 'Product Quote Options', 'url' => ['/product-quote-option/index']],
-                ['label' => 'Orders', 'url' => ['/order/index']],
-                ['label' => 'Offers', 'url' => ['/offer/index']],
-                ['label' => 'Offer Products', 'url' => ['/offer-product/index']],
-                ['label' => 'Order Products', 'url' => ['/order-product/index']],
-                ['label' => 'Invoices', 'url' => ['/invoice/index']],
+                ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
+                ['label' => 'Product Type Payment Method', 'url' => ['/product/product-type-payment-method/index']],
+                ['label' => 'Products', 'url' => ['/product/product-crud/index']],
+                ['label' => 'Product Options', 'url' => ['/product/product-option-crud/index']],
+                ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
+                ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
+                ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
+                ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
+                ['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
+                ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
+                ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],
+                ['label' => 'Offers View Log', 'url' => ['/offer/offer-view-log-crud/index']],
+                ['label' => 'Offers Status Log', 'url' => ['/offer/offer-status-log-crud/index']],
+                ['label' => 'Offer Products', 'url' => ['/offer/offer-product-crud/index']],
+                ['label' => 'Order Products', 'url' => ['/order/order-product-crud/index']],
+                ['label' => 'Invoices', 'url' => ['/invoice/invoice-crud/index']],
+                ['label' => 'Invoices Status Log', 'url' => ['/invoice/invoice-status-log-crud/index']],
                 ['label' => 'Billing Info', 'url' => ['/billing-info/index']],
                 ['label' => 'Credit Cards', 'url' => ['/credit-card/index']],
                 ['label' => 'Payments', 'url' => ['/payment/index']],

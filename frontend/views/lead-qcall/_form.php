@@ -83,6 +83,7 @@ use yii\widgets\ActiveForm;
                 'customPlaceholder' => '',
                 'allowDropdown' => false,
                 'preferredCountries' => ['us'],
+                'customContainer' => 'intl-tel-input'
             ]
         ]) ?>
 

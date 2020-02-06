@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 //            ['class' => 'yii\grid\SerialColumn'],
 
             'qsbc_id',
-            'qsbc_flight_pax_id',
+            'qsbc_flight_pax_code_id',
             'qsbc_flight_quote_segment_id',
             'qsbc_first_piece',
             'qsbc_last_piece',

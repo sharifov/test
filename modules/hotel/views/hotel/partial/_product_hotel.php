@@ -1,6 +1,6 @@
 <?php
 
-use common\models\Product;
+use modules\product\src\entities\product\Product;
 use modules\hotel\models\search\HotelQuoteSearch;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
@@ -134,10 +134,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Add Room request');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -150,10 +154,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Update Room request');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -166,11 +174,15 @@ $js = <<<JS
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Search Hotel Quotes');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            $('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('d-none');
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -524,10 +536,14 @@ $js = <<<JS
             modal.find('.modal-title').html('Add Invoice');
             modal.find('.modal-body').load(url, function( response, status, xhr ) {
                 //$('#preloader').addClass('d-none');
-                modal.modal({
-                  backdrop: 'static',
-                  show: true
-                });
+                if (status == 'error') {
+                    alert(response);
+                } else {
+                    modal.modal({
+                      backdrop: 'static',
+                      show: true
+                    });
+                }
             });
         });
         
@@ -540,10 +556,14 @@ $js = <<<JS
             modal.find('.modal-title').html('Update Invoice');
             modal.find('.modal-body').load(url, function( response, status, xhr ) {
                 //$('#preloader').addClass('d-none');
-                modal.modal({
-                  backdrop: 'static',
-                  show: true
-                });
+                if (status == 'error') {
+                    alert(response);
+                } else {
+                    modal.modal({
+                      backdrop: 'static',
+                      show: true
+                    });
+                }
             });
         });
         
