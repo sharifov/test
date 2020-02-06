@@ -113,6 +113,20 @@ $user = Yii::$app->user->identity;
                                 ?>
                             </td>
                         </tr>
+                        <tr>
+                            <th>My Product Types:</th>
+                            <td><i class="fa fa-list"></i>
+                                <?php
+                                    if ($productTypeList = Yii::$app->user->identity->productType) {
+                                        $productTypeValue = '';
+                                        foreach ($productTypeList as $productType) {
+                                            $productTypeValue .= Html::tag('span', Html::encode($productType->pt_name), ['class' => 'label label-default']) . ' ';
+                                        }
+                                        echo $productTypeValue;
+                                    }
+                                ?>
+                            </td>
+                        </tr>
                     </table>
                 </div>
             </div>

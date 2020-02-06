@@ -165,9 +165,8 @@ class UserProductTypeController extends FController
     public function actionUpdateAjax()
     {
         $data = Yii::$app->request->get('data');
-
-        $upp_user_id = $data['upt_user_id'] ?? 0;
-        $upp_project_id = $data['upt_product_type_id'] ?? 0;
+        $upp_user_id = (int) $data['upt_user_id'] ?? 0;
+        $upp_project_id = (int) $data['upt_product_type_id'] ?? 0;
 
         $model = $this->findModel($upp_user_id, $upp_project_id);
 
@@ -176,10 +175,8 @@ class UserProductTypeController extends FController
                 return 'Success <script>$("#modal-df").modal("hide")</script>';
             }
         }
-
         return $this->renderAjax('update_ajax', [
             'model' => $model,
         ]);
-
     }
 }

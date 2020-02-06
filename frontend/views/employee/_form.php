@@ -501,14 +501,6 @@ JS;
             <?php \yii\widgets\Pjax::end(); ?>
         </div>
 
-
-        <?
-            /* TODO:
-                *) create RBAC permission
-                *) add to this template and main menu
-             */
-        ?>
-
         <div class="user-project-type">
             <h4>Product Type</h4>
             <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-product-type']); ?>
