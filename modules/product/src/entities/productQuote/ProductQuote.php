@@ -434,6 +434,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 		return $this->pq_status_id === ProductQuoteStatus::NEW;
 	}
 
+	public function decline(): void
+	{
+		$this->pq_status_id = ProductQuoteStatus::DECLINED;
+	}
+
+	public function isDeclined(): bool
+	{
+		return $this->pq_status_id === ProductQuoteStatus::DECLINED;
+	}
+
     public function isHotel(): bool
     {
         return $this->pqProduct->isHotel();

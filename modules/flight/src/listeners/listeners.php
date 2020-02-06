@@ -1,8 +1,8 @@
 <?php
 
-use modules\flight\src\events\FlightCountPassengersChangedEvent;
-use modules\flight\src\listeners\FlightCountPassengersChangedEventListener;
+use modules\flight\src\events\FlightRequestUpdateEvent;
+use modules\flight\src\listeners\FlightRequestUpdateEventListener;
 
 return [
-    FlightCountPassengersChangedEvent::class => [FlightCountPassengersChangedEventListener::class],
+    FlightRequestUpdateEvent::class => [FlightRequestUpdateEventListener::class],
 ];

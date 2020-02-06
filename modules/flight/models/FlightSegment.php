@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use modules\flight\src\dto\flightSegment\SegmentDTO;
+use modules\flight\src\events\FlightRequestUpdateEvent;
 use sales\entities\EventTrait;
 use Yii;
 
@@ -105,6 +106,11 @@ class FlightSegment extends \yii\db\ActiveRecord
 	 */
 	public function edit(SegmentDTO $segmentDTO): void
 	{
+		if ($this->fs_origin_iata !== $segmentDTO->origin ||
+			$this->fs_destination_iata !== $segmentDTO->destination ||
+			$this->fs_departure_date !== $segmentDTO->departure) {
+			$this->recordEvent(new FlightRequestUpdateEvent($this->fsFlight), FlightRequestUpdateEvent::EVENT_KEY);
+		}
 		$this->fs_origin_iata = $segmentDTO->origin;
 		$this->fs_destination_iata = $segmentDTO->destination;
 		$this->fs_departure_date = $segmentDTO->departure;

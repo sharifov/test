@@ -265,19 +265,21 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
             </div>
             <div class="col-md-2">
                 <div class="d-flex flex-column align-items-center justify-content-start" style="width: 100%; height: 100%;">
-                    <span style="margin: 20px 0;" class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/offer/offer/list-menu-ajax'])?>">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
-                        <span class="dropdown-menu" role="menu">
-                            <?php // ajax loaded content ?>
+                    <?php if(!$model->isDeclined()): ?>
+                        <span style="margin: 20px 0;" class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/offer/offer/list-menu-ajax'])?>">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
+                            <span class="dropdown-menu" role="menu">
+                                <?php // ajax loaded content ?>
+                            </span>
                         </span>
-                    </span>
 
-                    <span class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/order/order/list-menu-ajax'])?>">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
-                        <span class="dropdown-menu" role="menu">
-                            <?php // ajax loaded content ?>
+                        <span class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/order/order/list-menu-ajax'])?>">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
+                            <span class="dropdown-menu" role="menu">
+                                <?php // ajax loaded content ?>
+                            </span>
                         </span>
-                    </span>
+                    <?php endif; ?>
 
                     <span style="margin: 20px 0;" class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i> Options</a>
