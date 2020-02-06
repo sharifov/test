@@ -16,6 +16,7 @@ use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -442,6 +443,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 	public function isDeclined(): bool
 	{
 		return $this->pq_status_id === ProductQuoteStatus::DECLINED;
+	}
+
+	/**
+	 * @param Currency $currency
+	 */
+	public function recountClientPrice(Currency $currency): void
+	{
+		$this->pq_client_currency = $currency->cur_code;
+		$this->pq_client_currency_rate = $currency->cur_app_rate;
+		$this->pq_client_price = ProductQuoteHelper::roundPrice($this->pq_price * $this->pq_client_currency_rate);
 	}
 
     public function isHotel(): bool

@@ -251,18 +251,21 @@ class Flight extends \yii\db\ActiveRecord implements Productable
 	}
 
 	/**
-	 * @param string|null $type
+	 * @param int|null $type
 	 */
-	public function setTripType(string $type = null): void
+	public function setTripType(?int $type = null): void
 	{
-		if ($type) {
-			$list = self::getTripTypeList();
-			if (isset($list[$type])) {
-				$this->fl_trip_type_id = $type;
-				return;
+		$list = self::getTripTypeList();
+		if (isset($list[$type])) {
+			if ($this->fl_trip_type_id !== $type) {
+				$this->recordEvent((new FlightRequestUpdateEvent($this)), FlightRequestUpdateEvent::EVENT_KEY);
 			}
+
+			$this->fl_trip_type_id = $type;
+		} else {
+			$this->fl_trip_type_id = null;
+			$this->recordEvent((new FlightRequestUpdateEvent($this)), FlightRequestUpdateEvent::EVENT_KEY);
 		}
-		$this->fl_trip_type_id = null;
 	}
 
 	/**
