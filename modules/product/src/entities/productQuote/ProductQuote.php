@@ -364,7 +364,8 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public static function clone(
         ProductQuote $quote,
         int $productId,
-        ?int $ownerId
+        ?int $ownerId,
+        ?int $creatorId
     ): self
     {
         $clone = new self();
@@ -377,7 +378,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $clone->pq_order_id = null;
         $clone->pq_status_id = ProductQuoteStatus::NEW;
         $clone->pq_owner_user_id = $ownerId;
-        $clone->recordEvent(new ProductQuoteCloneCreatedEvent($clone));
+        $clone->pq_clone_id = $quote->pq_id;
+        $clone->recordEvent(new ProductQuoteCloneCreatedEvent(
+            $clone,
+            null,
+            $clone->pq_status_id,
+            null,
+            ProductQuoteStatusAction::CLONE,
+            $clone->pq_owner_user_id,
+            $creatorId
+        ));
 
         return $clone;
     }
@@ -422,5 +432,15 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 	public function isNew(): bool
 	{
 		return $this->pq_status_id === ProductQuoteStatus::NEW;
+	}
+
+    public function isHotel(): bool
+    {
+        return $this->pqProduct->isHotel();
+	}
+
+    public function isFlight(): bool
+    {
+        return $this->pqProduct->isFlight();
 	}
 }

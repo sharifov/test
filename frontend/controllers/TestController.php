@@ -38,6 +38,7 @@ use DateTime;
 use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteClasses;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
@@ -169,10 +170,8 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $quote = ProductQuote::findOne(8);
-        if ($q = $quote->getChildQuote()) {
-            VarDumper::dump($q->serialize());
-        }
+        $service = Yii::createObject(ProductQuoteCloneService::class);
+        $service->clone(8, 30, 295, 294);
 
         die;
         return $this->render('blank');

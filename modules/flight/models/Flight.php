@@ -312,4 +312,14 @@ class Flight extends \yii\db\ActiveRecord implements Productable
     {
         return (new FlightSerializer($this))->getData();
 	}
+
+    public function getId(): int
+    {
+        return $this->fl_id;
+	}
+
+	public static function findByProduct(int $productId): ?Productable
+    {
+        return self::find()->byProduct($productId)->limit(1)->one();
+    }
 }

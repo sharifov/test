@@ -480,6 +480,11 @@ class FlightQuote extends ActiveRecord implements Quotable
         return self::find()->byProductQuote($productQuoteId)->limit(1)->one();
     }
 
+    public function getId(): int
+    {
+        return $this->fq_id;
+    }
+
     /**
 	 * @return float
 	 */
