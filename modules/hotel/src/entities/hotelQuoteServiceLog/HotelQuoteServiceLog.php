@@ -6,6 +6,7 @@ use common\models\Employee;
 use modules\hotel\models\HotelQuote;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -20,23 +21,23 @@ use yii\helpers\ArrayHelper;
  * @property string|null $hqsl_created_dt
  * @property string|null $hqsl_updated_dt
  *
- * @property \yii\db\ActiveQuery $hotelQuote
- * @property \yii\db\ActiveQuery $createdUser
+ * @property ActiveQuery $hotelQuote
+ * @property ActiveQuery $createdUser
  */
 class HotelQuoteServiceLog extends ActiveRecord
 {
-    public const STATUS_SEND_REQUEST = 1;
-    public const STATUS_SUCCESS = 2;
-    public const STATUS_FAIL = 3; // Api response with error
-    public const STATUS_ERROR = 4; // System request error (404 etc.)
+    public const STATUS_SEND_REQUEST    = 1;
+    public const STATUS_SUCCESS         = 2;
+    public const STATUS_FAIL            = 3; // Api response with error
+    public const STATUS_ERROR           = 4; // System request error (404 etc.)
 
-    public const ACTION_TYPE_BOOK = 1;
-    public const ACTION_TYPE_CHECK = 2;
-    public const ACTION_TYPE_CANCEL = 3;
+    public const ACTION_TYPE_BOOK       = 1;
+    public const ACTION_TYPE_CHECK      = 2;
+    public const ACTION_TYPE_CANCEL     = 3;
 
     public const STATUS_LIST = [
-    	self::STATUS_SEND_REQUEST => 'Send request',
-        self::STATUS_SUCCESS => 'Success',
+    	self::STATUS_SEND_REQUEST   => 'Send request',
+        self::STATUS_SUCCESS        => 'Success',
         self::STATUS_FAIL => 'Fail',
 		self::STATUS_ERROR => 'Error',
     ];
@@ -79,7 +80,7 @@ class HotelQuoteServiceLog extends ActiveRecord
     /**
      * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'hqsl_id' => 'ID',
@@ -117,27 +118,27 @@ class HotelQuoteServiceLog extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCreatedUser()
+    public function getCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'hqsl_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getHotelQuote()
+    public function getHotelQuote(): ActiveQuery
     {
         return $this->hasOne(HotelQuote::class, ['hq_id' => 'hqsl_hotel_quote_id']);
     }
 
     /**
-     * @return Scopes|\yii\db\ActiveQuery
+     * @return Scopes|ActiveQuery
      */
     public static function find()
     {
-        return new Scopes(get_called_class());
+        return new Scopes(static::class);
     }
 
 }

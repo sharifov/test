@@ -268,6 +268,8 @@ class HotelQuoteController extends FController
 
         try {
             $model = HotelQuoteBookGuard::guard($id);
+
+            /** @var HotelQuoteBookService $bookService */
             $bookService = Yii::$container->get(HotelQuoteBookService::class);
 
             if ($checkRate) {
@@ -326,12 +328,12 @@ class HotelQuoteController extends FController
      * @return HotelQuote the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($id): HotelQuote
     {
         if (($model = HotelQuote::findOne($id)) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('The requested HotelQuote does not exist.');
     }
 }

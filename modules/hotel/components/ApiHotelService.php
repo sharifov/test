@@ -49,7 +49,7 @@ class ApiHotelService extends Component
 		self::DESTINATION_HOTEL
 	];
 
-    private $apiServiceName = 'TravelServices Api';
+    private $apiServiceName = 'TravelServicesApi';
 
     public function init() : void
     {
@@ -216,7 +216,7 @@ class ApiHotelService extends Component
      * @param string $method
      * @return array
      */
-    public function requestBookingHandler(string $urlAction, array $params, int $hotelQuoteId, string $method = 'post')
+    public function requestBookingHandler(string $urlAction, array $params, int $hotelQuoteId, string $method = 'post'): array
     {
         $result = ['status' => 0, 'message' => '', 'data' => []];
         $urlMethod = $urlAction . '_' . $method;
@@ -246,8 +246,8 @@ class ApiHotelService extends Component
 
                 } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
                     $resultMessage->title = $this->apiServiceName . ' responded with an error.';
-                    $resultMessage->message = (isset($response->data['error']['message'])) ? $response->data['error']['message'] : '';
-                    $resultMessage->code = (isset($response->data['error']['code'])) ? $response->data['error']['code'] : '';
+                    $resultMessage->message = $response->data['error']['message'] ?? '';
+                    $resultMessage->code = $response->data['error']['code'] ?? '';
 
                     $serviceLogStatusId = HotelQuoteServiceLog::STATUS_FAIL;
                     $serviceLogMessage = serialize($response->data);

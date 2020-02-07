@@ -13,6 +13,9 @@ use sales\services\TransactionManager;
 /**
  * Class HotelQuoteBookService
  *
+ * @property int $status
+ * @property string $message
+ *
  * @property  ApiHotelService $apiService
  * @property ProductQuoteRepository $productQuoteRepository
  * @property TransactionManager $transactionManager
@@ -51,7 +54,7 @@ class HotelQuoteBookService
      * @return $this
      * @throws \Throwable
      */
-    public function book(HotelQuote $model)
+    public function book(HotelQuote $model): self
     {
         $rooms = [];
         $client = $this->getClient($model);
