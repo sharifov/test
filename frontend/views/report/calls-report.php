@@ -10,7 +10,7 @@ $this->params['breadcrumbs'][] = $this->title;
 /**
  * @var $this yii\web\View
  * @var $searchModel common\models\search\CallSearch;
- * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $dataProvider yii\data\ArrayDataProvider
  */
 $list = new ListsAccess(Yii::$app->user->id);
 
@@ -37,12 +37,11 @@ $list = new ListsAccess(Yii::$app->user->id);
 
     <?php
     $gridColumns = [
-        //['class' => 'yii\grid\SerialColumn'],
         [
             'label' => 'Username',
             'attribute' => 'c_created_user_id',
-            'value' => static function ($searchModel) {
-                $employee = \common\models\Employee::findone($searchModel['c_created_user_id']);
+            'value' => static function ($data) {
+                $employee = \common\models\Employee::findone($data['c_created_user_id']);
                 return $employee->username;
             },
             'format' => 'raw',
@@ -214,8 +213,8 @@ $list = new ListsAccess(Yii::$app->user->id);
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
             'contentOptions' => [
-                    'style' => 'background-color:#fcf8e3',
-                    'class' => 'text-center'
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
             ],
             'filterOptions' => ['style' => 'background-color:#fcf8e3;'],
         ],
