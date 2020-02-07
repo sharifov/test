@@ -208,7 +208,12 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
                 ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
                 ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
-                ['label' => 'User Product Type', 'url' => ['/user-product-type/index'], 'icon' => 'list'],
+                [
+                    'label' => 'User Product Type',
+                    'url' => ['/user-product-type/index'],
+                    'icon' => 'list',
+                    'visible' => Yii::$app->user->can('userProductTypeList')
+                ],
             ]
         ];
 

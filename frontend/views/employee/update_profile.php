@@ -71,9 +71,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                 echo $projectsValue;
                             ?>
                         </div>
-                        <div class="col-md-12">
-                            <label class="control-label">My Product Types</label>:
-                            <?php
+                        <?php if (Yii::$app->user->can('site_profile_userProductTypeList')) :?>
+                            <div class="col-md-12">
+                                <label class="control-label">My Product Types</label>:
+                                <?php
                                     if ($productTypeList = Yii::$app->user->identity->productType) {
                                         $productTypeValue = '';
                                         foreach ($productTypeList as $productType) {
@@ -83,7 +84,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                         echo $productTypeValue;
                                     }
                                 ?>
-                        </div>
+                            </div>
+                        <?php endif ?>
                     </div>
                 </div>
             </div>

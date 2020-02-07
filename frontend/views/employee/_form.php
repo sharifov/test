@@ -1,6 +1,8 @@
 <?php
 
+use common\models\UserProductType;
 use modules\product\src\entities\productType\ProductType;
+use sales\auth\Auth;
 use yii\web\View;
 use yii\grid\ActionColumn;
 
@@ -501,52 +503,75 @@ JS;
             <?php \yii\widgets\Pjax::end(); ?>
         </div>
 
-        <div class="user-project-type">
-            <h4>Product Type</h4>
-            <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-product-type']); ?>
+        <?php if (Auth::can('userProductTypeList')) :?>
+            <div class="user-product-type">
+                <h4>Product Type</h4>
+                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-product-type']); ?>
 
-            <p>
-                <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Add Product Type',null,
-                    [
-                        'class' => 'btn btn-success btn-xs add-product-type',
-                        'title' => 'Add Product Type',
-                        'data-user_id' => $model->id,
-                        'data-user_name' => $model->username,
-                        'data-pjax' => '0',
-                    ]
-                )?>
-            </p>
+                <?php if (Auth::can('lead_view_userProductTypeAdd')) :?>
+                    <p>
+                        <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Add Product Type',null,
+                            [
+                                'class' => 'btn btn-success btn-xs add-product-type',
+                                'title' => 'Add Product Type',
+                                'data-user_id' => $model->id,
+                                'data-user_name' => $model->username,
+                                'data-pjax' => '0',
+                            ]
+                        )?>
+                    </p>
+                <?php endif ?>
 
-            <?= \yii\grid\GridView::widget([
-                'dataProvider' => $dataUserProductType,
-                'columns' => [
-                    [
-                        'attribute' => 'upt_product_type_id',
-                        'value' => function(\common\models\UserProductType $model) {
-                            return $model->productType->pt_name;
-                        },
-                    ],
-                    'upt_commission_percent',
-                    'upt_product_enabled:booleanByLabel',
-                    [
-                        'class' => ActionColumn::class,
-                        'template' => '{update} {delete}',
-                        'controller' => 'user-product-type',
-                        'buttons' => [
-                            'update' => function ($url, $model, $key) {
-                                return Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
-                                    'class' => 'update-product-type',
-                                    'title' => 'Update Product Type',
-                                    'data-id' => $key,
-                                    'data-pjax' => '0',
-                                ]);
+                <?= \yii\grid\GridView::widget([
+                    'dataProvider' => $dataUserProductType,
+                    'columns' => [
+                        [
+                            'attribute' => 'upt_product_type_id',
+                            'value' => function(UserProductType $model) {
+                                return $model->productType->pt_name;
                             },
                         ],
+                        'upt_commission_percent',
+                        'upt_product_enabled:booleanByLabel',
+                        [
+                            'class' => ActionColumn::class,
+                            'template' => '{update} {delete}',
+                            'controller' => 'user-product-type',
+                            'buttons' => [
+                                'update' => function ($url, $model, $key) {
+                                    if (Auth::can('lead_view_userProductTypeUpdate')) {
+                                        $updateButton = Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
+                                            'class' => 'update-product-type',
+                                            'title' => 'Update Product Type',
+                                            'data-id' => $key,
+                                            'data-pjax' => '0',
+                                        ]);
+                                    } else {
+                                        $updateButton = Html::tag('span', '', [
+                                            'class' => 'glyphicon glyphicon-edit text-secondary',
+                                            'title' => 'No access'
+                                        ]);
+                                    }
+                                    return $updateButton;
+                                },
+                                'delete' => function ($url, $model, $key) {
+                                    if (Auth::can('lead_view_userProductTypeDelete')) {
+                                        $deleteButton = Html::a('<span class="glyphicon glyphicon-trash"></span>',$url, []);
+                                    } else {
+                                        $deleteButton = Html::tag('span', '', [
+                                            'class' => 'glyphicon glyphicon-trash text-secondary',
+                                            'title' => 'No access'
+                                        ]);
+                                    }
+                                    return $deleteButton;
+                                },
+                            ],
+                        ],
                     ],
-                ],
-            ]); ?>
-            <?php \yii\widgets\Pjax::end(); ?>
-        </div>
+                ]); ?>
+                <?php \yii\widgets\Pjax::end(); ?>
+            </div>
+        <?php endif ?>
 
         <?php /*
         <div class="card card-default">
