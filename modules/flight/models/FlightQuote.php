@@ -242,7 +242,7 @@ class FlightQuote extends ActiveRecord implements Quotable
      */
     public function getFlightQuotePaxPrices()
     {
-        return $this->hasMany(FlightQuotePaxPrice::class, ['qpp_flight_quote_id' => 'fq_id']);
+        return $this->hasMany(FlightQuotePaxPrice::class, ['qpp_flight_quote_id' => 'fq_id'])->orderBy(['qpp_flight_pax_code_id' => SORT_ASC]);
     }
 
     /**

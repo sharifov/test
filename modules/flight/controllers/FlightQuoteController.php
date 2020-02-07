@@ -204,7 +204,7 @@ class FlightQuoteController extends FController
 
 			if ($quotes === false) {
 				$quotes = $this->quoteSearchService->search($flight, $gds);
-				if ($quotes['results']) {
+				if (!empty($quotes['results'])) {
 					\Yii::$app->cacheFile->set($flight->fl_request_hash_key, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
 				}
 			}

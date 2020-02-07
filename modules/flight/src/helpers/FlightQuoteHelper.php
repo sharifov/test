@@ -6,6 +6,7 @@ use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\helpers\product\ProductQuoteHelper;
@@ -34,77 +35,69 @@ class FlightQuoteHelper
 
 	/**
 	 * @param FlightQuote $flightQuote
-	 * @return array
+	 * @return FlightQuotePriceDataDTO
 	 */
-	public static function getPricesData(FlightQuote $flightQuote): array
+	public static function getPricesData(FlightQuote $flightQuote): FlightQuotePriceDataDTO
 	{
+		/** @var $prices FlightQuotePaxPriceDTO[] */
 		$prices = [];
 		$service_fee_percent = $flightQuote->getServiceFeePercent();
-		$defData = [
-			'fare' => 0,
-			'taxes' => 0,
-			'net' => 0, // fare + taxes
-			'tickets' => 0,
-			'mark_up' => 0,
-			'extra_mark_up' => 0,
-			'service_fee' => 0,
-			'selling' => 0, //net + mark_up + extra_mark_up + service_fee
-			'service_fee_sum' => 0,
-			'client_selling' => 0
-		];
-		$total = $defData;
 
+		$dtoPax = new FlightQuotePaxPriceDataDTO();
 		$paxCodeId = null;
-		foreach ($flightQuote->flightQuotePaxPrices as $price){
+		$dtoTotal = new FlightQuoteTotalPriceDTO();
+		foreach ($flightQuote->flightQuotePaxPrices as $price) {
 			$paxCode = FlightPax::getPaxTypeById($price->qpp_flight_pax_code_id);
-			if($paxCodeId !== $price->qpp_flight_pax_code_id) {
-				$prices[$paxCode] = $defData;
-				$paxCodeId = $price->qpp_flight_pax_code_id;
+			if ($dtoPax->paxCodeId !== $price->qpp_flight_pax_code_id) {
+				$dtoPax = new FlightQuotePaxPriceDataDTO();
+				$dtoPax->paxCodeId = $price->qpp_flight_pax_code_id;
+				$dtoPax->paxCode = $paxCode;
 			}
-			$prices[$paxCode]['fare'] += $price->qpp_fare;
-			$prices[$paxCode]['taxes'] += $price->qpp_tax;
-			$prices[$paxCode]['net'] = (float)(($prices[$paxCode]['fare'] + $prices[$paxCode]['taxes']) * $price->qpp_cnt);
-			$prices[$paxCode]['tickets'] += $price->qpp_cnt;
-			$prices[$paxCode]['mark_up'] += $price->qpp_system_mark_up * $price->qpp_cnt;
-			$prices[$paxCode]['extra_mark_up'] += $price->qpp_agent_mark_up * $price->qpp_cnt;
-			$prices[$paxCode]['selling'] = ($prices[$paxCode]['net'] + $prices[$paxCode]['mark_up'] + $prices[$paxCode]['extra_mark_up']);
-			$prices[$paxCode]['service_fee'] = ($prices[$paxCode]['selling'] * $service_fee_percent / 100);
-			$prices[$paxCode]['selling'] += $prices[$paxCode]['service_fee'];
-			$prices[$paxCode]['selling'] = ProductQuoteHelper::roundPrice($prices[$paxCode]['selling']);
-			$prices[$paxCode]['client_selling'] = ProductQuoteHelper::roundPrice($prices[$paxCode]['selling'] * $flightQuote->fqProductQuote->pq_client_currency_rate);
+
+			$dtoPax->fare += $price->qpp_fare;
+			$dtoPax->taxes += $price->qpp_tax;
+			$dtoPax->net = ($dtoPax->fare + $dtoPax->taxes) * $price->qpp_cnt;
+			$dtoPax->tickets += $price->qpp_cnt;
+			$dtoPax->markUp += $price->qpp_system_mark_up * $price->qpp_cnt;
+			$dtoPax->extraMarkUp += $price->qpp_agent_mark_up * $price->qpp_cnt;
+			$dtoPax->selling = $dtoPax->net + $dtoPax->markUp + $dtoPax->extraMarkUp;
+			$dtoPax->serviceFee = $dtoPax->selling * $service_fee_percent / 100;
+			$dtoPax->selling = ProductQuoteHelper::roundPrice($dtoPax->serviceFee + $dtoPax->selling);
+			$dtoPax->clientSelling = ProductQuoteHelper::roundPrice($dtoPax->selling * $flightQuote->fqProductQuote->pq_client_currency_rate);
+
+			$prices[$paxCode] = $dtoPax;
+
+			$dtoTotal->tickets += $dtoPax->tickets;
+			$dtoTotal->net += $dtoPax->net;
+			$dtoTotal->markUp += $dtoPax->markUp;
+			$dtoTotal->extraMarkUp += $dtoPax->extraMarkUp;
+			$dtoTotal->selling += $dtoPax->selling;
+			$dtoTotal->serviceFeeSum += ProductQuoteHelper::roundPrice($dtoPax->serviceFee);
+			$dtoTotal->clientSelling += $dtoPax->clientSelling;
 		}
 
-		foreach ($prices as $key => $price){
-			$total['tickets'] += $price['tickets'];
-			$total['net'] += $price['net'];
-			$total['mark_up'] += $price['mark_up'];
-			$total['extra_mark_up'] += $price['extra_mark_up'];
-			$total['selling'] += $price['selling'];
-			$total['service_fee_sum'] += ProductQuoteHelper::roundPrice($price['service_fee']);
-			$total['client_selling'] += $price['client_selling'];
-		}
+		$priceDto = new FlightQuotePriceDataDTO();
+		$priceDto->prices = $prices;
+		$priceDto->total = $dtoTotal;
+		$priceDto->serviceFeePercent = $service_fee_percent;
+		$priceDto->serviceFee = ($priceDto->serviceFeePercent > 0) ? ($dtoTotal->selling * $priceDto->serviceFeePercent / 100) : 0;
+		$priceDto->processingFee = $flightQuote->getProcessingFee();
 
-		return [
-			'prices' => $prices,
-			'total' => $total,
-			'service_fee_percent' => $service_fee_percent,
-			'service_fee' => ($service_fee_percent > 0)?$total['selling'] * $service_fee_percent / 100:0,
-			'processing_fee' => $flightQuote->getProcessingFee()
-		];
+		return $priceDto;
 	}
 
 	/**
 	 * @param array $priceData
 	 * @return string
 	 */
-	public static function getEstimationProfitText(array $priceData): string
+	public static function getEstimationProfitText(FlightQuotePriceDataDTO $priceData): string
 	{
 		$data = [];
 		/* if(isset($priceData['service_fee']) && $priceData['service_fee'] > 0){
 			$data[] = '<span class="text-danger">Merchant fee: -'.round($priceData['service_fee'],2).'$</span>';
 		} */
-		if(isset($priceData['processing_fee']) && $priceData['processing_fee'] > 0){
-			$data[] = '<span class="text-danger">Processing fee: -'.ProductQuoteHelper::roundPrice($priceData['processing_fee']).'$</span>';
+		if($priceData->processingFee > 0){
+			$data[] = '<span class="text-danger">Processing fee: -'.ProductQuoteHelper::roundPrice($priceData->processingFee).'$</span>';
 		}
 
 		return (empty($data))?'-':implode('<br/>', $data);
@@ -114,11 +107,11 @@ class FlightQuoteHelper
 	 * @param array $priceData
 	 * @return false|float
 	 */
-	public static function getEstimationProfit(array $priceData)
+	public static function getEstimationProfit(FlightQuotePriceDataDTO $priceData)
 	{
 		$profit = 0;
-		$markUp = $priceData['total']['mark_up'] + $priceData['total']['extra_mark_up'];
-		$processingFee = $priceData['processing_fee'];
+		$markUp = $priceData->total->markUp + $priceData->total->extraMarkUp;
+		$processingFee = $priceData->processingFee;
 
 		$profit += $markUp;
 		$profit -= $processingFee;
@@ -130,7 +123,7 @@ class FlightQuoteHelper
 	 * @param FlightQuote $flightQuote
 	 * @return float|int|null
 	 */
-	public function getFinalProfit(FlightQuote $flightQuote)
+	public static function getFinalProfit(FlightQuote $flightQuote)
 	{
 		$lead = $flightQuote->fqProductQuote->pqProduct->prLead;
 		$final = $lead->final_profit;

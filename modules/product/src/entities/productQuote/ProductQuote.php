@@ -16,6 +16,7 @@ use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -432,6 +433,40 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 	public function isNew(): bool
 	{
 		return $this->pq_status_id === ProductQuoteStatus::NEW;
+	}
+
+	public function decline(): void
+	{
+		$this->pq_status_id = ProductQuoteStatus::DECLINED;
+	}
+
+	public function isDeclined(): bool
+	{
+		return $this->pq_status_id === ProductQuoteStatus::DECLINED;
+	}
+
+	/**
+	 * @param Currency $currency
+	 */
+	public function recountClientPrice(Currency $currency): void
+	{
+		$this->pq_client_currency = $currency->cur_code;
+		$this->pq_client_currency_rate = $currency->cur_app_rate;
+		$this->pq_client_price = ProductQuoteHelper::roundPrice($this->pq_price * $this->pq_client_currency_rate);
+	}
+
+	/**
+	 * @param float $originPrice
+	 * @param float $price
+	 * @param float $clientPrice
+	 * @param float $serviceFeeSum
+	 */
+	public function setQuotePrice(float $originPrice, float $price, float $clientPrice, float $serviceFeeSum)
+	{
+		$this->pq_origin_price = $originPrice;
+		$this->pq_price = $price;
+		$this->pq_client_price = $clientPrice;
+		$this->pq_service_fee_sum = $serviceFeeSum;
 	}
 
     public function isHotel(): bool

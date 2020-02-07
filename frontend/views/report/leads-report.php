@@ -9,13 +9,12 @@ $this->params['breadcrumbs'][] = $this->title;
 /**
  * @var $this yii\web\View
  * @var $searchModel common\models\search\LeadSearch;
- * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $dataProvider yii\data\ArrayDataProvider
  */
 $list = new ListsAccess(Yii::$app->user->id);
 ?>
 <div class="calls-report-index">
     <h1><i class=""></i> <?= Html::encode($this->title) ?></h1>
-
     <div class="">
         <div class="x_panel">
             <div class="x_title">
@@ -34,13 +33,12 @@ $list = new ListsAccess(Yii::$app->user->id);
     </div>
 
     <?php
-
     $gridColumns = [
         [
             'label' => 'Username',
             'attribute' => 'lfOwnerId',
-            'value' => static function ($searchModel) {
-                $employee = \common\models\Employee::findone($searchModel['user_id']);
+            'value' => static function ($data) {
+                $employee = \common\models\Employee::findone($data['user_id']);
                 return $employee->username;
             },
             'format' => 'raw',
@@ -51,8 +49,9 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'created_date',
         ],
         [
+            'label' => 'New Total',
             'attribute' => 'newTotal',
-            'value' => function($data) {
+            'value' => static function($data) {
                 return $data['newTotal'] ?: '-';
             },
             'contentOptions' => [
@@ -60,6 +59,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Inbox Leads Taken',
             'attribute' => 'inboxLeadsTaken',
             'value' => function($data) {
                 return $data['inboxLeadsTaken'] ?: '-';
@@ -69,6 +69,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Call Leads Taken',
             'attribute' => 'callLeadsTaken',
             'value' => function($data) {
                 return $data['callLeadsTaken'] ?: '-';
@@ -78,6 +79,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Redial Leads Taken',
             'attribute' => 'redialLeadsTaken',
             'value' => function($data) {
                 return $data['redialLeadsTaken'] ?: '-';
@@ -87,6 +89,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Leads Created',
             'attribute' => 'leadsCreated',
             'value' => function($data) {
                 return $data['leadsCreated'] ?: '-';
@@ -96,6 +99,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Leads Cloned',
             'attribute' => 'leadsCloned',
             'value' => function($data) {
                 return $data['leadsCloned'] ?: '-';
@@ -105,6 +109,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Follow Up Total',
             'attribute' => 'followUpTotal',
             'value' => function($data) {
                 return $data['followUpTotal'] ?: '-';
@@ -114,6 +119,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'To Follow Up',
             'attribute' => 'toFollowUp',
             'value' => function($data) {
                 return $data['toFollowUp'] ?: '-';
@@ -123,6 +129,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Follow Up Leads Taken',
             'attribute' => 'followUpLeadsTaken',
             'value' => function($data) {
                 return $data['followUpLeadsTaken'] ?: '-';
@@ -141,6 +148,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Trash Leads',
             'attribute' => 'trashLeads',
             'value' => function($data) {
                 return $data['trashLeads'] ?: '-';
@@ -150,6 +158,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Sold Leads',
             'attribute' => 'soldLeads',
             'value' => function($data) {
                 return $data['soldLeads'] ?: '-';
@@ -159,6 +168,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Profit',
             'attribute' => 'profit',
             'value' => function($data) {
                 return number_format($data['profit']) ?: '-';
@@ -168,6 +178,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ],
         ],
         [
+            'label' => 'Tips',
             'attribute' => 'tips',
             'value' => function($data) {
                 return number_format($data['tips']) ?: '-';
@@ -182,12 +193,9 @@ $list = new ListsAccess(Yii::$app->user->id);
         'dataProvider' => $dataProvider,
         'columns' => $gridColumns,
         'fontAwesome' => true,
-        //'stream' => false, // this will automatically save file to a folder on web server
-        //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
-        'batchSize' => 10,
+        'timeout' => 60,
         'target' => \kartik\export\ExportMenu::TARGET_BLANK,
-        //'linkPath' => '/assets/',
-        //'folder' => '@webroot/assets', // this is default save folder on server
+
         'dropdownOptions' => [
             'label' => 'Full Export'
         ],
@@ -214,20 +222,6 @@ $list = new ListsAccess(Yii::$app->user->id);
             '{export}',
             $fullExportMenu,
         ],
-        'beforeHeader' => [
-            [
-                /*'columns' => [
-                    ['content' => '', 'options' => ['colspan' => 2]],
-                    ['content' => 'Outgoing Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
-                    ['content' => 'Incoming Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
-                ],*/
-            ]
-        ],
     ]);
-
     ?>
-
-
-
-
 </div>
