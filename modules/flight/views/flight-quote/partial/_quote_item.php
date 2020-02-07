@@ -127,6 +127,13 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
 						'data-id' => $model->pq_id,
 						'title' => 'View status log'
 					]) ?>
+
+                    <?= Html::a('<i class="fa fa-list"></i> Clone', null, [
+                        'class' => 'dropdown-item btn-clone-product-quote',
+                        'data-product-quote-id' => $flightQuote->fq_product_quote_id,
+                        'data-flight-quote-id' => $flightQuote->fq_id,
+                        'data-product-id' => $flightQuote->fqProductQuote->pq_product_id,
+                    ]) ?>
 <!---->
 <!--					--><?//= Html::a('<i class="fa fa-list-alt"></i> Reserv. dump', null, [
 //						'class' => 'btn-reservation-dump dropdown-item',

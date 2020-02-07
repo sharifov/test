@@ -171,7 +171,7 @@ class TestController extends FController
     {
 
         $service = Yii::createObject(ProductQuoteCloneService::class);
-        $service->clone(8, 30, 295, 294);
+        $service->clone(9, 33, 295, 294);
 
         die;
         return $this->render('blank');

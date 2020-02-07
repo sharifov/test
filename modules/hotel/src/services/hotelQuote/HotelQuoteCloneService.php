@@ -7,31 +7,26 @@ use modules\hotel\models\HotelQuoteRoom;
 use modules\hotel\src\entities\hotelQuote\HotelQuoteRepository;
 use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
 use modules\hotel\src\repositories\hotel\HotelRepository;
-use sales\services\TransactionManager;
 
 /**
  * Class HotelQuoteCloneService
  *
- * @property TransactionManager $transactionManager
  * @property HotelQuoteRepository $hotelQuoteRepository
  * @property HotelQuoteRoomRepository $hotelQuoteRoomRepository
  * @property HotelRepository $hotelRepository
  */
 class HotelQuoteCloneService
 {
-    private $transactionManager;
     private $hotelQuoteRepository;
     private $hotelQuoteRoomRepository;
     private $hotelRepository;
 
     public function __construct(
-        TransactionManager $transactionManager,
         HotelQuoteRepository $hotelQuoteRepository,
         HotelQuoteRoomRepository $hotelQuoteRoomRepository,
         HotelRepository $hotelRepository
     )
     {
-        $this->transactionManager = $transactionManager;
         $this->hotelQuoteRepository = $hotelQuoteRepository;
         $this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
         $this->hotelRepository = $hotelRepository;

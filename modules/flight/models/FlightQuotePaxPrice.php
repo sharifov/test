@@ -140,6 +140,18 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
 		return $paxPrice;
 	}
 
+    public static function clone(FlightQuotePaxPrice $paxPrice, int $quoteId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $paxPrice->attributes;
+
+        $clone->qpp_id = null;
+        $clone->qpp_flight_quote_id = $quoteId;
+
+        return $clone;
+	}
+
     public function serialize(): array
     {
         return (new FlightQuotePaxPriceSerializer($this))->getData();
