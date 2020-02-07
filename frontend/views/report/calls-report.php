@@ -239,12 +239,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         'dataProvider' => $dataProvider,
         'columns' => $gridColumns,
         'fontAwesome' => true,
-        //'stream' => false, // this will automatically save file to a folder on web server
-        //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
-        'batchSize' => 10,
-        'target' => \kartik\export\ExportMenu::TARGET_BLANK,
-        //'linkPath' => '/assets/',
-        //'folder' => '@webroot/assets', // this is default save folder on server
+        'timeout' => 60,
         'dropdownOptions' => [
             'label' => 'Full Export'
         ],
