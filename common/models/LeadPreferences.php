@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\local\LeadLogMessage;
 use sales\entities\EventTrait;
+use sales\events\lead\LeadPreferencesUpdateCurrencyEvent;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -55,11 +56,15 @@ class LeadPreferences extends \yii\db\ActiveRecord
 	 * @param null|string $currency
      *
 	 */
-    public function edit($marketPrice, $clientBudget, $numberStops, $currency)
+    public function edit($marketPrice, $clientBudget, $numberStops, $currency): void
 	{
 		$this->market_price = $marketPrice;
 		$this->clients_budget = $clientBudget;
 		$this->number_stops = $numberStops;
+
+		if ($this->pref_currency != $currency) {
+			$this->recordEvent((new LeadPreferencesUpdateCurrencyEvent($this)));
+		}
         $this->pref_currency = $currency;
 	}
 

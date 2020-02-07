@@ -5,13 +5,18 @@ namespace modules\flight\src\events;
 use modules\flight\models\Flight;
 
 /**
- * Class FlightCountPassengersChangedEvent
+ * Class FlightRequestUpdateEvent
  * @package modules\flight\src\events
  *
  * @property Flight $flight
  */
-class FlightCountPassengersChangedEvent
+class FlightRequestUpdateEvent
 {
+	public const EVENT_KEY = 'FlightRequestUpdate';
+
+	/**
+	 * @var Flight
+	 */
 	public $flight;
 
 	/**

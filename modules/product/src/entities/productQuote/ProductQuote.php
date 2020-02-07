@@ -8,13 +8,15 @@ use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
-use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\product\src\entities\product\Product;
+use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -43,6 +45,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pq_updated_user_id
  * @property string|null $pq_created_dt
  * @property string|null $pq_updated_dt
+ * @property int|null $pq_clone_id
  *
  * @property OfferProduct[] $offerProducts
  * @property Offer[] $opOffers
@@ -58,10 +61,15 @@ use yii\db\ActiveRecord;
  * @property float $optionAmountSum
  * @property float $totalCalcSum
  * @property ProductQuoteOption[] $productQuoteOptions
+ * @property ProductQuote|null $clone
+ *
+ * @property Quotable|null $childQuote
  */
 class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
+
+    private $childQuote;
 
 	public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
@@ -74,7 +82,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return [
             [['pq_gid', 'pq_product_id'], 'required'],
-            [['pq_product_id', 'pq_order_id', 'pq_status_id', 'pq_owner_user_id', 'pq_created_user_id', 'pq_updated_user_id'], 'integer'],
+            [['pq_product_id', 'pq_order_id', 'pq_owner_user_id', 'pq_created_user_id', 'pq_updated_user_id'], 'integer'],
             [['pq_description'], 'string'],
             [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate'], 'number'],
             [['pq_created_dt', 'pq_updated_dt'], 'safe'],
@@ -89,6 +97,14 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             [['pq_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pq_owner_user_id' => 'id']],
             [['pq_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['pq_product_id' => 'pr_id']],
             [['pq_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pq_updated_user_id' => 'id']],
+
+            ['pq_clone_id', 'exist', 'skipOnError' => true, 'targetClass' => static::class, 'targetAttribute' => ['pq_clone_id' => 'pq_id'], 'filter' => function($query) {
+                $query->andWhere(['not', ['pq_id' => $this->pq_id]]);
+            }],
+
+            ['pq_status_id', 'required'],
+            ['pq_status_id', 'integer'],
+            ['pq_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
         ];
     }
 
@@ -105,7 +121,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             'pqProduct' => 'Product',
             'pq_order_id' => 'Order ID',
             'pq_description' => 'Description',
-            'pq_status_id' => 'Status ID',
+            'pq_status_id' => 'Status',
             'pq_price' => 'Price',
             'pq_origin_price' => 'Origin Price',
             'pq_client_price' => 'Client Price',
@@ -122,6 +138,8 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             'pqUpdatedUser' => 'Updated User',
             'pq_created_dt' => 'Created Dt',
             'pq_updated_dt' => 'Updated Dt',
+            'pq_clone_id' => 'Clone Id',
+            'clone' => 'Clone Id',
         ];
     }
 
@@ -156,6 +174,22 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->pq_service_fee_sum           = $this->pq_service_fee_sum === null ? null : (float) $this->pq_service_fee_sum;
         $this->pq_origin_currency_rate      = $this->pq_origin_currency_rate === null ? null : (float) $this->pq_origin_currency_rate;
         $this->pq_client_currency_rate      = $this->pq_client_currency_rate === null ? null : (float) $this->pq_client_currency_rate;
+    }
+
+    public function getChildQuote(): ?Quotable
+    {
+        if ($this->childQuote !== null) {
+            return $this->childQuote;
+        }
+
+        $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'findByProductQuote'];
+        $this->childQuote =  $finder($this->pq_id);
+        return $this->childQuote;
+    }
+
+    public function getClone(): ActiveQuery
+    {
+        return $this->hasOne(static::class, ['pq_id' => 'pq_clone_id']);
     }
 
     /**
@@ -328,6 +362,37 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 		return $quote;
 	}
 
+    public static function clone(
+        ProductQuote $quote,
+        int $productId,
+        ?int $ownerId,
+        ?int $creatorId
+    ): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $quote->attributes;
+
+        $clone->pq_id = null;
+        $clone->pq_gid = self::generateGid();
+        $clone->pq_product_id = $productId;
+        $clone->pq_order_id = null;
+        $clone->pq_status_id = ProductQuoteStatus::NEW;
+        $clone->pq_owner_user_id = $ownerId;
+        $clone->pq_clone_id = $quote->pq_id;
+        $clone->recordEvent(new ProductQuoteCloneCreatedEvent(
+            $clone,
+            null,
+            $clone->pq_status_id,
+            null,
+            ProductQuoteStatusAction::CLONE,
+            $clone->pq_owner_user_id,
+            $creatorId
+        ));
+
+        return $clone;
+    }
+
 	/**
 	 * @return string
 	 */
@@ -368,5 +433,35 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 	public function isNew(): bool
 	{
 		return $this->pq_status_id === ProductQuoteStatus::NEW;
+	}
+
+	public function decline(): void
+	{
+		$this->pq_status_id = ProductQuoteStatus::DECLINED;
+	}
+
+	public function isDeclined(): bool
+	{
+		return $this->pq_status_id === ProductQuoteStatus::DECLINED;
+	}
+
+	/**
+	 * @param Currency $currency
+	 */
+	public function recountClientPrice(Currency $currency): void
+	{
+		$this->pq_client_currency = $currency->cur_code;
+		$this->pq_client_currency_rate = $currency->cur_app_rate;
+		$this->pq_client_price = ProductQuoteHelper::roundPrice($this->pq_price * $this->pq_client_currency_rate);
+	}
+
+    public function isHotel(): bool
+    {
+        return $this->pqProduct->isHotel();
+	}
+
+    public function isFlight(): bool
+    {
+        return $this->pqProduct->isFlight();
 	}
 }
