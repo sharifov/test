@@ -382,8 +382,8 @@ class QuoteController extends ApiBaseController
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
-
         $uid = Yii::$app->request->post('uid');
+        $checkout_id = Yii::$app->request->post('checkout_id');
         $clientIP = Yii::$app->request->post('clientIP');
 
         if (!$uid) {
@@ -396,6 +396,10 @@ class QuoteController extends ApiBaseController
             throw new NotFoundHttpException('Not found Quote UID: ' . $uid, 2);
         }
 
+        if ($checkout_id) {
+            $model->lead->hybrid_uid = $checkout_id;
+            $model->lead->save();
+        }
 
         $response = [
             'status' => 'Failed',
@@ -444,9 +448,6 @@ class QuoteController extends ApiBaseController
                 'currency' => 'USD',
                 'currencyRate' => 1,
             ];
-
-
-
 
 
             $paxPriceData = $model->getQuotePricePassengersData();
