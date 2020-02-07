@@ -7,14 +7,14 @@ use modules\hotel\models\HotelQuote;
 /**
  * Class HotelQuoteCloneCreatedEvent
  *
- * @property HotelQuote $hotelQuote
+ * @property HotelQuote $quote
  */
 class HotelQuoteCloneCreatedEvent
 {
-    public $hotelQuote;
+    public $quote;
 
-    public function __construct(HotelQuote $hotelQuote)
+    public function __construct(HotelQuote $quote)
     {
-        $this->hotelQuote = $hotelQuote;
+        $this->quote = $quote;
     }
 }

@@ -91,4 +91,16 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
 		return $trip;
 	}
 
+    public static function clone(FlightQuoteTrip $trip, int $quoteId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $trip->attributes;
+
+        $clone->fqt_id = null;
+        $clone->fqt_flight_quote_id = $quoteId;
+
+        return $clone;
+	}
+
 }

@@ -79,6 +79,13 @@ use yii\helpers\Html;
 <!--                        </li>-->
 <!--                    </ul>-->
 
+                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
+                        'class' => 'dropdown-item text-warning btn-clone-product-quote',
+                        'data-product-quote-id' => $model->hq_product_quote_id,
+                        'data-hotel-quote-id' => $model->hq_id,
+                        'data-product-id' => $model->hqProductQuote->pq_product_id,
+                    ]) ?>
+
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
                         //'data-product-quote-id' => $model->hq_product_quote_id,

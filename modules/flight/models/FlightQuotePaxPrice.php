@@ -55,6 +55,8 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             [['qpp_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['qpp_client_currency' => 'cur_code']],
             [['qpp_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['qpp_flight_quote_id' => 'fq_id']],
             [['qpp_origin_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['qpp_origin_currency' => 'cur_code']],
+
+            ['qpp_cnt', 'integer'],
         ];
     }
 
@@ -138,6 +140,18 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
 		$paxPrice->qpp_client_tax = $dto->clientTax;
 
 		return $paxPrice;
+	}
+
+    public static function clone(FlightQuotePaxPrice $paxPrice, int $quoteId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $paxPrice->attributes;
+
+        $clone->qpp_id = null;
+        $clone->qpp_flight_quote_id = $quoteId;
+
+        return $clone;
 	}
 
     public function serialize(): array

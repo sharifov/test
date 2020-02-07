@@ -2,6 +2,7 @@
 
 namespace modules\product\src\services\productQuote;
 
+use modules\flight\src\services\flightQuote\FlightQuoteCloneService;
 use modules\hotel\src\services\hotelQuote\HotelQuoteCloneService;
 use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -9,7 +10,6 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use sales\services\TransactionManager;
-use yii\helpers\VarDumper;
 
 /**
  * Class ProductQuoteCloneService
@@ -19,6 +19,7 @@ use yii\helpers\VarDumper;
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  * @property HotelQuoteCloneService $hotelQuoteCloneService
  * @property ProductRepository $productRepository
+ * @property FlightQuoteCloneService $flightQuoteCloneService
  */
 class ProductQuoteCloneService
 {
@@ -27,13 +28,15 @@ class ProductQuoteCloneService
     private $productQuoteOptionRepository;
     private $hotelQuoteCloneService;
     private $productRepository;
+    private $flightQuoteCloneService;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
         ProductQuoteOptionRepository $productQuoteOptionRepository,
         TransactionManager $transactionManager,
         HotelQuoteCloneService $hotelQuoteCloneService,
-        ProductRepository $productRepository
+        ProductRepository $productRepository,
+        FlightQuoteCloneService $flightQuoteCloneService
     )
     {
         $this->productQuoteRepository = $productQuoteRepository;
@@ -41,6 +44,7 @@ class ProductQuoteCloneService
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
         $this->hotelQuoteCloneService = $hotelQuoteCloneService;
         $this->productRepository = $productRepository;
+        $this->flightQuoteCloneService = $flightQuoteCloneService;
     }
 
     public function clone(int $productQuoteId, int $toProductId, ?int $ownerId, ?int $creatorId): ProductQuote
@@ -73,7 +77,9 @@ class ProductQuoteCloneService
                 if ($originalQuote->isHotel()) {
                     $this->hotelQuoteCloneService->clone($childQuote->getId(), $childProduct->getId(), $productQuote->pq_id);
                 } elseif ($originalQuote->isFlight()) {
-
+                    $this->flightQuoteCloneService->clone($childQuote->getId(), $childProduct->getId(), $productQuote->pq_id);
+                } else {
+                    throw new \DomainException('Undefined Product Quote type');
                 }
             }
 

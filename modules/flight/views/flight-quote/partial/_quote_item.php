@@ -123,12 +123,19 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                         ]) ?>
                     </span>
 
-					<?= Html::a('<i class="fa fa-list"></i> Status logs', null, [
-						'class' => 'flight-quote-view-status-log sl-quote__status-log dropdown-item',
-						'data-id' => $model->pq_id,
-						'title' => 'View status log'
-					]) ?>
+                    <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                        'class' => 'dropdown-item text-success btn-product-quote-status-log',
+                        'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $flightQuote->fqProductQuote->pq_gid]),
+                        'data-gid' => $flightQuote->fqProductQuote->pq_gid,
+                        'title' => 'View status log'
+                    ]) ?>
 
+                    <?= Html::a('<i class="fa fa-list"></i> Clone', null, [
+                        'class' => 'dropdown-item btn-clone-product-quote',
+                        'data-product-quote-id' => $flightQuote->fq_product_quote_id,
+                        'data-flight-quote-id' => $flightQuote->fq_id,
+                        'data-product-id' => $flightQuote->fqProductQuote->pq_product_id,
+                    ]) ?>
 <!---->
 <!--					--><?//= Html::a('<i class="fa fa-list-alt"></i> Reserv. dump', null, [
 //						'class' => 'btn-reservation-dump dropdown-item',
