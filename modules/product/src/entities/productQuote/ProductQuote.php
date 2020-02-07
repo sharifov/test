@@ -455,6 +455,20 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 		$this->pq_client_price = ProductQuoteHelper::roundPrice($this->pq_price * $this->pq_client_currency_rate);
 	}
 
+	/**
+	 * @param float $originPrice
+	 * @param float $price
+	 * @param float $clientPrice
+	 * @param float $serviceFeeSum
+	 */
+	public function setQuotePrice(float $originPrice, float $price, float $clientPrice, float $serviceFeeSum)
+	{
+		$this->pq_origin_price = $originPrice;
+		$this->pq_price = $price;
+		$this->pq_client_price = $clientPrice;
+		$this->pq_service_fee_sum = $serviceFeeSum;
+	}
+
     public function isHotel(): bool
     {
         return $this->pqProduct->isHotel();

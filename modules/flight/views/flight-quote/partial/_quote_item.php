@@ -10,6 +10,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
+use yii\widgets\Pjax;
 
 $flightQuote = FlightQuote::findByProductQuoteId($model);
 
@@ -83,26 +84,24 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                 </span>
 			<?php endif; ?>
 
-			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
-			<?php $priceData = FlightQuoteHelper::getPricesData($flightQuote);	?>
+			<?php Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+			<?php $priceData = FlightQuoteHelper::getPricesData($flightQuote); ?>
 
-			<?php if($model->isApplied() && $model->pqProduct->prLead->final_profit !== null):?>
+			<?php if($model->isApplied() && $model->pqProduct->prLead->final_profit !== null): ?>
 				<button id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
-						data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData);?>'>
-					<?= '$'.FlightQuoteHelper::getFinalProfit($flightQuote);?>
+						data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData) ?>'>
+					<?= '$'.FlightQuoteHelper::getFinalProfit($flightQuote) ?>
 				</button>
 			<?php else:?>
 
 				<a id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
-				   data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData);?>'>
-					<?php if(isset($priceData['total'])):?>
-						<?=number_format(FlightQuoteHelper::getEstimationProfit($priceData),2);?>$
-					<?php endif;?>
+				   data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData) ?>'>
+                    <?= FlightQuoteHelper::getEstimationProfit($priceData) ?>$
 				</a>
 			<?php endif;?>
 
 
-			<?php \yii\widgets\Pjax::end(); ?>
+			<?php Pjax::end(); ?>
 		</div>
 		<div class="quote__heading-right">
 
@@ -313,13 +312,13 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
         <div class="row">
             <div class="col-md-10">
                 <div class="quote__actions">
-                    <?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_prices-'.$flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+                    <?php Pjax::begin(['id' => 'pjax-quote_prices-'.$flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                     <?= $this->render('_quote_prices', [
                         'quote' => $model,
                         'flightQuote' => $flightQuote,
                         'priceData' => $priceData
                     ]); ?>
-                    <?php \yii\widgets\Pjax::end(); ?>
+                    <?php Pjax::end(); ?>
                 </div>
             </div>
             <div class="col-md-2">
