@@ -379,6 +379,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $clone->pq_order_id = null;
         $clone->pq_status_id = ProductQuoteStatus::NEW;
         $clone->pq_owner_user_id = $ownerId;
+        $clone->pq_created_user_id = $ownerId;
         $clone->pq_clone_id = $quote->pq_id;
         $clone->recordEvent(new ProductQuoteCloneCreatedEvent(
             $clone,
