@@ -503,12 +503,12 @@ JS;
             <?php \yii\widgets\Pjax::end(); ?>
         </div>
 
-        <?php if (Auth::can('userProductTypeList')) :?>
+        <?php if (Auth::can('user-product-type/list')) :?>
             <div class="user-product-type">
                 <h4>Product Type</h4>
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-product-type']); ?>
 
-                <?php if (Auth::can('lead_view_userProductTypeAdd')) :?>
+                <?php if (Auth::can('user-product-type/create')) :?>
                     <p>
                         <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Add Product Type',null,
                             [
@@ -538,8 +538,8 @@ JS;
                             'template' => '{update} {delete}',
                             'controller' => 'user-product-type',
                             'buttons' => [
-                                'update' => function ($url, $model, $key) {
-                                    if (Auth::can('lead_view_userProductTypeUpdate')) {
+                                'update' => static function ($key) {
+                                    if (Auth::can('user-product-type/update')) {
                                         $updateButton = Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
                                             'class' => 'update-product-type',
                                             'title' => 'Update Product Type',
@@ -554,9 +554,9 @@ JS;
                                     }
                                     return $updateButton;
                                 },
-                                'delete' => function ($url, $model, $key) {
-                                    if (Auth::can('lead_view_userProductTypeDelete')) {
-                                        $deleteButton = Html::a('<span class="glyphicon glyphicon-trash"></span>',$url, []);
+                                'delete' => static function ($url) {
+                                    if (Auth::can('user-product-type/delete')) {
+                                        $deleteButton = Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, []);
                                     } else {
                                         $deleteButton = Html::tag('span', '', [
                                             'class' => 'glyphicon glyphicon-trash text-secondary',

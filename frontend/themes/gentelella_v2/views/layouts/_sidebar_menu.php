@@ -212,7 +212,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                     'label' => 'User Product Type',
                     'url' => ['/user-product-type/index'],
                     'icon' => 'list',
-                    'visible' => Yii::$app->user->can('userProductTypeList')
+                    'visible' => Yii::$app->user->can('user-product-type/list')
                 ],
             ]
         ];

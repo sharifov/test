@@ -3,15 +3,16 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use modules\product\src\entities\productType\ProductType;
+use Throwable;
 use Yii;
 use common\models\UserProductType;
 use common\models\search\UserProductTypeSearch;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * UserProductTypeController implements the CRUD actions for UserProductType model.
@@ -21,9 +22,33 @@ class UserProductTypeController extends FController
     /**
      * @return array
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         $behaviors = [
+            'access' => [
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'view'],
+                        'roles' => ['user-product-type/list'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['create', 'create-ajax'],
+                        'roles' => ['user-product-type/create'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['update', 'update-ajax'],
+                        'roles' => ['user-product-type/update'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['delete'],
+                        'roles' => ['user-product-type/delete'],
+                    ],
+                ]
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -51,8 +76,8 @@ class UserProductTypeController extends FController
 
     /**
      * Displays a single UserProductType model.
-     * @param integer $upt_user_id
-     * @param integer $upt_product_type_id
+     * @param int $upt_user_id
+     * @param int $upt_product_type_id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -84,8 +109,8 @@ class UserProductTypeController extends FController
     /**
      * Updates an existing UserProductType model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $upt_user_id
-     * @param integer $upt_product_type_id
+     * @param int $upt_user_id
+     * @param int $upt_product_type_id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -105,10 +130,10 @@ class UserProductTypeController extends FController
     /**
      * @param $upt_user_id
      * @param $upt_product_type_id
-     * @return \yii\web\Response
+     * @return Response
      * @throws NotFoundHttpException
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
+     * @throws Throwable
+     * @throws StaleObjectException
      */
     public function actionDelete($upt_user_id, $upt_product_type_id)
     {
@@ -120,8 +145,8 @@ class UserProductTypeController extends FController
     /**
      * Finds the UserProductType model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $upt_user_id
-     * @param integer $upt_product_type_id
+     * @param int $upt_user_id
+     * @param int $upt_product_type_id
      * @return UserProductType the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -138,14 +163,14 @@ class UserProductTypeController extends FController
      * @return string
      * @throws BadRequestHttpException
      */
-    public function actionCreateAjax()
+    public function actionCreateAjax(): string
     {
         $userId = (int) Yii::$app->request->get('user_id', 0);
         if (!$user = Employee::findOne($userId)) {
             throw new BadRequestHttpException('Invalid User Id: ' . $userId, 1);
         }
 
-        $model = new UserProductType;
+        $model = new UserProductType();
         $model->upt_user_id = $userId;
 
         if ($model->load(Yii::$app->request->post())) {
@@ -162,11 +187,11 @@ class UserProductTypeController extends FController
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionUpdateAjax()
+    public function actionUpdateAjax(): string
     {
         $data = Yii::$app->request->get('data');
-        $upp_user_id = (int) $data['upt_user_id'] ?? 0;
-        $upp_project_id = (int) $data['upt_product_type_id'] ?? 0;
+        $upp_user_id = $data['upt_user_id'] ?? 0;
+        $upp_project_id = $data['upt_product_type_id'] ?? 0;
 
         $model = $this->findModel($upp_user_id, $upp_project_id);
 

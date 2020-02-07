@@ -1,5 +1,7 @@
 <?php
 
+use common\models\Employee;
+use modules\product\src\entities\productType\ProductType;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -12,21 +14,11 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'upt_user_id')->textInput() ?>
+    <?= $form->field($model, 'upt_user_id')->dropDownList(Employee::getList(), ['prompt' => '-']) ?>
 
-    <?= $form->field($model, 'upt_product_type_id')->textInput() ?>
-
-    <?= $form->field($model, 'upt_commission_percent')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'upt_product_enabled')->textInput() ?>
-
-    <?= $form->field($model, 'upt_created_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'upt_updated_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'upt_created_dt')->textInput() ?>
-
-    <?= $form->field($model, 'upt_updated_dt')->textInput() ?>
+    <?= $form->field($model, 'upt_product_type_id')->dropDownList(ProductType::getList(), ['prompt' => '-']) ?>
+    <?= $form->field($model, 'upt_commission_percent')->input('number', ['step' => 0.01]) ?>
+    <?= $form->field($model, 'upt_product_enabled')->checkbox()?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

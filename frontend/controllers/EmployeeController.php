@@ -16,6 +16,7 @@ use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProfile;
 use frontend\models\UserMultipleForm;
+use sales\auth\Auth;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
@@ -655,15 +656,21 @@ class EmployeeController extends FController
                 }
             }
 
-        return $this->render('_form', [
+        $result = [
             'model' => $model,
             'modelUserParams' => $modelUserParams,
             'dataProvider' => $dataProvider,
             'modelProfile' => $modelProfile,
-            'dataUserProductType' => new ActiveDataProvider([
+        ];
+
+        if (Auth::can('user-product-type/list')) {
+            $dataUserProductType = new ActiveDataProvider([
                 'query' => UserProductType::find()->andFilterWhere(['upt_user_id' => $model->id])
-            ]),
-        ]);
+            ]);
+            $result = ArrayHelper::merge($result, ['dataUserProductType' => $dataUserProductType]);
+        }
+
+        return $this->render('_form', $result);
     }
 
     public function actionSwitch()
