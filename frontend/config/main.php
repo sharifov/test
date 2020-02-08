@@ -274,7 +274,7 @@ return [
             'class' => InvoiceModule::class,
         ],
 
-        'qaTask' => [
+        'qa-task' => [
             'class' => QaTaskModule::class,
         ],
 

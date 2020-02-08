@@ -30,11 +30,20 @@ use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
-use Mpdf\Tag\P;
+use modules\qaTask\src\entities\QaObjectType;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asQaObjectType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaObjectType::asFormat($value);
+    }
+
     public function asOfferSendLogType($value): string
     {
         if ($value === null) {
