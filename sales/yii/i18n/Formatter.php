@@ -31,6 +31,7 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
 use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use yii\bootstrap4\Html;
 
@@ -43,6 +44,15 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return QaTaskStatus::asFormat($value);
+    }
+
+    public function asQaTaskCreatedType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskCreatedType::asFormat($value);
     }
 
     public function asQaObjectType($value): string
@@ -328,6 +338,15 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return Html::encode($name);
+    }
+
+    public function asDepartment($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return Department::asFormat($value);
     }
 
     /**
