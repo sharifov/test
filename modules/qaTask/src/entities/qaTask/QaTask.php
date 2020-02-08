@@ -7,6 +7,7 @@ use common\models\Employee;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use sales\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -40,6 +41,8 @@ use yii\db\ActiveRecord;
  */
 class QaTask extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public static function tableName(): string
     {
         return '{{%qa_task}}';
