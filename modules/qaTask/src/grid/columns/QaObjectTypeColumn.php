@@ -2,7 +2,6 @@
 
 namespace modules\qaTask\src\grid\columns;
 
-
 use modules\qaTask\src\entities\QaObjectType;
 use yii\grid\DataColumn;
 

@@ -4,7 +4,10 @@ namespace modules\qaTask\src\entities\qaTaskCategory;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\QaObjectType;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "{{%qa_task_category}}".
@@ -53,17 +56,25 @@ class QaTaskCategory extends \yii\db\ActiveRecord
 
             ['tc_default', 'required'],
             ['tc_default', 'boolean'],
+        ];
+    }
 
-            ['tc_created_user_id', 'integer'],
-            ['tc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['tc_created_user_id' => 'id']],
-
-            ['tc_updated_user_id', 'integer'],
-            ['tc_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['tc_updated_user_id' => 'id']],
-
-            ['tc_created_dt', 'required'],
-            ['tc_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-
-            ['tc_updated_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['tc_created_dt', 'tc_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['tc_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'tc_created_user_id',
+                'updatedByAttribute' => 'tc_updated_user_id',
+            ],
         ];
     }
 

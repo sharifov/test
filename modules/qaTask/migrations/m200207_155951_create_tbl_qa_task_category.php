@@ -30,7 +30,7 @@ class m200207_155951_create_tbl_qa_task_category extends Migration
             'tc_default' => $this->boolean()->defaultValue(false)->notNull(),
             'tc_created_user_id' => $this->integer()->null(),
             'tc_updated_user_id' => $this->integer()->null(),
-            'tc_created_dt' => $this->dateTime()->notNull(),
+            'tc_created_dt' => $this->dateTime()->null(),
             'tc_updated_dt' => $this->dateTime()->null(),
         ], $tableOptions);
 

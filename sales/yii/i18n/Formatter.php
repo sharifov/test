@@ -31,10 +31,20 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
 use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asQaTaskStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskStatus::asFormat($value);
+    }
+
     public function asQaObjectType($value): string
     {
         if ($value === null) {
