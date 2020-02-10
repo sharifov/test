@@ -3,7 +3,7 @@
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
-use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReasonQuery;
+use modules\qaTask\src\helpers\formatters\QaTaskStatusReasonFormatter;
 use sales\access\ListsAccess;
 use sales\auth\Auth;
 use sales\widgets\DateTimePicker;
@@ -36,7 +36,7 @@ $list = new ListsAccess(Auth::id());
 
         <?= $form->field($model, 'tsl_duration')->textInput() ?>
 
-        <?= $form->field($model, 'tsl_reason_id')->dropDownList(QaTaskStatusReasonQuery::getList(), ['prompt' => 'Select reason']) ?>
+        <?= $form->field($model, 'tsl_reason_id')->dropDownList(QaTaskStatusReasonFormatter::formatListByFullDescription(), ['prompt' => 'Select reason']) ?>
 
         <?= $form->field($model, 'tsl_description')->textInput(['maxlength' => true]) ?>
 
