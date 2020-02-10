@@ -2,16 +2,16 @@
 
 namespace modules\qaTask\controllers;
 
+use frontend\controllers\FController;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReason;
 use modules\qaTask\src\entities\qaTaskStatusReason\search\QaTaskStatusReasonCrudSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
-class QaTaskStatusReasonCrudController extends Controller
+class QaTaskStatusReasonCrudController extends FController
 {
     public function behaviors(): array
     {

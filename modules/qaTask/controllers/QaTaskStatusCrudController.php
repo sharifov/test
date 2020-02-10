@@ -2,11 +2,11 @@
 
 namespace modules\qaTask\controllers;
 
+use frontend\controllers\FController;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\entities\qaTaskStatus\search\QaTaskStatusCrudSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -14,7 +14,7 @@ use yii\web\Response;
 /**
  * QaTaskStatusCrudController implements the CRUD actions for QaTaskStatus model.
  */
-class QaTaskStatusCrudController extends Controller
+class QaTaskStatusCrudController extends FController
 {
     public function behaviors(): array
     {

@@ -2,17 +2,17 @@
 
 namespace modules\qaTask\controllers;
 
+use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
 use Yii;
 use modules\qaTask\src\entities\qaTaskStatusLog\search\QaTaskStatusLogCrudSearch;
 use sales\auth\Auth;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
-class QaTaskStatusLogCrudController extends Controller
+class QaTaskStatusLogCrudController extends FController
 {
     public function behaviors(): array
     {

@@ -2,14 +2,14 @@
 
 namespace modules\qaTask\controllers;
 
+use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskStatusLog\search\QaTaskStatusLogSearch;
 use Yii;
 use sales\auth\Auth;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
-class QaTaskStatusLogController extends Controller
+class QaTaskStatusLogController extends FController
 {
     public function actionShow(): string
     {
