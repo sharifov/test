@@ -667,9 +667,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @return \yii\db\ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
-    public function getProductType()
+    public function getProductType(): \yii\db\ActiveQuery
     {
-        return $this->hasMany(ProductType::class, ['pt_id' => 'upt_product_type_id'])->viaTable(UserProductType::tableName(), ['upt_user_id' => 'id']);
+        return $this->hasMany(ProductType::class, ['pt_id' => 'upt_product_type_id'])
+            ->viaTable(UserProductType::tableName(), ['upt_user_id' => 'id'])
+            ->andWhere(['upt_product_enabled' => true])
+            ->orderBy(['pt_name' => SORT_ASC]);
     }
 
     /**

@@ -4,7 +4,7 @@ use common\models\Employee;
 use console\migrations\RbacMigrationService;
 use yii\base\NotSupportedException;
 use yii\db\Migration;
-use yii\helpers\ArrayHelper;
+use yii\rbac\ManagerInterface;
 
 /**
  * Class m200206_070016_create_user_product_type_table
@@ -21,6 +21,7 @@ class m200206_070016_create_user_product_type_table extends Migration
         'user-product-type/create',
         'user-product-type/update',
         'user-product-type/delete',
+        'product/manage/all',
     ];
 
     public $tableName = 'user_product_type';
@@ -30,15 +31,20 @@ class m200206_070016_create_user_product_type_table extends Migration
     /** @var RbacMigrationService  */
     private $rbacMigrationService;
 
+    /** @var ManagerInterface  */
+    private $authManager;
+
     public function init()
     {
         parent::init();
         $this->rbacMigrationService = new RbacMigrationService();
+        $this->authManager = $this->rbacMigrationService->getAuth();
     }
 
     /**
      * @throws NotSupportedException
      * @throws \yii\base\Exception
+     * @throws Exception
      */
     public function safeUp(): void
     {

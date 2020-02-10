@@ -5,11 +5,11 @@ namespace common\models;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\product\src\entities\productType\ProductType;
 
 /**
- * This is the model class for table "user-product-type".
  *
  * @property int $upt_user_id
  * @property int $upt_product_type_id
@@ -30,7 +30,7 @@ class UserProductType extends ActiveRecord
     /**
      * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'user_product_type';
     }
@@ -38,7 +38,7 @@ class UserProductType extends ActiveRecord
     /**
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['upt_user_id', 'upt_product_type_id'], 'required'],
@@ -56,7 +56,7 @@ class UserProductType extends ActiveRecord
     /**
      * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'upt_user_id' => 'User',
@@ -70,6 +70,9 @@ class UserProductType extends ActiveRecord
         ];
     }
 
+    /**
+     * @return array
+     */
     public function behaviors(): array
     {
         return [
@@ -90,33 +93,33 @@ class UserProductType extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getUser()
+    public function getUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'upt_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getProductType()
+    public function getProductType(): ActiveQuery
     {
         return $this->hasOne(ProductType::class, ['pt_id' => 'upt_product_type_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCreatedUser()
+    public function getCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'upt_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getUpdatedUser()
+    public function getUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'upt_updated_user_id']);
     }
