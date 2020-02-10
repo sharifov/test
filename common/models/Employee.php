@@ -975,6 +975,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return ArrayHelper::map($data, 'id', 'username');
     }
 
+	/**
+	 * @param array $role
+	 * @return array
+	 */
+	public static function getListSplitProfitByRole(array $role = ['agent']): array
+	{
+		$data = self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['in', 'auth_assignment.item_name', $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
+		return ArrayHelper::map($data, 'id', 'username');
+	}
+
     /**
      * @param int $userId
      * @return array

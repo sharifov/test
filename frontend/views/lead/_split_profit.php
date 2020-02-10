@@ -18,7 +18,7 @@ $user = Yii::$app->user->identity;
 if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByRole('agent');
+    $userList = \common\models\Employee::getListSplitProfitByRole(['agent', 'supervision']);
 }
 
 $js = <<<JS
