@@ -13,6 +13,14 @@ use yii\web\Response;
 
 class QaTaskQueueController extends Controller
 {
+    public function beforeAction($action): bool
+    {
+        if ($action->id === 'count') {
+            $this->enableCsrfValidation = false;
+        }
+        return parent::beforeAction($action);
+    }
+
     public function actionPending(): string
     {
         $searchModel = new QaTaskQueuePendingSearch();
@@ -60,6 +68,7 @@ class QaTaskQueueController extends Controller
     public function actionCount(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
+
         $types = Yii::$app->request->post('types');
 
         if (!is_array($types)) {
