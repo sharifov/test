@@ -73,6 +73,22 @@ class QaTaskStatus extends \yii\db\ActiveRecord
         return self::LIST;
     }
 
+    public static function guard(?int $startStatus, int $endStatus): void
+    {
+        self::guardTransferFrom($startStatus);
+        self::guardTransferTo($startStatus, $endStatus);
+    }
+
+    private static function guardTransferFrom(?int $startStatus): void
+    {
+        //todo
+    }
+
+    private static function guardTransferTo(?int $startStatus, int $endStatus): void
+    {
+        //todo
+    }
+
     public static function tableName(): string
     {
         return '{{%qa_task_status}}';

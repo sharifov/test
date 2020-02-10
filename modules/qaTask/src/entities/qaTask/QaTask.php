@@ -5,6 +5,14 @@ namespace modules\qaTask\src\entities\qaTask;
 use common\models\Department;
 use common\models\Employee;
 use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskCanceledEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskClosedEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskDeadlineEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskEscalatedEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskPendingEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskProcessingEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskUnAssignEvent;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use sales\entities\EventTrait;
@@ -42,6 +50,103 @@ use yii\db\ActiveRecord;
 class QaTask extends \yii\db\ActiveRecord
 {
     use EventTrait;
+
+    public function pending(): void
+    {
+        QaTaskStatus::guard($this->t_status_id, QaTaskStatus::PENDING);
+        $this->t_status_id = QaTaskStatus::PENDING;
+        $this->recordEvent(new QaTaskPendingEvent($this));
+    }
+
+    public function isPending(): bool
+    {
+        return $this->t_status_id === QaTaskStatus::PENDING;
+    }
+
+    public function processing(): void
+    {
+        QaTaskStatus::guard($this->t_status_id, QaTaskStatus::PROCESSING);
+        $this->t_status_id = QaTaskStatus::PROCESSING;
+        $this->recordEvent(new QaTaskProcessingEvent($this));
+    }
+
+    public function isProcessing(): bool
+    {
+        return $this->t_status_id === QaTaskStatus::PROCESSING;
+    }
+
+    public function escalated(): void
+    {
+        QaTaskStatus::guard($this->t_status_id, QaTaskStatus::ESCALATED);
+        $this->t_status_id = QaTaskStatus::ESCALATED;
+        $this->recordEvent(new QaTaskEscalatedEvent($this));
+    }
+
+    public function isEscalated(): bool
+    {
+        return $this->t_status_id === QaTaskStatus::ESCALATED;
+    }
+
+    public function closed(): void
+    {
+        QaTaskStatus::guard($this->t_status_id, QaTaskStatus::CLOSED);
+        $this->t_status_id = QaTaskStatus::CLOSED;
+        $this->recordEvent(new QaTaskClosedEvent($this));
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->t_status_id === QaTaskStatus::CLOSED;
+    }
+
+    public function canceled(): void
+    {
+        QaTaskStatus::guard($this->t_status_id, QaTaskStatus::CANCELED);
+        $this->t_status_id = QaTaskStatus::CANCELED;
+        $this->recordEvent(new QaTaskCanceledEvent($this));
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->t_status_id === QaTaskStatus::CANCELED;
+    }
+
+    public function assign(int $userId): void
+    {
+        if ($this->isAssigned($userId)) {
+            throw new \DomainException('Qa Task is already assigned to this user.');
+        }
+        $this->t_assigned_user_id = $userId;
+        $this->recordEvent(new QaTaskAssignEvent($this, $userId));
+    }
+
+    public function isAssigned(int $userId): bool
+    {
+        return $this->t_assigned_user_id === $userId;
+    }
+
+    public function unAssign(): void
+    {
+        if ($this->isUnAssigned()) {
+            throw new \DomainException('Qa Task is already unassigned.');
+        }
+        $this->recordEvent(new QaTaskUnAssignEvent($this, $this->t_assigned_user_id));
+        $this->t_assigned_user_id = null;
+    }
+
+    public function isUnAssigned(): bool
+    {
+        return $this->t_assigned_user_id === null;
+    }
+
+    public function deadline(\DateTimeImmutable $date): void
+    {
+        if ($this->t_deadline_dt === $date->format('Y-m-d H:i:s')) {
+            throw new \DomainException('Qa Task is already deadlined with this date: ' . $this->t_deadline_dt . '.');
+        }
+        $this->t_deadline_dt = $date->format('Y-m-d H:i:s');
+        $this->recordEvent(new QaTaskDeadlineEvent($this, $date));
+    }
 
     public static function tableName(): string
     {
