@@ -82,9 +82,10 @@ class FlightManageService
 
 	/**
 	 * @param array $segments
-	 * @return string
+	 * @return int|null
+	 * @throws \yii\base\InvalidConfigException
 	 */
-	private function calculateTripType(array $segments): string
+	private function calculateTripType(array $segments): ?int
 	{
 		$segmentsDTO = [];
 

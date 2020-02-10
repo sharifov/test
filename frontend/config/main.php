@@ -7,6 +7,7 @@ use modules\invoice\InvoiceModule;
 use modules\offer\OfferModule;
 use modules\order\OrderModule;
 use modules\product\ProductModule;
+use modules\qaTask\QaTaskModule;
 use sales\yii\i18n\Formatter;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
@@ -271,6 +272,10 @@ return [
 
         'invoice' => [
             'class' => InvoiceModule::class,
+        ],
+
+        'qa-task' => [
+            'class' => QaTaskModule::class,
         ],
 
     ],

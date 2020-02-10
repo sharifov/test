@@ -8,12 +8,17 @@ use sales\repositories\airport\AirportRepository;
 
 class FlightTripTypeCalculator
 {
-	public static function calculate(SegmentDTO ...$segments): string
+	/**
+	 * @param SegmentDTO ...$segments
+	 * @return int|null
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public static function calculate(SegmentDTO ...$segments): ?int
 	{
 		$countSegments = count($segments);
 
 		if ($countSegments === 0) {
-			return '';
+			return null;
 		}
 
 		if ($countSegments === 1) {

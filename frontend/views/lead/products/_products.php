@@ -90,6 +90,7 @@ JS;
 
 $ajaxDeleteProductUrl = \yii\helpers\Url::to(['/product/product/delete-ajax']);
 $ajaxDeleteProductQuoteUrl = \yii\helpers\Url::to(['/product/product-quote/delete-ajax']);
+$ajaxCloneProductQuoteUrl = \yii\helpers\Url::to(['/product/product-quote/clone']);
 
 
 $js = <<<JS
@@ -175,6 +176,68 @@ $js = <<<JS
     });
 
 
+    $('body').on('click', '.btn-clone-product-quote', function(e) {
+        
+        let productQuoteId = $(this).data('product-quote-id');
+        let productId = $(this).data('product-id');
+        
+      if(!confirm('Are you sure you want to clone quote ('+ productQuoteId +') ?')) {
+        return '';
+      }
+        
+      e.preventDefault();
+      $('#preloader').removeClass('d-none');
+      
+      
+      /*alert(productId);
+      
+      let btnSubmit = $(this).find(':submit');
+      btnSubmit.prop('disabled', true);
+      btnSubmit.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');*/
+
+     // $('#preloader').removeClass('d-none');
+
+      $.ajax({
+          url: '$ajaxCloneProductQuoteUrl',
+          type: 'post',
+          data: {'id': productQuoteId},
+  //        contentType: false,
+  //        cache: false,
+//          processData: false,
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  alert(data.error);
+                  new PNotify({
+                        title: 'Error: clone product quote',
+                        type: 'error',
+                        text: data.error,
+                        hide: true
+                    });
+              } else {
+                  $.pjax.reload({
+                      container: '#pjax-product-quote-list-' + productId
+                  });
+                  new PNotify({
+                        title: 'The product quote was successfully cloned',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            //btnSubmit.prop('disabled', false);
+            //btnSubmit.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
+            //alert( "complete" );
+            $('#preloader').addClass('d-none');
+        });
+      // return false;
+    });
+    
     $('body').on('click', '.btn-delete-product-quote', function(e) {
         
         let productQuoteId = $(this).data('product-quote-id');

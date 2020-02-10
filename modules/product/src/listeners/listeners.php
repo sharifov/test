@@ -1,5 +1,8 @@
 <?php
 
+use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
+use modules\product\src\entities\productQuoteOption\events\ProductQuoteOptionCloneCreatedEvent;
+use modules\product\src\listeners\ProductQuoteChangeStatusLogListener;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
@@ -10,6 +13,8 @@ use modules\product\src\listeners\productQuote\ProductQuoteErrorEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteInProgressEventListener;
 
 return [
+    ProductQuoteCloneCreatedEvent::class => [ProductQuoteChangeStatusLogListener::class],
+    ProductQuoteOptionCloneCreatedEvent::class => [],
     ProductQuoteInProgressEvent::class => [ProductQuoteInProgressEventListener::class],
     ProductQuoteBookedEvent::class => [ProductQuoteBookedEventListener::class],
     ProductQuoteErrorEvent::class => [ProductQuoteErrorEventListener::class],

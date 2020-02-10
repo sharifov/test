@@ -192,11 +192,12 @@ class FlightQuoteManageService
 	{
 		$priceData = FlightQuoteHelper::getPricesData($flightQuote);
 
-		$productQuote->pq_origin_price = ProductQuoteHelper::roundPrice((float)$priceData['total']['net']);
-		$productQuote->pq_price = ProductQuoteHelper::calcSystemPrice($priceData['total']['selling'], $productQuote->pq_origin_currency);
-		$productQuote->pq_client_price = ProductQuoteHelper::roundPrice($productQuote->pq_price * $productQuote->pq_client_currency_rate);
-		$productQuote->pq_service_fee_sum = ProductQuoteHelper::roundPrice((float)$priceData['total']['service_fee_sum']);
-
+		$productQuote->setQuotePrice(
+			ProductQuoteHelper::roundPrice((float)$priceData->total->net),
+			ProductQuoteHelper::calcSystemPrice($priceData->total->selling, $productQuote->pq_origin_currency),
+			ProductQuoteHelper::roundPrice($productQuote->pq_price * $productQuote->pq_client_currency_rate),
+			ProductQuoteHelper::roundPrice((float)$priceData->total->serviceFeeSum)
+		);
 		$this->productQuoteRepository->save($productQuote);
 	}
 
@@ -228,7 +229,7 @@ class FlightQuoteManageService
 			$tripNr = (int)$tripKey + 1;
 			$segmentNr = 1;
 
-			$flightTrip = FlightQuoteTrip::create($flightQuote, $quote['totalDuration']);
+			$flightTrip = FlightQuoteTrip::create($flightQuote, $trip['duration']);
 			$this->flightQuoteTripRepository->save($flightTrip);
 
 			$this->createSegment($trip, $flightQuote, $flightTrip, $tripNr, $segmentNr);

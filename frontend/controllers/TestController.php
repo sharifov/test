@@ -37,8 +37,11 @@ use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteClasses;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
+use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\services\ProductQuoteStatusLogService;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
@@ -47,6 +50,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\access\EmployeeSourceAccess;
+use sales\auth\Auth;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
@@ -166,58 +170,8 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $service = Yii::createObject(ProductQuoteStatusLogService::class);
-        $service->log(new CreateDto(4, 3,  5, 'etr', 295, 295));
-
-        die;
-
-        $data = [
-            'client' => [
-                'phone' => '+37369636963',
-            ],
-            'uid' => '346g6142wdg22rhdf',
-            'status' => Lead::STATUS_BOOK_FAILED,
-            'sub_sources_code' => 'JIVOCH',
-            'cabin' => 'E',
-            'adults' => 2,
-            'children' => 2,
-            'infants' => 2,
-            'segments' => [
-                [
-                    'origin' => 'NYC',
-                    'destination' => 'LON',
-                    'departure' => '2019-12-16',
-                ],
-                [
-                    'origin' => 'LON',
-                    'destination' => 'NYC',
-                    'departure' => '2019-12-17',
-                ],
-                [
-                    'origin' => 'LON',
-                    'destination' => 'NYC',
-                    'departure' => '2019-12-18',
-                ],
-            ],
-        ];
-
-        $form = new LeadForm();
-        if ($form->load($data, '') && $form->validate()) {
-            $handler = Yii::createObject(Handler::class);
-            $handler->handle($form);
-        } else {
-            VarDumper::dump($form->errors);
-        }
-
-die;
-
-
-        VarDumper::dump($ids);
-        die;
-        VarDumper::dump(count($idsCommongroups));
-        $user = Employee::findOne(500);
-        $idsGroups = array_keys($user->getUserGroupList());
-        VarDumper::dump($idsGroups);
+        $service = Yii::createObject(ProductQuoteCloneService::class);
+        $service->clone(9, 33, 295, 294);
 
         die;
         return $this->render('blank');

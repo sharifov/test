@@ -3,6 +3,8 @@
 namespace modules\flight\src\repositories\flightQuoteTripRepository;
 
 use modules\flight\models\FlightQuoteTrip;
+use modules\flight\src\exceptions\FlightCodeException;
+use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
 /**
@@ -11,15 +13,26 @@ use sales\repositories\Repository;
  */
 class FlightQuoteTripRepository extends Repository
 {
-	/**
-	 * @param FlightQuoteTrip $flightQuoteTrip
-	 * @return int
-	 */
-	public function save(FlightQuoteTrip $flightQuoteTrip): int
+    public function find(int $id): FlightQuoteTrip
+    {
+        if ($segment = FlightQuoteTrip::findOne($id)) {
+            return $segment;
+        }
+        throw new NotFoundException('Flight Quote Trip is not found', FlightCodeException::FLIGHT_QUOTE_TRIP_NOT_FOUND);
+    }
+
+	public function save(FlightQuoteTrip $trip): int
 	{
-		if (!$flightQuoteTrip->save()) {
-			throw new \RuntimeException($flightQuoteTrip->getErrorSummary(false)[0]);
+		if (!$trip->save()) {
+			throw new \RuntimeException($trip->getErrorSummary(false)[0]);
 		}
-		return $flightQuoteTrip->fqt_id;
+		return $trip->fqt_id;
 	}
+
+    public function remove(FlightQuoteTrip $trip): void
+    {
+        if (!$trip->delete()) {
+            throw new \RuntimeException('Removing error', FlightCodeException::FLIGHT_QUOTE_TRIP_REMOVE);
+        }
+    }
 }

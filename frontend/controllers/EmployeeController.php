@@ -545,6 +545,15 @@ class EmployeeController extends FController
 
                     //$model->roles;
 
+                    if ($model->form_roles) {
+                        $availableRoles = Employee::getAllRoles();
+                        foreach ($model->form_roles as $keyItem => $roleItem) {
+                            if (!array_key_exists($roleItem, $availableRoles)) {
+                                unset($model->form_roles[$keyItem]);
+                            }
+                        }
+                    }
+
                     $model->addRole(false);
 
                     //VarDumper::dump(Yii::$app->request->post(), 10, true); exit;

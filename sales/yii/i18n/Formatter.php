@@ -30,11 +30,61 @@ use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
-use Mpdf\Tag\P;
+use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
+use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asQaTask(?QaTask $task): string
+    {
+        if ($task === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskFormatter::asQaTask($task);
+    }
+
+    public function asQaTaskStatusAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskStatusAction::asFormat($value);
+    }
+
+    public function asQaTaskStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskStatus::asFormat($value);
+    }
+
+    public function asQaTaskCreatedType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskCreatedType::asFormat($value);
+    }
+
+    public function asQaObjectType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaObjectType::asFormat($value);
+    }
+
     public function asOfferSendLogType($value): string
     {
         if ($value === null) {
@@ -309,6 +359,15 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return Html::encode($name);
+    }
+
+    public function asDepartment($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return Department::asFormat($value);
     }
 
     /**

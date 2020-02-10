@@ -21,6 +21,8 @@ class ProductQuoteCrudSearch extends ProductQuote
 
             ['pq_created_dt', 'date', 'format' => 'php:Y-m-d'],
             ['pq_updated_dt', 'date', 'format' => 'php:Y-m-d'],
+
+            ['pq_clone_id', 'integer'],
         ];
     }
 
@@ -53,6 +55,7 @@ class ProductQuoteCrudSearch extends ProductQuote
         // grid filtering conditions
         $query->andFilterWhere([
             'pq_id' => $this->pq_id,
+            'pq_clone_id' => $this->pq_clone_id,
             'pq_product_id' => $this->pq_product_id,
             'pq_order_id' => $this->pq_order_id,
             'pq_status_id' => $this->pq_status_id,

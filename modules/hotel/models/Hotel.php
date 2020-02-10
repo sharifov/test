@@ -2,6 +2,7 @@
 
 namespace modules\hotel\models;
 
+use modules\hotel\src\entities\hotel\serializer\HotelSerializer;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuery;
@@ -327,4 +328,18 @@ class Hotel extends ActiveRecord implements Productable
 		return self::DESTINATION_TYPE_LIST;
 	}
 
+    public function getId():int
+    {
+        return $this->ph_id;
+	}
+
+	public function serialize(): array
+    {
+        return (new HotelSerializer($this))->getData();
+    }
+
+    public static function findByProduct(int $productId): ?Productable
+    {
+        return self::find()->byProduct($productId)->limit(1)->one();
+    }
 }

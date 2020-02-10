@@ -4,15 +4,15 @@ namespace modules\flight\models;
 
 use common\models\Airline;
 use common\models\Employee;
+use modules\flight\src\entities\flightQuote\events\FlightQuoteCloneCreatedEvent;
 use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
+use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
-use sales\entities\serializer\Serializable;
-use sales\interfaces\QuoteCommunicationInterface;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use modules\flight\models\query\FlightQuoteQuery;
+use modules\flight\src\entities\flightQuote\Scopes;
 
 /**
  * This is the model class for table "flight_quote".
@@ -50,7 +50,7 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  */
-class FlightQuote extends ActiveRecord implements Serializable
+class FlightQuote extends ActiveRecord implements Quotable
 {
 	use EventTrait;
 
@@ -164,7 +164,9 @@ class FlightQuote extends ActiveRecord implements Serializable
             [['fq_gds_pcc'], 'string', 'max' => 10],
             [['fq_cabin_class'], 'string', 'max' => 1],
             [['fq_created_expert_name'], 'string', 'max' => 20],
-            [['fq_flight_id', 'fq_hash_key'], 'unique', 'targetAttribute' => ['fq_flight_id', 'fq_hash_key'] , 'message' => 'Flight already have this quote;'],
+
+            [['fq_hash_key'], 'unique', 'targetAttribute' => ['fq_flight_id', 'fq_hash_key'] , 'message' => 'Flight already have this quote;', 'skipOnEmpty' => true],
+
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
@@ -240,7 +242,7 @@ class FlightQuote extends ActiveRecord implements Serializable
      */
     public function getFlightQuotePaxPrices()
     {
-        return $this->hasMany(FlightQuotePaxPrice::class, ['qpp_flight_quote_id' => 'fq_id']);
+        return $this->hasMany(FlightQuotePaxPrice::class, ['qpp_flight_quote_id' => 'fq_id'])->orderBy(['qpp_flight_pax_code_id' => SORT_ASC]);
     }
 
     /**
@@ -267,13 +269,9 @@ class FlightQuote extends ActiveRecord implements Serializable
         return $this->hasMany(FlightQuoteTrip::class, ['fqt_flight_quote_id' => 'fq_id']);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return FlightQuoteQuery the active query used by this AR class.
-     */
-    public static function find()
+    public static function find(): Scopes
     {
-        return new FlightQuoteQuery(static::class);
+        return new Scopes(static::class);
     }
 
 	/**
@@ -405,6 +403,21 @@ class FlightQuote extends ActiveRecord implements Serializable
 		return $flightQuote;
 	}
 
+    public static function clone(FlightQuote $quote, int $flightId, int $productQuoteId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $quote->attributes;
+
+        $clone->fq_id = null;
+        $clone->fq_hash_key = null;
+        $clone->fq_flight_id = $flightId;
+        $clone->fq_product_quote_id = $productQuoteId;
+        $clone->recordEvent(new FlightQuoteCloneCreatedEvent($clone));
+
+        return $clone;
+	}
+
 	/**
 	 * @param $type
 	 * @return mixed|string
@@ -470,7 +483,7 @@ class FlightQuote extends ActiveRecord implements Serializable
 	 * @param ProductQuote $productQuote
 	 * @return FlightQuote|null
 	 */
-	public static function findByProductQuote(ProductQuote $productQuote): ?FlightQuote
+	public static function findByProductQuoteId(ProductQuote $productQuote): ?FlightQuote
 	{
 		return self::findOne(['fq_product_quote_id' => $productQuote->pq_id]);
 	}
@@ -480,8 +493,17 @@ class FlightQuote extends ActiveRecord implements Serializable
         return (new FlightQuoteSerializer($this))->getData();
     }
 
+    public static function findByProductQuote(int $productQuoteId): ?Quotable
+    {
+        return self::find()->byProductQuote($productQuoteId)->limit(1)->one();
+    }
 
-	/**
+    public function getId(): int
+    {
+        return $this->fq_id;
+    }
+
+    /**
 	 * @return float
 	 */
 	public function getServiceFeePercent(): float

@@ -143,7 +143,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             <?=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
              <?//=\yii\helpers\Html::encode($model->hqProductQuote->pq_gid)?>
 
-        | <?=ProductQuoteStatus::asFormat($model->hqProductQuote->pq_status_id)?>
+        | <?= ProductQuoteStatus::asFormat($model->hqProductQuote->pq_status_id) ?>
+
+        <?php if ($model->hqProductQuote->pq_clone_id): ?>
+            <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
+        <?php endif;?>
 
         <ul class="nav navbar-right panel_toolbox">
 <!--            <li>-->
@@ -191,6 +195,13 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 <!--                            </div>-->
 <!--                        </li>-->
 <!--                    </ul>-->
+
+                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
+                        'class' => 'dropdown-item text-warning btn-clone-product-quote',
+                        'data-product-quote-id' => $model->hq_product_quote_id,
+                        'data-hotel-quote-id' => $model->hq_id,
+                        'data-product-id' => $model->hqProductQuote->pq_product_id,
+                    ]) ?>
 
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',

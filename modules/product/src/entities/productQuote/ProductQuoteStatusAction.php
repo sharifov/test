@@ -6,10 +6,10 @@ use yii\bootstrap4\Html;
 
 class ProductQuoteStatusAction
 {
-    public const TEST = 1;
+    public const CLONE = 1;
 
     private const LIST = [
-        self::TEST => 'api/product-quote/action',
+        self::CLONE => 'clone',
     ];
 
     public static function getList(): array

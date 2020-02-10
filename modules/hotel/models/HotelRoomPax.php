@@ -2,6 +2,7 @@
 
 namespace modules\hotel\models;
 
+use sales\entities\EventTrait;
 use Yii;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -21,6 +22,8 @@ use yii\helpers\ArrayHelper;
  */
 class HotelRoomPax extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public const PAX_TYPE_ADL = 1;
     public const PAX_TYPE_CHD = 2;
 

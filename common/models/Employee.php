@@ -288,6 +288,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return in_array(self::ROLE_USER_MANAGER, $this->getRoles(true), true);
     }
 
+    public function isAnySenior(): bool
+    {
+        return
+            in_array(self::ROLE_SALES_SENIOR, $this->getRoles(true), true)
+            || in_array(self::ROLE_EXCHANGE_SENIOR, $this->getRoles(true), true)
+            || in_array(self::ROLE_SUPPORT_SENIOR, $this->getRoles(true), true);
+    }
+
     /**
      * @param string $key
      * @return mixed|null
@@ -754,7 +762,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        if(!$user->isAdmin() && !$user->isSuperAdmin()) {
+        if((!$user->isAdmin() && !$user->isSuperAdmin()) || $user->isAnySenior()) {
             if(isset($roles[self::ROLE_ADMIN])) {
                 unset($roles[self::ROLE_ADMIN]);
             }

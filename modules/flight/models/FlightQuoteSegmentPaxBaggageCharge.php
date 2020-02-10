@@ -132,6 +132,18 @@ class FlightQuoteSegmentPaxBaggageCharge extends \yii\db\ActiveRecord
 		return $baggageCharge;
 	}
 
+    public static function clone(FlightQuoteSegmentPaxBaggageCharge $baggageCharge, int $segmentId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $baggageCharge->attributes;
+
+        $clone->qsbc_id = null;
+        $clone->qsbc_flight_quote_segment_id = $segmentId;
+
+        return $clone;
+	}
+
 	public function serialize(): array
     {
         return (new FlightQuoteSegmentPaxBaggageChargeSerializer($this))->getData();

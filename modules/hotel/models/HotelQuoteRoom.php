@@ -5,7 +5,9 @@ namespace modules\hotel\models;
 use common\models\Currency;
 use modules\hotel\models\query\HotelQuoteRoomQuery;
 use sales\helpers\email\TextConvertingHelper;
+use modules\hotel\src\entities\hotelQuoteRoom\events\HotelQuoteRoomCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuoteRoom\serializer\HotelQuoteRoomSerializer;
+use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -46,6 +48,20 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
         self::TYPE_RECHECK => 'RECHECK',
         self::TYPE_BOOKABLE => 'BOOKABLE',
     ];
+
+    use EventTrait;
+
+    public static function clone(HotelQuoteRoom $room, int $quoteId)
+    {
+        $clone = new self();
+
+        $clone->attributes = $room->attributes;
+        $clone->hqr_id = null;
+        $clone->hqr_hotel_quote_id = $quoteId;
+        $clone->recordEvent(new HotelQuoteRoomCloneCreatedEvent($clone));
+
+        return $clone;
+    }
 
     /**
      * @return string
