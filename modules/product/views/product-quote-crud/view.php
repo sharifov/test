@@ -32,11 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'pq_id',
             'pq_gid',
+            'clone:productQuote',
             'pq_name',
             'pqProduct:product',
             'pq_order_id',
             'pq_description:ntext',
-            'pq_status_id',
+            'pq_status_id:productQuoteStatus',
             'pq_price',
             'pq_origin_price',
             'pq_client_price',

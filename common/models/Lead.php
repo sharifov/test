@@ -108,6 +108,7 @@ use yii\helpers\VarDumper;
  * @property int|null $l_delayed_charge
  * @property int|null $l_type_create
  * @property int $l_is_test
+ * @property string|null $hybrid_uid
  *
  * @property float $finalProfit
  * @property int $quotesCount
@@ -464,7 +465,7 @@ class Lead extends ActiveRecord
             [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt', 'l_last_action_dt'], 'safe'],
 
             [['final_profit', 'tips', 'agents_processing_fee', 'l_init_price'], 'number'],
-            [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
+            [['uid', 'hybrid_uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
             [['gid', 'l_request_hash'], 'string', 'max' => 32],

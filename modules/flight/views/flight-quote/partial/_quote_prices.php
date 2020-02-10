@@ -3,11 +3,12 @@
  * @var $this View
  * @var $quote ProductQuote
  * @var $flightQuote FlightQuote
- * @var $priceData array
+ * @var $priceData FlightQuotePriceDataDTO
  */
 
 use kartik\editable\Editable;
 use modules\flight\models\FlightQuote;
+use modules\flight\src\helpers\FlightQuotePriceDataDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use yii\helpers\Url;
 use yii\web\View;
@@ -28,19 +29,19 @@ use yii\web\View;
 	</tr>
 	</thead>
 	<tbody>
-	<?php foreach ($priceData['prices'] as $paxCode => $price):?>
-        <?php $count = $price['tickets'] ?: 1; ?>
+	<?php foreach ($priceData->prices as $paxCode => $price):?>
+        <?php $count = $price->tickets ?: 1; ?>
 		<tr>
-			<th><?= $paxCode?></th>
-			<td>x <?= $count?></td>
-			<td><?= number_format($price['net'] / $count, 2) ?></td>
-			<td><?= number_format($price['mark_up'] / $count, 2) ?></td>
+			<th><?= $paxCode ?></th>
+			<td>x <?= $count ?></td>
+			<td><?= number_format($price->net / $count, 2) ?></td>
+			<td><?= number_format($price->markUp / $count, 2) ?></td>
 			<td><?php if($quote->isNew()):?>
 					<?= Editable::widget([
 						'name'=>'extra_markup['.strtoupper($paxCode).']['.$flightQuote->fq_id.']',
 						'asPopover' => false,
 						'pjaxContainerId' => 'pjax-quote_prices-'.$quote->pq_id,
-						'value' => number_format($price['extra_mark_up'] / $count, 2),
+						'value' => number_format($price->extraMarkUp / $count, 2),
 						'header' => 'Extra markup',
 						'size'=>'sm',
 						'inputType' => Editable::INPUT_TEXT,
@@ -55,27 +56,27 @@ use yii\web\View;
                         ]
 					]) ?>
 				<?php else:?>
-					<?= number_format($price['extra_mark_up'] / $count, 2)?>
+					<?= number_format($price->extraMarkUp / $count, 2)?>
 				<?php endif;?>
 			</td>
-			<td><?= number_format($priceData['service_fee_percent'], 2) ?> %</td>
-			<td><?= number_format($price['service_fee'] / $count, 2) ?> </td>
-			<td><?= number_format($price['selling'] / $count, 2) ?></td>
-			<td><?= number_format($price['client_selling'] / $count, 2) ?></td>
+			<td><?= number_format($priceData->serviceFeePercent, 2) ?> %</td>
+			<td><?= number_format($price->serviceFee / $count, 2) ?> </td>
+			<td><?= number_format($price->selling / $count, 2) ?></td>
+			<td><?= number_format($price->clientSelling / $count, 2) ?></td>
 		</tr>
 	<?php endforeach;?>
 	</tbody>
 	<tfoot>
 	<tr>
 		<th>Total</th>
-		<td><?= $priceData['total']['tickets']?></td>
-		<td><?= number_format($priceData['total']['net'], 2)?></td>
-		<td><?= number_format($priceData['total']['mark_up'], 2)?></td>
-		<td class="total-markup-<?= $quote->pq_id ?>"><?= number_format($priceData['total']['extra_mark_up'], 2)?></td>
-		<td><?= number_format($priceData['service_fee_percent'], 2) ?> %</td>
-		<td><?= number_format($priceData['total']['service_fee_sum'], 2) ?></td>
-		<td class="total-sellingPrice-<?= $quote->pq_id ?>"><?= number_format($priceData['total']['selling'], 2)?></td>
-		<td class="total-sellingPrice-<?= $quote->pq_id ?>"><?= number_format($priceData['total']['client_selling'], 2)?></td>
+		<td><?= $priceData->total->tickets?></td>
+		<td><?= number_format($priceData->total->net, 2)?></td>
+		<td><?= number_format($priceData->total->markUp, 2)?></td>
+		<td class="total-markup-<?= $quote->pq_id ?>"><?= number_format($priceData->total->extraMarkUp, 2)?></td>
+		<td><?= number_format($priceData->serviceFeePercent, 2) ?> %</td>
+		<td><?= number_format($priceData->total->serviceFeeSum, 2) ?></td>
+		<td class="total-sellingPrice-<?= $quote->pq_id ?>"><?= number_format($priceData->total->selling, 2)?></td>
+		<td class="total-sellingPrice-<?= $quote->pq_id ?>"><?= number_format($priceData->total->clientSelling, 2)?></td>
 	</tr>
 	</tfoot>
 </table>

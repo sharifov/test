@@ -14,7 +14,7 @@ $dataProvider = FlightQuoteHelper::generateDataProviderForQuoteList($product);
 ?>
 
 
-<?php Pjax::begin(['id' => 'flight_quotes_list_' . $product->pr_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+<?php Pjax::begin(['id' => 'pjax-product-quote-list-' . $product->pr_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
         <h2><i class="fa fa-folder-o"></i> Quotes</h2>

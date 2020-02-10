@@ -4,6 +4,7 @@ use modules\flight\models\Flight;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use yii\bootstrap4\Alert;
 use yii\data\ArrayDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
@@ -58,7 +59,7 @@ if($quotes && (isset($quotes['count']) && $quotes['count'] > 0)):
 JS;
 	$this->registerJs($js);
 
-	$flightQuotes = \yii\helpers\ArrayHelper::getColumn($flight->flightQuotes, 'fq_hash_key');
+	$flightQuotes = ArrayHelper::getColumn($flight->flightQuotes, 'fq_hash_key');
 	?>
     <script>
         pjaxOffFormSubmit('#pjax-quote-filter');

@@ -306,6 +306,19 @@ $isSuperAdmin = $user->isSuperAdmin();
         ];
 
         $menuItems[] = [
+            'label' => 'Qa Task',
+            'url' => 'javascript:',
+            'icon' => 'list',
+            'items' => [
+                ['label' => 'Tasks', 'url' => ['/qa-task/qa-task-crud-index/index']],
+                ['label' => 'Categories', 'url' => ['/qa-task/qa-task-category-crud/index']],
+                ['label' => 'Statuses', 'url' => ['/qa-task/qa-task-status-crud/index']],
+                ['label' => 'Status Reasons', 'url' => ['/qa-task/qa-task-status-reason-crud/index']],
+                ['label' => 'Status log', 'url' => ['/qa-task/qa-task-status-log-crud/index']],
+            ]
+        ];
+
+        $menuItems[] = [
             'label' => Yii::t('menu', 'Languages'),
             'url' => 'javascript:',
             'icon' => 'language',

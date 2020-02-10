@@ -2,24 +2,35 @@
 namespace modules\flight\src\repositories\flightQuoteSegment;
 
 use modules\flight\models\FlightQuoteSegment;
+use modules\flight\src\exceptions\FlightCodeException;
+use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
 /**
  * Class FlightQuoteSegmentRepository
- * @package modules\flight\src\repositories\flightQuoteSegment
  */
 class FlightQuoteSegmentRepository extends Repository
 {
+    public function find(int $id): FlightQuoteSegment
+    {
+        if ($segment = FlightQuoteSegment::findOne($id)) {
+            return $segment;
+        }
+        throw new NotFoundException('Flight Quote Segment is not found', FlightCodeException::FLIGHT_QUOTE_SEGMENT_NOT_FOUND);
+    }
 
-	/**
-	 * @param FlightQuoteSegment $flightQuoteSegment
-	 * @return int
-	 */
-	public function save(FlightQuoteSegment $flightQuoteSegment): int
+	public function save(FlightQuoteSegment $segment): int
 	{
-		if (!$flightQuoteSegment->save()) {
-			throw new \RuntimeException($flightQuoteSegment->getErrorSummary(false)[0]);
+		if (!$segment->save()) {
+			throw new \RuntimeException($segment->getErrorSummary(false)[0]);
 		}
-		return $flightQuoteSegment->fqs_id;
+		return $segment->fqs_id;
 	}
+
+    public function remove(FlightQuoteSegment $segment): void
+    {
+        if (!$segment->delete()) {
+            throw new \RuntimeException('Removing error', FlightCodeException::FLIGHT_QUOTE_SEGMENT_REMOVE);
+        }
+    }
 }
