@@ -23,7 +23,7 @@ class Menu extends \yii\widgets\Menu
     /**
      * @inheritdoc
      */
-    public $linkTemplate = '<a href="{url}">{icon}<span>{label}</span>{badge}</a>';
+    public $linkTemplate = '<a href="{url}" {attributes}>{icon}<span>{label}</span>{badge}</a>';
 
     /**
      * @inheritdoc
@@ -88,6 +88,13 @@ class Menu extends \yii\widgets\Menu
         } else {
             $badgeOptions = null;
         }
+
+        if (isset($item['attributes']) && is_array($item['attributes'])) {
+        	$attributes = ' ';
+        	foreach ($item['attributes'] as $attribute => $value) {
+        		$attributes .= "{$attribute}='{$value}' ";
+			}
+		}
         return strtr(
             $renderedItem,
             [
@@ -109,6 +116,7 @@ class Menu extends \yii\widgets\Menu
 //						? (new Icon('chevron-down'))->tag('span')
 						: ''
                     ),
+				'{attributes}' => $attributes ?? ''
             ]
         );
     }

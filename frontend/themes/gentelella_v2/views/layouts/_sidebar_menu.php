@@ -39,6 +39,7 @@ $isSuperAdmin = $user->isSuperAdmin();
         $menuLItems = [];
 
         $menuLItems[] = ['label' => 'Create new Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        $menuLItems[] = ['label' => 'Create new Lead 2', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create new Lead 2']];
         $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
         $menuLItems[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase text-info'];
 
@@ -375,7 +376,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'items' => $menuItems,
             'encodeLabels' => false,
             'activateParents' => true,
-            'linkTemplate' => '<a href="{url}">{icon}<span>{label}</span>{badge}</a>'
+            'linkTemplate' => '<a href="{url}" {attributes}>{icon}<span>{label}</span>{badge}</a>'
         ]);
 
         function ensureVisibility(&$items)
@@ -472,3 +473,46 @@ if (Yii::$app->user->can('caseSection')) {
     $urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
     $this->registerJs("updateCounters('$urlCasesQCount', 'cases-q-info', 'cases-q');", $this::POS_LOAD);
 }
+
+$js = <<<JS
+$('.nav.side-menu [data-ajax-link]').on('click', function (e) {
+    e.preventDefault();
+    let ajaxLink = $(this).data('ajax-link');
+    let modalTitle = $(this).data('modal-title');
+    
+    if (ajaxLink) {
+        let url = $(this).attr('href');
+        
+        var modal = $('#modal-md');
+        $.ajax({
+            type: 'post',
+            url: url,
+            data: {},
+            dataType: 'html',
+            beforeSend: function () {
+                modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+                modal.find('.modal-title').html(modalTitle);
+                modal.modal('show');
+            },
+            success: function (data) {
+                modal.find('.modal-body').html(data);
+                modal.find('.modal-title').html(modalTitle);
+                $('#preloader').addClass('d-none');
+            },
+            error: function () {
+                new PNotify({
+                    title: 'Error',
+                    type: 'error',
+                    text: 'Internal Server Error. Try again letter.',
+                    hide: true
+                });
+                setTimeout(function () {
+                    $('#modal-md').modal('hide');
+                }, 300)
+            },
+        })
+    }
+});
+JS;
+$this->registerJs($js);
+
