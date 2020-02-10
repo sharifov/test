@@ -54,7 +54,7 @@ class QaTaskStatus extends \yii\db\ActiveRecord
         return self::LIST[$value] ?? 'Undefined';
     }
 
-    private static function getCssClass(?int $value): string
+    public static function getCssClass(?int $value): string
     {
         return self::CSS_CLASS_LIST[$value] ?? 'secondary';
     }

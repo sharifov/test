@@ -1,5 +1,6 @@
 <?php
 
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use \yii\helpers\Url;
 
 /* @var $this \yii\web\View */
@@ -307,7 +308,11 @@ $isSuperAdmin = $user->isSuperAdmin();
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
-                ['label' => 'Tasks', 'url' => ['/qa-task/qa-task-crud-index/index']],
+                ['label' => 'Pending <span id="qa-task-q-pending" data-type="pending" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PENDING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/pending']],
+                ['label' => 'Processing <span id="qa-task-q-processing" data-type="processing" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PROCESSING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/processing']],
+                ['label' => 'Escalated <span id="qa-task-q-escalated" data-type="escalated" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::ESCALATED).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/escalated']],
+                ['label' => 'Closed <span id="qa-task-q-closed" data-type="closed" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::CLOSED).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/closed']],
+                ['label' => 'Tasks', 'url' => ['/qa-task/qa-task-crud/index']],
                 ['label' => 'Categories', 'url' => ['/qa-task/qa-task-category-crud/index']],
                 ['label' => 'Statuses', 'url' => ['/qa-task/qa-task-status-crud/index']],
                 ['label' => 'Status Reasons', 'url' => ['/qa-task/qa-task-status-reason-crud/index']],
@@ -435,7 +440,6 @@ $isSuperAdmin = $user->isSuperAdmin();
 
 $js =<<<JS
 function updateCounters(url, className, idName) {
-    
     var types = [];
     $("." + className).each(function(i) {
         types.push($(this).data('type'));
@@ -471,4 +475,8 @@ if (Yii::$app->user->can('leadSection')) {
 if (Yii::$app->user->can('caseSection')) {
     $urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
     $this->registerJs("updateCounters('$urlCasesQCount', 'cases-q-info', 'cases-q');", $this::POS_LOAD);
+}
+if (Yii::$app->user->can('/qa-task/qa-task-queue/count')) {
+    $urlQaTaskCount = Url::to(['/qa-task/qa-task-queue/count']);
+    $this->registerJs("updateCounters('$urlQaTaskCount', 'qa-task-info', 'qa-task-q');", $this::POS_LOAD);
 }
