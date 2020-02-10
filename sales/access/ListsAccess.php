@@ -112,26 +112,4 @@ class ListsAccess
         }
         return $this->employees;
     }
-
-
-    /**
-     * @param bool $productManageAll
-     * @return array
-     */
-    public function getProductList(bool $productManageAll): array
-    {
-        if ($productManageAll) {
-            return ProductType::getEnabledList();
-        } elseif ($this->user) {
-            return $this->user->productType
-                ->select(['pt_name', 'pt_id'])
-                ->orderBy(['pt_name' => SORT_ASC])
-                ->indexBy('pt_id')
-                ->asArray()
-                ->column();
-        } else {
-            return [];
-        }
-    }
-
 }

@@ -7,6 +7,7 @@
 use common\models\Employee;
 use common\models\User;
 use frontend\models\LeadForm;
+use sales\access\EmployeeProductAccess;
 use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -167,8 +168,7 @@ if($project){
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
     <?php if(!$leadModel->isNewRecord):
-       $productTypes = (new ListsAccess(Yii::$app->user->id))
-           ->getProductList(Yii::$app->user->can('product/manage/all'));
+       $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductList();
     ?>
         <div class="dropdown">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">

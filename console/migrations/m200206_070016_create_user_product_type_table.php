@@ -31,14 +31,10 @@ class m200206_070016_create_user_product_type_table extends Migration
     /** @var RbacMigrationService  */
     private $rbacMigrationService;
 
-    /** @var ManagerInterface  */
-    private $authManager;
-
     public function init()
     {
         parent::init();
         $this->rbacMigrationService = new RbacMigrationService();
-        $this->authManager = $this->rbacMigrationService->getAuth();
     }
 
     /**
