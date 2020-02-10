@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\lead\useCases\lead\create\LeadManageForm;
 use unclead\multipleinput\MultipleInput;
 use yii\widgets\ActiveForm;
 use unclead\multipleinput\MultipleInputColumn;
@@ -8,42 +9,17 @@ use borales\extensions\phoneInput\PhoneInput;
 /**
  * @var $this yii\web\View
  * @var $form ActiveForm
- * @var $leadForm sales\forms\lead\LeadCreateForm
+ * @var $leadForm LeadManageForm
  */
 
 ?>
 
 <div class="row">
-	<div class="col-md-4">
-		<?= $form->field($leadForm->client, 'firstName')->textInput() ?>
-	</div>
-
-	<div class="col-md-4">
-		<?= $form->field($leadForm->client, 'middleName')->textInput() ?>
-	</div>
-
-	<div class="col-md-4">
-		<?= $form->field($leadForm->client, 'lastName')->textInput() ?>
-	</div>
-</div>
-
-<div class="row">
 	<div class="col-md-4 col-sm-12">
 		<div id="create-lead-email">
-			<?= $form->field($leadForm, 'emails')->widget(MultipleInput::class, [
-				'max' => 10,
-				'enableError' => true,
-				'columns' => [
-					[
-						'name' => 'email',
-						'title' => 'Email',
-					],
-					[
-						'name' => 'help',
-						'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT
-					],
-				]
-			])->label(false) ?>
+			<?= $form->field($leadForm->email, 'email')->textInput([
+                'type' => 'email'
+			])->label(true) ?>
 		</div>
 	</div>
 	<div class="col-md-4 col-sm-12">
@@ -85,40 +61,39 @@ JS;
 		$this->registerJs($js);
 		?>
 		<div id="create-lead-phone">
-			<?= $form->field($leadForm, 'phones')->widget(MultipleInput::class, [
-				'max' => 10,
-				'enableError' => true,
-				'columns' => [
-					[
-						'name' => 'phone',
-						'title' => 'Phone',
-						'type' => PhoneInput::class,
-						'options' => [
-							'jsOptions' => [
-								'nationalMode' => false,
-								'preferredCountries' => ['us'],
-								'customContainer' => 'intl-tel-input'
-							],
-							'options' => [
-								'onkeydown' => '
-                                        return !validationField.validate(event);
-                                    ',
-								'onkeyup' => '
-                                        var value = $(this).val();
-                                        $(this).val(value.replace(/[^0-9\+]+/g, ""));
-                                    '
-							]
-						]
-					],
-					[
-						'name' => 'help',
-						'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT
-					],
-				]
-			])->label(false) ?>
+			<?= $form->field($leadForm->phone, 'phone')->widget(PhoneInput::class, [
+                'jsOptions' => [
+                    'nationalMode' => false,
+                    'preferredCountries' => ['us'],
+                    'customContainer' => 'intl-tel-input'
+                ],
+                'options' => [
+                    'onkeydown' => '
+                                    return !validationField.validate(event);
+                                ',
+                    'onkeyup' => '
+                                    var value = $(this).val();
+                                    $(this).val(value.replace(/[^0-9\+]+/g, ""));
+                                '
+                ]
+			])->label(true) ?>
 		</div>
 	</div>
 	<div class="col-md-4">
 		<?= $form->field($leadForm, 'requestIp')->textInput() ?>
 	</div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+		<?= $form->field($leadForm->client, 'firstName')->textInput() ?>
+    </div>
+
+    <div class="col-md-4">
+		<?= $form->field($leadForm->client, 'middleName')->textInput() ?>
+    </div>
+
+    <div class="col-md-4">
+		<?= $form->field($leadForm->client, 'lastName')->textInput() ?>
+    </div>
 </div>

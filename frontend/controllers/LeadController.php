@@ -1845,11 +1845,11 @@ class LeadController extends FController
 			$data = CompositeFormHelper::prepareDataForMultiInput(
 				Yii::$app->request->post(),
 				'LeadManageForm',
-				['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm']
+				[]
 			);
-			$form = new LeadManageForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), 0);
+			$form = new LeadManageForm(0);
 			$form->assignDep(Department::DEPARTMENT_SALES);
-			if ($form->load($data['post']) && $form->validate()) {
+			if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
 				try {
 					$leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
 					$lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);

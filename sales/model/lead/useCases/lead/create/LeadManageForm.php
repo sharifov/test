@@ -29,8 +29,8 @@ use sales\repositories\NotFoundException;
  * @property int $depId
  * @property int|null $userId
  * @property ClientCreateForm $client
- * @property EmailCreateForm[] $emails
- * @property PhoneCreateForm[] $phones
+ * @property EmailCreateForm $email
+ * @property PhoneCreateForm $phone
  * @property PreferencesCreateForm $preferences
  */
 class LeadManageForm extends CompositeForm
@@ -48,24 +48,18 @@ class LeadManageForm extends CompositeForm
 
 	/**
 	 * LeadCreateForm constructor.
-	 * @param int $countEmails
-	 * @param int $countPhones
 	 * @param int|null $userId
 	 * @param array $config
 	 */
-	public function __construct(int $countEmails = 1, int $countPhones = 1, ?int $userId = null, $config = [])
+	public function __construct(?int $userId = null, $config = [])
 	{
 		$this->status = Lead::STATUS_PROCESSING;
 
 		$this->client = new ClientCreateForm();
 
-		$this->emails = array_map(static function () {
-			return new EmailCreateForm();
-		}, self::createCountMultiField($countEmails));
+		$this->email = new EmailCreateForm();
 
-		$this->phones = array_map(static function () {
-			return new PhoneCreateForm();
-		}, self::createCountMultiField($countPhones));
+		$this->phone = new PhoneCreateForm();
 
 		$this->preferences = new PreferencesCreateForm();
 
@@ -102,7 +96,9 @@ class LeadManageForm extends CompositeForm
 
 			['requestIp', 'ip'],
 
-			[['emails', 'phones'], 'safe'],
+			[['email', 'phone'], 'safe'],
+
+			[['phone'], 'required'],
 
 			['status', 'in', 'range' => array_keys(LeadHelper::statusList())],
 
@@ -146,81 +142,62 @@ class LeadManageForm extends CompositeForm
 
 	private function sourceRulesPhoneRequired(): void
 	{
-		if (count($this->phones) < 1) {
-			$this->addError('source', 'Phone cannot be blank.');
+		if (empty($this->phone->phone)) {
+			$this->addError('sourceId', 'Phone cannot be blank.');
 			return;
 		}
-		foreach ($this->phones as $phone) {
-			$phone->required = true;
-		}
+		$this->phone->required = true;
 	}
 
 	private function sourceRulesEmailRequired(): void
 	{
-		if (count($this->emails) < 1) {
-			$this->addError('source', 'Email cannot be blank.');
+		if (empty($this->email->email)) {
+			$this->addError('sourceId', 'Email cannot be blank.');
 			return;
 		}
-		foreach ($this->emails as $email) {
-			$email->required = true;
-		}
+		$this->email->required = true;
 	}
 
 	private function sourceRulesEmailAndPhoneRequired(): void
 	{
-		if (count($this->emails) < 1) {
-			$this->addError('source', 'Email cannot be blank.');
+		if (empty($this->email->email)) {
+			$this->addError('sourceId', 'Email cannot be blank.');
 			return;
 		}
-		if (count($this->phones) < 1) {
-			$this->addError('source', 'Phone cannot be blank.');
+		if (empty($this->phone->phone)) {
+			$this->addError('sourceId', 'Phone cannot be blank.');
 			return;
 		}
-		foreach ($this->emails as $email) {
-			$email->required = true;
-		}
-		foreach ($this->phones as $phone) {
-			$phone->required = true;
-		}
+		$this->email->required = true;
+		$this->phone->required = true;
 	}
 
 	private function sourceRulesEmailOrPhoneRequired(): void
 	{
-		if (count($this->emails) < 1 && count($this->phones) < 1) {
-			$this->addError('source', 'Email or Phone cannot be blank.');
+		if (empty($this->phone->phone) && empty($this->email->email)) {
+			$this->addError('sourceId', 'Email or Phone cannot be blank.');
 			return;
 		}
 
 		$oneEmailIsNotEmpty = false;
 		$onePhoneIsNotEmpty = false;
 
-		foreach ($this->emails as $email) {
-			if ($email->email) {
-				$oneEmailIsNotEmpty = true;
-			}
+		if ($this->email->email) {
+			$oneEmailIsNotEmpty = true;
 		}
-		foreach ($this->phones as $phone) {
-			if ($phone->phone) {
-				$onePhoneIsNotEmpty = true;
-			}
+		if ($this->phone->phone) {
+			$onePhoneIsNotEmpty = true;
 		}
 
 		if (!$oneEmailIsNotEmpty && !$onePhoneIsNotEmpty) {
-			foreach ($this->emails as $email) {
-				$email->required = true;
-				$email->message = 'Email or Phone cannot be blank.';
-			}
-			foreach ($this->phones as $phone) {
-				$phone->required = true;
-				$phone->message = 'Phone or Email cannot be blank.';
-			}
+			$this->email->required = true;
+			$this->email->message = 'Email or Phone cannot be blank.';
+
+			$this->phone->required = true;
+			$this->phone->message = 'Phone or Email cannot be blank.';
 		} else {
-			foreach ($this->emails as $email) {
-				$email->required = false;
-			}
-			foreach ($this->phones as $phone) {
-				$phone->required = false;
-			}
+			$this->email->required = false;
+			$this->phone->required = false;
 		}
 	}
 
@@ -228,65 +205,42 @@ class LeadManageForm extends CompositeForm
 	{
 		if (parent::validate($attributeNames, $clearErrors)) {
 			$this->loadClientData();
-			$this->checkEmptyPhones();
-			$this->checkEmptyEmails();
+			$this->checkEmptyPhone();
+			$this->checkEmptyEmail();
 			return true;
 		}
-		$this->checkEmptyPhones();
-		$this->checkEmptyEmails();
+		$this->checkEmptyPhone();
+		$this->checkEmptyEmail();
 		return false;
 	}
 
 	private function loadClientData(): void
 	{
-
 		if (!$this->hasErrors()) {
-			if (isset($this->emails[0]) && $this->emails[0]->email) {
-				$this->clientEmail = $this->emails[0]->email;
+			if (isset($this->email) && $this->email->email) {
+				$this->clientEmail = $this->email->email;
 			} else {
 				$this->clientEmail = '';
 			}
-			if (isset($this->phones[0]) && $this->phones[0]->phone) {
-				$this->clientPhone = $this->phones[0]->phone;
+			if (isset($this->phone) && $this->phone->phone) {
+				$this->clientPhone = $this->phone->phone;
 			} else {
 				$this->clientPhone = '';
 			}
 		}
 	}
 
-	private function checkEmptyPhones(): void
+	private function checkEmptyPhone(): void
 	{
-		$errors = false;
-		foreach ($this->phones as $key => $phone) {
-			if ($key > 0 && !$phone->phone) {
-				if (!$this->getErrors('phones.' . $key . '.phone')) {
-					$errors = true;
-					$this->addError('phones.' . $key . '.phone', 'Phone cannot be blank.');
-				}
-			}
-		}
-		if (!$errors && count($this->phones) > 1 && isset($this->phones[0]->phone) && !$this->phones[0]->phone) {
-			if (!$this->getErrors('phones.0.phone')) {
-				$this->addError('phones.0.phone', 'Phone cannot be blank.');
-			}
+		if (empty($this->phone->phone)) {
+			$this->addError('sourceId', 'Phone cannot be blank.');
 		}
 	}
 
-	private function checkEmptyEmails(): void
+	private function checkEmptyEmail(): void
 	{
-		$errors = false;
-		foreach ($this->emails as $key => $email) {
-			if ($key > 0 && !$email->email) {
-				if (!$this->getErrors('emails.' . $key . '.email')) {
-					$errors = true;
-					$this->addError('emails.' . $key . '.email', 'Email cannot be blank.');
-				}
-			}
-		}
-		if (!$errors && count($this->emails) > 1 && isset($this->emails[0]->email) && !$this->emails[0]->email) {
-			if (!$this->getErrors('emails.0.email')) {
-				$this->addError('emails.0.email', 'Email cannot be blank.');
-			}
+		if (empty($this->email->email)) {
+			$this->addError('sourceId', 'Email cannot be blank.');
 		}
 	}
 
@@ -311,7 +265,7 @@ class LeadManageForm extends CompositeForm
 	 */
 	public function internalForms(): array
 	{
-		return ['client', 'emails', 'phones', 'preferences'];
+		return ['client', 'email', 'phone', 'preferences'];
 	}
 
 	/**

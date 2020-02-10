@@ -116,7 +116,7 @@ class LeadManageService
 		?string $reason
 	): Lead
 	{
-		$client = $this->clientManageService->getOrCreate($form->phones, $form->emails, $form->client);
+		$client = $this->clientManageService->getOrCreate([$form->phone], [$form->email], $form->client);
 
 		$lead = Lead::createManually(
 			$client->id,
@@ -138,14 +138,9 @@ class LeadManageService
 
 		$lead->processing($employeeId, $creatorId, $reason);
 
-		$this->clientManageService->addPhones($client, $form->phones);
+		$this->clientManageService->addPhones($client, [$form->phone]);
 
-		$phones = [];
-		foreach ($form->phones as $phone) {
-			$phones[] = $phone->phone;
-		}
-
-		$this->clientManageService->addEmails($client, $form->emails);
+		$this->clientManageService->addEmails($client, [$form->email]);
 
 		$hash = $this->leadHashGenerator->generate(
 			null,
@@ -154,13 +149,13 @@ class LeadManageService
 			null,
 			null,
 			null,
-			$phones,
+			[$form->phone->phone],
 			null
 		);
 
 		$lead->setRequestHash($hash);
 
-		$lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest($phones);
+		$lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$form->phone]);
 
 		$leadId = $this->leadRepository->save($lead);
 
