@@ -37,6 +37,9 @@ class m200208_112507_create_tbl_qa_task_status_reason extends Migration
 
         $this->addForeignKey('FK-qa_task_status_reason-tsr_created_user_id', '{{%qa_task_status_reason}}', ['tsr_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-qa_task_status_reason-tsr_updated_user_id', '{{%qa_task_status_reason}}', ['tsr_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+        $this->createIndex('idx-unique-qa_task_status_reason-object-status-name', '{{%qa_task_status_reason}}', [
+            'tsr_object_type_id', 'tsr_status_id', 'tsr_name'
+        ], true);
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -49,6 +52,7 @@ class m200208_112507_create_tbl_qa_task_status_reason extends Migration
      */
     public function safeDown()
     {
+        $this->dropIndex('idx-unique-qa_task_status_reason-object-status-name', '{{%qa_task_status_reason}}');
         $this->dropForeignKey('FK-qa_task_status_reason-tsr_updated_user_id', '{{%qa_task_status_reason}}');
         $this->dropForeignKey('FK-qa_task_status_reason-tsr_created_user_id', '{{%qa_task_status_reason}}');
         $this->dropTable('{{%qa_task_status_reason}}');
