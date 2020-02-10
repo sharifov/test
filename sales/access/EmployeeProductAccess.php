@@ -29,7 +29,7 @@ class EmployeeProductAccess
     public function getProductList(): array
     {
         if ($this->user->can('product/manage/all')) {
-            return ProductType::getList(true);
+            return ProductType::getEnabledList();
         } else {
             $employee = UserFinder::find($this->user->id);
             return $employee->productType

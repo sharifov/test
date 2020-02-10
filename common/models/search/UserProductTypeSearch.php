@@ -14,7 +14,7 @@ class UserProductTypeSearch extends UserProductType
     /**
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['upt_user_id', 'upt_product_type_id', 'upt_product_enabled', 'upt_created_user_id', 'upt_updated_user_id'], 'integer'],

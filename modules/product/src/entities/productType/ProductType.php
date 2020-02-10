@@ -91,15 +91,24 @@ class ProductType extends \yii\db\ActiveRecord
 	}
 
     /**
-     * @param bool|null $enabled
      * @return array
      */
-    public static function getList(?bool $enabled): array
+    public static function getList(): array
     {
-        $result = self::find()->select(['pt_name', 'pt_id']);
-        if (isset($enabled)) {
-            $result->where(['pt_enabled' => $enabled]);
-        }
-        return $result->orderBy(['pt_name' => SORT_ASC])->indexBy('pt_id')->asArray()->column();
+        return self::find()->select(['pt_name', 'pt_id'])->orderBy(['pt_name' => SORT_ASC])->indexBy('pt_id')->asArray()->column();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getEnabledList(): array
+    {
+        return self::find()
+            ->select(['pt_name', 'pt_id'])
+            ->where(['pt_enabled' => true])
+            ->orderBy(['pt_name' => SORT_ASC])
+            ->indexBy('pt_id')
+            ->asArray()
+            ->column();
     }
 }

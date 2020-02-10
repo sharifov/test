@@ -670,9 +670,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getProductType(): \yii\db\ActiveQuery
     {
         return $this->hasMany(ProductType::class, ['pt_id' => 'upt_product_type_id'])
-            ->viaTable(UserProductType::tableName(), ['upt_user_id' => 'id'])
-            ->andWhere(['upt_product_enabled' => true])
-            ->orderBy(['pt_name' => SORT_ASC]);
+            ->viaTable(UserProductType::tableName(), ['upt_user_id' => 'id'], static function ($query) {
+            /* @var \yii\db\ActiveQuery $query */
+            $query->andWhere(['upt_product_enabled' => true]);
+        });
     }
 
     /**
