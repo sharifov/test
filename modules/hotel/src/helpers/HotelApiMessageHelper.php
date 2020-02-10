@@ -5,6 +5,10 @@ namespace modules\hotel\src\helpers;
 use sales\helpers\app\HttpStatusCodeHelper;
 use sales\helpers\email\TextConvertingHelper;
 
+/**
+ * Class HotelApiMessageHelper
+ * @package modules\hotel\src\helpers
+ */
 class HotelApiMessageHelper
 {
 	public $title;
@@ -37,7 +41,7 @@ class HotelApiMessageHelper
     /**
      * @return $this
      */
-    public function prepareMessage()
+    public function prepareMessage(): self
     {
         $this->forHuman = 'Title (' . $this->title . '):' . $this->separator;
         if (array_key_exists($this->urlMethod, $this->urlMethodMap)) {
@@ -72,7 +76,7 @@ class HotelApiMessageHelper
      * @param string $method
      * @return string
      */
-    public function getErrorMessageByCode(int $code, string $url, string $method)
+    public function getErrorMessageByCode(int $code, string $url, string $method): string
     {
         $errorMessage = HttpStatusCodeHelper::getName($code);
         switch ($code) {

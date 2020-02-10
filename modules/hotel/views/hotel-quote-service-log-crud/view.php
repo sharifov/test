@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model modules\hotel\models\HotelQuoteServiceLog */
+/* @var $model modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog */
 
 $this->title = $model->hqsl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Hotel Quote Service Logs', 'url' => ['index']];

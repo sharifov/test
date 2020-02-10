@@ -4,17 +4,18 @@ namespace modules\hotel\src\useCases\api\bookQuote;
 
 use modules\hotel\models\HotelQuote;
 
+/**
+ * Class HotelQuoteCancelBookGuard
+ * @package modules\hotel\src\useCases\api\bookQuote
+ */
 class HotelQuoteCancelBookGuard
 {
     /**
-     * @param int $id
+     * @param HotelQuote $model
      * @return HotelQuote
      */
-    public static function guard(int $id): HotelQuote
+    public static function guard(HotelQuote $model): HotelQuote
 	{
-		if (!$model = HotelQuote::findOne($id)) {
-            throw new \DomainException('Hotel Quote not found;');
-        }
         if (!$model->isBooking()) {
             throw new \DomainException('Hotel Quote not booked;');
         }

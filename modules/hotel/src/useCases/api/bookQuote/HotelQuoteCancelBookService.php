@@ -5,6 +5,10 @@ namespace modules\hotel\src\useCases\api\bookQuote;
 use modules\hotel\components\ApiHotelService;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\HotelQuoteRoom;
+use modules\hotel\src\entities\hotelQuoteServiceLog\CreateDto;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus as LogStatus;
 use sales\auth\Auth;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -52,20 +56,24 @@ class HotelQuoteCancelBookService
      * @return $this
      * @throws \Throwable
      */
-    public function cancelBook(HotelQuote $model)
+    public function cancelBook(HotelQuote $model): self
     {
         $params = ['bookingId' => $model->hq_booking_id];
-        $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params, $model->hq_id,'delete');
+
+        $createDto = new CreateDto($model->hq_id,LogStatus::ACTION_TYPE_CANCEL, $params);
+        $hotelQuoteServiceLog = HotelQuoteServiceLog::create($createDto);
+
+        $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params, 'delete');
         $userId = Auth::id();
 
-        if ($apiResponse['status']) {
+        if ($apiResponse['statusApi'] === HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
             $this->transactionManager->wrap(function () use ($model, $apiResponse, $userId) {
                 $productQuote = $model->hqProductQuote;
                 $productQuote->cancelled($userId);
                 $this->productQuoteRepository->save($productQuote);
 
-                $model->hq_booking_id = null;
-                $model->save();
+                $model->setBookingId('')
+                    ->saveChanges();
 
                 HotelQuoteRoom::updateAll(
                     [
@@ -87,6 +95,10 @@ class HotelQuoteCancelBookService
                 $this->productQuoteRepository->save($productQuote);
             });
         }
+
+        $hotelQuoteServiceLog->setStatus($apiResponse['statusApi'])
+            ->setMessage($apiResponse['logData'])
+            ->saveChanges();
 
         return $this;
     }

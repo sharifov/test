@@ -4,6 +4,7 @@ namespace modules\hotel\migrations;
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use Yii;
 use yii\db\Migration;
 
@@ -33,7 +34,7 @@ class m200204_113105_create_table_hotel_quote_service_log extends Migration
             'hqsl_id' => $this->primaryKey(),
             'hqsl_hotel_quote_id' => $this->integer()->notNull(),
             'hqsl_action_type_id' => $this->integer()->notNull(),
-            'hqsl_status_id' => $this->integer()->notNull(),
+            'hqsl_status_id' => $this->integer()->notNull()->defaultValue(HotelQuoteServiceLogStatus::STATUS_SEND_REQUEST),
             'hqsl_message' => $this->text(),
             'hqsl_created_user_id' => $this->integer(),
             'hqsl_created_dt' => $this->dateTime(),

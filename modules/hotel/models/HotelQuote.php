@@ -289,7 +289,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                                     $hotelQuoteRoomPax->hqrp_dob = $pax->hrp_dob;
                                     $hotelQuoteRoomPax->save();
                                 }
-                                array_push($importedHotelRoomIds, $hotelRoom['hr_id']);
+                                $importedHotelRoomIds[] = $hotelRoom['hr_id'];
                                 $importHotelRoomStatus = true;
                             }
                         }
@@ -369,5 +369,21 @@ class HotelQuote extends ActiveRecord implements Quotable
         return $this->hq_id;
     }
 
+    /**
+     * @param string $bookingId
+     * @return $this
+     */
+    public function setBookingId(string $bookingId): self
+    {
+        $this->hq_booking_id = $bookingId;
+        return $this;
+    }
 
+    /**
+     * @return bool
+     */
+    public function saveChanges(): bool
+    {
+        return $this->save();
+    }
 }

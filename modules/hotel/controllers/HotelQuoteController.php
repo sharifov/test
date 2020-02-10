@@ -7,6 +7,7 @@ use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\search\HotelQuoteSearch;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
@@ -258,21 +259,24 @@ class HotelQuoteController extends FController
     }
 
     /**
-     * @return Response
+     * @return array
      */
-    public function actionAjaxBook()
+    public function actionAjaxBook(): array
     {
+        Yii::$app->response->format = Response::FORMAT_JSON;
         $id = (int) Yii::$app->request->post('id', 0);
         $checkRate = Yii::$app->request->post('check_rate', 1);
         $result = ['status' => 0, 'message' => '', 'data' => []];
 
         try {
-            $model = HotelQuoteBookGuard::guard($id);
+            $model = $this->findModel($id);
+            HotelQuoteBookGuard::guard($model);
 
             /** @var HotelQuoteBookService $bookService */
             $bookService = Yii::$container->get(HotelQuoteBookService::class);
 
             if ($checkRate) {
+                /** @var HotelQuoteCheckRateService $checkRateService */
                 $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
                 $checkResult = $checkRateService->checkRate($model);
 
@@ -291,22 +295,27 @@ class HotelQuoteController extends FController
             }
         } catch (\Throwable $throwable) {
             $result['message'] = $throwable->getMessage();
-            \Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Controller:HotelQuoteController:AjaxBook:Throwable');
         }
-        return $this->asJson($result);
+        return $result;
     }
 
     /**
-     * @return Response
+     * @return array
      */
-    public function actionAjaxCancelBook()
+    public function actionAjaxCancelBook(): array
     {
+        Yii::$app->response->format = Response::FORMAT_JSON;
         $id = (int) Yii::$app->request->post('id', 0);
 
         try {
-            $model = HotelQuoteCancelBookGuard::guard($id);
+            $model = $this->findModel($id);
+            HotelQuoteCancelBookGuard::guard($model);
+
+            /** @var HotelQuoteCancelBookService $cancelBookService */
             $cancelBookService = Yii::$container->get(HotelQuoteCancelBookService::class);
             $resultCancel = $cancelBookService->cancelBook($model);
+
             $result = [
                 'message' => $resultCancel->message,
                 'status' => $resultCancel->status,
@@ -316,9 +325,9 @@ class HotelQuoteController extends FController
                 'message' => $throwable->getMessage(),
                 'status' => 0,
             ];
-            \Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Controller:HotelQuoteController:AjaxCancelBook:Throwable');
         }
-        return $this->asJson($result);
+        return $result;
     }
 
     /**

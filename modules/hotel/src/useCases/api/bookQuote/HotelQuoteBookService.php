@@ -6,6 +6,10 @@ use common\models\Client;
 use modules\hotel\components\ApiHotelService;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\HotelQuoteRoomPax;
+use modules\hotel\src\entities\hotelQuoteServiceLog\CreateDto;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus as LogStatus;
 use sales\auth\Auth;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -22,7 +26,7 @@ use sales\services\TransactionManager;
  */
 class HotelQuoteBookService
 {
-	public $status = 0;
+	public $status = 0; // 0 failed : 1 success
     public $message = '';
     /**
 	 * @var TransactionManager
@@ -76,12 +80,15 @@ class HotelQuoteBookService
             'rooms' => $rooms,
         ];
 
-        $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params, $model->hq_id);
+        $createDto = new CreateDto($model->hq_id,LogStatus::ACTION_TYPE_BOOK, $params);
+        $hotelQuoteServiceLog = HotelQuoteServiceLog::create($createDto);
 
-        if ($apiResponse['status']) {
+        $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params);
+
+        if ($apiResponse['statusApi'] === HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
             $this->transactionManager->wrap(function () use ($model, $apiResponse, $productQuote, $userId) {
-                $model->hq_booking_id = $apiResponse['data']['reference'];
-                $model->save();
+                $model->setBookingId($apiResponse['data']['reference'])
+                    ->saveChanges();
 
                 $productQuote->booked($userId);
                 $this->productQuoteRepository->save($productQuote);
@@ -97,6 +104,10 @@ class HotelQuoteBookService
                 $this->productQuoteRepository->save($productQuote);
             });
         }
+
+        $hotelQuoteServiceLog->setStatus($apiResponse['statusApi'])
+            ->setMessage($apiResponse['logData'])
+            ->saveChanges();
 
         return $this;
     }

@@ -9,6 +9,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  *
@@ -26,38 +27,10 @@ use yii\helpers\ArrayHelper;
  */
 class HotelQuoteServiceLog extends ActiveRecord
 {
-    public const STATUS_SEND_REQUEST    = 1;
-    public const STATUS_SUCCESS         = 2;
-    public const STATUS_FAIL            = 3; // Api response with error
-    public const STATUS_ERROR           = 4; // System request error (404 etc.)
-
-    public const ACTION_TYPE_BOOK       = 1;
-    public const ACTION_TYPE_CHECK      = 2;
-    public const ACTION_TYPE_CANCEL     = 3;
-
-    public const STATUS_LIST = [
-    	self::STATUS_SEND_REQUEST   => 'Send request',
-        self::STATUS_SUCCESS        => 'Success',
-        self::STATUS_FAIL => 'Fail',
-		self::STATUS_ERROR => 'Error',
-    ];
-
-    public const ACTION_TYPE_LIST = [
-    	self::ACTION_TYPE_BOOK => 'Book',
-        self::ACTION_TYPE_CHECK => 'Check',
-		self::ACTION_TYPE_CANCEL => 'Cancel',
-    ];
-
-    public const URL_METHOD_ACTION_TYPE_MAP = [
-        'booking/book_post' => self::ACTION_TYPE_BOOK,
-        'booking/checkrate_post' => self::ACTION_TYPE_CHECK,
-        'booking/book_delete' => self::ACTION_TYPE_CANCEL,
-    ];
-
     /**
      * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'hotel_quote_service_log';
     }
@@ -65,7 +38,7 @@ class HotelQuoteServiceLog extends ActiveRecord
     /**
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['hqsl_hotel_quote_id', 'hqsl_action_type_id', 'hqsl_status_id'], 'required'],
@@ -141,4 +114,59 @@ class HotelQuoteServiceLog extends ActiveRecord
         return new Scopes(static::class);
     }
 
+    /**
+     * @param CreateDto $dto
+     * @param bool $save
+     * @return HotelQuoteServiceLog
+     */
+    public static function create(CreateDto $dto, bool $save = true): HotelQuoteServiceLog
+    {
+        $model = new self();
+        $model->hqsl_hotel_quote_id = $dto->hqsl_hotel_quote_id;
+        $model->hqsl_message = $dto->hqsl_message;
+        $model->hqsl_status_id = $dto->hqsl_status_id;
+        $model->hqsl_action_type_id = $dto->hqsl_action_type_id;
+
+        if ($save) {
+            $model->save();
+        }
+        return $model;
+    }
+
+    /**
+     * @param int $statusId
+     * @return HotelQuoteServiceLog
+     */
+    public function setStatus(int $statusId): HotelQuoteServiceLog
+    {
+        if (!array_key_exists($statusId, HotelQuoteServiceLogStatus::STATUS_LIST)) {
+            throw new \InvalidArgumentException('Invalid Status');
+        }
+
+        $this->hqsl_status_id = $statusId;
+        return $this;
+    }
+
+    /**
+     * @param $message
+     * @param bool $toString
+     * @return HotelQuoteServiceLog
+     */
+    public function setMessage($message, bool $toString = true): HotelQuoteServiceLog
+    {
+        if ($toString) {
+            $message = VarDumper::dumpAsString($message);
+        }
+        $this->hqsl_message = $message;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function saveChanges(): bool
+    {
+        return $this->save();
+    }
 }
+

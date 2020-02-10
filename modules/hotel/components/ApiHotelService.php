@@ -8,8 +8,8 @@
 
 namespace modules\hotel\components;
 
-use modules\hotel\src\entities\hotelQuoteServiceLog\events\HotelQuoteServiceLogCreateEvent;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\helpers\HotelApiDataHelper;
 use modules\hotel\src\helpers\HotelApiMessageHelper;
 use yii\base\Component;
@@ -48,8 +48,6 @@ class ApiHotelService extends Component
 		self::DESTINATION_CITY_ZONE,
 		self::DESTINATION_HOTEL
 	];
-
-    private $apiServiceName = 'TravelServicesApi';
 
     public function init() : void
     {
@@ -212,83 +210,55 @@ class ApiHotelService extends Component
     /**
      * @param string $urlAction
      * @param array $params
-     * @param int $hotelQuoteId
      * @param string $method
      * @return array
      */
-    public function requestBookingHandler(string $urlAction, array $params, int $hotelQuoteId, string $method = 'post'): array
+    public function requestBookingHandler(string $urlAction, array $params, string $method = 'post'): array
     {
-        $result = ['status' => 0, 'message' => '', 'data' => []];
+        $result = ['statusApi' => HotelQuoteServiceLogStatus::STATUS_ERROR, 'message' => '', 'data' => []];
         $urlMethod = $urlAction . '_' . $method;
         $url = $this->url . $urlAction;
         $resultMessage = new HotelApiMessageHelper($urlMethod, func_get_args());
-
-        $hotelQuoteServiceLog = new HotelQuoteServiceLog;
-        $hotelQuoteServiceLog->hqsl_hotel_quote_id = $hotelQuoteId;
-        $hotelQuoteServiceLog->hqsl_message = serialize($params);
-        $hotelQuoteServiceLog->hqsl_status_id = HotelQuoteServiceLog::STATUS_SEND_REQUEST;
-        $hotelQuoteServiceLog->hqsl_action_type_id = HotelQuoteServiceLog::URL_METHOD_ACTION_TYPE_MAP[$urlMethod];
-        $hotelQuoteServiceLog->save();
 
         try {
             $response = $this->sendRequest($urlAction, $params, $method);
 
             if ($response->isOk) {
-                if ((new HotelApiDataHelper)->checkDataResponse($urlMethod, $response->data)) {
-                    $result['data'] = (new HotelApiDataHelper)->prepareDataResponse($urlMethod, $response->data);
-                    $result['status'] = 1;
+                if ((new HotelApiDataHelper())->checkDataResponse($urlMethod, $response->data)) {
 
-                    $resultMessage->title = 'Process completed successfully';
-                    $resultMessage->message = 'Process('. $urlMethod .') completed successfully';
-
-                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_SUCCESS;
-                    $serviceLogMessage = serialize($response->data);
+                    $result['data'] = (new HotelApiDataHelper())->prepareDataResponse($urlMethod, $response->data);
+                    $result['data']['logData'] = $response->data;
+                    $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_SUCCESS;
+                    $resultMessage->message = 'Process('. $resultMessage->urlMethodMap[$urlMethod] .') completed successfully';
 
                 } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
-                    $resultMessage->title = $this->apiServiceName . ' responded with an error.';
-                    $resultMessage->message = $response->data['error']['message'] ?? '';
-                    $resultMessage->code = $response->data['error']['code'] ?? '';
 
-                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_FAIL;
-                    $serviceLogMessage = serialize($response->data);
+                    $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_FAIL_WITH_ERROR;
+                    $result['data']['logData'] = $response->data;
+                    $resultMessage->message = $response->data['error']['message'];
 
                 } else {
-                    $resultMessage->title = $this->apiServiceName . ' did not send expected data.';
+                    $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_FAIL;
+                    $result['data']['logData'] = $response;
                     $resultMessage->message = $resultMessage->getErrorMessageByCode($response->statusCode, $url, $method);
-                    $resultMessage->code = $response->statusCode;
-                    $resultMessage->additional = $response->content;
-
-                    $serviceLogStatusId = HotelQuoteServiceLog::STATUS_FAIL;
-                    $serviceLogMessage = serialize($response->data);
                 }
             } else {
-                $resultMessage->title = $this->apiServiceName . ' api response error.';
+                $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_ERROR_RESPONSE;
+                $result['data']['logData'] = $response;
                 $resultMessage->message = $resultMessage->getErrorMessageByCode($response->statusCode, $url, $method);
-                $resultMessage->code = $response->statusCode;
-                $resultMessage->additional = $response->content;
-
-                $serviceLogStatusId = HotelQuoteServiceLog::STATUS_ERROR;
-                $serviceLogMessage = serialize($response);
             }
         } catch (\Throwable $throwable) {
-            $resultMessage->title = 'Hotel booking request api throwable error.';
+            $resultMessage->title = HotelQuoteServiceLogStatus::getTitle(HotelQuoteServiceLogStatus::STATUS_ERROR);
             $resultMessage->message = $throwable->getMessage();
             $resultMessage->code = $throwable->getCode();
 
-            $serviceLogStatusId = HotelQuoteServiceLog::STATUS_ERROR;
-            $serviceLogMessage = serialize($throwable);
+            $result['data']['logData'] = $resultMessage->prepareMessage()->forLog;
+            \Yii::error(VarDumper::dumpAsString($result['data']['logData']),
+                'Component:ApiHotelService:' . $resultMessage->urlMethodMap[$urlMethod]);
         }
 
-        $message = $resultMessage->prepareMessage();
-        $result['message'] = $message->forHuman;
-
-		if (!$result['status']) {
-		    \Yii::error(VarDumper::dumpAsString($message->forLog),self::class . ':' . __FUNCTION__ . ':' . $urlMethod);
-		}
-
-        $hotelQuoteServiceLog->hqsl_status_id = $serviceLogStatusId;
-        $hotelQuoteServiceLog->hqsl_message = $serviceLogMessage;
-        $hotelQuoteServiceLog->save();
+        $resultMessage->title = HotelQuoteServiceLogStatus::getTitle($result['statusApi']);
+        $result['message'] = $resultMessage->prepareMessage()->forHuman;
 
 		return $result;
 	}

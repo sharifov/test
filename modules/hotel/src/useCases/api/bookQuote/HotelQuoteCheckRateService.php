@@ -5,6 +5,10 @@ namespace modules\hotel\src\useCases\api\bookQuote;
 use modules\hotel\components\ApiHotelService;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\HotelQuoteRoom;
+use modules\hotel\src\entities\hotelQuoteServiceLog\CreateDto;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus as LogStatus;
 use sales\auth\Auth;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -18,7 +22,7 @@ use sales\services\TransactionManager;
  */
 class HotelQuoteCheckRateService
 {
-	public $status = 0; // failed
+	public $status = 0; // 0 failed : 1 success
     public $message = '';
 	/**
 	 * @var TransactionManager
@@ -51,14 +55,14 @@ class HotelQuoteCheckRateService
      * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
      */
-    public function checkRate(HotelQuote $model)
+    public function checkRate(HotelQuote $model): self
     {
         $hotel = HotelQuoteCheckRateGuard::hotel($model);
         $hotelQuoteRooms = HotelQuoteCheckRateGuard::hotelQuoteRooms($model);
         $userId = Auth::id();
         $rooms = [];
         foreach ($hotelQuoteRooms as $hotelQuoteRoom) {
-            /* @var $hotelQuoteRoom HotelQuoteRoom */
+            /* @var HotelQuoteRoom $hotelQuoteRoom */
             if ($hotelQuoteRoom->hqr_type === $hotelQuoteRoom::TYPE_BOOKABLE && !empty($hotelQuoteRoom->hqr_rate_comments_id)) {
                 $roomData = [
                     'type' => $hotelQuoteRoom::TYPE_LIST[$hotelQuoteRoom::TYPE_BOOKABLE],
@@ -78,9 +82,12 @@ class HotelQuoteCheckRateService
             'rooms' => $rooms,
         ];
 
+        $createDto = new CreateDto($model->hq_id,LogStatus::ACTION_TYPE_CHECK, $params);
+        $hotelQuoteServiceLog = HotelQuoteServiceLog::create($createDto);
+
         $apiResponse = $this->apiService->requestBookingHandler('booking/checkrate', $params, $model->hq_id);
 
-        if ($apiResponse['status']) {
+        if ($apiResponse['statusApi'] === HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
             if (count($apiResponse['data']['rooms'])) {
                 foreach ($apiResponse['data']['rooms'] as $room) {
                     if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])){
@@ -103,6 +110,11 @@ class HotelQuoteCheckRateService
                 $this->productQuoteRepository->save($productQuote);
             });
         }
+
+        $hotelQuoteServiceLog->setStatus($apiResponse['statusApi'])
+            ->setMessage($apiResponse['logData'])
+            ->saveChanges();
+
         return $this;
     }
 }

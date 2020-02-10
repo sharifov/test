@@ -5,6 +5,10 @@ namespace modules\hotel\src\useCases\api\bookQuote;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
 
+/**
+ * Class HotelQuoteCheckRateGuard
+ * @package modules\hotel\src\useCases\api\bookQuote
+ */
 class HotelQuoteCheckRateGuard
 {
     /**
