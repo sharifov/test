@@ -465,8 +465,9 @@ class Lead extends ActiveRecord
             [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt', 'l_last_action_dt'], 'safe'],
 
             [['final_profit', 'tips', 'agents_processing_fee', 'l_init_price'], 'number'],
-            [['uid', 'hybrid_uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
+            [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
+            [['hybrid_uid'], 'string', 'max' => 15],
             [['cabin'], 'string', 'max' => 1],
             [['gid', 'l_request_hash'], 'string', 'max' => 32],
             [['l_client_first_name', 'l_client_last_name'], 'string', 'max' => 50],
