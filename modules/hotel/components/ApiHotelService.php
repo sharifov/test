@@ -254,7 +254,7 @@ class ApiHotelService extends Component
 
             $result['data']['logData'] = $resultMessage->prepareMessage()->forLog;
             \Yii::error(VarDumper::dumpAsString($result['data']['logData']),
-                'Component:ApiHotelService:' . $resultMessage->urlMethodMap[$urlMethod]);
+                'ApiHotelService error:' . $resultMessage->urlMethodMap[$urlMethod]);
         }
 
         $resultMessage->title = HotelQuoteServiceLogStatus::getTitle($result['statusApi']);

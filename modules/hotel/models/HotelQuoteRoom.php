@@ -161,7 +161,7 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
      * @return bool
      * @throws \yii\base\InvalidConfigException
      */
-    public function setAdditionalInfo(array $room)
+    public function setAdditionalInfo(array $room): bool
     {
         $this->hqr_rate_comments_id = $room['rateCommentsId'] ?? null;
         $this->hqr_type = ($room['type'] == self::TYPE_LIST[self::TYPE_BOOKABLE]) ?

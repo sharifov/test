@@ -1,6 +1,7 @@
 <?php
 
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
@@ -25,21 +26,21 @@ use dosamigos\datepicker\DatePicker;
             [
                 'attribute' => 'hqsl_action_type_id',
                 'value' => static function (HotelQuoteServiceLog $model) {
-                    return HotelQuoteServiceLog::ACTION_TYPE_LIST[$model->hqsl_action_type_id];
+                    return HotelQuoteServiceLogStatus::ACTION_TYPE_LIST[$model->hqsl_action_type_id];
                 },
-                'filter' => HotelQuoteServiceLog::ACTION_TYPE_LIST,
+                'filter' => HotelQuoteServiceLogStatus::ACTION_TYPE_LIST,
             ],
             [
                 'attribute' => 'hqsl_status_id',
                 'value' => static function (HotelQuoteServiceLog $model) {
-                    return HotelQuoteServiceLog::STATUS_LIST[$model->hqsl_status_id];
+                    return HotelQuoteServiceLogStatus::STATUS_LIST[$model->hqsl_status_id];
                 },
-                'filter' => HotelQuoteServiceLog::STATUS_LIST,
+                'filter' => HotelQuoteServiceLogStatus::STATUS_LIST,
             ],
             [
                 'attribute' => 'hqsl_message',
                 'value' => static function (HotelQuoteServiceLog $model) {
-                    $message = VarDumper::dumpAsString(unserialize($model->hqsl_message), 10);
+                    $message = $model->hqsl_message;
 
                     if (strlen($message) < 600) {
                         return '<pre><small>' . $message . '</small></pre>';

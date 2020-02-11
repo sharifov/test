@@ -12,9 +12,9 @@ use yii\data\ActiveDataProvider;
 class HotelQuoteServiceLogCrudSearch extends HotelQuoteServiceLog
 {
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['hqsl_id', 'hqsl_hotel_quote_id', 'hqsl_action_type_id', 'hqsl_status_id', 'hqsl_created_user_id'], 'integer'],
@@ -23,9 +23,9 @@ class HotelQuoteServiceLogCrudSearch extends HotelQuoteServiceLog
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function scenarios()
+    public function scenarios(): array
     {
         return Model::scenarios();
     }
@@ -38,7 +38,7 @@ class HotelQuoteServiceLogCrudSearch extends HotelQuoteServiceLog
      * @param int $hotelQuoteId
      * @return ActiveDataProvider
      */
-    public function search($params, int $hotelQuoteId = 0)
+    public function search($params, int $hotelQuoteId = 0): ActiveDataProvider
     {
         $query = HotelQuoteServiceLog::find()->orderBy(['hqsl_id' => SORT_DESC]);
 

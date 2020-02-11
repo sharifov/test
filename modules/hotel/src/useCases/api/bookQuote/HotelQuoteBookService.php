@@ -106,7 +106,7 @@ class HotelQuoteBookService
         }
 
         $hotelQuoteServiceLog->setStatus($apiResponse['statusApi'])
-            ->setMessage($apiResponse['logData'])
+            ->setMessage($apiResponse['data']['logData'])
             ->saveChanges();
 
         return $this;

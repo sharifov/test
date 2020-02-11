@@ -2,6 +2,10 @@
 
 namespace modules\hotel\src\helpers;
 
+/**
+ * Class HotelApiDataHelper
+ * @package modules\hotel\src\helpers
+ */
 class HotelApiDataHelper
 {
     /**
@@ -9,7 +13,7 @@ class HotelApiDataHelper
      * @param array $responseData
      * @return bool
      */
-    public function checkDataResponse(string $urlMethod, array $responseData)
+    public function checkDataResponse(string $urlMethod, array $responseData): bool
     {
         $result = false;
         switch ($urlMethod) {
@@ -24,7 +28,7 @@ class HotelApiDataHelper
                 }
                 break;
             case 'booking/book_delete':
-                if (isset($responseData['booking']['status']) && strtoupper($responseData['booking']['status']) == 'CANCELLED') {
+                if (isset($responseData['booking']['status']) && strtoupper($responseData['booking']['status']) === 'CANCELLED') {
                     $result = true;
                 }
                 break;
@@ -37,13 +41,13 @@ class HotelApiDataHelper
      * @param array $responseData
      * @return array
      */
-    public function prepareDataResponse(string $urlMethod, array $responseData)
+    public function prepareDataResponse(string $urlMethod, array $responseData): array
     {
         switch ($urlMethod) {
             case 'booking/checkrate_post':
                 $result = [
                     'source' => $responseData,
-                    'rateComments' => (isset($responseData['rateComments'])) ?: '',
+                    'rateComments' => $responseData['rateComments'] ?? '',
                     'rooms' => ((isset($responseData['hotel']['rooms']))) ? $this->prepareRooms($responseData['hotel']['rooms']) : [],
                 ];
                 break;

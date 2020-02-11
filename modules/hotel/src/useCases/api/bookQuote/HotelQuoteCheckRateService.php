@@ -85,9 +85,10 @@ class HotelQuoteCheckRateService
         $createDto = new CreateDto($model->hq_id,LogStatus::ACTION_TYPE_CHECK, $params);
         $hotelQuoteServiceLog = HotelQuoteServiceLog::create($createDto);
 
-        $apiResponse = $this->apiService->requestBookingHandler('booking/checkrate', $params, $model->hq_id);
+        $apiResponse = $this->apiService->requestBookingHandler('booking/checkrate', $params);
 
         if ($apiResponse['statusApi'] === HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
+
             if (count($apiResponse['data']['rooms'])) {
                 foreach ($apiResponse['data']['rooms'] as $room) {
                     if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])){
@@ -112,7 +113,7 @@ class HotelQuoteCheckRateService
         }
 
         $hotelQuoteServiceLog->setStatus($apiResponse['statusApi'])
-            ->setMessage($apiResponse['logData'])
+            ->setMessage($apiResponse['data']['logData'])
             ->saveChanges();
 
         return $this;
