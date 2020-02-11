@@ -6,17 +6,17 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use yii\grid\DataColumn;
 
 /**
- * Class QaTaskStatusActionColumn
+ * Class QaTaskActionColumn
  *
  * Ex.
      [
-         'class' => \modules\qaTask\src\grid\columns\QaTaskStatusActionColumn::class,
+         'class' => \modules\qaTask\src\grid\columns\QaTaskActionColumn::class,
          'attribute' => 'tsl_action_id',
      ],
  */
-class QaTaskStatusActionColumn extends DataColumn
+class QaTaskActionColumn extends DataColumn
 {
-    public $format = 'qaTaskStatusAction';
+    public $format = 'qaTaskAction';
 
     public function init(): void
     {
@@ -27,4 +27,3 @@ class QaTaskStatusActionColumn extends DataColumn
         }
     }
 }
-

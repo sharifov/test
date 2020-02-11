@@ -5,17 +5,18 @@ namespace modules\qaTask\controllers;
 use frontend\controllers\FController;
 use sales\auth\Auth;
 use Yii;
-use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReason;
-use modules\qaTask\src\entities\qaTaskStatusReason\search\QaTaskStatusReasonCrudSearch;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
+use modules\qaTask\src\entities\qaTaskActionReason\search\QaTaskActionReasonCrudSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
-class QaTaskStatusReasonCrudController extends FController
+class QaTaskActionReasonCrudController extends FController
 {
     public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -23,6 +24,7 @@ class QaTaskStatusReasonCrudController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -30,7 +32,7 @@ class QaTaskStatusReasonCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new QaTaskStatusReasonCrudSearch();
+        $searchModel = new QaTaskActionReasonCrudSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
@@ -56,13 +58,13 @@ class QaTaskStatusReasonCrudController extends FController
      */
     public function actionCreate()
     {
-        $model = new QaTaskStatusReason([
-            'tsr_enabled' => 1,
-            'tsr_comment_required' => 0,
+        $model = new QaTaskActionReason([
+            'tar_enabled' => 1,
+            'tar_comment_required' => 0,
         ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->tsr_id]);
+            return $this->redirect(['view', 'id' => $model->tar_id]);
         }
 
         return $this->render('create', [
@@ -80,7 +82,7 @@ class QaTaskStatusReasonCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->tsr_id]);
+            return $this->redirect(['view', 'id' => $model->tar_id]);
         }
 
         return $this->render('update', [
@@ -104,12 +106,12 @@ class QaTaskStatusReasonCrudController extends FController
 
     /**
      * @param $id
-     * @return QaTaskStatusReason
+     * @return QaTaskActionReason
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): QaTaskStatusReason
+    protected function findModel($id): QaTaskActionReason
     {
-        if (($model = QaTaskStatusReason::findOne($id)) !== null) {
+        if (($model = QaTaskActionReason::findOne($id)) !== null) {
             return $model;
         }
 

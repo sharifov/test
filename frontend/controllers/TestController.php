@@ -43,7 +43,7 @@ use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\services\ProductQuoteStatusLogService;
-use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReasonQuery;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\EmployeeAccessHelper;
@@ -171,7 +171,7 @@ class TestController extends FController
     public function actionTest()
     {
 
-        VarDumper::dump(QaTaskStatusReasonQuery::getProcessingList(2));die;
+        VarDumper::dump(QaTaskActionReasonQuery::getProcessingList(2));die;
 
 
         $service = Yii::createObject(ProductQuoteCloneService::class);

@@ -6,7 +6,7 @@ use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReason;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
 use yii\db\ActiveQuery;
 
 /**
@@ -28,7 +28,7 @@ use yii\db\ActiveQuery;
  * @property Employee $createdUser
  * @property Employee $assignedUser
  * @property QaTask $task
- * @property QaTaskStatusReason $reason
+ * @property QaTaskActionReason $reason
  */
 class QaTaskStatusLog extends \yii\db\ActiveRecord
 {
@@ -81,9 +81,9 @@ class QaTaskStatusLog extends \yii\db\ActiveRecord
 
             ['tsl_reason_id', 'integer'],
             ['tsl_reason_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['tsl_reason_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskStatusReason::class, 'targetAttribute' => ['tsl_reason_id' => 'tsr_id']],
+            ['tsl_reason_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskActionReason::class, 'targetAttribute' => ['tsl_reason_id' => 'tar_id']],
             ['tsl_reason_id', function () {
-                if ($this->reason->tsr_object_type_id !== $this->task->t_object_type_id) {
+                if ($this->reason->tar_object_type_id !== $this->task->t_object_type_id) {
                     $this->addError('tsl_reason_id', 'Different types Reason and Task');
                 }
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
@@ -113,7 +113,7 @@ class QaTaskStatusLog extends \yii\db\ActiveRecord
             'tsl_start_dt' => 'Start Dt',
             'tsl_end_dt' => 'End Dt',
             'tsl_reason_id' => 'Reason',
-            'reason.tsr_name' => 'Reason',
+            'reason.tar_name' => 'Reason',
             'tsl_description' => 'Description',
             'tsl_duration' => 'Duration',
             'tsl_action_id' => 'Action',
@@ -126,7 +126,7 @@ class QaTaskStatusLog extends \yii\db\ActiveRecord
 
     public function getReason(): ActiveQuery
     {
-        return $this->hasOne(QaTaskStatusReason::class, ['tsr_id' => 'tsl_reason_id']);
+        return $this->hasOne(QaTaskActionReason::class, ['tar_id' => 'tsl_reason_id']);
     }
 
     public function getCreatedUser(): ActiveQuery

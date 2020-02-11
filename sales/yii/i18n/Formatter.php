@@ -49,7 +49,7 @@ class Formatter extends \yii\i18n\Formatter
         return QaTaskFormatter::asQaTask($task);
     }
 
-    public function asQaTaskStatusAction($value): string
+    public function asQaTaskAction($value): string
     {
         if ($value === null) {
             return $this->nullDisplay;

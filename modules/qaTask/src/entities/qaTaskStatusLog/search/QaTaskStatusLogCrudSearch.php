@@ -7,7 +7,7 @@ use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
-use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReason;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
@@ -35,7 +35,7 @@ class QaTaskStatusLogCrudSearch extends QaTaskStatusLog
             ['tsl_duration', 'integer'],
 
             ['tsl_reason_id', 'integer'],
-            ['tsl_reason_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskStatusReason::class, 'targetAttribute' => ['tsl_reason_id' => 'tsr_id']],
+            ['tsl_reason_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskActionReason::class, 'targetAttribute' => ['tsl_reason_id' => 'tar_id']],
 
             ['tsl_description', 'string', 'max' => 255],
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\qaTask\src\entities\qaTaskStatusReason;
+namespace modules\qaTask\src\entities\qaTaskActionReason;
 
 /**
  * Class ReasonDto
