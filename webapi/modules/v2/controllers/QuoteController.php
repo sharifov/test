@@ -396,11 +396,6 @@ class QuoteController extends ApiBaseController
             throw new NotFoundHttpException('Not found Quote UID: ' . $uid, 2);
         }
 
-        if ($checkout_id) {
-            $model->lead->hybrid_uid = $checkout_id;
-            $model->lead->save();
-        }
-
         $response = [
             'status' => 'Failed',
             'result' => [],
@@ -408,6 +403,11 @@ class QuoteController extends ApiBaseController
         ];
 
         try {
+
+            if ($checkout_id && !$model->lead->hybrid_uid) {
+                $model->lead->hybrid_uid = $checkout_id;
+                $model->lead->save();
+            }
 
             $response['status'] = $model->status != $model::STATUS_DECLINED ? 'Success' : 'Failed';
 
