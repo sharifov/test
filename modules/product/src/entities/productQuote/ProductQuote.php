@@ -168,10 +168,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
                 'createdByAttribute' => 'pq_created_user_id', //'pq_owner_user_id',
                 'updatedByAttribute' => 'pq_updated_user_id',
             ],
-            /*'pg_profit_amount' => [
-
-            ]*/
-            /* TODO::  */
         ];
     }
 
@@ -345,31 +341,21 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     }
 
     /**
+     * @param bool $round
      * @return float
      */
-    public function profitCalc(): float
+    public function profitCalc(bool $round = true): float
     {
-        $extraMarkupAmount = $this->optionExtraMarkupSum; // EMA
-        $childQuote = $this->getChildQuote();
-        $processingFeeAmount = $childQuote ? $childQuote->getProcessingFee() : 0.00;
+        $childQuote = $this->childQuote;
+        $processingFeeAmount = $childQuote ? $childQuote->getProcessingFee() : 0.00; // PFA
+        $systemMarkupAmount = $childQuote ? $childQuote->getSystemMarkUp() : 0.00; // MA
+        $agentExtraMarkupAmount = $childQuote ? $childQuote->getAgentMarkUp() : 0.00; // EMA agent (pax/room etc.)
+        $optionExtraMarkupAmount = $this->optionExtraMarkupSum; // EMA options
 
-        $markupAmount = 0; /* TODO: MA calc algorithm ? */
+        $result = ($systemMarkupAmount + $agentExtraMarkupAmount + $optionExtraMarkupAmount) - $processingFeeAmount;
 
-        $result = ($markupAmount + $extraMarkupAmount) - $processingFeeAmount;
-        return ProductQuoteHelper::roundPrice($result);
+        return ($round) ? ProductQuoteHelper::roundPrice($result) : $result;
     }
-
-//    public function getQuoteItem()
-//    {
-//        $quote = null;
-//        if ($this->pqProduct->pr_type_id === ProductType::PRODUCT_FLIGHT) {
-//            $quote = FlightQuote::find()->where(['fq_product_quote_id' => $this->pq_id])->one();
-//        } elseif ($this->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL) {
-//            $quote = HotelQuote::find()->where(['hq_product_quote_id' => $this->pq_id])->one();
-//        }
-//
-//        return $quote;
-//    }
 
 	/**
 	 * @param ProductQuoteDTO $dto
@@ -517,6 +503,15 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->pqProduct->isFlight();
 	}
+
+    /**
+     * @return $this
+     */
+    public function setProfitAmount(): self
+    {
+        $this->pq_profit_amount = $this->profitCalc();
+        return $this;
+    }
 
 	/**
      * @param int|null $creatorId

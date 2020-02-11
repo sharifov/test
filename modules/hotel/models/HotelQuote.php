@@ -421,4 +421,20 @@ class HotelQuote extends ActiveRecord implements Quotable
     {
         return $this->save();
     }
+
+	/**
+     * @return float
+     */
+    public function getSystemMarkUp(): float
+    {
+        return 0.00;
+    }
+
+    /**
+     * @return float
+     */
+    public function getAgentMarkUp(): float
+    {
+        return 0.00;
+    }
 }
