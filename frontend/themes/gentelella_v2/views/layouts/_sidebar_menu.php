@@ -308,6 +308,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
+                ['label' => 'Search', 'url' => ['/qa-task/qa-task-queue/search']],
                 ['label' => 'Pending <span id="qa-task-q-pending" data-type="pending" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PENDING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/pending']],
                 ['label' => 'Processing <span id="qa-task-q-processing" data-type="processing" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PROCESSING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/processing']],
                 ['label' => 'Escalated <span id="qa-task-q-escalated" data-type="escalated" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::ESCALATED).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/escalated']],

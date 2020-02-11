@@ -2,11 +2,11 @@
 
 namespace modules\qaTask\controllers;
 
+use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
-class QaTaskController extends Controller
+class QaTaskController extends FController
 {
     /**
      * @param $gid
