@@ -49,12 +49,6 @@ class UserProductTypeController extends FController
                     ],
                 ]
             ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
