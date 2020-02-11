@@ -2,9 +2,11 @@
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskCreatedTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskQueueActionColumn;
+use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\department\DepartmentColumn;
 use sales\yii\grid\UserColumn;
@@ -42,6 +44,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $task->t_category_id ? $task->category->tc_name : null;
                 },
                 'filter' => QaTaskCategoryQuery::getList(),
+            ],
+            [
+                'class' => QaTaskStatusColumn::class,
+                'attribute' => 't_status_id',
+                'filter' => QaTaskStatus::getProcessingQueueList(),
             ],
             't_rating',
             [

@@ -7,6 +7,7 @@ use common\models\Employee;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\qaTask\src\entities\qaTask\QaTask;
@@ -24,6 +25,9 @@ class QaTaskQueueProcessingSearch extends QaTask
             ['t_object_type_id', 'in', 'range' => array_keys(QaObjectType::getList())],
 
             ['t_object_id', 'integer'],
+
+            ['t_status_id', 'integer'],
+            ['t_status_id', 'in', 'range' => array_keys(QaTaskStatus::getProcessingQueueList())],
 
             ['t_category_id', 'integer'],
             ['t_category_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskCategory::class, 'targetAttribute' => ['t_category_id' => 'tc_id']],
@@ -57,10 +61,16 @@ class QaTaskQueueProcessingSearch extends QaTask
     {
         $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category']);
 
-        $query->processing();
+        $query->andWhere(['OR',
+            ['t_status_id' => QaTaskStatus::PROCESSING],
+            ['t_status_id' => QaTaskStatus::ESCALATED],
+        ]);
+
+        $query->andWhere(['IS NOT', 't_assigned_user_id',  null]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['t_updated_dt' => SORT_DESC]],
         ]);
 
         $this->load($params);
@@ -89,6 +99,7 @@ class QaTaskQueueProcessingSearch extends QaTask
             't_object_type_id' => $this->t_object_type_id,
             't_object_id' => $this->t_object_id,
             't_category_id' => $this->t_category_id,
+            't_status_id' => $this->t_status_id,
             't_rating' => $this->t_rating,
             't_create_type_id' => $this->t_create_type_id,
             't_department_id' => $this->t_department_id,

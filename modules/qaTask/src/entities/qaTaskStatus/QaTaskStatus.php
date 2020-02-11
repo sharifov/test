@@ -73,6 +73,14 @@ class QaTaskStatus extends \yii\db\ActiveRecord
         return self::LIST;
     }
 
+    public static function getProcessingQueueList(): array
+    {
+        return [
+            self::PROCESSING => self::getName(self::PROCESSING),
+            self::ESCALATED => self::getName(self::ESCALATED),
+        ];
+    }
+
     public static function guard(?int $startStatus, int $endStatus): void
     {
         self::guardTransferFrom($startStatus);
