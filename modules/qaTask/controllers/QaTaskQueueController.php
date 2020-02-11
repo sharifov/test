@@ -2,16 +2,17 @@
 
 namespace modules\qaTask\controllers;
 
+use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\search\queue\QaTaskQueueClosedSearch;
 use modules\qaTask\src\entities\qaTask\search\queue\QaTaskQueueEscalatedSearch;
 use modules\qaTask\src\entities\qaTask\search\queue\QaTaskQueueProcessingSearch;
+use modules\qaTask\src\entities\qaTask\search\queue\QaTaskQueueSearch;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTask\search\queue\QaTaskQueuePendingSearch;
-use yii\web\Controller;
 use yii\web\Response;
 
-class QaTaskQueueController extends Controller
+class QaTaskQueueController extends FController
 {
     public function beforeAction($action): bool
     {
@@ -19,6 +20,17 @@ class QaTaskQueueController extends Controller
             $this->enableCsrfValidation = false;
         }
         return parent::beforeAction($action);
+    }
+
+    public function actionSearch(): string
+    {
+        $searchModel = new QaTaskQueueSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('search', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     public function actionPending(): string
