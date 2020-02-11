@@ -514,7 +514,7 @@ class FlightQuote extends ActiveRecord implements Quotable
 	/**
 	 * @return float|int
 	 */
-	public function getProcessingFee()
+	public function getProcessingFee(): float
 	{
 		$processingFeeAmount = $this->fqProductQuote->pqProduct->prType->getProcessingFeeAmount();
 
