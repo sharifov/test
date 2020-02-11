@@ -1,6 +1,7 @@
 <?php
 
 use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
+use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
 use sales\yii\grid\BooleanColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\UserColumn;
@@ -35,7 +36,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => QaObjectTypeColumn::class,
                 'attribute' => 'tsr_object_type_id',
             ],
-            'tsr_status_id:qaTaskStatus',
+            [
+                'class' => QaTaskStatusColumn::class,
+                'attribute' => 'tsr_status_id',
+            ],
             'tsr_key',
             'tsr_name',
             [

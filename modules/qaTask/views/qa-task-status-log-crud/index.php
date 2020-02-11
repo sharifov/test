@@ -6,6 +6,7 @@ use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReasonQuery;
 use modules\qaTask\src\grid\columns\QaTaskColumn;
 use modules\qaTask\src\grid\columns\QaTaskStatusActionColumn;
 use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
+use modules\qaTask\src\helpers\formatters\QaTaskStatusReasonFormatter;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
 use sales\yii\grid\UserColumn;
@@ -68,7 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (QaTaskStatusLog $log) {
                     return $log->tsl_reason_id ? $log->reason->tsr_name : null;
                 },
-                'filter' => QaTaskStatusReasonQuery::getList(),
+                'filter' => QaTaskStatusReasonFormatter::formatListByFullDescription(),
             ],
             'tsl_description',
             [

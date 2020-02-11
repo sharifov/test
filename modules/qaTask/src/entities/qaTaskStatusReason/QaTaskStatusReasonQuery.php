@@ -18,4 +18,13 @@ class QaTaskStatusReasonQuery
     {
         return QaTaskStatusReason::find()->list()->enabled()->column();
     }
+
+    /**
+     * @param int $objectTypeId
+     * @return ReasonDto[] array
+     */
+    public static function getActionList(int $objectTypeId): array
+    {
+        $list = QaTaskStatusReason::find()->list()->enabled()->processing()->byObjectType($objectTypeId)->column();
+    }
 }
