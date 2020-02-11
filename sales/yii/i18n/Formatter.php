@@ -34,7 +34,7 @@ use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
 use yii\bootstrap4\Html;
 
@@ -55,7 +55,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return QaTaskStatusAction::asFormat($value);
+        return QaTaskActions::asFormat($value);
     }
 
     public function asQaTaskStatus($value): string

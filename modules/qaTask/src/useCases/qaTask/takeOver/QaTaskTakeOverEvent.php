@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\action\takeOver;
+namespace modules\qaTask\src\useCases\qaTask\takeOver;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 
@@ -11,7 +11,7 @@ use modules\qaTask\src\entities\qaTask\QaTask;
  * @property int $newAssignUserId
  * @property int|null $oldAssignedUserId
  */
-class QaTaskActionTakeOverEvent
+class QaTaskTakeOverEvent
 {
     public $task;
     public $newAssignUserId;

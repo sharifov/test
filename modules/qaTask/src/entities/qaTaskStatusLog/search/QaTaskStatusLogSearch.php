@@ -4,7 +4,7 @@ namespace modules\qaTask\src\entities\qaTaskStatusLog\search;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
 use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReason;
 use sales\helpers\query\QueryHelper;
@@ -37,7 +37,7 @@ class QaTaskStatusLogSearch extends QaTaskStatusLog
 
             ['tsl_action_id', 'integer'],
             ['tsl_action_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['tsl_action_id', 'in', 'range' => array_keys(QaTaskStatusAction::getList())],
+            ['tsl_action_id', 'in', 'range' => array_keys(QaTaskActions::getList())],
 
             ['tsl_assigned_user_id', 'integer'],
             ['tsl_assigned_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['tsl_assigned_user_id' => 'id']],

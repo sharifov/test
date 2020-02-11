@@ -1,9 +1,8 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\action\takeOver;
+namespace modules\qaTask\src\useCases\qaTask\takeOver;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReasonQuery;
 use sales\yii\validators\IsNotArrayValidator;
 use yii\base\Model;
 
@@ -15,7 +14,7 @@ use yii\base\Model;
  * @property QaTask $task
  * @property array $reasons
  */
-class QaTaskActionTakeOverForm extends Model
+class QaTaskTakeOverForm extends Model
 {
     public $reasonId;
     public $description;

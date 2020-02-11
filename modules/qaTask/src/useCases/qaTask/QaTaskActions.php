@@ -1,21 +1,25 @@
 <?php
 
-namespace modules\qaTask\src\entities\qaTaskStatus;
+namespace modules\qaTask\src\useCases\qaTask;
 
 use yii\bootstrap4\Html;
 
-class QaTaskStatusAction
+class QaTaskActions
 {
     public const TAKE = 1;
-    public const RETURN = 2;
-    public const ASSIGN = 3;
-    public const CREATE = 4;
+    public const TAKE_OVER = 2;
+    public const CANCEL = 3;
+    public const CLOSE = 4;
+    public const ESCALATE = 5;
+    public const RETURN = 6;
 
     private const LIST = [
         self::TAKE => 'Take',
+        self::TAKE_OVER => 'Take Over',
+        self::CANCEL => 'Cancel',
+        self::CLOSE => 'Close',
+        self::ESCALATE => 'Escalate',
         self::RETURN => 'Return',
-        self::ASSIGN => 'Assign',
-        self::CREATE => 'Create',
     ];
 
     public static function getList(): array

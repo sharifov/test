@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\action\take;
+namespace modules\qaTask\src\useCases\qaTask\take;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 
@@ -10,7 +10,7 @@ use modules\qaTask\src\entities\qaTask\QaTask;
  * @property QaTask $task
  * @property int $userId
  */
-class QaTaskActionTakeEvent
+class QaTaskTakeEvent
 {
     public $task;
     public $userId;

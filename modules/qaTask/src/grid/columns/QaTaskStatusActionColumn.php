@@ -2,7 +2,7 @@
 
 namespace modules\qaTask\src\grid\columns;
 
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use yii\grid\DataColumn;
 
 /**
@@ -23,7 +23,7 @@ class QaTaskStatusActionColumn extends DataColumn
         parent::init();
 
         if ($this->filter === null) {
-            $this->filter = QaTaskStatusAction::getList();
+            $this->filter = QaTaskActions::getList();
         }
     }
 }
