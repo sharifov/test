@@ -31,6 +31,11 @@ class QaObjectType
         return self::LIST;
     }
 
+    public static function isExist(int $typeId): bool
+    {
+        return isset(self::getList()[$typeId]);
+    }
+
     public static function asFormat(?int $value): string
     {
         return Html::tag(
