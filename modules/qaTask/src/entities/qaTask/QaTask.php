@@ -15,6 +15,7 @@ use modules\qaTask\src\entities\qaTask\events\QaTaskProcessingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskUnAssignEvent;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
 use sales\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -46,6 +47,7 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property Employee $updatedUser
  * @property Department $department
+ * @property QaTaskStatusLog[] $statusLogs
  */
 class QaTask extends \yii\db\ActiveRecord
 {
@@ -265,6 +267,11 @@ class QaTask extends \yii\db\ActiveRecord
     public function getDepartment(): ActiveQuery
     {
         return $this->hasOne(Department::class, ['dep_id' => 't_department_id']);
+    }
+
+    public function getStatusLogs(): ActiveQuery
+    {
+        return $this->hasMany(QaTaskStatusLog::class, ['tsl_task_id' => 't_id']);
     }
 
     public static function find(): Scopes
