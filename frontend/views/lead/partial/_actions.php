@@ -167,9 +167,8 @@ if($project){
 ?>
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
-    <?php if(!$leadModel->isNewRecord):
-       $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductList();
-    ?>
+    <?php $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductList(); ?>
+    <?php if(count($productTypes)): ?>
         <div class="dropdown">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-plus"></i> Product

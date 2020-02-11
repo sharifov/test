@@ -28,17 +28,23 @@ class EmployeeProductAccess
      */
     public function getProductList(): array
     {
+        $list = [];
+
         if ($this->user->can('product/manage/all')) {
-            return ProductType::getEnabledList();
+            $list = ProductType::getEnabledList();
         } else {
             $employee = UserFinder::find($this->user->id);
-            return $employee->productType
-                ->select(['pt_name', 'pt_id'])
-                ->orderBy(['pt_name' => SORT_ASC])
-                ->indexBy('pt_id')
-                ->asArray()
-                ->column();
+            if ($employee->productType) {
+                $list = $employee->productType
+                    ->select(['pt_name', 'pt_id'])
+                    ->orderBy(['pt_name' => SORT_ASC])
+                    ->indexBy('pt_id')
+                    ->asArray()
+                    ->column();
+            }
         }
+
+        return $list ?? [];
     }
 
     /**
