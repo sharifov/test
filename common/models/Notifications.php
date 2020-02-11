@@ -37,6 +37,8 @@ class Notifications extends ActiveRecord
     CONST TYPE_WARNING = 3;
     CONST TYPE_DANGER = 4;
 
+    private $_triggerList = [];
+
     /**
      * @inheritdoc
      */
@@ -339,4 +341,44 @@ class Notifications extends ActiveRecord
         }
     }
 
+    public function changeTitle(string $title)
+    {
+        $this->n_title = $title;
+    }
+
+
+    /**
+     * @param string $name
+     */
+    public function addTrigger(string $name): void
+    {
+        $this->_triggerList[$name] = $name;
+    }
+
+
+    public function triggerAll(): void
+    {
+        if ($this->_triggerList) {
+            foreach ($this->_triggerList as $triggerName) {
+                $this->trigger($triggerName);
+            }
+        }
+    }
+
+    /**
+     * Attaches an event handler to an event.
+     *
+     * @param string $name the event name
+     * @param callable $handler the event handler
+     * @param mixed $data the data to be passed to the event handler when the event is triggered.
+     * When the event handler is invoked, this data can be accessed via [[Event::data]].
+     * @param bool $append whether to append new event handler to the end of the existing
+     * handler list. If false, the new handler will be inserted at the beginning of the existing
+     * handler list.
+     */
+    public function onList($name, $handler, $data = null, $append = true): void
+    {
+        $this->on($name, $handler, $data, $append);
+        $this->addTrigger($name);
+    }
 }
