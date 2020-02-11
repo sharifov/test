@@ -61,6 +61,7 @@ class QaTaskQueueClosedSearch extends QaTask
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['t_updated_dt' => SORT_DESC]],
         ]);
 
         $this->load($params);
