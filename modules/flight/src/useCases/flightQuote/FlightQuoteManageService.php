@@ -198,6 +198,7 @@ class FlightQuoteManageService
 			ProductQuoteHelper::roundPrice($productQuote->pq_price * $productQuote->pq_client_currency_rate),
 			ProductQuoteHelper::roundPrice((float)$priceData->total->serviceFeeSum)
 		);
+		$productQuote->setProfitAmount();
 		$this->productQuoteRepository->save($productQuote);
 	}
 
