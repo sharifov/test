@@ -168,9 +168,10 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
                 'createdByAttribute' => 'pq_created_user_id', //'pq_owner_user_id',
                 'updatedByAttribute' => 'pq_updated_user_id',
             ],
-            'pg_profit_amount' => [
-                /* TODO:  */
-            ]
+            /*'pg_profit_amount' => [
+
+            ]*/
+            /* TODO::  */
         ];
     }
 
@@ -349,11 +350,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function profitCalc(): float
     {
         $extraMarkupAmount = $this->optionExtraMarkupSum; // EMA
+        $childQuote = $this->getChildQuote();
+        $processingFeeAmount = $childQuote ? $childQuote->getProcessingFee() : 0.00;
+
         $markupAmount = 0; /* TODO: MA calc algorithm ? */
 
-        /* TODO: Quote::SERVICE_FEE OR $this->pq_service_fee_sum ? */
-
-        $result = ($markupAmount + $extraMarkupAmount) - (float) $this->pq_service_fee_sum;
+        $result = ($markupAmount + $extraMarkupAmount) - $processingFeeAmount;
         return ProductQuoteHelper::roundPrice($result);
     }
 

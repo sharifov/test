@@ -7,4 +7,5 @@ interface Quotable
     public static function findByProductQuote(int $productQuoteId): ?Quotable;
     public function serialize(): array;
     public function getId(): int;
+    public function getProcessingFee(): float;
 }
