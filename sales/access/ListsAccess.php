@@ -4,6 +4,7 @@ namespace sales\access;
 
 use common\models\Employee;
 use common\models\Project;
+use modules\product\src\entities\productType\ProductType;
 use sales\helpers\user\UserFinder;
 
 /**
@@ -111,5 +112,4 @@ class ListsAccess
         }
         return $this->employees;
     }
-
 }

@@ -71,6 +71,19 @@ $this->params['breadcrumbs'][] = $this->title;
                                 echo $projectsValue;
                             ?>
                         </div>
+                        <?php if ($productTypeList = Yii::$app->user->identity->productType) :?>
+                            <div class="col-md-12">
+                                <label class="control-label">My Product Types</label>:
+                                <?php
+                                    $productTypeValue = '';
+                                    foreach ($productTypeList as $productType) {
+                                        $productTypeValue .= Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' .
+                                            Html::encode($productType->pt_name), ['class' => 'label label-default']) . ' ';
+                                    }
+                                    echo $productTypeValue;
+                                ?>
+                            </div>
+                        <?php endif ?>
                     </div>
                 </div>
             </div>

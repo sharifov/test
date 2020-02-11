@@ -6,6 +6,7 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
 use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
+use modules\product\src\entities\productType\ProductType;
 use sales\access\EmployeeGroupAccess;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
@@ -67,6 +68,7 @@ use yii\web\NotFoundHttpException;
  * @property int $callExpertCount
  *
  * @property Access $access
+ * @property \yii\db\ActiveQuery $productType
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -398,7 +400,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(DepartmentPhoneProject::class, ['dpp_updated_user_id' => 'id']);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -415,6 +416,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(Department::class, ['dep_id' => 'ud_dep_id'])->viaTable('user_department', ['ud_user_id' => 'id']);
     }
 
+    /**
+     * @return bool
+     */
     public function isActive()
     {
         return $this->status === self::STATUS_ACTIVE;
@@ -667,6 +671,18 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(Project::class, ['id' => 'project_id'])->viaTable('project_employee_access', ['employee_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getProductType(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ProductType::class, ['pt_id' => 'upt_product_type_id'])
+            ->viaTable(UserProductType::tableName(), ['upt_user_id' => 'id'], static function ($query) {
+            /* @var \yii\db\ActiveQuery $query */
+            $query->andWhere(['upt_product_enabled' => true]);
+        });
+    }
 
     /**
      * @inheritdoc

@@ -5,7 +5,10 @@
  */
 
 use common\models\Employee;
+use common\models\User;
 use frontend\models\LeadForm;
+use sales\access\EmployeeProductAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
@@ -164,34 +167,19 @@ if($project){
 ?>
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
-
-
-    <?php if(!$leadModel->isNewRecord && ($user->isAdmin() || $user->isSupervision())):
-
-        $productTypes = \modules\product\src\entities\productType\ProductType::find()->/*where(['pt_enabled' => true])*/all();
-
-        ?>
-
-        <!--<div class="">
-            <button id="add_product_scenario_one" type="button" class="btn btn-primary" >
-                <i class="fa fa-plus"></i> Product
-            </button>
-        </div>-->
-
+    <?php $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductList(); ?>
+    <?php if(count($productTypes)): ?>
         <div class="dropdown">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-plus"></i> Product
             </button>
             <div class="dropdown-menu">
-                <?php foreach ($productTypes as $productType):?>
-                    <a class="dropdown-item add-product <?=$productType->pt_enabled ? '' : 'disabled'?>" href="#" data-product-type-id="<?=Html::encode($productType->pt_id)?>">add <?=Html::encode($productType->pt_name)?></a>
+                <?php foreach ($productTypes as $id => $name):?>
+                    <a class="dropdown-item add-product" href="#" data-product-type-id="<?=Html::encode($id)?>">add <?=Html::encode($name)?></a>
                 <?php endforeach; ?>
             </div>
         </div> &nbsp;
-
     <?php endif; ?>
-
-
 
     <?php if (!$user->isQa()) : ?>
 

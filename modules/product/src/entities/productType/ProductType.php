@@ -89,4 +89,26 @@ class ProductType extends \yii\db\ActiveRecord
 
 		return ProductQuoteHelper::roundPrice($setting['processing_fee_amount'] ? (float)$setting['processing_fee_amount'] : self::PROCESSING_FEE_AMOUNT);
 	}
+
+    /**
+     * @return array
+     */
+    public static function getList(): array
+    {
+        return self::find()->select(['pt_name', 'pt_id'])->orderBy(['pt_name' => SORT_ASC])->indexBy('pt_id')->asArray()->column();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getEnabledList(): array
+    {
+        return self::find()
+            ->select(['pt_name', 'pt_id'])
+            ->where(['pt_enabled' => true])
+            ->orderBy(['pt_name' => SORT_ASC])
+            ->indexBy('pt_id')
+            ->asArray()
+            ->column();
+    }
 }
