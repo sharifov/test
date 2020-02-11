@@ -4,6 +4,7 @@ namespace modules\hotel\models;
 
 use common\models\Currency;
 use modules\hotel\models\query\HotelQuoteRoomQuery;
+use sales\helpers\email\TextConvertingHelper;
 use modules\hotel\src\entities\hotelQuoteRoom\events\HotelQuoteRoomCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuoteRoom\serializer\HotelQuoteRoomSerializer;
 use sales\entities\EventTrait;
@@ -30,12 +31,24 @@ use yii\db\ActiveRecord;
  * @property int|null $hqr_rooms
  * @property int|null $hqr_adults
  * @property int|null $hqr_children
+ * @property string|null $hqr_children_ages
+ * @property string|null $hqr_rate_comments_id
+ * @property string|null $hqr_rate_comments
+ * @property int $hqr_type
  *
  * @property Currency $hqrCurrency
  * @property HotelQuote $hqrHotelQuote
  */
 class HotelQuoteRoom extends ActiveRecord implements Serializable
 {
+    public const TYPE_RECHECK = 0;
+    public const TYPE_BOOKABLE = 1;
+
+    public const TYPE_LIST = [
+        self::TYPE_RECHECK => 'RECHECK',
+        self::TYPE_BOOKABLE => 'BOOKABLE',
+    ];
+
     use EventTrait;
 
     public static function clone(HotelQuoteRoom $room, int $quoteId)
@@ -64,8 +77,8 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
     public function rules()
     {
         return [
-            [['hqr_hotel_quote_id'], 'required'],
-            [['hqr_hotel_quote_id', 'hqr_rooms', 'hqr_adults', 'hqr_children'], 'integer'],
+            [['hqr_hotel_quote_id', 'hqr_type'], 'required'],
+            [['hqr_hotel_quote_id', 'hqr_rooms', 'hqr_adults', 'hqr_children', 'hqr_type'], 'integer'],
             [['hqr_amount', 'hqr_cancel_amount'], 'number'],
             [['hqr_cancel_from_dt'], 'safe'],
             [['hqr_room_name'], 'string', 'max' => 150],
@@ -75,6 +88,8 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
             [['hqr_payment_type', 'hqr_code'], 'string', 'max' => 10],
             [['hqr_board_code'], 'string', 'max' => 2],
             [['hqr_board_name'], 'string', 'max' => 100],
+            [['hqr_children_ages', 'hqr_rate_comments_id'], 'string', 'max' => 50],
+            [['hqr_rate_comments'], 'string', 'max' => 255],
             [['hqr_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['hqr_currency' => 'cur_code']],
             [['hqr_hotel_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelQuote::class, 'targetAttribute' => ['hqr_hotel_quote_id' => 'hq_id']],
         ];
@@ -139,5 +154,38 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new HotelQuoteRoomSerializer($this))->getData();
+    }
+
+    /**
+     * @param array $room
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function setAdditionalInfo(array $room): bool
+    {
+        $this->hqr_rate_comments_id = $room['rateCommentsId'] ?? null;
+        $this->hqr_type = ($room['type'] == self::TYPE_LIST[self::TYPE_BOOKABLE]) ?
+            self::TYPE_BOOKABLE : self::TYPE_RECHECK;
+        $this->hqr_rate_comments = $this->prepareRateComments($room);
+
+        return $this->save();
+    }
+
+    /**
+     * @param array $room
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function prepareRateComments(array $room): string
+    {
+        $rateComments = (isset($room['rateComments'])) ? TextConvertingHelper::htmlToText($room['rateComments']) : '';
+        if (isset($room['cancellationPolicies']) && count($room['cancellationPolicies'])) {
+            $rateComments .= '  Cancellation Policies:';
+            foreach ($room['cancellationPolicies'] as $policy) {
+                $rateComments .= ' From: ' . \Yii::$app->formatter->asDatetime(strtotime($policy['from']));
+                $rateComments .= ' Amount: ' . \Yii::$app->db->quoteValue($policy['amount']);
+            }
+        }
+        return $rateComments;
     }
 }

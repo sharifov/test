@@ -17,6 +17,123 @@ use yii\helpers\Html;
 
 <?php if ($model->hqProductQuote): ?>
 
+<?php
+$js = <<<JS
+    $('body').off('click', '.btn-book-quote').on('click', '.btn-book-quote', function (e) {
+
+        if(!confirm('Are you sure you want to book this quote?')) {
+            return '';
+        }
+
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('hotel-quote-id');
+        let productId = $(this).data('product-id');
+        
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'The quote was successfully booking',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });
+                $.pjax.reload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
+            } else {
+                new PNotify({
+                    title: 'Booking failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });
+                $.pjax.reload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
+    $('body').off('click', '.btn-cancel-book-quote').on('click', '.btn-cancel-book-quote', function (e) {
+
+        if(!confirm('Are you sure you want to cancel book this quote?')) {
+            return '';
+        }
+
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('hotel-quote-id');
+        let productId = $(this).data('product-id');
+        
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'Booking is canceled',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });
+                $.pjax.reload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
+            } else {
+                new PNotify({
+                    title: 'Process failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });
+                $.pjax.reload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
+    $(document).on('click', '.btn-product-api-service-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let quoteId = $(this).data('hotel-quote-id');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Api service log [' + quoteId + ']');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+     });
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
+
 <div class="x_panel">
     <div class="x_title">
 
@@ -93,8 +210,40 @@ use yii\helpers\Html;
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
                     ]) ?>
 
-                    <?= Html::a('<i class="fa fa-plus-circle"></i> Status log', null, [
-                        'class' => 'dropdown-item text-success btn-product-quote-status-log',
+                    <?php if ($model->isBookable()): ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Book',
+                             null,
+                            [
+                                'class' => 'dropdown-item btn-book-quote',
+                                'data-url' => \yii\helpers\Url::to('/hotel/hotel-quote/ajax-book'),
+                                'data-hotel-quote-id' => $model->hq_id,
+                                'data-product-id' => $model->hqProductQuote->pq_product_id,
+                            ]
+                        ) ?>
+                    <? endif; ?>
+                    <?php if ($model->isBooking()): ?>
+                        <?= Html::a('<i class="fa fa-share-square"></i> Cancel Book',null,
+                            [
+                                'class' => 'dropdown-item text-danger btn-cancel-book-quote',
+                                'data-url' => \yii\helpers\Url::to('/hotel/hotel-quote/ajax-cancel-book'),
+                                'data-hotel-quote-id' => $model->hq_id,
+                                'data-product-id' => $model->hqProductQuote->pq_product_id,
+                            ]
+                        ) ?>
+                    <? endif; ?>
+
+                    <?= Html::a('<i class="fa fa-list-alt"></i> API Service Log', null,
+                        [
+                            'class' => 'dropdown-item text-secondary btn-product-api-service-log',
+                            'data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
+                            'data-hotel-quote-id' => $model->hq_id,
+                            'data-product-id' => $model->hqProductQuote->pq_product_id,
+                        ]
+                    )?>
+
+                    <?= Html::a('<i class="fa fa-list-alt"></i> Status log', null, [
+                        'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
                         'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $model->hqProductQuote->pq_gid]),
                         'data-gid' => $model->hqProductQuote->pq_gid,
                     ]) ?>
@@ -166,7 +315,12 @@ use yii\helpers\Html;
 
 
 <!--                    <td>--><?//=Html::encode($room->hqr_payment_type)?><!--</td>-->
-                    <td title="code: <?=Html::encode($room->hqr_board_code)?>"><?=Html::encode($room->hqr_board_name)?></td>
+                    <td title="code: <?=Html::encode($room->hqr_board_code)?>">
+                        <?=Html::encode($room->hqr_board_name)?>
+                        <?php if ($room->hqr_rate_comments):?>
+                            <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode($room->hqr_rate_comments)?>"></i>
+                        <?endif;?>
+                    </td>
                     <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
                     <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
                     <td>

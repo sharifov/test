@@ -396,9 +396,6 @@ $js = <<<JS
       // return false;
     });
     
-        
-
-
     /*$("#product-accordion").on("pjax:start", function () {            
         $('#preloader').removeClass('d-none');
     });
@@ -406,6 +403,8 @@ $js = <<<JS
     $("#product-accordion").on("pjax:end", function () {           
        $('#preloader').addClass('d-none');
     }); */
+    
+    
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY);

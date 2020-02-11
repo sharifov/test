@@ -2,21 +2,31 @@
 
 namespace modules\hotel\controllers;
 
+use frontend\controllers\FController;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
-use modules\hotel\src\repositories\hotel\HotelRepository;
-use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
-use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
-use Yii;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\search\HotelQuoteSearch;
-use frontend\controllers\FController;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
+use modules\hotel\src\repositories\hotel\HotelRepository;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
+use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
+use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
+
+use sales\helpers\app\AppHelper;
+use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
@@ -144,7 +154,6 @@ class HotelQuoteController extends FController
 
             $productId = $modelHotel->ph_product_id;
 
-
             $result = $modelHotel->getSearchData();
 
             $hotelData = Hotel::getHotelDataByCode($result, $hotelCode);
@@ -250,18 +259,90 @@ class HotelQuoteController extends FController
     }
 
     /**
+     * @return array
+     */
+    public function actionAjaxBook(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $id = (int) Yii::$app->request->post('id', 0);
+        $checkRate = Yii::$app->request->post('check_rate', 1);
+        $result = ['status' => 0, 'message' => '', 'data' => []];
+
+        try {
+            $model = $this->findModel($id);
+            HotelQuoteBookGuard::guard($model);
+
+            /** @var HotelQuoteBookService $bookService */
+            $bookService = Yii::$container->get(HotelQuoteBookService::class);
+
+            if ($checkRate) {
+                /** @var HotelQuoteCheckRateService $checkRateService */
+                $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
+                $checkResult = $checkRateService->checkRate($model);
+
+                if ($checkResult->status) {
+                    $bookService->book($model);
+                    $result['status'] = $bookService->status;
+                    $result['message'] = $bookService->message;
+                } else {
+                    $result['status'] = $checkResult->status;
+                    $result['message'] = $checkResult->message;
+                }
+            } else {
+                $bookService->book($model);
+                $result['status'] = $bookService->status;
+                $result['message'] = $bookService->message;
+            }
+        } catch (\Throwable $throwable) {
+            $result['message'] = $throwable->getMessage();
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Controller:HotelQuoteController:AjaxBook:Throwable');
+        }
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public function actionAjaxCancelBook(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $id = (int) Yii::$app->request->post('id', 0);
+
+        try {
+            $model = $this->findModel($id);
+            HotelQuoteCancelBookGuard::guard($model);
+
+            /** @var HotelQuoteCancelBookService $cancelBookService */
+            $cancelBookService = Yii::$container->get(HotelQuoteCancelBookService::class);
+            $resultCancel = $cancelBookService->cancelBook($model);
+
+            $result = [
+                'message' => $resultCancel->message,
+                'status' => $resultCancel->status,
+            ];
+        } catch (\Throwable $throwable) {
+            $result = [
+                'message' => $throwable->getMessage(),
+                'status' => 0,
+            ];
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Controller:HotelQuoteController:AjaxCancelBook:Throwable');
+        }
+        return $result;
+    }
+
+    /**
      * Finds the HotelQuote model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
      * @return HotelQuote the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($id): HotelQuote
     {
         if (($model = HotelQuote::findOne($id)) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('The requested HotelQuote does not exist.');
     }
 }
