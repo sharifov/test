@@ -61,12 +61,7 @@ class QaTaskQueueProcessingSearch extends QaTask
     {
         $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category']);
 
-        $query->andWhere(['OR',
-            ['t_status_id' => QaTaskStatus::PROCESSING],
-            ['t_status_id' => QaTaskStatus::ESCALATED],
-        ]);
-
-        $query->andWhere(['IS NOT', 't_assigned_user_id',  null]);
+        $query->queueProcessing()->assigned();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

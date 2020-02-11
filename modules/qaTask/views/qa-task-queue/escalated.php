@@ -55,11 +55,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => UserColumn::class,
-                'attribute' => 't_assigned_user_id',
-                'relation' => 'assignedUser',
-            ],
-            [
-                'class' => UserColumn::class,
                 'attribute' => 't_created_user_id',
                 'relation' => 'createdUser',
             ],

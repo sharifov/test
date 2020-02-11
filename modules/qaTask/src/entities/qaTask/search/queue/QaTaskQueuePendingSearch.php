@@ -52,9 +52,9 @@ class QaTaskQueuePendingSearch extends QaTask
 
     public function search($params, Employee $user): ActiveDataProvider
     {
-        $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category']);
+        $query = QaTask::find()->with(['createdUser', 'updatedUser', 'category']);
 
-        $query->pending()->andWhere(['t_assigned_user_id' => null]);
+        $query->pending()->unAssigned();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

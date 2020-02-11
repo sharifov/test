@@ -47,20 +47,18 @@ class QaTaskQueueEscalatedSearch extends QaTask
 
             ['t_updated_user_id', 'integer'],
             ['t_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['t_updated_user_id' => 'id']],
-
-            ['t_assigned_user_id', 'integer'],
-            ['t_assigned_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['t_assigned_user_id' => 'id']],
         ];
     }
 
     public function search($params, Employee $user): ActiveDataProvider
     {
-        $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category']);
+        $query = QaTask::find()->with(['createdUser', 'updatedUser', 'category']);
 
-        $query->escalated();
+        $query->escalated()->unAssigned();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['t_updated_dt' => SORT_ASC]],
         ]);
 
         $this->load($params);
@@ -92,7 +90,6 @@ class QaTaskQueueEscalatedSearch extends QaTask
             't_rating' => $this->t_rating,
             't_create_type_id' => $this->t_create_type_id,
             't_department_id' => $this->t_department_id,
-            't_assigned_user_id' => $this->t_assigned_user_id,
             't_created_user_id' => $this->t_created_user_id,
             't_updated_user_id' => $this->t_updated_user_id,
         ]);
