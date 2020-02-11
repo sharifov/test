@@ -8,15 +8,25 @@ use yii\grid\ActionColumn;
 
 class QaTaskQueueActionColumn extends ActionColumn
 {
-    public function __construct($config = [])
+    public function __construct(
+        string $template = '',
+        array $visibleButtons = [],
+        array $buttons = [],
+        $config = []
+    )
     {
-        $config['template'] = '{viewTask} {viewObject}';
-        $config['visibleButtons'] = [
-            /*'view' => function ($model, $key, $index) {
-                return true;
-            },*/
-        ];
-        $config['buttons'] = [
+        $customConfig['template'] = '{viewTask} {viewObject}' . $template;
+
+        $customConfig['visibleButtons'] = array_merge($visibleButtons, [
+//            'viewTask' => static function ($model, $key, $index) {
+//                return true;
+//            },
+//            'viewObject' => static function ($model, $key, $index) {
+//                return true;
+//            },
+        ]);
+
+        $customConfig['buttons'] = array_merge($buttons, [
             'viewTask' => static function ($url, QaTask $model) {
                 return Html::a('<i class="glyphicon glyphicon-search"></i> Task', [
                     '/qa-task/qa-task/view',
@@ -38,7 +48,8 @@ class QaTaskQueueActionColumn extends ActionColumn
                         'title' => 'View Object',
                     ]);
             },
-        ];
+        ]);
+        $config = array_merge($customConfig, $config);
         parent::__construct($config);
     }
 }

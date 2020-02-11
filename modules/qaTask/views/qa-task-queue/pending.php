@@ -4,7 +4,7 @@ use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskCreatedTypeColumn;
-use modules\qaTask\src\grid\columns\QaTaskQueueActionColumn;
+use modules\qaTask\src\grid\columns\QaTaskQueuePendingActionColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\department\DepartmentColumn;
 use sales\yii\grid\UserColumn;
@@ -55,11 +55,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => UserColumn::class,
-                'attribute' => 't_assigned_user_id',
-                'relation' => 'assignedUser',
-            ],
-            [
-                'class' => UserColumn::class,
                 'attribute' => 't_created_user_id',
                 'relation' => 'createdUser',
             ],
@@ -81,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 't_updated_dt',
             ],
             [
-                'class' => QaTaskQueueActionColumn::class,
+                'class' => QaTaskQueuePendingActionColumn::class,
             ],
         ],
     ]) ?>
