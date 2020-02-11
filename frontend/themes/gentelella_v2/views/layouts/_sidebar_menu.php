@@ -364,6 +364,12 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
 				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
+                [
+                    'label' => Yii::t('language', 'Tools'), 'url' => 'javascript:', 'icon' => 'cog',
+                    'items' => [
+                        ['label' => Yii::t('language', 'Check Flight Dump'), 'url' => ['/tools/check-flight-dump']],
+                    ]
+                ],
             ]
         ];
 
