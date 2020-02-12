@@ -42,6 +42,10 @@ use yii\helpers\Html;
                         <strong>Market:</strong>
                         <span><?= Html::encode(($lead->project ? $lead->project->name : '') . ($lead->source ? ' - ' . $lead->source->name : ''))?></span>
                     </div>
+                    <div class="page-header__general-item">
+                        <strong title="Hybrid UID">HUID:</strong>
+                        <span><?= Html::encode($lead->hybrid_uid)?></span>
+                    </div>
 <!--                    <div class="page-header__general-item">-->
 <!--                        --><?//= $this->render('_rating', [
 //                            'lead' => $lead
