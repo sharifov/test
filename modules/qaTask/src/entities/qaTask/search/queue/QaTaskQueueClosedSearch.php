@@ -79,6 +79,8 @@ class QaTaskQueueClosedSearch extends QaTask
     {
         $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
+        $query->projects(array_keys($this->projects));
+
         $query->closed();
 
         $dataProvider = new ActiveDataProvider([

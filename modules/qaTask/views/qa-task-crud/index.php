@@ -42,7 +42,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ProjectColumn::class,
                 'attribute' => 't_project_id',
                 'relation' => 'project',
-                'onlyUserProjects' => true,
             ],
             [
                 'class' => QaObjectTypeColumn::class,

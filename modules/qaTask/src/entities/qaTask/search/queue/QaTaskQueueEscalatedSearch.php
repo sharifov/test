@@ -76,6 +76,8 @@ class QaTaskQueueEscalatedSearch extends QaTask
     {
         $query = QaTask::find()->with(['createdUser', 'updatedUser', 'category', 'project']);
 
+        $query->projects(array_keys($this->projects));
+
         $query->escalated()->unAssigned();
 
         $dataProvider = new ActiveDataProvider([

@@ -83,6 +83,8 @@ class QaTaskQueueProcessingSearch extends QaTask
     {
         $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
+        $query->projects(array_keys($this->projects));
+
         $query->queueProcessing()->assigned();
 
         $dataProvider = new ActiveDataProvider([

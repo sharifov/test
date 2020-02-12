@@ -76,6 +76,8 @@ class QaTaskQueuePendingSearch extends QaTask
     {
         $query = QaTask::find()->with(['createdUser', 'updatedUser', 'category', 'project']);
 
+        $query->projects(array_keys($this->projects));
+
         $query->pending()->unAssigned();
 
         $dataProvider = new ActiveDataProvider([

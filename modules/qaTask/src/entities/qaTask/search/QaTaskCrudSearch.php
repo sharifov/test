@@ -4,12 +4,12 @@ namespace modules\qaTask\src\entities\qaTask\search;
 
 use common\models\Department;
 use common\models\Employee;
+use common\models\Project;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use sales\access\ListsAccess;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\qaTask\src\entities\qaTask\QaTask;
@@ -28,7 +28,7 @@ class QaTaskCrudSearch extends QaTask
     public function __construct(Employee $user, $config = [])
     {
         $this->user = $user;
-        $this->projects = (new ListsAccess($user->id))->getProjects();
+        $this->projects = Project::getList();
         parent::__construct($config);
     }
 

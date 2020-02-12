@@ -9,6 +9,11 @@ use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function projects(array $projects): self
+    {
+        return $this->andWhere(['t_project_id' => $projects]);
+    }
+
     public function queueProcessing(): self
     {
         return $this->andWhere(['OR',
