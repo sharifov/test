@@ -8,6 +8,7 @@ use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuoteStatusLog;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -198,7 +199,9 @@ class FlightQuoteManageService
 			ProductQuoteHelper::roundPrice($productQuote->pq_price * $productQuote->pq_client_currency_rate),
 			ProductQuoteHelper::roundPrice((float)$priceData->total->serviceFeeSum)
 		);
-		$productQuote->setProfitAmount();
+
+		$productQuote->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($productQuote->pq_id));
+
 		$this->productQuoteRepository->save($productQuote);
 	}
 

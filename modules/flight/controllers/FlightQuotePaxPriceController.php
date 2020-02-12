@@ -2,10 +2,18 @@
 
 namespace modules\flight\controllers;
 
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\services\RecalculateProfitAmountService;
+use sales\helpers\app\AppHelper;
 use Yii;
 use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\models\search\FlightQuotePaxPriceSearch;
 use frontend\controllers\FController;
+use yii\base\InvalidConfigException;
+use yii\di\NotInstantiableException;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -14,12 +22,13 @@ use yii\filters\VerbFilter;
  */
 class FlightQuotePaxPriceController extends FController
 {
+
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function behaviors()
+    public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -27,6 +36,7 @@ class FlightQuotePaxPriceController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -66,7 +76,20 @@ class FlightQuotePaxPriceController extends FController
     {
         $model = new FlightQuotePaxPrice();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('FlightQuotePaxPrice not saved');
+                }
+                $productQuote = $this->getProductQuote($model);
+                $this->recalculateProfitAmount($productQuote);
+                $transaction->commit();
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+            }
+
             return $this->redirect(['view', 'id' => $model->qpp_id]);
         }
 
@@ -86,7 +109,21 @@ class FlightQuotePaxPriceController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('FlightQuotePaxPrice not saved');
+                }
+                $productQuote = $this->getProductQuote($model);
+                $this->recalculateProfitAmount($productQuote);
+                $transaction->commit();
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+            }
+
             return $this->redirect(['view', 'id' => $model->qpp_id]);
         }
 
@@ -104,7 +141,17 @@ class FlightQuotePaxPriceController extends FController
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $model = $this->findModel($id);
+            $productQuote = $this->getProductQuote($model);
+            $model->delete();
+            $this->recalculateProfitAmount($productQuote);
+            $transaction->commit();
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+        }
 
         return $this->redirect(['index']);
     }
@@ -123,5 +170,30 @@ class FlightQuotePaxPriceController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @param FlightQuotePaxPrice $model
+     * @return ProductQuote
+     */
+    private function getProductQuote(FlightQuotePaxPrice $model): ProductQuote
+    {
+        return $model->qppFlightQuote->fqProductQuote;
+    }
+
+    /**
+     * @param ProductQuote $productQuote
+     * @return int
+     * @throws InvalidConfigException
+     * @throws NotInstantiableException
+     */
+    private function recalculateProfitAmount(ProductQuote $productQuote): int
+    {
+        $productQuote->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($productQuote->pq_id));
+
+        /** @var ProductQuoteRepository $productQuoteRepository */
+        $productQuoteRepository = Yii::$container->get(ProductQuoteRepository::class);
+
+        return $productQuoteRepository->save($productQuote);
     }
 }

@@ -1,7 +1,9 @@
 <?php
 
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuoteOption\events\ProductQuoteOptionCloneCreatedEvent;
+use modules\product\src\listeners\productQuote\ProductQuoteRecalculateProfitAmountListener;
 use modules\product\src\listeners\ProductQuoteChangeStatusLogListener;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
@@ -19,4 +21,5 @@ return [
     ProductQuoteBookedEvent::class => [ProductQuoteBookedEventListener::class],
     ProductQuoteErrorEvent::class => [ProductQuoteErrorEventListener::class],
     ProductQuoteCanceledEvent::class => [ProductQuoteCanceledEventListener::class],
+    ProductQuoteRecalculateProfitAmountEvent::class => [ProductQuoteRecalculateProfitAmountListener::class],
 ];
