@@ -4,27 +4,22 @@ namespace modules\qaTask\src\entities\qaTaskActionReason;
 
 class QaTaskActionReasonQuery
 {
-    public static function getList(): array
-    {
-        return QaTaskActionReason::find()->list()->column();
-    }
-
     public static function getListWithFullDescription(): array
     {
-        return QaTaskActionReason::find()->listWithFullDescription()->all();
-    }
-
-    public static function getListEnabled(): array
-    {
-        return QaTaskActionReason::find()->list()->enabled()->column();
+        return QaTaskActionReason::find()->list()->all();
     }
 
     /**
      * @param int $objectTypeId
-     * @return ReasonDto[] array
+     * @param int $actionId
+     * @return ReasonDto[]
      */
-    public static function getActionList(int $objectTypeId): array
+    public static function getReasons(int $objectTypeId, int $actionId): array
     {
-        $list = QaTaskActionReason::find()->list()->enabled()->processing()->byObjectType($objectTypeId)->column();
+        $reasons = [];
+        foreach (QaTaskActionReason::find()->list()->action($actionId)->objectType($objectTypeId)->enabled()->all() as $reason) {
+            $reasons[$reason['tar_id']] = new ReasonDto($reason['tar_id'], $reason['tar_name'], $reason['tar_comment_required']);
+        }
+        return $reasons;
     }
 }

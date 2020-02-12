@@ -30,9 +30,9 @@ class QaTaskTakeOverService
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function takeOver(int $taskId, int $userId): void
+    public function takeOver(QaTaskTakeOverForm $form, int $userId): void
     {
-        $task = $this->taskRepository->find($taskId);
+        $task = $this->taskRepository->find($form->getTaskId());
         $user = $this->userRepository->find($userId);
 
         if ($task->isAssigned($user->id)) {
@@ -55,6 +55,12 @@ class QaTaskTakeOverService
         $task->assign($user->id);
         $this->taskRepository->save($task);
 
-        $this->eventDispatcher->dispatch(new QaTaskTakeOverEvent($task, $user->id, $oldAssignedUserId));
+        $this->eventDispatcher->dispatch(new QaTaskTakeOverEvent(
+            $task,
+            $user->id,
+            $oldAssignedUserId,
+            $form->reasonId,
+            $form->description
+        ));
     }
 }

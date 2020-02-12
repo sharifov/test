@@ -43,7 +43,10 @@ use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\services\ProductQuoteStatusLogService;
+use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
+use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\EmployeeAccessHelper;
@@ -171,7 +174,14 @@ class TestController extends FController
     public function actionTest()
     {
 
-        VarDumper::dump(QaTaskActionReasonQuery::getProcessingList(2));die;
+        $task = QaTask::findOne(3);
+        $form = new QaTaskTakeOverForm($task, [
+            'reasonId' => 4,
+            //'description' =>
+        ]);
+        $form->validate();
+        VarDumper::dump($form->errors);
+        die;
 
 
         $service = Yii::createObject(ProductQuoteCloneService::class);

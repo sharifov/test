@@ -21,4 +21,9 @@ class ReasonDto
         $this->name = $name;
         $this->commentRequired = $commentRequired;
     }
+
+    public function isCommentRequired(): bool
+    {
+        return $this->commentRequired;
+    }
 }

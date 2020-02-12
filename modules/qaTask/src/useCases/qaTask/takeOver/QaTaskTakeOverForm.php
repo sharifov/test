@@ -3,7 +3,9 @@
 namespace modules\qaTask\src\useCases\qaTask\takeOver;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
-use sales\yii\validators\IsNotArrayValidator;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
+use modules\qaTask\src\entities\qaTaskActionReason\ReasonDto;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use yii\base\Model;
 
 /**
@@ -12,7 +14,7 @@ use yii\base\Model;
  * @property int $reasonId
  * @property string|null $description
  * @property QaTask $task
- * @property array $reasons
+ * @property ReasonDto[] $reasons
  */
 class QaTaskTakeOverForm extends Model
 {
@@ -25,7 +27,7 @@ class QaTaskTakeOverForm extends Model
     public function __construct(QaTask $task, $config = [])
     {
         $this->task = $task;
-        $this->reasons = [];
+        $this->reasons = QaTaskActionReasonQuery::getReasons($this->task->t_object_type_id, QaTaskActions::TAKE_OVER);
         parent::__construct($config);
     }
 
@@ -34,10 +36,18 @@ class QaTaskTakeOverForm extends Model
         return [
             ['reasonId', 'required'],
             ['reasonId', 'integer'],
+            ['reasonId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['reasonId', 'in', 'range' => array_keys($this->reasons)],
 
-            ['description', 'string'],
-            ['description', IsNotArrayValidator::class],
+            ['description', 'string', 'max' => 255],
+            ['description', 'required', 'when' => function () {
+                return (isset($this->reasons[$this->reasonId]) && $this->reasons[$this->reasonId]->isCommentRequired());
+            }, 'skipOnError' => true],
         ];
+    }
+
+    public function getTaskId(): int
+    {
+        return $this->task->t_id;
     }
 }
