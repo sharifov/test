@@ -346,7 +346,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function profitCalc(): float
     {
-        $childQuote = $this->childQuote;
+        $childQuote = $this->getChildQuote();
         $processingFeeAmount = $childQuote ? $childQuote->getProcessingFee() : 0.00; // PFA
         $systemMarkupAmount = $childQuote ? $childQuote->getSystemMarkUp() : 0.00; // MA
         $agentExtraMarkupAmount = $childQuote ? $childQuote->getAgentMarkUp() : 0.00; // EMA agent (pax/room etc.)

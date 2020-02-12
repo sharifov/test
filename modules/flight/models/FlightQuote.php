@@ -532,6 +532,7 @@ class FlightQuote extends ActiveRecord implements Quotable
         foreach ($this->flightQuotePaxPrices as $paxPrice) {
             $result += $paxPrice->qpp_system_mark_up;
         }
+
         return $result;
     }
 

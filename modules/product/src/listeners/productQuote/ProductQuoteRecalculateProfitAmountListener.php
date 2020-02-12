@@ -29,6 +29,8 @@ class ProductQuoteRecalculateProfitAmountListener
      */
     public function handle(ProductQuoteRecalculateProfitAmountEvent $event): void
     {
+        \yii\helpers\VarDumper::dump(['Listener' => $event], 10, true); exit();  /* TODO: to remove */
+
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $this->recalculateProfitAmountService->recalculate($event->productQuoteId);

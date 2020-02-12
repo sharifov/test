@@ -6,6 +6,7 @@ namespace modules\flight\controllers;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\dispatchers\EventDispatcher;
+use sales\dispatchers\SimpleEventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
 use modules\flight\models\FlightQuotePaxPrice;
@@ -126,14 +127,19 @@ class FlightQuotePaxPriceController extends FController
                 if ($markUpChanged) {
                     $productQuote = $this->getProductQuote($model);
                     $productQuote->profitAmount();
-                    /** @var EventDispatcher $eventDispatcher */
-                    $eventDispatcher = Yii::$container->get(EventDispatcher::class);
-                    $eventDispatcher->dispatchAll($productQuote->releaseEvents());
+
+                    // \yii\helpers\VarDumper::dump(['events' => $productQuote->releaseEvents()], 10, true); exit();  /* TODO: to remove */
+                    /* TODO::  */
+
                 }
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
                 Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+            }
+
+            if ($markUpChanged) {
+                \yii\helpers\VarDumper::dump(['afterUpdate' => $productQuote], 10, true); exit();  /* TODO: to remove */
             }
 
             return $this->redirect(['view', 'id' => $model->qpp_id]);
