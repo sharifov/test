@@ -13,6 +13,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\product\Product;
@@ -504,13 +505,14 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pqProduct->isFlight();
 	}
 
-    /**
-     * @return $this
-     */
-    public function setProfitAmount(): self
+    public function profitAmount(): void
     {
-        $this->pq_profit_amount = $this->profitCalc();
-        return $this;
+        $profitCalc = $this->profitCalc();
+
+        if (ProductQuoteHelper::roundPrice($this->pq_profit_amount) !== $profitCalc) {
+            $this->pq_profit_amount = $profitCalc;
+            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this->pq_id));
+        }
     }
 
 	/**

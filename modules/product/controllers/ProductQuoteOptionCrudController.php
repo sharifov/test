@@ -69,7 +69,7 @@ class ProductQuoteOptionCrudController extends FController
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
             $productQuote = $model->pqoProductQuote;
-            $productQuote->setProfitAmount();
+            $productQuote->profitAmount();
             $productQuote->save(); /* TODO::  */
 
             return $this->redirect(['view', 'id' => $model->pqo_id]);

@@ -5,7 +5,6 @@ namespace modules\flight\controllers;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
-use modules\product\src\services\RecalculateProfitAmountService;
 use sales\helpers\app\AppHelper;
 use Yii;
 use modules\flight\models\FlightQuotePaxPrice;
@@ -83,7 +82,7 @@ class FlightQuotePaxPriceController extends FController
                     throw new \RuntimeException('FlightQuotePaxPrice not saved');
                 }
                 $productQuote = $this->getProductQuote($model);
-                $this->recalculateProfitAmount($productQuote);
+                $productQuote->profitAmount();
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
@@ -116,8 +115,10 @@ class FlightQuotePaxPriceController extends FController
                 if (!$model->save()) {
                     throw new \RuntimeException('FlightQuotePaxPrice not saved');
                 }
-                $productQuote = $this->getProductQuote($model);
-                $this->recalculateProfitAmount($productQuote);
+                if ($model->isAttributeChanged('qpp_system_mark_up') || $model->isAttributeChanged('qpp_agent_mark_up')) {
+                    $productQuote = $this->getProductQuote($model);
+                    $productQuote->profitAmount();
+                }
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
@@ -146,7 +147,7 @@ class FlightQuotePaxPriceController extends FController
             $model = $this->findModel($id);
             $productQuote = $this->getProductQuote($model);
             $model->delete();
-            $this->recalculateProfitAmount($productQuote);
+            $productQuote->profitAmount();
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
@@ -179,21 +180,5 @@ class FlightQuotePaxPriceController extends FController
     private function getProductQuote(FlightQuotePaxPrice $model): ProductQuote
     {
         return $model->qppFlightQuote->fqProductQuote;
-    }
-
-    /**
-     * @param ProductQuote $productQuote
-     * @return int
-     * @throws InvalidConfigException
-     * @throws NotInstantiableException
-     */
-    private function recalculateProfitAmount(ProductQuote $productQuote): int
-    {
-        $productQuote->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($productQuote->pq_id));
-
-        /** @var ProductQuoteRepository $productQuoteRepository */
-        $productQuoteRepository = Yii::$container->get(ProductQuoteRepository::class);
-
-        return $productQuoteRepository->save($productQuote);
     }
 }
