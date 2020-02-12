@@ -3,6 +3,8 @@
 namespace sales\yii\grid\project;
 
 use common\models\Project;
+use sales\access\ListsAccess;
+use sales\auth\Auth;
 use yii\grid\DataColumn;
 
 /**
@@ -24,6 +26,8 @@ class ProjectColumn extends DataColumn
 
     public $relation;
 
+    public $onlyUserProjects = false;
+
     public function init(): void
     {
         parent::init();
@@ -33,7 +37,11 @@ class ProjectColumn extends DataColumn
         }
 
         if ($this->filter === null) {
-            $this->filter = \common\models\Project::getList();
+            if ($this->onlyUserProjects) {
+                $this->filter = (new ListsAccess(Auth::id()))->getProjects();
+            } else {
+                $this->filter = \common\models\Project::getList();
+            }
         }
     }
 

@@ -8,6 +8,7 @@ use modules\qaTask\src\grid\columns\QaTaskRatingColumn;
 use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\department\DepartmentColumn;
+use sales\yii\grid\project\ProjectColumn;
 use sales\yii\grid\UserColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -37,6 +38,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             't_id',
             't_gid',
+            [
+                'class' => ProjectColumn::class,
+                'attribute' => 't_project_id',
+                'relation' => 'project',
+                'onlyUserProjects' => true,
+            ],
             [
                 'class' => QaObjectTypeColumn::class,
                 'attribute' => 't_object_type_id',

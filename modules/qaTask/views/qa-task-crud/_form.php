@@ -28,6 +28,8 @@ $list = new ListsAccess(Auth::id());
 
         <?= $form->field($model, 't_gid')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 't_project_id')->dropDownList($list->getProjects(), ['prompt' => 'Select project']) ?>
+
         <?= $form->field($model, 't_object_type_id')->dropDownList(QaObjectType::getList(), ['prompt' => 'Select Object type']) ?>
 
         <?= $form->field($model, 't_object_id')->textInput() ?>

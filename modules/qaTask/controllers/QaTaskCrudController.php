@@ -38,8 +38,8 @@ class QaTaskCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new QaTaskCrudSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $searchModel = new QaTaskCrudSearch(Auth::user());
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

@@ -404,7 +404,7 @@ class Formatter extends \yii\i18n\Formatter
             throw new \InvalidArgumentException('value must be Project|int|string|null');
         }
 
-        return Html::tag('span', Html::encode($name), ['class' => 'badge']);
+        return Html::tag('span', Html::encode($name));
     }
 
     /**

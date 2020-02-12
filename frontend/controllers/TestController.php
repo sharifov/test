@@ -54,6 +54,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\access\EmployeeSourceAccess;
+use sales\access\ListsAccess;
 use sales\auth\Auth;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
@@ -174,13 +175,8 @@ class TestController extends FController
     public function actionTest()
     {
 
-        $task = QaTask::findOne(3);
-        $form = new QaTaskTakeOverForm($task, [
-            'reasonId' => 4,
-            //'description' =>
-        ]);
-        $form->validate();
-        VarDumper::dump($form->errors);
+       VarDumper::dump(Project::getList());
+       VarDumper::dump((new ListsAccess(Auth::id()))->getProjects());
         die;
 
 

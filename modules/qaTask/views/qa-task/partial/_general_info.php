@@ -20,6 +20,7 @@ use yii\widgets\DetailView;
                     <?= DetailView::widget([
                         'model' => $model,
                         'attributes' => [
+                            'project:projectName',
                             't_object_type_id:qaObjectType',
                             't_object_id',
                             't_status_id:qaTaskStatus',

@@ -24,8 +24,8 @@ class QaTaskQueueController extends FController
 
     public function actionSearch(): string
     {
-        $searchModel = new QaTaskQueueSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $searchModel = new QaTaskQueueSearch(Auth::user());
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('search', [
             'searchModel' => $searchModel,
@@ -35,8 +35,8 @@ class QaTaskQueueController extends FController
 
     public function actionPending(): string
     {
-        $searchModel = new QaTaskQueuePendingSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $searchModel = new QaTaskQueuePendingSearch(Auth::user());
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('pending', [
             'searchModel' => $searchModel,
@@ -46,8 +46,8 @@ class QaTaskQueueController extends FController
 
     public function actionProcessing(): string
     {
-        $searchModel = new QaTaskQueueProcessingSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $searchModel = new QaTaskQueueProcessingSearch(Auth::user());
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('processing', [
             'searchModel' => $searchModel,
@@ -57,8 +57,8 @@ class QaTaskQueueController extends FController
 
     public function actionEscalated(): string
     {
-        $searchModel = new QaTaskQueueEscalatedSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $searchModel = new QaTaskQueueEscalatedSearch(Auth::user());
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('escalated', [
             'searchModel' => $searchModel,
@@ -68,8 +68,8 @@ class QaTaskQueueController extends FController
 
     public function actionClosed(): string
     {
-        $searchModel = new QaTaskQueueClosedSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $searchModel = new QaTaskQueueClosedSearch(Auth::user());
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('closed', [
             'searchModel' => $searchModel,
@@ -119,21 +119,21 @@ class QaTaskQueueController extends FController
 
     private function countPending(): ?int
     {
-        return (new QaTaskQueuePendingSearch())->search([], Auth::user())->query->count();
+        return (new QaTaskQueuePendingSearch(Auth::user()))->search([])->query->count();
     }
 
     private function countProcessing(): ?int
     {
-        return (new QaTaskQueueProcessingSearch())->search([], Auth::user())->query->count();
+        return (new QaTaskQueueProcessingSearch(Auth::user()))->search([])->query->count();
     }
 
     private function countEscalated(): ?int
     {
-        return (new QaTaskQueueEscalatedSearch())->search([], Auth::user())->query->count();
+        return (new QaTaskQueueEscalatedSearch(Auth::user()))->search([])->query->count();
     }
 
     private function countClosed(): ?int
     {
-        return (new QaTaskQueueClosedSearch())->search([], Auth::user())->query->count();
+        return (new QaTaskQueueClosedSearch(Auth::user()))->search([])->query->count();
     }
 }

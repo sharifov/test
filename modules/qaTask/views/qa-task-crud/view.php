@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             't_id',
             't_gid',
+            'project:projectName',
             't_object_type_id:qaObjectType',
             't_object_id',
             'category.tc_name',

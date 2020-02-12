@@ -9,18 +9,38 @@ use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use sales\access\ListsAccess;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\qaTask\src\entities\qaTask\QaTask;
 
+/**
+ * Class QaTaskCrudSearch
+ *
+ * @property Employee $user
+ * @property array $projects
+ */
 class QaTaskCrudSearch extends QaTask
 {
+    private $user;
+    private $projects;
+
+    public function __construct(Employee $user, $config = [])
+    {
+        $this->user = $user;
+        $this->projects = (new ListsAccess($user->id))->getProjects();
+        parent::__construct($config);
+    }
+
     public function rules(): array
     {
         return [
             ['t_id', 'integer'],
 
             ['t_gid', 'string', 'max' => 32],
+
+            ['t_project_id', 'integer'],
+            ['t_project_id', 'in', 'range' => array_keys($this->projects)],
 
             ['t_object_type_id', 'integer'],
             ['t_object_type_id', 'in', 'range' => array_keys(QaObjectType::getList())],
@@ -59,9 +79,9 @@ class QaTaskCrudSearch extends QaTask
         ];
     }
 
-    public function search($params, Employee $user): ActiveDataProvider
+    public function search($params): ActiveDataProvider
     {
-        $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category']);
+        $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -76,20 +96,21 @@ class QaTaskCrudSearch extends QaTask
         }
 
         if ($this->t_created_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $this->user->timezone);
         }
 
         if ($this->t_updated_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $this->user->timezone);
         }
 
         if ($this->t_deadline_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $this->user->timezone);
         }
 
         // grid filtering conditions
         $query->andFilterWhere([
             't_id' => $this->t_id,
+            't_project_id' => $this->t_project_id,
             't_object_type_id' => $this->t_object_type_id,
             't_object_id' => $this->t_object_id,
             't_category_id' => $this->t_category_id,

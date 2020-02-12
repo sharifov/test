@@ -4,6 +4,7 @@ namespace modules\qaTask\src\entities\qaTask;
 
 use common\models\Department;
 use common\models\Employee;
+use common\models\Project;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskCanceledEvent;
@@ -27,6 +28,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $t_id
  * @property string $t_gid
+ * @property int|null $t_project_id
  * @property int $t_object_type_id
  * @property int $t_object_id
  * @property int|null $t_category_id
@@ -42,6 +44,7 @@ use yii\db\ActiveRecord;
  * @property string|null $t_created_dt
  * @property string|null $t_updated_dt
  *
+ * @property Project $project
  * @property QaTaskCategory $category
  * @property Employee $assignedUser
  * @property Employee $createdUser
@@ -156,6 +159,11 @@ class QaTask extends \yii\db\ActiveRecord
         $this->t_rating = $rating;
     }
 
+    public function isEqualProject(array $projects): bool
+    {
+        return in_array($this->t_project_id, $projects, true);
+    }
+
     public static function tableName(): string
     {
         return '{{%qa_task}}';
@@ -167,6 +175,11 @@ class QaTask extends \yii\db\ActiveRecord
             ['t_gid', 'required'],
             ['t_gid', 'string', 'max' => 32],
             ['t_gid', 'unique'],
+
+            ['t_project_id', 'required'],
+            ['t_project_id', 'integer'],
+            ['t_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['t_project_id', 'in', 'range' => array_keys(Project::getList())],
 
             ['t_object_type_id', 'required'],
             ['t_object_type_id', 'integer'],
@@ -231,6 +244,8 @@ class QaTask extends \yii\db\ActiveRecord
         return [
             't_id' => 'ID',
             't_gid' => 'Gid',
+            't_project_id' => 'Project',
+            'project' => 'Project',
             't_object_type_id' => 'Object Type',
             't_object_id' => 'Object ID',
             't_category_id' => 'Category',
@@ -250,6 +265,11 @@ class QaTask extends \yii\db\ActiveRecord
             't_updated_dt' => 'Updated Dt',
             'category.tc_name' => 'Category'
         ];
+    }
+
+    public function getProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 't_project_id']);
     }
 
     public function getAssignedUser(): ActiveQuery
