@@ -5,6 +5,7 @@ use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskCreatedTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskQueueActionColumn;
+use modules\qaTask\src\grid\columns\QaTaskRatingColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\department\DepartmentColumn;
 use sales\yii\grid\UserColumn;
@@ -43,7 +44,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => QaTaskCategoryQuery::getList(),
             ],
-            't_rating',
+            [
+                'class' => QaTaskRatingColumn::class,
+                'attribute' => 't_rating',
+            ],
             [
                 'class' => QaTaskCreatedTypeColumn::class,
                 'attribute' => 't_create_type_id',

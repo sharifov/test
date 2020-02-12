@@ -150,6 +150,12 @@ class QaTask extends \yii\db\ActiveRecord
         $this->recordEvent(new QaTaskDeadlineEvent($this, $date));
     }
 
+    public function changeRating(int $rating): void
+    {
+        QaTaskRating::guard($rating);
+        $this->t_rating = $rating;
+    }
+
     public static function tableName(): string
     {
         return '{{%qa_task}}';
@@ -182,7 +188,9 @@ class QaTask extends \yii\db\ActiveRecord
                 }
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['t_rating', 'integer', 'min' => 0, 'max' => 9],
+            ['t_rating', 'integer'],
+            ['t_rating', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['t_rating', 'in', 'range' => array_keys(QaTaskRating::getList())],
 
             ['t_create_type_id', 'integer'],
             ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreatedType::getList())],

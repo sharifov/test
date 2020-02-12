@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             't_object_id',
             'category.tc_name',
             't_status_id:qaTaskStatus',
-            't_rating',
+            't_rating:qaTaskRating',
             't_create_type_id:qaTaskCreatedType',
             't_description:ntext',
             't_department_id:department',

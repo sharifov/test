@@ -35,7 +35,7 @@ use yii\widgets\DetailView;
                     <?= DetailView::widget([
                         'model' => $model,
                         'attributes' => [
-                            't_rating',
+                            't_rating:qaTaskRating',
                             't_description:ntext',
                             'createdUser:userName',
                             'updatedUser:userName',

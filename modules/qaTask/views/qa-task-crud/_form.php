@@ -3,6 +3,7 @@
 use common\models\Department;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use sales\access\ListsAccess;
@@ -35,7 +36,7 @@ $list = new ListsAccess(Auth::id());
 
         <?= $form->field($model, 't_status_id')->dropDownList(QaTaskStatus::getList(), ['prompt' => 'Select status']) ?>
 
-        <?= $form->field($model, 't_rating')->textInput() ?>
+        <?= $form->field($model, 't_rating')->dropDownList(QaTaskRating::getList(), ['prompt' => 'Select rating']) ?>
 
         <?= $form->field($model, 't_create_type_id')->dropDownList(QaTaskCreatedType::getList(), ['prompt' => 'Select created type']) ?>
 

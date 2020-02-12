@@ -33,6 +33,7 @@ use modules\product\src\helpers\formatters\ProductQuoteFormatter;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
@@ -40,6 +41,15 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asQaTaskRating($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskRating::asFormat($value);
+    }
+
     public function asQaTask(?QaTask $task): string
     {
         if ($task === null) {

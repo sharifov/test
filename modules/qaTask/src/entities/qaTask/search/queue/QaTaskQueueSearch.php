@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\Employee;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use sales\helpers\query\QueryHelper;
@@ -32,7 +33,8 @@ class QaTaskQueueSearch extends QaTask
             ['t_category_id', 'integer'],
             ['t_category_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskCategory::class, 'targetAttribute' => ['t_category_id' => 'tc_id']],
 
-            ['t_rating', 'integer', 'min' => 0, 'max' => 9],
+            ['t_rating', 'integer'],
+            ['t_rating', 'in', 'range' => array_keys(QaTaskRating::getList())],
 
             ['t_create_type_id', 'integer'],
             ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreatedType::getList())],
