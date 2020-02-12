@@ -2,16 +2,15 @@
 
 namespace modules\flight\controllers;
 
-use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
+
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
 use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\models\search\FlightQuotePaxPriceSearch;
 use frontend\controllers\FController;
-use yii\base\InvalidConfigException;
-use yii\di\NotInstantiableException;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -76,13 +75,19 @@ class FlightQuotePaxPriceController extends FController
         $model = new FlightQuotePaxPrice();
 
         if ($model->load(Yii::$app->request->post())) {
+
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if (!$model->save()) {
                     throw new \RuntimeException('FlightQuotePaxPrice not saved');
                 }
+
                 $productQuote = $this->getProductQuote($model);
                 $productQuote->profitAmount();
+                /** @var EventDispatcher $eventDispatcher */
+                $eventDispatcher = Yii::$container->get(EventDispatcher::class);
+                $eventDispatcher->dispatchAll($productQuote->releaseEvents());
+
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
@@ -110,14 +115,20 @@ class FlightQuotePaxPriceController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
 
+            $markUpChanged = ($model->isAttributeChanged('qpp_system_mark_up') || $model->isAttributeChanged('qpp_agent_mark_up'));
+
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if (!$model->save()) {
                     throw new \RuntimeException('FlightQuotePaxPrice not saved');
                 }
-                if ($model->isAttributeChanged('qpp_system_mark_up') || $model->isAttributeChanged('qpp_agent_mark_up')) {
+
+                if ($markUpChanged) {
                     $productQuote = $this->getProductQuote($model);
                     $productQuote->profitAmount();
+                    /** @var EventDispatcher $eventDispatcher */
+                    $eventDispatcher = Yii::$container->get(EventDispatcher::class);
+                    $eventDispatcher->dispatchAll($productQuote->releaseEvents());
                 }
                 $transaction->commit();
             } catch (\Throwable $throwable) {
@@ -148,6 +159,10 @@ class FlightQuotePaxPriceController extends FController
             $productQuote = $this->getProductQuote($model);
             $model->delete();
             $productQuote->profitAmount();
+            /** @var EventDispatcher $eventDispatcher */
+            $eventDispatcher = Yii::$container->get(EventDispatcher::class);
+            $eventDispatcher->dispatchAll($productQuote->releaseEvents());
+
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();

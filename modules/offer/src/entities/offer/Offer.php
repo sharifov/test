@@ -301,6 +301,27 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
      */
     public function profitCalc(): float
     {
-        return ProductQuoteHelper::roundPrice(0); /* TODO:  */
+        $sum = 0;
+        if ($productQuotes = $this->opProductQuotes) {
+            foreach ($productQuotes as $productQuote) {
+                $sum += $productQuote->pq_profit_amount;
+            }
+        }
+        return $sum;
+    }
+
+    /**
+     * @return bool
+     */
+    public function profitAmount(): bool
+    {
+        $changed = false;
+        $profitCalc = ProductQuoteHelper::roundPrice($this->profitCalc());
+
+        if (ProductQuoteHelper::roundPrice($this->of_profit_amount) !== $profitCalc) {
+            $this->of_profit_amount = $profitCalc;
+            $changed = true;
+        }
+        return $changed;
     }
 }

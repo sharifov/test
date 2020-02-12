@@ -338,14 +338,13 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
                 $sum += $option->pqo_extra_markup;
             }
         }
-        return ProductQuoteHelper::roundPrice($sum);
+        return $sum;
     }
 
     /**
-     * @param bool $round
      * @return float
      */
-    public function profitCalc(bool $round = true): float
+    public function profitCalc(): float
     {
         $childQuote = $this->childQuote;
         $processingFeeAmount = $childQuote ? $childQuote->getProcessingFee() : 0.00; // PFA
@@ -353,9 +352,17 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $agentExtraMarkupAmount = $childQuote ? $childQuote->getAgentMarkUp() : 0.00; // EMA agent (pax/room etc.)
         $optionExtraMarkupAmount = $this->optionExtraMarkupSum; // EMA options
 
-        $result = ($systemMarkupAmount + $agentExtraMarkupAmount + $optionExtraMarkupAmount) - $processingFeeAmount;
+        return ($systemMarkupAmount + $agentExtraMarkupAmount + $optionExtraMarkupAmount) - $processingFeeAmount;
+    }
 
-        return ($round) ? ProductQuoteHelper::roundPrice($result) : $result;
+    public function profitAmount(): void
+    {
+        $profitCalc = ProductQuoteHelper::roundPrice($this->profitCalc());
+
+        if (ProductQuoteHelper::roundPrice($this->pq_profit_amount) !== $profitCalc) {
+            $this->pq_profit_amount = $profitCalc;
+            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this->pq_id));
+        }
     }
 
 	/**
@@ -504,16 +511,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->pqProduct->isFlight();
 	}
-
-    public function profitAmount(): void
-    {
-        $profitCalc = $this->profitCalc();
-
-        if (ProductQuoteHelper::roundPrice($this->pq_profit_amount) !== $profitCalc) {
-            $this->pq_profit_amount = $profitCalc;
-            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this->pq_id));
-        }
-    }
 
 	/**
      * @param int|null $creatorId

@@ -2,8 +2,10 @@
 
 namespace sales\services;
 
+use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\entities\order\OrderRepository;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\services\TransactionManager;
 
@@ -14,6 +16,7 @@ use sales\services\TransactionManager;
  * @property TransactionManager $transactionManager
  * @property OfferRepository $offerRepository
  * @property OrderRepository $orderRepository
+ * @property ProductQuote $productQuote
  */
 class RecalculateProfitAmountService
 {
@@ -34,8 +37,9 @@ class RecalculateProfitAmountService
 	 */
 	private $orderRepository;
 
-    private $productQuoteId;
-    private $saveChanges;
+    public $productQuote;
+    public $changedOffers = [];
+    public $changedOrders = [];
 
     /**
      * RecalculateProfitAmountService constructor.
@@ -58,20 +62,18 @@ class RecalculateProfitAmountService
 
     /**
      * @param int $productQuoteId
-     * @param bool $saveChanges
      * @return RecalculateProfitAmountService
      */
-    public function recalculate(int $productQuoteId, bool $saveChanges = true): RecalculateProfitAmountService
+    public function recalculate(int $productQuoteId): RecalculateProfitAmountService
     {
-        /* TODO::  */
-        $this->productQuoteId = $productQuoteId;
-        $this->saveChanges = $saveChanges;
+        $this->productQuote = $this->productQuoteRepository->find($productQuoteId);
 
+        /* TODO:: add logic if delete productQuote */
+        /* TODO:: add Status logic  */
 
+        $this->recalculateOffer();
+        $this->recalculateOrder();
 
-        if ($this->saveChanges) {
-            $this->saveProductQuote();
-        }
         return $this;
     }
 
@@ -80,7 +82,12 @@ class RecalculateProfitAmountService
      */
     private function recalculateOffer(): RecalculateProfitAmountService
     {
-        /* TODO::  */
+        $offers = $this->productQuote->opOffers;
+        foreach ($offers as $offer) {
+            if ($offer->profitAmount()) {
+                $this->changedOffers[] = $offer;
+            }
+        }
         return $this;
     }
 
@@ -89,21 +96,45 @@ class RecalculateProfitAmountService
      */
     private function recalculateOrder(): RecalculateProfitAmountService
     {
-        /* TODO::  */
+        $orders = $this->productQuote->orpOrders;
+        foreach ($orders as $order) {
+            $order->profitAmount();
+            if ($order->profitAmount()) {
+                $this->changedOrders[] = $order;
+            }
+        }
         return $this;
     }
 
     /**
-     * @return RecalculateProfitAmountService
+     * @return int
      */
-    private function saveProductQuote(): RecalculateProfitAmountService
+    public function saveProductQuote(): int
     {
-        /* TODO:: add transaction manager */
-
-        $productQuote = $this->productQuoteRepository->find($this->productQuoteId);
-        $this->productQuoteRepository->save($productQuote);
-        return $this;
+        return $this->productQuoteRepository->save($this->productQuote);
     }
 
+    /**
+     * @return array
+     */
+    public function saveOffers(): array
+    {
+        $result = [];
+        foreach ($this->changedOffers as $offer) {
+            $result[] = $this->offerRepository->save($offer);
+        }
+        return $result;
+    }
 
+    /**
+     * @return array
+     */
+    public function saveOrders(): array
+    {
+        $result = [];
+        foreach ($this->changedOrders as $order) {
+            $result[] = $this->orderRepository->save($order);
+        }
+        return $result;
+    }
 }
