@@ -1,19 +1,19 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\takeOver;
+namespace modules\qaTask\src\useCases\qaTask\escalate;
 
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\user\UserRepository;
 
 /**
- * Class QaTaskActionTakeOverService
+ * Class QaTaskCloseService
  *
  * @property QaTaskRepository $taskRepository
  * @property UserRepository $userRepository
  * @property EventDispatcher $eventDispatcher
  */
-class QaTaskTakeOverService
+class QaTaskEscalateService
 {
     private $taskRepository;
     private $userRepository;
@@ -30,35 +30,26 @@ class QaTaskTakeOverService
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function takeOver(QaTaskTakeOverForm $form): void
+    public function escalate(QaTaskEscalateForm $form): void
     {
         $task = $this->taskRepository->find($form->getTaskId());
         $user = $this->userRepository->find($form->getUserId());
 
-        if ($task->isAssigned($user->id)) {
-            throw new \DomainException('Task is already assigned with this user.');
-        }
-
-        if (!($task->isProcessing() || $task->isEscalated())) {
-            throw new \DomainException('Current status is denied.');
-        }
-
-        if (!$task->isUnAssigned()) {
-            throw new \DomainException('Task is already assigned.');
-        }
-
-        $oldAssignedUserId = $task->t_assigned_user_id;
-
         if (!$task->isProcessing()) {
-            $task->processing();
+            throw new \DomainException('Task must be in processing.');
         }
-        $task->assign($user->id);
+
+        if (!$task->isAssigned($user->id)) {
+            throw new \DomainException('User must be assigned.');
+        }
+
+        $task->escalated();
+        $task->changeRating($form->rating);
+        
         $this->taskRepository->save($task);
 
-        $this->eventDispatcher->dispatch(new QaTaskTakeOverEvent(
+        $this->eventDispatcher->dispatch(new QaTaskEscalateEvent(
             $task,
-            $user->id,
-            $oldAssignedUserId,
             $form->reasonId,
             $form->description
         ));

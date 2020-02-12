@@ -1,27 +1,30 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\takeOver;
+namespace modules\qaTask\src\useCases\qaTask\escalate;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\entities\qaTaskActionReason\ReasonDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use yii\base\Model;
 
 /**
- * Class QaTaskActionTakeOverForm
+ * Class QaTaskEscalateForm
  *
  * @property int $reasonId
  * @property string|null $description
+ * @property int|null $rating
  * @property QaTask $task
  * @property Employee $user
  * @property ReasonDto[] $reasons
  */
-class QaTaskTakeOverForm extends Model
+class QaTaskEscalateForm extends Model
 {
     public $reasonId;
     public $description;
+    public $rating;
 
     private $task;
     private $user;
@@ -31,7 +34,7 @@ class QaTaskTakeOverForm extends Model
     {
         $this->task = $task;
         $this->user = $user;
-        $this->reasons = QaTaskActionReasonQuery::getReasons($this->task->t_object_type_id, QaTaskActions::TAKE_OVER);
+        $this->reasons = QaTaskActionReasonQuery::getReasons($this->task->t_object_type_id, QaTaskActions::ESCALATE);
         parent::__construct($config);
     }
 
@@ -47,6 +50,11 @@ class QaTaskTakeOverForm extends Model
             ['description', 'required', 'when' => function () {
                 return (isset($this->reasons[$this->reasonId]) && $this->reasons[$this->reasonId]->isCommentRequired());
             }, 'skipOnError' => true],
+
+            ['rating', 'required'],
+            ['rating', 'integer'],
+            ['rating', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['rating', 'in', 'range' => array_keys(QaTaskRating::getList())],
         ];
     }
 
