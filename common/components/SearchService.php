@@ -155,10 +155,10 @@ class SearchService
 
             if ($flightSegment->flexibility > 0) {
                 $segment['flex'] = $flightSegment->flexibility;
-            }
 
-            if ($flightSegment->flexibility_type && $flexType = self::getSearchFlexType($flightSegment->flexibility_type)) {
-                $segment['ft'] = $flexType;
+                if ($flightSegment->flexibility_type && $flexType = self::getSearchFlexType($flightSegment->flexibility_type)) {
+                    $segment['ft'] = $flexType;
+                }
             }
 
             $fl[] = $segment;
