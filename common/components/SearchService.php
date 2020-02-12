@@ -30,7 +30,7 @@ class SearchService
      * @param $minutes
      * @return string
      */
-    public static function durationInMinutes($minutes)
+    public static function durationInMinutes($minutes): string
     {
         $hours = floor($minutes / 60);
         $minutes %= 60;
@@ -60,7 +60,7 @@ class SearchService
             return $mapping;
         }
 
-        return isset($mapping[$gds]) ? $mapping[$gds] : $gds;
+        return $mapping[$gds] ?? $gds;
     }
 
     public static function getCabin($cabin = null)
@@ -78,7 +78,7 @@ class SearchService
             return $mapping;
         }
 
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+        return $mapping[$cabin] ?? $cabin;
     }
 
     public static function getCabinRealCode($cabin)
@@ -90,16 +90,16 @@ class SearchService
             Lead::CABIN_FIRST => self::CABIN_FIRST,
         ];
 
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+        return $mapping[$cabin] ?? $cabin;
     }
 
-    public static function getOnlineQuotes(Lead $lead, $gdsCode = null)
+    public static function getOnlineQuotes(Lead $lead, int $limit = 600, $gdsCode = null)
     {
         $result = null;
-        $returned = '';
-        if ($lead->trip_type == Lead::TRIP_TYPE_ROUND_TRIP) {
-            $returned = date('m/d/Y', strtotime($lead->leadFlightSegments[1]->departure));
-        }
+//        $returned = '';
+//        if ($lead->trip_type === Lead::TRIP_TYPE_ROUND_TRIP) {
+//            $returned = date('m/d/Y', strtotime($lead->leadFlightSegments[1]->departure));
+//        }
 
         $fl = [];
 
@@ -111,22 +111,34 @@ class SearchService
             'inf' => $lead->infants,
         ];
 
+        if ($limit) {
+            $params['limit'] = $limit;
+        }
+
         if($gdsCode) {
             $params['gds'] = $gdsCode;
         }
 
         foreach ($lead->leadFlightSegments as $flightSegment) {
-            $fl[] = [
+            $segment = [
                 'o' => $flightSegment->origin,
                 'd' => $flightSegment->destination,
                 'dt' => $flightSegment->departure
             ];
+
+            if ($flightSegment->flexibility > 0) {
+                $segment['flex'] = $flightSegment->flexibility;
+            }
+
+            $fl[] = $segment;
         }
 
         $params['fl'] = $fl;
 
         $fields = http_build_query($params);
         $url = \Yii::$app->params['searchApiUrl'].'?' . $fields;
+
+
 
         ///
         $client = new Client();
@@ -137,7 +149,7 @@ class SearchService
 
         //VarDumper::dump($fields)
 
-        // Yii::info($url, 'info\CURL:getOnlineQuotes:quickSearch');
+        Yii::info($url, 'info\CURL:getOnlineQuotes:quickSearch');
 
         if ($response->isOk) {
             return $response->data;
