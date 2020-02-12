@@ -36,6 +36,8 @@ use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
+use sales\model\user\paymentCategory\UserPaymentCategory;
+use sales\model\user\payroll\UserPayroll;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
@@ -294,6 +296,34 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('span', Quote::getTypeName($value), ['class' => $class]);
     }
 
+	/**
+	 * @param $categoryId
+	 * @return string|null
+	 */
+    public function asUserPaymentCategoryName($categoryId): ?string
+	{
+		$category = UserPaymentCategory::findOne(['upc_id' => $categoryId]);
+
+		if ($category) {
+			return $category->upc_name ?? '--';
+		}
+		return '--';
+	}
+
+	/**
+	 * @param $statusId
+	 * @return string|null
+	 */
+	public function asUserPaymentStatusName($statusId): ?string
+	{
+		$statusName = UserPaymentCategory::getStatusName($statusId);
+
+		if ($statusName) {
+			return $statusName;
+		}
+		return '--';
+	}
+
     /**
      * @param $dateTime
      * @return string
@@ -333,6 +363,25 @@ class Formatter extends \yii\i18n\Formatter
 
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
     }
+
+	/**
+	 * @param $numberOfMonth
+	 * @return string
+	 */
+    public function asMonthNameByMonthNumber($numberOfMonth)
+	{
+		return \DateTime::createFromFormat('!m', $numberOfMonth)->format('F');
+	}
+
+	public function asUserPayrollAgentStatusName($agentStatusId): ?string
+	{
+		return UserPayroll::getAgentStatusName($agentStatusId);
+	}
+
+	public function asUserPayrollStatusName($statusId): ?string
+	{
+		return UserPayroll::getStatusName($statusId);
+	}
 
     /**
      * @param Department|int|string|null $value
