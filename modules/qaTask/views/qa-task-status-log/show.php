@@ -8,6 +8,7 @@ use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
 use sales\yii\grid\UserColumn;
 use yii\grid\GridView;
+use yii\grid\SerialColumn;
 use yii\widgets\Pjax;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -23,10 +24,7 @@ use yii\widgets\Pjax;
         'dataProvider' => $dataProvider,
         'filterModel' => false, //$searchModel,
         'columns' => [
-            [
-                'attribute' => 'tsl_id',
-                'options' => ['style' => 'width:80px'],
-            ],
+            ['class' => SerialColumn::class],
             [
                 'class' => QaTaskStatusColumn::class,
                 'attribute' => 'tsl_start_status_id',
