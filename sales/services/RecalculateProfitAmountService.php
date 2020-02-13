@@ -62,11 +62,13 @@ class RecalculateProfitAmountService
 
     /**
      * @param int $productQuoteId
+     * @param float $profitNew
      * @return RecalculateProfitAmountService
      */
-    public function recalculate(int $productQuoteId): RecalculateProfitAmountService
+    public function recalculate(int $productQuoteId, float $profitNew): RecalculateProfitAmountService
     {
         $this->productQuote = $this->productQuoteRepository->find($productQuoteId);
+        $this->productQuote->pq_profit_amount = $profitNew;
 
         /* TODO:: add logic if delete productQuote */
         /* TODO:: add Status logic  */

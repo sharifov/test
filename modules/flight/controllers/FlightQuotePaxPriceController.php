@@ -3,7 +3,7 @@
 namespace modules\flight\controllers;
 
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
 use modules\flight\models\FlightQuotePaxPrice;
@@ -15,9 +15,26 @@ use yii\filters\VerbFilter;
 
 /**
  * FlightQuotePaxPriceController implements the CRUD actions for FlightQuotePaxPrice model.
+ *
+ * @property EventDispatcher $eventDispatcher
  */
 class FlightQuotePaxPriceController extends FController
 {
+
+    private $eventDispatcher;
+
+    /**
+     * FlightQuotePaxPriceController constructor.
+     * @param $id
+     * @param $module
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, EventDispatcher $eventDispatcher, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->eventDispatcher = $eventDispatcher;
+    }
 
     /**
      * @return array
@@ -81,8 +98,8 @@ class FlightQuotePaxPriceController extends FController
                 }
                 $productQuote = $this->getProductQuote($model);
                 $productQuote->profitAmount();
-                $productQuoteRepository = Yii::$container->get(ProductQuoteRepository::class);
-                $productQuoteRepository->save($productQuote);
+                $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
@@ -119,8 +136,7 @@ class FlightQuotePaxPriceController extends FController
                 if ($checkProfit) {
                     $productQuote = $this->getProductQuote($model);
                     $productQuote->profitAmount();
-                    $productQuoteRepository = Yii::$container->get(ProductQuoteRepository::class);
-                    $productQuoteRepository->save($productQuote);
+                    $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
                 }
                 $transaction->commit();
             } catch (\Throwable $throwable) {
@@ -150,8 +166,7 @@ class FlightQuotePaxPriceController extends FController
             $productQuote = $this->getProductQuote($model);
             $model->delete();
             $productQuote->profitAmount();
-            $productQuoteRepository = Yii::$container->get(ProductQuoteRepository::class);
-            $productQuoteRepository->save($productQuote);
+            $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
             $transaction->commit();
         } catch (\Throwable $throwable) {
@@ -171,7 +186,7 @@ class FlightQuotePaxPriceController extends FController
      */
     protected function findModel($id)
     {
-        if (($model = FlightQuotePaxPrice::findOne($id)) !== null) {y
+        if (($model = FlightQuotePaxPrice::findOne($id)) !== null) {
             return $model;
         }
 

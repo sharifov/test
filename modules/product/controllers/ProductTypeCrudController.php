@@ -3,7 +3,10 @@
 namespace modules\product\controllers;
 
 use frontend\controllers\FController;
+use modules\product\src\entities\product\Product;
 use sales\auth\Auth;
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
 use Yii;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productType\search\ProductTypeCrudSearch;
@@ -14,9 +17,24 @@ use yii\web\Response;
 
 /**
  * ProductTypeController implements the CRUD actions for ProductType model.
+ * @property EventDispatcher $eventDispatcher
  */
 class ProductTypeCrudController extends FController
 {
+    private $eventDispatcher;
+
+    /**
+     * ProductTypeCrudController constructor.
+     * @param $id
+     * @param $module
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, EventDispatcher $eventDispatcher, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->eventDispatcher = $eventDispatcher;
+    }
     /**
      * @return array
      */
@@ -83,8 +101,29 @@ class ProductTypeCrudController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $afterFeeAmount = $model->getProcessingFeeAmount();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('ProductType not saved');
+                }
+                $beforeFeeAmount = $model->getProcessingFeeAmount();
+                if ($afterFeeAmount !== $beforeFeeAmount) {
+                    foreach ($model->products as $product) {
+                        foreach ($product->productQuotes as $productQuote) {
+                            $productQuote->profitAmount();
+                            $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+                        }
+                    }
+                }
+                $transaction->commit();
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+            }
             return $this->redirect(['view', 'id' => $model->pt_id]);
         }
 

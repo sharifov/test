@@ -3,7 +3,10 @@
 namespace modules\product\controllers;
 
 use frontend\controllers\FController;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\auth\Auth;
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
 use Yii;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\search\ProductQuoteOptionCrudSearch;
@@ -14,9 +17,25 @@ use yii\web\Response;
 
 /**
  * ProductQuoteOptionController implements the CRUD actions for ProductQuoteOption model.
+ * @property EventDispatcher $eventDispatcher
  */
 class ProductQuoteOptionCrudController extends FController
 {
+    private $eventDispatcher;
+
+    /**
+     * ProductQuoteOptionCrudController constructor.
+     * @param $id
+     * @param $module
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, EventDispatcher $eventDispatcher, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @return array
      */
@@ -66,12 +85,22 @@ class ProductQuoteOptionCrudController extends FController
     {
         $model = new ProductQuoteOption();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
 
-            $productQuote = $model->pqoProductQuote;
-            $productQuote->profitAmount();
-            $productQuote->save(); /* TODO::  */
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('ProductQuoteOption not saved');
+                }
+                $productQuote = $model->pqoProductQuote;
+                $productQuote->profitAmount();
+                $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
+                $transaction->commit();
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+            }
             return $this->redirect(['view', 'id' => $model->pqo_id]);
         }
 
@@ -89,7 +118,24 @@ class ProductQuoteOptionCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+
+            $checkProfit = $model->isAttributeChanged('pqo_extra_markup');
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('ProductQuoteOption not saved');
+                }
+                if ($checkProfit) {
+                    $productQuote = $model->pqoProductQuote;
+                    $productQuote->profitAmount();
+                    $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+                }
+                $transaction->commit();
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+            }
             return $this->redirect(['view', 'id' => $model->pqo_id]);
         }
 
@@ -107,7 +153,19 @@ class ProductQuoteOptionCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $model = $this->findModel($id);
+            $productQuote = $model->pqoProductQuote;
+            $model->delete();
+            $productQuote->profitAmount();
+            $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+
+            $transaction->commit();
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+        }
 
         return $this->redirect(['index']);
     }

@@ -361,11 +361,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function profitAmount(): bool
     {
         $isChanged = false;
-        $profitCalc = ProductQuoteHelper::roundPrice($this->profitCalc());
-        $profitAmount = ProductQuoteHelper::roundPrice($this->pq_profit_amount);
-        if ($profitAmount !== $profitCalc) {
-            $this->pq_profit_amount = $profitCalc;
-            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this->pq_id));
+        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
+        $profitOld = ProductQuoteHelper::roundPrice($this->pq_profit_amount);
+        if ($profitOld !== $profitNew) {
+            $this->pq_profit_amount = $profitNew;
+            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this->pq_id, $profitNew));
             $isChanged = true;
         }
         return $isChanged;

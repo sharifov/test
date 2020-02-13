@@ -30,7 +30,8 @@ class ProductQuoteRecalculateProfitAmountListener
     public function handle(ProductQuoteRecalculateProfitAmountEvent $event): void
     {
         try {
-            $this->recalculateProfitAmountService->recalculate($event->productQuoteId);
+            $this->recalculateProfitAmountService->recalculate($event->productQuoteId, $event->profitNew);
+            $this->recalculateProfitAmountService->saveProductQuote();
 
             if ($this->recalculateProfitAmountService->changedOffers) {
                 $this->recalculateProfitAmountService->saveOffers();
