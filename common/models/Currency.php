@@ -29,6 +29,12 @@ use yii\helpers\VarDumper;
  */
 class Currency extends \yii\db\ActiveRecord
 {
+	private const DEFAULT_CURRENCY = 'USD';
+
+	private const DEFAULT_CURRENCY_CLIENT_RATE = 1.00;
+
+	private const DEFAULT_CURRENCY_BASE_RATE = 1.00;
+
     /**
      * {@inheritdoc}
      */
@@ -258,4 +264,42 @@ class Currency extends \yii\db\ActiveRecord
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'cur_code', 'cur_code');
     }
+
+    public static function getDefaultCurrency()
+	{
+		return self::find()->where(['cur_default' => 1])->one();
+	}
+
+	/**
+	 * @return string
+	 */
+    public static function getDefaultCurrencyCode(): string
+	{
+		return self::getDefaultCurrency()->cur_code ?? self::DEFAULT_CURRENCY;
+	}
+
+	/**
+	 * @return float
+	 */
+	public static function getDefaultClientCurrencyRate(): float
+	{
+		return self::getDefaultCurrency()->cur_app_rate ?? self::DEFAULT_CURRENCY_CLIENT_RATE;
+	}
+
+	/**
+	 * @return float
+	 */
+	public static function getDefaultBaseCurrencyRate(): float
+	{
+		return self::getDefaultCurrency()->cur_base_rate ?? self::DEFAULT_CURRENCY_BASE_RATE;
+	}
+
+	/**
+	 * @param string $code
+	 * @return float|null
+	 */
+	public static function getBaseRateByCurrencyCode(string $code): ?float
+	{
+		return self::find()->where(['cur_code' => $code])->one()->cur_base_rate ?? null;
+	}
 }

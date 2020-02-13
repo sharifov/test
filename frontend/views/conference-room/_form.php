@@ -27,6 +27,7 @@ use common\models\ConferenceRoom;
                 'customPlaceholder' => '',
                 'allowDropdown' => false,
                 //'preferredCountries' => ['us'],
+                'customContainer' => 'intl-tel-input'
             ]
         ]) ?>
 
@@ -92,6 +93,7 @@ use common\models\ConferenceRoom;
             'customPlaceholder' => '',
             'allowDropdown' => false,
             //'preferredCountries' => ['us'],
+            'customContainer' => 'intl-tel-input'
         ]
     ]) ?>
 

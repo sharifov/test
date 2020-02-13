@@ -20,7 +20,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'qsbc_id') ?>
 
-    <?= $form->field($model, 'qsbc_flight_pax_id') ?>
+    <?= $form->field($model, 'qsbc_flight_pax_code_id') ?>
 
     <?= $form->field($model, 'qsbc_flight_quote_segment_id') ?>
 

@@ -166,6 +166,7 @@ use yii\bootstrap4\Modal;
             'jsOptions' => [
                 'nationalMode' => false,
                 'preferredCountries' => ['us'],
+                'customContainer' => 'intl-tel-input'
             ]
         ])->label(false);
     }

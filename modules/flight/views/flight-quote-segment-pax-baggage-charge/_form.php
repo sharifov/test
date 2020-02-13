@@ -12,7 +12,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'qsbc_flight_pax_id')->textInput() ?>
+    <?= $form->field($model, 'qsbc_flight_pax_code_id')->textInput() ?>
 
     <?= $form->field($model, 'qsbc_flight_quote_segment_id')->textInput() ?>
 

@@ -5761,11 +5761,13 @@ input[disabled] + .radio-tab__text {
     display: flex;
     margin: 0;
 }
-.search-results__wrapper {
+.search-results__wrapper,
+.search-result__quote {
     position: relative;
     z-index: 1;
 }
-.search-results__wrapper.loading:after {
+.search-results__wrapper.loading:after,
+.search-result__quote.loading:after {
     content: "";
     width: 100%;
     height: 100%;

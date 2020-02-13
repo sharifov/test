@@ -25,6 +25,7 @@ use common\widgets\Alert;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
@@ -35,6 +36,7 @@ use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\forms\cases\CasesUpdateForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
+use sales\guards\cases\CaseTakeGuard;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -75,6 +77,7 @@ use yii\widgets\ActiveForm;
  * @property CasesSaleRepository $casesSaleRepository
  * @property CasesSaleService $casesSaleService
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
+ * @property CaseTakeGuard $caseTakeGuard
  */
 class CasesController extends FController
 {
@@ -88,6 +91,7 @@ class CasesController extends FController
     private $casesSaleRepository;
     private $casesSaleService;
     private $clientUpdateFromEntityService;
+    private $caseTakeGuard;
 
 	/**
 	 * CasesController constructor.
@@ -102,6 +106,7 @@ class CasesController extends FController
 	 * @param CasesSaleRepository $casesSaleRepository
 	 * @param CasesSaleService $casesSaleService
 	 * @param ClientUpdateFromEntityService $clientUpdateFromEntityService
+	 * @param CaseTakeGuard $caseTakeGuard
 	 * @param array $config
 	 */
     public function __construct(
@@ -116,6 +121,7 @@ class CasesController extends FController
 		CasesSaleRepository $casesSaleRepository,
 		CasesSaleService $casesSaleService,
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
+		CaseTakeGuard $caseTakeGuard,
 		$config = []
     )
     {
@@ -129,6 +135,7 @@ class CasesController extends FController
         $this->casesSaleRepository = $casesSaleRepository;
         $this->casesSaleService = $casesSaleService;
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
+        $this->caseTakeGuard = $caseTakeGuard;
     }
 
     /**
@@ -878,6 +885,7 @@ class CasesController extends FController
         $userId = Yii::$app->user->id;
         $case = $this->findModelByGid($gId);
         try {
+            $this->caseTakeGuard->guard($case);
             $user = $this->userRepository->find($userId);
             $this->casesManageService->take($case->cs_id, $user->id, $user->id);
             Yii::$app->session->setFlash('success', 'Success');
@@ -948,61 +956,64 @@ class CasesController extends FController
     }
 
     /**
-     * @return string|Response
+     * @return array|string|Response
      * @throws NotFoundHttpException
      */
     public function actionChangeStatus()
     {
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
-        $creatorId = $user->id;
-
         $gid = (string)Yii::$app->request->get('gid');
         $case = $this->findModelByGid($gid);
+        $user = Auth::user();
 
-        $form = new CasesChangeStatusForm($case, $user);
+        $statusForm = new CasesChangeStatusForm($case, $user);
 
-        $statusReasons = CasesStatus::STATUS_REASON_LIST;
+        if (Yii::$app->request->isAjax && $statusForm->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($statusForm);
+        }
 
-        try {
-            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+        if ($statusForm->load(Yii::$app->request->post()) && $statusForm->validate()) {
+            try {
 
-                $isSimpleAgent = $user->isSimpleAgent();
-
-                if ($isSimpleAgent && empty($case->cs_category)) {
-                    throw new \Exception('Status of a case without a category cannot be changed!');
+                if ($user->isSimpleAgent() && empty($case->cs_category)) {
+                    throw new \DomainException('Status of a case without a category cannot be changed!');
                 }
 
-                switch ((int)$form->status) {
+                switch ((int)$statusForm->statusId) {
                     case CasesStatus::STATUS_FOLLOW_UP :
-                        $this->casesManageService->followUp($case->cs_id, $creatorId, $form->message);
+                        $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message);
                         break;
                     case CasesStatus::STATUS_TRASH :
-                        $this->casesManageService->trash($case->cs_id, $creatorId, $form->message);
+                        $this->casesManageService->trash($case->cs_id, $user->id, $statusForm->message);
                         break;
                     case CasesStatus::STATUS_SOLVED :
-                        $this->casesManageService->solved($case->cs_id, $creatorId, $form->message);
+                        $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message);
                         break;
                     case CasesStatus::STATUS_PENDING :
-                        $this->casesManageService->pending($case->cs_id, $creatorId, $form->message);
+                        $this->casesManageService->pending($case->cs_id, $user->id, $statusForm->message);
+                        break;
+                    case CasesStatus::STATUS_PROCESSING :
+                        $this->casesManageService->processing($case->cs_id, $statusForm->userId, $user->id, $statusForm->message);
                         break;
                     default:
                         Yii::$app->session->setFlash('error', 'Undefined status');
                         return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
                 }
 
-                Yii::$app->session->setFlash('success', 'Case Status changed successfully ("' . CasesStatus::getName($form->status) . '")');
-                return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+                Yii::$app->session->setFlash('success', 'Case Status changed successfully ("' . CasesStatus::getName($statusForm->statusId) . '")');
+
+            } catch (\DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::$app->session->setFlash('error', 'Server error');
+                Yii::error($e, 'CasesController:actionChangeStatus');
             }
 
-        } catch (\Throwable $exception) {
-            $form->addError('status', $exception->getMessage());
+            return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
         }
 
         return $this->renderAjax('partial/_change_status', [
-            'model' => $form,
-            'statusReasons' => $statusReasons
+            'statusForm' => $statusForm,
         ]);
     }
 
@@ -1302,8 +1313,7 @@ class CasesController extends FController
 				$form = new CasesSaleForm($caseSale, $this->casesSaleService);
 
 				if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
-
-					$decodedSaleData = json_decode( (string)$caseSale->css_sale_data_updated, true );
+					$decodedSaleData = json_decode( (string)($form->caseSale->css_sale_data_updated), true );
 
 					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
 					if (!$difference) {
@@ -1367,7 +1377,7 @@ class CasesController extends FController
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
 			$updatedData['sale_id'] = $caseSaleId;
 
-			$response = BackOffice::sendRequest2('cs/update-passengers', $updatedData);
+			$response = BackOffice::sendRequest2('cs/update-passengers', $updatedData, 'POST', 90);
 			if ($response->isOk) {
 
 				$responseResult = json_decode($response->content, true)['results'];

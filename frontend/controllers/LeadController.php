@@ -21,8 +21,11 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
-use common\models\search\OfferSearch;
-use common\models\search\OrderSearch;
+use modules\offer\src\entities\offer\search\OfferSearch;
+use modules\offer\src\entities\offerSendLog\CreateDto;
+use modules\offer\src\entities\offerSendLog\OfferSendLogType;
+use modules\offer\src\services\OfferSendLogService;
+use modules\order\src\entities\order\search\OrderCrudSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\UserProjectParams;
@@ -31,6 +34,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
+use modules\order\src\entities\order\search\OrderSearch;
 use PHPUnit\Framework\Warning;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
@@ -598,6 +602,13 @@ class LeadController extends FController
                                 $comForm->c_preview_email = 0;
                             } else {
 
+                                if ($comForm->offerList) {
+                                    $service = Yii::createObject(OfferSendLogService::class);
+                                    foreach ($comForm->offerList as $offerId) {
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $comForm->c_email_to));
+                                    }
+                                }
+
                                 $previewEmailForm->e_email_message = $mailPreview['data']['email_body_html'];
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
@@ -693,6 +704,14 @@ class LeadController extends FController
                                     Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'LeadController:view:smsPreview');
                                     $comForm->c_preview_sms = 0;
                                 } else {
+
+                                    if ($comForm->offerList) {
+                                        $service = Yii::createObject(OfferSendLogService::class);
+                                        foreach ($comForm->offerList as $offerId) {
+                                            $service->log(new CreateDto($offerId, OfferSendLogType::SMS, $user->id, $comForm->c_phone_number));
+                                        }
+                                    }
+
                                     //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
                                     $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
                                     $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);
@@ -1037,14 +1056,9 @@ class LeadController extends FController
         $searchModelOffer = new OfferSearch();
         $params = Yii::$app->request->queryParams;
         $params['OfferSearch']['of_lead_id'] = $lead->id;
-        $dataProviderOffers = $searchModelOffer->searchByLead($params);
+        $dataProviderOffers = $searchModelOffer->searchByLead($params, $user);
 
-
-        $searchModelOrder = new OrderSearch();
-        $params = Yii::$app->request->queryParams;
-        $params['OrderSearch']['or_lead_id'] = $lead->id;
-        $dataProviderOrders = $searchModelOrder->searchByLead($params);
-
+        $dataProviderOrders = (new OrderSearch())->searchByLead($lead->id);
 
         $modelLeadChecklist = new LeadChecklist();
 

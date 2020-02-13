@@ -50,6 +50,7 @@ use borales\extensions\phoneInput\PhoneInput;
             'customPlaceholder' => '',
             'allowDropdown' => false,
             'preferredCountries' => ['us'],
+            'customContainer' => 'intl-tel-input'
         ]
     ]) ?>
 

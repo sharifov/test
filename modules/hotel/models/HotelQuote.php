@@ -2,9 +2,11 @@
 
 namespace modules\hotel\models;
 
-use common\models\ProductQuote;
+use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuoteQuery;
-use sales\interfaces\QuoteCommunicationInterface;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\entities\serializer\Serializable;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -26,10 +28,9 @@ use yii\helpers\VarDumper;
  * @property Hotel $hqHotel
  * @property HotelList $hqHotelList
  * @property ProductQuote $hqProductQuote
- * @property array $extraData
  * @property HotelQuoteRoom[] $hotelQuoteRooms
  */
-class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
+class HotelQuote extends ActiveRecord implements Serializable
 {
     /**
      * @return string
@@ -157,10 +158,10 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
                     $prQuote->pq_client_currency = $currency;
 
                     $prQuote->pq_owner_user_id = Yii::$app->user->id;
-                    $prQuote->pq_price = floatval($totalAmount);
-                    $prQuote->pq_origin_price = floatval($totalAmount);
-                    $prQuote->pq_client_price = floatval($totalAmount);
-                    $prQuote->pq_status_id = ProductQuote::STATUS_PENDING;
+                    $prQuote->pq_price = (float)$totalAmount;
+                    $prQuote->pq_origin_price = (float)$totalAmount;
+                    $prQuote->pq_client_price = (float)$totalAmount;
+                    $prQuote->pq_status_id = ProductQuoteStatus::PENDING;
                     $prQuote->pq_gid = self::generateGid();
                     $prQuote->pq_service_fee_sum = 0;
                     $prQuote->pq_client_currency_rate = 1;
@@ -227,22 +228,8 @@ class HotelQuote extends ActiveRecord  implements QuoteCommunicationInterface
         return md5(uniqid('hq', true));
     }
 
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
+    public function serialize(): array
     {
-        $data = [];
-        $hotelQuoteRoomData = [];
-        if ($this->hotelQuoteRooms) {
-            foreach ($this->hotelQuoteRooms as $hotelQuoteRoom) {
-                $hotelQuoteRoomData[] = $hotelQuoteRoom->extraData;
-            }
-        }
-
-        $data['hotel'] = $this->hqHotelList ? $this->hqHotelList->extraData : [];
-        $data['rooms'] = $hotelQuoteRoomData;
-        return $data;
+        return (new HotelQuoteSerializer($this))->getData();
     }
-
 }

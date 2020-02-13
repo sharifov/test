@@ -7,9 +7,9 @@ use common\models\Employee;
 
 class Auth
 {
-    public static function id(): int
+    public static function id(): ?int
     {
-        return Yii::$app->user->id;
+        return Yii::$app->user->id ?? null;
     }
 
     public static function user(): Employee

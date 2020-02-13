@@ -19,6 +19,7 @@ use yii\widgets\Pjax;
  * @var $flight Flight
  * @var $dataProvider ArrayDataProvider
  * @var $searchForm FlightQuoteSearchForm
+ * @var $pjaxId string
  */
 
 if($quotes && (isset($quotes['count']) && $quotes['count'] > 0)):
@@ -56,6 +57,8 @@ if($quotes && (isset($quotes['count']) && $quotes['count'] > 0)):
 
 JS;
 	$this->registerJs($js);
+
+	$flightQuotes = \yii\helpers\ArrayHelper::getColumn($flight->flightQuotes, 'fq_hash_key');
 	?>
     <script>
         pjaxOffFormSubmit('#pjax-quote-filter');
@@ -76,8 +79,8 @@ JS;
                 <?= \yii\widgets\ListView::widget([
                     'dataProvider' => $dataProvider,
                     'emptyText' => '<div class="text-center">Not found quotes</div><br>',
-                    'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines) {
-                        return $this->render('_quote_search_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines]);
+                    'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes) {
+                        return $this->render('_quote_search_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines, 'flightQuotes' => $flightQuotes]);
                     },
                     'layout' => '{summary}{pager}{items}{pager}',
                     'itemOptions' => [
@@ -85,10 +88,6 @@ JS;
                     ]
                 ]) ?>
 	    </div>
-    <?php Pjax::end(); ?>
-
-
-
 <?php
 $urlCreateFlightQuoteFromSearch = Url::to(['/flight/flight-quote/ajax-add-quote']);
 $js = <<<JS
@@ -110,7 +109,7 @@ $js = <<<JS
         $('.search-results__wrapper').removeClass('loading');
     });
     
-    $('.flight_create_quote__btn', document).off().on('click', function (e) {
+    $('#flight-details__modal, .search-result__quote').off().on('click', '.flight_create_quote__btn', function (e) {
         e.preventDefault();
         var key = $(this).data('key');
         var gds = $(this).data('gds');
@@ -120,6 +119,9 @@ $js = <<<JS
             url: '$urlCreateFlightQuoteFromSearch',
             type: 'post',
             data: {'key': key, 'gds': gds, flightId: '$flightId'},
+            beforeSend: function () {
+              $('#'+searchResId).addClass('loading');
+            },
             success: function (data) {
                 var error = '';
                 
@@ -127,9 +129,9 @@ $js = <<<JS
                 if(data.status == true){
                     //$('#search-results__modal').modal('hide');
                     $('#flight-details__modal').modal('hide');
-                    $('#'+searchResId).addClass('quote--selected');
+                    $('#'+searchResId).addClass('quote--selected').find('.flight_create_quote__btn').remove();
 
-                    $.pjax.reload({container: '#quotes_list', async: false});
+                    // $.pjax.reload({container: '#quotes_list', async: false});
                     $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
                     
                     new PNotify({
@@ -139,9 +141,9 @@ $js = <<<JS
                         hide: true
                     });
                     
+                    $.pjax.reload({container: '#$pjaxId', url: "/flight/flight/pjax-flight-request-view?pr_id=$flight->fl_product_id",  push: false, replace: false, timeout: 2000});
                 } else {
-                   
-                     if(data.error) {
+                    if(data.error) {
                         error = data.error;    
                     } else {
                         error = 'Some errors was happened during create quote. Please try again later';
@@ -153,18 +155,21 @@ $js = <<<JS
                         text: error,
                         hide: true
                     });
-                    
-                   
                 }
             },
             error: function (error) {
                 console.log('Error: ' + error);
+            },
+            complete: function () {
+              $('#'+searchResId).removeClass('loading');
             }
         });
     });
 JS;
 $this->registerJs($js);
 ?>
+    <?php Pjax::end(); ?>
+
 <?php else:?>
 	<div class="search-results__wrapper">
 		<?php if (!empty($errorMessage)): ?>

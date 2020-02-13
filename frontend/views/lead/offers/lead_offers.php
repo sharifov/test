@@ -6,6 +6,7 @@
  */
 
 use common\models\Lead;
+use yii\helpers\Url;
 use yii\web\View;
 use yii\bootstrap4\Html;
 
@@ -22,7 +23,7 @@ use yii\bootstrap4\Html;
         <ul class="nav navbar-right panel_toolbox">
             <li>
                 <?= Html::a('<i class="fa fa-plus-circle success"></i> add Offer', null, [
-                    'data-url' => \yii\helpers\Url::to(['/offer/create-ajax', 'id' => $lead->id]),
+                    'data-url' => \yii\helpers\Url::to(['/offer/offer/create-ajax', 'id' => $lead->id]),
                     'class' => 'btn btn-light btn-create-offer'
                 ])?>
             </li>
@@ -57,8 +58,6 @@ use yii\bootstrap4\Html;
 </div>
 <?php yii\widgets\Pjax::end() ?>
 
-
-
 <?php
 
 $js = <<<JS
@@ -73,10 +72,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Add offer');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -89,10 +92,14 @@ $js = <<<JS
         modal.find('.modal-title').html('Update offer');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
         });
     });
     
@@ -153,6 +160,69 @@ $js = <<<JS
       // return false;
     });
     
+     $(document).on('click', '.btn-offer-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Offer [' + gid + '] status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+            //$('#preloader').addClass('d-none');
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+     });
+    
+     $(document).on('click', '.btn-offer-send-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-md');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Offer [' + gid + '] send history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+     });
+    
+     $(document).on('click', '.btn-offer-view-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Offer [' + gid + '] view history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+     });
+     
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY, 'lead-offer-js');

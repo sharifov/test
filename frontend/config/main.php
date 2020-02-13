@@ -1,6 +1,12 @@
 <?php
 
 use common\models\Employee;
+use modules\flight\FlightModule;
+use modules\hotel\HotelModule;
+use modules\invoice\InvoiceModule;
+use modules\offer\OfferModule;
+use modules\order\OrderModule;
+use modules\product\ProductModule;
 use sales\yii\i18n\Formatter;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
@@ -244,11 +250,27 @@ return [
 
 
         'flight' => [
-            'class' => \modules\flight\FlightModule::class,
+            'class' => FlightModule::class,
         ],
 
         'hotel' => [
-            'class' => \modules\hotel\HotelModule::class,
+            'class' => HotelModule::class,
+        ],
+
+        'product' => [
+            'class' => ProductModule::class,
+        ],
+
+        'offer' => [
+            'class' => OfferModule::class,
+        ],
+
+        'order' => [
+            'class' => OrderModule::class,
+        ],
+
+        'invoice' => [
+            'class' => InvoiceModule::class,
         ],
 
     ],

@@ -27,7 +27,7 @@ class WebSocketAsset extends AssetBundle
 
     public $js = [
         'js/pnotify/pnotify.custom.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/js/ion.sound.min.js'
+        //'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/js/ion.sound.min.js'
         /*'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.js',
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.desktop.js',
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.animate.js',

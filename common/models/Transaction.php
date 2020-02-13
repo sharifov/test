@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use modules\invoice\src\entities\invoice\Invoice;
 use Yii;
 
 /**

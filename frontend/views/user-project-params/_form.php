@@ -48,6 +48,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'customPlaceholder' => '',
                 'allowDropdown' => false,
                 'preferredCountries' => ['us'],
+                'customContainer' => 'intl-tel-input'
             ]
         ]) ?>
 

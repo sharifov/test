@@ -8,6 +8,9 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
 use DateTime;
+use modules\offer\src\entities\offer\Offer;
+use modules\order\src\entities\order\Order;
+use modules\product\src\entities\product\Product;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
@@ -3856,7 +3859,7 @@ Reason: {reason}
             foreach ($offerIds as $ofId) {
                 $offerModel = Offer::findOne($ofId);
                 if($offerModel) {
-                    $offerItem = $offerModel->communicationData; //attributes;
+                    $offerItem = $offerModel->serialize(); //attributes;
                     //$quoteItem = array_merge($quoteItem, $offerModel->getInfoForEmail2());
                     $content_data['offers'][] = $offerItem;
                 }
@@ -4472,5 +4475,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
         return $str;
     }
+
+	/**
+	 * @return bool
+	 */
+    public function isInTrash(): bool
+	{
+		return $this->status === self::STATUS_TRASH;
+	}
 
 }

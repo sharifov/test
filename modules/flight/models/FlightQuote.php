@@ -2,8 +2,13 @@
 
 namespace modules\flight\models;
 
+use common\models\Airline;
 use common\models\Employee;
-use common\models\ProductQuote;
+use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
+use sales\entities\EventTrait;
+use sales\entities\serializer\Serializable;
 use sales\interfaces\QuoteCommunicationInterface;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -42,11 +47,12 @@ use modules\flight\models\query\FlightQuoteQuery;
  * @property FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @property FlightQuoteSegment[] $flightQuoteSegments
  * @property FlightQuoteStatusLog[] $flightQuoteStatusLogs
- * @property array $extraData
  * @property FlightQuoteTrip[] $flightQuoteTrips
+ * @property Airline $mainAirline
  */
-class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
+class FlightQuote extends ActiveRecord implements Serializable
 {
+	use EventTrait;
 
 	public const FARE_TYPE_PUBLIC = 'PUB';
 	public const FARE_TYPE_PRIVATE = 'SR';
@@ -58,6 +64,13 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 		self::FARE_TYPE_PRIVATE => 'Private',
 		self::FARE_TYPE_COMMISSION => 'Commission',
 		self::FARE_TYPE_TOUR => 'Tour',
+	];
+
+	public const FARE_TYPE_ID_LIST = [
+		self::FARE_TYPE_PUBLIC => 1,
+		self::FARE_TYPE_PRIVATE => 2,
+		self::FARE_TYPE_COMMISSION => 3,
+		self::FARE_TYPE_TOUR => 4
 	];
 
 	public const STOPS_DIRECT = 0;
@@ -114,7 +127,19 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 		self::SORT_BY_DURATION_DESC	=> 'duration',
 	];
 
-    /**
+	public const TYPE_BASE = 0;
+	public const TYPE_ORIGINAL = 1;
+	public const TYPE_ALTERNATIVE = 2;
+
+	public const TYPE_LIST = [
+		self::TYPE_BASE => 'Base',
+		self::TYPE_ORIGINAL => 'Original',
+		self::TYPE_ALTERNATIVE => 'Alternative',
+	];
+
+	public const SERVICE_FEE = 0.035;
+
+	/**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -129,9 +154,9 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
     {
         return [
             [['fq_flight_id'], 'required'],
-            [['fq_flight_id', 'fq_source_id', 'fq_product_quote_id', 'fq_gds_offer_id', 'fq_type_id', 'fq_trip_type_id', 'fq_fare_type_id', 'fq_created_user_id', 'fq_created_expert_id'], 'integer'],
+            [['fq_flight_id', 'fq_source_id', 'fq_product_quote_id', 'fq_type_id', 'fq_trip_type_id', 'fq_fare_type_id', 'fq_created_user_id', 'fq_created_expert_id'], 'integer'],
             [['fq_service_fee_percent'], 'number'],
-            [['fq_reservation_dump', 'fq_pricing_info'], 'string'],
+            [['fq_reservation_dump', 'fq_pricing_info', 'fq_gds_offer_id'], 'string'],
             [['fq_origin_search_data', 'fq_last_ticket_date'], 'safe'],
             [['fq_hash_key', 'fq_request_hash'], 'string', 'max' => 32],
             [['fq_record_locator'], 'string', 'max' => 8],
@@ -139,7 +164,7 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
             [['fq_gds_pcc'], 'string', 'max' => 10],
             [['fq_cabin_class'], 'string', 'max' => 1],
             [['fq_created_expert_name'], 'string', 'max' => 20],
-            [['fq_hash_key'], 'unique'],
+            [['fq_flight_id', 'fq_hash_key'], 'unique', 'targetAttribute' => ['fq_flight_id', 'fq_hash_key'] , 'message' => 'Flight already have this quote;'],
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
@@ -202,6 +227,14 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'fq_product_quote_id']);
     }
 
+	/**
+	 * @return ActiveQuery
+	 */
+	public function getMainAirline(): ActiveQuery
+	{
+		return $this->hasOne(Airline::class, ['iata' => 'fq_main_airline']);
+	}
+
     /**
      * @return ActiveQuery
      */
@@ -242,15 +275,6 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
     {
         return new FlightQuoteQuery(static::class);
     }
-
-    /**
-     * @return array
-     */
-    public function getExtraData(): array
-    {
-        return []; // TODO: Implement getExtraData() method.
-    }
-
 
 	/**
 	 * @return array
@@ -340,10 +364,140 @@ class FlightQuote extends ActiveRecord implements QuoteCommunicationInterface
 	}
 
 	/**
-	 *
+	 * @param string $fareType
+	 * @return int|null
 	 */
-	public static function create()
+	public static function getFareTypeId(string $fareType): ?int
 	{
+		return self::FARE_TYPE_ID_LIST[$fareType] ?? null;
+	}
 
+	/**
+	 * @param FlightQuoteCreateDTO $dto
+	 * @return FlightQuote
+	 */
+	public static function create(FlightQuoteCreateDTO $dto): FlightQuote
+	{
+		$flightQuote = new self();
+
+		$flightQuote->fq_flight_id = $dto->flightId;
+		$flightQuote->fq_source_id = $dto->sourceId;
+		$flightQuote->fq_product_quote_id = $dto->productQuoteId;
+		$flightQuote->fq_hash_key = $dto->hashKey;
+		$flightQuote->fq_service_fee_percent = $dto->serviceFeePercent;
+		$flightQuote->fq_record_locator = $dto->recordLocator;
+		$flightQuote->fq_gds = $dto->gds;
+		$flightQuote->fq_gds_offer_id = $dto->gdsOfferId;
+		$flightQuote->fq_gds_pcc = $dto->gdsPcc;
+		$flightQuote->fq_type_id = $dto->typeId;
+		$flightQuote->fq_cabin_class = $dto->cabinClass;
+		$flightQuote->fq_trip_type_id = $dto->tripTypeId;
+		$flightQuote->fq_main_airline = $dto->mainAirline;
+		$flightQuote->fq_fare_type_id = $dto->fareType;
+		$flightQuote->fq_created_user_id = $dto->createdUserId;
+		$flightQuote->fq_created_expert_id = $dto->createdExpertId;
+		$flightQuote->fq_created_expert_name = $dto->createdExpertName;
+		$flightQuote->fq_reservation_dump = $dto->reservationDump;
+		$flightQuote->fq_pricing_info = $dto->pricingInfo;
+		$flightQuote->fq_origin_search_data = $dto->originSearchData;
+		$flightQuote->fq_last_ticket_date = $dto->lastTicketDate;
+		$flightQuote->fq_request_hash = $dto->requestHash;
+		return $flightQuote;
+	}
+
+	/**
+	 * @param $type
+	 * @return mixed|string
+	 */
+	public static function getTypeName(int $type)
+	{
+		return self::TYPE_LIST[$type] ?? '-';
+	}
+
+	public function isBase(): bool
+	{
+		return $this->fq_type_id === self::TYPE_BASE;
+	}
+
+	public function base(): void
+	{
+		$this->fq_type_id = self::TYPE_BASE;
+	}
+
+	public function isOriginal(): bool
+	{
+		return $this->fq_type_id === self::TYPE_ORIGINAL;
+	}
+
+	public function original(): void
+	{
+		$this->fq_type_id = self::TYPE_ORIGINAL;
+	}
+
+	public function isAlternative(): bool
+	{
+		return $this->fq_type_id === self::TYPE_ALTERNATIVE;
+	}
+
+	public function alternative(): void
+	{
+		$this->fq_type_id = self::TYPE_ALTERNATIVE;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function createdByExpert(): bool
+	{
+		return $this->fq_created_expert_id ? true : false;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getEmployeeName(): string
+	{
+		$createdByExpert = $this->createdByExpert();
+
+		if ($createdByExpert) {
+			return $this->fq_created_expert_name;
+		}
+
+		return $this->fqCreatedUser->username;
+	}
+
+	/**
+	 * @param ProductQuote $productQuote
+	 * @return FlightQuote|null
+	 */
+	public static function findByProductQuote(ProductQuote $productQuote): ?FlightQuote
+	{
+		return self::findOne(['fq_product_quote_id' => $productQuote->pq_id]);
+	}
+
+	public function serialize(): array
+    {
+        return (new FlightQuoteSerializer($this))->getData();
+    }
+
+
+	/**
+	 * @return float
+	 */
+	public function getServiceFeePercent(): float
+	{
+		return $this->fq_service_fee_percent ?? 0.00;
+	}
+
+	/**
+	 * @return float|int
+	 */
+	public function getProcessingFee()
+	{
+		$processingFeeAmount = $this->fqProductQuote->pqProduct->prType->getProcessingFeeAmount();
+
+		$flight = $this->fqFlight;
+
+		return ($flight->fl_adults + $flight->fl_children) * $processingFeeAmount;
 	}
 }
