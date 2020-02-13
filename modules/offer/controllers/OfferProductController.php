@@ -2,9 +2,13 @@
 
 namespace modules\offer\controllers;
 
+use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\offer\src\entities\offerProduct\OfferProductRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
+
+use sales\helpers\app\AppHelper;
 use Yii;
 use frontend\controllers\FController;
 use yii\db\Exception;
@@ -15,8 +19,26 @@ use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
+/**
+ * @property OfferProductRepository $offerProductRepository
+ */
 class OfferProductController extends FController
 {
+    private $offerProductRepository;
+
+    /**
+     * OfferProductController constructor.
+     * @param $id
+     * @param $module
+     * @param OfferProductRepository $offerProductRepository
+     * @param array $config
+     */
+    public function __construct($id, $module, OfferProductRepository $offerProductRepository,  $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->offerProductRepository = $offerProductRepository;
+    }
+
     /**
      * @return array
      */
@@ -122,37 +144,15 @@ class OfferProductController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         try {
-            if (!$offerId) {
-                throw new Exception('OfferId param is empty', 2);
-            }
+            $model = $this->offerProductRepository->find($offerId, $productQuoteId);
+            $model->prepareRemove();
+            $this->offerProductRepository->remove($model);
 
-            if (!$productQuoteId) {
-                throw new Exception('ProductQuoteId param is empty', 3);
-            }
-
-            $model = $this->findModel($offerId, $productQuoteId);
-            if (!$model->delete()) {
-                throw new Exception('Offer Product (offer: '.$offerId.', quote: '.$productQuoteId.') not deleted', 4);
-            }
         } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableFormatter($throwable),'OfferProductController:' . __FUNCTION__  . ':Exception');
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
         return ['message' => 'Successfully removed product quote (' . $productQuoteId . ') from offer (' . $offerId . ')'];
-    }
-
-    /**
-     * @param $op_offer_id
-     * @param $op_product_quote_id
-     * @return OfferProduct
-     * @throws NotFoundHttpException
-     */
-    protected function findModel($op_offer_id, $op_product_quote_id): OfferProduct
-    {
-        if (($model = OfferProduct::findOne(['op_offer_id' => $op_offer_id, 'op_product_quote_id' => $op_product_quote_id])) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

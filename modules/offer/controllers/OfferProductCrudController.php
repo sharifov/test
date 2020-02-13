@@ -3,6 +3,7 @@
 namespace modules\offer\controllers;
 
 use sales\auth\Auth;
+use sales\dispatchers\EventDispatcher;
 use Yii;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\entities\offerProduct\search\OfferProductCrudSearch;
@@ -13,10 +14,25 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
- * Class OfferProductCrudController
+ * @property EventDispatcher $eventDispatcher
  */
 class OfferProductCrudController extends FController
 {
+    private $eventDispatcher;
+
+    /**
+     * OfferProductCrudController constructor.
+     * @param $id
+     * @param $module
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, EventDispatcher $eventDispatcher, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @return array
      */
