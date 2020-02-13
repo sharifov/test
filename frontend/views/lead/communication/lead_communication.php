@@ -27,7 +27,7 @@ $c_type_id = $comForm->c_type_id;
         <ul class="nav navbar-right panel_toolbox">
             <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
-            <?/*<li class="dropdown">
+            <?php /*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <ul class="dropdown-menu" role="menu">
                     <li><a href="#">Settings 1</a>
@@ -43,7 +43,7 @@ $c_type_id = $comForm->c_type_id;
     </div>
     <div class="x_content" style="display: block;">
     <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication' ,'enablePushState' => false]) ?>
-        <?/*<h1><?=random_int(1, 100)?></h1>*/ ?>
+        <?php /*<h1><?=random_int(1, 100)?></h1>*/ ?>
         <div class="panel">
             <div class="chat__list">
 
@@ -218,7 +218,7 @@ $c_type_id = $comForm->c_type_id;
 
                             <div class="col-sm-6 form-group">
                                 <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                                <?//= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
+                                <?php //= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
                                 <?= $form3->field($previewSmsForm, 's_language_id')->hiddenInput()->label(false); ?>
                                 <?= $form3->field($previewSmsForm, 's_sms_tpl_id')->hiddenInput()->label(false); ?>
                                 <?= $form3->field($previewSmsForm, 's_quote_list')->hiddenInput()->label(false) ?>
@@ -361,12 +361,12 @@ $c_type_id = $comForm->c_type_id;
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
-                                <?//= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
+                                <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
                                 <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                                <?//= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
+                                <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
                                 <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                             </div>
 
@@ -409,7 +409,7 @@ $c_type_id = $comForm->c_type_id;
 
                         <div id="email-input-box" class="message-field-email" style="display: none;">
                             <div class="form-group" id="email-textarea-div">
-                                <?//= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
+                                <?php //= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
 
 
                                 <?php
@@ -424,7 +424,7 @@ $c_type_id = $comForm->c_type_id;
                                     ]);
                                 ?>
 
-<!--                                --><?//= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
+<!--                                --><?php //= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
 //                                    'options' => [
 //                                        'rows' => 6,
 //                                        'readonly' => false
@@ -485,10 +485,10 @@ $c_type_id = $comForm->c_type_id;
                                         'disabled' => ($comForm->c_voice_status == 1 ? true : false)
                                     ]) ?>
 
-                                    <?/*<a href="#" class="call-phone" data-project-id="6" data-lead-id="92138" data-phone="+37369594567">+37369594567</a> - Alex <br/>*/?>
+                                    <?php /*<a href="#" class="call-phone" data-project-id="6" data-lead-id="92138" data-phone="+37369594567">+37369594567</a> - Alex <br/>*/?>
 
-                                    <?//= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
-                                    <?/*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
+                                    <?php //= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
+                                    <?php /*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
                                 </div>
                             <?php else: ?>
                                 <div class="call-box__btns">

@@ -35,11 +35,11 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
                     ]) ?>
                 </li>
 
-                <?//php if ($is_manager) : ?>
+                <?php //php if ($is_manager) : ?>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                     <div class="dropdown-menu" role="menu">
-                        <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+                        <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
@@ -56,7 +56,7 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
 
                     </div>
                 </li>
-                <?//php endif; ?>
+                <?php //php endif; ?>
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>

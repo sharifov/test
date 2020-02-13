@@ -134,7 +134,7 @@ $user = Yii::$app->user->identity;
 
                 <div class="form-group">
                     <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-warning']) ?>
-                    <?//= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                    <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
                 </div>
                 <?php ActiveForm::end(); ?>
             </div>

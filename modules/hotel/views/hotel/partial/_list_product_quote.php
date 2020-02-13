@@ -139,9 +139,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
         <span class="badge badge-white">Q<?=($model->hq_product_quote_id)?></span> Hotel "<b><?=\yii\helpers\Html::encode($model->hqHotelList->hl_name)?></b>"
             (<?=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>),
-            <?//=\yii\helpers\Html::encode($model->hqProductQuote->pq_name)?>
+            <?php //=\yii\helpers\Html::encode($model->hqProductQuote->pq_name)?>
             <?=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
-             <?//=\yii\helpers\Html::encode($model->hqProductQuote->pq_gid)?>
+             <?php //=\yii\helpers\Html::encode($model->hqProductQuote->pq_gid)?>
 
         | <?= ProductQuoteStatus::asFormat($model->hqProductQuote->pq_status_id) ?>
 
@@ -171,11 +171,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <h6 class="dropdown-header">Quote Q<?=($model->hq_product_quote_id)?></h6>
-                    <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+                    <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
-                   <?/* <div class="dropdown-divider"></div>
+                   <?php /* <div class="dropdown-divider"></div>
 
                     <!-- Level three dropdown-->
                     <div class="dropdown-submenu">
@@ -262,7 +262,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     </div>
     <div class="x_content" style="display: block">
 
-        <?/*= $this->render('../quotes/quote_list', [
+        <?php /*= $this->render('../quotes/quote_list', [
             'dataProvider' => $quotesProvider,
             'lead' => $lead,
             'leadForm' => $leadForm,
@@ -304,7 +304,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
                 <tr>
 <!--                    <td>-->
-<!--                        --><?////=Html::encode($room->hqr_id)?>
+<!--                        --><?php ////=Html::encode($room->hqr_id)?>
 <!--                        --><?php
 //                            //\yii\helpers\VarDumper::dump($room->attributes, 10, true);
 //                        ?>
@@ -314,7 +314,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     <td title="code: <?=Html::encode($room->hqr_code)?>, class: <?=Html::encode($room->hqr_class)?>"><?=Html::encode($room->hqr_room_name)?></td>
 
 
-<!--                    <td>--><?//=Html::encode($room->hqr_payment_type)?><!--</td>-->
+<!--                    <td>--><?php //=Html::encode($room->hqr_payment_type)?><!--</td>-->
                     <td title="code: <?=Html::encode($room->hqr_board_code)?>">
                         <?=Html::encode($room->hqr_board_name)?>
                         <?php if ($room->hqr_rate_comments):?>
@@ -328,7 +328,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
                         <?php endif; ?>
                     </td>
-<!--                    <td>--><?////=Html::encode($room->hqr_id)?><!--</td>-->
+<!--                    <td>--><?php ////=Html::encode($room->hqr_id)?><!--</td>-->
                     <td class="text-right"><?=number_format($room->hqr_amount, 2)?> <?=Html::encode($room->hqr_currency)?></td>
                 </tr>
                 <?php endforeach; ?>
@@ -386,7 +386,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     <td class="text-center" style="width: 120px"><?= ProductQuoteOptionStatus::asFormat($quoteOption->pqo_status_id)?></td>
                     <td class="text-right" title="Extra Markup"><?=number_format($quoteOption->pqo_extra_markup, 2)?> USD</td>
                     <td class="text-right"><?=number_format($quoteOption->pqo_price, 2)?> USD</td>
-<!--                    <td class="text-right">--><?//=number_format($quoteOption->pqo_client_price, 2)?><!-- --><?//=Html::encode($model->hqProductQuote->pq_client_currency)?><!--</td>-->
+<!--                    <td class="text-right">--><?php //=number_format($quoteOption->pqo_client_price, 2)?><!-- --><?php //=Html::encode($model->hqProductQuote->pq_client_currency)?><!--</td>-->
                     <td>
                         <?php
                         echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i>', null, [
@@ -421,7 +421,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         <?=number_format($totalAmountOption, 2)?> USD
                     </th>
 <!--                    <td class="text-right">-->
-<!--                        <b>--><?//=number_format($totalClientAmount, 2)?><!-- --><?//=Html::encode($model->hqProductQuote->pq_client_currency)?><!--</b>-->
+<!--                        <b>--><?php //=number_format($totalClientAmount, 2)?><!-- --><?php //=Html::encode($model->hqProductQuote->pq_client_currency)?><!--</b>-->
 <!--                    </td>-->
                     <th></th>
                 </tr>

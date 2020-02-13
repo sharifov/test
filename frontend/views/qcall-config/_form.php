@@ -30,13 +30,13 @@ use yii\widgets\ActiveForm;
 
      <?= $form->field($model, 'qc_phone_switch')->checkbox() ?>
 
-<!--    --><?//= $form->field($model, 'qc_created_dt')->textInput() ?>
+<!--    --><?php //= $form->field($model, 'qc_created_dt')->textInput() ?>
 <!---->
-<!--    --><?//= $form->field($model, 'qc_updated_dt')->textInput() ?>
+<!--    --><?php //= $form->field($model, 'qc_updated_dt')->textInput() ?>
 <!---->
-<!--    --><?//= $form->field($model, 'qc_created_user_id')->textInput() ?>
+<!--    --><?php //= $form->field($model, 'qc_created_user_id')->textInput() ?>
 <!---->
-<!--    --><?//= $form->field($model, 'qc_updated_user_id')->textInput() ?>
+<!--    --><?php //= $form->field($model, 'qc_updated_user_id')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save Config', ['class' => 'btn btn-success']) ?>

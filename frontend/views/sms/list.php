@@ -45,7 +45,7 @@ $user = Yii::$app->user->identity;
 
     <p>
 
-        <?//= Html::a('<i class="fa fa-plus"></i> Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('<i class="fa fa-plus"></i> Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
 
         <?= Html::a('<i class="fa fa-check"></i> Make Read All', ['all-read'], [
             'class' => 'btn btn-info',
@@ -86,7 +86,7 @@ $user = Yii::$app->user->identity;
 
             </table>
 
-            <?/*<div class="tile-stats">
+            <?php /*<div class="tile-stats">
                 <div class="icon"><i class="fa fa-comments"></i></div>
                 <div class="count">
 

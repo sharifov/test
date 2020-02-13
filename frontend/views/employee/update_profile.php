@@ -101,7 +101,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
                 </div>*/ ?>
                 <div class="col-md-6">
-                    <?//= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+                    <?php //= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
 
                     <?php
                     echo $form->field($modelUserParams, 'up_timezone')->widget(\kartik\select2\Select2::class, [

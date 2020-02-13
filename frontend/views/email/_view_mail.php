@@ -85,7 +85,7 @@ use yii\widgets\ActiveForm;
         <object width="100%" height="800" data="<?=\yii\helpers\Url::to(['email/view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
     </div>
 
-    <?/*<div class="attachment">
+    <?php /*<div class="attachment">
         <p>
             <span><i class="fa fa-paperclip"></i> 3 attachments — </span>
             <a href="#">Download all attachments</a> |
@@ -142,7 +142,7 @@ use yii\widgets\ActiveForm;
 
         </ul>
     </div>*/?>
-    <?/*<div class="btn-group">
+    <?php /*<div class="btn-group">
         <button class="btn btn-sm btn-primary" type="button"><i class="fa fa-reply"></i> Reply</button>
         <button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Forward"><i class="fa fa-share"></i></button>
         <button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Print"><i class="fa fa-print"></i></button>

@@ -48,11 +48,11 @@ use yii\helpers\Html;
             <ul class="nav navbar-nav navbar-right">
                 <li class="">
                     <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                        <?/*<img src="http://placehold.it/128x128" alt="">*/ ?>
+                        <?php /*<img src="http://placehold.it/128x128" alt="">*/ ?>
 
-                        <?//=Html::img($grav_url, ['alt' => 'avatar'])?>
+                        <?php //=Html::img($grav_url, ['alt' => 'avatar'])?>
 
-                        <?/*php
+                        <?php /*php
                             $myRolesModel = \webvimark\modules\UserManagement\models\rbacDB\Role::getUserRoles(Yii::$app->user->id);
                             $myRoles = [];
                             if($myRolesModel) {
@@ -64,13 +64,13 @@ use yii\helpers\Html;
 
                         ?>
                         <b><?=implode(', ', $myRoles) ; ?></b>:
-                        <?/*=Html::encode(Yii::$app->user->identity->username)*/?>
+                        <?php /*=Html::encode(Yii::$app->user->identity->username)*/?>
                         Menu
 
                         <span class=" fa fa-angle-down"></span>
                     </a>
                     <ul class="dropdown-menu dropdown-usermenu pull-right">
-                        <?/*<li><a href="javascript:;">  Profile</a>
+                        <?php /*<li><a href="javascript:;">  Profile</a>
                         </li>
                         <li>
                             <a href="javascript:;">
@@ -85,7 +85,7 @@ use yii\helpers\Html;
                         <li>
                             <?=Html::a('<i class="fa fa-home pull-right"></i> Home', ['/site/index'],
                                 ['title' => 'Home']) ?>
-                            <?/*=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
+                            <?php /*=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
                                 ['title' => "My Profile"])*/ ?>
                             <?=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/site/logout'],
                                 ['title' => "Logout"]) ?>
@@ -95,7 +95,7 @@ use yii\helpers\Html;
                         </li>
                     </ul>
                 </li>
-                <?//= frontend\widgets\Notifications::widget(); ?>
+                <?php //= frontend\widgets\Notifications::widget(); ?>
                 <?= frontend\widgets\OnlineConnection::widget() ?>
 
                 <li>

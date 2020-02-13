@@ -76,7 +76,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <div class="row">
                     <div class="col-sm-6">
                         <?php if($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()): ?>
-                            <?//= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
+                            <?php //= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
 
                             <?php
                                 echo $form->field($model, 'form_roles')->widget(\kartik\select2\Select2::class, [
@@ -226,7 +226,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
                         </div>
                         <div class="col-md-6">
-                            <?//= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+                            <?php //= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
                             <?php
                             echo $form->field($modelUserParams, 'up_timezone')->widget(\kartik\select2\Select2::class, [
                                 'data' => Employee::timezoneList(true),
@@ -390,7 +390,7 @@ JS;
             <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
             <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-upp']); ?>
             <p>
-                <?//= Html::a('Create User Project Params', ['user-project-params/create'], ['class' => 'btn btn-success']) ?>
+                <?php //= Html::a('Create User Project Params', ['user-project-params/create'], ['class' => 'btn btn-success']) ?>
 
                 <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Create Project Params',null,
                     [
@@ -591,7 +591,7 @@ JS;
 
 
     <?php endif; ?>
-    <?/*= $this->render('partial/_activities', [
+    <?php /*= $this->render('partial/_activities', [
         'model' => $model
     ])*/ ?>
 

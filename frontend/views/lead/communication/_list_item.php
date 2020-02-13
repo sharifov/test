@@ -20,7 +20,7 @@ $fromType = 'client';
 
 ?>
 
-<?//php \yii\helpers\VarDumper::dump($model, 10, true) ?>
+<?php //php \yii\helpers\VarDumper::dump($model, 10, true) ?>
 
 <?php if($model['type'] === 'voice'):
 
@@ -55,7 +55,7 @@ $fromType = 'client';
 
             <?php if($call->isIn()):?>
                 <div class="chat__sender">
-                    <i class="fa fa-phone" title="<?=Html::encode($call->c_from)?>"></i> <?//php $call->cClient ? Html::encode($call->cClient->full_name) : ''?>
+                    <i class="fa fa-phone" title="<?=Html::encode($call->c_from)?>"></i> <?php //php $call->cClient ? Html::encode($call->cClient->full_name) : ''?>
                     to <b><?=($call->cCreatedUser ? '<i class="fa fa-user"></i> '.Html::encode($call->cCreatedUser->username) : '-') ?></b>
                 </div>
             <?php else: ?>

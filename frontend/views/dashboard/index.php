@@ -30,7 +30,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
 
 
 ?>
-<?/*<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>*/?>
+<?php /*<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>*/?>
 
 <?php
 
@@ -575,7 +575,7 @@ JS;
 
                     <div class="form-group">
                         <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-primary']) ?>
-                        <?//= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                        <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
                     </div>
                     <?php ActiveForm::end(); ?>
                 </div>

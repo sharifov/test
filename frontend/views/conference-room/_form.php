@@ -19,7 +19,7 @@ use common\models\ConferenceRoom;
 
         <?= $form->field($model, 'cr_name')->textInput(['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 'cr_phone_number')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'cr_phone_number')->textInput(['maxlength' => true]) ?>
         <?= $form->field($model, 'cr_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
             'jsOptions' => [
                 'formatOnDisplay' => false,
@@ -37,7 +37,7 @@ use common\models\ConferenceRoom;
 
 
 
-    <?//= $form->field($model, 'cr_start_dt')->textInput() ?>
+    <?php //= $form->field($model, 'cr_start_dt')->textInput() ?>
 
     <?= $form->field($model, 'cr_start_dt')->widget(\dosamigos\datetimepicker\DateTimePicker::class, [
         'language' => 'en',
@@ -82,10 +82,10 @@ use common\models\ConferenceRoom;
 
 
 
-    <?//= $form->field($model, 'cr_end_dt')->textInput() ?>
+    <?php //= $form->field($model, 'cr_end_dt')->textInput() ?>
 
 
-    <?//= $form->field($model, 'cr_moderator_phone_number')->textInput(['maxlength' => true]) ?>
+    <?php //= $form->field($model, 'cr_moderator_phone_number')->textInput(['maxlength' => true]) ?>
     <?= $form->field($model, 'cr_moderator_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
         'jsOptions' => [
             'formatOnDisplay' => false,
@@ -130,13 +130,13 @@ use common\models\ConferenceRoom;
 
 
     <!---->
-    <!--    --><?//= $form->field($model, 'cr_created_dt')->textInput() ?>
+    <!--    --><?php //= $form->field($model, 'cr_created_dt')->textInput() ?>
     <!---->
-    <!--    --><?//= $form->field($model, 'cr_updated_dt')->textInput() ?>
+    <!--    --><?php //= $form->field($model, 'cr_updated_dt')->textInput() ?>
     <!---->
-    <!--    --><?//= $form->field($model, 'cr_created_user_id')->textInput() ?>
+    <!--    --><?php //= $form->field($model, 'cr_created_user_id')->textInput() ?>
     <!---->
-    <!--    --><?//= $form->field($model, 'cr_updated_user_id')->textInput() ?>
+    <!--    --><?php //= $form->field($model, 'cr_updated_user_id')->textInput() ?>
 
 
     </div>

@@ -123,7 +123,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
 
 
-                        <?/*php if($isAdmin):*/ ?>
+                        <?php /*php if($isAdmin):*/ ?>
                             <?= frontend\widgets\OnlineConnection::widget() ?>
                             <?= frontend\widgets\Notifications::widget() ?>
 
@@ -132,9 +132,9 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                             <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>
                         </li>
 
-                        <?/*php endif;*/?>
+                        <?php /*php endif;*/?>
 
-                        <?//= frontend\widgets\ChatNotifications::widget(); ?>
+                        <?php //= frontend\widgets\ChatNotifications::widget(); ?>
 
                     </ul>
                 </nav>

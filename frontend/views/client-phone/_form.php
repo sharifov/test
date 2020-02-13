@@ -17,8 +17,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'phone', ['enableClientValidation' => false])->textInput(['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 'created')->textInput() ?>
-        <?//= $form->field($model, 'updated')->textInput() ?>
+        <?php //= $form->field($model, 'created')->textInput() ?>
+        <?php //= $form->field($model, 'updated')->textInput() ?>
 
         <?= $form->field($model, 'type')->dropDownList($model::getPhoneTypeList()) ?>
 

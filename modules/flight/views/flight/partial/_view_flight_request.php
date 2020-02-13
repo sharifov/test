@@ -30,22 +30,22 @@ use yii\helpers\Html;
 //							default: $iconClass = '';
 //						}
 //						?>
-<!--                        <i class="--><?//=$iconClass?><!-- text-success" aria-hidden="true"></i>-->
-<!--                        --><?//= FlightFormatHelper::tripTypeName($itineraryForm->tripType) ?><!-- •-->
-<!--                        <b>--><?//= FlightFormatHelper::cabinName($itineraryForm->cabin) ?><!--</b> •-->
-<!--                        --><?//= (int)$itineraryForm->adults + (int)$itineraryForm->children + (int)$itineraryForm->infants ?><!-- pax</span>-->
+<!--                        <i class="--><?php //=$iconClass?><!-- text-success" aria-hidden="true"></i>-->
+<!--                        --><?php //= FlightFormatHelper::tripTypeName($itineraryForm->tripType) ?><!-- •-->
+<!--                        <b>--><?php //= FlightFormatHelper::cabinName($itineraryForm->cabin) ?><!--</b> •-->
+<!--                        --><?php //= (int)$itineraryForm->adults + (int)$itineraryForm->children + (int)$itineraryForm->infants ?><!-- pax</span>-->
 <!--				<span>-->
 <!--                        --><?php //if ($itineraryForm->adults): ?>
 <!--							<span><strong class="label label-success"-->
-<!--										  style="margin-left: 7px;">--><?//= $itineraryForm->adults ?><!--</strong> ADT</span>-->
+<!--										  style="margin-left: 7px;">--><?php //= $itineraryForm->adults ?><!--</strong> ADT</span>-->
 <!--						--><?php //endif; ?>
 <!--					--><?php //if ($itineraryForm->children): ?>
 <!--						<span><strong class="label label-success"-->
-<!--									  style="margin-left: 7px;">--><?//= $itineraryForm->children ?><!--</strong> CHD</span>-->
+<!--									  style="margin-left: 7px;">--><?php //= $itineraryForm->children ?><!--</strong> CHD</span>-->
 <!--					--><?php //endif; ?>
 <!--					--><?php //if ($itineraryForm->infants): ?>
 <!--						<span><strong class="label label-success"-->
-<!--									  style="margin-left: 7px;">--><?//= $itineraryForm->infants ?><!--</strong> INF</span>-->
+<!--									  style="margin-left: 7px;">--><?php //= $itineraryForm->infants ?><!--</strong> INF</span>-->
 <!--					--><?php //endif; ?>
 <!--                    </span>-->
 <!--			</div>-->

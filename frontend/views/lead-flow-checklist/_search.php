@@ -46,7 +46,7 @@ if($user->isAdmin()) {
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-12">
-                    <?//= $form->field($model, 'status')->dropDownList(\common\models\Lead::STATUS_LIST, ['prompt' => '-']) ?>
+                    <?php //= $form->field($model, 'status')->dropDownList(\common\models\Lead::STATUS_LIST, ['prompt' => '-']) ?>
                     <?php
                     echo $form->field($model, 'statuses')->widget(\kartik\select2\Select2::class, [
                         'data' => \common\models\Lead::STATUS_LIST,

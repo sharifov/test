@@ -25,7 +25,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cs_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 
-        <?//= $form->field($model, 'cs_client_id')->textInput() ?>
+        <?php //= $form->field($model, 'cs_client_id')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

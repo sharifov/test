@@ -78,7 +78,7 @@ if($user->isAdmin() || $user->isQa()) {
 
                     <div class="form-group">
                         <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-success']) ?>
-                        <?//= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                        <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
                     </div>
 
                     <?php ActiveForm::end(); ?>

@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'stp_hidden')->checkbox() ?>
 
-    <?/*= $form->field($model, 'stp_created_user_id')->textInput() ?>
+    <?php /*= $form->field($model, 'stp_created_user_id')->textInput() ?>
 
     <?= $form->field($model, 'stp_updated_user_id')->textInput() ?>
 

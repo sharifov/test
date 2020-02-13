@@ -26,7 +26,7 @@ $pjaxId = 'pjax-hotel-room-form';
 
         <?php echo $form->errorSummary($model) ?>
 
-        <?//= $form->field($model, 'hr_hotel_id')->textInput() ?>
+        <?php //= $form->field($model, 'hr_hotel_id')->textInput() ?>
 
         <?= $form->field($model, 'hr_room_name')->textInput(['maxlength' => true]) ?>
 
@@ -144,7 +144,7 @@ $pjaxId = 'pjax-hotel-room-form';
         ])->label(false) ?>
 
         <div class="form-group text-center">
-            <?//php \yii\helpers\VarDumper::dump(\yii\helpers\ArrayHelper::merge(['' => '---'], \modules\hotel\models\HotelRoomPax::getPaxTypeList())) ?>
+            <?php //php \yii\helpers\VarDumper::dump(\yii\helpers\ArrayHelper::merge(['' => '---'], \modules\hotel\models\HotelRoomPax::getPaxTypeList())) ?>
             <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
         </div>
 

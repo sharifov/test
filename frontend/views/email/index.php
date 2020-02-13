@@ -74,7 +74,7 @@ if ($user->isAdmin() || $user->isQa()) {
     </div>
 
     <p>
-        <?/*= Html::a('Create Email', ['create'], ['class' => 'btn btn-success'])*/ ?>
+        <?php /*= Html::a('Create Email', ['create'], ['class' => 'btn btn-success'])*/ ?>
     </p>
 
     <?= GridView::widget([

@@ -24,7 +24,7 @@ use borales\extensions\phoneInput\PhoneInput;
 <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true], 'action' => ['user-project-params/create-ajax'], 'method' => 'post']); ?>
 
 <div class="col-md-12">
-    <?//= $form->field($model, 'upp_user_id')->dropDownList($userList, ['prompt' => '-']) ?>
+    <?php //= $form->field($model, 'upp_user_id')->dropDownList($userList, ['prompt' => '-']) ?>
     <?php
         echo $form->field($model, 'upp_user_id')->hiddenInput()->label(false);
     ?>
@@ -41,7 +41,7 @@ use borales\extensions\phoneInput\PhoneInput;
     <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
 
-    <?//= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
+    <?php //= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
 
 
     <?= $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
@@ -60,7 +60,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
     <?php //= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
 
-    <?//= Html::input('hidden', 'redirect', Yii::$app->request->get('redirect')) ?>
+    <?php //= Html::input('hidden', 'redirect', Yii::$app->request->get('redirect')) ?>
 
     <div class="form-group text-center">
         <?= Html::submitButton('Save Params', ['class' => 'btn btn-success']) ?>

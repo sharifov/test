@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?//= Html::a('Create Api Log', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('Create Api Log', ['create'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('Delete All', ['delete-all'], [
             'class' => 'btn btn-danger',
             'data' => [

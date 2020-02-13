@@ -37,7 +37,7 @@ $isAgent = false;
                     <?=Html::a('<i class="fa fa-search warning"></i> Search Lead', null, ['class' => 'modal', 'id' => 'search-lead-btn', 'title' => 'Search Lead for Case'])?>
                 </li>
                 <?php endif; ?>
-                <?/*<li class="dropdown">
+                <?php /*<li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                     <ul class="dropdown-menu" role="menu">
                         <li> <?= Html::a('<i class="fa fa-remove"></i> Decline Quotes', null, [

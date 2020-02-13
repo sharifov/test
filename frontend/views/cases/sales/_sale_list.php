@@ -21,7 +21,7 @@ $user = Yii::$app->user->identity;
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Search Sales', null, ['class' => 'modal', 'id' => 'search-sale-btn', 'title' => 'Search Sales for Case'])?>
                 </li>
-                <?/*<li class="dropdown">
+                <?php /*<li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                     <ul class="dropdown-menu" role="menu">
                         <li> <?= Html::a('<i class="fa fa-remove"></i> Decline Quotes', null, [
@@ -125,7 +125,7 @@ $user = Yii::$app->user->identity;
             ?>
 
 
-            <?/*= GridView::widget([
+            <?php /*= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
                 'columns' => [

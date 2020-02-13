@@ -29,7 +29,7 @@ use yii\helpers\Html;
         <div class="x_title">
             <h2><i class="fa fa-plane"></i> Flight - default</h2>
             <ul class="nav navbar-right panel_toolbox">
-                <?/*php if ($is_manager) : ?>
+                <?php /*php if ($is_manager) : ?>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                         <div class="dropdown-menu" role="menu">

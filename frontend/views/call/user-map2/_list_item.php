@@ -69,9 +69,9 @@ use \common\models\Call;
                 <?php if($model->c_lead_id && $model->cLead):?>
                     <i>l:<?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?>
 
-                        <?//=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?>
+                        <?php //=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?>
                     </i><br>
-                    <?/*php
+                    <?php /*php
                         $segments = $model->cLead->leadFlightSegments;
                         $segmentData = [];
                         if ($segments) {
@@ -85,7 +85,7 @@ use \common\models\Call;
                     ?>
 
 
-                    <?//=$model->c_lead_id?>
+                    <?php //=$model->c_lead_id?>
                 <?php endif; ?>
 
                 <?php if($model->c_case_id && $model->cCase):?>
@@ -104,9 +104,9 @@ use \common\models\Call;
             </td>
             <td class="text-left">
 
-<!--                sid: <b>--><?//=$model->c_call_sid?><!--</b><br>-->
+<!--                sid: <b>--><?php //=$model->c_call_sid?><!--</b><br>-->
 <!--                --><?php //if($model->c_parent_call_sid):?>
-<!--                    pid: --><?//=$model->c_parent_call_sid?><!--<br>-->
+<!--                    pid: --><?php //=$model->c_parent_call_sid?><!--<br>-->
 <!--                --><?php //endif; ?>
 
                 <?php if($model->cuaUsers):?>
@@ -148,7 +148,7 @@ use \common\models\Call;
                 <?php if ($model->isStatusIvr() || $model->isStatusRinging() || $model->isStatusInProgress() || $model->isStatusQueue()):?>
                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
                 <?php else: ?>
-                    <span class="badge badge-primary"><?=gmdate('i:s', $sec)?></span> <?//data-sec="<?=$sec" data-control="pause" data-format="%M:%S"?>
+                    <span class="badge badge-primary"><?=gmdate('i:s', $sec)?></span> <?php //data-sec="<?=$sec" data-control="pause" data-format="%M:%S"?>
                     <?php if ($model->c_recording_url):?>
                         <small><i class="fa fa-play-circle-o"></i></small>
                     <?php endif;?>
