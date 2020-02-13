@@ -8,6 +8,7 @@ use common\models\Project;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskCanceledEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskChangeRatingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskClosedEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskDeadlineEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskEscalatedEvent;
@@ -156,6 +157,9 @@ class QaTask extends \yii\db\ActiveRecord
     public function changeRating(int $rating): void
     {
         QaTaskRating::guard($rating);
+        if ($this->t_rating !== $rating) {
+            $this->recordEvent(new QaTaskChangeRatingEvent($this, $rating));
+        }
         $this->t_rating = $rating;
     }
 
