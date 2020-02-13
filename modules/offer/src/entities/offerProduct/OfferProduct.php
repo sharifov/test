@@ -98,4 +98,5 @@ class OfferProduct extends \yii\db\ActiveRecord
     {
         return new Scopes(static::class);
     }
+
 }

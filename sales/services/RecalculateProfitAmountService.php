@@ -4,10 +4,10 @@ namespace sales\services;
 
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferRepository;
+use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
-use sales\services\TransactionManager;
 
 /**
  * Class ProductQuoteStatusLogService
@@ -17,6 +17,11 @@ use sales\services\TransactionManager;
  * @property OfferRepository $offerRepository
  * @property OrderRepository $orderRepository
  * @property ProductQuote $productQuote
+ *
+ * @property Offer[] $offers
+ * @property Offer[] $changedOffers
+ * @property Order[] $orders
+ * @property Order[] $changedOrders
  */
 class RecalculateProfitAmountService
 {
@@ -37,7 +42,10 @@ class RecalculateProfitAmountService
 	 */
 	private $orderRepository;
 
-    public $productQuote;
+    private $productQuote;
+    private $offers = [];
+    private $orders = [];
+
     public $changedOffers = [];
     public $changedOrders = [];
 
@@ -62,21 +70,39 @@ class RecalculateProfitAmountService
 
     /**
      * @param ProductQuote $productQuote
-     * @param float $profitNew
-     * @param float $profitOld
+     * @param float|null $profitNew
+     * @param float|null $profitOld
      * @return RecalculateProfitAmountService
      */
-    public function recalculate(ProductQuote $productQuote, float $profitNew, float $profitOld): RecalculateProfitAmountService
+    public function recalculateByProductQuote(ProductQuote $productQuote, ?float $profitNew, ?float $profitOld): RecalculateProfitAmountService
     {
+        /* TODO::
+            $profitNew
+            $profitOld
+            add RuntimeException to saving methods
+            if no need - remove Repositories
+         */
+
         $this->productQuote = $productQuote;
 
-        /* TODO:: add logic if delete productQuote */
-        /* TODO:: add Status logic  */
+        $this->offers = $this->productQuote->opOffers;
+        $this->orders = $this->productQuote->orpOrders;
 
-        $this->recalculateOffer();
-        $this->recalculateOrder();
+        $this->recalculateOffer()->saveOffers();
+        $this->recalculateOrder()->saveOrders();
 
         return $this;
+    }
+
+    /**
+     * @param Offer $offer
+     * @return array
+     */
+    public function recalculateByOffer(Offer $offer): array
+    {
+        $this->offers[] = $offer;
+
+        return $this->recalculateOffer()->saveOffers();
     }
 
     /**
@@ -84,8 +110,7 @@ class RecalculateProfitAmountService
      */
     private function recalculateOffer(): RecalculateProfitAmountService
     {
-        $offers = $this->productQuote->opOffers;
-        foreach ($offers as $offer) {
+        foreach ($this->offers as $offer) {
             if ($offer->profitAmount()) {
                 $this->changedOffers[] = $offer;
             }
@@ -98,8 +123,7 @@ class RecalculateProfitAmountService
      */
     private function recalculateOrder(): RecalculateProfitAmountService
     {
-        $orders = $this->productQuote->orpOrders;
-        foreach ($orders as $order) {
+        foreach ($this->orders as $order) {
             $order->profitAmount();
             if ($order->profitAmount()) {
                 $this->changedOrders[] = $order;
@@ -113,7 +137,10 @@ class RecalculateProfitAmountService
      */
     public function saveProductQuote(): int
     {
-        return $this->productQuote->save(false);
+        if (!$this->productQuote->save(false)) {
+            throw new \RuntimeException('Product Quote not saved');
+        }
+        return $this->productQuote->pq_id;
     }
 
     /**
@@ -123,7 +150,12 @@ class RecalculateProfitAmountService
     {
         $result = [];
         foreach ($this->changedOffers as $offer) {
-            $result[] = $this->offerRepository->save($offer);
+            $saved = $offer->save(false);
+            if ($saved) {
+                $result[] = $offer->of_id;
+            } else {
+                throw new \RuntimeException('Offer not saved');
+            }
         }
         return $result;
     }
@@ -135,7 +167,12 @@ class RecalculateProfitAmountService
     {
         $result = [];
         foreach ($this->changedOrders as $order) {
-            $result[] = $this->orderRepository->save($order);
+            $saved = $order->save(false);
+            if ($saved) {
+                $result[] = $order->or_id;
+            } else {
+                throw new \RuntimeException('Order not saved');
+            }
         }
         return $result;
     }
