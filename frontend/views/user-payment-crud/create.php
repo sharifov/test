@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\payment\UserPayment */
+/* @var $model sales\model\user\entity\payment\UserPayment */
 
 $this->title = 'Create User Payment';
 $this->params['breadcrumbs'][] = ['label' => 'User Payments', 'url' => ['index']];

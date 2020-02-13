@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\user\payroll\UserPayroll;
+use sales\model\user\entity\payroll\UserPayroll;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\payroll\UserPayroll */
+/* @var $model sales\model\user\entity\payroll\UserPayroll */
 
 $this->title = $model->upsUser->username . ' - ' . UserPayroll::getAgentStatusName($model->ups_agent_status_id) . ' - ' . UserPayroll::getStatusName($model->ups_status_id);
 $this->params['breadcrumbs'][] = ['label' => 'User Payrolls', 'url' => ['index']];

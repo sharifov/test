@@ -17,7 +17,7 @@ class m200211_092000_create_tbl_user_payment extends Migration
 		$this->createTable('{{%user_payment}}', [
 			'upt_id' => $this->primaryKey(),
 			'upt_assigned_user_id' => $this->integer()->notNull(),
-			'upt_category_id' => $this->integer()->notNull(),
+			'upt_category_id' => $this->integer(),
 			'upt_status_id' => $this->tinyInteger(1),
 			'upt_amount' => $this->decimal(8, 2),
 			'upt_description' => $this->string(),
@@ -35,6 +35,7 @@ class m200211_092000_create_tbl_user_payment extends Migration
 			'upt_assigned_user_id',
 			'{{%employees}}',
 			'id',
+			'CASCADE',
 			'CASCADE'
 		);
 
@@ -43,7 +44,9 @@ class m200211_092000_create_tbl_user_payment extends Migration
 			'{{%user_payment}}',
 			'upt_category_id',
 			'{{%user_payment_category}}',
-			'upc_id'
+			'upc_id',
+			'SET NULL',
+			'CASCADE'
 		);
 
 		$this->addForeignKey(
@@ -51,7 +54,9 @@ class m200211_092000_create_tbl_user_payment extends Migration
 			'{{%user_payment}}',
 			'upt_created_user_id',
 			'{{%employees}}',
-			'id'
+			'id',
+			'SET NULL',
+			'CASCADE'
 		);
 
 		$this->addForeignKey(
@@ -59,7 +64,9 @@ class m200211_092000_create_tbl_user_payment extends Migration
 			'{{%user_payment}}',
 			'upt_updated_user_id',
 			'{{%employees}}',
-			'id'
+			'id',
+			'SET NULL',
+			'CASCADE'
 		);
 
 		$this->addForeignKey(
@@ -67,7 +74,9 @@ class m200211_092000_create_tbl_user_payment extends Migration
 			'{{%user_payment}}',
 			'upt_payroll_id',
 			'{{%user_payroll}}',
-			'ups_id'
+			'ups_id',
+			'SET NULL',
+			'CASCADE'
 		);
 
 		\Yii::$app->db->getSchema()->refreshTableSchema('{{%user_payment}}');

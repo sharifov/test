@@ -1,11 +1,11 @@
 <?php
 
-namespace sales\model\user\paymentCategory;
+namespace sales\model\user\entity\paymentCategory;
 
 use common\models\Employee;
 use common\models\query\EmployeeQuery;
-use sales\model\user\payment\UserPayment;
-use sales\model\user\payment\UserPaymentQuery;
+use sales\model\user\entity\payment\UserPayment;
+use sales\model\user\entity\payment\UserPaymentQuery;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

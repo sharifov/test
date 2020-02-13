@@ -1,16 +1,15 @@
 <?php
 
-namespace sales\model\user\profit;
+namespace sales\model\user\entity\profit;
 
 use common\models\Employee;
 use common\models\Lead;
 use common\models\query\EmployeeQuery;
 use common\models\query\LeadsQuery;
 use modules\order\src\entities\order\Order;
-use modules\order\src\entities\orderProduct\Scopes;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\model\user\payroll\UserPayroll;
-use sales\model\user\payroll\UserPayrollQuery;
+use sales\model\user\entity\payroll\UserPayroll;
+use sales\model\user\entity\payroll\UserPayrollQuery;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -75,7 +74,8 @@ class UserProfit extends \yii\db\ActiveRecord
 					ActiveRecord::EVENT_BEFORE_INSERT => ['up_created_dt', 'up_updated_dt'],
 					ActiveRecord::EVENT_BEFORE_UPDATE => ['up_updated_dt'],
 				],
-				'value' => date('Y-m-d H:i:s')
+				'value' => date('Y-m-d H:i:s'),
+				'preserveNonEmptyValues' => true
 			],
 		];
 	}

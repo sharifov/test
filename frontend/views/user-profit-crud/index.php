@@ -1,13 +1,13 @@
 <?php
 
-use sales\model\user\profit\UserProfit;
+use sales\model\user\entity\profit\UserProfit;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\UserColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\user\profit\search\UserProfitSearch */
+/* @var $searchModel sales\model\user\entity\profit\search\UserProfitSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Profits';

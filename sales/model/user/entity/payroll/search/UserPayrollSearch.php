@@ -1,13 +1,13 @@
 <?php
 
-namespace sales\model\user\payroll\search;
+namespace sales\model\user\entity\payroll\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use sales\model\user\payroll\UserPayroll;
+use sales\model\user\entity\payroll\UserPayroll;
 
 /**
- * UserPayrollSearch represents the model behind the search form of `sales\model\user\payroll\UserPayroll`.
+ * UserPayrollSearch represents the model behind the search form of `sales\model\user\entity\payroll\UserPayroll`.
  */
 class UserPayrollSearch extends UserPayroll
 {

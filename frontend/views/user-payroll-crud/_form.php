@@ -1,13 +1,12 @@
 <?php
 
 use common\models\Employee;
-use sales\model\user\paymentCategory\UserPaymentCategory;
-use sales\model\user\payroll\UserPayroll;
+use sales\model\user\entity\payroll\UserPayroll;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\payroll\UserPayroll */
+/* @var $model sales\model\user\entity\payroll\UserPayroll */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -23,36 +22,20 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'ups_user_id')->dropDownList(Employee::getList()) ?>
 
-            <?php $model->ups_month = $model->ups_month ? date('F', strtotime($model->ups_month)) : date('F'); ?>
-            <?= $form->field($model, 'ups_month')->widget(\kartik\date\DatePicker::class, [
-                'pluginOptions' => [
-                    'format' => 'MM',
-                    'minViewMode'=>'months',
-					'autoclose' => true,
-					'todayHighlight' => true
-                ]
-            ]) ?>
+            <?= $form->field($model, 'ups_month')->input('number') ?>
 
-			<?php $model->ups_year = $model->ups_year ?: date('Y'); ?>
-			<?= $form->field($model, 'ups_year')->widget(\kartik\date\DatePicker::class, [
-				'pluginOptions' => [
-					'format' => 'yyyy',
-					'minViewMode'=>'years',
-					'autoclose' => true,
-					'todayHighlight' => true,
-				]
-            ]) ?>
+			<?= $form->field($model, 'ups_year')->input('number') ?>
 
-            <?= $form->field($model, 'ups_base_amount')->textInput(['maxlength' => true, 'type' => 'number']) ?>
+            <?= $form->field($model, 'ups_base_amount')->textInput(['maxlength' => true, 'type' => 'number', 'step' => 0.01]) ?>
 
-            <?= $form->field($model, 'ups_profit_amount')->textInput(['maxlength' => true, 'type' => 'number']) ?>
+            <?= $form->field($model, 'ups_profit_amount')->textInput(['maxlength' => true, 'type' => 'number', 'step' => 0.01]) ?>
 
-            <?= $form->field($model, 'ups_tax_amount')->textInput(['maxlength' => true, 'type' => 'number']) ?>
+            <?= $form->field($model, 'ups_tax_amount')->textInput(['maxlength' => true, 'type' => 'number', 'step' => 0.01]) ?>
         </div>
         <div class="col-md-3">
-            <?= $form->field($model, 'ups_payment_amount')->textInput(['maxlength' => true, 'type' => 'number']) ?>
+            <?= $form->field($model, 'ups_payment_amount')->textInput(['maxlength' => true, 'type' => 'number', 'step' => 0.01]) ?>
 
-            <?= $form->field($model, 'ups_total_amount')->textInput(['maxlength' => true, 'type' => 'number']) ?>
+            <?= $form->field($model, 'ups_total_amount')->textInput(['maxlength' => true, 'type' => 'number', 'step' => 0.01]) ?>
 
             <?= $form->field($model, 'ups_agent_status_id')->dropDownList(UserPayroll::getAgentStatusList(), ['prompt' => '--']) ?>
 

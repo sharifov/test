@@ -1,13 +1,13 @@
 <?php
 
-namespace sales\model\user\profit;
+namespace sales\model\user\entity\paymentCategory;
 
 /**
- * This is the ActiveQuery class for [[UserProfit]].
+ * This is the ActiveQuery class for [[UserPaymentCategory]].
  *
- * @see UserProfit
+ * @see UserPaymentCategory
  */
-class UserProfitQuery extends \yii\db\ActiveQuery
+class UserPaymentCategoryQuery extends \yii\db\ActiveQuery
 {
     /*public function active()
     {
@@ -16,7 +16,7 @@ class UserProfitQuery extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return UserProfit[]|array
+     * @return UserPaymentCategory[]|array
      */
     public function all($db = null)
     {
@@ -25,7 +25,7 @@ class UserProfitQuery extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return UserProfit|array|null
+     * @return UserPaymentCategory|array|null
      */
     public function one($db = null)
     {

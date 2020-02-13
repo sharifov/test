@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\payroll\UserPayroll */
+/* @var $model sales\model\user\entity\payroll\UserPayroll */
 
 $this->title = 'Update User Payroll: ' . $model->ups_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Payrolls', 'url' => ['index']];

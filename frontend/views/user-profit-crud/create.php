@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\profit\UserProfit */
+/* @var $model sales\model\user\entity\profit\UserProfit */
 
 $this->title = 'Create User Profit';
 $this->params['breadcrumbs'][] = ['label' => 'User Profits', 'url' => ['index']];

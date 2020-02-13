@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\user\paymentCategory\UserPaymentCategory;
+use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use yii\db\Migration;
 
 /**

@@ -36,8 +36,8 @@ use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
-use sales\model\user\paymentCategory\UserPaymentCategory;
-use sales\model\user\payroll\UserPayroll;
+use sales\model\user\entity\paymentCategory\UserPaymentCategory;
+use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter

@@ -37,6 +37,7 @@ class m200211_095004_create_tbl_user_profit extends Migration
 			'up_user_id',
 			'{{%employees}}',
 			'id',
+			'CASCADE',
 			'CASCADE'
 		);
 
@@ -45,7 +46,9 @@ class m200211_095004_create_tbl_user_profit extends Migration
 			'{{%user_profit}}',
 			'up_lead_id',
 			'{{%leads}}',
-			'id'
+			'id',
+			'SET NULL',
+			'CASCADE'
 		);
 
 		$this->addForeignKey(
@@ -53,7 +56,9 @@ class m200211_095004_create_tbl_user_profit extends Migration
 			'{{%user_profit}}',
 			'up_order_id',
 			'{{%order}}',
-			'or_id'
+			'or_id',
+			'SET NULL',
+			'CASCADE'
 		);
 
 		$this->addForeignKey(
@@ -61,7 +66,9 @@ class m200211_095004_create_tbl_user_profit extends Migration
 			'{{%user_profit}}',
 			'up_product_quote_id',
 			'{{%product_quote}}',
-			'pq_id'
+			'pq_id',
+			'SET NULL',
+			'CASCADE'
 		);
 
 		$this->addForeignKey(
@@ -69,7 +76,9 @@ class m200211_095004_create_tbl_user_profit extends Migration
 			'{{%user_profit}}',
 			'up_payroll_id',
 			'{{%user_payroll}}',
-			'ups_id'
+			'ups_id',
+			'SET NULL',
+			'CASCADE'
 		);
 
 		\Yii::$app->db->getSchema()->refreshTableSchema('{{%user_profit}}');

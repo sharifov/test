@@ -1,16 +1,54 @@
 <?php
 
-namespace sales\model\user\profit\search;
+namespace sales\model\user\entity\profit\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use sales\model\user\profit\UserProfit;
+use sales\model\user\entity\profit\UserProfit;
 
 /**
- * UserProfitSearch represents the model behind the search form of `sales\model\user\profit\UserProfit`.
+ * Class UserProfitSearch
+ * @package sales\model\user\entity\profit\search
+ *
+ * @property int $payment_id
+ * @property int $payroll_id
+ * @property float $base_amount
+ * @property float $sum_profit_amount
+ * @property float $sum_payment_amount
+ * @property string $date
  */
 class UserProfitSearch extends UserProfit
 {
+	/**
+	 * @var int
+	 */
+	public $payment_id;
+
+	/**
+	 * @var int
+	 */
+	public $payroll_id;
+
+	/**
+	 * @var float
+	 */
+	public $base_amount;
+
+	/**
+	 * @var float
+	 */
+	public $sum_profit_amount;
+
+	/**
+	 * @var float
+	 */
+	public $sum_payment_amount;
+
+	/**
+	 * @var string
+	 */
+	public $date;
+
     /**
      * {@inheritdoc}
      */
@@ -39,8 +77,8 @@ class UserProfitSearch extends UserProfit
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
-    {
+    public function search($params): ActiveDataProvider
+	{
         $query = UserProfit::find();
 
         // add conditions that should always apply here
@@ -77,4 +115,38 @@ class UserProfitSearch extends UserProfit
 
         return $dataProvider;
     }
+
+	/**
+	 * @param string $date
+	 * @param int|null $userId
+	 * @return array|UserProfitSearch[]
+	 */
+    public static function searchForCalcPayroll(string $date, int $userId = null): array
+	{
+		$query = self::find()->select([
+			'u.up_user_id',
+			'p.upt_id as payment_id',
+			'up.up_base_amount as base_amount',
+			'sum(distinct u.up_amount) as sum_profit_amount',
+			'sum(distinct p.upt_amount) as sum_payment_amount',
+			'date_format(u.up_created_dt, \'%Y-%M\') as `date`',
+			'u.up_payroll_id as `payroll_id`'
+		])->alias('u');
+
+		$query->innerJoin('employees e', 'u.up_user_id = e.id')
+			->innerJoin('user_params up', 'e.id = up.up_user_id')
+			->innerJoin('user_payment p', 'e.id = p.upt_assigned_user_id and date_format(u.up_created_dt, \'%Y-%m\') = date_format(p.upt_date, \'%Y-%m\')');
+
+		$query->where(['date_format(u.up_created_dt, \'%Y-%m\')' => $date]);
+
+		if ($userId) {
+			$query->andWhere(['u.up_user_id' => $userId]);
+		}
+
+		$query->groupBy(
+			'u.up_user_id'
+		);
+
+		return $query->all();
+	}
 }

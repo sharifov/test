@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\user\paymentCategory\UserPaymentCategory;
+use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\payment\UserPayment */
+/* @var $model sales\model\user\entity\payment\UserPayment */
 
 $this->title = $model->uptAssignedUser->username . ' - ' . $model->uptCategory->upc_name . ' - ' . UserPaymentCategory::getStatusName($model->upt_status_id);
 $this->params['breadcrumbs'][] = ['label' => 'User Payments', 'url' => ['index']];

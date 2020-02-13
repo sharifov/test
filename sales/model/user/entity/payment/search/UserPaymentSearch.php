@@ -1,13 +1,13 @@
 <?php
 
-namespace sales\model\user\payment\search;
+namespace sales\model\user\entity\payment\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use sales\model\user\payment\UserPayment;
+use sales\model\user\entity\payment\UserPayment;
 
 /**
- * UserPaymentSearch represents the model behind the search form of `sales\model\user\payment\UserPayment`.
+ * UserPaymentSearch represents the model behind the search form of `sales\model\user\entity\payment\UserPayment`.
  */
 class UserPaymentSearch extends UserPayment
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\user\payment;
+namespace sales\model\user\entity\payment;
 
 /**
  * This is the ActiveQuery class for [[UserPayment]].

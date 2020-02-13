@@ -42,6 +42,7 @@ class m200211_081059_create_tbl_user_payroll extends Migration
 			'ups_user_id',
 			'{{%employees}}',
 			'id',
+			'CASCADE',
 			'CASCADE'
 		);
 

@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\paymentCategory\UserPaymentCategory */
+/* @var $model sales\model\user\entity\paymentCategory\UserPaymentCategory */
 
 $this->title = $model->upc_name;
 $this->params['breadcrumbs'][] = ['label' => 'User Payment Categories', 'url' => ['index']];

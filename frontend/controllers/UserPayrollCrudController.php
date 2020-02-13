@@ -2,20 +2,33 @@
 
 namespace frontend\controllers;
 
+use sales\services\user\payroll\UserPayrollService;
 use Yii;
-use sales\model\user\payroll\UserPayroll;
-use sales\model\user\payroll\search\UserPayrollSearch;
+use sales\model\user\entity\payroll\UserPayroll;
+use sales\model\user\entity\payroll\search\UserPayrollSearch;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * UserPayrollCrudController implements the CRUD actions for UserPayroll model.
+ *
+ * @property UserPayrollService $userPayrollService
  */
 class UserPayrollCrudController extends FController
 {
-    /**
+	/**
+	 * @var UserPayrollService
+	 */
+	private $userPayrollService;
+
+	public function __construct($id, $module, UserPayrollService $userPayrollService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->userPayrollService = $userPayrollService;
+	}
+
+	/**
      * {@inheritdoc}
      */
     public function behaviors()
@@ -110,6 +123,48 @@ class UserPayrollCrudController extends FController
 
         return $this->redirect(['index']);
     }
+
+	/**
+	 * @return \yii\web\Response
+	 * @throws NotFoundHttpException
+	 */
+    public function actionCalculateUserPayroll(): \yii\web\Response
+	{
+		if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
+			$date = Yii::$app->request->post('date');
+			$userId = Yii::$app->request->post('userId');
+			$action = Yii::$app->request->post('action');
+
+			$result = [
+				'error' => false,
+				'message' => 'Successfully calculated'
+			];
+
+			try {
+				if (empty($date)) {
+					throw new \RuntimeException('Date is not provided');
+				}
+
+				if ((int)$action === 1) {
+					$this->userPayrollService->calcUserPayrollByYearMonth($date, $userId ?: null);
+				} else if ((int)$action === 2) {
+					$this->userPayrollService->recalculateUserPayroll($date, $userId ?: null);
+				} else {
+					throw new \RuntimeException('Unknown Action');
+				}
+			} catch (\RuntimeException $e) {
+				$result['error'] = true;
+				$result['message'] = $e->getMessage();
+			} catch (\Throwable $e) {
+				$result['error'] = true;
+				$result['message'] = 'Internal Server Error';
+				Yii::error($e->getMessage(), 'UserPayrollCrudController::actionCalculateUserPayroll::Throwable');
+			}
+
+			return $this->asJson($result);
+		}
+		throw new NotFoundHttpException('Page Not found');
+	}
 
     /**
      * Finds the UserPayroll model based on its primary key value.

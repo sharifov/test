@@ -9,7 +9,7 @@ use yii\widgets\Pjax;
 use sales\yii\grid\userPayment\UserPaymentStatusIdColumn;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\user\payment\search\UserPaymentSearch */
+/* @var $searchModel sales\model\user\entity\payment\search\UserPaymentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Payments';

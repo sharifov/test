@@ -7,7 +7,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\user\paymentCategory\search\UserPaymentCategorySearch */
+/* @var $searchModel sales\model\user\entity\paymentCategory\search\UserPaymentCategorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Payment Categories';

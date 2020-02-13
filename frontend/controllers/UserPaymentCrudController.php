@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\user\payment\UserPayment;
-use sales\model\user\payment\search\UserPaymentSearch;
+use sales\model\user\entity\payment\UserPayment;
+use sales\model\user\entity\payment\search\UserPaymentSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;

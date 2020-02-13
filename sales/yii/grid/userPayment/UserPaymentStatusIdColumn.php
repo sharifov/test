@@ -1,7 +1,7 @@
 <?php
 namespace sales\yii\grid\userPayment;
 
-use sales\model\user\payment\UserPayment;
+use sales\model\user\entity\payment\UserPayment;
 use yii\grid\DataColumn;
 
 class UserPaymentStatusIdColumn extends DataColumn

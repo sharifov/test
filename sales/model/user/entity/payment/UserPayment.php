@@ -1,13 +1,13 @@
 <?php
 
-namespace sales\model\user\payment;
+namespace sales\model\user\entity\payment;
 
 use common\models\Employee;
 use common\models\query\EmployeeQuery;
-use sales\model\user\paymentCategory\UserPaymentCategory;
-use sales\model\user\paymentCategory\UserPaymentCategoryQuery;
-use sales\model\user\payroll\UserPayroll;
-use sales\model\user\payroll\UserPayrollQuery;
+use sales\model\user\entity\paymentCategory\UserPaymentCategory;
+use sales\model\user\entity\paymentCategory\UserPaymentCategoryQuery;
+use sales\model\user\entity\payroll\UserPayroll;
+use sales\model\user\entity\payroll\UserPayrollQuery;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -84,7 +84,7 @@ class UserPayment extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['upt_assigned_user_id', 'upt_category_id', 'upt_status_id'], 'required'],
+            [['upt_assigned_user_id', 'upt_status_id'], 'required'],
             [['upt_id', 'upt_assigned_user_id', 'upt_category_id', 'upt_status_id', 'upt_created_user_id', 'upt_updated_user_id', 'upt_payroll_id'], 'integer'],
             [['upt_amount'], 'number'],
             [['upt_date', 'upt_created_dt', 'upt_updated_dt'], 'safe'],

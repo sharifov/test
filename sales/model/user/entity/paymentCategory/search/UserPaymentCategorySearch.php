@@ -1,14 +1,14 @@
 <?php
 
-namespace sales\model\user\paymentCategory\search;
+namespace sales\model\user\entity\paymentCategory\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use sales\model\user\paymentCategory\UserPaymentCategory;
+use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 
 /**
  * Class UserPaymentCategorySearch
- * @package sales\model\user\paymentCategory\search
+ * @package sales\model\user\entity\paymentCategory\search
  */
 class UserPaymentCategorySearch extends UserPaymentCategory
 {
