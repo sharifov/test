@@ -55,8 +55,30 @@ class QaTaskTakeOverForm extends Model
         return $this->task->t_id;
     }
 
+    public function getTaskGid(): string
+    {
+        return $this->task->t_gid;
+    }
+
     public function getUserId(): int
     {
         return $this->user->id;
+    }
+
+    public function getReasonList(): array
+    {
+        $list = [];
+        foreach ($this->reasons as $reason) {
+            $list[$reason->id] = $reason->name;
+        }
+        return $list;
+    }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'reasonId' => 'Reason',
+            'description' => 'Description',
+        ];
     }
 }

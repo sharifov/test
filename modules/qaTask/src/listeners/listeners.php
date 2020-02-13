@@ -11,6 +11,7 @@ use modules\qaTask\src\entities\qaTask\events\QaTaskProcessingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskUnAssignEvent;
 use modules\qaTask\src\useCases\qaTask\take\QaTaskTakeEvent;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverEvent;
+use modules\qaTask\src\listeners\QaTaskChangeStateEventListener;
 
 return [
     QaTaskAssignEvent::class => [],
@@ -23,6 +24,6 @@ return [
     QaTaskDeadlineEvent::class => [],
     QaTaskChangeRatingEvent::class => [],
 
-    QaTaskTakeEvent::class => [],
-    QaTaskTakeOverEvent::class => [],
+    QaTaskTakeEvent::class => [QaTaskChangeStateEventListener::class],
+    QaTaskTakeOverEvent::class => [QaTaskChangeStateEventListener::class],
 ];

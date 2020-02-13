@@ -2,6 +2,7 @@
 
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\take\QaTaskTakeService;
+use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverService;
 use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -13,12 +14,11 @@ use yii\helpers\Url;
 <?= Html::button(
     '<i class="fa fa-list"></i> Status History ' . ($model->statusLogs ? '(' . count($model->statusLogs) . ')' : ''),
     [
-        'class' => 'btn btn-secondary',
-        'id' => 'btn-status-history',
+        'class' => 'btn-modal-show btn btn-secondary',
         'title' => 'Status history',
         'data-url' => Url::to(['/qa-task/qa-task-status-log/show', 'gid' => $model->t_gid]),
-        'data-id' => $model->t_id,
-        'data-gid' => $model->t_gid,
+        'data-title' => 'Task [' . $model->t_id . '] status history',
+        'data-modal-id' => 'modal-lg',
     ]
 ) ?>
 
@@ -33,28 +33,44 @@ use yii\helpers\Url;
     ) ?>
 <?php endif; ?>
 
+<?php if (QaTaskTakeOverService::can($model, Auth::id())): ?>
+    <?= Html::button(
+        'Take over',
+        [
+            'class' => 'btn-modal-show btn btn-' . QaTaskStatus::getCssClass(QaTaskStatus::PROCESSING),
+            'title' => 'Take over',
+            'data-url' => Url::to(['/qa-task/qa-task-action/take-over', 'gid' => $model->t_gid]),
+            'data-title' => 'Task [' . $model->t_id . '] take over',
+            'data-modal-id' => 'modal-df',
+        ]
+    ) ?>
+<?php endif; ?>
+
 <?php
 $js = <<<JS
- $(document).on('click', '#btn-status-history', function(e){        
-        e.preventDefault();
-        let url = $(this).data('url');
-        let id = $(this).data('id');
-        let gid = $(this).data('gid');
-        let modal = $('#modal-lg');
-          
-        modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Task [' + id + '] status history');
-        modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            //$('#preloader').addClass('d-none');
-            if (status == 'error') {
-                alert(response);
-            } else {
-                modal.modal({
-                  backdrop: 'static',
-                  show: true
-                });
-            }
-        });
+
+ $(document).on('click', '.btn-modal-show', function(e){        
+    e.preventDefault();
+    
+    let url = $(this).data('url');
+    let title = $(this).data('title');
+    let modalId = $(this).data('modal-id');
+    let modal = $('#' + modalId);
+      
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html(title);
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        //$('#preloader').addClass('d-none');
+        if (status == 'error') {
+            alert(response);
+        } else {
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        }
     });
+ });
+
 JS;
 $this->registerJs($js);

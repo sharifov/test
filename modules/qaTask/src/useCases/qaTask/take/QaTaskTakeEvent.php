@@ -3,21 +3,29 @@
 namespace modules\qaTask\src\useCases\qaTask\take;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\entities\qaTask\QaTaskChangeStateInterface;
+use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 
 /**
  * Class QaTaskActionTakeEvent
  *
  * @property QaTask $task
- * @property int $userId
+ * @property CreateDto $changeStateLog
  */
-class QaTaskTakeEvent
+class QaTaskTakeEvent implements QaTaskChangeStateInterface
 {
     public $task;
-    public $userId;
 
-    public function __construct(QaTask $task, int $userId)
+    private $changeStateLog;
+
+    public function __construct(QaTask $task, CreateDto $changeStateLog)
     {
         $this->task = $task;
-        $this->userId = $userId;
+        $this->changeStateLog = $changeStateLog;
+    }
+
+    public function getChangeStateLog(): CreateDto
+    {
+        return clone $this->changeStateLog;
     }
 }

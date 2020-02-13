@@ -4,6 +4,9 @@ namespace modules\qaTask\src\useCases\qaTask\take;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use sales\access\EmployeeProjectAccess;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\user\UserRepository;
@@ -33,12 +36,14 @@ class QaTaskTakeService
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function take(int $taskId, int $userId): void
+    public function take(int $taskId, int $userId, int $creatorId): void
     {
         $task = $this->taskRepository->find($taskId);
         $user = $this->userRepository->find($userId);
 
         self::businessGuard($task, $user->id);
+
+        $startStatusId = $task->t_status_id;
 
         if ($task->isPending()) {
             $task->processing();
@@ -47,7 +52,19 @@ class QaTaskTakeService
         $task->assign($user->id);
         $this->taskRepository->save($task);
 
-        $this->eventDispatcher->dispatch(new QaTaskTakeEvent($task, $user->id));
+        $this->eventDispatcher->dispatch(new QaTaskTakeEvent(
+            $task,
+            new CreateDto(
+                $task->t_id,
+                $startStatusId,
+                QaTaskStatus::PROCESSING,
+                null,
+                null,
+                QaTaskActions::TAKE,
+                $user->id,
+                $creatorId
+            )
+        ));
     }
 
     private static function businessGuard(QaTask $task, int $userId): void
