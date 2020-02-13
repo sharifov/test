@@ -365,7 +365,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $profitOld = ProductQuoteHelper::roundPrice($this->pq_profit_amount);
         if ($profitOld !== $profitNew) {
             $this->pq_profit_amount = $profitNew;
-            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this->pq_id, $profitNew));
+            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this, $profitNew, $profitOld));
             $isChanged = true;
         }
         return $isChanged;

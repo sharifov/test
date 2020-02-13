@@ -2,23 +2,27 @@
 
 namespace modules\product\src\entities\productQuote\events;
 
+use modules\product\src\entities\productQuote\ProductQuote;
+
 /**
  * Class ProductQuoteRecalculateProfitAmountEvent
  * @package modules\product\src\entities\productQuote\events
  */
 class ProductQuoteRecalculateProfitAmountEvent
 {
-    public $productQuoteId;
+    public $productQuote;
     public $profitNew;
+    public $profitOld;
 
     /**
      * ProductQuoteRecalculateProfitAmountEvent constructor.
-     * @param int $productQuoteId
-     * @param float $profitOld
+     * @param ProductQuote $productQuote
      * @param float $profitNew
+     * @param float $profitOld
      */
-    public function __construct(int $productQuoteId, float $profitNew) {
-        $this->productQuoteId = $productQuoteId;
+    public function __construct(ProductQuote $productQuote, float $profitNew, float $profitOld) {
+        $this->productQuote = $productQuote;
         $this->profitNew = $profitNew;
+        $this->profitOld = $profitOld;
     }
 }

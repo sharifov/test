@@ -211,7 +211,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
      */
     public function getOpProductQuotes(): ActiveQuery
     {
-        return $this->hasMany(ProductQuote::class, ['of_id' => 'op_product_quote_id'])->viaTable('offer_product', ['op_offer_id' => 'of_id']);
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])->viaTable('offer_product', ['op_offer_id' => 'of_id']);
     }
 
     public function getSendLogs(): ActiveQuery
@@ -316,10 +316,10 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
     public function profitAmount(): bool
     {
         $changed = false;
-        $profitCalc = ProductQuoteHelper::roundPrice($this->profitCalc());
-
-        if (ProductQuoteHelper::roundPrice($this->of_profit_amount) !== $profitCalc) {
-            $this->of_profit_amount = $profitCalc;
+        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
+        $profitOld = ProductQuoteHelper::roundPrice($this->of_profit_amount);
+        if ($profitNew !== $profitOld) {
+            $this->of_profit_amount = $profitNew;
             $changed = true;
         }
         return $changed;

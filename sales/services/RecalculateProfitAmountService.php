@@ -61,14 +61,14 @@ class RecalculateProfitAmountService
     }
 
     /**
-     * @param int $productQuoteId
+     * @param ProductQuote $productQuote
      * @param float $profitNew
+     * @param float $profitOld
      * @return RecalculateProfitAmountService
      */
-    public function recalculate(int $productQuoteId, float $profitNew): RecalculateProfitAmountService
+    public function recalculate(ProductQuote $productQuote, float $profitNew, float $profitOld): RecalculateProfitAmountService
     {
-        $this->productQuote = $this->productQuoteRepository->find($productQuoteId);
-        $this->productQuote->pq_profit_amount = $profitNew;
+        $this->productQuote = $productQuote;
 
         /* TODO:: add logic if delete productQuote */
         /* TODO:: add Status logic  */
@@ -113,7 +113,7 @@ class RecalculateProfitAmountService
      */
     public function saveProductQuote(): int
     {
-        return $this->productQuoteRepository->save($this->productQuote);
+        return $this->productQuote->save(false);
     }
 
     /**
