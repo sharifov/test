@@ -161,7 +161,7 @@ class QaTask extends \yii\db\ActiveRecord
 
     public function isEqualProject(array $projects): bool
     {
-        return in_array($this->t_project_id, $projects, true);
+        return in_array($this->t_project_id, $projects, false);
     }
 
     public static function tableName(): string

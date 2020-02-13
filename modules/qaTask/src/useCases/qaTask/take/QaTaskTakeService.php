@@ -2,9 +2,12 @@
 
 namespace modules\qaTask\src\useCases\qaTask\take;
 
+use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
+use sales\access\EmployeeProjectAccess;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\user\UserRepository;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Class QaTaskActionTakeService
@@ -35,18 +38,50 @@ class QaTaskTakeService
         $task = $this->taskRepository->find($taskId);
         $user = $this->userRepository->find($userId);
 
-        if (!($task->isPending() || $task->isEscalated())) {
-            throw new \DomainException('Current status is denied.');
+        self::businessGuard($task, $user->id);
+
+        if ($task->isPending()) {
+            $task->processing();
         }
+
+        $task->assign($user->id);
+        $this->taskRepository->save($task);
+
+        $this->eventDispatcher->dispatch(new QaTaskTakeEvent($task, $user->id));
+    }
+
+    private static function businessGuard(QaTask $task, int $userId): void
+    {
+        EmployeeProjectAccess::guard($task->t_project_id, $userId);
 
         if (!$task->isUnAssigned()) {
             throw new \DomainException('Task is already assigned.');
         }
 
-        $task->processing();
-        $task->assign($user->id);
-        $this->taskRepository->save($task);
+        if (!($task->isPending() || $task->isEscalated())) {
+            throw new \DomainException('Current status is denied.');
+        }
+    }
 
-        $this->eventDispatcher->dispatch(new QaTaskTakeEvent($task, $user->id));
+    /**
+     * @param QaTask $task
+     * @throws ForbiddenHttpException
+     */
+    public static function permissionGuard(QaTask $task): void
+    {
+        if (!\Yii::$app->user->can('qa-task/task/take', ['task' => $task])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+    }
+
+    public static function can(QaTask $task, int $userId): bool
+    {
+        try {
+            self::permissionGuard($task);
+            self::businessGuard($task, $userId);
+        } catch (\Throwable $e) {
+            return false;
+        }
+        return true;
     }
 }

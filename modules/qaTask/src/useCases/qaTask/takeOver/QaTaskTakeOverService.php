@@ -3,6 +3,7 @@
 namespace modules\qaTask\src\useCases\qaTask\takeOver;
 
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
+use sales\access\EmployeeProjectAccess;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\user\UserRepository;
 
@@ -34,6 +35,8 @@ class QaTaskTakeOverService
     {
         $task = $this->taskRepository->find($form->getTaskId());
         $user = $this->userRepository->find($form->getUserId());
+
+        EmployeeProjectAccess::guard($task->t_project_id, $user->id);
 
         if ($task->isAssigned($user->id)) {
             throw new \DomainException('Task is already assigned with this user.');

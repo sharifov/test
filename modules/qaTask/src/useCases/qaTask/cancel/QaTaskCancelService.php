@@ -3,6 +3,7 @@
 namespace modules\qaTask\src\useCases\qaTask\cancel;
 
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
+use sales\access\EmployeeProjectAccess;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\user\UserRepository;
 
@@ -34,6 +35,8 @@ class QaTaskCancelService
     {
         $task = $this->taskRepository->find($form->getTaskId());
         $user = $this->userRepository->find($userId);
+
+        EmployeeProjectAccess::guard($task->t_project_id, $user->id);
 
         $oldAssignedUserId = $task->t_assigned_user_id;
 
