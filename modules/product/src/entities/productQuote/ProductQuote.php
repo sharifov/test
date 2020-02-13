@@ -355,14 +355,20 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return ($systemMarkupAmount + $agentExtraMarkupAmount + $optionExtraMarkupAmount) - $processingFeeAmount;
     }
 
-    public function profitAmount(): void
+    /**
+     * @return bool
+     */
+    public function profitAmount(): bool
     {
+        $isChanged = false;
         $profitCalc = ProductQuoteHelper::roundPrice($this->profitCalc());
-
-        if (ProductQuoteHelper::roundPrice($this->pq_profit_amount) !== $profitCalc) {
+        $profitAmount = ProductQuoteHelper::roundPrice($this->pq_profit_amount);
+        if ($profitAmount !== $profitCalc) {
             $this->pq_profit_amount = $profitCalc;
             $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this->pq_id));
+            $isChanged = true;
         }
+        return $isChanged;
     }
 
 	/**

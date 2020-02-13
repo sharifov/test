@@ -2,11 +2,8 @@
 
 namespace modules\flight\controllers;
 
-
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
-use sales\dispatchers\EventDispatcher;
-use sales\dispatchers\SimpleEventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
 use modules\flight\models\FlightQuotePaxPrice;
@@ -82,13 +79,10 @@ class FlightQuotePaxPriceController extends FController
                 if (!$model->save()) {
                     throw new \RuntimeException('FlightQuotePaxPrice not saved');
                 }
-
                 $productQuote = $this->getProductQuote($model);
                 $productQuote->profitAmount();
-                /** @var EventDispatcher $eventDispatcher */
-                $eventDispatcher = Yii::$container->get(EventDispatcher::class);
-                $eventDispatcher->dispatchAll($productQuote->releaseEvents());
-
+                $productQuoteRepository = Yii::$container->get(ProductQuoteRepository::class);
+                $productQuoteRepository->save($productQuote);
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
@@ -116,32 +110,23 @@ class FlightQuotePaxPriceController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
 
-            $markUpChanged = ($model->isAttributeChanged('qpp_system_mark_up') || $model->isAttributeChanged('qpp_agent_mark_up'));
-
+            $checkProfit = $model->isAttributeChanged('qpp_system_mark_up') || $model->isAttributeChanged('qpp_agent_mark_up');
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if (!$model->save()) {
                     throw new \RuntimeException('FlightQuotePaxPrice not saved');
                 }
-
-                if ($markUpChanged) {
+                if ($checkProfit) {
                     $productQuote = $this->getProductQuote($model);
                     $productQuote->profitAmount();
-
-                    // \yii\helpers\VarDumper::dump(['events' => $productQuote->releaseEvents()], 10, true); exit();  /* TODO: to remove */
-                    /* TODO::  */
-
+                    $productQuoteRepository = Yii::$container->get(ProductQuoteRepository::class);
+                    $productQuoteRepository->save($productQuote);
                 }
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
                 Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
             }
-
-            if ($markUpChanged) {
-                \yii\helpers\VarDumper::dump(['afterUpdate' => $productQuote], 10, true); exit();  /* TODO: to remove */
-            }
-
             return $this->redirect(['view', 'id' => $model->qpp_id]);
         }
 
@@ -165,9 +150,8 @@ class FlightQuotePaxPriceController extends FController
             $productQuote = $this->getProductQuote($model);
             $model->delete();
             $productQuote->profitAmount();
-            /** @var EventDispatcher $eventDispatcher */
-            $eventDispatcher = Yii::$container->get(EventDispatcher::class);
-            $eventDispatcher->dispatchAll($productQuote->releaseEvents());
+            $productQuoteRepository = Yii::$container->get(ProductQuoteRepository::class);
+            $productQuoteRepository->save($productQuote);
 
             $transaction->commit();
         } catch (\Throwable $throwable) {
@@ -187,7 +171,7 @@ class FlightQuotePaxPriceController extends FController
      */
     protected function findModel($id)
     {
-        if (($model = FlightQuotePaxPrice::findOne($id)) !== null) {
+        if (($model = FlightQuotePaxPrice::findOne($id)) !== null) {y
             return $model;
         }
 
