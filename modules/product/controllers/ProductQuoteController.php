@@ -101,7 +101,7 @@ class ProductQuoteController extends FController
 
             $this->eventDispatcher->dispatchAll([
                 new OfferRecalculateProfitAmountEvent($model->opOffers),
-                new OrderRecalculateProfitAmountEvent([$model->orpOrders]),
+                new OrderRecalculateProfitAmountEvent($model->orpOrders),
             ]);
 
             if (!$model->delete()) {

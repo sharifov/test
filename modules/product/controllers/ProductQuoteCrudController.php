@@ -159,7 +159,7 @@ class ProductQuoteCrudController extends FController
         try {
             $this->eventDispatcher->dispatchAll([
                 new OfferRecalculateProfitAmountEvent($model->opOffers),
-                new OrderRecalculateProfitAmountEvent([$model->orpOrders]),
+                new OrderRecalculateProfitAmountEvent($model->orpOrders),
             ]);
             if (!$model->delete()) {
                 throw new Exception('Product Quote (' . $id . ') not deleted');
