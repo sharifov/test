@@ -44,39 +44,45 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'pqProduct',
             ],
             'pq_order_id',
-            'pq_description:ntext',
+//            'pq_description:ntext',
             [
                 'class' => \modules\product\src\grid\columns\ProductQuoteStatusColumn::class,
                 'attribute' => 'pq_status_id',
             ],
 
-            'pq_price',
-            'pq_origin_price',
-            'pq_client_price',
             'pq_service_fee_sum',
+            'pq_origin_price',
             'pq_origin_currency',
-            'pq_client_currency',
             'pq_origin_currency_rate',
+            'pq_price',
+            'pq_client_currency',
             'pq_client_currency_rate',
+            'pq_client_price',
+            [
+                'label' => 'Calc client price',
+                'value' => static function (\modules\product\src\entities\productQuote\ProductQuote $model) {
+                    return number_format($model->pq_price * $model->pq_client_currency_rate, 2);
+                }
+            ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 'pq_owner_user_id',
                 'relation' => 'pqOwnerUser',
             ],
-            [
-                'class' => UserColumn::class,
-                'attribute' => 'pq_created_user_id',
-                'relation' => 'pqCreatedUser',
-            ],
+//            [
+//                'class' => UserColumn::class,
+//                'attribute' => 'pq_created_user_id',
+//                'relation' => 'pqCreatedUser',
+//            ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 'pq_updated_user_id',
                 'relation' => 'pqUpdatedUser',
             ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'pq_created_dt',
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'pq_created_dt',
+//            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pq_updated_dt',
