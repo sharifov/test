@@ -2,6 +2,8 @@
 
 namespace modules\product\controllers;
 
+use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
@@ -9,6 +11,7 @@ use Yii;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\search\ProductQuoteCrudSearch;
 use frontend\controllers\FController;
+use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -95,8 +98,8 @@ class ProductQuoteCrudController extends FController
                 }
                 $model->profitAmount();
                 $this->eventDispatcher->dispatchAll($model->releaseEvents());
-
                 $transaction->commit();
+
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
                 Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
@@ -118,7 +121,21 @@ class ProductQuoteCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('ProductQuote not saved');
+                }
+                $model->profitAmount();
+                $this->eventDispatcher->dispatchAll($model->releaseEvents());
+                $transaction->commit();
+
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+            }
             return $this->redirect(['view', 'id' => $model->pq_id]);
         }
 
@@ -136,7 +153,23 @@ class ProductQuoteCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $this->eventDispatcher->dispatchAll([
+                new OfferRecalculateProfitAmountEvent($model->opOffers),
+                new OrderRecalculateProfitAmountEvent([$model->orpOrders]),
+            ]);
+            if (!$model->delete()) {
+                throw new Exception('Product Quote (' . $id . ') not deleted');
+            }
+            $transaction->commit();
+
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+        }
 
         return $this->redirect(['index']);
     }
