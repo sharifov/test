@@ -121,6 +121,12 @@ class ProductQuoteCrudController extends FController
     {
         $model = $this->findModel($id);
 
+        /* TODO::
+            ProductQuoteCrudController/Update
+            - скрыть поле Pq Profit Amount и расчитывать его динамически
+            - при редактировании Pq Profit Amount вручную перераситывать Offers/Orders
+         */
+
         if ($model->load(Yii::$app->request->post())) {
 
             $transaction = Yii::$app->db->beginTransaction();
