@@ -55,6 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="col-md-9">
 
+            <?php if ($model->flightQuote && $model->flightQuote->flightQuotePaxPrices): ?>
             <div>
                 <label for="" class="control-label">Flight Quote Pax Price</label>
                 <?= \yii\grid\GridView::widget([
@@ -130,6 +131,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]) ?>
             </div>
+            <?php endif; ?>
             <div>
 				<?= DetailView::widget([
 					'model' => $model,
