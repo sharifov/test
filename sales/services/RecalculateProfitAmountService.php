@@ -99,8 +99,18 @@ class RecalculateProfitAmountService
      */
     public function recalculateByOffer(array $offers): array
     {
-        $this->offers[] = $offers;
+        $this->offers = $offers;
         return $this->recalculateOffer()->saveOffers();
+    }
+
+    /**
+     * @param array $orders
+     * @return array
+     */
+    public function recalculateByOrder(array $orders): array
+    {
+        $this->orders[] = $orders;
+        return $this->recalculateOrder()->saveOrders();
     }
 
     /**
