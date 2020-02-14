@@ -122,8 +122,8 @@ class OfferProductController extends FController
                     throw new Exception('Product Quote ID ('.$productQuoteId.'), Offer ID ('.$offerId.'): ' . VarDumper::dumpAsString($offer->errors), 17);
                 }
             }
-            $offerProduct = new OfferProduct();
-            $offerProduct::create($offer->of_id, $productQuoteId);
+
+            $offerProduct = OfferProduct::create($offer->of_id, $productQuoteId);
             $this->offerProductRepository->save($offerProduct);
 
         } catch (\Throwable $throwable) {

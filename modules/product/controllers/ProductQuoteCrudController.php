@@ -3,6 +3,8 @@
 namespace modules\product\controllers;
 
 use sales\auth\Auth;
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
 use Yii;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\search\ProductQuoteCrudSearch;
@@ -14,9 +16,27 @@ use yii\web\Response;
 
 /**
  * ProductQuoteController implements the CRUD actions for ProductQuote model.
+ *
+ * @property EventDispatcher $eventDispatcher
  */
 class ProductQuoteCrudController extends FController
 {
+    private $eventDispatcher;
+
+    /**
+     * ProductQuoteCrudController constructor.
+     * @param $id
+     * @param $module
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, EventDispatcher $eventDispatcher, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+
     /**
      * @return array
      */
@@ -66,7 +86,21 @@ class ProductQuoteCrudController extends FController
     {
         $model = new ProductQuote();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('ProductQuote not saved');
+                }
+                $model->profitAmount();
+                $this->eventDispatcher->dispatchAll($model->releaseEvents());
+
+                $transaction->commit();
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+            }
             return $this->redirect(['view', 'id' => $model->pq_id]);
         }
 
