@@ -61,4 +61,12 @@ class QaTaskCloseForm extends Model
     {
         return $this->task->t_gid;
     }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'description' => 'Description',
+            'rating' => 'Rating',
+        ];
+    }
 }

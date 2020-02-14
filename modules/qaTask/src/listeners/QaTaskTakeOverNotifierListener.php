@@ -39,7 +39,7 @@ class QaTaskTakeOverNotifierListener
         try {
             $newOwner = $this->userRepository->find($event->getChangeStateLog()->assignedId);
         } catch (NotFoundException $e) {
-            Yii::error('Not found employee (' . $event->getChangeStateLog()->assignedId . ')', 'QaTaskTakeOverNotifierListener:not New Assigned User');
+            Yii::error('Not found employee (' . $event->getChangeStateLog()->assignedId . ')', 'QaTaskTakeOverNotifierListener:not found New Assigned User');
             return;
         }
 
@@ -47,9 +47,9 @@ class QaTaskTakeOverNotifierListener
 
         $subject = Yii::t('email', 'You task #{id} has been taken by {username}', ['id' => $task->t_id, 'username' => $newOwner->username]);
 
-        $description = '';
-        if ($reason = QaTaskActionReason::findOne($event->getChangeStateLog()->reasonId)) {
-            $description = $reason->tar_name;
+        $reason = '';
+        if ($reasonModel = QaTaskActionReason::findOne($event->getChangeStateLog()->reasonId)) {
+            $reason = $reasonModel->tar_name;
         }
 
         $body = Yii::t('email', "You task #{id} has been taken by {username} ({role}). Reason: {reason}. {url}",
@@ -57,7 +57,7 @@ class QaTaskTakeOverNotifierListener
                 'id' => $task->t_id,
                 'username' => $newOwner->username,
                 'role' => implode(',', $newOwner->getRoles(true)),
-                'reason' => $description,
+                'reason' => $reason,
                 'url' => Url::toRoute( ['/qa-task/qa-task/view', 'gid' => $task->t_gid], true),
             ]);
 

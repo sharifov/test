@@ -9,7 +9,9 @@ use modules\qaTask\src\entities\qaTask\events\QaTaskStatusEscalatedEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskStatusPendingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskStatusProcessingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskUnAssignEvent;
+use modules\qaTask\src\listeners\QaTaskCancelNotifierListener;
 use modules\qaTask\src\listeners\QaTaskTakeOverNotifierListener;
+use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelEvent;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseEvent;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateEvent;
 use modules\qaTask\src\useCases\qaTask\take\QaTaskTakeEvent;
@@ -41,5 +43,9 @@ return [
     ],
     QaTaskCloseEvent::class => [
         QaTaskChangeStateEventListener::class,
+    ],
+    QaTaskCancelEvent::class => [
+        QaTaskChangeStateEventListener::class,
+        QaTaskCancelNotifierListener::class,
     ],
 ];

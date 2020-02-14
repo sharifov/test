@@ -44,7 +44,7 @@ class QaTaskEscalateForm extends Model
             ['reasonId', 'required'],
             ['reasonId', 'integer'],
             ['reasonId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['reasonId', 'in', 'range' => array_keys($this->reasons)],
+            ['reasonId', 'in', 'range' => array_keys($this->getReasonList())],
 
             ['description', 'string', 'max' => 255],
             ['description', 'required', 'when' => function () {

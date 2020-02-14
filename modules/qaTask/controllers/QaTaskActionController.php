@@ -2,6 +2,8 @@
 
 namespace modules\qaTask\controllers;
 
+use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelForm;
+use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelService;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseForm;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseService;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateForm;
@@ -26,6 +28,7 @@ use yii\widgets\ActiveForm;
  * @property QaTaskTakeOverService $takeOverService
  * @property QaTaskEscalateService $escalateService
  * @property QaTaskCloseService $closeService
+ * @property QaTaskCancelService $cancelService
  */
 class QaTaskActionController extends FController
 {
@@ -33,6 +36,7 @@ class QaTaskActionController extends FController
     private $takeOverService;
     private $escalateService;
     private $closeService;
+    private $cancelService;
 
     public function __construct(
         $id,
@@ -41,6 +45,7 @@ class QaTaskActionController extends FController
         QaTaskTakeOverService $takeOverService,
         QaTaskEscalateService $escalateService,
         QaTaskCloseService $closeService,
+        QaTaskCancelService $cancelService,
         $config = []
     )
     {
@@ -49,13 +54,14 @@ class QaTaskActionController extends FController
         $this->takeOverService = $takeOverService;
         $this->escalateService = $escalateService;
         $this->closeService = $closeService;
+        $this->cancelService = $cancelService;
     }
 
     public function behaviors(): array
     {
         $behaviors = [
             'access' => [
-                'allowActions' => ['take', 'take-over', 'escalate', 'close'],
+                'allowActions' => ['take', 'take-over', 'escalate', 'close', 'cancel'],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -181,6 +187,40 @@ class QaTaskActionController extends FController
         }
 
         return $this->renderAjax('close', [
+            'model' => $form
+        ]);
+    }
+
+    /**
+     * @param $gid
+     * @return array|string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionCancel($gid)
+    {
+        $task = $this->findModel((string)$gid);
+
+        QaTaskCancelService::permissionGuard($task);
+
+        $form = new QaTaskCancelForm($task, Auth::user());
+
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+
+        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->cancelService->cancel($form);
+                \Yii::$app->session->addFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                \Yii::$app->session->addFlash('error', $e->getMessage());
+            }
+            return $this->redirect(['/qa-task/qa-task/view', 'gid' => $task->t_gid]);
+        }
+
+        return $this->renderAjax('cancel', [
             'model' => $form
         ]);
     }

@@ -20,7 +20,6 @@ class m200214_071649_create_permissions_escalate extends Migration
 
         $escalateRule = new QaTaskEscalateRule();
         $auth->add($escalateRule);
-
         $escalate = $auth->createPermission('qa-task/task/escalate');
         $escalate->description = 'Task Escalate';
         $escalate->ruleName = $escalateRule->name;

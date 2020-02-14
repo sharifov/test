@@ -28,7 +28,7 @@ $form = ActiveForm::begin([
     <?= $form->field($model, 'description')->textarea(['rows' => 5]) ?>
 
     <div class="form-group text-right">
-        <?= Html::submitButton('<i class="fa fa-check-square"></i> Close', ['class' => 'btn btn-info']) ?>
+        <?= Html::submitButton('<i class="fa fa-check-square"></i> Apply', ['class' => 'btn btn-info']) ?>
     </div>
 
 <?php

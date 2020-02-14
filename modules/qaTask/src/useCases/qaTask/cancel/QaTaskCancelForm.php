@@ -2,6 +2,7 @@
 
 namespace modules\qaTask\src\useCases\qaTask\cancel;
 
+use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\entities\qaTaskActionReason\ReasonDto;
@@ -14,6 +15,7 @@ use yii\base\Model;
  * @property int $reasonId
  * @property string|null $description
  * @property QaTask $task
+ * @property Employee $user
  * @property ReasonDto[] $reasons
  */
 class QaTaskCancelForm extends Model
@@ -22,11 +24,13 @@ class QaTaskCancelForm extends Model
     public $description;
 
     private $task;
+    private $user;
     private $reasons;
 
-    public function __construct(QaTask $task, $config = [])
+    public function __construct(QaTask $task, Employee $user, $config = [])
     {
         $this->task = $task;
+        $this->user = $user;
         $this->reasons = QaTaskActionReasonQuery::getReasons($this->task->t_object_type_id, QaTaskActions::CANCEL);
         parent::__construct($config);
     }
@@ -37,7 +41,7 @@ class QaTaskCancelForm extends Model
             ['reasonId', 'required'],
             ['reasonId', 'integer'],
             ['reasonId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['reasonId', 'in', 'range' => array_keys($this->reasons)],
+            ['reasonId', 'in', 'range' => array_keys($this->getReasonList())],
 
             ['description', 'string', 'max' => 255],
             ['description', 'required', 'when' => function () {
@@ -46,8 +50,35 @@ class QaTaskCancelForm extends Model
         ];
     }
 
+    public function getReasonList(): array
+    {
+        $list = [];
+        foreach ($this->reasons as $reason) {
+            $list[$reason->id] = $reason->name;
+        }
+        return $list;
+    }
+
     public function getTaskId(): int
     {
         return $this->task->t_id;
+    }
+
+    public function getTaskGid(): string
+    {
+        return $this->task->t_gid;
+    }
+
+    public function getUserId(): int
+    {
+        return $this->user->id;
+    }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'reasonId' => 'Reason',
+            'description' => 'Description',
+        ];
     }
 }

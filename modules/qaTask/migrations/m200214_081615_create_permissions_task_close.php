@@ -20,7 +20,6 @@ class m200214_081615_create_permissions_task_close extends Migration
 
         $closeRule = new QaTaskCloseRule();
         $auth->add($closeRule);
-
         $close = $auth->createPermission('qa-task/task/close');
         $close->description = 'Task Close';
         $close->ruleName = $closeRule->name;
@@ -41,6 +40,7 @@ class m200214_081615_create_permissions_task_close extends Migration
         if ($permission = $auth->getPermission('qa-task/task/close')) {
             $auth->remove($permission);
         }
+
         if ($rule = $auth->getRule('qa-task/task/close_Rule')) {
             $auth->remove($rule);
         }
