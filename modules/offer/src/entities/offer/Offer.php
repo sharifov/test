@@ -317,7 +317,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
     {
         $changed = false;
         $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
-        $profitOld = ProductQuoteHelper::roundPrice($this->of_profit_amount);
+        $profitOld = ProductQuoteHelper::roundPrice((float) $this->of_profit_amount);
 
         if ($profitNew !== $profitOld) {
             $this->of_profit_amount = $profitNew;

@@ -293,7 +293,8 @@ class Order extends ActiveRecord
     {
         $changed = false;
         $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
-        $profitOld = ProductQuoteHelper::roundPrice($this->or_profit_amount);
+        $profitOld = ProductQuoteHelper::roundPrice((float) $this->or_profit_amount);
+
         if ($profitNew !== $profitOld) {
             $this->or_profit_amount = $profitNew;
             $changed = true;
