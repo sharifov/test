@@ -4,7 +4,6 @@ namespace modules\qaTask\src\useCases\qaTask\take;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use sales\access\EmployeeProjectAccess;
@@ -36,7 +35,7 @@ class QaTaskTakeService
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function take(int $taskId, int $userId, int $creatorId): void
+    public function take(int $taskId, int $userId): void
     {
         $task = $this->taskRepository->find($taskId);
         $user = $this->userRepository->find($userId);
@@ -57,12 +56,12 @@ class QaTaskTakeService
             new CreateDto(
                 $task->t_id,
                 $startStatusId,
-                QaTaskStatus::PROCESSING,
+                $task->t_status_id,
                 null,
                 null,
                 QaTaskActions::TAKE,
-                $user->id,
-                $creatorId
+                $task->t_assigned_user_id,
+                $user->id
             )
         ));
     }

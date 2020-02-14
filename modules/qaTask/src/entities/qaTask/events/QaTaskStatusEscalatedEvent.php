@@ -5,11 +5,11 @@ namespace modules\qaTask\src\entities\qaTask\events;
 use modules\qaTask\src\entities\qaTask\QaTask;
 
 /**
- * Class QaTaskProcessingEvent
+ * Class QaTaskStatusEscalatedEvent
  *
  * @property QaTask $task
  */
-class QaTaskProcessingEvent
+class QaTaskStatusEscalatedEvent
 {
     public $task;
 

@@ -54,13 +54,41 @@ class QaTaskEscalateForm extends Model
             ['rating', 'required'],
             ['rating', 'integer'],
             ['rating', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['rating', 'in', 'range' => array_keys(QaTaskRating::getList())],
+            ['rating', 'in', 'range' => array_keys($this->getRatingList())],
+        ];
+    }
+
+    public function getRatingList(): array
+    {
+        return QaTaskRating::getList();
+    }
+
+    public function getReasonList(): array
+    {
+        $list = [];
+        foreach ($this->reasons as $reason) {
+            $list[$reason->id] = $reason->name;
+        }
+        return $list;
+    }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'reasonId' => 'Reason',
+            'description' => 'Description',
+            'rating' => 'Rating',
         ];
     }
 
     public function getTaskId(): int
     {
         return $this->task->t_id;
+    }
+
+    public function getTaskGid(): string
+    {
+        return $this->task->t_gid;
     }
 
     public function getUserId(): int

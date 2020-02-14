@@ -2,6 +2,8 @@
 
 namespace modules\qaTask\controllers;
 
+use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateForm;
+use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateService;
 use Yii;
 use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\QaTask;
@@ -20,30 +22,34 @@ use yii\widgets\ActiveForm;
  *
  * @property QaTaskTakeService $takeService
  * @property QaTaskTakeOverService $takeOverService
+ * @property QaTaskEscalateService $escalateService
  */
 class QaTaskActionController extends FController
 {
     private $takeService;
     private $takeOverService;
+    private $escalateService;
 
     public function __construct(
         $id,
         $module,
         QaTaskTakeService $takeService,
         QaTaskTakeOverService $takeOverService,
+        QaTaskEscalateService $escalateService,
         $config = []
     )
     {
         parent::__construct($id, $module, $config);
         $this->takeService = $takeService;
         $this->takeOverService = $takeOverService;
+        $this->escalateService = $escalateService;
     }
 
     public function behaviors(): array
     {
         $behaviors = [
             'access' => [
-                'allowActions' => ['take', 'take-over'],
+                'allowActions' => ['take', 'take-over', 'escalate'],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -62,7 +68,7 @@ class QaTaskActionController extends FController
         QaTaskTakeService::permissionGuard($task);
 
         try {
-            $this->takeService->take($task->t_id, Auth::id(), Auth::id());
+            $this->takeService->take($task->t_id, Auth::id());
             Yii::$app->session->addFlash('success', 'Success');
         } catch (\DomainException $e) {
             Yii::$app->session->addFlash('error', $e->getMessage());
@@ -92,7 +98,7 @@ class QaTaskActionController extends FController
 
         if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
             try {
-                $this->takeOverService->takeOver($form, Auth::id());
+                $this->takeOverService->takeOver($form);
                 \Yii::$app->session->addFlash('success', 'Success');
             } catch (\DomainException $e) {
                 \Yii::$app->session->addFlash('error', $e->getMessage());
@@ -101,6 +107,40 @@ class QaTaskActionController extends FController
         }
 
         return $this->renderAjax('take-over', [
+            'model' => $form
+        ]);
+    }
+
+    /**
+     * @param $gid
+     * @return array|string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionEscalate($gid)
+    {
+        $task = $this->findModel((string)$gid);
+
+        QaTaskEscalateService::permissionGuard($task);
+
+        $form = new QaTaskEscalateForm($task, Auth::user());
+
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+
+        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->escalateService->escalate($form);
+                \Yii::$app->session->addFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                \Yii::$app->session->addFlash('error', $e->getMessage());
+            }
+            return $this->redirect(['/qa-task/qa-task/view', 'gid' => $task->t_gid]);
+        }
+
+        return $this->renderAjax('escalate', [
             'model' => $form
         ]);
     }

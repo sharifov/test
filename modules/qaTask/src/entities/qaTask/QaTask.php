@@ -7,13 +7,13 @@ use common\models\Employee;
 use common\models\Project;
 use modules\qaTask\src\entities\QaObjectType;
 use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskCanceledEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusCanceledEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskChangeRatingEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskClosedEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusClosedEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskDeadlineEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskEscalatedEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskPendingEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskProcessingEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusEscalatedEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusPendingEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusProcessingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskUnAssignEvent;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
@@ -61,7 +61,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::PENDING);
         $this->t_status_id = QaTaskStatus::PENDING;
-        $this->recordEvent(new QaTaskPendingEvent($this));
+        $this->recordEvent(new QaTaskStatusPendingEvent($this));
     }
 
     public function isPending(): bool
@@ -73,7 +73,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::PROCESSING);
         $this->t_status_id = QaTaskStatus::PROCESSING;
-        $this->recordEvent(new QaTaskProcessingEvent($this));
+        $this->recordEvent(new QaTaskStatusProcessingEvent($this));
     }
 
     public function isProcessing(): bool
@@ -85,7 +85,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::ESCALATED);
         $this->t_status_id = QaTaskStatus::ESCALATED;
-        $this->recordEvent(new QaTaskEscalatedEvent($this));
+        $this->recordEvent(new QaTaskStatusEscalatedEvent($this));
     }
 
     public function isEscalated(): bool
@@ -97,7 +97,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::CLOSED);
         $this->t_status_id = QaTaskStatus::CLOSED;
-        $this->recordEvent(new QaTaskClosedEvent($this));
+        $this->recordEvent(new QaTaskStatusClosedEvent($this));
     }
 
     public function isClosed(): bool
@@ -109,7 +109,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::CANCELED);
         $this->t_status_id = QaTaskStatus::CANCELED;
-        $this->recordEvent(new QaTaskCanceledEvent($this));
+        $this->recordEvent(new QaTaskStatusCanceledEvent($this));
     }
 
     public function isCanceled(): bool
