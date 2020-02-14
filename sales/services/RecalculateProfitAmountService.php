@@ -76,11 +76,10 @@ class RecalculateProfitAmountService
      */
     public function recalculateByProductQuote(ProductQuote $productQuote, ?float $profitNew, ?float $profitOld): RecalculateProfitAmountService
     {
-        /* TODO::
+        /* TODO:: removal candidates
             $profitNew
             $profitOld
-            add RuntimeException to saving methods
-            if no need - remove Repositories
+            Repositories
          */
 
         $this->productQuote = $productQuote;

@@ -82,6 +82,21 @@ class OfferProduct extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param int $offerId
+     * @param int $productQuoteId
+     * @return static
+     */
+    public static function create(int $offerId, int $productQuoteId): self
+    {
+        $model = new static();
+        $model->op_offer_id = $offerId;
+        $model->op_product_quote_id = $productQuoteId;
+        $model->recordEvent(new OfferRecalculateProfitAmountEvent($model->opOffer));
+
+        return $model;
+    }
+
+    /**
      * @return ActiveQuery
      */
     public function getOpCreatedUser(): ActiveQuery
@@ -103,10 +118,4 @@ class OfferProduct extends \yii\db\ActiveRecord
     {
         return new Scopes(static::class);
     }
-
-    public function prepareRemove(): void
-    {
-       $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffer));
-    }
-
 }

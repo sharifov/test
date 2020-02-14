@@ -8,6 +8,7 @@ use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\entities\offerProduct\OfferProductRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 
+use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
 use frontend\controllers\FController;
@@ -21,22 +22,26 @@ use yii\web\Response;
 
 /**
  * @property OfferProductRepository $offerProductRepository
+ * @property EventDispatcher $eventDispatcher
  */
 class OfferProductController extends FController
 {
     private $offerProductRepository;
+    private $eventDispatcher;
 
     /**
      * OfferProductController constructor.
      * @param $id
      * @param $module
      * @param OfferProductRepository $offerProductRepository
+     * @param EventDispatcher $eventDispatcher
      * @param array $config
      */
-    public function __construct($id, $module, OfferProductRepository $offerProductRepository,  $config = [])
+    public function __construct($id, $module, OfferProductRepository $offerProductRepository, EventDispatcher $eventDispatcher, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->offerProductRepository = $offerProductRepository;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -117,14 +122,9 @@ class OfferProductController extends FController
                     throw new Exception('Product Quote ID ('.$productQuoteId.'), Offer ID ('.$offerId.'): ' . VarDumper::dumpAsString($offer->errors), 17);
                 }
             }
-
             $offerProduct = new OfferProduct();
-            $offerProduct->op_offer_id = $offer->of_id;
-            $offerProduct->op_product_quote_id = $productQuoteId;
-
-            if (!$offerProduct->save()) {
-                throw new Exception('Product Quote ID ('.$productQuoteId.'), Offer ID ('.$offerId.'): ' . VarDumper::dumpAsString($offerProduct->errors), 16);
-            }
+            $offerProduct::create($offer->of_id, $productQuoteId);
+            $this->offerProductRepository->save($offerProduct);
 
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
@@ -142,17 +142,17 @@ class OfferProductController extends FController
         $productQuoteId = (int) Yii::$app->request->post('product_quote_id');
 
         Yii::$app->response->format = Response::FORMAT_JSON;
-
+        $transaction = Yii::$app->db->beginTransaction();
         try {
             $model = $this->offerProductRepository->find($offerId, $productQuoteId);
-            $model->prepareRemove();
+            $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent($model->opOffer)]);
             $this->offerProductRepository->remove($model);
-
+            $transaction->commit();
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable),'OfferProductController:' . __FUNCTION__  . ':Exception');
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable),'OfferProductController:' . __FUNCTION__  . ':Exception');
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
-
         return ['message' => 'Successfully removed product quote (' . $productQuoteId . ') from offer (' . $offerId . ')'];
     }
 }
