@@ -37,9 +37,27 @@ $this->params['breadcrumbs'][] = $this->title;
 				'attribute' => 'up_user_id',
 				'relation' => 'upUser',
 			],
-            'upLead:lead:Lead',
-            'upOrder:order:Order',
-            'upProductQuote:productQuote:Product Quote',
+            [
+                'attribute' => 'up_lead_id',
+                'value' => static function (UserProfit $model) {
+                    return ($model->up_lead_id && $model->upLead) ? Html::a($model->up_lead_id, ['/lead/view', 'gid' => $model->upLead->gid], ['data-pjax' => 0, 'target' => '_blank']) : null;
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'up_order_id',
+                'value' => static function (UserProfit $model) {
+					return $model->up_order_id ? Html::a($model->up_order_id, ['/order/order-crud/view', 'id' => $model->up_order_id], ['data-pjax' => 0, 'target' => '_blank']) : null;
+                },
+				'format' => 'raw'
+			],
+			[
+				'attribute' => 'up_product_quote_id',
+				'value' => static function (UserProfit $model) {
+					return $model->up_product_quote_id ? Html::a($model->up_product_quote_id, ['/product/product-quote-crud/view', 'id' => $model->up_product_quote_id], ['data-pjax' => 0, 'target' => '_blank']) : null;
+				},
+				'format' => 'raw'
+			],
             'up_percent:percent',
             'up_profit',
             'up_split_percent:percent',
