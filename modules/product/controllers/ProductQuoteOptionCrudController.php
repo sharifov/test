@@ -3,7 +3,6 @@
 namespace modules\product\controllers;
 
 use frontend\controllers\FController;
-use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;

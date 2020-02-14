@@ -95,11 +95,13 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
 			<?php else:?>
 
 				<a id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click"
-				    data-placement="top" data-container="body" title="Estimation Profit <?= $model->pq_profit_amount ?>"
+				    data-placement="top" data-container="body" title="Estimation Profit"
 				    data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData) ?>' class="popover-class quote__profit">
                     <?= FlightQuoteHelper::getEstimationProfit($priceData) ?>$
 				</a>
 			<?php endif;?>
+
+            <i class="ml-2 fas fa-hand-holding-usd" title="Profit Amount"></i> <?= $model->pq_profit_amount ?>
 
 			<?php Pjax::end(); ?>
 		</div>

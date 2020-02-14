@@ -350,7 +350,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $processingFeeAmount = $childQuote ? $childQuote->getProcessingFee() : 0.00; // PFA
         $systemMarkupAmount = $childQuote ? $childQuote->getSystemMarkUp() : 0.00; // MA
         $agentExtraMarkupAmount = $childQuote ? $childQuote->getAgentMarkUp() : 0.00; // EMA agent (pax/room etc.)
-        $optionExtraMarkupAmount = $this->optionExtraMarkupSum; // EMA options
+        $optionExtraMarkupAmount = $this->getOptionExtraMarkupSum(); // EMA options
 
         return ($systemMarkupAmount + $agentExtraMarkupAmount + $optionExtraMarkupAmount) - $processingFeeAmount;
     }
