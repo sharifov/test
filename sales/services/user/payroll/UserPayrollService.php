@@ -58,7 +58,11 @@ class UserPayrollService
 			foreach ($this->userProfitRepository->getDataForCalcUserPayroll($date, $userId) as $profit) {
 				$newPayroll = UserPayroll::create((new UserPayrollCreateDTO())->feelByUserPayrollSearch($profit));
 
-				$payrollId = $this->userPayrollRepository->save($newPayroll);
+				try {
+					$payrollId = $this->userPayrollRepository->save($newPayroll);
+				} catch (\RuntimeException $e) {
+					continue;
+				}
 				$this->userProfitRepository->linkPayroll($newPayroll);
 
 				$payment = $this->userPaymentRepository->findById($profit->payment_id);

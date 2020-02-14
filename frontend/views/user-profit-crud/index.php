@@ -27,26 +27,30 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+		'rowOptions'=> static function(UserProfit $model){
+            return ['class' => $model->getRowClass()];
+		},
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            'up_id',
 			[
 				'class' => UserColumn::class,
 				'attribute' => 'up_user_id',
-				'relation' => 'upUser'
+				'relation' => 'upUser',
 			],
-            'up_lead_id',
-            'up_order_id',
-            'up_product_quote_id',
-            'up_percent',
+            'upLead:lead:Lead',
+            'upOrder:order:Order',
+            'upProductQuote:productQuote:Product Quote',
+            'up_percent:percent',
             'up_profit',
-            'up_split_percent',
+            'up_split_percent:percent',
             'up_amount',
             [
                 'attribute' => 'up_status_id',
                 'value' => static function (UserProfit $model) {
-                    return UserProfit::getStatusName($model->up_status_id);
+                    return UserProfit::asFormat($model->up_status_id);
                 },
-                'filter' => UserProfit::getStatusList()
+                'filter' => UserProfit::getStatusList(),
+                'format' => 'raw'
             ],
 			[
 				'class' => DateTimeColumn::class,
@@ -56,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => DateTimeColumn::class,
 				'attribute' => 'up_updated_dt',
 			],
-            'up_payroll_id',
+            'up_payroll_id:payroll',
             [
                 'attribute' => 'up_type_id',
                 'value' => static function (UserProfit $model) {

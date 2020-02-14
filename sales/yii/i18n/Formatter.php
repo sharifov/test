@@ -231,6 +231,18 @@ class Formatter extends \yii\i18n\Formatter
         return ProductQuoteFormatter::asProductQuote($productQuote);
     }
 
+    public function asPayroll($userPayrollId): string
+	{
+		if ($userPayrollId === null) {
+			return $this->nullDisplay;
+		}
+		return Html::a(
+			$userPayrollId,
+			['/user-payroll-crud/view', 'id' => $userPayrollId],
+			['target' => '_blank', 'data-pjax' => 0]
+		);
+	}
+
     public function asProduct(?Product $product): string
     {
         if ($product === null) {

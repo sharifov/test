@@ -107,8 +107,8 @@ class UserProfitSearch extends UserProfit
             'up_split_percent' => $this->up_split_percent,
             'up_amount' => $this->up_amount,
             'up_status_id' => $this->up_status_id,
-            'up_created_dt' => $this->up_created_dt,
-            'up_updated_dt' => $this->up_updated_dt,
+            'date_format(up_created_dt, "%Y-%m-%d")' => $this->up_created_dt,
+            'date_format(up_updated_dt, "%Y-%m-%d")' => $this->up_updated_dt,
             'up_payroll_id' => $this->up_payroll_id,
             'up_type_id' => $this->up_type_id,
         ]);

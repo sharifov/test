@@ -11,6 +11,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\user\entity\payroll\UserPayroll;
 use sales\model\user\entity\payroll\UserPayrollQuery;
 use yii\behaviors\TimestampBehavior;
+use yii\bootstrap4\Html;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -50,6 +51,13 @@ class UserProfit extends \yii\db\ActiveRecord
 		self::STATUS_DONE => 'Done',
 		self::STATUS_CANCELED => 'Canceled',
 		self::STATUS_DELETED => 'Deleted'
+	];
+
+	public const STATUS_CLASS_LIST = [
+		self::STATUS_PENDING => 'info',
+		self::STATUS_DONE => 'success',
+		self::STATUS_CANCELED => 'warning',
+		self::STATUS_DELETED => 'danger'
 	];
 
 	public const TYPE_SALE_COMM = 1;
@@ -211,6 +219,33 @@ class UserProfit extends \yii\db\ActiveRecord
 	public function calcAmount(): void
 	{
 		$this->up_amount = round((((float)$this->up_profit * (int)$this->up_percent / 100) * (int)$this->up_split_percent / 100), 2);
+	}
+
+	public static function asFormat(?int $value): ?string
+	{
+		return $value ? Html::tag(
+			'span',
+			self::getStatusName($value),
+			['class' => 'badge badge-' . self::getClassName($value)]
+		) : null;
+	}
+
+	private static function getClassName(?int $value): string
+	{
+		return self::STATUS_CLASS_LIST[$value] ?? 'secondary';
+	}
+
+	public function isDone(): bool
+	{
+		return $this->up_status_id === self::STATUS_DONE;
+	}
+
+	/**
+	 * @return mixed|null
+	 */
+	public function getRowClass()
+	{
+		return self::STATUS_CLASS_LIST[$this->up_status_id] ?? null;
 	}
 
     /**

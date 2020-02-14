@@ -61,8 +61,8 @@ class UserPaymentCategorySearch extends UserPaymentCategory
             'upc_enabled' => $this->upc_enabled,
             'upc_created_user_id' => $this->upc_created_user_id,
             'upc_updated_user_id' => $this->upc_updated_user_id,
-            'upc_created_dt' => $this->upc_created_dt,
-            'upc_updated_dt' => $this->upc_updated_dt,
+            'date_format(upc_created_dt, "%Y-%m-%d")' => $this->upc_created_dt,
+            'date_format(upc_updated_dt, "%Y-%m-%d")' => $this->upc_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'upc_name', $this->upc_name])

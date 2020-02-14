@@ -40,14 +40,18 @@ class UserPayrollSearch extends UserPayroll
      * @return ActiveDataProvider
      */
     public function search($params)
-    {
+	{
         $query = UserPayroll::find();
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-        ]);
+			'sort'=> ['defaultOrder' => ['ups_id' => SORT_DESC]],
+			'pagination' => [
+				'pageSize' => 30,
+			],
+		]);
 
         $this->load($params);
 
@@ -70,8 +74,8 @@ class UserPayrollSearch extends UserPayroll
             'ups_total_amount' => $this->ups_total_amount,
             'ups_agent_status_id' => $this->ups_agent_status_id,
             'ups_status_id' => $this->ups_status_id,
-            'ups_created_dt' => $this->ups_created_dt,
-            'ups_updated_dt' => $this->ups_updated_dt,
+            'date_format(ups_created_dt, "%Y-%m-%d")' => $this->ups_created_dt,
+            'date_format(ups_updated_dt, "%Y-%m-%d")' => $this->ups_updated_dt,
         ]);
 
         return $dataProvider;

@@ -10,6 +10,7 @@ use sales\model\user\entity\payroll\UserPayroll;
 use sales\model\user\entity\payroll\UserPayrollQuery;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\bootstrap4\Html;
 use yii\db\ActiveRecord;
 
 /**
@@ -46,6 +47,13 @@ class UserPayment extends \yii\db\ActiveRecord
 		self::STATUS_APPROVED => 'Approved',
 		self::STATUS_CANCELED => 'Canceled',
 		self::STATUS_DELETED => 'Deleted'
+	];
+
+	public const STATUS_CLASS_LIST = [
+		self::STATUS_PENDING => 'info',
+		self::STATUS_APPROVED => 'success',
+		self::STATUS_CANCELED => 'warning',
+		self::STATUS_DELETED => 'danger'
 	];
 
 	/**
@@ -188,4 +196,26 @@ class UserPayment extends \yii\db\ActiveRecord
     {
         return new UserPaymentQuery(static::class);
     }
+
+	public static function asFormat(?int $value): ?string
+	{
+		return $value ? Html::tag(
+			'span',
+			self::getStatusName($value),
+			['class' => 'badge badge-' . self::getClassName($value)]
+		) : null;
+	}
+
+	/**
+	 * @return mixed|null
+	 */
+	public function getRowClass()
+	{
+		return self::STATUS_CLASS_LIST[$this->upt_status_id] ?? null;
+	}
+
+	private static function getClassName(?int $value): string
+	{
+		return self::STATUS_CLASS_LIST[$value] ?? 'secondary';
+	}
 }

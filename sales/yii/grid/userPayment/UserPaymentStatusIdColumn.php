@@ -7,6 +7,7 @@ use yii\grid\DataColumn;
 class UserPaymentStatusIdColumn extends DataColumn
 {
 	public $filter;
+	public $format = 'raw';
 
 	public function init(): void
 	{
@@ -25,6 +26,6 @@ class UserPaymentStatusIdColumn extends DataColumn
 	 */
 	public function getDataCellValue($model, $key, $index)
 	{
-		return UserPayment::getStatusName($model->{$this->attribute});
+		return UserPayment::asFormat($model->{$this->attribute});
 	}
 }

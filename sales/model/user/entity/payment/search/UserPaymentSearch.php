@@ -47,6 +47,10 @@ class UserPaymentSearch extends UserPayment
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+			'sort'=> ['defaultOrder' => ['upt_id' => SORT_DESC]],
+			'pagination' => [
+				'pageSize' => 30,
+			],
         ]);
 
         $this->load($params);
@@ -67,8 +71,8 @@ class UserPaymentSearch extends UserPayment
             'upt_date' => $this->upt_date,
             'upt_created_user_id' => $this->upt_created_user_id,
             'upt_updated_user_id' => $this->upt_updated_user_id,
-            'upt_created_dt' => $this->upt_created_dt,
-            'upt_updated_dt' => $this->upt_updated_dt,
+            'date_format(upt_created_dt, "%Y-%m-%d")' => $this->upt_created_dt,
+            'date_format(upt_updated_dt, "%Y-%m-%d")' => $this->upt_updated_dt,
             'upt_payroll_id' => $this->upt_payroll_id,
         ]);
 
