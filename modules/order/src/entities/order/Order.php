@@ -292,10 +292,10 @@ class Order extends ActiveRecord
     public function profitAmount(): bool
     {
         $changed = false;
-        $profitCalc = ProductQuoteHelper::roundPrice($this->profitCalc());
-
-        if (ProductQuoteHelper::roundPrice($this->or_profit_amount) !== $profitCalc) {
-            $this->or_profit_amount = $profitCalc;
+        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
+        $profitOld = ProductQuoteHelper::roundPrice($this->or_profit_amount);
+        if ($profitNew !== $profitOld) {
+            $this->or_profit_amount = $profitNew;
             $changed = true;
         }
         return $changed;

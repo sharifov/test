@@ -127,6 +127,7 @@ class OfferProductController extends FController
             $this->offerProductRepository->save($offerProduct);
 
         } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable),'OfferProductController:' . __FUNCTION__ );
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
@@ -145,12 +146,12 @@ class OfferProductController extends FController
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $model = $this->offerProductRepository->find($offerId, $productQuoteId);
-            $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
             $this->offerProductRepository->remove($model);
+            $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable),'OfferProductController:' . __FUNCTION__  . ':Exception');
+            Yii::error(AppHelper::throwableFormatter($throwable),'OfferProductController:' . __FUNCTION__  );
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
         return ['message' => 'Successfully removed product quote (' . $productQuoteId . ') from offer (' . $offerId . ')'];

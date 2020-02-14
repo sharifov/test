@@ -109,7 +109,7 @@ class RecalculateProfitAmountService
      */
     public function recalculateByOrder(array $orders): array
     {
-        $this->orders[] = $orders;
+        $this->orders = $orders;
         return $this->recalculateOrder()->saveOrders();
     }
 
@@ -132,7 +132,6 @@ class RecalculateProfitAmountService
     private function recalculateOrder(): RecalculateProfitAmountService
     {
         foreach ($this->orders as $order) {
-            $order->profitAmount();
             if ($order->profitAmount()) {
                 $this->changedOrders[] = $order;
             }
