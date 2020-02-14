@@ -4,6 +4,7 @@ namespace modules\qaTask\migrations;
 
 use modules\qaTask\src\rbac\rules\task\actions\cancel\QaTaskCancelEscalateRule;
 use modules\qaTask\src\rbac\rules\task\actions\cancel\QaTaskCancelPendingRule;
+use modules\qaTask\src\rbac\rules\task\actions\cancel\QaTaskCancelProcessingCurrentRule;
 use modules\qaTask\src\rbac\rules\task\actions\cancel\QaTaskCancelProcessingRule;
 use Yii;
 use yii\db\Migration;
@@ -37,6 +38,14 @@ class m200214_104849_create_permissions_task_cancel extends Migration
         $auth->add($cancelProcessing);
         $auth->addChild($cancelProcessing, $cancel);
 
+        $cancelProcessingCurrentRule = new QaTaskCancelProcessingCurrentRule();
+        $auth->add($cancelProcessingCurrentRule);
+        $cancelProcessingCurrent = $auth->createPermission('qa-task/task/cancel_Processing_Current');
+        $cancelProcessingCurrent->description = 'Task Cancel only from status Processing and Current user is assigned';
+        $cancelProcessingCurrent->ruleName = $cancelProcessingCurrentRule->name;
+        $auth->add($cancelProcessingCurrent);
+        $auth->addChild($cancelProcessingCurrent, $cancel);
+
         $cancelPendingRule = new QaTaskCancelPendingRule();
         $auth->add($cancelPendingRule);
         $cancelPending = $auth->createPermission('qa-task/task/cancel_Pending');
@@ -48,7 +57,7 @@ class m200214_104849_create_permissions_task_cancel extends Migration
         $cancelEscalateRule = new QaTaskCancelEscalateRule();
         $auth->add($cancelEscalateRule);
         $cancelEscalate = $auth->createPermission('qa-task/task/cancel_Escalate');
-        $cancelEscalate->description = 'Task Cancel only from status Escalated';
+        $cancelEscalate->description = 'Task Cancel only from status Escalated and Current user is assigned';
         $cancelEscalate->ruleName = $cancelEscalateRule->name;
         $auth->add($cancelEscalate);
         $auth->addChild($cancelEscalate, $cancel);
@@ -77,6 +86,13 @@ class m200214_104849_create_permissions_task_cancel extends Migration
             $auth->remove($rule);
         }
         if ($permission = $auth->getPermission('qa-task/task/cancel_Processing')) {
+            $auth->remove($permission);
+        }
+
+        if ($rule = $auth->getRule('qa-task/task/cancel_Processing_Current_Rule')) {
+            $auth->remove($rule);
+        }
+        if ($permission = $auth->getPermission('qa-task/task/cancel_Processing_Current')) {
             $auth->remove($permission);
         }
 

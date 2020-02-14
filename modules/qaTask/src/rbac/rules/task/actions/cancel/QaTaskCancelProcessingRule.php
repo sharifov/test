@@ -16,6 +16,6 @@ class QaTaskCancelProcessingRule extends Rule
         }
         /** @var QaTask $task */
         $task = $params['task'];
-        return $task->isProcessing() && $task->isAssigned($userId);
+        return $task->isProcessing();
     }
 }
