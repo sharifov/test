@@ -21,6 +21,8 @@ use yii\bootstrap4\Html;
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
 
+        <i class="ml-2 fas fa-hand-holding-usd" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
+
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
@@ -153,10 +155,6 @@ use yii\bootstrap4\Html;
             <?php endif; ?>
             <?php endif; ?>
         </table>
-
-        <?php
-            $order->or_profit_amount; /* TODO:  */
-        ?>
 
         <i class="fa fa-user"></i> <?=$order->orCreatedUser ? Html::encode($order->orCreatedUser->username) : '-'?>,
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($order->or_created_dt)) ?>,

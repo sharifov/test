@@ -145,6 +145,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
         | <?= ProductQuoteStatus::asFormat($model->hqProductQuote->pq_status_id) ?>
 
+        <i class="ml-2 fas fa-hand-holding-usd" title="Profit Amount"></i> <?= $model->hqProductQuote->pq_profit_amount ?>
+
         <?php if ($model->hqProductQuote->pq_clone_id): ?>
             <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
         <?php endif;?>

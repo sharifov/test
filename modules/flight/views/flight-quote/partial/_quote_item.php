@@ -94,18 +94,18 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
 				</button>
 			<?php else:?>
 
-				<a id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
-				   data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData) ?>'>
+				<a id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click"
+				    data-placement="top" data-container="body" title="Estimation Profit <?= $model->pq_profit_amount ?>"
+				    data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData) ?>' class="popover-class quote__profit">
                     <?= FlightQuoteHelper::getEstimationProfit($priceData) ?>$
 				</a>
 			<?php endif;?>
-
 
 			<?php Pjax::end(); ?>
 		</div>
 		<div class="quote__heading-right">
 
-			<div class="dropdown">
+			<div class="dropdown" title="<?= $model->pq_id ?>">
 				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
 					<span class="fas fa-list-ul"></span>
 					<span class="caret"></span>
