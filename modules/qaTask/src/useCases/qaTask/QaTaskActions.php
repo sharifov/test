@@ -10,14 +10,16 @@ class QaTaskActions
     public const TAKE_OVER = 2;
     public const CANCEL = 3;
     public const CLOSE = 4;
-    public const ESCALATE = 5;
-    public const RETURN = 6;
+    public const DECIDE = 5;
+    public const ESCALATE = 6;
+    public const RETURN = 7;
 
     private const LIST = [
         self::TAKE => 'Take',
         self::TAKE_OVER => 'Take Over',
         self::CANCEL => 'Cancel',
         self::CLOSE => 'Close',
+        self::DECIDE => 'Decide',
         self::ESCALATE => 'Escalate',
         self::RETURN => 'Return',
     ];

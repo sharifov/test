@@ -2,6 +2,8 @@
 
 namespace modules\qaTask\controllers;
 
+use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseForm;
+use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseService;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateForm;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateService;
 use Yii;
@@ -23,12 +25,14 @@ use yii\widgets\ActiveForm;
  * @property QaTaskTakeService $takeService
  * @property QaTaskTakeOverService $takeOverService
  * @property QaTaskEscalateService $escalateService
+ * @property QaTaskCloseService $closeService
  */
 class QaTaskActionController extends FController
 {
     private $takeService;
     private $takeOverService;
     private $escalateService;
+    private $closeService;
 
     public function __construct(
         $id,
@@ -36,6 +40,7 @@ class QaTaskActionController extends FController
         QaTaskTakeService $takeService,
         QaTaskTakeOverService $takeOverService,
         QaTaskEscalateService $escalateService,
+        QaTaskCloseService $closeService,
         $config = []
     )
     {
@@ -43,13 +48,14 @@ class QaTaskActionController extends FController
         $this->takeService = $takeService;
         $this->takeOverService = $takeOverService;
         $this->escalateService = $escalateService;
+        $this->closeService = $closeService;
     }
 
     public function behaviors(): array
     {
         $behaviors = [
             'access' => [
-                'allowActions' => ['take', 'take-over', 'escalate'],
+                'allowActions' => ['take', 'take-over', 'escalate', 'close'],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -141,6 +147,40 @@ class QaTaskActionController extends FController
         }
 
         return $this->renderAjax('escalate', [
+            'model' => $form
+        ]);
+    }
+
+    /**
+     * @param $gid
+     * @return array|string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionClose($gid)
+    {
+        $task = $this->findModel((string)$gid);
+
+        QaTaskCloseService::permissionGuard($task);
+
+        $form = new QaTaskCloseForm($task, Auth::user());
+
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+
+        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->closeService->close($form);
+                \Yii::$app->session->addFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                \Yii::$app->session->addFlash('error', $e->getMessage());
+            }
+            return $this->redirect(['/qa-task/qa-task/view', 'gid' => $task->t_gid]);
+        }
+
+        return $this->renderAjax('close', [
             'model' => $form
         ]);
     }
