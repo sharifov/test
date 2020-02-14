@@ -91,7 +91,7 @@ class OfferProduct extends \yii\db\ActiveRecord
         $model = new static();
         $model->op_offer_id = $offerId;
         $model->op_product_quote_id = $productQuoteId;
-        $model->recordEvent(new OfferRecalculateProfitAmountEvent($model->opOffer));
+        $model->recordEvent(new OfferRecalculateProfitAmountEvent([$model->opOffer]));
 
         return $model;
     }

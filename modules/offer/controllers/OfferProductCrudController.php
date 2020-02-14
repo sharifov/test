@@ -97,7 +97,7 @@ class OfferProductCrudController extends FController
                 if (!$model->save()) {
                     throw new \RuntimeException('FlightQuotePaxPrice not created');
                 }
-                $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent($model->opOffer)]);
+                $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
                 $transaction->commit();
                 return $this->redirect(['view',
                     'op_offer_id' => $model->op_offer_id,
@@ -129,7 +129,7 @@ class OfferProductCrudController extends FController
                 if (!$model->save()) {
                     throw new \RuntimeException('FlightQuotePaxPrice not created');
                 }
-                $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent($model->opOffer)]);
+                $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
                 $transaction->commit();
                 return $this->redirect(['view',
                     'op_offer_id' => $model->op_offer_id,
@@ -158,7 +158,7 @@ class OfferProductCrudController extends FController
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $model = $this->offerProductRepository->find($op_offer_id, $op_product_quote_id);
-            $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent($model->opOffer)]);
+            $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
             $this->offerProductRepository->remove($model);
             $transaction->commit();
         } catch (\Throwable $throwable) {

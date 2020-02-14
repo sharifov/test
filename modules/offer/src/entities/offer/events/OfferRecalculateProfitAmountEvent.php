@@ -2,22 +2,20 @@
 
 namespace modules\offer\src\entities\offer\events;
 
-use modules\offer\src\entities\offer\Offer;
-
 /**
  * Class OfferRecalculateProfitAmountEvent
  * @package modules\offer\src\entities\offer\events
  */
 class OfferRecalculateProfitAmountEvent
 {
-    public $offer;
+    public $offers;
 
     /**
      * OfferRecalculateProfitAmountEvent constructor.
-     * @param Offer $offer
+     * @param array $offers [Offer]
      */
-    public function __construct(Offer $offer)
+    public function __construct(array $offers)
     {
-        $this->offer = $offer;
+        $this->offers = $offers;
     }
 }

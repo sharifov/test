@@ -2,9 +2,12 @@
 
 namespace modules\product\controllers;
 
+use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\auth\Auth;
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
 use Yii;
 use frontend\controllers\FController;
 use modules\hotel\models\HotelQuote;
@@ -19,15 +22,26 @@ use yii\web\Response;
  * Class ProductQuoteController
  *
  * @property ProductQuoteCloneService $productQuoteCloneService
+ * @property EventDispatcher $eventDispatcher
  */
 class ProductQuoteController extends FController
 {
     private $productQuoteCloneService;
+    private $eventDispatcher;
 
-    public function __construct($id, $module, ProductQuoteCloneService $productQuoteCloneService, $config = [])
+    /**
+     * ProductQuoteController constructor.
+     * @param $id
+     * @param $module
+     * @param ProductQuoteCloneService $productQuoteCloneService
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, ProductQuoteCloneService $productQuoteCloneService, EventDispatcher $eventDispatcher, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->productQuoteCloneService = $productQuoteCloneService;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -76,13 +90,24 @@ class ProductQuoteController extends FController
 
         Yii::$app->response->format = Response::FORMAT_JSON;
 
+        $transaction = Yii::$app->db->beginTransaction();
         try {
 
             if (!$id) {
                 throw new Exception('Product quote ID not found', 3);
             }
-
             $model = $this->findModel($id);
+
+            /* TODO::
+                add logic to recalculate:
+                * )orders
+             */
+
+            $this->eventDispatcher->dispatchAll([
+                new OfferRecalculateProfitAmountEvent([$model->opOffers]),
+                'todo recalc orders',
+            ]);
+
             if (!$model->delete()) {
                 throw new Exception('Product Quote (' . $id . ') not deleted', 4);
             }
@@ -96,6 +121,29 @@ class ProductQuoteController extends FController
                 }
             }
 
+            $transaction->commit();
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        /* -------------------------------------------------------- */
+        try {
+            if (!$id) {
+                throw new Exception('Product quote ID not found', 3);
+            }
+            $model = $this->findModel($id);
+            if (!$model->delete()) {
+                throw new Exception('Product Quote (' . $id . ') not deleted', 4);
+            }
+            if ((int)$model->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
+                $modelHotelQuote = HotelQuote::findOne(['hq_product_quote_id' => $model->pq_id]);
+                if ($modelHotelQuote) {
+                    if (!$modelHotelQuote->delete()) {
+                        throw new Exception('Hotel Quote (' . $modelHotelQuote->hq_id . ') not deleted', 5);
+                    }
+                }
+            }
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }

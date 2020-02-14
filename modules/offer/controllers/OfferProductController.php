@@ -145,7 +145,7 @@ class OfferProductController extends FController
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $model = $this->offerProductRepository->find($offerId, $productQuoteId);
-            $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent($model->opOffer)]);
+            $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
             $this->offerProductRepository->remove($model);
             $transaction->commit();
         } catch (\Throwable $throwable) {

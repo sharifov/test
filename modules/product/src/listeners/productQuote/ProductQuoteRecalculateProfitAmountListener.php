@@ -31,14 +31,6 @@ class ProductQuoteRecalculateProfitAmountListener
     {
         try {
             $this->recalculateProfitAmountService->recalculateByProductQuote($event->productQuote, $event->profitNew, $event->profitOld);
-            $this->recalculateProfitAmountService->saveProductQuote();
-
-            if ($this->recalculateProfitAmountService->changedOffers) {
-                $this->recalculateProfitAmountService->saveOffers();
-            }
-            if ($this->recalculateProfitAmountService->changedOrders) {
-                $this->recalculateProfitAmountService->saveOrders();
-            }
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'Listeners:' . self::class);
         }
