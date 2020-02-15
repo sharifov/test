@@ -2,36 +2,17 @@
 
 namespace modules\qaTask\src\entities\qaTask\search;
 
-use common\models\Department;
 use common\models\Employee;
-use common\models\Project;
-use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
-use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\qaTask\src\entities\qaTask\QaTask;
 
 /**
  * Class QaTaskCrudSearch
- *
- * @property Employee $user
- * @property array $projects
  */
-class QaTaskCrudSearch extends QaTask
+class QaTaskCrudSearch extends QaTaskSearch
 {
-    private $user;
-    private $projects;
-
-    public function __construct(Employee $user, $config = [])
-    {
-        $this->user = $user;
-        $this->projects = Project::getList();
-        parent::__construct($config);
-    }
-
     public function rules(): array
     {
         return [
@@ -40,27 +21,27 @@ class QaTaskCrudSearch extends QaTask
             ['t_gid', 'string', 'max' => 32],
 
             ['t_project_id', 'integer'],
-            ['t_project_id', 'in', 'range' => array_keys($this->projects)],
+            ['t_project_id', 'in', 'range' => array_keys($this->getProjectList())],
 
             ['t_object_type_id', 'integer'],
-            ['t_object_type_id', 'in', 'range' => array_keys(QaTaskObjectType::getList())],
+            ['t_object_type_id', 'in', 'range' => array_keys($this->getObjectTypeList())],
 
             ['t_object_id', 'integer'],
 
             ['t_status_id', 'integer'],
-            ['t_status_id', 'in', 'range' => array_keys(QaTaskStatus::getList())],
+            ['t_status_id', 'in', 'range' => array_keys($this->getStatusList())],
 
             ['t_category_id', 'integer'],
             ['t_category_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskCategory::class, 'targetAttribute' => ['t_category_id' => 'tc_id']],
 
             ['t_rating', 'integer'],
-            ['t_rating', 'in', 'range' => array_keys(QaTaskRating::getList())],
+            ['t_rating', 'in', 'range' => array_keys($this->getRatingList())],
 
             ['t_create_type_id', 'integer'],
-            ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreatedType::getList())],
+            ['t_create_type_id', 'in', 'range' => array_keys($this->getCreatedTypeList())],
 
             ['t_department_id', 'integer'],
-            ['t_department_id', 'in', 'range' => array_keys(Department::DEPARTMENT_LIST)],
+            ['t_department_id', 'in', 'range' => array_keys($this->getDepartmentList())],
 
             ['t_description', 'string'],
 

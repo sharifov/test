@@ -15,7 +15,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\qaTask\src\entities\qaTask\search\queue\QaTaskQueuePendingSearch */
+/* @var $searchModel modules\qaTask\src\entities\qaTask\search\queue\QaTaskSearchPendingSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Qa Tasks Escalated';

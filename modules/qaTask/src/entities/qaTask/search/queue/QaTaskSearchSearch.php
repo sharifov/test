@@ -2,36 +2,18 @@
 
 namespace modules\qaTask\src\entities\qaTask\search\queue;
 
-use common\models\Department;
 use common\models\Employee;
-use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
-use modules\qaTask\src\entities\qaTask\QaTaskRating;
+use modules\qaTask\src\entities\qaTask\search\QaTaskSearch;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use sales\access\ListsAccess;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\qaTask\src\entities\qaTask\QaTask;
 
 /**
- * Class QaTaskQueueProcessingSearch
- *
- * @property Employee $user
- * @property array $projects
+ * Class QaTaskQueueSearch
  */
-class QaTaskQueueProcessingSearch extends QaTask
+class QaTaskSearchSearch extends QaTaskSearch
 {
-    private $user;
-    private $projects;
-
-    public function __construct(Employee $user, $config = [])
-    {
-        $this->user = $user;
-        $this->projects = (new ListsAccess($user->id))->getProjects();
-        parent::__construct($config);
-    }
-
     public function rules(): array
     {
         return [
@@ -40,27 +22,27 @@ class QaTaskQueueProcessingSearch extends QaTask
             ['t_gid', 'string', 'max' => 32],
 
             ['t_project_id', 'integer'],
-            ['t_project_id', 'in', 'range' => array_keys($this->projects)],
+            ['t_project_id', 'in', 'range' => array_keys($this->getProjectList())],
 
             ['t_object_type_id', 'integer'],
-            ['t_object_type_id', 'in', 'range' => array_keys(QaTaskObjectType::getList())],
+            ['t_object_type_id', 'in', 'range' => array_keys($this->getObjectTypeList())],
 
             ['t_object_id', 'integer'],
 
             ['t_status_id', 'integer'],
-            ['t_status_id', 'in', 'range' => array_keys(QaTaskStatus::getProcessingQueueList())],
+            ['t_status_id', 'in', 'range' => array_keys($this->getStatusList())],
 
             ['t_category_id', 'integer'],
             ['t_category_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskCategory::class, 'targetAttribute' => ['t_category_id' => 'tc_id']],
 
             ['t_rating', 'integer'],
-            ['t_rating', 'in', 'range' => array_keys(QaTaskRating::getList())],
+            ['t_rating', 'in', 'range' => array_keys($this->getRatingList())],
 
             ['t_create_type_id', 'integer'],
-            ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreatedType::getList())],
+            ['t_create_type_id', 'in', 'range' => array_keys($this->getCreatedTypeList())],
 
             ['t_department_id', 'integer'],
-            ['t_department_id', 'in', 'range' => array_keys(Department::DEPARTMENT_LIST)],
+            ['t_department_id', 'in', 'range' => array_keys($this->getDepartmentList())],
 
             ['t_description', 'string'],
 
@@ -83,13 +65,13 @@ class QaTaskQueueProcessingSearch extends QaTask
     {
         $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
-        $query->projects(array_keys($this->projects));
-
-        $query->queueProcessing()->assigned();
+        $query->projects(array_keys($this->getProjectList()));
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['t_updated_dt' => SORT_DESC]],
+            'sort'=> [
+                'defaultOrder' => ['t_id' => SORT_DESC]
+            ],
         ]);
 
         $this->load($params);
