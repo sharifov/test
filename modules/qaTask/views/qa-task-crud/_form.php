@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Department;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
@@ -30,7 +30,7 @@ $list = new ListsAccess(Auth::id());
 
         <?= $form->field($model, 't_project_id')->dropDownList($list->getProjects(), ['prompt' => 'Select project']) ?>
 
-        <?= $form->field($model, 't_object_type_id')->dropDownList(QaObjectType::getList(), ['prompt' => 'Select Object type']) ?>
+        <?= $form->field($model, 't_object_type_id')->dropDownList(QaTaskObjectType::getList(), ['prompt' => 'Select Object type']) ?>
 
         <?= $form->field($model, 't_object_id')->textInput() ?>
 

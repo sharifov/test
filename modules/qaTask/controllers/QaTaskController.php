@@ -4,7 +4,7 @@ namespace modules\qaTask\controllers;
 
 use common\models\Lead;
 use frontend\controllers\FController;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use sales\entities\cases\Cases;
 use yii\web\BadRequestHttpException;
@@ -30,14 +30,14 @@ class QaTaskController extends FController
         $typeId = (int)$typeId;
         $id = (int)$id;
 
-        if ($typeId === QaObjectType::LEAD) {
+        if (QaTaskObjectType::isLead($typeId)) {
             if ($object = Lead::findOne($id)) {
                 return $this->redirect(['/lead/view', 'gid' => $object->gid]);
             }
             throw new BadRequestHttpException('Not found Lead: ' . $id);
         }
 
-        if ($typeId === QaObjectType::CASE) {
+        if (QaTaskObjectType::isCase($typeId)) {
             if ($object = Cases::findOne($id)) {
                 return $this->redirect(['/cases/view', 'gid' => $object->cs_gid]);
             }

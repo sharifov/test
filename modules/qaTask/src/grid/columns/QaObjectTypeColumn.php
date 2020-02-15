@@ -2,7 +2,7 @@
 
 namespace modules\qaTask\src\grid\columns;
 
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use yii\grid\DataColumn;
 
 /**
@@ -23,7 +23,7 @@ class QaObjectTypeColumn extends DataColumn
         parent::init();
 
         if ($this->filter === null) {
-            $this->filter = QaObjectType::getList();
+            $this->filter = QaTaskObjectType::getList();
         }
     }
 }

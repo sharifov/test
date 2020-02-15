@@ -3,7 +3,7 @@
 namespace modules\qaTask\src\entities\qaTaskActionReason;
 
 use common\models\Employee;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -41,7 +41,7 @@ class QaTaskActionReason extends \yii\db\ActiveRecord
         return [
             ['tar_object_type_id', 'required'],
             ['tar_object_type_id', 'integer'],
-            ['tar_object_type_id', 'in', 'range' => array_keys(QaObjectType::getList())],
+            ['tar_object_type_id', 'in', 'range' => array_keys(QaTaskObjectType::getList())],
 
             ['tar_action_id', 'required'],
             ['tar_action_id', 'integer'],

@@ -6,33 +6,27 @@ use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\entities\qaTaskActionReason\ReasonDto;
+use modules\qaTask\src\useCases\qaTask\QaTaskActionForm;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use yii\base\Model;
 
 /**
  * Class QaTaskReturnToEscalateForm
  *
  * @property int $reasonId
  * @property string|null $description
- * @property QaTask $task
- * @property Employee $user
  * @property ReasonDto[] $reasons
  */
-class QaTaskReturnToEscalateForm extends Model
+class QaTaskReturnToEscalateForm extends QaTaskActionForm
 {
     public $reasonId;
     public $description;
 
-    private $task;
-    private $user;
     private $reasons;
 
     public function __construct(QaTask $task, Employee $user, $config = [])
     {
-        $this->task = $task;
-        $this->user = $user;
+        parent::__construct($task, $user, $config);
         $this->reasons = QaTaskActionReasonQuery::getReasons($this->task->t_object_type_id, QaTaskActions::RETURN);
-        parent::__construct($config);
     }
 
     public function rules(): array
@@ -57,21 +51,6 @@ class QaTaskReturnToEscalateForm extends Model
             $list[$reason->id] = $reason->name;
         }
         return $list;
-    }
-
-    public function getTaskId(): int
-    {
-        return $this->task->t_id;
-    }
-
-    public function getTaskGid(): string
-    {
-        return $this->task->t_gid;
-    }
-
-    public function getUserId(): int
-    {
-        return $this->user->id;
     }
 
     public function attributeLabels(): array

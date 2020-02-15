@@ -7,8 +7,8 @@ use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\entities\qaTaskActionReason\ReasonDto;
+use modules\qaTask\src\useCases\qaTask\QaTaskActionForm;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use yii\base\Model;
 
 /**
  * Class QaTaskEscalateForm
@@ -16,26 +16,20 @@ use yii\base\Model;
  * @property int $reasonId
  * @property string|null $description
  * @property int|null $rating
- * @property QaTask $task
- * @property Employee $user
  * @property ReasonDto[] $reasons
  */
-class QaTaskEscalateForm extends Model
+class QaTaskEscalateForm extends QaTaskActionForm
 {
     public $reasonId;
     public $description;
     public $rating;
 
-    private $task;
-    private $user;
     private $reasons;
 
     public function __construct(QaTask $task, Employee $user, $config = [])
     {
-        $this->task = $task;
-        $this->user = $user;
+        parent::__construct($task, $user, $config);
         $this->reasons = QaTaskActionReasonQuery::getReasons($this->task->t_object_type_id, QaTaskActions::ESCALATE);
-        parent::__construct($config);
     }
 
     public function rules(): array
@@ -79,20 +73,5 @@ class QaTaskEscalateForm extends Model
             'description' => 'Description',
             'rating' => 'Rating',
         ];
-    }
-
-    public function getTaskId(): int
-    {
-        return $this->task->t_id;
-    }
-
-    public function getTaskGid(): string
-    {
-        return $this->task->t_gid;
-    }
-
-    public function getUserId(): int
-    {
-        return $this->user->id;
     }
 }

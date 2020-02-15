@@ -3,7 +3,7 @@
 namespace modules\qaTask\src\entities\qaTaskActionReason\search;
 
 use common\models\Employee;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
@@ -15,7 +15,7 @@ class QaTaskActionReasonCrudSearch extends QaTaskActionReason
     {
         return [
             ['tar_object_type_id', 'integer'],
-            ['tar_object_type_id', 'in', 'range' => array_keys(QaObjectType::getList())],
+            ['tar_object_type_id', 'in', 'range' => array_keys(QaTaskObjectType::getList())],
 
             ['tar_action_id', 'integer'],
             ['tar_action_id', 'in', 'range' => array_keys(QaTaskActions::getList())],

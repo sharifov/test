@@ -4,7 +4,7 @@ namespace modules\qaTask\src\entities\qaTask\search\queue;
 
 use common\models\Department;
 use common\models\Employee;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
@@ -43,7 +43,7 @@ class QaTaskQueueSearch extends QaTask
             ['t_project_id', 'in', 'range' => array_keys($this->projects)],
 
             ['t_object_type_id', 'integer'],
-            ['t_object_type_id', 'in', 'range' => array_keys(QaObjectType::getList())],
+            ['t_object_type_id', 'in', 'range' => array_keys(QaTaskObjectType::getList())],
 
             ['t_object_id', 'integer'],
 

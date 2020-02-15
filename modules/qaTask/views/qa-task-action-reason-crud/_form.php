@@ -1,6 +1,6 @@
 <?php
 
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use yii\helpers\Html;
@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'tar_object_type_id')->dropDownList(QaObjectType::getList(), ['prompt' => 'Select Object Type']) ?>
+        <?= $form->field($model, 'tar_object_type_id')->dropDownList(QaTaskObjectType::getList(), ['prompt' => 'Select Object Type']) ?>
 
         <?= $form->field($model, 'tar_action_id')->dropDownList(QaTaskActions::getList(), ['prompt' => 'Select action']) ?>
 

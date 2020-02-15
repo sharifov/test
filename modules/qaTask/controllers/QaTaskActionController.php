@@ -6,6 +6,12 @@ use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelForm;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelService;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseForm;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseService;
+use modules\qaTask\src\useCases\qaTask\decide\lead\reAssign\QaTaskDecideLeadReAssignForm;
+use modules\qaTask\src\useCases\qaTask\decide\lead\reAssign\QaTaskDecideLeadReAssignService;
+use modules\qaTask\src\useCases\qaTask\decide\lead\sendToRedialQueue\QaTaskDecideLeadSendToRedialQueue;
+use modules\qaTask\src\useCases\qaTask\decide\noAction\QaTaskDecideNoActionForm;
+use modules\qaTask\src\useCases\qaTask\decide\noAction\QaTaskDecideNoActionService;
+use modules\qaTask\src\useCases\qaTask\decide\QaTaskDecideService;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateForm;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateService;
 use modules\qaTask\src\useCases\qaTask\returnTask\toEscalate\QaTaskReturnToEscalateForm;
@@ -35,6 +41,9 @@ use yii\widgets\ActiveForm;
  * @property QaTaskCancelService $cancelService
  * @property QaTaskReturnToPendingService $returnToPendingService
  * @property QaTaskReturnToEscalateService $returnToEscalateService
+ * @property QaTaskDecideLeadSendToRedialQueue $decideLeadSendToRedialQueue
+ * @property QaTaskDecideNoActionService $decideNoActionService
+ * @property QaTaskDecideLeadReAssignService $decideLeadReAssignService
  */
 class QaTaskActionController extends FController
 {
@@ -45,6 +54,9 @@ class QaTaskActionController extends FController
     private $cancelService;
     private $returnToPendingService;
     private $returnToEscalateService;
+    private $decideLeadSendToRedialQueue;
+    private $decideNoActionService;
+    private $decideLeadReAssignService;
 
     public function __construct(
         $id,
@@ -56,6 +68,9 @@ class QaTaskActionController extends FController
         QaTaskCancelService $cancelService,
         QaTaskReturnToPendingService $returnToPendingService,
         QaTaskReturnToEscalateService $returnToEscalateService,
+        QaTaskDecideLeadSendToRedialQueue $decideLeadSendToRedialQueue,
+        QaTaskDecideNoActionService $decideNoActionService,
+        QaTaskDecideLeadReAssignService $decideLeadReAssignService,
         $config = []
     )
     {
@@ -67,6 +82,9 @@ class QaTaskActionController extends FController
         $this->cancelService = $cancelService;
         $this->returnToPendingService = $returnToPendingService;
         $this->returnToEscalateService = $returnToEscalateService;
+        $this->decideLeadSendToRedialQueue = $decideLeadSendToRedialQueue;
+        $this->decideNoActionService = $decideNoActionService;
+        $this->decideLeadReAssignService = $decideLeadReAssignService;
     }
 
     public function behaviors(): array
@@ -81,6 +99,9 @@ class QaTaskActionController extends FController
                     'cancel',
                     'return-to-pending',
                     'return-to-escalate',
+                    'decide-no-action',
+                    'decide-lead-send-to-redial-queue',
+                    'decide-lead-re-assign',
                 ],
             ],
         ];
@@ -309,6 +330,96 @@ class QaTaskActionController extends FController
         }
 
         return $this->renderAjax('return-to-escalate', [
+            'model' => $form
+        ]);
+    }
+
+    /**
+     * @param $gid
+     * @return array|string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionDecideNoAction($gid)
+    {
+        $task = $this->findModel((string)$gid);
+
+        QaTaskDecideService::permissionGuard();
+
+        $form = new QaTaskDecideNoActionForm($task, Auth::user());
+
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+
+        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->decideNoActionService->handle($form);
+                \Yii::$app->session->addFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                \Yii::$app->session->addFlash('error', $e->getMessage());
+            }
+            return $this->redirect(['/qa-task/qa-task/view', 'gid' => $task->t_gid]);
+        }
+
+        return $this->renderAjax('decide-no-action', [
+            'model' => $form
+        ]);
+    }
+
+    /**
+     * @param $gid
+     * @return array|string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionDecideLeadSendToRedialQueue($gid)
+    {
+        $task = $this->findModel((string)$gid);
+
+        QaTaskDecideService::permissionGuard();
+
+        try {
+            $this->decideLeadSendToRedialQueue->handle($task->t_id, Auth::id());
+            \Yii::$app->session->addFlash('success', 'Success');
+        } catch (\DomainException $e) {
+            \Yii::$app->session->addFlash('error', $e->getMessage());
+        }
+
+        return $this->redirect(['/qa-task/qa-task/view', 'gid' => $task->t_gid]);
+    }
+
+    /**
+     * @param $gid
+     * @return array|string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionDecideLeadReAssign($gid)
+    {
+        $task = $this->findModel((string)$gid);
+
+        QaTaskDecideService::permissionGuard();
+
+        $form = new QaTaskDecideLeadReAssignForm($task, Auth::user());
+
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+
+        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->decideLeadReAssignService->handle($form);
+                \Yii::$app->session->addFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                \Yii::$app->session->addFlash('error', $e->getMessage());
+            }
+            return $this->redirect(['/qa-task/qa-task/view', 'gid' => $task->t_gid]);
+        }
+
+        return $this->renderAjax('decide-lead-re-assign', [
             'model' => $form
         ]);
     }

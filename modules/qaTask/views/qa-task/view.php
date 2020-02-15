@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="x_panel">
         <div class="x_content" style="display: block;">
-            <?= $this->render('partial/_actions', [
+            <?= $this->render('partial/actions', [
                 'model' => $model,
             ])
             ?>
@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="row">
         <div class="col-md-4">
-            <?= $this->render('partial/_general_info', [
+            <?= $this->render('partial/general_info', [
                 'model' => $model,
             ])
             ?>

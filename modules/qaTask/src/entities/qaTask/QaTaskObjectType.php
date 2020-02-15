@@ -1,12 +1,12 @@
 <?php
 
-namespace modules\qaTask\src\entities;
+namespace modules\qaTask\src\entities\qaTask;
 
 use common\models\Lead;
 use sales\entities\cases\Cases;
 use yii\bootstrap4\Html;
 
-class QaObjectType
+class QaTaskObjectType
 {
     public const LEAD = 1;
     public const CASE = 2;
@@ -53,6 +53,16 @@ class QaObjectType
     private static function getCssClass(?int $value): string
     {
         return self::CLASS_LIST[$value] ?? 'secondary';
+    }
+
+    public static function isLead(int $type): bool
+    {
+        return $type === self::LEAD;
+    }
+
+    public static function isCase(int $type): bool
+    {
+        return $type === self::CASE;
     }
 
     public static function getObjectClass(int $type): string

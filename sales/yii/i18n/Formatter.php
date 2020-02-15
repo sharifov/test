@@ -30,7 +30,7 @@ use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
@@ -92,7 +92,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return QaObjectType::asFormat($value);
+        return QaTaskObjectType::asFormat($value);
     }
 
     public function asOfferSendLogType($value): string

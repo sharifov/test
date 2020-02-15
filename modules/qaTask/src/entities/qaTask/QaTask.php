@@ -5,7 +5,7 @@ namespace modules\qaTask\src\entities\qaTask;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskStatusCanceledEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskChangeRatingEvent;
@@ -188,7 +188,7 @@ class QaTask extends \yii\db\ActiveRecord
             ['t_object_type_id', 'required'],
             ['t_object_type_id', 'integer'],
             ['t_object_type_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['t_object_type_id', 'in', 'range' => array_keys(QaObjectType::getList())],
+            ['t_object_type_id', 'in', 'range' => array_keys(QaTaskObjectType::getList())],
 
             ['t_object_id', 'required'],
             ['t_object_id', 'integer'],
