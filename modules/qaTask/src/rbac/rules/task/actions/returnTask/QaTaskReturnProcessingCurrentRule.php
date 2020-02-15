@@ -1,13 +1,13 @@
 <?php
 
-namespace modules\qaTask\src\rbac\rules\task\actions\cancel;
+namespace modules\qaTask\src\rbac\rules\task\actions\returnTask;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use yii\rbac\Rule;
 
-class QaTaskCancelProcessingRule extends Rule
+class QaTaskReturnProcessingCurrentRule extends Rule
 {
-    public $name = 'qa-task/qa-task-action/cancel_Processing_Rule';
+    public $name = 'qa-task/qa-task-action/return_Processing_Current_Rule';
 
     public function execute($userId, $item, $params): bool
     {
@@ -16,6 +16,6 @@ class QaTaskCancelProcessingRule extends Rule
         }
         /** @var QaTask $task */
         $task = $params['task'];
-        return $task->isProcessing();
+        return $task->isProcessing() && $task->isAssigned($userId);
     }
 }

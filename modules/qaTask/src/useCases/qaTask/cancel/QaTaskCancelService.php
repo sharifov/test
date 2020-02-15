@@ -77,7 +77,7 @@ class QaTaskCancelService
      */
     public static function permissionGuard(QaTask $task): void
     {
-        if (!\Yii::$app->user->can('qa-task/task/cancel', ['task' => $task])) {
+        if (!\Yii::$app->user->can('qa-task/qa-task-action/cancel', ['task' => $task])) {
             throw new ForbiddenHttpException('Access denied.');
         }
     }

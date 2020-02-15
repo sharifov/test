@@ -7,7 +7,7 @@ use yii\rbac\Rule;
 
 class QaTaskCancelPendingRule extends Rule
 {
-    public $name = 'qa-task/task/cancel_Pending_Rule';
+    public $name = 'qa-task/qa-task-action/cancel_Pending_Rule';
 
     public function execute($userId, $item, $params): bool
     {

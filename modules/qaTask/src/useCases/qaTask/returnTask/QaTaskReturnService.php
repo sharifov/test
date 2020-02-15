@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\close;
+namespace modules\qaTask\src\useCases\qaTask\returnTask;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
@@ -12,13 +12,13 @@ use sales\repositories\user\UserRepository;
 use yii\web\ForbiddenHttpException;
 
 /**
- * Class QaTaskCloseService
+ * Class QaTaskCancelService
  *
  * @property QaTaskRepository $taskRepository
  * @property UserRepository $userRepository
  * @property EventDispatcher $eventDispatcher
  */
-class QaTaskCloseService
+class QaTaskReturnService
 {
     private $taskRepository;
     private $userRepository;
@@ -35,7 +35,7 @@ class QaTaskCloseService
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function close(QaTaskCloseForm $form): void
+    public function return(QaTaskReturnForm $form): void
     {
         $task = $this->taskRepository->find($form->getTaskId());
         $user = $this->userRepository->find($form->getUserId());
@@ -43,20 +43,37 @@ class QaTaskCloseService
         self::businessGuard($task, $user->id);
 
         $startStatusId = $task->t_status_id;
+        $oldAssignedUserId = $task->t_assigned_user_id;
 
-        $task->closed();
-        $task->changeRating($form->rating);
+        if ($form->toPending()) {
+            $task->pending();
+        } elseif ($form->toEscalate()) {
+            if ($task->isProcessing()) {
+                throw new \DomainException('Task is processing.');
+            }
+            if (!$task->isEscalated()) {
+                $task->escalated();
+            }
+        } else {
+            throw new \DomainException('Undefined -to status-');
+        }
+
+        if (!$task->isUnAssigned()) {
+            $task->unAssign();
+        }
+
         $this->taskRepository->save($task);
 
-        $this->eventDispatcher->dispatch(new QaTaskCloseEvent(
+        $this->eventDispatcher->dispatch(new QaTaskReturnEvent(
             $task,
+            $oldAssignedUserId,
             new CreateDto(
                 $task->t_id,
                 $startStatusId,
                 $task->t_status_id,
-                null,
+                $form->reasonId,
                 $form->description,
-                QaTaskActions::CLOSE,
+                QaTaskActions::RETURN,
                 $task->t_assigned_user_id,
                 $user->id
             )
@@ -67,21 +84,18 @@ class QaTaskCloseService
     {
         EmployeeProjectAccess::guard($task->t_project_id, $userId);
 
-        if (!$task->isProcessing()) {
-            throw new \DomainException('Task must be in processing.');
-        }
-
-        if (!$task->isAssigned($userId)) {
-            throw new \DomainException('User must be assigned.');
+        if ($task->isPending()) {
+            throw new \DomainException('Task is pending.');
         }
     }
 
     /**
+     * @param QaTask $task
      * @throws ForbiddenHttpException
      */
-    public static function permissionGuard(): void
+    public static function permissionGuard(QaTask $task): void
     {
-        if (!\Yii::$app->user->can('qa-task/qa-task-action/close')) {
+        if (!\Yii::$app->user->can('qa-task/qa-task-action/return', ['task' => $task])) {
             throw new ForbiddenHttpException('Access denied.');
         }
     }
@@ -89,7 +103,7 @@ class QaTaskCloseService
     public static function can(QaTask $task, int $userId): bool
     {
         try {
-            self::permissionGuard();
+            self::permissionGuard($task);
             self::businessGuard($task, $userId);
         } catch (\Throwable $e) {
             return false;

@@ -7,7 +7,7 @@ use yii\rbac\Rule;
 
 class QaTaskTakeOverProcessingRule extends Rule
 {
-    public $name = 'qa-task/task/take-over_Processing_Rule';
+    public $name = 'qa-task/qa-task-action/take-over_Processing_Rule';
 
     public function execute($user, $item, $params): bool
     {

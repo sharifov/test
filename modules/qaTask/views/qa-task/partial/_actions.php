@@ -4,6 +4,7 @@ use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelService;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseService;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateService;
+use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnService;
 use modules\qaTask\src\useCases\qaTask\take\QaTaskTakeService;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverService;
 use sales\auth\Auth;
@@ -83,6 +84,19 @@ use yii\helpers\Url;
             'title' => 'Cancel',
             'data-url' => Url::to(['/qa-task/qa-task-action/cancel', 'gid' => $model->t_gid]),
             'data-title' => 'Task [' . $model->t_id . '] cancel',
+            'data-modal-id' => 'modal-df',
+        ]
+    ) ?>
+<?php endif; ?>
+
+<?php if (QaTaskReturnService::can($model, Auth::id())): ?>
+    <?= Html::button(
+        'Return',
+        [
+            'class' => 'btn-modal-show btn btn-' . QaTaskStatus::getCssClass(QaTaskStatus::PENDING),
+            'title' => 'Return',
+            'data-url' => Url::to(['/qa-task/qa-task-action/return', 'gid' => $model->t_gid]),
+            'data-title' => 'Task [' . $model->t_id . '] return',
             'data-modal-id' => 'modal-df',
         ]
     ) ?>

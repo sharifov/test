@@ -77,12 +77,11 @@ class QaTaskEscalateService
     }
 
     /**
-     * @param QaTask $task
      * @throws ForbiddenHttpException
      */
-    public static function permissionGuard(QaTask $task): void
+    public static function permissionGuard(): void
     {
-        if (!\Yii::$app->user->can('qa-task/task/escalate', ['task' => $task])) {
+        if (!\Yii::$app->user->can('qa-task/qa-task-action/escalate')) {
             throw new ForbiddenHttpException('Access denied.');
         }
     }
@@ -90,7 +89,7 @@ class QaTaskEscalateService
     public static function can(QaTask $task, int $userId): bool
     {
         try {
-            self::permissionGuard($task);
+            self::permissionGuard();
             self::businessGuard($task, $userId);
         } catch (\Throwable $e) {
             return false;

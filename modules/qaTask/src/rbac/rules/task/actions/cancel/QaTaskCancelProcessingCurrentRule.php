@@ -7,7 +7,7 @@ use yii\rbac\Rule;
 
 class QaTaskCancelProcessingCurrentRule extends Rule
 {
-    public $name = 'qa-task/task/cancel_Processing_Current_Rule';
+    public $name = 'qa-task/qa-task-action/cancel_Processing_Current_Rule';
 
     public function execute($userId, $item, $params): bool
     {

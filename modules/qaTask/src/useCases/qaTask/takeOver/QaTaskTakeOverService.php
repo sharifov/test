@@ -91,7 +91,7 @@ class QaTaskTakeOverService
      */
     public static function permissionGuard(QaTask $task): void
     {
-        if (!\Yii::$app->user->can('qa-task/task/take-over', ['task' => $task])) {
+        if (!\Yii::$app->user->can('qa-task/qa-task-action/take-over', ['task' => $task])) {
             throw new ForbiddenHttpException('Access denied.');
         }
     }

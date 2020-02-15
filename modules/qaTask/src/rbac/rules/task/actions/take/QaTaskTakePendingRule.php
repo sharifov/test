@@ -7,7 +7,7 @@ use yii\rbac\Rule;
 
 class QaTaskTakePendingRule extends Rule
 {
-    public $name = 'qa-task/task/take_Pending_Rule';
+    public $name = 'qa-task/qa-task-action/take_Pending_Rule';
 
     public function execute($user, $item, $params): bool
     {

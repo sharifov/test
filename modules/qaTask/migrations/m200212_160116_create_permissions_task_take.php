@@ -2,7 +2,6 @@
 
 namespace modules\qaTask\migrations;
 
-use modules\qaTask\src\rbac\rules\task\actions\take\QaTaskTakeEscalateRule;
 use modules\qaTask\src\rbac\rules\task\actions\take\QaTaskTakePendingRule;
 use Yii;
 use yii\db\Migration;
@@ -19,25 +18,17 @@ class m200212_160116_create_permissions_task_take extends Migration
     {
         $auth = Yii::$app->authManager;
 
-        $take = $auth->createPermission('qa-task/task/take');
+        $take = $auth->createPermission('qa-task/qa-task-action/take');
         $take->description = 'Task Take';
         $auth->add($take);
 
         $takePendingRule = new QaTaskTakePendingRule();
         $auth->add($takePendingRule);
-        $takePending = $auth->createPermission('qa-task/task/take_Pending');
+        $takePending = $auth->createPermission('qa-task/qa-task-action/take_Pending');
         $takePending->description = 'Task Take only from status Pending';
         $takePending->ruleName = $takePendingRule->name;
         $auth->add($takePending);
         $auth->addChild($takePending, $take);
-
-        $takeEscalateRule = new QaTaskTakeEscalateRule();
-        $auth->add($takeEscalateRule);
-        $takeEscalate = $auth->createPermission('qa-task/task/take_Escalate');
-        $takeEscalate->description = 'Task Take only from status Escalate';
-        $takeEscalate->ruleName = $takeEscalateRule->name;
-        $auth->add($takeEscalate);
-        $auth->addChild($takeEscalate, $take);
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -51,19 +42,14 @@ class m200212_160116_create_permissions_task_take extends Migration
     {
         $auth = Yii::$app->authManager;
 
-        if ($permission = $auth->getPermission('qa-task/task/take')) {
+        if ($permission = $auth->getPermission('qa-task/qa-task-action/take')) {
             $auth->remove($permission);
         }
-        if ($rule = $auth->getRule('qa-task/task/take_Pending_Rule')) {
+
+        if ($rule = $auth->getRule('qa-task/qa-task-action/take_Pending_Rule')) {
             $auth->remove($rule);
         }
-        if ($permission = $auth->getPermission('qa-task/task/take_Pending')) {
-            $auth->remove($permission);
-        }
-        if ($rule = $auth->getRule('qa-task/task/take_Escalate_Rule')) {
-            $auth->remove($rule);
-        }
-        if ($permission = $auth->getPermission('qa-task/task/take_Escalate')) {
+        if ($permission = $auth->getPermission('qa-task/qa-task-action/take_Pending')) {
             $auth->remove($permission);
         }
 

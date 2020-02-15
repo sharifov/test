@@ -1,13 +1,13 @@
 <?php
 
-namespace modules\qaTask\src\rbac\rules\task\actions\escalate;
+namespace modules\qaTask\src\rbac\rules\task\actions\returnTask;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use yii\rbac\Rule;
 
-class QaTaskEscalateRule extends Rule
+class QaTaskReturnProcessingRule extends Rule
 {
-    public $name = 'qa-task/task/escalate_Rule';
+    public $name = 'qa-task/qa-task-action/return_Processing_Rule';
 
     public function execute($userId, $item, $params): bool
     {
@@ -16,6 +16,6 @@ class QaTaskEscalateRule extends Rule
         }
         /** @var QaTask $task */
         $task = $params['task'];
-        return $task->isProcessing() && $task->isAssigned($userId);
+        return $task->isProcessing();
     }
 }

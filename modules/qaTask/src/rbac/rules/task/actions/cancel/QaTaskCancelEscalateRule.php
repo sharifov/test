@@ -7,7 +7,7 @@ use yii\rbac\Rule;
 
 class QaTaskCancelEscalateRule extends Rule
 {
-    public $name = 'qa-task/task/cancel_Escalate_Rule';
+    public $name = 'qa-task/qa-task-action/cancel_Escalate_Rule';
 
     public function execute($userId, $item, $params): bool
     {
