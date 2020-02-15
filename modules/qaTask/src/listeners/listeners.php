@@ -16,6 +16,8 @@ use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelEvent;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseEvent;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateEvent;
 use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnEvent;
+use modules\qaTask\src\useCases\qaTask\returnTask\toEscalate\QaTaskReturnToEscalateEvent;
+use modules\qaTask\src\useCases\qaTask\returnTask\toPending\QaTaskReturnToPendingEvent;
 use modules\qaTask\src\useCases\qaTask\take\QaTaskTakeEvent;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverEvent;
 use modules\qaTask\src\listeners\QaTaskChangeStateEventListener;
@@ -54,4 +56,6 @@ return [
         QaTaskChangeStateEventListener::class,
         QaTaskReturnNotifierListener::class,
     ],
+    QaTaskReturnToPendingEvent::class => [],
+    QaTaskReturnToEscalateEvent::class => [],
 ];

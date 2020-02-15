@@ -8,8 +8,10 @@ use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseForm;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseService;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateForm;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateService;
-use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnForm;
-use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnService;
+use modules\qaTask\src\useCases\qaTask\returnTask\toEscalate\QaTaskReturnToEscalateForm;
+use modules\qaTask\src\useCases\qaTask\returnTask\toEscalate\QaTaskReturnToEscalateService;
+use modules\qaTask\src\useCases\qaTask\returnTask\toPending\QaTaskReturnToPendingForm;
+use modules\qaTask\src\useCases\qaTask\returnTask\toPending\QaTaskReturnToPendingService;
 use Yii;
 use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\QaTask;
@@ -31,7 +33,8 @@ use yii\widgets\ActiveForm;
  * @property QaTaskEscalateService $escalateService
  * @property QaTaskCloseService $closeService
  * @property QaTaskCancelService $cancelService
- * @property QaTaskReturnService $returnService
+ * @property QaTaskReturnToPendingService $returnToPendingService
+ * @property QaTaskReturnToEscalateService $returnToEscalateService
  */
 class QaTaskActionController extends FController
 {
@@ -40,7 +43,8 @@ class QaTaskActionController extends FController
     private $escalateService;
     private $closeService;
     private $cancelService;
-    private $returnService;
+    private $returnToPendingService;
+    private $returnToEscalateService;
 
     public function __construct(
         $id,
@@ -50,7 +54,8 @@ class QaTaskActionController extends FController
         QaTaskEscalateService $escalateService,
         QaTaskCloseService $closeService,
         QaTaskCancelService $cancelService,
-        QaTaskReturnService $returnService,
+        QaTaskReturnToPendingService $returnToPendingService,
+        QaTaskReturnToEscalateService $returnToEscalateService,
         $config = []
     )
     {
@@ -60,14 +65,23 @@ class QaTaskActionController extends FController
         $this->escalateService = $escalateService;
         $this->closeService = $closeService;
         $this->cancelService = $cancelService;
-        $this->returnService = $returnService;
+        $this->returnToPendingService = $returnToPendingService;
+        $this->returnToEscalateService = $returnToEscalateService;
     }
 
     public function behaviors(): array
     {
         $behaviors = [
             'access' => [
-                'allowActions' => ['take', 'take-over', 'escalate', 'close', 'cancel', 'return'],
+                'allowActions' => [
+                    'take',
+                    'take-over',
+                    'escalate',
+                    'close',
+                    'cancel',
+                    'return-to-pending',
+                    'return-to-escalate',
+                ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -237,17 +251,13 @@ class QaTaskActionController extends FController
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    public function actionReturn($gid)
+    public function actionReturnToPending($gid)
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskReturnService::permissionGuard($task);
+        QaTaskReturnToPendingService::permissionGuard($task);
 
-        $form = new QaTaskReturnForm(
-            $task,
-            Auth::user(),
-            (!$task->isProcessing() && Yii::$app->user->can('qa-task/qa-task-action/return_To_Escalate'))
-        );
+        $form = new QaTaskReturnToPendingForm($task, Auth::user());
 
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -256,7 +266,7 @@ class QaTaskActionController extends FController
 
         if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
             try {
-                $this->returnService->return($form);
+                $this->returnToPendingService->return($form);
                 \Yii::$app->session->addFlash('success', 'Success');
             } catch (\DomainException $e) {
                 \Yii::$app->session->addFlash('error', $e->getMessage());
@@ -264,7 +274,41 @@ class QaTaskActionController extends FController
             return $this->redirect(['/qa-task/qa-task/view', 'gid' => $task->t_gid]);
         }
 
-        return $this->renderAjax('return', [
+        return $this->renderAjax('return-to-pending', [
+            'model' => $form
+        ]);
+    }
+
+    /**
+     * @param $gid
+     * @return array|string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionReturnToEscalate($gid)
+    {
+        $task = $this->findModel((string)$gid);
+
+        QaTaskReturnToEscalateService::permissionGuard($task);
+
+        $form = new QaTaskReturnToEscalateForm($task, Auth::user());
+
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+
+        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->returnToEscalateService->return($form);
+                \Yii::$app->session->addFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                \Yii::$app->session->addFlash('error', $e->getMessage());
+            }
+            return $this->redirect(['/qa-task/qa-task/view', 'gid' => $task->t_gid]);
+        }
+
+        return $this->renderAjax('return-to-escalate', [
             'model' => $form
         ]);
     }

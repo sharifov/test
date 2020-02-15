@@ -1,24 +1,25 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\returnTask;
+namespace modules\qaTask\src\useCases\qaTask\returnTask\toPending;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
+use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnEvent;
 use sales\access\EmployeeProjectAccess;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\user\UserRepository;
 use yii\web\ForbiddenHttpException;
 
 /**
- * Class QaTaskCancelService
+ * Class QaTaskReturnToPendingService
  *
  * @property QaTaskRepository $taskRepository
  * @property UserRepository $userRepository
  * @property EventDispatcher $eventDispatcher
  */
-class QaTaskReturnService
+class QaTaskReturnToPendingService
 {
     private $taskRepository;
     private $userRepository;
@@ -35,7 +36,7 @@ class QaTaskReturnService
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function return(QaTaskReturnForm $form): void
+    public function return(QaTaskReturnToPendingForm $form): void
     {
         $task = $this->taskRepository->find($form->getTaskId());
         $user = $this->userRepository->find($form->getUserId());
@@ -45,18 +46,7 @@ class QaTaskReturnService
         $startStatusId = $task->t_status_id;
         $oldAssignedUserId = $task->t_assigned_user_id;
 
-        if ($form->toPending()) {
-            $task->pending();
-        } elseif ($form->toEscalate()) {
-            if ($task->isProcessing()) {
-                throw new \DomainException('Task is processing.');
-            }
-            if (!$task->isEscalated()) {
-                $task->escalated();
-            }
-        } else {
-            throw new \DomainException('Undefined -to status-');
-        }
+        $task->pending();
 
         if (!$task->isUnAssigned()) {
             $task->unAssign();
@@ -64,20 +54,29 @@ class QaTaskReturnService
 
         $this->taskRepository->save($task);
 
-        $this->eventDispatcher->dispatch(new QaTaskReturnEvent(
-            $task,
-            $oldAssignedUserId,
-            new CreateDto(
-                $task->t_id,
-                $startStatusId,
-                $task->t_status_id,
-                $form->reasonId,
-                $form->description,
-                QaTaskActions::RETURN,
-                $task->t_assigned_user_id,
-                $user->id
+        $stateLog = new CreateDto(
+            $task->t_id,
+            $startStatusId,
+            $task->t_status_id,
+            $form->reasonId,
+            $form->description,
+            QaTaskActions::RETURN,
+            $task->t_assigned_user_id,
+            $user->id
+        );
+
+        $this->eventDispatcher->dispatchAll([
+            new QaTaskReturnToPendingEvent(
+                $task,
+                $oldAssignedUserId,
+                $stateLog
+            ),
+            new QaTaskReturnEvent(
+                $task,
+                $oldAssignedUserId,
+                $stateLog
             )
-        ));
+        ]);
     }
 
     private static function businessGuard(QaTask $task, int $userId): void

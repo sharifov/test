@@ -1,19 +1,19 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\returnTask;
+namespace modules\qaTask\src\useCases\qaTask\returnTask\toPending;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskChangeStateInterface;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 
 /**
- * Class QaTaskReturnEvent
+ * Class QaTaskReturnToPendingEvent
  *
  * @property QaTask $task
  * @property int|null $oldAssignedUserId
  * @property CreateDto $changeStateLog
  */
-class QaTaskReturnEvent implements QaTaskChangeStateInterface
+class QaTaskReturnToPendingEvent implements QaTaskChangeStateInterface
 {
     public $task;
     public $oldAssignedUserId;

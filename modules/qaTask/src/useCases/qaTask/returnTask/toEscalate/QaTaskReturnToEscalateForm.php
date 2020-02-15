@@ -1,62 +1,43 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\returnTask;
+namespace modules\qaTask\src\useCases\qaTask\returnTask\toEscalate;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\entities\qaTaskActionReason\ReasonDto;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use yii\base\Model;
 
 /**
- * Class QaTaskCancelForm
+ * Class QaTaskReturnToEscalateForm
  *
- * @property int $statusId
  * @property int $reasonId
  * @property string|null $description
  * @property QaTask $task
  * @property Employee $user
  * @property ReasonDto[] $reasons
- * @property array $statusList
  */
-class QaTaskReturnForm extends Model
+class QaTaskReturnToEscalateForm extends Model
 {
-    public $statusId;
     public $reasonId;
     public $description;
 
     private $task;
     private $user;
     private $reasons;
-    private $statusList;
 
-    public function __construct(QaTask $task, Employee $user, bool $canToEscalate, $config = [])
+    public function __construct(QaTask $task, Employee $user, $config = [])
     {
         $this->task = $task;
         $this->user = $user;
         $this->reasons = QaTaskActionReasonQuery::getReasons($this->task->t_object_type_id, QaTaskActions::RETURN);
-
-        $this->statusList = [
-            QaTaskStatus::PENDING => QaTaskStatus::getName(QaTaskStatus::PENDING)
-        ];
-
-        if ($canToEscalate) {
-            $this->statusList[QaTaskStatus::ESCALATED] = QaTaskStatus::getName(QaTaskStatus::ESCALATED);
-        }
-
         parent::__construct($config);
     }
 
     public function rules(): array
     {
         return [
-            ['statusId', 'required'],
-            ['statusId', 'integer'],
-            ['statusId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['statusId', 'in', 'range' => array_keys($this->getStatusList())],
-
             ['reasonId', 'required'],
             ['reasonId', 'integer'],
             ['reasonId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
@@ -67,21 +48,6 @@ class QaTaskReturnForm extends Model
                 return (isset($this->reasons[$this->reasonId]) && $this->reasons[$this->reasonId]->isCommentRequired());
             }, 'skipOnError' => true],
         ];
-    }
-
-    public function toPending(): bool
-    {
-        return $this->statusId === QaTaskStatus::PENDING;
-    }
-
-    public function toEscalate(): bool
-    {
-        return $this->statusId === QaTaskStatus::ESCALATED;
-    }
-
-    public function getStatusList(): array
-    {
-        return $this->statusList;
     }
 
     public function getReasonList(): array
@@ -111,7 +77,6 @@ class QaTaskReturnForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'statusId' => 'Status',
             'reasonId' => 'Reason',
             'description' => 'Description',
         ];

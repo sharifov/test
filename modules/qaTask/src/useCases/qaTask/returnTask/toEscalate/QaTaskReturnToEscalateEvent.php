@@ -1,19 +1,19 @@
 <?php
 
-namespace modules\qaTask\src\useCases\qaTask\returnTask;
+namespace modules\qaTask\src\useCases\qaTask\returnTask\toEscalate;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskChangeStateInterface;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 
 /**
- * Class QaTaskReturnEvent
+ * Class QaTaskReturnToEscalateEvent
  *
  * @property QaTask $task
  * @property int|null $oldAssignedUserId
  * @property CreateDto $changeStateLog
  */
-class QaTaskReturnEvent implements QaTaskChangeStateInterface
+class QaTaskReturnToEscalateEvent implements QaTaskChangeStateInterface
 {
     public $task;
     public $oldAssignedUserId;
