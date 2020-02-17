@@ -2,6 +2,7 @@
 namespace common\components;
 
 use common\models\Lead;
+use common\models\LeadFlightSegment;
 use common\models\local\FlightSegment;
 use common\models\Quote;
 use Yii;
@@ -30,7 +31,7 @@ class SearchService
      * @param $minutes
      * @return string
      */
-    public static function durationInMinutes($minutes)
+    public static function durationInMinutes($minutes): string
     {
         $hours = floor($minutes / 60);
         $minutes %= 60;
@@ -60,9 +61,13 @@ class SearchService
             return $mapping;
         }
 
-        return isset($mapping[$gds]) ? $mapping[$gds] : $gds;
+        return $mapping[$gds] ?? $gds;
     }
 
+    /**
+     * @param null $cabin
+     * @return array|mixed|null
+     */
     public static function getCabin($cabin = null)
     {
         $mapping = [
@@ -78,9 +83,13 @@ class SearchService
             return $mapping;
         }
 
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+        return $mapping[$cabin] ?? $cabin;
     }
 
+    /**
+     * @param $cabin
+     * @return mixed
+     */
     public static function getCabinRealCode($cabin)
     {
         $mapping = [
@@ -90,17 +99,35 @@ class SearchService
             Lead::CABIN_FIRST => self::CABIN_FIRST,
         ];
 
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+        return $mapping[$cabin] ?? $cabin;
     }
 
-    public static function getOnlineQuotes(Lead $lead, $gdsCode = null)
+    /**
+     * @param string $flexType
+     * @return int|null
+     */
+    public static function getSearchFlexType(string $flexType): ?int
+    {
+        $mapping = [
+            LeadFlightSegment::FLEX_TYPE_MINUS          => -1,
+            LeadFlightSegment::FLEX_TYPE_PLUS_MINUS     => 0,
+            LeadFlightSegment::FLEX_TYPE_PLUS           => 1
+        ];
+
+        return $mapping[$flexType] ?: null;
+    }
+
+    /**
+     * @param Lead $lead
+     * @param int $limit
+     * @param null $gdsCode
+     * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
+    public static function getOnlineQuotes(Lead $lead, int $limit = 600, $gdsCode = null)
     {
         $result = null;
-        $returned = '';
-        if ($lead->trip_type == Lead::TRIP_TYPE_ROUND_TRIP) {
-            $returned = date('m/d/Y', strtotime($lead->leadFlightSegments[1]->departure));
-        }
-
         $fl = [];
 
         $params = [
@@ -111,16 +138,30 @@ class SearchService
             'inf' => $lead->infants,
         ];
 
+        if ($limit) {
+            $params['limit'] = $limit;
+        }
+
         if($gdsCode) {
             $params['gds'] = $gdsCode;
         }
 
         foreach ($lead->leadFlightSegments as $flightSegment) {
-            $fl[] = [
+            $segment = [
                 'o' => $flightSegment->origin,
                 'd' => $flightSegment->destination,
                 'dt' => $flightSegment->departure
             ];
+
+            if ($flightSegment->flexibility > 0) {
+                $segment['flex'] = $flightSegment->flexibility;
+
+                if ($flightSegment->flexibility_type && $flexType = self::getSearchFlexType($flightSegment->flexibility_type)) {
+                    $segment['ft'] = $flexType;
+                }
+            }
+
+            $fl[] = $segment;
         }
 
         $params['fl'] = $fl;
@@ -128,7 +169,7 @@ class SearchService
         $fields = http_build_query($params);
         $url = \Yii::$app->params['searchApiUrl'].'?' . $fields;
 
-        ///
+
         $client = new Client();
         $client->setTransport(CurlTransport::class);
         $request = $client->createRequest();
@@ -137,7 +178,7 @@ class SearchService
 
         //VarDumper::dump($fields)
 
-        // Yii::info($url, 'info\CURL:getOnlineQuotes:quickSearch');
+        //Yii::info(urldecode($url), 'info\CURL:getOnlineQuotes:quickSearch');
 
         if ($response->isOk) {
             return $response->data;
@@ -151,19 +192,13 @@ class SearchService
             );
         }
 
-        ///
-
-        /* $ch = curl_init();
-        curl_setopt($ch, CURLOPT_VERBOSE, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        $result = curl_exec($ch); */
-
-        //Yii::warning(sprintf("Request:\n%s\n\nDump:\n%s", print_r($fields, true), print_r(curl_getinfo($ch), true)), 'SearchService::getOnlineQuotes()');
-
         return json_decode($result, true);
     }
 
+    /**
+     * @param $result
+     * @return array
+     */
     public static function getAirlineLocationInfo($result)
     {
         $airlinesIata = [];

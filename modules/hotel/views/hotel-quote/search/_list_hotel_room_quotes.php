@@ -53,7 +53,7 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
                         <i class="fa fa-child"></i> <?=(\yii\helpers\Html::encode($room['children'] ?? 0))?>
                     </td>
             <!--        <td>-->
-            <!--            ages: --><?//=(\yii\helpers\Html::encode($room['childrenAges'] ?? ''))?>
+            <!--            ages: --><?php //=(\yii\helpers\Html::encode($room['childrenAges'] ?? ''))?>
             <!--        </td>-->
                     <td>
                         <?=number_format(\yii\helpers\Html::encode($room['amount']), 2)?> $

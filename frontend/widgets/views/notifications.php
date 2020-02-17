@@ -31,8 +31,6 @@
                     </span>
                     <span class="message">
                         <?=\yii\helpers\StringHelper::truncate(\common\models\Email::strip_html_tags($item->n_message), 80, '...');?><br>
-                        <?/*=$item->n_created_dt?><br>
-                        <?= Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))*/?>
                     </span>
                 </a>
                 <?php

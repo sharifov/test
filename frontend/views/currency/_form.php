@@ -38,11 +38,11 @@ use yii\widgets\ActiveForm;
 
 
 
-        <?//= $form->field($model, 'cur_created_dt')->textInput() ?>
+        <?php //= $form->field($model, 'cur_created_dt')->textInput() ?>
 
-        <?//= $form->field($model, 'cur_updated_dt')->textInput() ?>
+        <?php //= $form->field($model, 'cur_updated_dt')->textInput() ?>
 
-        <?//= $form->field($model, 'cur_synch_dt')->textInput() ?>
+        <?php //= $form->field($model, 'cur_synch_dt')->textInput() ?>
         </div>
     </div>
 

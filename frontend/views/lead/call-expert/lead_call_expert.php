@@ -61,7 +61,7 @@ $user = Yii::$app->user->identity;
 
             </li>
             <li>
-                <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
+                <?php //=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
                 <?php if($lead->leadFlightSegmentsCount):?>
                     <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
                         <?php if($user->isEnableCallExpert() && $lead->isProcessing()): ?>
@@ -76,7 +76,7 @@ $user = Yii::$app->user->identity;
                 <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
             </li>
 
-            <?/*<li class="dropdown">
+            <?php /*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
 
 

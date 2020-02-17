@@ -42,7 +42,7 @@ $pjaxId = 'pjax-add-product-quote-option'; // . uniqid();
 
         <?= $form->field($model, 'pqo_price')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 
-        <?//= $form->field($model, 'pqo_client_price')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
+        <?php //= $form->field($model, 'pqo_client_price')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 
         <?= $form->field($model, 'pqo_extra_markup')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 

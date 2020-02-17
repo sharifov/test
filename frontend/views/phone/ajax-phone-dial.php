@@ -164,7 +164,7 @@ $user = Yii::$app->user->identity;
                 ]) ?>
             </div>
 
-            <?/*<div class="alert alert-info" role="alert">
+            <?php /*<div class="alert alert-info" role="alert">
                 <p>If there is no call and an error has occurred, please inform the manager of the problem.</p>
             </div>*/?>
 

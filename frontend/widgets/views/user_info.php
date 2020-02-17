@@ -33,7 +33,7 @@
         <?php endif; ?>
 
 <!--        <span>-->
-<!--            Updated: <i class="fa fa-clock-o"></i> --><?//= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>
+<!--            Updated: <i class="fa fa-clock-o"></i> --><?php //= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>
 <!--        </span>-->
 
     </a>

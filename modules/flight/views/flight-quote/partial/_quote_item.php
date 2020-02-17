@@ -37,11 +37,11 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
 	<div class="quote__heading flex-wrap">
 		<div class="quote__heading-left">
 <!--			--><?php //if ($flightQuote->isOriginal()): ?>
-<!--				<span class="label label-primary">--><?//= FlightQuote::getTypeName($flightQuote->fq_type_id) ?><!--</span>-->
+<!--				<span class="label label-primary">--><?php //= FlightQuote::getTypeName($flightQuote->fq_type_id) ?><!--</span>-->
 <!--			--><?php //elseif (in_array($model->pq_status_id, [ProductQuoteStatus::NEW , ProductQuoteStatus::, Quote::STATUS_OPENED])) : ?>
 <!--				<div class="custom-checkbox">-->
-<!--					<input class="quotes-uid" id="q--><?//= $model->uid ?><!--" value="--><?//= $model->uid ?><!--" data-id="--><?//=$model->id?><!--" type="checkbox" name="quote[--><?//= $model->uid ?><!--]">-->
-<!--					<label for="q--><?//= $model->uid ?><!--"></label>-->
+<!--					<input class="quotes-uid" id="q--><?php //= $model->uid ?><!--" value="--><?php //= $model->uid ?><!--" data-id="--><?php //=$model->id?><!--" type="checkbox" name="quote[--><?php //= $model->uid ?><!--]">-->
+<!--					<label for="q--><?php //= $model->uid ?><!--"></label>-->
 <!--				</div>-->
 <!--			--><?php //endif; ?>
 
@@ -49,7 +49,7 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
 
 			<?= ProductQuoteStatus::getStatusSpan($model)?>
 
-<!--			<span class="quote__id">QUID: <strong>--><?//= $model->pq_id ?><!--</strong></span>-->
+<!--			<span class="quote__id">QUID: <strong>--><?php //= $model->pq_id ?><!--</strong></span>-->
 
             <?php if ($model->pq_clone_id): ?>
                 <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
@@ -139,7 +139,7 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                         'data-product-id' => $flightQuote->fqProductQuote->pq_product_id,
                     ]) ?>
 <!---->
-<!--					--><?//= Html::a('<i class="fa fa-list-alt"></i> Reserv. dump', null, [
+<!--					--><?php //= Html::a('<i class="fa fa-list-alt"></i> Reserv. dump', null, [
 //						'class' => 'btn-reservation-dump dropdown-item',
 //						'title' => 'Reservation Dump quote: ' . $model->uid,
 //						'data-content' => \yii\helpers\Html::encode($model->reservation_dump)

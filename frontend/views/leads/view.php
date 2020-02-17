@@ -29,7 +29,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?//= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?php //= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
 
         <?= Html::a('<i class="fa fa-search"></i> View Lead', ['/lead/view', 'gid' => $model->gid], ['class' => 'btn btn-primary']) ?>
 
@@ -38,7 +38,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             'url' => new \frontend\widgets\lead\editTool\Url(Url::to(['leads/edit']), ['id' => $model->id])])
         ?>
 
-        <?/*= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?php /*= Html::a('Delete', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -409,7 +409,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             <h3>Quotes:</h3>
         <?php \yii\widgets\Pjax::begin(); ?>
         <p>
-            <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+            <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
         </p>
 
         <?= \yii\grid\GridView::widget([

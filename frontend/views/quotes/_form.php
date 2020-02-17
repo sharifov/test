@@ -40,9 +40,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'fare_type')->textInput(['maxlength' => true]) ?>
 
-    <?//= $form->field($model, 'created')->textInput() ?>
+    <?php //= $form->field($model, 'created')->textInput() ?>
 
-    <?//= $form->field($model, 'updated')->textInput() ?>
+    <?php //= $form->field($model, 'updated')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

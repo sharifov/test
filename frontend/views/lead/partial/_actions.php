@@ -202,18 +202,18 @@ if($project){
 
 <!--    	--><?php //if(count($buttonsSubAction) > 1):?>
 <!--    	<div class="dropdown inline-block">-->
-<!--            --><?//= Html::a('<i class="fa fa-ellipsis-v"></i> Action', null, [
+<!--            --><?php //= Html::a('<i class="fa fa-ellipsis-v"></i> Action', null, [
 //                'class' => 'btn btn-default',
 //                'data-toggle' => 'dropdown'
 //            ]) ?>
 <!--            <ul class="dropdown-menu" aria-labelledby="dLabel">-->
 <!--                --><?php //foreach ($buttonsSubAction as $button):?>
-<!--                <li>--><?//= $button?><!--</li>-->
+<!--                <li>--><?php //= $button?><!--</li>-->
 <!--                --><?php //endforeach;?>
 <!--            </ul>-->
 <!--        </div>-->
 <!--        --><?php //elseif (count($buttonsSubAction) == 1):?>
-<!--        	--><?//= $buttonsSubAction[0];?>
+<!--        	--><?php //= $buttonsSubAction[0];?>
 <!--    	--><?php //endif;?>
 
         <?php  if (!empty($leadModel->bo_flight_id) && $leadModel->isOwner($user->id) && $leadModel->isBooked()) {

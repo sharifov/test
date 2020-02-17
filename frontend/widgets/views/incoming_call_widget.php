@@ -74,7 +74,7 @@ use yii\widgets\Pjax;
                 ?>
                 <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; /*background-color: rgba(58,199,200,0.26)*/">
                     <div class="col-md-4" style="padding-top: 5px;">
-                        <?//=$call->c_id?>
+                        <?php //=$call->c_id?>
                         <?php if($call->cProject):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cProject->name)?></span> <?php endif; ?>
                         <?php if($call->cDep):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
                         <?php if($call->c_source_type_id):?> <span class="label label-warning"><?=\yii\helpers\Html::encode($call->getSourceName())?></span> <?php endif; ?>
@@ -109,11 +109,11 @@ use yii\widgets\Pjax;
                     <div class="col-md-3 text-right">
 
                         <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-accept'])?>
-                        <?//=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
-                        <?//=\yii\helpers\Html::a('<i class="fa fa-close"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
+                        <?php //=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
+                        <?php //=\yii\helpers\Html::a('<i class="fa fa-close"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
                     </div>
                 </div>
-                <?/*<table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
+                <?php /*<table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
                     <tr>
                         <td style="width:100px"><i class="fa fa-user"></i> <span></span></td>
                         <td style="width:120px">
@@ -183,9 +183,9 @@ use yii\widgets\Pjax;
                     </div>
                     <div class="col-md-4 text-right">
 
-                        <?//=\yii\helpers\Html::a('<i class="fa fa-ban"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger btn-incoming-call-busy'])?>
+                        <?php //=\yii\helpers\Html::a('<i class="fa fa-ban"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger btn-incoming-call-busy'])?>
                         <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-accept'])?>
-                        <?//=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
+                        <?php //=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
 
                     </div>
                 </div>

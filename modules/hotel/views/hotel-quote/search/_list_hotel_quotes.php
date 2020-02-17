@@ -72,7 +72,7 @@ $roomDataProvider = new ArrayDataProvider([
     <tr>
         <td></td>
         <td>
-            <?//php \yii\helpers\VarDumper::dump($model, 3, true)?>
+            <?php //php \yii\helpers\VarDumper::dump($model, 3, true)?>
 
             <?php \yii\widgets\Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
             <?= \yii\widgets\ListView::widget([

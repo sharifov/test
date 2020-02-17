@@ -24,7 +24,7 @@ $user = Yii::$app->user->identity;
                 <li>
                     <?php if($lead->isProcessing() && ($lead->isOwner($user->id) || $user->isAdmin())): ?>
                         <?php if(Yii::$app->request->get('act') === 'add-note-form'): ?>
-                            <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
+                            <?php /*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
                         <?php else: ?>
                             <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['lead/view', 'gid' => $lead->gid, 'act' => 'add-note-form'], ['id' => 'btn-notes-form'])?>
                         <?php endif; ?>

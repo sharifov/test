@@ -20,8 +20,8 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?//= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?/*= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?php //= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?php /*= Html::a('Delete', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -141,7 +141,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
             <h3>Prices:</h3>
             <?php \yii\widgets\Pjax::begin(); ?>
             <p>
-                <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+                <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             </p>
 
             <?= \yii\grid\GridView::widget([

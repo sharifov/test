@@ -13,10 +13,10 @@ use yii\widgets\Pjax;
 ?>
 <div class="hotel-quote-index">
 
-<!--    <h1>--><?//= Html::encode($this->title) ?><!--</h1>-->
+<!--    <h1>--><?php //= Html::encode($this->title) ?><!--</h1>-->
 <!---->
 <!--    <p>-->
-<!--        --><?//= Html::a('Create Hotel Quote', ['create'], ['class' => 'btn btn-success']) ?>
+<!--        --><?php //= Html::a('Create Hotel Quote', ['create'], ['class' => 'btn btn-success']) ?>
 <!--    </p>-->
 
     <?php
@@ -86,7 +86,7 @@ The SPA service at Christmas is closed on December 25 and January 1.'
     ]) ?>
 
 
-    <?/*= GridView::widget([
+    <?php /*= GridView::widget([
         'dataProvider' => $dataProvider,
         //'filterModel' => $searchModel,
         'columns' => [

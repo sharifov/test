@@ -36,7 +36,7 @@ use yii\widgets\ActiveForm;
 
             <?php if($model->e_is_new):?>
                 <i class="fa fa-circle" title="New message"></i><br>
-            <?php endif; ?><?/*<i class="fa fa-edit"></i>*/?>
+            <?php endif; ?><?php /*<i class="fa fa-edit"></i>*/?>
         </div>
         <div class="right">
             <h3>

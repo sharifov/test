@@ -21,7 +21,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'dpp_redial')->dropDownList([0 => 'No', 1 => 'Yes']) ?>
 
-        <?//= $form->field($model, 'dpp_source_id')->dropDownList(Sour) ?>
+        <?php //= $form->field($model, 'dpp_source_id')->dropDownList(Sour) ?>
 
         <?php
             echo $form->field($model, 'dpp_source_id')->widget(\kartik\select2\Select2::class, [
@@ -41,7 +41,7 @@ use yii\widgets\ActiveForm;
         ]);
         ?>
 
-        <?//= $form->field($model, 'dpp_params')->textInput() ?>
+        <?php //= $form->field($model, 'dpp_params')->textInput() ?>
 
         <?= $form->field($model, 'dpp_enable')->checkbox() ?>
 
@@ -55,9 +55,9 @@ use yii\widgets\ActiveForm;
 
 
 
-        <?//= $form->field($model, 'dpp_updated_user_id')->textInput() ?>
+        <?php //= $form->field($model, 'dpp_updated_user_id')->textInput() ?>
 
-        <?//= $form->field($model, 'dpp_updated_dt')->textInput() ?>
+        <?php //= $form->field($model, 'dpp_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

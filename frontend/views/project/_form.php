@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'api_key')->textInput(['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 'contact_info')->textarea(['rows' => 6]) ?>
+        <?php //= $form->field($model, 'contact_info')->textarea(['rows' => 6]) ?>
 
         <?php
 
@@ -48,7 +48,7 @@ use yii\widgets\ActiveForm;
     <div class="col-md-6">
 
 
-    <?/*= $form->field($model, 'last_update')->textInput()*/ ?>
+    <?php /*= $form->field($model, 'last_update')->textInput()*/ ?>
 
 
     <?php

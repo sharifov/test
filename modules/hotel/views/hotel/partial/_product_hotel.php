@@ -20,7 +20,7 @@ $params['HotelQuoteSearch']['hq_hotel_id'] = $model->ph_id;
 $dataProviderQuotes = $searchModel->searchProduct($params);*/
 
 ?>
-<?//php \yii\widgets\Pjax::begin(['id' => 'pjax-product-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
+<?php //php \yii\widgets\Pjax::begin(['id' => 'pjax-product-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
@@ -31,14 +31,14 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
                 (<?=count($product->productQuotes)?>)
             </h2>
             <ul class="nav navbar-right panel_toolbox">
-                <?//php if ($is_manager) : ?>
+                <?php //php if ($is_manager) : ?>
                     <!--                    <li>-->
-                    <!--                        --><?//=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
+                    <!--                        --><?php //=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
                     <!--                    </li>-->
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                         <div class="dropdown-menu" role="menu">
-                            <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+                            <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
@@ -80,7 +80,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
 
                         </div>
                     </li>
-                <?//php endif; ?>
+                <?php //php endif; ?>
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>
@@ -88,7 +88,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: none">
-            <?//php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
+            <?php //php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
                 <?= $this->render('_view_search', [
                     'model' => $product->hotel,
@@ -96,10 +96,10 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
                     //'dataProviderRooms'
                 ]) ?>
                 <?php \yii\widgets\Pjax::end();?>
-            <?//php endif; ?>
+            <?php //php endif; ?>
         </div>
     </div>
-<?//php \yii\widgets\Pjax::end()?>
+<?php //php \yii\widgets\Pjax::end()?>
 
 
 

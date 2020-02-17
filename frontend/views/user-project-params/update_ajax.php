@@ -20,7 +20,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
 
 <div class="col-md-12">
-    <?//= $form->field($model, 'upp_user_id')->dropDownList($userList, ['prompt' => '-']) ?>
+    <?php //= $form->field($model, 'upp_user_id')->dropDownList($userList, ['prompt' => '-']) ?>
     <?php
         //echo $form->field($model, 'upp_user_id')->hiddenInput(['prompt' => '-'])->label(false);
     ?>
@@ -39,7 +39,7 @@ use borales\extensions\phoneInput\PhoneInput;
     <?= $form->field($model, 'upp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 
 
-    <?//= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['disabled' => true]) ?>
+    <?php //= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['disabled' => true]) ?>
 
     <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
@@ -56,9 +56,9 @@ use borales\extensions\phoneInput\PhoneInput;
 
     <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
 
-    <?//= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
+    <?php //= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
 
-    <?//= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
+    <?php //= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
 
     <?= Html::input('hidden', 'redirect', Yii::$app->request->get('redirect')) ?>
 

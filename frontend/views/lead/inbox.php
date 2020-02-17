@@ -74,7 +74,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
 
-        <?/*
+        <?php /*
         <div class="col-md-3">
             <table class="table table-bordered">
                 <tr>
@@ -130,7 +130,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?=Yii::$app->formatter->asTime(time())?>)
                 </div>
 
-                <?/*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
+                <?php /*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
                 <?php echo date('Y-m-d H:i:s')*/?>
         </div>
     <?php endif; ?>

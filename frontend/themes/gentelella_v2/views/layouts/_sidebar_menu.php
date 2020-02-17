@@ -304,6 +304,12 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Payments', 'url' => ['/payment/index']],
                 ['label' => 'Payment Methods', 'url' => ['/payment-method/index']],
                 ['label' => 'Transactions', 'url' => ['/transaction/index']],
+                ['label' => 'Payroll', 'url' => 'javascript:', 'items' => [
+                        ['label' => 'User Payment', 'url' => '/user-payment-crud/index'],
+                        ['label' => 'User Payment Category', 'url' => '/user-payment-category-crud/index'],
+                        ['label' => 'User Payroll', 'url' => '/user-payroll-crud/index'],
+                        ['label' => 'User Profit', 'url' => '/user-profit-crud/index'],
+                ], 'hasChild' => true]
             ]
         ];
 

@@ -265,7 +265,7 @@ $user = Yii::$app->user->identity;
                             ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['trash_count']?>, <?=$item['pending_count']?>, <?=$item['proc_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?='--'?>'],
                             <?php endforeach;?>
 
-                            <?//=$item['sum_price'].'$'?>
+                            <?php //=$item['sum_price'].'$'?>
                         ]);
 
                         var options = {
@@ -449,7 +449,7 @@ $user = Yii::$app->user->identity;
 
                 <div class="form-group">
                     <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-primary']) ?>
-                    <?//= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                    <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
                 </div>
 
                 <?php ActiveForm::end(); ?>

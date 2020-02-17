@@ -78,7 +78,7 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'phone')->textInput(['maxlength' => true]) ?>
                     </div>
 <!--                        <div class="col-md-4">-->
-<!--                            --><?////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>
+<!--                            --><?php ////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>
 <!--                        </div>-->
             </div>
         </div>
@@ -90,7 +90,7 @@ use yii\widgets\ActiveForm;
             <br>
             <div class="form-group text-center">
                 <?= Html::submitButton('<i class="fa fa-search"></i> Search sales', ['class' => 'btn btn-primary']) ?>
-                <?//= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', [''], ['class' => 'btn btn-warning']) ?>
+                <?php //= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', [''], ['class' => 'btn btn-warning']) ?>
                 <?php //= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-warning']) ?>
             </div>
         </div>

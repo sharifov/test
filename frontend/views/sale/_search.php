@@ -21,7 +21,7 @@ use yii\widgets\ActiveForm;
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
 
-                <?/*<li class="dropdown">
+                <?php /*<li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
 
 
@@ -91,7 +91,7 @@ use yii\widgets\ActiveForm;
                             <?= $form->field($model, 'phone', ['enableClientValidation' => false])->textInput(['maxlength' => true]) ?>
                         </div>
 <!--                        <div class="col-md-4">-->
-<!--                            --><?////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>
+<!--                            --><?php ////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>
 <!--                        </div>-->
                     </div>
                 </div>

@@ -57,7 +57,7 @@ class Menu extends \yii\widgets\Menu
         foreach ($items as &$item)
         {
             if ( isset( $item['url'] ) AND !isset( $item['visible'] ) AND !in_array($item['url'], ['', '#', 'javascript:'])) {
-                $item['visible'] = User::canRoute($item['url']);
+                $item['visible'] = \Yii::$app->user->can($item['url']);
             }
 
             if ( isset( $item['items'] ) ) {

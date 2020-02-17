@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
 
 ?>
 
-<?//= $form->field($leadForm, 'sourceId')->dropDownList($leadForm->listSourceId(), ['prompt' => '---']) ?>
+<?php //= $form->field($leadForm, 'sourceId')->dropDownList($leadForm->listSourceId(), ['prompt' => '---']) ?>
 
 <div class="row">
 	<div class="col-md-6">

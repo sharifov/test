@@ -194,10 +194,11 @@ class FlightQuoteManageService
 	{
 		$priceData = FlightQuoteHelper::getPricesData($flightQuote);
 
+		$systemPrice = ProductQuoteHelper::calcSystemPrice($priceData->total->selling, $productQuote->pq_origin_currency);
 		$productQuote->setQuotePrice(
 			ProductQuoteHelper::roundPrice((float)$priceData->total->net),
-			ProductQuoteHelper::calcSystemPrice($priceData->total->selling, $productQuote->pq_origin_currency),
-			ProductQuoteHelper::roundPrice($productQuote->pq_price * $productQuote->pq_client_currency_rate),
+			$systemPrice,
+			ProductQuoteHelper::roundPrice($systemPrice * $productQuote->pq_client_currency_rate),
 			ProductQuoteHelper::roundPrice((float)$priceData->total->serviceFeeSum)
 		);
         $productQuote->profitAmount();

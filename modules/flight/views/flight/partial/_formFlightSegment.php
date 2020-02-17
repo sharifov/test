@@ -52,10 +52,14 @@ $select2Properties = [
 			'type' => Select2::class,
 			'title' => 'Origin',
 			'value' => static function ($segment) {
-				return $segment['fs_origin_iata'];
+				return $segment['fs_origin_iata'] ?? '';
 			},
 			'options' => static function ($segment) use ($select2Properties) {
-				$select2Properties['data'] = [$segment['fs_origin_iata'] => $segment['fs_origin_iata_label']];
+				if (isset($segment['fs_origin_iata'])) {
+					$select2Properties['data'] = [$segment['fs_origin_iata'] => $segment['fs_origin_iata_label']];
+				} else {
+					$select2Properties['data'] = [];
+				}
 				return $select2Properties;
 			},
 			'headerOptions' => [
@@ -67,10 +71,14 @@ $select2Properties = [
 			'type' => Select2::class,
 			'title' => 'Destination',
 			'value' => static function ($segment) {
-				return $segment['fs_destination_iata'];
+				return $segment['fs_destination_iata'] ?? '';
 			},
 			'options' => static function ($segment) use ($select2Properties) {
-				$select2Properties['data'] = [$segment['fs_destination_iata'] => $segment['fs_destination_iata_label']];
+				if (isset($segment['fs_destination_iata'])) {
+					$select2Properties['data'] = [$segment['fs_destination_iata'] => $segment['fs_destination_iata_label']];
+				} else {
+					$select2Properties['data'] = [];
+				}
 				return $select2Properties;
 			},
 
@@ -80,7 +88,7 @@ $select2Properties = [
 			'type' => DatePicker::class,
 			'title' => 'Departure',
 			'value' => static function ($segment) {
-				return $segment['fs_departure_date'] ? date('d-M-Y', strtotime($segment['fs_departure_date'])) : date('d-M-Y');
+				return (isset($segment['fs_departure_date']) && $segment['fs_departure_date']) ? date('d-M-Y', strtotime($segment['fs_departure_date'])) : date('d-M-Y');
 			},
 			'options' => [
 				'addon' => '',
@@ -105,7 +113,7 @@ $select2Properties = [
 			'type' => 'dropDownList',
 			'title' => 'Flex (+/-)',
 			'value' => static function ($segment) {
-				return $segment['fs_flex_type_id'];
+				return $segment['fs_flex_type_id'] ?? '';
 			},
 			'items' => FlightSegmentHelper::flexibilityTypeList(),
 			'headerOptions' => [
@@ -118,7 +126,7 @@ $select2Properties = [
 			'type' => 'dropDownList',
 			'title' => 'Flex (days)',
 			'value' => static function ($segment) {
-				return $segment['fs_flex_days'];
+				return $segment['fs_flex_days'] ?? '';
 			},
 			'items' => FlightSegmentHelper::flexibilityList(),
 			'headerOptions' => [

@@ -17,11 +17,11 @@ use yii\widgets\ActiveForm;
 
         <?=$form->errorSummary($model)?>
 
-        <?//= $form->field($model, 's_reply_id')->textInput() ?>
+        <?php //= $form->field($model, 's_reply_id')->textInput() ?>
 
 
 
-        <?//= $form->field($model, 's_project_id')->textInput() ?>
+        <?php //= $form->field($model, 's_project_id')->textInput() ?>
 
             <div class="row">
                 <div class="col-md-6">
@@ -36,22 +36,22 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 's_sms_text')->textarea(['rows' => 6]) ?>
 
-        <?//= $form->field($model, 's_sms_data')->textarea(['rows' => 6]) ?>
+        <?php //= $form->field($model, 's_sms_data')->textarea(['rows' => 6]) ?>
 
-        <?//= $form->field($model, 's_type_id')->textInput() ?>
+        <?php //= $form->field($model, 's_type_id')->textInput() ?>
 
-        <?//= $form->field($model, 's_template_type_id')->textInput() ?>
+        <?php //= $form->field($model, 's_template_type_id')->textInput() ?>
         <div class="row">
             <div class="col-md-6">
                 <?= $form->field($model, 's_lead_id')->input('number', ['min' => 1]) ?>
-                <?//= $form->field($model, 's_language_id')->textInput(['maxlength' => true]) ?>
+                <?php //= $form->field($model, 's_language_id')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-md-6">
 
             </div>
         </div>
 
-        <?/*= $form->field($model, 's_communication_id')->textInput() ?>
+        <?php /*= $form->field($model, 's_communication_id')->textInput() ?>
 
         <?= $form->field($model, 's_is_deleted')->textInput() ?>
 
