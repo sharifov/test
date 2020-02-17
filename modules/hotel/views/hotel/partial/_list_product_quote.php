@@ -319,7 +319,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         <?=Html::encode($room->hqr_board_name)?>
                         <?php if ($room->hqr_rate_comments):?>
                             <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode($room->hqr_rate_comments)?>"></i>
-                        <?endif;?>
+                        <?php endif;?>
                     </td>
                     <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
                     <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
