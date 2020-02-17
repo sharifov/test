@@ -1,7 +1,6 @@
 <?php
 
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskCreatedTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskRatingColumn;
@@ -42,10 +41,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ProjectColumn::class,
                 'attribute' => 't_project_id',
                 'relation' => 'project',
+                'filter' => $searchModel->getProjectList(),
             ],
             [
                 'class' => QaObjectTypeColumn::class,
                 'attribute' => 't_object_type_id',
+                'filter' => $searchModel->getObjectTypeList(),
             ],
             't_object_id',
             [
@@ -53,39 +54,46 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (QaTask $task) {
                     return $task->t_category_id ? $task->category->tc_name : null;
                 },
-                'filter' => QaTaskCategoryQuery::getList(),
+                'filter' => $searchModel->getCategoryList(),
             ],
             [
                 'class' => QaTaskStatusColumn::class,
                 'attribute' => 't_status_id',
+                'filter' => $searchModel->getStatusList(),
             ],
             [
                 'class' => QaTaskRatingColumn::class,
                 'attribute' => 't_rating',
+                'filter' => $searchModel->getRatingList(),
             ],
             [
                 'class' => QaTaskCreatedTypeColumn::class,
                 'attribute' => 't_create_type_id',
+                'filter' => $searchModel->getCreatedTypeList(),
             ],
             [
                 'class' => DepartmentColumn::class,
                 'attribute' => 't_department_id',
                 'relation' => 'department',
+                'filter' => $searchModel->getDepartmentList(),
             ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 't_assigned_user_id',
                 'relation' => 'assignedUser',
+                'filter' => $searchModel->getUserList(),
             ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 't_created_user_id',
                 'relation' => 'createdUser',
+                'filter' => $searchModel->getUserList(),
             ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 't_updated_user_id',
                 'relation' => 'updatedUser',
+                'filter' => $searchModel->getUserList(),
             ],
             [
                 'class' => DateTimeColumn::class,

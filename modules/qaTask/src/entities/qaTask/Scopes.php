@@ -16,10 +16,19 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function queueProcessing(): self
     {
-        return $this->andWhere(['OR',
-            ['t_status_id' => QaTaskStatus::PROCESSING],
-            ['t_status_id' => QaTaskStatus::ESCALATED],
-        ]);
+        return $this->statuses(array_keys(QaTaskStatus::getProcessingQueueList()));
+    }
+
+    public function statuses(array $statuses): self
+    {
+        $condition = ['OR'];
+        foreach ($statuses as $status) {
+            if (!QaTaskStatus::isExist($status)) {
+                throw new \InvalidArgumentException('Undefined Qa Task status: ' . $status);
+            }
+            $condition[] = ['t_status_id' => $status];
+        }
+        return $this->andWhere($condition);
     }
 
     public function pending(): self

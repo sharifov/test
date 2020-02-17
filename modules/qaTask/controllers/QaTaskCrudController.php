@@ -4,6 +4,8 @@ namespace modules\qaTask\controllers;
 
 use common\models\Project;
 use frontend\controllers\FController;
+use modules\qaTask\src\entities\qaTask\search\CreateDto;
+use sales\access\ListsAccess;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTask\QaTask;
@@ -39,7 +41,11 @@ class QaTaskCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new QaTaskCrudSearch(Auth::user(), Project::getList());
+        $searchModel = QaTaskCrudSearch::create(new CreateDto([
+            'user' => Auth::user(),
+            'projectList' => Project::getList(),
+            'userList' => (new ListsAccess(Auth::id()))->getEmployees(),
+        ]));
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

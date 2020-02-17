@@ -14,6 +14,6 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function list(): self
     {
-        return $this->select(['tc_name', 'tc_id'])->orderBy(['tc_id' => SORT_ASC])->indexBy('tc_id')->asArray();
+        return $this->select(['tc_name', 'tc_object_type_id', 'tc_id'])->orderBy(['tc_id' => SORT_ASC])->indexBy('tc_id')->asArray();
     }
 }

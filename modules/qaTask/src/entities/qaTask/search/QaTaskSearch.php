@@ -2,51 +2,57 @@
 
 namespace modules\qaTask\src\entities\qaTask\search;
 
-use common\models\Department;
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
-use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
-use modules\qaTask\src\entities\qaTask\QaTaskRating;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-
 /**
  * Class QaTaskSearch
  *
  * @property Employee $user
  * @property array $projectList
+ * @property array $userList
  * @property array $objectTypeList
  * @property array $statusList
  * @property array $ratingList
  * @property array $createdTypeList
  * @property array $departmentList
+ * @property array $categoryList
  */
 class QaTaskSearch extends QaTask
 {
     protected $user;
 
-    private $projectList;
-    private $objectTypeList;
-    private $statusList;
-    private $ratingList;
-    private $createdTypeList;
-    private $departmentList;
+    private $projectList = [];
+    private $userList = [];
+    private $objectTypeList = [];
+    private $statusList = [];
+    private $ratingList = [];
+    private $createdTypeList = [];
+    private $departmentList = [];
+    private $categoryList = [];
 
-    public function __construct(Employee $user, array $projectList, $config = [])
+    public static function create(CreateDto $dto): self
     {
-        $this->user = $user;
-        $this->projectList = $projectList;
-        $this->objectTypeList = QaTaskObjectType::getList();
-        $this->statusList = QaTaskStatus::getList();
-        $this->ratingList = QaTaskRating::getList();
-        $this->createdTypeList = QaTaskCreatedType::getList();
-        $this->departmentList = Department::DEPARTMENT_LIST;
-        parent::__construct($config);
+        $search = new static();
+        $search->user = $dto->user;
+        $search->projectList = $dto->projectList;
+        $search->userList = $dto->userList;
+        $search->objectTypeList = $dto->objectTypeList;
+        $search->statusList = $dto->statusList;
+        $search->ratingList = $dto->ratingList;
+        $search->createdTypeList = $dto->createdTypeList;
+        $search->departmentList = $dto->departmentList;
+        $search->categoryList = $dto->categoryList;
+        return $search;
     }
 
     public function getProjectList(): array
     {
         return $this->projectList;
+    }
+
+    public function getUserList(): array
+    {
+        return $this->userList;
     }
 
     public function getObjectTypeList(): array
@@ -72,5 +78,10 @@ class QaTaskSearch extends QaTask
     public function getDepartmentList(): array
     {
         return $this->departmentList;
+    }
+
+    public function getCategoryList(): array
+    {
+        return $this->categoryList;
     }
 }

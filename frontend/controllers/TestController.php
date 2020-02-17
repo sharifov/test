@@ -45,6 +45,8 @@ use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\services\ProductQuoteStatusLogService;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
+use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use Mpdf\Tag\P;
@@ -174,18 +176,7 @@ class TestController extends FController
 
     public function actionTest()
     {
-
-       VarDumper::dump(Project::getList());
-       VarDumper::dump((new ListsAccess(Auth::id()))->getProjects());
-        die;
-
-
-        $service = Yii::createObject(ProductQuoteCloneService::class);
-        $service->clone(9, 33, 295, 294);
-
-        die;
         return $this->render('blank');
-
     }
 
     private function getPathForTable($actions, $controller, &$batchTmpTableItem, &$batchTmpTableItemChild, $role)

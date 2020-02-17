@@ -2,12 +2,9 @@
 
 namespace modules\qaTask\src\entities\qaTask\search\queue;
 
-use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\search\QaTaskSearch;
-use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
-use modules\qaTask\src\entities\qaTask\QaTask;
 
 /**
  * Class QaTaskQueueSearch
@@ -33,7 +30,7 @@ class QaTaskSearchSearch extends QaTaskSearch
             ['t_status_id', 'in', 'range' => array_keys($this->getStatusList())],
 
             ['t_category_id', 'integer'],
-            ['t_category_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskCategory::class, 'targetAttribute' => ['t_category_id' => 'tc_id']],
+            ['t_category_id', 'in', 'range' => array_keys($this->getCategoryList())],
 
             ['t_rating', 'integer'],
             ['t_rating', 'in', 'range' => array_keys($this->getRatingList())],
@@ -51,19 +48,19 @@ class QaTaskSearchSearch extends QaTaskSearch
             ['t_updated_dt', 'date', 'format' => 'php:Y-m-d'],
 
             ['t_created_user_id', 'integer'],
-            ['t_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['t_created_user_id' => 'id']],
+            ['t_created_user_id', 'in', 'range' => array_keys($this->getUserList())],
 
             ['t_updated_user_id', 'integer'],
-            ['t_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['t_updated_user_id' => 'id']],
+            ['t_updated_user_id', 'in', 'range' => array_keys($this->getUserList())],
 
             ['t_assigned_user_id', 'integer'],
-            ['t_assigned_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['t_assigned_user_id' => 'id']],
+            ['t_assigned_user_id', 'in', 'range' => array_keys($this->getUserList())],
         ];
     }
 
     public function search($params): ActiveDataProvider
     {
-        $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
+        $query = static::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
         $query->projects(array_keys($this->getProjectList()));
 
