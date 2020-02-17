@@ -94,7 +94,7 @@ use yii\helpers\Html;
                             </li>
                             <li>
 								<?=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/site/logout'],
-									['title' => "Logout"]) ?>
+									['title' => 'Logout']) ?>
                             </li>
                         </ul>
                     </li>

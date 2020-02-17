@@ -27,6 +27,8 @@ use yii\queue\beanstalk\Queue;
  * @property string $n_created_dt
  * @property string $n_unique_id
  *
+ * @property array $_eventList
+ *
  * @property Employee $nUser
  */
 class Notifications extends ActiveRecord
@@ -37,7 +39,7 @@ class Notifications extends ActiveRecord
     CONST TYPE_WARNING = 3;
     CONST TYPE_DANGER = 4;
 
-    private $_triggerList = [];
+    private $_eventList = [];
 
     /**
      * @inheritdoc
@@ -341,28 +343,23 @@ class Notifications extends ActiveRecord
         }
     }
 
-    public function changeTitle(string $title)
+    public function changeTitle(string $title): void
     {
         $this->n_title = $title;
     }
 
 
     /**
-     * @param string $name
+     * @return array
      */
-    public function addTrigger(string $name): void
+    public function triggerEvents(): array
     {
-        $this->_triggerList[$name] = $name;
-    }
-
-
-    public function triggerAll(): void
-    {
-        if ($this->_triggerList) {
-            foreach ($this->_triggerList as $triggerName) {
-                $this->trigger($triggerName);
+        if ($this->_eventList) {
+            foreach ($this->_eventList as $eventName) {
+                $this->trigger($eventName);
             }
         }
+        return $this->_eventList;
     }
 
     /**
@@ -376,9 +373,9 @@ class Notifications extends ActiveRecord
      * handler list. If false, the new handler will be inserted at the beginning of the existing
      * handler list.
      */
-    public function onList($name, $handler, $data = null, $append = true): void
+    public function addEvent($name, $handler, $data = null, $append = true): void
     {
         $this->on($name, $handler, $data, $append);
-        $this->addTrigger($name);
+        $this->_eventList[] = $name;
     }
 }

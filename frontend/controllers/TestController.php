@@ -70,6 +70,7 @@ use sales\helpers\user\UserFinder;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\SegmentForm;
+use sales\model\notification\events\NotificationEvents;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
@@ -988,6 +989,78 @@ class TestController extends FController
         $result = AppHelper::filterByRange($array, 'price', null, 3);
         $result = AppHelper::filterByRange($array, 'price', 2, 3);
         $result = AppHelper::filterByArray($array, 'gds', ['A', 'B']);
+
+        VarDumper::dump($result, 10, true);
+    }
+
+    public function actionTestEvents()
+    {
+
+        $result = [];
+
+        $db = \Yii::$app->db;
+
+        $transaction = $db->beginTransaction();
+
+        try {
+
+            $user = Employee::findOne(\Yii::$app->user->id);
+
+            if ($user) {
+                $user->save(false);
+            }
+
+            $notify = Notifications::findOne(1);
+
+            if ($notify) {
+                $notify->addEvent(NotificationEvents::NOTIFY_SENT, [NotificationEvents::class, 'send'],
+                    $notify->n_title);
+
+                //Event::on(Notifications::class, NotificationEvents::EVENT_NOTIFY, [NotificationEvents::class, 'send'], $notify->n_title);
+
+
+                $notify->changeTitle('title ' . random_int(1, 100) . ' - ' . date('H:i:s'));
+
+                $notify->addEvent(NotificationEvents::NOTIFY_UPDATE, [NotificationEvents::class, 'send2'], $notify->n_title);
+                $notify->addEvent(NotificationEvents::NOTIFY_UPDATE, [NotificationEvents::class, 'send']);
+
+                $notify->save();
+                $notify->addEvent(NotificationEvents::NOTIFY_DELETE, [NotificationEvents::class, 'send'], $notify->attributes);
+            }
+
+
+
+            //$notify->on(NotificationEvents::EVENT_NOTIFY_DELETE, [NotificationEvents::class, 'send'], $notify->attributes);
+
+
+            /*$rows = $db->createCommand('SELECT * FROM notifications WHERE n_id = 1')->queryAll();
+
+            $rows = $db->createCommand('SELECT * FROM notifications WHERE n_id = 2')->queryAll();
+
+
+            $db->createCommand("UPDATE notifications SET n_title='demo2' WHERE n_id = 1")->execute();*/
+
+            //$db->createCommand("UPDATE notifications SET n_title2='demo2' WHERE n_id = 1")->execute();
+
+            $transaction->commit();
+
+            //$notify->trigger(NotificationEvents::EVENT_MESSAGE_SENT, new Event(['sender' => $user]));
+
+            $result = $notify->triggerEvents();
+
+            //$notify->trigger(NotificationEvents::EVENT_NOTIFY);
+
+
+
+        } catch(\Exception $e) {
+            $transaction->rollBack();
+            VarDumper::dump($e->getMessage());
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            VarDumper::dump($e->getMessage());
+        }
+
+        //\Yii::$app->trigger('bar', new Event(['notify' => new Notifications()]));
 
         VarDumper::dump($result, 10, true);
     }

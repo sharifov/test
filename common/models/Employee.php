@@ -2114,4 +2114,18 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return new EmployeeQuery(static::class);
     }
+
+    /**
+     * @param string $default
+     * @return string
+     */
+    public function getGravatarUrl(string $default = 'identicon'): string
+    {
+        if($this->email) {
+            $url = '//www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?d=' . $default . '&s=128';
+        } else {
+            $url = '//www.gravatar.com/avatar/?d=' . $default . '&s=60';
+        }
+        return $url;
+    }
 }

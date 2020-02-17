@@ -3,9 +3,11 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
+use common\models\Employee;
 use yii\helpers\Html;
 
 $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
+\frontend\assets\PageLoaderAsset::register($this);
 
 
 //$this->registerCssFile('@frontend/themes/gentelella/css/custom.css');
@@ -18,24 +20,24 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
 <head>
-    <meta name="description" content="Sales">
+    <meta name="description" content="CRM Sales">
     <?php
-    $this->registerMetaTag(['http-equiv' => 'Content-Type', 'content' => 'text/html; charset=UTF-8']);
-    $this->registerMetaTag(['http-equiv' => 'X-UA-Compatible', 'content' => 'IE=edge']);
+        $this->registerMetaTag(['http-equiv' => 'Content-Type', 'content' => 'text/html; charset=UTF-8']);
+        $this->registerMetaTag(['http-equiv' => 'X-UA-Compatible', 'content' => 'IE=edge']);
 
-    $this->registerMetaTag(['charset' => Yii::$app->charset]);
-    $this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1']);
-    $this->metaTags[] = Html::csrfMetaTags();
-    $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
-    $this->registerMetaTag(['name' => 'msapplication-TileColor', 'content' => '#a9e04b']);
-    //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
-    $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.ico']);
-    $this->head();
+        $this->registerMetaTag(['charset' => Yii::$app->charset]);
+        $this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1']);
+        $this->metaTags[] = Html::csrfMetaTags();
+        $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
+        $this->registerMetaTag(['name' => 'msapplication-TileColor', 'content' => '#a9e04b']);
+        //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
+        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.ico']);
+        $this->head();
 
-    //$this->head();
+        //$this->head();
 
-    $host = 'Sales';
-    echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
+        $host = 'Sales';
+        echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
     ?>
     <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
     <?php //php $this->head() ?>
@@ -49,6 +51,14 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 </head>
 <body class="nav-<?= !empty($_COOKIE['menuIsCollapsed']) && $_COOKIE['menuIsCollapsed'] === 'true' ? 'sm' : 'md' ?>">
 <?php $this->beginBody(); ?>
+
+<div id="page-loader" class="overlay" style="display: block">
+    <div class="preloader">
+        <span class="fas fa-circle-o-notch fa-spin fa-10x"></span>
+        <div class="preloader__text">Loading ...<br>"<?= Html::encode($this->title)?>"</div>
+    </div>
+</div>
+
 <div class="container body">
     <div class="main_container">
         <?php if(!Yii::$app->user->isGuest):?>
@@ -57,18 +67,9 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
             <div class="left_col scroll-view">
 
                 <?php
-                    /** @var \common\models\Employee $user */
+                    /** @var Employee $user */
                     $user = Yii::$app->user->identity;
-
-                    $default = 'identicon';
-
-                    if($user && $user->email) {
-                        $gravUrl = '//www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=identicon&s=128';
-
-                    } else {
-                        $gravUrl = '//www.gravatar.com/avatar/?d=identicon&s=60';
-                    }
-
+                    $gravUrl = $user->getGravatarUrl();
                 ?>
 
                 <!-- navbar left -->
@@ -171,10 +172,15 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                             'label' => false,
                             'template' => '<li class="breadcrumb-item"><a href="'.Yii::$app->urlManager->createUrl('/').'">Home</a></li>',
                         ],
-                        'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+                        'links' => $this->params['breadcrumbs'] ?? [],
                     ]);?>
                 </div>
+
                 <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="spinner-wrapper">
+                        <div class="spinner">
+                        </div>
+                    </div>
                     <?=\frontend\themes\gentelella_v2\widgets\FlashAlert::widget()?>
                     <?= $content ?>
                 </div>
