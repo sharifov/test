@@ -225,7 +225,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
         return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])
             ->viaTable(OfferProduct::tableName(), ['op_offer_id' => 'of_id'], static function ($query) {
             /* @var ActiveQuery $query */
-            $query->andWhere(['not', ['upt_product_enabled' => [ProductQuoteStatus::CANCEL_GROUP]]]);
+            $query->andWhere(['not', ['pq_status_id' => [ProductQuoteStatus::CANCEL_GROUP]]]);
         });
     }
 

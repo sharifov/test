@@ -129,12 +129,8 @@ class ProductQuoteCrudController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
 
-            if ($model->isAttributeChanged('pq_profit_amount')) {
-                $model->profitAmount();
-            }
-            if ($model->isAttributeChanged('pq_status_id') &&
-                in_array($model->pq_status_id, ProductQuoteStatus::CANCEL_GROUP, false)) {
-                    $model->recalculateOffersOrders();
+            if ($model->isAttributeChanged('pq_status_id') || $model->isAttributeChanged('pq_profit_amount')) {
+                $model->recalculateOffersOrders();
             }
 
             $transaction = Yii::$app->db->beginTransaction();

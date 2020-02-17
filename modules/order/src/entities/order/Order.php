@@ -217,7 +217,7 @@ class Order extends ActiveRecord
         return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])
             ->viaTable(OrderProduct::tableName(), ['op_offer_id' => 'of_id'], static function ($query) {
             /* @var ActiveQuery $query */
-            $query->andWhere(['not', ['upt_product_enabled' => [ProductQuoteStatus::CANCEL_GROUP]]]);
+            $query->andWhere(['not', ['pq_status_id' => [ProductQuoteStatus::CANCEL_GROUP]]]);
         });
     }
 

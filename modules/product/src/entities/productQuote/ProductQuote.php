@@ -21,6 +21,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProf
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
@@ -72,6 +73,7 @@ use yii\db\ActiveRecord;
  * @property float $optionExtraMarkupSum
  * @property float $totalCalcSum
  * @property ProductQuoteOption[] $productQuoteOptions
+ * @property ProductQuoteOption[] $productQuoteOptionsActive
  * @property ProductQuote|null $clone
  *
  * @property Quotable|null $childQuote
@@ -294,13 +296,21 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->hasOne(Employee::class, ['id' => 'pq_updated_user_id']);
     }
 
-
     /**
      * @return ActiveQuery
      */
     public function getProductQuoteOptions(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProductQuoteOptionsActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id'])
+            ->andWhere(['not', ['pqo_status_id' => [ProductQuoteOptionStatus::CANCEL_GROUP]]]);
     }
 
     public static function find(): Scopes
@@ -338,7 +348,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getOptionExtraMarkupSum(): float
     {
         $sum = 0;
-        if ($options = $this->productQuoteOptions) {
+        if ($options = $this->productQuoteOptionsActive) {
             foreach ($options as $option) {
                 $sum += $option->pqo_extra_markup;
             }
