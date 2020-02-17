@@ -546,6 +546,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::IN_PROGRESS) {
             $this->setStatus(ProductQuoteStatus::IN_PROGRESS);
+            $this->recalculateOffersOrders();
         }
     }
 

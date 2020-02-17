@@ -223,10 +223,8 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuotesActive(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])
-            ->viaTable(OfferProduct::tableName(), ['op_offer_id' => 'of_id'], static function ($query) {
-            /* @var ActiveQuery $query */
-            $query->andWhere(['not', ['pq_status_id' => [ProductQuoteStatus::CANCEL_GROUP]]]);
-        });
+            ->viaTable('offer_product', ['op_offer_id' => 'of_id'])
+            ->where(['not', ['pq_status_id' => ProductQuoteStatus::CANCEL_GROUP]]);
     }
 
     public function getSendLogs(): ActiveQuery
@@ -318,7 +316,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
     public function profitCalc(): float
     {
         $sum = 0;
-        if ($productQuotes = $this->getProductQuotesActive()) {
+        if ($productQuotes = $this->productQuotesActive) {
             foreach ($productQuotes as $productQuote) {
                 /** @var ProductQuote $productQuote */
                 $sum += $productQuote->pq_profit_amount;

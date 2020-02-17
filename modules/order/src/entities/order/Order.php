@@ -214,11 +214,9 @@ class Order extends ActiveRecord
      */
     public function getProductQuotesActive(): ActiveQuery
     {
-        return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])
-            ->viaTable(OrderProduct::tableName(), ['op_offer_id' => 'of_id'], static function ($query) {
-            /* @var ActiveQuery $query */
-            $query->andWhere(['not', ['pq_status_id' => [ProductQuoteStatus::CANCEL_GROUP]]]);
-        });
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])
+            ->viaTable(OrderProduct::tableName(), ['orp_order_id' => 'or_id'])
+            ->where(['not', ['pq_status_id' => ProductQuoteStatus::CANCEL_GROUP]]);
     }
 
     /**
@@ -294,7 +292,7 @@ class Order extends ActiveRecord
     public function profitCalc(): float
     {
         $sum = 0;
-        if ($productQuotes = $this->getProductQuotesActive()) {
+        if ($productQuotes = $this->productQuotesActive) {
             foreach ($productQuotes as $productQuote) {
                 /** @var ProductQuote $productQuote */
                 $sum += $productQuote->pq_profit_amount;
