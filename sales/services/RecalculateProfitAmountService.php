@@ -3,19 +3,11 @@
 namespace sales\services;
 
 use modules\offer\src\entities\offer\Offer;
-use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\entities\order\Order;
-use modules\order\src\entities\order\OrderRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteRepository;
 
 /**
- * Class ProductQuoteStatusLogService
- *
- * @property ProductQuoteRepository $productQuoteRepository
- * @property TransactionManager $transactionManager
- * @property OfferRepository $offerRepository
- * @property OrderRepository $orderRepository
+ * Class RecalculateProfitAmountService
  * @property ProductQuote $productQuote
  *
  * @property Offer[] $offers
@@ -25,23 +17,6 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
  */
 class RecalculateProfitAmountService
 {
-    /**
-	 * @var TransactionManager
-	 */
-	private $transactionManager;
-	/**
-	 * @var ProductQuoteRepository
-	 */
-	private $productQuoteRepository;
-    /**
-	 * @var OfferRepository
-	 */
-	private $offerRepository;
-	/**
-	 * @var OrderRepository
-	 */
-	private $orderRepository;
-
     private $productQuote;
     private $offers = [];
     private $orders = [];
@@ -50,73 +25,74 @@ class RecalculateProfitAmountService
     public $changedOrders = [];
 
     /**
-     * RecalculateProfitAmountService constructor.
-     * @param ProductQuoteRepository $productQuoteRepository
-     * @param TransactionManager $transactionManager
-     * @param OfferRepository $offerRepository
-     * @param OrderRepository $orderRepository
-     */
-    public function __construct(
-        ProductQuoteRepository $productQuoteRepository,
-        TransactionManager $transactionManager,
-        OfferRepository $offerRepository,
-        OrderRepository $orderRepository)
-    {
-        $this->productQuoteRepository = $productQuoteRepository;
-        $this->transactionManager = $transactionManager;
-        $this->offerRepository = $offerRepository;
-        $this->orderRepository = $orderRepository;
-    }
-
-    /**
      * @param ProductQuote $productQuote
-     * @param float|null $profitNew
-     * @param float|null $profitOld
      * @return RecalculateProfitAmountService
      */
-    public function recalculateByProductQuote(ProductQuote $productQuote, ?float $profitNew, ?float $profitOld): RecalculateProfitAmountService
+    public function setByProductQuote(ProductQuote $productQuote): RecalculateProfitAmountService
     {
-        /* TODO:: removal candidates
-            $profitNew
-            $profitOld
-            Repositories
-         */
-
         $this->productQuote = $productQuote;
         $this->offers = $this->productQuote->opOffers;
         $this->orders = $this->productQuote->orpOrders;
-
-        $this->saveProductQuote();
-        $this->recalculateOffer()->saveOffers();
-        $this->recalculateOrder()->saveOrders();
 
         return $this;
     }
 
     /**
-     * @param array $offers [Offer]
-     * @return array
+     * @return RecalculateProfitAmountService
+     * @throws \yii\base\InvalidConfigException
      */
-    public function recalculateByOffer(array $offers): array
+    public function recalculateAll(): RecalculateProfitAmountService
+    {
+        $this->saveProductQuote();
+        $this->setChangedOffers()->saveOffers();
+        $this->setChangedOrders()->saveOrders();
+
+        return $this;
+    }
+
+    /**
+     * @param array $offers
+     * @return RecalculateProfitAmountService
+     */
+    public function setOffers(array $offers): RecalculateProfitAmountService
     {
         $this->offers = $offers;
-        return $this->recalculateOffer()->saveOffers();
+        return $this;
+    }
+
+    /**
+     * @return array
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function recalculateOffers(): array
+    {
+        return $this->setChangedOffers()->saveOffers();
     }
 
     /**
      * @param array $orders
-     * @return array
+     * @return RecalculateProfitAmountService
      */
-    public function recalculateByOrder(array $orders): array
+    public function setOrders(array $orders): RecalculateProfitAmountService
     {
         $this->orders = $orders;
-        return $this->recalculateOrder()->saveOrders();
+        return $this;
+    }
+
+    /**
+     * @return array
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function recalculateOrders(): array
+    {
+        return $this->setChangedOrders()->saveOrders();
     }
 
     /**
      * @return RecalculateProfitAmountService
+     * @throws \yii\base\InvalidConfigException
      */
-    private function recalculateOffer(): RecalculateProfitAmountService
+    private function setChangedOffers(): RecalculateProfitAmountService
     {
         foreach ($this->offers as $offer) {
             if ($offer->profitAmount()) {
@@ -128,8 +104,9 @@ class RecalculateProfitAmountService
 
     /**
      * @return RecalculateProfitAmountService
+     * @throws \yii\base\InvalidConfigException
      */
-    private function recalculateOrder(): RecalculateProfitAmountService
+    private function setChangedOrders(): RecalculateProfitAmountService
     {
         foreach ($this->orders as $order) {
             if ($order->profitAmount()) {

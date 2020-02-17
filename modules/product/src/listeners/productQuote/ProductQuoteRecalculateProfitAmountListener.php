@@ -30,7 +30,7 @@ class ProductQuoteRecalculateProfitAmountListener
     public function handle(ProductQuoteRecalculateProfitAmountEvent $event): void
     {
         try {
-            $this->recalculateProfitAmountService->recalculateByProductQuote($event->productQuote, $event->profitNew, $event->profitOld);
+            $this->recalculateProfitAmountService->setByProductQuote($event->productQuote)->recalculateAll();
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'Listeners:' . self::class);
         }

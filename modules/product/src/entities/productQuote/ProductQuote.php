@@ -4,13 +4,17 @@ namespace modules\product\src\entities\productQuote;
 
 use common\models\Currency;
 use common\models\Employee;
+use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteExpiredEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
@@ -366,7 +370,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
         if ($profitOld !== $profitNew) {
             $this->pq_profit_amount = $profitNew;
-            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this, $profitNew, $profitOld));
+            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this));
             $isChanged = true;
         }
         return $isChanged;
@@ -475,11 +479,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 		return $this->pq_status_id === ProductQuoteStatus::NEW;
 	}
 
-	public function decline(): void
-	{
-		$this->pq_status_id = ProductQuoteStatus::DECLINED;
-	}
-
 	public function isDeclined(): bool
 	{
 		return $this->pq_status_id === ProductQuoteStatus::DECLINED;
@@ -553,12 +552,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function error(?int $creatorId, ?string $description = ''): void
     {
-       $this->recordEvent(
+        $this->recordEvent(
             new ProductQuoteErrorEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
         );
-       if ($this->pq_status_id !== ProductQuoteStatus::ERROR) {
+        if ($this->pq_status_id !== ProductQuoteStatus::ERROR) {
             $this->setStatus(ProductQuoteStatus::ERROR);
-       }
+        }
     }
 
     /**
@@ -567,12 +566,46 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function cancelled(?int $creatorId, ?string $description = ''): void
     {
-       $this->recordEvent(
+        $this->recordEvent(
             new ProductQuoteCanceledEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
         );
-       if ($this->pq_status_id !== ProductQuoteStatus::CANCELED) {
+        if ($this->pq_status_id !== ProductQuoteStatus::CANCELED) {
             $this->setStatus(ProductQuoteStatus::CANCELED);
+            $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffers));
+            $this->recordEvent(new OrderRecalculateProfitAmountEvent($this->orpOrders));
+        }
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function declined(?int $creatorId, ?string $description = ''): void
+    {
+       $this->recordEvent(
+            new ProductQuoteDeclinedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+       );
+       if ($this->pq_status_id !== ProductQuoteStatus::DECLINED) {
+            $this->setStatus(ProductQuoteStatus::DECLINED);
+            $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffers));
+            $this->recordEvent(new OrderRecalculateProfitAmountEvent($this->orpOrders));
        }
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function expired(?int $creatorId, ?string $description = ''): void
+    {
+        $this->recordEvent(
+            new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+        );
+        if ($this->pq_status_id !== ProductQuoteStatus::EXPIRED) {
+            $this->setStatus(ProductQuoteStatus::EXPIRED);
+            $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffers));
+            $this->recordEvent(new OrderRecalculateProfitAmountEvent($this->orpOrders));
+        }
     }
 
     /**

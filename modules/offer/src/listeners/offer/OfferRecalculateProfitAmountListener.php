@@ -30,7 +30,7 @@ class OfferRecalculateProfitAmountListener
     public function handle(OfferRecalculateProfitAmountEvent $event): void
     {
         try {
-            $this->recalculateProfitAmountService->recalculateByOffer($event->offers);
+            $this->recalculateProfitAmountService->setOffers($event->offers)->recalculateOffers();
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'Listeners:' . self::class);
         }

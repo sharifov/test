@@ -3,10 +3,10 @@
 namespace modules\product\src\entities\productQuote\events;
 
 /**
- * Class ProductQuoteCanceledEvent
+ * Class ProductQuoteExpiredEvent
  * @package modules\product\src\entities\productQuote\events
  */
-class ProductQuoteCanceledEvent
+class ProductQuoteExpiredEvent
 {
     public $productQuoteId;
     public $startStatusId;
@@ -15,7 +15,7 @@ class ProductQuoteCanceledEvent
     public $creatorId;
 
     /**
-     * ProductQuoteCanceledEvent constructor.
+     * ProductQuoteExpiredEvent constructor.
      * @param int $productQuoteId
      * @param int|null $startStatusId
      * @param string|null $description

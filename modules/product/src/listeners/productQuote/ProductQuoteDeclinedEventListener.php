@@ -2,7 +2,7 @@
 
 namespace modules\product\src\listeners\productQuote;
 
-use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\services\ProductQuoteStatusLogService;
@@ -13,12 +13,12 @@ use Yii;
  *
  * @property ProductQuoteStatusLogService $productQuoteStatusLogService
  */
-class ProductQuoteCanceledEventListener
+class ProductQuoteDeclinedEventListener
 {
     private $productQuoteStatusLogService;
 
     /**
-     * ProductQuoteCanceledEventListener constructor.
+     * ProductQuoteDeclinedEventListener constructor.
      * @param ProductQuoteStatusLogService $productQuoteStatusLogService
      */
     public function __construct(ProductQuoteStatusLogService $productQuoteStatusLogService)
@@ -27,15 +27,15 @@ class ProductQuoteCanceledEventListener
     }
 
     /**
-     * @param ProductQuoteCanceledEvent $event
+     * @param ProductQuoteDeclinedEvent $event
      */
-    public function handle(ProductQuoteCanceledEvent $event): void
+    public function handle(ProductQuoteDeclinedEvent $event): void
     {
         try {
             $this->productQuoteStatusLogService->log(new CreateDto(
                 $event->productQuoteId,
                 $event->startStatusId,
-                ProductQuoteStatus::CANCELED,
+                ProductQuoteStatus::DECLINED,
                 $event->description,
                 null,
                 $event->ownerId,

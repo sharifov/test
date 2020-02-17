@@ -10,6 +10,7 @@ use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\entities\offerSendLog\OfferSendLog;
 use modules\offer\src\entities\offerViewLog\OfferViewLog;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 use sales\entities\serializer\Serializable;
@@ -46,6 +47,7 @@ use yii\db\ActiveRecord;
  * @property OfferProduct[] $offerProducts
  * @property float $offerTotalCalcSum
  * @property ProductQuote[] $opProductQuotes
+ * @property ProductQuote[] $productQuotesActive
  * @property OfferSendLog[] $sendLogs
  * @property OfferSendLog $lastSendLog
  * @property OfferViewLog[] $viewLogs
@@ -214,6 +216,19 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
         return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])->viaTable('offer_product', ['op_offer_id' => 'of_id']);
     }
 
+    /**
+     * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getProductQuotesActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])
+            ->viaTable(OfferProduct::tableName(), ['op_offer_id' => 'of_id'], static function ($query) {
+            /* @var ActiveQuery $query */
+            $query->andWhere(['not', ['upt_product_enabled' => [ProductQuoteStatus::CANCEL_GROUP]]]);
+        });
+    }
+
     public function getSendLogs(): ActiveQuery
     {
         return $this->hasMany(OfferSendLog::class, ['ofsndl_offer_id' => 'of_id']);
@@ -298,12 +313,14 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
 
     /**
      * @return float
+     * @throws \yii\base\InvalidConfigException
      */
     public function profitCalc(): float
     {
         $sum = 0;
-        if ($productQuotes = $this->opProductQuotes) {
+        if ($productQuotes = $this->getProductQuotesActive()) {
             foreach ($productQuotes as $productQuote) {
+                /** @var ProductQuote $productQuote */
                 $sum += $productQuote->pq_profit_amount;
             }
         }
@@ -312,6 +329,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
 
     /**
      * @return bool
+     * @throws \yii\base\InvalidConfigException
      */
     public function profitAmount(): bool
     {

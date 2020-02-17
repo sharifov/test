@@ -31,7 +31,7 @@ class OrderRecalculateProfitAmountListener
     public function handle(OrderRecalculateProfitAmountEvent $event): void
     {
         try {
-            $this->recalculateProfitAmountService->recalculateByOrder($event->orders);
+            $this->recalculateProfitAmountService->setOrders($event->orders)->recalculateOrders();
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'Listeners:' . self::class);
         }

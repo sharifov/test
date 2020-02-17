@@ -11,18 +11,12 @@ use modules\product\src\entities\productQuote\ProductQuote;
 class ProductQuoteRecalculateProfitAmountEvent
 {
     public $productQuote;
-    public $profitNew;
-    public $profitOld;
 
     /**
      * ProductQuoteRecalculateProfitAmountEvent constructor.
      * @param ProductQuote $productQuote
-     * @param float $profitNew
-     * @param float $profitOld
      */
-    public function __construct(ProductQuote $productQuote, float $profitNew, float $profitOld) {
+    public function __construct(ProductQuote $productQuote) {
         $this->productQuote = $productQuote;
-        $this->profitNew = $profitNew;
-        $this->profitOld = $profitOld;
     }
 }

@@ -53,7 +53,7 @@ class FlightRequestUpdateEventListener
 						$this->flightQuoteStatusLogRepository->save($quoteStatusLog);
 
 						if ($productQuote) {
-							$productQuote->decline();
+							$productQuote->declined();
 							$this->productQuoteRepository->save($productQuote);
 						}
 					} catch (\Exception $e) {

@@ -8,6 +8,7 @@ use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
@@ -47,6 +48,7 @@ use yii\db\ActiveRecord;
  * @property Employee $orUpdatedUser
  * @property OrderProduct[] $orderProducts
  * @property ProductQuote[] $orpProductQuotes
+ * @property ProductQuote[] $productQuotesActive
  * @property float $orderTotalCalcSum
  * @property ProductQuote[] $productQuotes
  */
@@ -208,6 +210,19 @@ class Order extends ActiveRecord
 
     /**
      * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getProductQuotesActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])
+            ->viaTable(OrderProduct::tableName(), ['op_offer_id' => 'of_id'], static function ($query) {
+            /* @var ActiveQuery $query */
+            $query->andWhere(['not', ['upt_product_enabled' => [ProductQuoteStatus::CANCEL_GROUP]]]);
+        });
+    }
+
+    /**
+     * @return ActiveQuery
      */
     public function getProductQuotes(): ActiveQuery
     {
@@ -274,12 +289,14 @@ class Order extends ActiveRecord
 
     /**
      * @return float
+     * @throws \yii\base\InvalidConfigException
      */
     public function profitCalc(): float
     {
         $sum = 0;
-        if ($productQuotes = $this->orpProductQuotes) {
+        if ($productQuotes = $this->getProductQuotesActive()) {
             foreach ($productQuotes as $productQuote) {
+                /** @var ProductQuote $productQuote */
                 $sum += $productQuote->pq_profit_amount;
             }
         }
@@ -288,6 +305,7 @@ class Order extends ActiveRecord
 
     /**
      * @return bool
+     * @throws \yii\base\InvalidConfigException
      */
     public function profitAmount(): bool
     {

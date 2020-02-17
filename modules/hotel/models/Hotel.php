@@ -8,6 +8,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\interfaces\Productable;
+use sales\auth\Auth;
 use sales\entities\EventTrait;
 use Yii;
 use yii\db\ActiveQuery;
@@ -173,7 +174,9 @@ class Hotel extends ActiveRecord implements Productable
         if ($this->hotelQuotes) {
             foreach ($this->hotelQuotes as $quote) {
                 if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuoteStatus::DONE) {
-                    $quote->hqProductQuote->pq_status_id = ProductQuoteStatus::DECLINED;
+                    $creatorId = Auth::id();
+                    $description = 'Find invalid request quotes and update status';
+                    $quote->hqProductQuote->declined($creatorId, $description);
                     $quote->hqProductQuote->save();
                 }
             }
