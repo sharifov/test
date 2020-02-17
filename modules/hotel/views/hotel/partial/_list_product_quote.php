@@ -221,7 +221,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 'data-product-id' => $model->hqProductQuote->pq_product_id,
                             ]
                         ) ?>
-                    <? endif; ?>
+                    <?php endif; ?>
                     <?php if ($model->isBooking()): ?>
                         <?= Html::a('<i class="fa fa-share-square"></i> Cancel Book',null,
                             [
@@ -231,7 +231,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 'data-product-id' => $model->hqProductQuote->pq_product_id,
                             ]
                         ) ?>
-                    <? endif; ?>
+                    <?php endif; ?>
 
                     <?= Html::a('<i class="fa fa-list-alt"></i> API Service Log', null,
                         [
