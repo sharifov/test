@@ -4,6 +4,8 @@ namespace modules\product\controllers;
 
 use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
@@ -21,24 +23,33 @@ use yii\web\Response;
  * ProductQuoteController implements the CRUD actions for ProductQuote model.
  *
  * @property EventDispatcher $eventDispatcher
+ * @property ProductQuoteRepository $productQuoteRepository
  */
 class ProductQuoteCrudController extends FController
 {
+    /**
+	 * @var EventDispatcher
+	 */
     private $eventDispatcher;
+    /**
+	 * @var ProductQuoteRepository
+	 */
+	private $productQuoteRepository;
 
     /**
      * ProductQuoteCrudController constructor.
      * @param $id
      * @param $module
      * @param EventDispatcher $eventDispatcher
+     * @param ProductQuoteRepository $productQuoteRepository
      * @param array $config
      */
-    public function __construct($id, $module, EventDispatcher $eventDispatcher, $config = [])
+    public function __construct($id, $module, EventDispatcher $eventDispatcher, ProductQuoteRepository $productQuoteRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->eventDispatcher = $eventDispatcher;
+        $this->productQuoteRepository = $productQuoteRepository;
     }
-
 
     /**
      * @return array
@@ -90,16 +101,11 @@ class ProductQuoteCrudController extends FController
         $model = new ProductQuote();
 
         if ($model->load(Yii::$app->request->post())) {
-
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                if (!$model->save()) {
-                    throw new \RuntimeException('ProductQuote not saved');
-                }
                 $model->profitAmount();
-                $this->eventDispatcher->dispatchAll($model->releaseEvents());
+                $this->productQuoteRepository->save($model);
                 $transaction->commit();
-
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
                 Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
@@ -121,23 +127,20 @@ class ProductQuoteCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        /* TODO::
-            ProductQuoteCrudController/Update
-            - скрыть поле Pq Profit Amount и расчитывать его динамически
-            - при редактировании Pq Profit Amount вручную перераситывать Offers/Orders
-         */
-
         if ($model->load(Yii::$app->request->post())) {
+
+            if ($model->isAttributeChanged('pq_profit_amount')) {
+                $model->profitAmount();
+            }
+            if ($model->isAttributeChanged('pq_status_id') &&
+                in_array($model->pq_status_id, ProductQuoteStatus::CANCEL_GROUP, false)) {
+                    $model->recalculateOffersOrders();
+            }
 
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                if (!$model->save()) {
-                    throw new \RuntimeException('ProductQuote not saved');
-                }
-                $model->profitAmount();
-                $this->eventDispatcher->dispatchAll($model->releaseEvents());
+                $this->productQuoteRepository->save($model);
                 $transaction->commit();
-
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
                 Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
@@ -159,17 +162,11 @@ class ProductQuoteCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $model = $this->findModel($id);
-
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $this->eventDispatcher->dispatchAll([
-                new OfferRecalculateProfitAmountEvent($model->opOffers),
-                new OrderRecalculateProfitAmountEvent($model->orpOrders),
-            ]);
-            if (!$model->delete()) {
-                throw new Exception('Product Quote (' . $id . ') not deleted');
-            }
+            $model = $this->productQuoteRepository->find($id);
+            $model->prepareRemove();
+            $this->productQuoteRepository->remove($model);
             $transaction->commit();
 
         } catch (\Throwable $throwable) {

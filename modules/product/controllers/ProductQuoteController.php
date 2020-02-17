@@ -2,18 +2,13 @@
 
 namespace modules\product\controllers;
 
-use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
-use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
-use sales\helpers\app\AppHelper;
 use Yii;
 use frontend\controllers\FController;
-use modules\hotel\models\HotelQuote;
-use modules\product\src\entities\productType\ProductType;
-use yii\base\Exception;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
@@ -24,11 +19,19 @@ use yii\web\Response;
  *
  * @property ProductQuoteCloneService $productQuoteCloneService
  * @property EventDispatcher $eventDispatcher
+ * @property ProductQuoteRepository $productQuoteRepository
  */
 class ProductQuoteController extends FController
 {
     private $productQuoteCloneService;
+    /**
+	 * @var EventDispatcher
+	 */
     private $eventDispatcher;
+    /**
+	 * @var ProductQuoteRepository
+	 */
+	private $productQuoteRepository;
 
     /**
      * ProductQuoteController constructor.
@@ -36,13 +39,22 @@ class ProductQuoteController extends FController
      * @param $module
      * @param ProductQuoteCloneService $productQuoteCloneService
      * @param EventDispatcher $eventDispatcher
+     * @param ProductQuoteRepository $productQuoteRepository
      * @param array $config
      */
-    public function __construct($id, $module, ProductQuoteCloneService $productQuoteCloneService, EventDispatcher $eventDispatcher, $config = [])
+    public function __construct(
+        $id,
+        $module,
+        ProductQuoteCloneService $productQuoteCloneService,
+        EventDispatcher $eventDispatcher,
+        ProductQuoteRepository $productQuoteRepository,
+        $config = []
+    )
     {
         parent::__construct($id, $module, $config);
         $this->productQuoteCloneService = $productQuoteCloneService;
         $this->eventDispatcher = $eventDispatcher;
+        $this->productQuoteRepository = $productQuoteRepository;
     }
 
     /**
@@ -93,31 +105,11 @@ class ProductQuoteController extends FController
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-
-            if (!$id) {
-                throw new Exception('Product quote ID not found', 3);
-            }
-            $model = $this->findModel($id);
-
-            $this->eventDispatcher->dispatchAll([
-                new OfferRecalculateProfitAmountEvent($model->opOffers),
-                new OrderRecalculateProfitAmountEvent($model->orpOrders),
-            ]);
-
-            if (!$model->delete()) {
-                throw new Exception('Product Quote (' . $id . ') not deleted', 4);
-            }
-
-            if ((int)$model->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
-                $modelHotelQuote = HotelQuote::findOne(['hq_product_quote_id' => $model->pq_id]);
-                if ($modelHotelQuote) {
-                    if (!$modelHotelQuote->delete()) {
-                        throw new Exception('Hotel Quote (' . $modelHotelQuote->hq_id . ') not deleted', 5);
-                    }
-                }
-            }
-
+            $model = $this->productQuoteRepository->find($id);
+            $model->prepareRemove();
+            $this->productQuoteRepository->remove($model);
             $transaction->commit();
+
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
             return ['error' => 'Error: ' . $throwable->getMessage()];

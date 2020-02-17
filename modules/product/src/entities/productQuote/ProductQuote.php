@@ -95,7 +95,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             [['pq_gid', 'pq_product_id'], 'required'],
             [['pq_product_id', 'pq_order_id', 'pq_owner_user_id', 'pq_created_user_id', 'pq_updated_user_id'], 'integer'],
             [['pq_description'], 'string'],
-            [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate'], 'number'],
+            [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate', 'pq_profit_amount'], 'number'],
             [['pq_created_dt', 'pq_updated_dt'], 'safe'],
             [['pq_gid'], 'string', 'max' => 32],
             [['pq_name'], 'string', 'max' => 40],
@@ -151,6 +151,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             'pq_updated_dt' => 'Updated Dt',
             'pq_clone_id' => 'Clone Id',
             'clone' => 'Clone Id',
+            'pq_profit_amount' => 'Profit amount',
         ];
     }
 
@@ -376,6 +377,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $isChanged;
     }
 
+    public function recalculateOffersOrders(): void
+    {
+        $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffers));
+        $this->recordEvent(new OrderRecalculateProfitAmountEvent($this->orpOrders));
+    }
+
 	/**
 	 * @param ProductQuoteDTO $dto
 	 * @return ProductQuote
@@ -571,8 +578,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::CANCELED) {
             $this->setStatus(ProductQuoteStatus::CANCELED);
-            $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffers));
-            $this->recordEvent(new OrderRecalculateProfitAmountEvent($this->orpOrders));
+            $this->recalculateOffersOrders();
         }
     }
 
@@ -587,8 +593,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
        );
        if ($this->pq_status_id !== ProductQuoteStatus::DECLINED) {
             $this->setStatus(ProductQuoteStatus::DECLINED);
-            $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffers));
-            $this->recordEvent(new OrderRecalculateProfitAmountEvent($this->orpOrders));
+            $this->recalculateOffersOrders();
        }
     }
 
@@ -603,8 +608,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::EXPIRED) {
             $this->setStatus(ProductQuoteStatus::EXPIRED);
-            $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffers));
-            $this->recordEvent(new OrderRecalculateProfitAmountEvent($this->orpOrders));
+            $this->recalculateOffersOrders();
         }
     }
 
@@ -620,4 +624,14 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
         $this->pq_status_id = $status;
     }
+
+    public function prepareRemove(): void
+    {
+        $this->recalculateOffersOrders();
+
+        if ($childQuote = $this->getChildQuote()){
+            $childQuote->delete();
+        }
+    }
+
 }
