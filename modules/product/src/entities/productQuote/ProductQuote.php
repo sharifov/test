@@ -310,7 +310,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteOptionsActive(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id'])
-            ->andWhere(['not', ['pqo_status_id' => [ProductQuoteOptionStatus::CANCEL_GROUP]]]);
+            ->where(['not', ['pqo_status_id' => ProductQuoteOptionStatus::CANCEL_GROUP]]);
     }
 
     public static function find(): Scopes

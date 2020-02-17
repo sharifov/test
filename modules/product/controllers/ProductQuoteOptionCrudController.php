@@ -119,7 +119,8 @@ class ProductQuoteOptionCrudController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
 
-            $checkProfit = $model->isAttributeChanged('pqo_extra_markup');
+            $checkProfit = ($model->isAttributeChanged('pqo_extra_markup') || $model->isAttributeChanged('pqo_status_id'));
+
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if (!$model->save()) {
