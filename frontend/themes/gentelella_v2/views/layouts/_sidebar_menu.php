@@ -291,6 +291,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
                 ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
                 ['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
+                ['label' => 'Orders User Profit', 'url' => ['/order/order-user-profit-crud/index']],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],
                 ['label' => 'Offers View Log', 'url' => ['/offer/offer-view-log-crud/index']],
