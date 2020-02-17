@@ -67,7 +67,7 @@ class Order extends ActiveRecord
             [['or_gid', 'or_lead_id'], 'required'],
             [['or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id'], 'integer'],
             [['or_description'], 'string'],
-            [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate'], 'number'],
+            [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate', 'or_profit_amount'], 'number'],
             [['or_created_dt', 'or_updated_dt'], 'safe'],
             [['or_gid'], 'string', 'max' => 32],
             [['or_uid'], 'string', 'max' => 15],
@@ -106,6 +106,7 @@ class Order extends ActiveRecord
             'or_updated_user_id' => 'Updated User',
             'or_created_dt' => 'Created Dt',
             'or_updated_dt' => 'Updated Dt',
+            'or_profit_amount' => 'Profit amount',
         ];
     }
 

@@ -78,7 +78,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
             [['of_gid', 'of_lead_id'], 'required'],
             [['of_lead_id', 'of_status_id', 'of_owner_user_id', 'of_created_user_id', 'of_updated_user_id'], 'integer'],
             [['of_created_dt', 'of_updated_dt'], 'safe'],
-            [['of_client_currency_rate', 'of_app_total', 'of_client_total'], 'number'],
+            [['of_client_currency_rate', 'of_app_total', 'of_client_total', 'of_profit_amount'], 'number'],
             [['of_gid'], 'string', 'max' => 32],
             [['of_uid'], 'string', 'max' => 15],
             [['of_name'], 'string', 'max' => 40],
@@ -115,6 +115,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
             'of_client_currency_rate' => 'Client Currency Rate',
             'of_app_total' => 'App Total',
             'of_client_total' => 'Client Total',
+            'of_profit_amount' => 'Profit amount',
         ];
     }
 
