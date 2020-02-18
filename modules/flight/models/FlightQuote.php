@@ -530,7 +530,7 @@ class FlightQuote extends ActiveRecord implements Quotable
     {
         $result = 0.00;
         foreach ($this->flightQuotePaxPrices as $paxPrice) {
-            $result += $paxPrice->qpp_system_mark_up;
+            $result += $paxPrice->qpp_system_mark_up * $paxPrice->qpp_cnt;
         }
 
         return $result;
@@ -543,7 +543,7 @@ class FlightQuote extends ActiveRecord implements Quotable
     {
         $result = 0.00;
         foreach ($this->flightQuotePaxPrices as $paxPrice) {
-            $result += $paxPrice->qpp_agent_mark_up;
+            $result += $paxPrice->qpp_agent_mark_up * $paxPrice->qpp_cnt;
         }
         return $result;
     }
