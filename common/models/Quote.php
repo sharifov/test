@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\BackOffice;
+use common\components\SearchService;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
@@ -13,10 +14,9 @@ use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\Html;
 use yii\db\Query;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
-use common\components\SearchService;
 
 /**
  * This is the model class for table "quotes".
@@ -2107,7 +2107,11 @@ class Quote extends \yii\db\ActiveRecord
                 ];
     }
 
-    public function getQuoteInformationForExpert($single = false)
+    /**
+     * @param bool $single
+     * @return array|null
+     */
+    public function getQuoteInformationForExpert($single = false): ?array
     {
         $qInformation = [
             'record_locator' => $this->record_locator,
@@ -2122,6 +2126,7 @@ class Quote extends \yii\db\ActiveRecord
             'fare_type' => $this->fare_type,
             'employee_name' => $this->employee_name,
             'type_id' => $this->type_id,
+            'lead_source_id' => $this->lead->source_id,
         ];
 
         $pQInformation = [];
@@ -2148,21 +2153,21 @@ class Quote extends \yii\db\ActiveRecord
                 'information' => $qInformation,
                 'LeadQuotePrice' => $pQInformation
             ];
-        } else {
-            return [
-                'LeadRequest' => [
-                    'uid' => $this->lead->uid,
-                    'gid' => $this->lead->gid,
-                    'market_info_id' => $this->lead->source->id
-                ],
-                'LeadQuote' => [
-                    'uid' => $this->uid,
-                    'created_by_seller' => $this->created_by_seller,
-                    'information' => $qInformation
-                ],
-                'LeadQuotePrice' => $pQInformation
-            ];
         }
+
+        return [
+            'LeadRequest' => [
+                'uid' => $this->lead->uid,
+                'gid' => $this->lead->gid,
+                'market_info_id' => $this->lead->source->id
+            ],
+            'LeadQuote' => [
+                'uid' => $this->uid,
+                'created_by_seller' => $this->created_by_seller,
+                'information' => $qInformation
+            ],
+            'LeadQuotePrice' => $pQInformation
+        ];
     }
 
     public function getStatusLog()
