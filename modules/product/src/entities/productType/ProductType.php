@@ -3,6 +3,7 @@
 namespace modules\product\src\entities\productType;
 
 use common\models\PaymentMethod;
+use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethod;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
@@ -21,6 +22,7 @@ use sales\helpers\product\ProductQuoteHelper;
  * @property string $pt_updated_dt
  *
  * @property ProductTypePaymentMethod[] $productTypePaymentMethod
+ * @property Product[] $products
  */
 class ProductType extends \yii\db\ActiveRecord
 {
@@ -81,13 +83,21 @@ class ProductType extends \yii\db\ActiveRecord
 	}
 
 	/**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getProducts(): \yii\db\ActiveQuery
+	{
+		return $this->hasMany(Product::class, ['pr_type_id' => 'pt_id']);
+	}
+
+	/**
 	 * @return float
 	 */
     public function getProcessingFeeAmount(): float
 	{
 		$setting = json_decode((string)$this->pt_settings, true);
 
-		return ProductQuoteHelper::roundPrice($setting['processing_fee_amount'] ? (float)$setting['processing_fee_amount'] : self::PROCESSING_FEE_AMOUNT);
+		return ProductQuoteHelper::roundPrice(isset($setting['processing_fee_amount']) ? (float)$setting['processing_fee_amount'] : self::PROCESSING_FEE_AMOUNT);
 	}
 
     /**

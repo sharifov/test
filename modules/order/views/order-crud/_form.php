@@ -48,6 +48,8 @@ $list = (new ListsAccess(Auth::id()));
 
         <?= $form->field($model, 'or_client_currency_rate')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'or_profit_amount')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'or_owner_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
 
         <?= $form->field($model, 'or_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>

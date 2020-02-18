@@ -17,7 +17,8 @@ class ProductQuoteCrudSearch extends ProductQuote
         return [
             [['pq_id', 'pq_product_id', 'pq_order_id', 'pq_status_id', 'pq_owner_user_id', 'pq_created_user_id', 'pq_updated_user_id'], 'integer'],
             [['pq_gid', 'pq_name', 'pq_description', 'pq_origin_currency', 'pq_client_currency'], 'safe'],
-            [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate'], 'number'],
+            [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum',
+                'pq_origin_currency_rate', 'pq_client_currency_rate', 'pq_profit_amount'], 'number'],
 
             ['pq_created_dt', 'date', 'format' => 'php:Y-m-d'],
             ['pq_updated_dt', 'date', 'format' => 'php:Y-m-d'],
@@ -68,6 +69,7 @@ class ProductQuoteCrudSearch extends ProductQuote
             'pq_owner_user_id' => $this->pq_owner_user_id,
             'pq_created_user_id' => $this->pq_created_user_id,
             'pq_updated_user_id' => $this->pq_updated_user_id,
+            'pq_profit_amount' => $this->pq_profit_amount,
         ]);
 
         $query->andFilterWhere(['like', 'pq_gid', $this->pq_gid])

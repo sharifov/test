@@ -8,7 +8,9 @@ use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -36,6 +38,7 @@ use yii\db\ActiveRecord;
  * @property int|null $or_updated_user_id
  * @property string|null $or_created_dt
  * @property string|null $or_updated_dt
+ * @property float|null $or_profit_amount
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -45,6 +48,7 @@ use yii\db\ActiveRecord;
  * @property Employee $orUpdatedUser
  * @property OrderProduct[] $orderProducts
  * @property ProductQuote[] $orpProductQuotes
+ * @property ProductQuote[] $productQuotesActive
  * @property float $orderTotalCalcSum
  * @property ProductQuote[] $productQuotes
  */
@@ -63,7 +67,7 @@ class Order extends ActiveRecord
             [['or_gid', 'or_lead_id'], 'required'],
             [['or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id'], 'integer'],
             [['or_description'], 'string'],
-            [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate'], 'number'],
+            [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate', 'or_profit_amount'], 'number'],
             [['or_created_dt', 'or_updated_dt'], 'safe'],
             [['or_gid'], 'string', 'max' => 32],
             [['or_uid'], 'string', 'max' => 15],
@@ -102,6 +106,7 @@ class Order extends ActiveRecord
             'or_updated_user_id' => 'Updated User',
             'or_created_dt' => 'Created Dt',
             'or_updated_dt' => 'Updated Dt',
+            'or_profit_amount' => 'Profit amount',
         ];
     }
 
@@ -206,6 +211,17 @@ class Order extends ActiveRecord
 
     /**
      * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getProductQuotesActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])
+            ->viaTable(OrderProduct::tableName(), ['orp_order_id' => 'or_id'])
+            ->where(['not', ['pq_status_id' => ProductQuoteStatus::CANCEL_GROUP]]);
+    }
+
+    /**
+     * @return ActiveQuery
      */
     public function getProductQuotes(): ActiveQuery
     {
@@ -269,4 +285,38 @@ class Order extends ActiveRecord
 
         $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
     }
+
+    /**
+     * @return float
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function profitCalc(): float
+    {
+        $sum = 0;
+        if ($productQuotes = $this->productQuotesActive) {
+            foreach ($productQuotes as $productQuote) {
+                /** @var ProductQuote $productQuote */
+                $sum += $productQuote->pq_profit_amount;
+            }
+        }
+        return $sum;
+    }
+
+    /**
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function recalculateProfitAmount(): bool
+    {
+        $changed = false;
+        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
+        $profitOld = ProductQuoteHelper::roundPrice((float) $this->or_profit_amount);
+
+        if ($profitNew !== $profitOld) {
+            $this->or_profit_amount = $profitNew;
+            $changed = true;
+        }
+        return $changed;
+    }
+
 }

@@ -21,6 +21,8 @@ use yii\bootstrap4\Html;
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
 
+        <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
+
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->

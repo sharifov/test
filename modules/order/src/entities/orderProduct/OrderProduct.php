@@ -3,6 +3,7 @@
 namespace modules\order\src\entities\orderProduct;
 
 use common\models\Employee;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\EventTrait;
@@ -77,6 +78,20 @@ class OrderProduct extends \yii\db\ActiveRecord
             'orpCreatedUser' => 'Created User',
             'orp_created_dt' => 'Created Dt',
         ];
+    }
+
+    /**
+     * @param int $orderId
+     * @param int $productQuoteId
+     * @return static
+     */
+    public static function create(int $orderId, int $productQuoteId): self
+    {
+        $model = new static();
+        $model->orp_order_id = $orderId;
+        $model->orp_product_quote_id = $productQuoteId;
+        $model->recordEvent(new OrderRecalculateProfitAmountEvent([$model->orpOrder]));
+        return $model;
     }
 
     /**

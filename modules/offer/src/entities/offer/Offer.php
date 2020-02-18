@@ -10,7 +10,9 @@ use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\entities\offerSendLog\OfferSendLog;
 use modules\offer\src\entities\offerViewLog\OfferViewLog;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
+use sales\helpers\product\ProductQuoteHelper;
 use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -35,6 +37,7 @@ use yii\db\ActiveRecord;
  * @property float|null $of_client_currency_rate
  * @property float|null $of_app_total
  * @property float|null $of_client_total
+ * @property float|null $of_profit_amount
  *
  * @property Currency $ofClientCurrency
  * @property Employee $ofCreatedUser
@@ -44,6 +47,7 @@ use yii\db\ActiveRecord;
  * @property OfferProduct[] $offerProducts
  * @property float $offerTotalCalcSum
  * @property ProductQuote[] $opProductQuotes
+ * @property ProductQuote[] $productQuotesActive
  * @property OfferSendLog[] $sendLogs
  * @property OfferSendLog $lastSendLog
  * @property OfferViewLog[] $viewLogs
@@ -74,7 +78,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
             [['of_gid', 'of_lead_id'], 'required'],
             [['of_lead_id', 'of_status_id', 'of_owner_user_id', 'of_created_user_id', 'of_updated_user_id'], 'integer'],
             [['of_created_dt', 'of_updated_dt'], 'safe'],
-            [['of_client_currency_rate', 'of_app_total', 'of_client_total'], 'number'],
+            [['of_client_currency_rate', 'of_app_total', 'of_client_total', 'of_profit_amount'], 'number'],
             [['of_gid'], 'string', 'max' => 32],
             [['of_uid'], 'string', 'max' => 15],
             [['of_name'], 'string', 'max' => 40],
@@ -111,6 +115,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
             'of_client_currency_rate' => 'Client Currency Rate',
             'of_app_total' => 'App Total',
             'of_client_total' => 'Client Total',
+            'of_profit_amount' => 'Profit amount',
         ];
     }
 
@@ -209,7 +214,18 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
      */
     public function getOpProductQuotes(): ActiveQuery
     {
-        return $this->hasMany(ProductQuote::class, ['of_id' => 'op_product_quote_id'])->viaTable('offer_product', ['op_offer_id' => 'of_id']);
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])->viaTable('offer_product', ['op_offer_id' => 'of_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getProductQuotesActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuote::class, ['pq_id' => 'op_product_quote_id'])
+            ->viaTable('offer_product', ['op_offer_id' => 'of_id'])
+            ->where(['not', ['pq_status_id' => ProductQuoteStatus::CANCEL_GROUP]]);
     }
 
     public function getSendLogs(): ActiveQuery
@@ -292,5 +308,38 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new OfferSerializer($this))->getData();
+    }
+
+    /**
+     * @return float
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function profitCalc(): float
+    {
+        $sum = 0;
+        if ($productQuotes = $this->productQuotesActive) {
+            foreach ($productQuotes as $productQuote) {
+                /** @var ProductQuote $productQuote */
+                $sum += $productQuote->pq_profit_amount;
+            }
+        }
+        return $sum;
+    }
+
+    /**
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function recalculateProfitAmount(): bool
+    {
+        $changed = false;
+        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
+        $profitOld = ProductQuoteHelper::roundPrice((float) $this->of_profit_amount);
+
+        if ($profitNew !== $profitOld) {
+            $this->of_profit_amount = $profitNew;
+            $changed = true;
+        }
+        return $changed;
     }
 }

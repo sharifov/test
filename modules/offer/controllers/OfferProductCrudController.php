@@ -2,7 +2,12 @@
 
 namespace modules\offer\controllers;
 
+use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
+use modules\offer\src\entities\offerProduct\OfferProductRepository;
 use sales\auth\Auth;
+
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
 use Yii;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\entities\offerProduct\search\OfferProductCrudSearch;
@@ -13,10 +18,29 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
- * Class OfferProductCrudController
+ * @property OfferProductRepository $offerProductRepository
+ * @property EventDispatcher $eventDispatcher
  */
 class OfferProductCrudController extends FController
 {
+    private $offerProductRepository;
+    private $eventDispatcher;
+
+    /**
+     * OfferProductCrudController constructor.
+     * @param $id
+     * @param $module
+     * @param OfferProductRepository $offerProductRepository
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, OfferProductRepository $offerProductRepository, EventDispatcher $eventDispatcher, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->offerProductRepository = $offerProductRepository;
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @return array
      */
@@ -67,10 +91,23 @@ class OfferProductCrudController extends FController
     {
         $model = new OfferProduct();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'op_offer_id' => $model->op_offer_id, 'op_product_quote_id' => $model->op_product_quote_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('FlightQuotePaxPrice not created');
+                }
+                $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
+                $transaction->commit();
+                return $this->redirect(['view',
+                    'op_offer_id' => $model->op_offer_id,
+                    'op_product_quote_id' => $model->op_product_quote_id
+                ]);
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable),  'OfferProductCrudController:' . __FUNCTION__ );
+            }
         }
-
         return $this->render('create', [
             'model' => $model,
         ]);
@@ -86,10 +123,23 @@ class OfferProductCrudController extends FController
     {
         $model = $this->findModel($op_offer_id, $op_product_quote_id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'op_offer_id' => $model->op_offer_id, 'op_product_quote_id' => $model->op_product_quote_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('FlightQuotePaxPrice not created');
+                }
+                $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
+                $transaction->commit();
+                return $this->redirect(['view',
+                    'op_offer_id' => $model->op_offer_id,
+                    'op_product_quote_id' => $model->op_product_quote_id
+                ]);
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductCrudController:' . __FUNCTION__ );
+            }
         }
-
         return $this->render('update', [
             'model' => $model,
         ]);
@@ -105,7 +155,16 @@ class OfferProductCrudController extends FController
      */
     public function actionDelete($op_offer_id, $op_product_quote_id): Response
     {
-        $this->findModel($op_offer_id, $op_product_quote_id)->delete();
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $model = $this->offerProductRepository->find($op_offer_id, $op_product_quote_id);
+            $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
+            $this->offerProductRepository->remove($model);
+            $transaction->commit();
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable),'OfferProductCrudController:' . __FUNCTION__  . ':Exception');
+        }
 
         return $this->redirect(['index']);
     }

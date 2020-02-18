@@ -23,6 +23,7 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
             <h2>
                 <i class="fa fa-folder-o"></i> Hotel Quotes (<?=$dataProviderQuotes->totalCount?>)
             </h2>
+
             <ul class="nav navbar-right panel_toolbox">
                 <li>
                     <?= Html::a('<i class="fa fa-search warning"></i> Search Quotes', null, [

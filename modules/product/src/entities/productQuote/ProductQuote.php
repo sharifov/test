@@ -4,24 +4,31 @@ namespace modules\product\src\entities\productQuote;
 
 use common\models\Currency;
 use common\models\Employee;
+use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\flight\models\FlightQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteExpiredEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChildrenProfitAmountEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
-use sales\entities\serializer\Serializable;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -50,6 +57,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pq_updated_user_id
  * @property string|null $pq_created_dt
  * @property string|null $pq_updated_dt
+ * @property float|null $pq_profit_amount
  * @property int|null $pq_clone_id
  *
  * @property OfferProduct[] $offerProducts
@@ -64,8 +72,10 @@ use yii\db\ActiveRecord;
  * @property Product $pqProduct
  * @property Employee $pqUpdatedUser
  * @property float $optionAmountSum
+ * @property float $optionExtraMarkupSum
  * @property float $totalCalcSum
  * @property ProductQuoteOption[] $productQuoteOptions
+ * @property ProductQuoteOption[] $productQuoteOptionsActive
  * @property ProductQuote|null $clone
  * @property FlightQuote|null $flightQuote
  *
@@ -90,7 +100,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             [['pq_gid', 'pq_product_id'], 'required'],
             [['pq_product_id', 'pq_order_id', 'pq_owner_user_id', 'pq_created_user_id', 'pq_updated_user_id'], 'integer'],
             [['pq_description'], 'string'],
-            [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate'], 'number'],
+            [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate', 'pq_profit_amount'], 'number'],
             [['pq_created_dt', 'pq_updated_dt'], 'safe'],
             [['pq_gid'], 'string', 'max' => 32],
             [['pq_name'], 'string', 'max' => 40],
@@ -146,6 +156,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             'pq_updated_dt' => 'Updated Dt',
             'pq_clone_id' => 'Clone Id',
             'clone' => 'Clone Id',
+            'pq_profit_amount' => 'Profit amount',
         ];
     }
 
@@ -293,13 +304,21 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->hasOne(Employee::class, ['id' => 'pq_updated_user_id']);
     }
 
-
     /**
      * @return ActiveQuery
      */
     public function getProductQuoteOptions(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProductQuoteOptionsActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id'])
+            ->where(['not', ['pqo_status_id' => ProductQuoteOptionStatus::CANCEL_GROUP]]);
     }
 
     public static function find(): Scopes
@@ -331,18 +350,50 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return round($this->optionAmountSum + $this->pq_price, 2);
     }
 
+    /**
+     * @return float
+     */
+    public function getOptionExtraMarkupSum(): float
+    {
+        $sum = 0;
+        if ($options = $this->productQuoteOptionsActive) {
+            foreach ($options as $option) {
+                $sum += $option->pqo_extra_markup;
+            }
+        }
+        return $sum;
+    }
 
-//    public function getQuoteItem()
-//    {
-//        $quote = null;
-//        if ($this->pqProduct->pr_type_id === ProductType::PRODUCT_FLIGHT) {
-//            $quote = FlightQuote::find()->where(['fq_product_quote_id' => $this->pq_id])->one();
-//        } elseif ($this->pqProduct->pr_type_id === ProductType::PRODUCT_HOTEL) {
-//            $quote = HotelQuote::find()->where(['hq_product_quote_id' => $this->pq_id])->one();
-//        }
-//
-//        return $quote;
-//    }
+    /**
+     * @return float
+     */
+    public function profitCalc(): float
+    {
+        $childQuote = $this->getChildQuote();
+        $processingFeeAmount = $childQuote ? $childQuote->getProcessingFee() : 0.00; // PFA
+        $systemMarkupAmount = $childQuote ? $childQuote->getSystemMarkUp() : 0.00; // MA
+        $agentExtraMarkupAmount = $childQuote ? $childQuote->getAgentMarkUp() : 0.00; // EMA agent (pax/room etc.)
+        $optionExtraMarkupAmount = $this->getOptionExtraMarkupSum(); // EMA options
+
+        return ($systemMarkupAmount + $agentExtraMarkupAmount + $optionExtraMarkupAmount) - $processingFeeAmount;
+    }
+
+    /**
+     * @return bool
+     */
+    public function recalculateProfitAmount(): bool
+    {
+        $isChanged = false;
+        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
+        $profitOld = ProductQuoteHelper::roundPrice((float) $this->pq_profit_amount);
+
+        if ($profitOld !== $profitNew) {
+            $this->pq_profit_amount = $profitNew;
+            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this));
+            $isChanged = true;
+        }
+        return $isChanged;
+    }
 
 	/**
 	 * @param ProductQuoteDTO $dto
@@ -447,11 +498,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 		return $this->pq_status_id === ProductQuoteStatus::NEW;
 	}
 
-	public function decline(): void
-	{
-		$this->pq_status_id = ProductQuoteStatus::DECLINED;
-	}
-
 	public function isDeclined(): bool
 	{
 		return $this->pq_status_id === ProductQuoteStatus::DECLINED;
@@ -502,6 +548,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::IN_PROGRESS) {
             $this->setStatus(ProductQuoteStatus::IN_PROGRESS);
+            $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
         }
     }
 
@@ -525,12 +572,12 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function error(?int $creatorId, ?string $description = ''): void
     {
-       $this->recordEvent(
+        $this->recordEvent(
             new ProductQuoteErrorEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
         );
-       if ($this->pq_status_id !== ProductQuoteStatus::ERROR) {
+        if ($this->pq_status_id !== ProductQuoteStatus::ERROR) {
             $this->setStatus(ProductQuoteStatus::ERROR);
-       }
+        }
     }
 
     /**
@@ -539,12 +586,43 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function cancelled(?int $creatorId, ?string $description = ''): void
     {
-       $this->recordEvent(
+        $this->recordEvent(
             new ProductQuoteCanceledEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
         );
-       if ($this->pq_status_id !== ProductQuoteStatus::CANCELED) {
+        if ($this->pq_status_id !== ProductQuoteStatus::CANCELED) {
             $this->setStatus(ProductQuoteStatus::CANCELED);
+            $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
+        }
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function declined(?int $creatorId, ?string $description = ''): void
+    {
+       $this->recordEvent(
+            new ProductQuoteDeclinedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+       );
+       if ($this->pq_status_id !== ProductQuoteStatus::DECLINED) {
+            $this->setStatus(ProductQuoteStatus::DECLINED);
+            $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
        }
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function expired(?int $creatorId, ?string $description = ''): void
+    {
+        $this->recordEvent(
+            new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+        );
+        if ($this->pq_status_id !== ProductQuoteStatus::EXPIRED) {
+            $this->setStatus(ProductQuoteStatus::EXPIRED);
+            $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
+        }
     }
 
     /**
@@ -558,5 +636,14 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         ProductQuoteStatus::guard($this->pq_status_id, $status);
 
         $this->pq_status_id = $status;
+    }
+
+    public function prepareRemove(): void
+    {
+        $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
+
+        if ($childQuote = $this->getChildQuote()){
+            $childQuote->delete();
+        }
     }
 }

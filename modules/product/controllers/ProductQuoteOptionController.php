@@ -2,6 +2,8 @@
 
 namespace modules\product\controllers;
 
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
 use Yii;
 use frontend\controllers\FController;
 use modules\product\src\forms\ProductQuoteOptionForm;
@@ -16,8 +18,27 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
+/**
+ * Class ProductQuoteOptionController
+ * @property EventDispatcher $eventDispatcher
+ */
 class ProductQuoteOptionController extends FController
 {
+    private $eventDispatcher;
+
+    /**
+     * ProductQuoteOptionCrudController constructor.
+     * @param $id
+     * @param $module
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, EventDispatcher $eventDispatcher, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @return array
      */
@@ -51,10 +72,23 @@ class ProductQuoteOptionController extends FController
             if ($form->validate()) {
                 $model = new ProductQuoteOption();
                 $model->attributes = $form->attributes;
-                if ($model->save()) {
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
+
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    if (!$model->save()) {
+                        Yii::error(VarDumper::dumpAsString($model->errors), 'ProductQuoteOptionController:CreateAjax:ProductQuoteOption:save');
+                        throw new \RuntimeException('ProductQuoteOption not saved');
+                    }
+                    $productQuote = $model->pqoProductQuote;
+                    $productQuote->recalculateProfitAmount();
+                    $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+
+                    $transaction->commit();
+                } catch (\Throwable $throwable) {
+                    $transaction->rollBack();
+                    Yii::error(AppHelper::throwableFormatter($throwable),'ProductQuoteOptionController:' . __FUNCTION__ );
                 }
-                Yii::error(VarDumper::dumpAsString($model->errors), 'ProductQuoteOptionController:CreateAjax:ProductQuoteOption:save');
+                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
             }
         } else {
             $productQuoteId = (int) Yii::$app->request->get('id');
@@ -102,12 +136,29 @@ class ProductQuoteOptionController extends FController
         $form->pqo_product_quote_id = $model->pqo_product_quote_id;
 
         if ($form->load(Yii::$app->request->post())) {
+
             if ($form->validate()) {
                 $model->attributes = $form->attributes;
-                if ($model->save()) {
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
+
+                $checkProfit = ($model->isAttributeChanged('pqo_extra_markup') || $model->isAttributeChanged('pqo_status_id'));
+
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    if (!$model->save()) {
+                        Yii::error(VarDumper::dumpAsString($model->errors), 'ProductQuoteOptionController:UpdateAjax:ProductQuoteOption:save');
+                        throw new \RuntimeException('ProductQuoteOption not saved');
+                    }
+                    if ($checkProfit) {
+                        $productQuote = $model->pqoProductQuote;
+                        $productQuote->recalculateProfitAmount();
+                        $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+                    }
+                    $transaction->commit();
+                } catch (\Throwable $throwable) {
+                    $transaction->rollBack();
+                    Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__ );
                 }
-                Yii::error(VarDumper::dumpAsString($model->errors), 'ProductQuoteOptionController:UpdateAjax:ProductQuoteOption:save');
+                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
             }
         } else {
             $form->attributes = $model->attributes;
@@ -127,13 +178,22 @@ class ProductQuoteOptionController extends FController
     {
         $id = Yii::$app->request->post('id');
         Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = Yii::$app->db->beginTransaction();
 
         try {
             $model = $this->findModel($id);
+            $productQuote = $model->pqoProductQuote;
             if (!$model->delete()) {
                 throw new Exception('Product Quote Option ('.$id.') not deleted', 2);
             }
+            $productQuote->recalculateProfitAmount();
+            $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+
+            $transaction->commit();
         } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__ );
+
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 

@@ -13,6 +13,7 @@ use sales\interfaces\QuoteCommunicationInterface;
 use sales\entities\serializer\Serializable;
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
+use sales\helpers\product\ProductQuoteHelper;
 use Yii;
 use yii\base\Exception;
 use yii\db\ActiveQuery;
@@ -380,10 +381,60 @@ class HotelQuote extends ActiveRecord implements Quotable
     }
 
     /**
+     * @return int|null
+     */
+    public function getAdults(): ?int
+    {
+        $result = 0;
+        foreach ($this->hotelQuoteRooms as $room) {
+            $result += $room->hqr_adults;
+        }
+        return $result;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getChildren(): ?int
+    {
+        $result = 0;
+        foreach ($this->hotelQuoteRooms as $room) {
+            $result += $room->hqr_children;
+        }
+        return $result;
+    }
+
+    /**
+     * @return float
+     */
+    public function getProcessingFee(): float
+	{
+		$processingFeeAmount = $this->hqProductQuote->pqProduct->prType->getProcessingFeeAmount();
+        $result = ($this->getAdults() + $this->getChildren()) * $processingFeeAmount;
+		return ProductQuoteHelper::roundPrice($result);
+	}
+
+    /**
      * @return bool
      */
     public function saveChanges(): bool
     {
         return $this->save();
+    }
+
+	/**
+     * @return float
+     */
+    public function getSystemMarkUp(): float
+    {
+        return 0.00;
+    }
+
+    /**
+     * @return float
+     */
+    public function getAgentMarkUp(): float
+    {
+        return 0.00;
     }
 }

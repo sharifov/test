@@ -3,8 +3,12 @@
 namespace modules\order\controllers;
 
 use frontend\controllers\FController;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderProduct\OrderProductRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
 use Yii;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use yii\db\Exception;
@@ -15,8 +19,31 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
+/**
+ * @property OrderProductRepository $orderProductRepository
+ * @property EventDispatcher $eventDispatcher
+ */
 class OrderProductController extends FController
 {
+    private $orderProductRepository;
+    private $eventDispatcher;
+
+    /**
+     * OrderProductController constructor.
+     * @param $id
+     * @param $module
+     * @param OrderProductRepository $orderProductRepository
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
+    public function __construct($id, $module, OrderProductRepository $orderProductRepository, EventDispatcher $eventDispatcher, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->orderProductRepository = $orderProductRepository;
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+
     /**
      * @return array
      */
@@ -93,15 +120,15 @@ class OrderProductController extends FController
                 }
             }
 
-            $orderProduct = new OrderProduct();
-            $orderProduct->orp_order_id = $order->or_id;
-            $orderProduct->orp_product_quote_id = $productQuoteId;
+            $orderProduct = OrderProduct::create($order->or_id, $productQuoteId);
+            $this->orderProductRepository->save($orderProduct);
 
             if (!$orderProduct->save()) {
                 throw new Exception('Product Quote ID ('.$productQuoteId.'), Order ID ('.$orderId.'): ' . VarDumper::dumpAsString($orderProduct->errors), 16);
             }
 
         } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable),'OrderProductController:' . __FUNCTION__  );
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
@@ -117,21 +144,15 @@ class OrderProductController extends FController
         $productQuoteId = (int) Yii::$app->request->post('product_quote_id');
 
         Yii::$app->response->format = Response::FORMAT_JSON;
-
+        $transaction = Yii::$app->db->beginTransaction();
         try {
-            if (!$orderId) {
-                throw new Exception('OrderId param is empty', 2);
-            }
-
-            if (!$productQuoteId) {
-                throw new Exception('ProductQuoteId param is empty', 3);
-            }
-
-            $model = $this->findModel($orderId, $productQuoteId);
-            if (!$model->delete()) {
-                throw new Exception('Order Product (offer: '.$orderId.', quote: '.$productQuoteId.') not deleted', 4);
-            }
+            $model = $this->orderProductRepository->find($orderId, $productQuoteId);
+            $this->orderProductRepository->remove($model);
+            $this->eventDispatcher->dispatchAll([new OrderRecalculateProfitAmountEvent([$model->orpOrder])]);
+            $transaction->commit();
         } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable),'OrderProductController:' . __FUNCTION__  );
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 

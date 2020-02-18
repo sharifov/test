@@ -145,6 +145,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
         | <?= ProductQuoteStatus::asFormat($model->hqProductQuote->pq_status_id) ?>
 
+        <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->hqProductQuote->pq_profit_amount ?>
+
         <?php if ($model->hqProductQuote->pq_clone_id): ?>
             <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
         <?php endif;?>
@@ -431,6 +433,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <?php
             $totalAmount = round($totalAmountRoom + $totalAmountOption + $totalExtraMarkupOption, 2);
         ?>
+
+        <?php
+           $model->hqProductQuote->pq_profit_amount;
+        ?>
+
         <div class="text-right"><h4>Total: <?=number_format($totalAmount, 2)?> USD</h4></div>
 
 

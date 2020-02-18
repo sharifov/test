@@ -57,6 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pq_price',
             'pq_client_currency',
             'pq_client_currency_rate',
+            'pq_profit_amount',
             'pq_client_price',
             [
                 'label' => 'Calc client price',

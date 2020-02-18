@@ -260,6 +260,11 @@ use yii\helpers\Html;
         <?php
             $totalAmount = round($totalAmountRoom + $totalAmountOption + $totalExtraMarkupOption, 2);
         ?>
+
+        <?php
+           $model->hqProductQuote->pq_profit_amount;
+        ?>
+
         <div class="text-right"><h4>Total: <?=number_format($totalAmount, 2)?> USD</h4></div>
 
 

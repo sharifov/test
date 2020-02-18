@@ -37,6 +37,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'of_client_total')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
 
+        <?= $form->field($model, 'of_profit_amount')->textInput() ?>
+
         <? /*= $form->field($model, 'of_created_user_id')->textInput() ?>
 
         <?= $form->field($model, 'of_updated_user_id')->textInput() ?>

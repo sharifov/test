@@ -512,9 +512,9 @@ class FlightQuote extends ActiveRecord implements Quotable
 	}
 
 	/**
-	 * @return float|int
+	 * @return float
 	 */
-	public function getProcessingFee()
+	public function getProcessingFee(): float
 	{
 		$processingFeeAmount = $this->fqProductQuote->pqProduct->prType->getProcessingFeeAmount();
 
@@ -522,4 +522,29 @@ class FlightQuote extends ActiveRecord implements Quotable
 
 		return ($flight->fl_adults + $flight->fl_children) * $processingFeeAmount;
 	}
+
+    /**
+     * @return float
+     */
+    public function getSystemMarkUp(): float
+    {
+        $result = 0.00;
+        foreach ($this->flightQuotePaxPrices as $paxPrice) {
+            $result += $paxPrice->qpp_system_mark_up;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return float
+     */
+    public function getAgentMarkUp(): float
+    {
+        $result = 0.00;
+        foreach ($this->flightQuotePaxPrices as $paxPrice) {
+            $result += $paxPrice->qpp_agent_mark_up;
+        }
+        return $result;
+    }
 }

@@ -17,6 +17,7 @@ class OfferCrudSearch extends Offer
         return [
             [['of_id', 'of_lead_id', 'of_status_id', 'of_owner_user_id', 'of_created_user_id', 'of_updated_user_id'], 'integer'],
             [['of_gid', 'of_uid', 'of_name'], 'safe'],
+            [['of_profit_amount'], 'number'],
 
             ['of_created_dt', 'date', 'format' => 'php:Y-m-d'],
             ['of_updated_dt', 'date', 'format' => 'php:Y-m-d'],
@@ -57,6 +58,7 @@ class OfferCrudSearch extends Offer
             'of_owner_user_id' => $this->of_owner_user_id,
             'of_created_user_id' => $this->of_created_user_id,
             'of_updated_user_id' => $this->of_updated_user_id,
+            'of_profit_amount' => $this->of_profit_amount,
         ]);
 
         $query->andFilterWhere(['like', 'of_gid', $this->of_gid])

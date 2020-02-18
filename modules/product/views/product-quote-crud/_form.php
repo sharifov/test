@@ -45,6 +45,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pq_client_currency_rate')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'pq_profit_amount')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'pq_owner_user_id')->textInput() ?>
 
         <? /*= $form->field($model, 'pq_created_user_id')->textInput() ?>

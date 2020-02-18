@@ -21,6 +21,8 @@ use yii\bootstrap4\Html;
              <?= OfferStatus::asFormat($offer->of_status_id) ?>
              <?= OfferFormatter::asSentView($offer) ?>
 
+             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $offer->of_profit_amount ?>
+
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
