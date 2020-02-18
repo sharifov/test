@@ -80,7 +80,7 @@ class ProductQuoteOptionController extends FController
                         throw new \RuntimeException('ProductQuoteOption not saved');
                     }
                     $productQuote = $model->pqoProductQuote;
-                    $productQuote->profitAmount();
+                    $productQuote->recalculateProfitAmount();
                     $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
                     $transaction->commit();
@@ -150,7 +150,7 @@ class ProductQuoteOptionController extends FController
                     }
                     if ($checkProfit) {
                         $productQuote = $model->pqoProductQuote;
-                        $productQuote->profitAmount();
+                        $productQuote->recalculateProfitAmount();
                         $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
                     }
                     $transaction->commit();
@@ -186,7 +186,7 @@ class ProductQuoteOptionController extends FController
             if (!$model->delete()) {
                 throw new Exception('Product Quote Option ('.$id.') not deleted', 2);
             }
-            $productQuote->profitAmount();
+            $productQuote->recalculateProfitAmount();
             $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
             $transaction->commit();

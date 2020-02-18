@@ -18,6 +18,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteExpiredEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChildrenProfitAmountEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
@@ -380,7 +381,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     /**
      * @return bool
      */
-    public function profitAmount(): bool
+    public function recalculateProfitAmount(): bool
     {
         $isChanged = false;
         $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
@@ -392,12 +393,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             $isChanged = true;
         }
         return $isChanged;
-    }
-
-    public function recalculateOffersOrders(): void
-    {
-        $this->recordEvent(new OfferRecalculateProfitAmountEvent($this->opOffers));
-        $this->recordEvent(new OrderRecalculateProfitAmountEvent($this->orpOrders));
     }
 
 	/**
@@ -553,7 +548,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::IN_PROGRESS) {
             $this->setStatus(ProductQuoteStatus::IN_PROGRESS);
-            $this->recalculateOffersOrders();
+            $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
         }
     }
 
@@ -596,7 +591,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::CANCELED) {
             $this->setStatus(ProductQuoteStatus::CANCELED);
-            $this->recalculateOffersOrders();
+            $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
         }
     }
 
@@ -611,7 +606,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
        );
        if ($this->pq_status_id !== ProductQuoteStatus::DECLINED) {
             $this->setStatus(ProductQuoteStatus::DECLINED);
-            $this->recalculateOffersOrders();
+            $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
        }
     }
 
@@ -626,7 +621,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::EXPIRED) {
             $this->setStatus(ProductQuoteStatus::EXPIRED);
-            $this->recalculateOffersOrders();
+            $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
         }
     }
 
@@ -645,11 +640,10 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
     public function prepareRemove(): void
     {
-        $this->recalculateOffersOrders();
+        $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
 
         if ($childQuote = $this->getChildQuote()){
             $childQuote->delete();
         }
     }
-
 }

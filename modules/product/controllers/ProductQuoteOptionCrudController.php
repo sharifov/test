@@ -92,7 +92,7 @@ class ProductQuoteOptionCrudController extends FController
                     throw new \RuntimeException('ProductQuoteOption not saved');
                 }
                 $productQuote = $model->pqoProductQuote;
-                $productQuote->profitAmount();
+                $productQuote->recalculateProfitAmount();
                 $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
                 $transaction->commit();
@@ -128,7 +128,7 @@ class ProductQuoteOptionCrudController extends FController
                 }
                 if ($checkProfit) {
                     $productQuote = $model->pqoProductQuote;
-                    $productQuote->profitAmount();
+                    $productQuote->recalculateProfitAmount();
                     $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
                 }
                 $transaction->commit();
@@ -158,7 +158,7 @@ class ProductQuoteOptionCrudController extends FController
             $model = $this->findModel($id);
             $productQuote = $model->pqoProductQuote;
             $model->delete();
-            $productQuote->profitAmount();
+            $productQuote->recalculateProfitAmount();
             $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
             $transaction->commit();

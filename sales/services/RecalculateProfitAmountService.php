@@ -95,7 +95,7 @@ class RecalculateProfitAmountService
     private function setChangedOffers(): RecalculateProfitAmountService
     {
         foreach ($this->offers as $offer) {
-            if ($offer->profitAmount()) {
+            if ($offer->recalculateProfitAmount()) {
                 $this->changedOffers[] = $offer;
             }
         }
@@ -109,7 +109,7 @@ class RecalculateProfitAmountService
     private function setChangedOrders(): RecalculateProfitAmountService
     {
         foreach ($this->orders as $order) {
-            if ($order->profitAmount()) {
+            if ($order->recalculateProfitAmount()) {
                 $this->changedOrders[] = $order;
             }
         }

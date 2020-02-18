@@ -4,6 +4,7 @@ namespace modules\product\controllers;
 
 use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChildrenProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
@@ -103,7 +104,7 @@ class ProductQuoteCrudController extends FController
         if ($model->load(Yii::$app->request->post())) {
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                $model->profitAmount();
+                $model->recalculateProfitAmount();
                 $this->productQuoteRepository->save($model);
                 $transaction->commit();
             } catch (\Throwable $throwable) {
@@ -129,13 +130,16 @@ class ProductQuoteCrudController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
 
-            if ($model->isAttributeChanged('pq_status_id') || $model->isAttributeChanged('pq_profit_amount')) {
-                $model->recalculateOffersOrders();
-            }
+            $recalculateProfitAmount = ($model->isAttributeChanged('pq_status_id') || $model->isAttributeChanged('pq_profit_amount'));
 
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                $this->productQuoteRepository->save($model);
+                if (!$model->save()) {
+                    throw new \RuntimeException('ProductQuote not saved');
+                }
+                if ($recalculateProfitAmount) {
+                    $this->eventDispatcher->dispatchAll([new ProductQuoteRecalculateChildrenProfitAmountEvent($model)]);
+                }
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();

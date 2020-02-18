@@ -306,7 +306,7 @@ class Order extends ActiveRecord
      * @return bool
      * @throws \yii\base\InvalidConfigException
      */
-    public function profitAmount(): bool
+    public function recalculateProfitAmount(): bool
     {
         $changed = false;
         $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());

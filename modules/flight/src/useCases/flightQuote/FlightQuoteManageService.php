@@ -180,7 +180,7 @@ class FlightQuoteManageService
 
 			$flightQuote = $flightQuotePaxPrice->qppFlightQuote;
 			$productQuote = $flightQuote->fqProductQuote;
-            $productQuote->profitAmount();
+            $productQuote->recalculateProfitAmount();
 
 			$this->calcProductQuotePrice($productQuote, $flightQuote);
 		});
@@ -201,7 +201,7 @@ class FlightQuoteManageService
 			ProductQuoteHelper::roundPrice($systemPrice * $productQuote->pq_client_currency_rate),
 			ProductQuoteHelper::roundPrice((float)$priceData->total->serviceFeeSum)
 		);
-        $productQuote->profitAmount();
+        $productQuote->recalculateProfitAmount();
 
 		$this->productQuoteRepository->save($productQuote);
 	}

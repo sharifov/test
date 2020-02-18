@@ -97,7 +97,7 @@ class FlightQuotePaxPriceController extends FController
                     throw new \RuntimeException('FlightQuotePaxPrice not saved');
                 }
                 $productQuote = $this->getProductQuote($model);
-                $productQuote->profitAmount();
+                $productQuote->recalculateProfitAmount();
                 $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
                 $transaction->commit();
@@ -135,7 +135,7 @@ class FlightQuotePaxPriceController extends FController
                 }
                 if ($checkProfit) {
                     $productQuote = $this->getProductQuote($model);
-                    $productQuote->profitAmount();
+                    $productQuote->recalculateProfitAmount();
                     $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
                 }
                 $transaction->commit();
@@ -165,7 +165,7 @@ class FlightQuotePaxPriceController extends FController
             $model = $this->findModel($id);
             $productQuote = $this->getProductQuote($model);
             $model->delete();
-            $productQuote->profitAmount();
+            $productQuote->recalculateProfitAmount();
             $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
             $transaction->commit();

@@ -330,7 +330,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
      * @return bool
      * @throws \yii\base\InvalidConfigException
      */
-    public function profitAmount(): bool
+    public function recalculateProfitAmount(): bool
     {
         $changed = false;
         $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
