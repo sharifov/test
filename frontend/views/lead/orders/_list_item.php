@@ -21,7 +21,7 @@ use yii\bootstrap4\Html;
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
 
-        <i class="ml-2 fas fa-hand-holding-usd" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
+        <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
 
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->

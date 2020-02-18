@@ -101,7 +101,7 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
 				</a>
 			<?php endif;?>
 
-            <i class="ml-2 fas fa-hand-holding-usd" title="Profit Amount"></i> <?= $model->pq_profit_amount ?>
+            <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->pq_profit_amount ?>
 
 			<?php Pjax::end(); ?>
 		</div>
