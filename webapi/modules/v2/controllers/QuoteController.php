@@ -317,7 +317,7 @@ class QuoteController extends ApiBaseController
     "lead_delayed_charge": 0,
     "lead_status": null,
     "booked_quote_uid": null,
-    "lead_source_id":137,
+    "source_code":"38T556",
     "agentName": "admin",
     "agentEmail": "admin@wowfare.com",
     "agentDirectLine": "",
@@ -424,7 +424,7 @@ class QuoteController extends ApiBaseController
             $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;
-            $response['lead_source_id'] = ($model->lead && $model->lead->source_id) ? $model->lead->source_id : null;
+            $response['source_code'] = ($model->lead && isset($model->lead->source->cid)) ? $model->lead->source->cid : null;
 
             if(in_array($model->lead->status,[Lead::STATUS_SOLD, Lead::STATUS_BOOKED])){
                 $response['lead_status'] = $model->lead->status == Lead::STATUS_SOLD ? 'sold' : 'booked';
