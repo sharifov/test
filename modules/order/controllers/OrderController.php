@@ -5,6 +5,7 @@ namespace modules\order\controllers;
 use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\order\src\forms\OrderForm;
+use modules\order\src\services\OrderManageService;
 use Yii;
 use modules\order\src\entities\order\Order;
 use frontend\controllers\FController;
@@ -17,9 +18,26 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
+/**
+ * Class OrderController
+ * @package modules\order\controllers
+ *
+ * @property OrderManageService $orderManageService
+ */
 class OrderController extends FController
 {
-    /**
+	/**
+	 * @var OrderManageService
+	 */
+	private $orderManageService;
+
+	public function __construct($id, $module, OrderManageService $orderManageService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->orderManageService = $orderManageService;
+	}
+
+	/**
      * @return array
      */
     public function behaviors(): array
@@ -49,28 +67,16 @@ class OrderController extends FController
             //Yii::$app->response->format = Response::FORMAT_JSON;
 
             if ($model->validate()) {
-                $order = new Order();
-                //$order->attributes = $model->attributes;
-                $order->initCreate();
 
-                $order->or_lead_id = $model->or_lead_id;
-                $order->or_name = $model->or_name;
+            	try {
+            		$this->orderManageService->createOrder($model);
 
-                if (!$order->or_name && $order->or_lead_id) {
-                    $order->or_name = $order->generateName();
-                }
-
-                $order->updateOrderTotalByCurrency();
-
-                if ($order->save()) {
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
-                }
-
-                //$model->errors = $offer->errors;
-                Yii::error(VarDumper::dumpAsString($order->errors), 'OrderController:CreateAjax:Order:save');
+					return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
+				} catch (\Throwable $e) {
+                	Yii::error(VarDumper::dumpAsString($e->getMessage()), 'OrderController:CreateAjax:orderManageService:createOrder');
+				}
 
             }
-            //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
         } else {
 
             $leadId = (int) Yii::$app->request->get('id');

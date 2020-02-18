@@ -7,6 +7,7 @@ use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\order\src\forms\OrderForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
@@ -141,7 +142,29 @@ class Order extends ActiveRecord
         $this->or_gid = self::generateGid();
         $this->or_uid = self::generateUid();
         $this->or_status_id = OrderStatus::PENDING;
+
+        if ($this->orLead && $this->orLead->employee_id) {
+        	$this->or_owner_user_id = $this->orLead->employee_id;
+		}
     }
+
+    public function create(OrderForm $orderForm): self
+	{
+		$this->or_gid = self::generateGid();
+		$this->or_uid = self::generateUid();
+		$this->or_status_id = OrderStatus::PENDING;
+		$this->or_lead_id = $orderForm->or_lead_id;
+		$this->or_name = $orderForm->or_name;
+		if ($this->orLead && $this->orLead->employee_id) {
+			$this->or_owner_user_id = $this->orLead->employee_id;
+		}
+		if (!$this->or_name && $this->or_lead_id) {
+			$this->or_name = $this->generateName();
+		}
+		$this->updateOrderTotalByCurrency();
+
+		return $this;
+	}
 
     /**
      * @return ActiveQuery
