@@ -5,8 +5,8 @@ namespace modules\qaTask\src\entities\qaTask;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
-use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskCreatedEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskStatusCanceledEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskChangeRatingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskStatusClosedEvent;
@@ -56,6 +56,35 @@ use yii\db\ActiveRecord;
 class QaTask extends \yii\db\ActiveRecord
 {
     use EventTrait;
+
+    public static function create(
+        int $objectType,
+        int $objectId,
+        ?int $projectId,
+        ?int $departmentId,
+        int $categoryId,
+        int $createType,
+        ?string $description
+    ): self
+    {
+        $task = new static();
+        $task->t_gid = self::generateGid();
+        $task->t_object_type_id = $objectType;
+        $task->t_object_id = $objectId;
+        $task->t_project_id = $projectId;
+        $task->t_department_id = $departmentId;
+        $task->t_category_id = $categoryId;
+        $task->t_create_type_id = $createType;
+        $task->t_status_id = QaTaskStatus::PENDING;
+        $task->t_description = $description;
+        $task->recordEvent(new QaTaskCreatedEvent($task));
+        return $task;
+    }
+
+    public static function generateGid(): string
+    {
+        return md5(uniqid('', true));
+    }
 
     public function pending(): void
     {
@@ -210,7 +239,7 @@ class QaTask extends \yii\db\ActiveRecord
             ['t_rating', 'in', 'range' => array_keys(QaTaskRating::getList())],
 
             ['t_create_type_id', 'integer'],
-            ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreatedType::getList())],
+            ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreateType::getList())],
 
             ['t_department_id', 'integer'],
             ['t_department_id', 'in', 'range' => array_keys(Department::DEPARTMENT_LIST)],

@@ -12,6 +12,7 @@ use sales\access\ListsAccess;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTask\search\queue\QaTaskSearchPendingSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Response;
 
 /**
@@ -25,6 +26,18 @@ class QaTaskQueueController extends FController
     private $availableProjects;
     private $availableUsers;
 
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'count',
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     public function beforeAction($action): bool
     {
         if ($action->id === 'count') {
@@ -35,7 +48,7 @@ class QaTaskQueueController extends FController
 
     public function actionSearch(): string
     {
-        $searchModel = QaTaskSearchSearch::create(new CreateDto([
+        $searchModel = QaTaskSearchSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
@@ -50,7 +63,7 @@ class QaTaskQueueController extends FController
 
     public function actionPending(): string
     {
-        $searchModel = QaTaskSearchPendingSearch::create(new CreateDto([
+        $searchModel = QaTaskSearchPendingSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
@@ -65,7 +78,7 @@ class QaTaskQueueController extends FController
 
     public function actionProcessing(): string
     {
-        $searchModel = QaTaskSearchProcessingSearch::create(new CreateDto([
+        $searchModel = QaTaskSearchProcessingSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
@@ -80,7 +93,7 @@ class QaTaskQueueController extends FController
 
     public function actionEscalated(): string
     {
-        $searchModel = QaTaskSearchEscalatedSearch::create(new CreateDto([
+        $searchModel = QaTaskSearchEscalatedSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
@@ -95,7 +108,7 @@ class QaTaskQueueController extends FController
 
     public function actionClosed(): string
     {
-        $searchModel = QaTaskSearchClosedSearch::create(new CreateDto([
+        $searchModel = QaTaskSearchClosedSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
@@ -168,7 +181,10 @@ class QaTaskQueueController extends FController
 
     private function countPending(): ?int
     {
-        return (QaTaskSearchPendingSearch::create(new CreateDto([
+        if (!Auth::can('/qa-task/qa-task-queue/pending')) {
+            return null;
+        }
+        return (QaTaskSearchPendingSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => [],
@@ -177,7 +193,10 @@ class QaTaskQueueController extends FController
 
     private function countProcessing(): ?int
     {
-        return (QaTaskSearchProcessingSearch::create(new CreateDto([
+        if (!Auth::can('/qa-task/qa-task-queue/processing')) {
+            return null;
+        }
+        return (QaTaskSearchProcessingSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => [],
@@ -186,7 +205,10 @@ class QaTaskQueueController extends FController
 
     private function countEscalated(): ?int
     {
-        return (QaTaskSearchEscalatedSearch::create(new CreateDto([
+        if (!Auth::can('/qa-task/qa-task-queue/escalated')) {
+            return null;
+        }
+        return (QaTaskSearchEscalatedSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => [],
@@ -195,7 +217,10 @@ class QaTaskQueueController extends FController
 
     private function countClosed(): ?int
     {
-        return (QaTaskSearchClosedSearch::create(new CreateDto([
+        if (!Auth::can('/qa-task/qa-task-queue/closed')) {
+            return null;
+        }
+        return (QaTaskSearchClosedSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => [],

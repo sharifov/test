@@ -41,7 +41,7 @@ class QaTaskCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = QaTaskCrudSearch::create(new CreateDto([
+        $searchModel = QaTaskCrudSearch::createSearch(new CreateDto([
             'user' => Auth::user(),
             'projectList' => Project::getList(),
             'userList' => (new ListsAccess(Auth::id()))->getEmployees(),

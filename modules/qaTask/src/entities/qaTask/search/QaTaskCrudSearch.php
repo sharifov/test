@@ -63,6 +63,9 @@ class QaTaskCrudSearch extends QaTaskSearch
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> [
+                'defaultOrder' => ['t_id' => SORT_DESC]
+            ],
         ]);
 
         $this->load($params);

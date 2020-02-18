@@ -34,7 +34,7 @@ class MultipleUpdateWidget extends Widget
     public $formId = 'multiple-update-form';
     public $buttonHeader = 'Update';
     public $notifyHeader = 'Multiple update';
-    public $summaryIdentifier = '.multiple-update-summary';
+    public $summaryIdentifier = '.multiple-update-summary .card-body';
 
     public function init(): void
     {

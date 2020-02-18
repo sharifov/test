@@ -51,7 +51,7 @@ class QaTaskDecideService
         $this->eventDispatcher->dispatch(new QaTaskDecideEvent(
             $task,
             new CreateDto(
-                $task->t_id,
+                $task,
                 $startStatusId,
                 $task->t_status_id,
                null,

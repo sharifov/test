@@ -1,6 +1,7 @@
 <?php
 
 use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskCreatedEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskStatusCanceledEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskChangeRatingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskStatusClosedEvent;
@@ -14,6 +15,7 @@ use modules\qaTask\src\listeners\QaTaskReturnNotifierListener;
 use modules\qaTask\src\listeners\QaTaskTakeOverNotifierListener;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelEvent;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseEvent;
+use modules\qaTask\src\useCases\qaTask\create\manually\QaTaskCreateManuallyEvent;
 use modules\qaTask\src\useCases\qaTask\decide\QaTaskDecideEvent;
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateEvent;
 use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnEvent;
@@ -34,6 +36,7 @@ return [
     QaTaskUnAssignEvent::class => [],
     QaTaskDeadlineEvent::class => [],
     QaTaskChangeRatingEvent::class => [],
+    QaTaskCreatedEvent::class => [],
 
     // Use cases events
     QaTaskTakeEvent::class => [
@@ -60,6 +63,9 @@ return [
     QaTaskReturnToPendingEvent::class => [],
     QaTaskReturnToEscalateEvent::class => [],
     QaTaskDecideEvent::class => [
+        QaTaskChangeStateEventListener::class,
+    ],
+    QaTaskCreateManuallyEvent::class => [
         QaTaskChangeStateEventListener::class,
     ],
 ];

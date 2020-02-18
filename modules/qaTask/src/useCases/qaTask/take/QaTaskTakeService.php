@@ -54,7 +54,7 @@ class QaTaskTakeService
         $this->eventDispatcher->dispatch(new QaTaskTakeEvent(
             $task,
             new CreateDto(
-                $task->t_id,
+                $task,
                 $startStatusId,
                 $task->t_status_id,
                 null,

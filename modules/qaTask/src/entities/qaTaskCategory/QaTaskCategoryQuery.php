@@ -2,6 +2,8 @@
 
 namespace modules\qaTask\src\entities\qaTaskCategory;
 
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
+
 class QaTaskCategoryQuery
 {
     /**
@@ -15,6 +17,16 @@ class QaTaskCategoryQuery
     public static function getSimpleListEnabled(): array
     {
         return QaTaskCategory::find()->list()->enabled()->column();
+    }
+
+    public static function getEnabledListByLead(): array
+    {
+        return self::getEnabledListByType(QaTaskObjectType::LEAD);
+    }
+
+    public static function getEnabledListByType(int $value): array
+    {
+        return QaTaskCategory::find()->list()->byType($value)->enabled()->column();
     }
 
     /**

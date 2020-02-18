@@ -4,7 +4,7 @@ namespace modules\qaTask\src\entities\qaTask;
 
 use yii\bootstrap4\Html;
 
-class QaTaskCreatedType
+class QaTaskCreateType
 {
     public const JOB = 1;
     public const TRIGGER = 2;

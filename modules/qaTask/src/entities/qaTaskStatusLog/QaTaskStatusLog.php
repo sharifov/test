@@ -35,7 +35,7 @@ class QaTaskStatusLog extends \yii\db\ActiveRecord
     public static function create(CreateDto $dto): self
     {
         $log = new static();
-        $log->tsl_task_id = $dto->taskId;
+        $log->tsl_task_id = $dto->getTaskId();
         $log->tsl_start_status_id = $dto->startStatusId;
         $log->tsl_end_status_id = $dto->endStatusId;
         $log->tsl_reason_id = $dto->reasonId;

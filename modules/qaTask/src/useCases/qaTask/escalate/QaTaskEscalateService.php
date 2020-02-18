@@ -51,7 +51,7 @@ class QaTaskEscalateService
         $this->eventDispatcher->dispatch(new QaTaskEscalateEvent(
             $task,
             new CreateDto(
-                $task->t_id,
+                $task,
                 $startStatusId,
                 $task->t_status_id,
                 $form->reasonId,

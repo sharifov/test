@@ -21,7 +21,7 @@ use yii\widgets\Pjax;
 $this->title = 'Qa Tasks Search';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="qa-task-index">
+<div class="qa-task-search">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

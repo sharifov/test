@@ -13,10 +13,10 @@ use yii\data\ActiveDataProvider;
  */
 class QaTaskSearchProcessingSearch extends QaTaskSearch
 {
-    public static function create(CreateDto $dto): QaTaskSearch
+    public static function createSearch(CreateDto $dto): QaTaskSearch
     {
         $dto->statusList = QaTaskStatus::getProcessingQueueList();
-        return parent::create($dto);
+        return parent::createSearch($dto);
     }
 
     public function rules(): array

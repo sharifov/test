@@ -20,7 +20,7 @@ use yii\widgets\Pjax;
 $this->title = 'Qa Tasks Pending';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="qa-task-index">
+<div class="qa-task-pending">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

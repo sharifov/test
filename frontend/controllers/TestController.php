@@ -44,9 +44,12 @@ use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\services\ProductQuoteStatusLogService;
 use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateForm;
+use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateService;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use Mpdf\Tag\P;
@@ -176,6 +179,22 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $service = Yii::createObject(QaTaskMultipleCreateService::class);
+        $log = $service->create(
+            new QaTaskMultipleCreateForm(
+                QaTaskObjectType::LEAD,
+                [],
+                Auth::id(),
+                [
+                    'categoryId' => 1,
+                    'ids' => [34,371096,371095]
+                ]
+            )
+        );
+
+        VarDumper::dump($log);
+        die;
+
         return $this->render('blank');
     }
 

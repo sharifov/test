@@ -32,7 +32,7 @@ use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTask\QaTaskCreateType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
@@ -83,7 +83,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return QaTaskCreatedType::asFormat($value);
+        return QaTaskCreateType::asFormat($value);
     }
 
     public function asQaObjectType($value): string

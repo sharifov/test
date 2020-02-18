@@ -21,6 +21,7 @@ use sales\entities\cases\events\CasesSolvedStatusEvent;
 use sales\entities\cases\events\CasesStatusChangeEvent;
 use sales\entities\cases\events\CasesTrashStatusEvent;
 use sales\entities\EventTrait;
+use sales\interfaces\Objectable;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
@@ -56,7 +57,7 @@ use Yii;
  * @property CasesStatusLog[] $casesStatusLogs
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  */
-class Cases extends ActiveRecord
+class Cases extends ActiveRecord implements Objectable
 {
 
     use EventTrait;
@@ -564,5 +565,15 @@ class Cases extends ActiveRecord
     public function updateLastAction(): int
     {
         return self::updateAll(['cs_last_action_dt' => date('Y-m-d H:i:s')], ['cs_id' => $this->cs_id]);
+    }
+
+    public function getProjectId(): ?int
+    {
+        return $this->cs_project_id;
+    }
+
+    public function getDepartmentId(): ?int
+    {
+        return $this->cs_dep_id;
     }
 }

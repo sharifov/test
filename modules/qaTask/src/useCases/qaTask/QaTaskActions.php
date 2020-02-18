@@ -13,6 +13,7 @@ class QaTaskActions
     public const DECIDE = 5;
     public const ESCALATE = 6;
     public const RETURN = 7;
+    public const CREATE = 8;
 
     private const LIST = [
         self::TAKE => 'Take',
@@ -22,6 +23,7 @@ class QaTaskActions
         self::DECIDE => 'Decide',
         self::ESCALATE => 'Escalate',
         self::RETURN => 'Return',
+        self::CREATE => 'Create',
     ];
 
     public static function getList(): array

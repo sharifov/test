@@ -55,7 +55,7 @@ class QaTaskReturnToPendingService
         $this->taskRepository->save($task);
 
         $stateLog = new CreateDto(
-            $task->t_id,
+            $task,
             $startStatusId,
             $task->t_status_id,
             $form->reasonId,

@@ -2,7 +2,7 @@
 
 use common\models\Department;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTask\QaTaskCreateType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
@@ -41,7 +41,7 @@ $list = new ListsAccess(Auth::id());
 
         <?= $form->field($model, 't_rating')->dropDownList(QaTaskRating::getList(), ['prompt' => 'Select rating']) ?>
 
-        <?= $form->field($model, 't_create_type_id')->dropDownList(QaTaskCreatedType::getList(), ['prompt' => 'Select created type']) ?>
+        <?= $form->field($model, 't_create_type_id')->dropDownList(QaTaskCreateType::getList(), ['prompt' => 'Select created type']) ?>
 
         <?= $form->field($model, 't_description')->textarea(['rows' => 6]) ?>
 

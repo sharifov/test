@@ -51,7 +51,7 @@ class QaTaskCloseService
         $this->eventDispatcher->dispatch(new QaTaskCloseEvent(
             $task,
             new CreateDto(
-                $task->t_id,
+                $task,
                 $startStatusId,
                 $task->t_status_id,
                 null,

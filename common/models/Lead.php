@@ -37,6 +37,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\interfaces\Objectable;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
@@ -203,7 +204,7 @@ use yii\helpers\VarDumper;
  * @property $quoteType
  *
  */
-class Lead extends ActiveRecord
+class Lead extends ActiveRecord implements Objectable
 {
     use EventTrait;
 
@@ -4486,4 +4487,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 		return $this->status === self::STATUS_TRASH;
 	}
 
+    public function getProjectId(): ?int
+    {
+        return $this->project_id;
+    }
+
+    public function getDepartmentId(): ?int
+    {
+        return $this->l_dep_id;
+    }
 }

@@ -9,6 +9,21 @@ use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function active(): self
+    {
+        return $this->andWhere(['NOT IN', 't_status_id', [QaTaskStatus::CANCELED, QaTaskStatus::CLOSED]]);
+    }
+
+    public function byObjectType(int $value): self
+    {
+        return $this->andWhere(['t_object_type_id' => $value]);
+    }
+
+    public function byObjectId(int $value): self
+    {
+        return $this->andWhere(['t_object_id' => $value]);
+    }
+
     public function projects(array $projects): self
     {
         return $this->andWhere(['t_project_id' => $projects]);

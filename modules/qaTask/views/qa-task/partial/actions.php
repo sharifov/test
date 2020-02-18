@@ -15,30 +15,3 @@
 <?= $this->render('actions/decide', ['model' => $model]) ?>
 
 <?php
-$js = <<<JS
-
- $(document).on('click', '.btn-modal-show', function(e){        
-    e.preventDefault();
-    
-    let url = $(this).data('url');
-    let title = $(this).data('title');
-    let modalId = $(this).data('modal-id');
-    let modal = $('#' + modalId);
-      
-    modal.find('.modal-body').html('');
-    modal.find('.modal-title').html(title);
-    modal.find('.modal-body').load(url, function( response, status, xhr ) {
-        //$('#preloader').addClass('d-none');
-        if (status == 'error') {
-            alert(response);
-        } else {
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
-        }
-    });
- });
-
-JS;
-$this->registerJs($js);

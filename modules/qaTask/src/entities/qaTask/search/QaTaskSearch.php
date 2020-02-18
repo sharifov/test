@@ -4,6 +4,7 @@ namespace modules\qaTask\src\entities\qaTask\search;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
+
 /**
  * Class QaTaskSearch
  *
@@ -30,7 +31,7 @@ class QaTaskSearch extends QaTask
     private $departmentList = [];
     private $categoryList = [];
 
-    public static function create(CreateDto $dto): self
+    public static function createSearch(CreateDto $dto): self
     {
         $search = new static();
         $search->user = $dto->user;

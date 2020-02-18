@@ -56,7 +56,7 @@ class QaTaskTakeOverService
             $task,
             $oldAssignedUserId,
             new CreateDto(
-                $task->t_id,
+                $task,
                 $startStatusId,
                 $task->t_status_id,
                 $form->reasonId,

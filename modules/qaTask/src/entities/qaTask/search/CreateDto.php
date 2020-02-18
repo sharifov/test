@@ -4,7 +4,7 @@ namespace modules\qaTask\src\entities\qaTask\search;
 
 use common\models\Department;
 use common\models\Employee;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTask\QaTaskCreateType;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
@@ -73,7 +73,7 @@ class CreateDto extends BaseObject
         Assert::isArray($this->ratingList);
 
         if ($this->createdTypeList === null) {
-            $this->createdTypeList = QaTaskCreatedType::getList();
+            $this->createdTypeList = QaTaskCreateType::getList();
         }
         Assert::isArray($this->createdTypeList);
 
