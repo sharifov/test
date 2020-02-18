@@ -39,26 +39,26 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
                 <!--                    <li>-->
                 <!--                        --><?php //=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
                 <!--                    </li>-->
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
-                    <div class="dropdown-menu" role="menu">
-                        <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
-                                'class' => 'dropdown-item text-danger btn-update-product',
-                                'data-product-id' => $product->pr_id
-                            ])*/ ?>
-
-                        <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
-                            'data-url' => \yii\helpers\Url::to([
-                                '/hotel/hotel-quote/search-ajax',
-                                'id' => $hotelProduct->ph_id
-                            ]),
-                            'data-hotel-id' => $hotelProduct->ph_id,
-                            'class' => 'dropdown-item text-success btn-search-hotel-quotes'
-                        ]) ?>
-
-
-                    </div>
-                </li>
+<!--                <li class="dropdown">-->
+<!--                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>-->
+<!--                    <div class="dropdown-menu" role="menu">-->
+<!--                        --><?php ///*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+//                                'class' => 'dropdown-item text-danger btn-update-product',
+//                                'data-product-id' => $product->pr_id
+//                            ])*/ ?>
+<!---->
+<!--                        --><?php //= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
+//                            'data-url' => \yii\helpers\Url::to([
+//                                '/hotel/hotel-quote/search-ajax',
+//                                'id' => $hotelProduct->ph_id
+//                            ]),
+//                            'data-hotel-id' => $hotelProduct->ph_id,
+//                            'class' => 'dropdown-item text-success btn-search-hotel-quotes'
+//                        ]) ?>
+<!---->
+<!---->
+<!--                    </div>-->
+<!--                </li>-->
                 <?php //php endif; ?>
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>

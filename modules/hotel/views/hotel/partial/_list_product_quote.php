@@ -168,7 +168,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             </li>
 
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <h6 class="dropdown-header">Quote Q<?=($model->hq_product_quote_id)?></h6>
                     <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
@@ -233,7 +233,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         ) ?>
                     <?php endif; ?>
 
-                    <?= Html::a('<i class="fa fa-list-alt"></i> API Service Log', null,
+                    <?= Html::a('<i class="fa fa-list"></i> API Service Log', null,
                         [
                             'class' => 'dropdown-item text-secondary btn-product-api-service-log',
                             'data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
@@ -242,7 +242,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         ]
                     )?>
 
-                    <?= Html::a('<i class="fa fa-list-alt"></i> Status log', null, [
+                    <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
                         'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
                         'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $model->hqProductQuote->pq_gid]),
                         'data-gid' => $model->hqProductQuote->pq_gid,
