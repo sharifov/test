@@ -2126,7 +2126,6 @@ class Quote extends \yii\db\ActiveRecord
             'fare_type' => $this->fare_type,
             'employee_name' => $this->employee_name,
             'type_id' => $this->type_id,
-            'lead_source_id' => $this->lead->source_id,
         ];
 
         $pQInformation = [];
