@@ -232,7 +232,10 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
             'leadForm' => $leadForm,
             'is_manager' => $is_manager,
         ])*/ ?>
-        <i class="fa fa-user"></i> <?=$model->pqProduct->prCreatedUser ? Html::encode($model->pqProduct->prCreatedUser->username) : '-'?>,
+        <i class="fa fa-user"></i> <?=$model->pqOwnerUser ? Html::encode($model->pqOwnerUser->username) : '-'?>,
+        <?php if($flightQuote && $flightQuote->fq_created_expert_name): ?>
+            <i class="fa fa-user-secret"></i> <?= Html::encode($flightQuote->fq_created_expert_name)?>,
+        <?php endif; ?>
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->pqProduct->pr_created_dt)) ?>,
         <?php /*<i title="code: <?=\yii\helpers\Html::encode($model->pq_gid)?>">GID: <?=\yii\helpers\Html::encode($model->pq_gid)?></i>*/ ?>
 
@@ -271,7 +274,7 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                             <?php if (!empty($flightQuote->fq_gds_offer_id)): ?>
                                 <i class="fas fa-passport success"></i>
                             <?php endif; ?>
-                            / <i><?= $flightQuote->fq_gds_pcc?></i>
+                            / <i><?= Html::encode($flightQuote->fq_gds_pcc)?></i>
                         </div>
                     </td>
                     <?php /*
@@ -289,6 +292,7 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
 
                             <?php if($model->isApplied() && $model->pqProduct->prLead->final_profit !== null): ?>
                             <td>
+                                Agent Profit:
                                 <button id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
                                         data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData) ?>'>
                                     <?= '$'.FlightQuoteHelper::getFinalProfit($flightQuote) ?>
@@ -296,6 +300,7 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                             </td>
                             <?php else:?>
                             <td>
+                                Agent Profit:
                                 <a id="quote_profit_<?= $model->pq_id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
                                    data-content='<?= FlightQuoteHelper::getEstimationProfitText($priceData) ?>'>
                                     <?= FlightQuoteHelper::getEstimationProfit($priceData) ?>$
@@ -310,29 +315,33 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                             <?php $ticketSegments = FlightQuoteHelper::getTicketSegments($flightQuote); ?>
 
                             <?php if($ticketSegments):?>
-                                <span title="Separate Ticket (<?=count($ticketSegments)?>)">
-                                    <i class="fa fa-ticket fa-border warning"></i>
+                                <span title="Separate Ticket (<?=count($ticketSegments)?>)" data-toggle="tooltip">
+                                    <i class="fa fa-ticket fa-border text-info"> <?=count($ticketSegments)?></i>
                                 </span>
                             <?php endif; ?>
 
-                            <span class="<?=$baggageInfo['hasFreeBaggage'] ? 'success' : 'warning'?>" data-toggle="tooltip"
+                            <span class="<?=$baggageInfo['hasFreeBaggage'] ? ($baggageInfo['freeBaggageInfo'] ? 'success' : 'warning') : ''?>" data-toggle="tooltip"
                                   title="<?= ($baggageInfo['freeBaggageInfo'])?'Free baggage - '.$baggageInfo['freeBaggageInfo']:'No free baggage'?>"
                                   data-original-title="<?= ($baggageInfo['freeBaggageInfo'])?'Free baggage - '.$baggageInfo['freeBaggageInfo']:'No free baggage'?>">
                                     <i class="fa fa-suitcase fa-border"></i><span class="quote__badge-num"></span>
                             </span>
 
-                            <span class="<?=$needRecheck ? 'warning' : ''?>" data-toggle="tooltip"
-                                  title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>"
-                                  data-original-title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>">
-                                  <i class="fas fa-warning fa-border"></i>
-                            </span>
+                            <?php if($needRecheck): ?>
+                                <span class="<?=$needRecheck ? 'warning' : ''?>" data-toggle="tooltip"
+                                      title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>"
+                                      data-original-title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>">
+                                      <i class="fas fa-warning fa-border"></i>
+                                </span>
+                            <?php endif; ?>
 
 
-                            <span class="<?=$hasAirportChange ? 'warning' : 'default'?>" data-toggle="tooltip"
-                                  title="<?= ($hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>"
-                                  data-original-title="<?= ($hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>">
-                                    <i class="fa fa-exchange fa-border"></i>
-                            </span>
+                            <?php if($hasAirportChange): ?>
+                                <span class="<?=$hasAirportChange ? 'warning' : 'default'?>" data-toggle="tooltip"
+                                      title="<?= ($hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>"
+                                      data-original-title="<?= ($hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>">
+                                        <i class="fa fa-exchange fa-border"></i>
+                                </span>
+                            <?php endif; ?>
                         </td>
 
                     </tr>
