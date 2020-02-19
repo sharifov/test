@@ -341,10 +341,10 @@ use yii\widgets\Pjax; ?>
 </script>
 
 <?php
-$callStatusUrl = \yii\helpers\Url::to(['user-call-status/update-status']);
-$clientInfoUrl = \yii\helpers\Url::to(['client/ajax-get-info']);
-$missedCallsUrl = \yii\helpers\Url::to(['call/ajax-missed-calls']);
-$callInfoUrl = \yii\helpers\Url::to(['call/ajax-call-info']);
+$callStatusUrl = \yii\helpers\Url::to(['/user-call-status/update-status']);
+$clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
+$missedCallsUrl = \yii\helpers\Url::to(['/call/ajax-missed-calls']);
+$callInfoUrl = \yii\helpers\Url::to(['/call/ajax-call-info']);
 
 $userId = Yii::$app->user->id;
 
@@ -430,7 +430,7 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 
 //if(Yii::$app->controller->uniqueId)
-/*if(in_array(Yii::$app->controller->action->uniqueId, ['orders/create'])) {
+/*if(in_array(Yii::$app->controller->action->uniqueId, ['/orders/create'])) {
 
 } else {*/
 

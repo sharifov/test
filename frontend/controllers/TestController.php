@@ -182,8 +182,14 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $id = LeadQuery::getLastActiveUserId(325682);
-        VarDumper::dump($id);
+        $skill = 1;
+        $count = UserProfile::find()->select('count(*)')->andWhere([
+            'up_user_id' =>
+                UserConnection::find()->select(['uc_user_id'])->indexBy('uc_user_id')->distinct()
+        ])
+        ->andWhere('up_skill >= ' . $skill)->count();
+
+        VarDumper::dump($count);
         die;
 
         return $this->render('blank');
