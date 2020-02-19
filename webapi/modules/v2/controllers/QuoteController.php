@@ -424,7 +424,7 @@ class QuoteController extends ApiBaseController
             $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;
-            $response['source_code'] = ($model->lead && isset($model->lead->source->cid)) ? $model->lead->source->cid : null;
+            $response['source_code'] = ($model->lead && isset($model->lead->source)) ? $model->lead->source->cid : null;
 
             if(in_array($model->lead->status,[Lead::STATUS_SOLD, Lead::STATUS_BOOKED])){
                 $response['lead_status'] = $model->lead->status == Lead::STATUS_SOLD ? 'sold' : 'booked';
