@@ -10,6 +10,7 @@ use sales\entities\cases\CasesQSearch;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesQSearch */
@@ -32,7 +33,9 @@ $lists = new ListsAccess($user->id);
     <?= Html::encode($this->title) ?>
 </h1>
 
-<div class="cases-index">
+<div class="cases-q-trash">
+
+    <?php Pjax::begin(['id' => 'cases-q-trash-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -144,5 +147,7 @@ $lists = new ListsAccess($user->id);
 
         ],
     ]); ?>
+
+    <?php Pjax::end() ?>
 
 </div>

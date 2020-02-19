@@ -59,6 +59,7 @@ class CasesSearch extends Cases
             ['cs_created_dt', 'string'],
             ['cs_client_id', 'integer'],
             ['cs_project_id', 'integer'],
+            ['cs_source_type_id', 'integer'],
             ['cs_last_action_dt', 'safe'],
 
             ['cssSaleId', 'integer'],
@@ -126,6 +127,7 @@ class CasesSearch extends Cases
             'cs_dep_id' => $this->cs_dep_id,
             'cs_category' => $this->cs_category,
             'cs_status' => $this->cs_status,
+            'cs_source_type_id' => $this->cs_source_type_id,
         ]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
@@ -235,7 +237,8 @@ class CasesSearch extends Cases
             'cs_dep_id' => $this->cs_dep_id,
             'cs_category' => $this->cs_category,
             'cs_status' => $this->cs_status,
-            'cs_client_id' => $this->cs_client_id
+            'cs_client_id' => $this->cs_client_id,
+            'cs_source_type_id' => $this->cs_source_type_id,
         ]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
@@ -328,7 +331,8 @@ class CasesSearch extends Cases
             'cs_created_dt' => 'Created',
             'cssSaleId' => 'Sale ID',
             'cssBookId' => 'Booking ID',
-            'salePNR' => 'Quote PNR'
+            'salePNR' => 'Quote PNR',
+            'cs_source_type_id' => 'Source type',
         ];
     }
 
