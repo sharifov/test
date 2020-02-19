@@ -101,7 +101,10 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
                         ]) ?>
 
                         <div class="dropdown-divider"></div>
-
+                        <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [
+                            'class' => 'dropdown-item text-warning btn-update-product',
+                            'data-product-id' => $product->pr_id,
+                        ]) ?>
                         <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Hotel',
                             null, [
                                 'class' => 'dropdown-item text-danger btn-delete-product',

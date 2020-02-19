@@ -140,11 +140,12 @@ $user = Yii::$app->user->identity;
         <div class="row" style="display: <?=$modelLeadCallExpert->hasErrors() ? 'block' : 'none'?>" id="div-call-expert-form">
 
             <div class="col-sm-3">
-                <?php
-                    $products = ArrayHelper::map($lead->products, 'pr_id', 'pr_name');
-                    $products = ArrayHelper::merge(['' => '---'], $products);
-                ?>
-                <?= $form->field($modelLeadCallExpert, 'lce_product_id')->dropDownList($products) ?>
+                <?= $form->field($modelLeadCallExpert, 'lce_product_id')->dropDownList(
+                    ArrayHelper::merge(
+                        ['' => '---'],
+                        ArrayHelper::map($lead->products, 'pr_id', 'pr_name')
+                    )
+                ) ?>
             </div>
 
             <div class="col-md-12">

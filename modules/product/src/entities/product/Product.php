@@ -249,4 +249,24 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     {
         return (new ProductSerializer($this))->getData();
     }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setName(string $name): self
+    {
+        $this->pr_name = $name;
+        return $this;
+    }
+
+    /**
+     * @param string $description
+     * @return $this
+     */
+    public function setDescription(string $description): self
+    {
+        $this->pr_description = $description;
+        return $this;
+    }
 }
