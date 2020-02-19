@@ -2,6 +2,9 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\Notifications;
 use common\models\Quote;
@@ -313,7 +316,6 @@ class QuoteController extends ApiBaseController
     "uid": "5cb97d1c78486",
     "lead_id": 92322,
     "lead_uid": "5cb8735a502f5",
-    "client_id": 1034,
     "lead_delayed_charge": 0,
     "lead_status": null,
     "booked_quote_uid": null,
@@ -323,6 +325,19 @@ class QuoteController extends ApiBaseController
     "agentDirectLine": "",
     "generalEmail": "info@wowfare.com",
     "generalDirectLine": "+37379731662",
+    "client": {
+        "client_id": 331968,
+        "first_name": "Johann",
+        "middle_name": "Sebastian",
+        "last_name": "Bach",
+        "phones": [
+            "+13152572166"
+        ],
+        "emails": [
+            "example@test.com",
+            "bah@gmail.com"
+        ]
+    },
     "quote": {
         "id": 382366,
         "uid": "5d43e1ec36372",
@@ -420,7 +435,6 @@ class QuoteController extends ApiBaseController
             $response['uid'] = $uid;
             $response['lead_id'] = $model->lead->id;
             $response['lead_uid'] = $model->lead->uid;
-            $response['client_id'] = $model->lead->client_id;
             $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;
@@ -437,6 +451,16 @@ class QuoteController extends ApiBaseController
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);
 
+            /** @var Lead $lead */
+            $lead = $model->lead;
+            $response['client'] = [
+                'client_id' => $lead->client_id,
+                'first_name' => $lead->client->first_name,
+                'middle_name' => $lead->client->middle_name,
+                'last_name' => $lead->client->last_name,
+                'phones' => ClientPhone::getPhoneListByClient($lead->client_id),
+                'emails' => ClientEmail::getEmailListByClient($lead->client_id),
+            ];
 
             $response['quote'] = $model->attributes;
 
