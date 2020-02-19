@@ -46,6 +46,7 @@ class QaTaskEscalateService
 
         $task->escalated();
         $task->changeRating($form->rating);
+        $task->unAssign();
         $this->taskRepository->save($task);
 
         $this->eventDispatcher->dispatch(new QaTaskEscalateEvent(
