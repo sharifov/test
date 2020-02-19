@@ -49,6 +49,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'category')->dropDownList([], ['prompt' => 'Choose a category']) ?>
 
+                <?= $form->field($model, 'sourceTypeId')->dropDownList($model->getSourceTypeList(), ['prompt' => 'Choose a source type']) ?>
+
                 <?= $form->field($model, 'clientPhone')->widget(PhoneInput::class, [
                     'name' => 'phone',
                     'jsOptions' => [

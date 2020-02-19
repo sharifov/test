@@ -37,6 +37,7 @@ use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
+use sales\entities\cases\CasesSourceType;
 use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
@@ -50,6 +51,15 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return QaTaskRating::asFormat($value);
+    }
+
+    public function asCasesSourceType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return CasesSourceType::asFormat($value);
     }
 
     public function asQaTask(?QaTask $task): string

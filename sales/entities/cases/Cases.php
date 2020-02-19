@@ -45,6 +45,7 @@ use Yii;
  * @property string $cs_updated_dt
  * @property string $cs_gid
  * @property string $cs_last_action_dt
+ * @property int|null $cs_source_type_id
  *
  * @property CasesCategory $category
  * @property Department $department
@@ -85,6 +86,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_source_type_id = CasesSourceType::SMS;
         $case->pending(null, 'Created by incoming sms');
         return $case;
     }
@@ -100,6 +102,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_source_type_id = CasesSourceType::SMS;
         $case->pending(null, 'Created by incoming sms');
         return $case;
     }
@@ -115,6 +118,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_source_type_id = CasesSourceType::MAIL;
         $case->pending(null, 'Created by incoming email');
         return $case;
     }
@@ -130,6 +134,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_source_type_id = CasesSourceType::MAIL;
         $case->pending(null, 'Created by incoming email');
         return $case;
     }
@@ -148,6 +153,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_call_id = $callId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = $depId;
+        $case->cs_source_type_id = CasesSourceType::CALL;
         $case->pending(null, 'Created by call');
         return $case;
     }
@@ -160,6 +166,7 @@ class Cases extends ActiveRecord implements Objectable
      * @param string|null $subject
      * @param string|null $description
      * @param int|null $creatorId
+     * @param int|null $sourceTypeId
      * @return Cases
      */
     public static function createByWeb(
@@ -169,7 +176,8 @@ class Cases extends ActiveRecord implements Objectable
         int $depId,
         ?string $subject,
         ?string $description,
-        ?int $creatorId
+        ?int $creatorId,
+        ?int $sourceTypeId
     ): self
     {
         $case = self::create();
@@ -179,6 +187,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_dep_id = $depId;
         $case->cs_subject = $subject;
         $case->cs_description = $description;
+        $case->cs_source_type_id = $sourceTypeId;
         $case->pending($creatorId, 'Created by web');
         return $case;
     }
