@@ -24,66 +24,97 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
     <div class="x_panel">
         <div class="x_title">
             <h2>
-                <i class="fas fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                <?php if ($product->pr_description):?>
-                    <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
-                <?php endif;?>
-                (<?=count($product->productQuotes)?>)
+                <a class="collapse-link">
+                    <i class="fas fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
+                    <?php if ($product->pr_description):?>
+                        <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
+                    <?php endif;?>
+                    <?php if ($product->productQuotes):?>
+                        <sup title="Number of quotes">(<?=count($product->productQuotes)?>)</sup>
+                    <?php endif;?>
+                </a>
             </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?php //php if ($is_manager) : ?>
                     <!--                    <li>-->
                     <!--                        --><?php //=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
                     <!--                    </li>-->
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
-                        <div class="dropdown-menu" role="menu">
-                            <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
-                                'class' => 'dropdown-item text-danger btn-update-product',
-                                'data-product-id' => $product->pr_id
-                            ])*/ ?>
-
-                            <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
-                                'data-url' => \yii\helpers\Url::to([
-                                    '/hotel/hotel-quote/search-ajax',
-                                    'id' => $product->hotel->ph_id
-                                ]),
-                                'data-hotel-id' => $product->hotel->ph_id,
-                                'class' => 'dropdown-item text-success btn-search-hotel-quotes'
-                            ]) ?>
-
-                            <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
-                                'data-url' => \yii\helpers\Url::to([
-                                    '/hotel/hotel/update-ajax',
-                                    'id' => $product->hotel->ph_id
-                                ]),
-                                'data-hotel-id' => $product->hotel->ph_id,
-                                'class' => 'dropdown-item text-warning btn-update-hotel-request'
-                            ]) ?>
+                    <li>
+                        <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
 
 
-                            <?= Html::a('<i class="fa fa-plus"></i> Add Room', null, [
-                                'data-url' => \yii\helpers\Url::to([
-                                    '/hotel/hotel-room/create-ajax',
-                                    'id' => $product->hotel->ph_id,
-                                ]),
-                                'data-hotel-id' => $product->hotel->ph_id,
-                                'class' => 'dropdown-item btn-add-hotel-room'
-                            ]) ?>
+                            <?php if ($product->hotel->ph_destination_code):?>
+                                (<b><?= Html::encode($product->hotel->ph_destination_code) ?></b>)
+                                <?= Html::encode($product->hotel->ph_destination_label) ?>
+                            <?php endif; ?>
 
 
-                            <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete product',
-                                null, [
-                                    'class' => 'dropdown-item text-danger btn-delete-product',
-                                    'data-product-id' => $product->pr_id
-                                ]) ?>
-
-                        </div>
+                        </span>
                     </li>
-                <?php //php endif; ?>
+                    <li>
+                        <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
+                             <?php if ($product->hotel->ph_check_in_date):?>
+                                 <b><?= Yii::$app->formatter->asDate(strtotime($product->hotel->ph_check_in_date)) ?></b>
+                             <?php endif; ?>
+                        </span>
+                    </li>
+                <li>
+                    <div style="margin-right: 50px"></div>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars warning"></i> <span class="text-warning">Actions</span></a>
+                    <div class="dropdown-menu" role="menu">
+                        <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+                            'class' => 'dropdown-item text-danger btn-update-product',
+                            'data-product-id' => $product->pr_id
+                        ])*/ ?>
+
+                        <h6 class="dropdown-header">P<?=$product->pr_id?> - H<?=$product->hotel->ph_id?></h6>
+
+                        <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
+                            'data-url' => \yii\helpers\Url::to([
+                                '/hotel/hotel/update-ajax',
+                                'id' => $product->hotel->ph_id
+                            ]),
+                            'data-hotel-id' => $product->hotel->ph_id,
+                            'class' => 'dropdown-item text-warning btn-update-hotel-request'
+                        ]) ?>
+
+                        <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
+                            'data-url' => \yii\helpers\Url::to([
+                                '/hotel/hotel-quote/search-ajax',
+                                'id' => $product->hotel->ph_id
+                            ]),
+                            'data-hotel-id' => $product->hotel->ph_id,
+                            'class' => 'dropdown-item text-success btn-search-hotel-quotes'
+                        ]) ?>
+
+
+                        <?= Html::a('<i class="fa fa-plus"></i> Add Room', null, [
+                            'data-url' => \yii\helpers\Url::to([
+                                '/hotel/hotel-room/create-ajax',
+                                'id' => $product->hotel->ph_id,
+                            ]),
+                            'data-hotel-id' => $product->hotel->ph_id,
+                            'class' => 'dropdown-item btn-add-hotel-room'
+                        ]) ?>
+
+                        <div class="dropdown-divider"></div>
+
+                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Hotel',
+                            null, [
+                                'class' => 'dropdown-item text-danger btn-delete-product',
+                                'data-product-id' => $product->pr_id
+                            ]) ?>
+
+                    </div>
+                </li>
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>
+                <?php //php endif; ?>
+
             </ul>
             <div class="clearfix"></div>
         </div>
