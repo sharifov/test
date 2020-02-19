@@ -8,12 +8,15 @@
  */
 
 use common\models\LeadCallExpert;
+use modules\product\src\entities\product\Product;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 $user = Yii::$app->user->identity;
 
 ?>
+
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-call-expert', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">
@@ -132,10 +135,18 @@ $user = Yii::$app->user->identity;
         ]);
 
         echo $form->errorSummary($modelLeadCallExpert);
-
         ?>
 
         <div class="row" style="display: <?=$modelLeadCallExpert->hasErrors() ? 'block' : 'none'?>" id="div-call-expert-form">
+
+            <div class="col-sm-3">
+                <?php
+                    $products = ArrayHelper::map($lead->products, 'pr_id', 'pr_name');
+                    $products = ArrayHelper::merge(['' => '---'], $products);
+                ?>
+                <?= $form->field($modelLeadCallExpert, 'lce_product_id')->dropDownList($products) ?>
+            </div>
+
             <div class="col-md-12">
                 <?= $form->field($modelLeadCallExpert, 'lce_request_text')->textarea(['rows' => 8, 'id' => 'lce_request_text'])->label('Request Message') ?>
             </div>

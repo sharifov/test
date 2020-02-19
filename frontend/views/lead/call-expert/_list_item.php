@@ -5,7 +5,22 @@
 
 <div class="row">
     <div class="col-md-12" style="margin-bottom: 4px">
-        Id: <?=$model->lce_id?>, <?=$model->getStatusLabel()?>
+        <?php
+            if ($model->product) {
+                if ($model->product->isFlight()) {
+                    $class = 'fa fa-plane';
+                } elseif ($model->product->isHotel()) {
+                    $class = 'fas fa-hotel';
+                } else {
+                    $class = '';
+                }
+                $product = '<i class="' . $class . '">  ' . $model->product->pr_name . ' ID:' . $model->product->pr_id . '</i>';
+            } else {
+                $product = '';
+            }
+        ?>
+
+        Id: <?=$model->lce_id?>, <?=$model->getStatusLabel()?> &nbsp;<?= $product?>
         <?php
             if($model->lce_response_lead_quotes) {
                 echo ', Quotes: ';
