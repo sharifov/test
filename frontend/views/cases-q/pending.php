@@ -6,6 +6,7 @@ use sales\entities\cases\CasesCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesQSearch */
@@ -19,7 +20,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <i class="fa fa-briefcase"></i> <?= Html::encode($this->title) ?>
 </h1>
 
-<div class="cases-index">
+<div class="cases-q-pending">
+
+    <?php Pjax::begin(['id' => 'cases-q-pending-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -121,5 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         ],
     ]); ?>
+
+    <?php Pjax::end() ?>
 
 </div>

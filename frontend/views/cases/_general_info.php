@@ -71,6 +71,7 @@ use yii\widgets\DetailView;
                             },
                             'format' => 'raw'
                         ],
+                        'cs_source_type_id:casesSourceType',
                         //'cs_subject',
                         //'cs_description:ntext',
                     ],

@@ -10,6 +10,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesQSearch;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesQSearch */
@@ -33,7 +34,9 @@ $lists = new ListsAccess($user->id);
     }
 </style>
 
-<div class="cases-index">
+<div class="cases-q-solved">
+
+    <?php Pjax::begin(['id' => 'cases-q-solved-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
     <?= GridView::widget([
@@ -145,5 +148,7 @@ $lists = new ListsAccess($user->id);
 
         ],
     ]); ?>
+
+    <?php Pjax::end() ?>
 
 </div>

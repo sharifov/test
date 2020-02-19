@@ -8,16 +8,16 @@ class CasesSourceType
 {
     public const CHAT = 1;
     public const CALL = 2;
-    public const MAIL = 3;
-    public const SMS = 4;
+    public const SMS = 3;
+    public const MAIL = 4;
     public const REVIEW = 5;
-    public const OTHER = 6;
+    public const OTHER = 9;
 
     private const LIST = [
         self::CHAT => 'Chat',
         self::CALL => 'Call',
-        self::MAIL => 'Mail',
         self::SMS => 'Sms',
+        self::MAIL => 'Mail',
         self::REVIEW => 'Review',
         self::OTHER => 'Other',
     ];
@@ -25,8 +25,8 @@ class CasesSourceType
     private const CLASS_LIST = [
         self::CHAT => 'primary',
         self::CALL => 'success',
-        self::MAIL => 'danger',
         self::SMS => 'light',
+        self::MAIL => 'danger',
         self::REVIEW => 'warning',
         self::OTHER => 'info',
     ];

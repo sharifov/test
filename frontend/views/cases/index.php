@@ -5,6 +5,7 @@ use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesCategory;
+use sales\yii\grid\cases\CasesSourceTypeColumn;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\entities\cases\Cases;
@@ -27,37 +28,34 @@ if ($user->isAdmin()) {
 } else {
     $userFilter = false;
 }
-?>
-<div class="cases-index">
-    <h1><i class=""></i> <?= Html::encode($this->title) ?></h1>
 
-    <div class="">
-        <div class="x_panel">
-            <div class="x_title">
-                <h2><i class="fa fa-search"></i> Search</h2>
-                <ul class="nav navbar-right panel_toolbox">
-                    <li>
-                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                    </li>
-                </ul>
-                <div class="clearfix"></div>
-            </div>
-            <div class="x_content" style="display: block">
-                <?php
-                if ($user->isAdmin()) {
-                    $searchTpl = '_search';
-                } else {
-                    $searchTpl = '_search_agents';
-                }
-                ?>
-                <?= $this->render($searchTpl, ['model' => $searchModel]); ?>
-            </div>
+$gridId = 'cases-grid-id';
+?>
+<div class="cases-search">
+    <h1><i class=""></i> <?= Html::encode($this->title) ?></h1>
+    <?php Pjax::begin(['id' => 'cases-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+
+    <div class="x_panel">
+        <div class="x_title">
+            <h2><i class="fa fa-search"></i> Search</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content" style="display: block">
+            <?php
+            if ($user->isAdmin()) {
+                $searchTpl = '_search';
+            } else {
+                $searchTpl = '_search_agents';
+            }
+            ?>
+            <?= $this->render($searchTpl, ['model' => $searchModel]); ?>
         </div>
     </div>
-
-    <?php
-        $gridId = 'cases-grid-id';
-    ?>
 
     <div class="card multiple-update-summary" style="margin-bottom: 10px; display: none">
         <div class="card-header">
@@ -67,16 +65,6 @@ if ($user->isAdmin()) {
         <div class="card-body"></div>
     </div>
 
-    <?php
-$js = <<<JS
-$('.close-icon').on('click', function(){    
-    $('.multiple-update-summary').slideUp();
-})
-JS;
-$this->registerJs($js);
-
-    ?>
-
     <?php if ($user->isAdmin() || $user->isExSuper() || $user->isSupSuper()): ?>
         <?= MultipleUpdateButtonWidget::widget([
             'modalId' => 'modal-df',
@@ -85,7 +73,7 @@ $this->registerJs($js);
         ]) ?>
     <?php endif;?>
 
-    <?php Pjax::begin(['id' => 'cases-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+
 
         <?= GridView::widget([
         'id' => $gridId,
@@ -146,6 +134,10 @@ $this->registerJs($js);
                     'class' => 'text-center'
                 ]
             ],
+            [
+                'class' => CasesSourceTypeColumn::class,
+                'attribute' => 'cs_source_type_id',
+            ],
             'cs_subject',
             [
                 'attribute' => 'cs_user_id',
@@ -195,3 +187,13 @@ $this->registerJs($js);
 
     <?php Pjax::end() ?>
 </div>
+
+<?php
+$js = <<<JS
+$('.close-icon').on('click', function(){    
+    $('.multiple-update-summary').slideUp();
+})
+JS;
+$this->registerJs($js);
+
+?>

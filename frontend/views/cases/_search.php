@@ -3,6 +3,7 @@
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -16,6 +17,9 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
+        'options' => [
+            'data-pjax' => 1
+        ],
     ]); ?>
     <div class="row">
         <div class="col-md-12">
@@ -54,6 +58,9 @@ use yii\widgets\ActiveForm;
                         ]
                     ]);?>
                 </div>
+                <div class="col-md-2">
+                    <?= $form->field($model, 'cs_source_type_id')->dropDownList(CasesSourceType::getList(), ['prompt' => '']) ?>
+                </div>
             </div>
         </div>
     </div>
@@ -87,12 +94,10 @@ use yii\widgets\ActiveForm;
         </div>
     </div>
 
-</div>
+    <div class="form-group text-center">
+        <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
+    </div>
 
-<div class="form-group text-center">
-    <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
-    <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
-</div>
-
-<?php ActiveForm::end(); ?>
+    <?php ActiveForm::end(); ?>
 </div>
