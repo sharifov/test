@@ -3,19 +3,13 @@
 use yii\db\Migration;
 
 /**
- * Class m200219_072317_add_column_poduct_to_lead_call_expert
+ * Class m200219_072317_add_column_product_id_to_lead_call_expert
  */
-class m200219_072317_add_column_poduct_to_lead_call_expert extends Migration
+class m200219_072317_add_column_product_id_to_lead_call_expert extends Migration
 {
-    /**
-     * @var string
-     */
-    public $tableName = 'lead_call_expert';
-    /**
-     * @var string
-     */
-    public $columnName = 'lce_product_id';
 
+    public $tableName = 'lead_call_expert';
+    public $columnName = 'lce_product_id';
     public $table;
 
     public function init()
