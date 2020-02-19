@@ -63,7 +63,7 @@ class QaTaskDecideLeadReAssignService
 
             EmployeeAccess::leadAccess($lead, $assignUser);
 
-            $lead->processing($assignUser->id, $form->getUserId());
+            $lead->processing($assignUser->id, $form->getUserId(), 'Re-assign (QA)');
             $this->leadRepository->save($lead);
 
         });
