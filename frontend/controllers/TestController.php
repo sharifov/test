@@ -37,6 +37,7 @@ use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
+use modules\lead\src\entities\lead\LeadQuery;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteClasses;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
@@ -181,6 +182,10 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $id = LeadQuery::getLastActiveUserId(325682);
+        VarDumper::dump($id);
+        die;
+
         return $this->render('blank');
     }
 
