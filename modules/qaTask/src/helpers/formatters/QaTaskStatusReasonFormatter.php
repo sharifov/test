@@ -2,17 +2,17 @@
 
 namespace modules\qaTask\src\helpers\formatters;
 
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReasonQuery;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 
 class QaTaskStatusReasonFormatter
 {
     public static function formatListByFullDescription(): array
     {
         $list = [];
-        foreach (QaTaskStatusReasonQuery::getListWithFullDescription() as $key => $item) {
-            $list[$key] = QaObjectType::getName($item['tsr_object_type_id']) . ' : ' . QaTaskStatus::getName($item['tsr_status_id']) . ' : '  . $item['tsr_name'];
+        foreach (QaTaskActionReasonQuery::getListWithFullDescription() as $key => $item) {
+            $list[$key] = QaTaskObjectType::getName($item['tar_object_type_id']) . ' : ' . QaTaskStatus::getName($item['tar_action_id']) . ' : '  . $item['tar_name'];
         }
         return $list;
     }

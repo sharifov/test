@@ -1,12 +1,13 @@
 <?php
 
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
-use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
+use modules\qaTask\src\grid\columns\QaTaskObjectTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskCreatedTypeColumn;
+use modules\qaTask\src\grid\columns\QaTaskRatingColumn;
 use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\department\DepartmentColumn;
+use sales\yii\grid\project\ProjectColumn;
 use sales\yii\grid\UserColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -37,45 +38,62 @@ $this->params['breadcrumbs'][] = $this->title;
             't_id',
             't_gid',
             [
-                'class' => QaObjectTypeColumn::class,
+                'class' => ProjectColumn::class,
+                'attribute' => 't_project_id',
+                'relation' => 'project',
+                'filter' => $searchModel->getProjectList(),
+            ],
+            [
+                'class' => QaTaskObjectTypeColumn::class,
                 'attribute' => 't_object_type_id',
+                'filter' => $searchModel->getObjectTypeList(),
             ],
             't_object_id',
             [
                 'attribute' => 't_category_id',
-                'value' => static function(QaTask $task) {
+                'value' => static function (QaTask $task) {
                     return $task->t_category_id ? $task->category->tc_name : null;
                 },
-                'filter' => QaTaskCategoryQuery::getList(),
+                'filter' => $searchModel->getCategoryList(),
             ],
             [
                 'class' => QaTaskStatusColumn::class,
                 'attribute' => 't_status_id',
+                'filter' => $searchModel->getStatusList(),
             ],
-            't_rating',
+            [
+                'class' => QaTaskRatingColumn::class,
+                'attribute' => 't_rating',
+                'filter' => $searchModel->getRatingList(),
+            ],
             [
                 'class' => QaTaskCreatedTypeColumn::class,
                 'attribute' => 't_create_type_id',
+                'filter' => $searchModel->getCreatedTypeList(),
             ],
             [
                 'class' => DepartmentColumn::class,
                 'attribute' => 't_department_id',
                 'relation' => 'department',
+                'filter' => $searchModel->getDepartmentList(),
             ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 't_assigned_user_id',
                 'relation' => 'assignedUser',
+                'filter' => $searchModel->getUserList(),
             ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 't_created_user_id',
                 'relation' => 'createdUser',
+                'filter' => $searchModel->getUserList(),
             ],
             [
                 'class' => UserColumn::class,
                 'attribute' => 't_updated_user_id',
                 'relation' => 'updatedUser',
+                'filter' => $searchModel->getUserList(),
             ],
             [
                 'class' => DateTimeColumn::class,

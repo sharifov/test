@@ -2,10 +2,11 @@
 
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
 use modules\qaTask\src\entities\qaTaskStatusLog\search\QaTaskStatusLogCrudSearch;
-use modules\qaTask\src\entities\qaTaskStatusReason\QaTaskStatusReasonQuery;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\grid\columns\QaTaskColumn;
-use modules\qaTask\src\grid\columns\QaTaskStatusActionColumn;
+use modules\qaTask\src\grid\columns\QaTaskActionColumn;
 use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
+use modules\qaTask\src\helpers\formatters\QaTaskStatusReasonFormatter;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
 use sales\yii\grid\UserColumn;
@@ -66,13 +67,13 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'tsl_reason_id',
                 'value' => static function (QaTaskStatusLog $log) {
-                    return $log->tsl_reason_id ? $log->reason->tsr_name : null;
+                    return $log->tsl_reason_id ? $log->reason->tar_name : null;
                 },
-                'filter' => QaTaskStatusReasonQuery::getList(),
+                'filter' => QaTaskStatusReasonFormatter::formatListByFullDescription(),
             ],
             'tsl_description',
             [
-                'class' => QaTaskStatusActionColumn::class,
+                'class' => QaTaskActionColumn::class,
                 'attribute' => 'tsl_action_id',
             ],
             [

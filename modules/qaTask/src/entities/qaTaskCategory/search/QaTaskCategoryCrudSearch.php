@@ -3,7 +3,7 @@
 namespace modules\qaTask\src\entities\qaTaskCategory\search;
 
 use common\models\Employee;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
@@ -18,7 +18,7 @@ class QaTaskCategoryCrudSearch extends QaTaskCategory
             ['tc_key', 'string', 'max' => 30],
 
             ['tc_object_type_id', 'integer'],
-            ['tc_object_type_id', 'in','range' => array_keys(QaObjectType::getList())],
+            ['tc_object_type_id', 'in','range' => array_keys(QaTaskObjectType::getList())],
 
             ['tc_name', 'string', 'max' => 30],
 

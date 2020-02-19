@@ -2,12 +2,13 @@
 
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
 use modules\qaTask\src\entities\qaTaskStatusLog\search\QaTaskStatusLogSearch;
-use modules\qaTask\src\grid\columns\QaTaskStatusActionColumn;
+use modules\qaTask\src\grid\columns\QaTaskActionColumn;
 use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\DurationColumn;
 use sales\yii\grid\UserColumn;
 use yii\grid\GridView;
+use yii\grid\SerialColumn;
 use yii\widgets\Pjax;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -23,10 +24,7 @@ use yii\widgets\Pjax;
         'dataProvider' => $dataProvider,
         'filterModel' => false, //$searchModel,
         'columns' => [
-            [
-                'attribute' => 'tsl_id',
-                'options' => ['style' => 'width:80px'],
-            ],
+            ['class' => SerialColumn::class],
             [
                 'class' => QaTaskStatusColumn::class,
                 'attribute' => 'tsl_start_status_id',
@@ -52,7 +50,7 @@ use yii\widgets\Pjax;
             [
                 'attribute' => 'tsl_reason_id',
                 'value' => static function (QaTaskStatusLog $log) {
-                    return $log->tsl_reason_id ? $log->reason->tsr_name : null;
+                    return $log->tsl_reason_id ? $log->reason->tar_name : null;
                 }
             ],
             [
@@ -61,7 +59,7 @@ use yii\widgets\Pjax;
                 'options' => ['style' => 'width:280px'],
             ],
             [
-                'class' => QaTaskStatusActionColumn::class,
+                'class' => QaTaskActionColumn::class,
                 'attribute' => 'tsl_action_id',
             ],
             [

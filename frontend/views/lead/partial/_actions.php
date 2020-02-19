@@ -7,8 +7,14 @@
 use common\models\Employee;
 use common\models\User;
 use frontend\models\LeadForm;
+
 use sales\access\EmployeeProductAccess;
 use sales\access\ListsAccess;
+
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
+use modules\qaTask\src\widgets\objectMenu\QaTaskObjectMenuWidget;
+use sales\auth\Auth;
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
@@ -290,6 +296,13 @@ if($project){
         <?php endif;?>
     </div>
 
+    <?php endif; ?>
+
+    <?php if (Auth::can('lead/view_QA_Tasks')): ?>
+        <?= QaTaskObjectMenuWidget::widget([
+                'objectType' => QaTaskObjectType::LEAD,
+                'objectId' => $leadModel->id,
+        ]) ?>
     <?php endif; ?>
 
 </div>

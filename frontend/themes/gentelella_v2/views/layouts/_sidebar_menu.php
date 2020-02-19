@@ -326,8 +326,9 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Tasks', 'url' => ['/qa-task/qa-task-crud/index']],
                 ['label' => 'Categories', 'url' => ['/qa-task/qa-task-category-crud/index']],
                 ['label' => 'Statuses', 'url' => ['/qa-task/qa-task-status-crud/index']],
-                ['label' => 'Status Reasons', 'url' => ['/qa-task/qa-task-status-reason-crud/index']],
+                ['label' => 'Action Reasons', 'url' => ['/qa-task/qa-task-action-reason-crud/index']],
                 ['label' => 'Status log', 'url' => ['/qa-task/qa-task-status-log-crud/index']],
+                ['label' => 'Rules', 'url' => ['/qa-task/qa-task-rules/index']],
             ]
         ];
 

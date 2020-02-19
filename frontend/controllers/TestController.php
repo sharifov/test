@@ -43,6 +43,16 @@ use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\services\ProductQuoteStatusLogService;
+use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
+use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
+use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateForm;
+use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateService;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
+use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\EmployeeAccessHelper;
@@ -50,6 +60,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\access\EmployeeSourceAccess;
+use sales\access\ListsAccess;
 use sales\auth\Auth;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
@@ -170,13 +181,7 @@ class TestController extends FController
 
     public function actionTest()
     {
-
-        $service = Yii::createObject(ProductQuoteCloneService::class);
-        $service->clone(9, 33, 295, 294);
-
-        die;
         return $this->render('blank');
-
     }
 
     private function getPathForTable($actions, $controller, &$batchTmpTableItem, &$batchTmpTableItemChild, $role)

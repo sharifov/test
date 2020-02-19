@@ -2,17 +2,13 @@
 
 namespace modules\qaTask\src\entities\qaTask\search;
 
-use common\models\Department;
-use common\models\Employee;
-use modules\qaTask\src\entities\QaObjectType;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
-use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
-use modules\qaTask\src\entities\qaTask\QaTask;
 
-class QaTaskCrudSearch extends QaTask
+/**
+ * Class QaTaskCrudSearch
+ */
+class QaTaskCrudSearch extends QaTaskSearch
 {
     public function rules(): array
     {
@@ -21,24 +17,28 @@ class QaTaskCrudSearch extends QaTask
 
             ['t_gid', 'string', 'max' => 32],
 
+            ['t_project_id', 'integer'],
+            ['t_project_id', 'in', 'range' => array_keys($this->getProjectList())],
+
             ['t_object_type_id', 'integer'],
-            ['t_object_type_id', 'in', 'range' => array_keys(QaObjectType::getList())],
+            ['t_object_type_id', 'in', 'range' => array_keys($this->getObjectTypeList())],
 
             ['t_object_id', 'integer'],
 
             ['t_status_id', 'integer'],
-            ['t_status_id', 'in', 'range' => array_keys(QaTaskStatus::getList())],
+            ['t_status_id', 'in', 'range' => array_keys($this->getStatusList())],
 
             ['t_category_id', 'integer'],
-            ['t_category_id', 'exist', 'skipOnError' => true, 'targetClass' => QaTaskCategory::class, 'targetAttribute' => ['t_category_id' => 'tc_id']],
+            ['t_category_id', 'in', 'range' => array_keys($this->getCategoryList())],
 
-            ['t_rating', 'integer', 'min' => 0, 'max' => 9],
+            ['t_rating', 'integer'],
+            ['t_rating', 'in', 'range' => array_keys($this->getRatingList())],
 
             ['t_create_type_id', 'integer'],
-            ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreatedType::getList())],
+            ['t_create_type_id', 'in', 'range' => array_keys($this->getCreatedTypeList())],
 
             ['t_department_id', 'integer'],
-            ['t_department_id', 'in', 'range' => array_keys(Department::DEPARTMENT_LIST)],
+            ['t_department_id', 'in', 'range' => array_keys($this->getDepartmentList())],
 
             ['t_description', 'string'],
 
@@ -47,22 +47,25 @@ class QaTaskCrudSearch extends QaTask
             ['t_updated_dt', 'date', 'format' => 'php:Y-m-d'],
 
             ['t_created_user_id', 'integer'],
-            ['t_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['t_created_user_id' => 'id']],
+            ['t_created_user_id', 'in', 'range' => array_keys($this->getUserList())],
 
             ['t_updated_user_id', 'integer'],
-            ['t_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['t_updated_user_id' => 'id']],
+            ['t_updated_user_id', 'in', 'range' => array_keys($this->getUserList())],
 
             ['t_assigned_user_id', 'integer'],
-            ['t_assigned_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['t_assigned_user_id' => 'id']],
+            ['t_assigned_user_id', 'in', 'range' => array_keys($this->getUserList())],
         ];
     }
 
-    public function search($params, Employee $user): ActiveDataProvider
+    public function search($params): ActiveDataProvider
     {
-        $query = QaTask::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category']);
+        $query = static::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> [
+                'defaultOrder' => ['t_id' => SORT_DESC]
+            ],
         ]);
 
         $this->load($params);
@@ -74,20 +77,21 @@ class QaTaskCrudSearch extends QaTask
         }
 
         if ($this->t_created_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $this->user->timezone);
         }
 
         if ($this->t_updated_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $this->user->timezone);
         }
 
         if ($this->t_deadline_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $this->user->timezone);
         }
 
         // grid filtering conditions
         $query->andFilterWhere([
             't_id' => $this->t_id,
+            't_project_id' => $this->t_project_id,
             't_object_type_id' => $this->t_object_type_id,
             't_object_id' => $this->t_object_id,
             't_category_id' => $this->t_category_id,

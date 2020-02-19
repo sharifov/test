@@ -4,14 +4,16 @@ namespace modules\qaTask\src\entities\qaTask;
 
 use common\models\Department;
 use common\models\Employee;
-use modules\qaTask\src\entities\QaObjectType;
+use common\models\Project;
 use modules\qaTask\src\entities\qaTask\events\QaTaskAssignEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskCanceledEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskClosedEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskCreatedEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusCanceledEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskChangeRatingEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusClosedEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskDeadlineEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskEscalatedEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskPendingEvent;
-use modules\qaTask\src\entities\qaTask\events\QaTaskProcessingEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusEscalatedEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusPendingEvent;
+use modules\qaTask\src\entities\qaTask\events\QaTaskStatusProcessingEvent;
 use modules\qaTask\src\entities\qaTask\events\QaTaskUnAssignEvent;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
@@ -27,6 +29,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $t_id
  * @property string $t_gid
+ * @property int|null $t_project_id
  * @property int $t_object_type_id
  * @property int $t_object_id
  * @property int|null $t_category_id
@@ -42,6 +45,7 @@ use yii\db\ActiveRecord;
  * @property string|null $t_created_dt
  * @property string|null $t_updated_dt
  *
+ * @property Project $project
  * @property QaTaskCategory $category
  * @property Employee $assignedUser
  * @property Employee $createdUser
@@ -53,11 +57,40 @@ class QaTask extends \yii\db\ActiveRecord
 {
     use EventTrait;
 
+    public static function create(
+        int $objectType,
+        int $objectId,
+        ?int $projectId,
+        ?int $departmentId,
+        int $categoryId,
+        int $createType,
+        ?string $description
+    ): self
+    {
+        $task = new static();
+        $task->t_gid = self::generateGid();
+        $task->t_object_type_id = $objectType;
+        $task->t_object_id = $objectId;
+        $task->t_project_id = $projectId;
+        $task->t_department_id = $departmentId;
+        $task->t_category_id = $categoryId;
+        $task->t_create_type_id = $createType;
+        $task->t_status_id = QaTaskStatus::PENDING;
+        $task->t_description = $description;
+        $task->recordEvent(new QaTaskCreatedEvent($task));
+        return $task;
+    }
+
+    public static function generateGid(): string
+    {
+        return md5(uniqid('', true));
+    }
+
     public function pending(): void
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::PENDING);
         $this->t_status_id = QaTaskStatus::PENDING;
-        $this->recordEvent(new QaTaskPendingEvent($this));
+        $this->recordEvent(new QaTaskStatusPendingEvent($this));
     }
 
     public function isPending(): bool
@@ -69,7 +102,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::PROCESSING);
         $this->t_status_id = QaTaskStatus::PROCESSING;
-        $this->recordEvent(new QaTaskProcessingEvent($this));
+        $this->recordEvent(new QaTaskStatusProcessingEvent($this));
     }
 
     public function isProcessing(): bool
@@ -81,7 +114,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::ESCALATED);
         $this->t_status_id = QaTaskStatus::ESCALATED;
-        $this->recordEvent(new QaTaskEscalatedEvent($this));
+        $this->recordEvent(new QaTaskStatusEscalatedEvent($this));
     }
 
     public function isEscalated(): bool
@@ -93,7 +126,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::CLOSED);
         $this->t_status_id = QaTaskStatus::CLOSED;
-        $this->recordEvent(new QaTaskClosedEvent($this));
+        $this->recordEvent(new QaTaskStatusClosedEvent($this));
     }
 
     public function isClosed(): bool
@@ -105,7 +138,7 @@ class QaTask extends \yii\db\ActiveRecord
     {
         QaTaskStatus::guard($this->t_status_id, QaTaskStatus::CANCELED);
         $this->t_status_id = QaTaskStatus::CANCELED;
-        $this->recordEvent(new QaTaskCanceledEvent($this));
+        $this->recordEvent(new QaTaskStatusCanceledEvent($this));
     }
 
     public function isCanceled(): bool
@@ -150,6 +183,20 @@ class QaTask extends \yii\db\ActiveRecord
         $this->recordEvent(new QaTaskDeadlineEvent($this, $date));
     }
 
+    public function changeRating(int $rating): void
+    {
+        QaTaskRating::guard($rating);
+        if ($this->t_rating !== $rating) {
+            $this->recordEvent(new QaTaskChangeRatingEvent($this, $rating));
+        }
+        $this->t_rating = $rating;
+    }
+
+    public function isEqualProject(array $projects): bool
+    {
+        return in_array($this->t_project_id, $projects, false);
+    }
+
     public static function tableName(): string
     {
         return '{{%qa_task}}';
@@ -162,10 +209,15 @@ class QaTask extends \yii\db\ActiveRecord
             ['t_gid', 'string', 'max' => 32],
             ['t_gid', 'unique'],
 
+            ['t_project_id', 'required'],
+            ['t_project_id', 'integer'],
+            ['t_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['t_project_id', 'in', 'range' => array_keys(Project::getList())],
+
             ['t_object_type_id', 'required'],
             ['t_object_type_id', 'integer'],
             ['t_object_type_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['t_object_type_id', 'in', 'range' => array_keys(QaObjectType::getList())],
+            ['t_object_type_id', 'in', 'range' => array_keys(QaTaskObjectType::getList())],
 
             ['t_object_id', 'required'],
             ['t_object_id', 'integer'],
@@ -182,10 +234,12 @@ class QaTask extends \yii\db\ActiveRecord
                 }
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['t_rating', 'integer', 'min' => 0, 'max' => 9],
+            ['t_rating', 'integer'],
+            ['t_rating', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['t_rating', 'in', 'range' => array_keys(QaTaskRating::getList())],
 
             ['t_create_type_id', 'integer'],
-            ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreatedType::getList())],
+            ['t_create_type_id', 'in', 'range' => array_keys(QaTaskCreateType::getList())],
 
             ['t_department_id', 'integer'],
             ['t_department_id', 'in', 'range' => array_keys(Department::DEPARTMENT_LIST)],
@@ -223,6 +277,8 @@ class QaTask extends \yii\db\ActiveRecord
         return [
             't_id' => 'ID',
             't_gid' => 'Gid',
+            't_project_id' => 'Project',
+            'project' => 'Project',
             't_object_type_id' => 'Object Type',
             't_object_id' => 'Object ID',
             't_category_id' => 'Category',
@@ -242,6 +298,11 @@ class QaTask extends \yii\db\ActiveRecord
             't_updated_dt' => 'Updated Dt',
             'category.tc_name' => 'Category'
         ];
+    }
+
+    public function getProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 't_project_id']);
     }
 
     public function getAssignedUser(): ActiveQuery

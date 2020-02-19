@@ -22,7 +22,7 @@
         if($model):
             foreach ($model as $n => $item): ?>
             <li>
-                <a href="<?=\yii\helpers\Url::to(['notifications/view2', 'id' => $item->n_id])?>" data-pjax="0">
+                <a href="<?=\yii\helpers\Url::to(['/notifications/view2', 'id' => $item->n_id])?>" data-pjax="0">
                     <span class="glyphicon glyphicon-info-sign"> <?php //remove-sign, ok-sign, question-sign ?>
                     </span>
                     <span>
@@ -97,7 +97,7 @@
         <?php endif;?>
         <li>
             <div class="text-center">
-                <?=\yii\helpers\Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['notifications/list'], ['data-pjax' => 0])?>
+                <?=\yii\helpers\Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['/notifications/list'], ['data-pjax' => 0])?>
             </div>
 
             <?php
