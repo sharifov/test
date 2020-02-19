@@ -30,11 +30,12 @@ use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTask\QaTaskCreateType;
+use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
 use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use sales\model\user\entity\payroll\UserPayroll;
@@ -42,6 +43,15 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asQaTaskRating($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskRating::asFormat($value);
+    }
+
     public function asQaTask(?QaTask $task): string
     {
         if ($task === null) {
@@ -51,13 +61,13 @@ class Formatter extends \yii\i18n\Formatter
         return QaTaskFormatter::asQaTask($task);
     }
 
-    public function asQaTaskStatusAction($value): string
+    public function asQaTaskAction($value): string
     {
         if ($value === null) {
             return $this->nullDisplay;
         }
 
-        return QaTaskStatusAction::asFormat($value);
+        return QaTaskActions::asFormat($value);
     }
 
     public function asQaTaskStatus($value): string
@@ -75,16 +85,16 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return QaTaskCreatedType::asFormat($value);
+        return QaTaskCreateType::asFormat($value);
     }
 
-    public function asQaObjectType($value): string
+    public function asQaTaskObjectType($value): string
     {
         if ($value === null) {
             return $this->nullDisplay;
         }
 
-        return QaObjectType::asFormat($value);
+        return QaTaskObjectType::asFormat($value);
     }
 
     public function asOfferSendLogType($value): string
@@ -455,7 +465,7 @@ class Formatter extends \yii\i18n\Formatter
             throw new \InvalidArgumentException('value must be Project|int|string|null');
         }
 
-        return Html::tag('span', Html::encode($name), ['class' => 'badge']);
+        return Html::tag('span', Html::encode($name));
     }
 
     /**

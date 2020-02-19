@@ -16,4 +16,5 @@ echo \frontend\widgets\multipleUpdate\lead\MultipleUpdateWidget::widget([
     'ids' => $ids,
     'pjaxId' => $pjaxId,
     'user' => $user,
+    'script' => "$('.multiple-update-summary').slideDown();",
 ]);

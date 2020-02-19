@@ -22,7 +22,7 @@ class QaTaskStatusLogService
 
     public function log(CreateDto $dto): void
     {
-        if ($previous = $this->repository->getPrevious($dto->taskId)) {
+        if ($previous = $this->repository->getPrevious($dto->getTaskId())) {
             $previous->end();
             $this->repository->save($previous);
         }

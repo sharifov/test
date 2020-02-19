@@ -218,11 +218,11 @@ class MultipleUpdateService
             return '';
         }
 
-        $out = '<div class="card" style="margin-bottom: 10px" ><div class="card-body"><ul>';
+        $out = '<ul>';
         foreach ($reports as $report) {
             $out .= Html::tag('li', Html::tag('span', $report, ['style' => 'color: #28a048']));
         }
-        return $out . '</ul></div></div>';
+        return $out . '</ul>';
     }
 
 

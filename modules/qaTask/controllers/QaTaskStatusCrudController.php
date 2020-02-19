@@ -7,6 +7,7 @@ use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\entities\qaTaskStatus\search\QaTaskStatusCrudSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -18,7 +19,7 @@ class QaTaskStatusCrudController extends FController
 {
     public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -26,6 +27,7 @@ class QaTaskStatusCrudController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

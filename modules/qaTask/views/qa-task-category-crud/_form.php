@@ -1,6 +1,6 @@
 <?php
 
-use modules\qaTask\src\entities\QaObjectType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use sales\access\ListsAccess;
 use sales\auth\Auth;
 use yii\helpers\Html;
@@ -22,7 +22,7 @@ $list = new ListsAccess(Auth::id());
 
         <?= $form->field($model, 'tc_key')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'tc_object_type_id')->dropDownList(QaObjectType::getList(), ['prompt' => 'Select Object Type']) ?>
+        <?= $form->field($model, 'tc_object_type_id')->dropDownList(QaTaskObjectType::getList(), ['prompt' => 'Select Object Type']) ?>
 
         <?= $form->field($model, 'tc_name')->textInput(['maxlength' => true]) ?>
 

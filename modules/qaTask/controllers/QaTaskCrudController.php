@@ -2,11 +2,15 @@
 
 namespace modules\qaTask\controllers;
 
+use common\models\Project;
 use frontend\controllers\FController;
+use modules\qaTask\src\entities\qaTask\search\CreateDto;
+use sales\access\ListsAccess;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\search\QaTaskCrudSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -21,7 +25,7 @@ class QaTaskCrudController extends FController
      */
     public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -29,6 +33,7 @@ class QaTaskCrudController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -36,8 +41,12 @@ class QaTaskCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new QaTaskCrudSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $searchModel = QaTaskCrudSearch::createSearch(new CreateDto([
+            'user' => Auth::user(),
+            'projectList' => Project::getList(),
+            'userList' => (new ListsAccess(Auth::id()))->getEmployees(),
+        ]));
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

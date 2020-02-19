@@ -1,6 +1,6 @@
 <?php
 
-use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
+use modules\qaTask\src\grid\columns\QaTaskObjectTypeColumn;
 use sales\yii\grid\BooleanColumn;
 use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\UserColumn;
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'tc_id',
             'tc_key',
             [
-                'class' => QaObjectTypeColumn::class,
+                'class' => QaTaskObjectTypeColumn::class,
                 'attribute' => 'tc_object_type_id',
             ],
             'tc_name',

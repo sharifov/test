@@ -1,7 +1,7 @@
 <?php
 
 namespace modules\qaTask\src\grid\columns;
-use modules\qaTask\src\entities\qaTask\QaTaskCreatedType;
+use modules\qaTask\src\entities\qaTask\QaTaskCreateType;
 use yii\grid\DataColumn;
 
 /**
@@ -22,7 +22,7 @@ class QaTaskCreatedTypeColumn extends DataColumn
         parent::init();
 
         if ($this->filter === null) {
-            $this->filter = QaTaskCreatedType::getList();
+            $this->filter = QaTaskCreateType::getList();
         }
     }
 }

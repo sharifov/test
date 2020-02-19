@@ -81,6 +81,11 @@ class QaTaskStatus extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function isExist(int $value): bool
+    {
+        return isset(self::LIST[$value]);
+    }
+
     public static function guard(?int $startStatus, int $endStatus): void
     {
         self::guardTransferFrom($startStatus);

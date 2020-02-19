@@ -3,6 +3,7 @@
 namespace modules\qaTask\src\grid\columns;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
+use sales\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\grid\ActionColumn;
 
@@ -18,12 +19,12 @@ class QaTaskQueueActionColumn extends ActionColumn
         $customConfig['template'] = '{viewTask} {viewObject}' . $template;
 
         $customConfig['visibleButtons'] = array_merge($visibleButtons, [
-//            'viewTask' => static function ($model, $key, $index) {
-//                return true;
-//            },
-//            'viewObject' => static function ($model, $key, $index) {
-//                return true;
-//            },
+            'viewTask' => static function ($model, $key, $index) {
+                return Auth::can('/qa-task/qa-task/view');
+            },
+            'viewObject' => static function ($model, $key, $index) {
+                return Auth::can('/qa-task/qa-task/view-object');
+            },
         ]);
 
         $customConfig['buttons'] = array_merge($buttons, [

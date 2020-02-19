@@ -1,7 +1,7 @@
 <?php
 
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatusAction;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
 use modules\qaTask\src\helpers\formatters\QaTaskStatusReasonFormatter;
 use sales\access\ListsAccess;
@@ -40,7 +40,7 @@ $list = new ListsAccess(Auth::id());
 
         <?= $form->field($model, 'tsl_description')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'tsl_action_id')->dropDownList(QaTaskStatusAction::getList(), ['prompt' => 'Select action']) ?>
+        <?= $form->field($model, 'tsl_action_id')->dropDownList(QaTaskActions::getList(), ['prompt' => 'Select action']) ?>
 
         <?= $form->field($model, 'tsl_assigned_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
 

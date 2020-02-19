@@ -18,9 +18,9 @@ class QaTaskCodeException
     public const QA_TASK_STATUS_SAVE = Module::QA_TASK . 301;
     public const QA_TASK_STATUS_REMOVE = Module::QA_TASK . 302;
 
-    public const QA_TASK_STATUS_REASON_NOT_FOUND = Module::QA_TASK . 400;
-    public const QA_TASK_STATUS_REASON_SAVE = Module::QA_TASK . 401;
-    public const QA_TASK_STATUS_REASON_REMOVE = Module::QA_TASK . 402;
+    public const QA_TASK_ACTION_REASON_NOT_FOUND = Module::QA_TASK . 400;
+    public const QA_TASK_ACTION_REASON_SAVE = Module::QA_TASK . 401;
+    public const QA_TASK_ACTION_REASON_REMOVE = Module::QA_TASK . 402;
 
     public const QA_TASK_STATUS_LOG_SAVE = Module::QA_TASK . 500;
     public const QA_TASK_STATUS_LOG_REMOVE = Module::QA_TASK . 501;

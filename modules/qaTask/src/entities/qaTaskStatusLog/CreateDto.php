@@ -2,10 +2,12 @@
 
 namespace modules\qaTask\src\entities\qaTaskStatusLog;
 
+use modules\qaTask\src\entities\qaTask\QaTask;
+
 /**
  * Class CreateDto
  *
- * @property $taskId
+ * @property QaTask $task
  * @property $startStatusId
  * @property $endStatusId
  * @property $reasonId
@@ -16,7 +18,7 @@ namespace modules\qaTask\src\entities\qaTaskStatusLog;
  */
 class CreateDto
 {
-    public $taskId;
+    public $task;
     public $startStatusId;
     public $endStatusId;
     public $reasonId;
@@ -26,7 +28,7 @@ class CreateDto
     public $creatorId;
 
     public function __construct(
-        int $taskId,
+        QaTask $task,
         ?int $startStatusId,
         int $endStatusId,
         ?int $reasonId,
@@ -36,7 +38,7 @@ class CreateDto
         ?int $creatorId
     )
     {
-        $this->taskId = $taskId;
+        $this->task = $task;
         $this->startStatusId = $startStatusId;
         $this->endStatusId = $endStatusId;
         $this->reasonId = $reasonId;
@@ -44,5 +46,10 @@ class CreateDto
         $this->actionId = $actionId;
         $this->assignedId = $assignedId;
         $this->creatorId = $creatorId;
+    }
+
+    public function getTaskId(): int
+    {
+        return $this->task->t_id;
     }
 }

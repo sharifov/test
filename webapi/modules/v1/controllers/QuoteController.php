@@ -11,6 +11,7 @@ use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
+use modules\lead\src\entities\lead\LeadQuery;
 use sales\repositories\lead\LeadRepository;
 use Yii;
 use yii\helpers\Html;
@@ -488,7 +489,11 @@ class QuoteController extends ApiBaseController
                         if (!$model->lead->isBooked()) {
                             try {
                                 $repo = Yii::createObject(LeadRepository::class);
-                                $model->lead->booked($model->lead->employee_id, null);
+                                $newOwner = $model->lead->employee_id;
+                                if (!$newOwner) {
+                                    $newOwner = LeadQuery::getLastActiveUserId($model->lead->id);
+                                }
+                                $model->lead->booked($newOwner, null);
                                 $repo->save($model->lead);
                             } catch (\Throwable $e) {
                                 Yii::error($e->getMessage(), 'API:Quote:Lead:Booked');
