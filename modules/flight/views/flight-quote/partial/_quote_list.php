@@ -17,7 +17,11 @@ $dataProvider = FlightQuoteHelper::generateDataProviderForQuoteList($product);
 <?php Pjax::begin(['id' => 'pjax-product-quote-list-' . $product->pr_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
-        <h2><i class="fa fa-folder-o"></i> Flight Quotes (<?=$dataProvider->totalCount?>)</h2>
+        <h2><i class="fa fa-folder-o"></i> Flight Quotes
+            <?php if($dataProvider->totalCount): ?>
+                <sup>(<?=$dataProvider->totalCount?>)</sup>
+            <?php endif; ?>
+        </h2>
         <ul class="nav navbar-right panel_toolbox">
             <li>
                 <?= \yii\bootstrap4\Html::a('<i class="fa fa-search warning"></i> Search Quotes', null, [
