@@ -9,66 +9,64 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\qaTask\src\entities\qaTaskCategory\search\QaTaskCategoryCrudSearch */
+/* @var $searchModel modules\qaTask\src\entities\qaTaskRules\search\QaTaskRulesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Qa Task Categories';
+$this->title = 'Qa Task Rules';
 $this->params['breadcrumbs'][] = $this->title;
-
 ?>
-<div class="qa-task-category-index">
+
+<div class="qa-task-rules-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>
-        <?= Html::a('Create Qa Task Category', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'tc_id',
-            'tc_key',
+            'tr_id',
+            'tr_key',
             [
                 'class' => QaTaskObjectTypeColumn::class,
-                'attribute' => 'tc_object_type_id',
+                'attribute' => 'tr_type',
             ],
-            'tc_name',
-            'tc_description',
+            'tr_name',
+            'tr_description',
+            [
+                'attribute' => 'tr_parameters',
+                'format' => 'ntext',
+                'options' => ['style' => 'width:80px'],
+            ],
             [
                 'class' => BooleanColumn::class,
-                'attribute' => 'tc_enabled',
-            ],
-            [
-                'class' => BooleanColumn::class,
-                'attribute' => 'tc_default',
+                'attribute' => 'tr_enabled',
             ],
             [
                 'class' => UserColumn::class,
-                'attribute' => 'tc_created_user_id',
+                'attribute' => 'tr_created_user_id',
                 'relation' => 'createdUser',
             ],
             [
                 'class' => UserColumn::class,
-                'attribute' => 'tc_updated_user_id',
+                'attribute' => 'tr_updated_user_id',
                 'relation' => 'updatedUser',
             ],
             [
                 'class' => DateTimeColumn::class,
-                'attribute' => 'tc_created_dt',
+                'attribute' => 'tr_created_dt',
             ],
             [
                 'class' => DateTimeColumn::class,
-                'attribute' => 'tc_updated_dt',
+                'attribute' => 'tr_updated_dt',
             ],
-
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{view}{update}'
+            ],
         ],
-    ]); ?>
+    ]) ?>
 
     <?php Pjax::end(); ?>
 

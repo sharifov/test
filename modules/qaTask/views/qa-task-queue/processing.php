@@ -1,7 +1,7 @@
 <?php
 
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
+use modules\qaTask\src\grid\columns\QaTaskObjectTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskCreatedTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskQueueActionColumn;
 use modules\qaTask\src\grid\columns\QaTaskRatingColumn;
@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => $searchModel->getProjectList(),
             ],
             [
-                'class' => QaObjectTypeColumn::class,
+                'class' => QaTaskObjectTypeColumn::class,
                 'attribute' => 't_object_type_id',
                 'filter' => $searchModel->getObjectTypeList(),
             ],

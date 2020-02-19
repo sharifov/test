@@ -1,7 +1,7 @@
 <?php
 
 use modules\qaTask\src\entities\qaTaskActionReason\search\QaTaskActionReasonCrudSearch;
-use modules\qaTask\src\grid\columns\QaObjectTypeColumn;
+use modules\qaTask\src\grid\columns\QaTaskObjectTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskActionColumn;
 use sales\yii\grid\BooleanColumn;
 use sales\yii\grid\DateTimeColumn;
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'tar_id',
             [
-                'class' => QaObjectTypeColumn::class,
+                'class' => QaTaskObjectTypeColumn::class,
                 'attribute' => 'tar_object_type_id',
             ],
             [

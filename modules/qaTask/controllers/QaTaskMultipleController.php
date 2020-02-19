@@ -74,11 +74,11 @@ class QaTaskMultipleController extends FController
             }
 
             try {
-                $messages = $this->multipleCreateService->create($form);
+                $log = $this->multipleCreateService->create($form);
                 return $this->asJson([
                     'success' => true,
-                    'message' => count($messages) . ' rows affected.',
-                    'text' => $this->multipleCreateService->formatMessages(...$messages),
+                    'message' => $log->count() . ' rows affected.',
+                    'text' => $log->format(),
                 ]);
             } catch (\DomainException $e) {
                 return $this->asJson([

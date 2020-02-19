@@ -11,13 +11,13 @@ use sales\interfaces\Objectable;
 /**
  * Class QaTaskMultipleCreateService
  *
- * @property Message[] $log
+ * @property Log $log
  * @property QaTaskRepository $taskRepository
  * @property QaTaskCreateManuallyService $createManuallyService
  */
 class QaTaskMultipleCreateService
 {
-    private $log = [];
+    private $log;
     private $taskRepository;
     private $createManuallyService;
 
@@ -26,15 +26,16 @@ class QaTaskMultipleCreateService
         QaTaskCreateManuallyService $createManuallyService
     )
     {
+        $this->log = new Log();
         $this->taskRepository = $taskRepository;
         $this->createManuallyService = $createManuallyService;
     }
 
     /**
      * @param QaTaskMultipleCreateForm $form
-     * @return Message[]
+     * @return Log
      */
-    public function create(QaTaskMultipleCreateForm $form): array
+    public function create(QaTaskMultipleCreateForm $form): Log
     {
         $objectClass = QaTaskObjectType::getObjectClass($form->objectType);
 
@@ -42,7 +43,7 @@ class QaTaskMultipleCreateService
 
             /** @var Objectable $object */
             if (!$object = $objectClass::findOne($id)) {
-                $this->addMessage(new ErrorMessage($form->objectType, $id,'not found'));
+                $this->log->add(new ErrorMessage($form->objectType, $id,'not found'));
                 continue;
             }
 
@@ -58,34 +59,16 @@ class QaTaskMultipleCreateService
                         ['categoryId' => $form->categoryId]
                     )
                 );
-                $this->addMessage(new SuccessMessage($form->objectType, $id,'Task created'));
+                $this->log->add(new SuccessMessage($form->objectType, $id,'Task created'));
             } catch (\DomainException $e) {
-                $this->addMessage(new ErrorMessage($form->objectType, $id, $e->getMessage()));
+                $this->log->add(new ErrorMessage($form->objectType, $id, $e->getMessage()));
             } catch (\Throwable $e) {
                 \Yii::error(QaTaskObjectType::getName($form->objectType) . ' Id: ' . $id  . PHP_EOL . $e, 'QaTaskMultipleCreateService:create');
-                $this->addMessage(new ErrorMessage($form->objectType, $id, 'Server error'));
+                $this->log->add(new ErrorMessage($form->objectType, $id, 'Server error'));
             }
 
         }
 
         return $this->log;
-    }
-
-    private function addMessage(Message $message): void
-    {
-        $this->log[] = $message;
-    }
-
-    public function formatMessages(Message ...$messages): string
-    {
-        if (!$messages) {
-            return '';
-        }
-
-        $out = '<ul>';
-        foreach ($messages as $message) {
-            $out .= '<li>' . $message->format() . '</li>';
-        }
-        return $out . '</ul>';
     }
 }

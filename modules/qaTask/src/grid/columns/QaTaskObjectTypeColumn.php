@@ -6,17 +6,17 @@ use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use yii\grid\DataColumn;
 
 /**
- * Class QaObjectTypeColumn
+ * Class QaTaskObjectTypeColumn
  *
  * Ex.
     [
-        'class' => \modules\qaTask\src\grid\columns\QaObjectTypeColumn::class,
+        'class' => \modules\qaTask\src\grid\columns\QaTaskObjectTypeColumn::class,
         'attribute' => 'tc_object_type_id',
     ],
  */
-class QaObjectTypeColumn extends DataColumn
+class QaTaskObjectTypeColumn extends DataColumn
 {
-    public $format = 'qaObjectType';
+    public $format = 'qaTaskObjectType';
 
     public function init(): void
     {

@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'tar_id',
-            'tar_object_type_id:qaObjectType',
+            'tar_object_type_id:qaTaskObjectType',
             'tar_action_id:qaTaskAction',
             'tar_key',
             'tar_name',

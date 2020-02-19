@@ -21,7 +21,7 @@ use yii\widgets\DetailView;
                         'model' => $model,
                         'attributes' => [
                             'project:projectName',
-                            't_object_type_id:qaObjectType',
+                            't_object_type_id:qaTaskObjectType',
                             't_object_id',
                             't_status_id:qaTaskStatus',
                             't_create_type_id:qaTaskCreatedType',

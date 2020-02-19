@@ -86,7 +86,7 @@ class Formatter extends \yii\i18n\Formatter
         return QaTaskCreateType::asFormat($value);
     }
 
-    public function asQaObjectType($value): string
+    public function asQaTaskObjectType($value): string
     {
         if ($value === null) {
             return $this->nullDisplay;

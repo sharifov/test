@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'tc_id',
             'tc_key',
-            'tc_object_type_id:qaObjectType',
+            'tc_object_type_id:qaTaskObjectType',
             'tc_name',
             'tc_description',
             'tc_enabled:booleanByLabel',
