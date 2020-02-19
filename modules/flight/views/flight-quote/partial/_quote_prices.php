@@ -14,19 +14,19 @@ use yii\helpers\Url;
 use yii\web\View;
 
 ?>
-<table class="table table-striped table-prices" id="quote-prices-<?= $quote->pq_id?>">
+<table class="table table-bordered table-striped" id="quote-prices-<?= $quote->pq_id?>">
 	<thead>
-	<tr>
-		<th>Pax</th>
-		<th>Q</th>
-		<th>NP, $</th>
-		<th>Mkp, $</th>
-		<th>Ex Mkp, $</th>
-		<th>SFP, %</th>
-		<th>SFP, $</th>
-		<th>SP, $</th>
-		<th>CSP, <?= $quote->pqClientCurrency->cur_symbol ?></th>
-	</tr>
+        <tr>
+            <th>Pax</th>
+            <th>Q</th>
+            <th>NP, $</th>
+            <th>Mkp, $</th>
+            <th>Ex Mkp, $</th>
+            <th>SFP, %</th>
+            <th>SFP, $</th>
+            <th>SP, $</th>
+            <th>CSP, <?= $quote->pqClientCurrency->cur_symbol ?></th>
+        </tr>
 	</thead>
 	<tbody>
 	<?php foreach ($priceData->prices as $paxCode => $price):?>
