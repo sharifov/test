@@ -33,6 +33,15 @@ $gridId = 'cases-grid-id';
 ?>
 <div class="cases-search">
     <h1><i class=""></i> <?= Html::encode($this->title) ?></h1>
+
+    <div class="card multiple-update-summary" style="margin-bottom: 10px; display: none">
+        <div class="card-header">
+            <span class="pull-right clickable close-icon"><i class="fa fa-times"></i></span>
+            Processing result log:
+        </div>
+        <div class="card-body"></div>
+    </div>
+
     <?php Pjax::begin(['id' => 'cases-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
     <div class="x_panel">
@@ -57,13 +66,6 @@ $gridId = 'cases-grid-id';
         </div>
     </div>
 
-    <div class="card multiple-update-summary" style="margin-bottom: 10px; display: none">
-        <div class="card-header">
-            <span class="pull-right clickable close-icon"><i class="fa fa-times"></i></span>
-            Processing result log:
-        </div>
-        <div class="card-body"></div>
-    </div>
 
     <?php if ($user->isAdmin() || $user->isExSuper() || $user->isSupSuper()): ?>
         <?= MultipleUpdateButtonWidget::widget([
