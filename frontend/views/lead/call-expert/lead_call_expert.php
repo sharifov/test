@@ -153,11 +153,16 @@ $user = Yii::$app->user->identity;
             <div class="col-md-12">
                 <div class="form-group text-center">
                     <?= Html::submitButton('<i class="fa fa-plus"></i> Create call Expert', ['class' => 'btn btn-success', 'id' => 'btn-submit-call-expert']) ?>
-                    <?= Html::button('<i class="fa fa-copy"></i>', ['title' => 'Past from Lead Notes', 'class' => 'btn btn-primary', 'onclick' => '$("#lce_request_text").val($("#lead-notes_for_experts").val())']) ?>
+                    <?= Html::button('<i class="fa fa-copy"></i>',
+                        [
+                            'title' => 'Past from Lead Notes',
+                            'class' => 'btn-note-from-client btn btn-primary',
+                        ]
+                    ) ?>
                     <?= Html::button('<i class="fas fa-copy"></i>',
                         [
                             'title' => 'Past from product description',
-                            'class' => 'btn btn-primary btn-product-description d-none',
+                            'class' => 'btn-product-description btn btn-primary d-none',
                         ]
                     ) ?>
                 </div>
@@ -185,10 +190,28 @@ $js = <<<JS
     
     $(document).on('click', '.btn-product-description', function() {
         let productId = $('#lce_product_id').val();
+        let requestText = $('#lce_request_text').val();
         let description = $('#product_description_' + productId).data('content');
+        let textNew = description;
         
-        $('#lce_request_text').append(description);
-    });     
+        if (requestText.length > 0) {
+            textNew = requestText + '\\n' +  description;
+        } 
+        
+        $('#lce_request_text').val(textNew);
+    });   
+    
+    $(document).on('click', '.btn-note-from-client', function() {
+        let noteFromClient = $('#lead-notes_for_experts').text();
+        let requestText = $('#lce_request_text').val();
+        let textNew = noteFromClient;
+        
+        if (requestText.length > 0) {
+            textNew = requestText + '\\n' +  noteFromClient;
+        } 
+        
+        $('#lce_request_text').val(textNew);
+    });    
 JS;
 
 $this->registerJs($js);
