@@ -4,14 +4,14 @@ namespace modules\product\src\entities\productQuote;
 
 use common\models\Currency;
 use common\models\Employee;
-use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\flight\models\FlightQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
-use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\order\src\events\OrderChangeStatusProcessingEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteCalculateUserProfitEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
@@ -563,6 +563,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
             $this->setStatus(ProductQuoteStatus::BOOKED);
+            $this->recordEvent((new OrderChangeStatusProcessingEvent($this)));
         }
     }
 
@@ -624,6 +625,21 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
         }
     }
+
+	/**
+	 * @param int|null $creatorId
+	 * @param string|null $description
+	 */
+    public function sold(?int $creatorId, ?string $description = ''): void
+	{
+		$this->recordEvent(
+			new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+		);
+		if ($this->pq_status_id !== ProductQuoteStatus::SOLD) {
+			$this->setStatus(ProductQuoteStatus::SOLD);
+			$this->recordEvent((new ProductQuoteCalculateUserProfitEvent($this)));
+		}
+	}
 
     /**
      * @param int|null $status

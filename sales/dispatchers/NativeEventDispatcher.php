@@ -32,8 +32,23 @@ class NativeEventDispatcher
 				if ($eventName === $classEventName) {
 					Event::trigger($eventClass, $classEventName);
 					unset(self::$queue[$eventClass][$classEventName]);
+
+					if (empty(self::$queue[$eventClass])) {
+						unset(self::$queue[$eventClass]);
+					}
 				}
 			}
+		}
+	}
+
+	public static function triggerBy(string $eventClass): void
+	{
+		if (isset(self::$queue[$eventClass])) {
+			foreach (self::$queue[$eventClass] as $classEventName) {
+				Event::trigger($eventClass, $classEventName);
+				unset(self::$queue[$eventClass][$classEventName]);
+			}
+			unset(self::$queue[$eventClass]);
 		}
 	}
 

@@ -69,6 +69,7 @@ class OrderUserProfitCrudController extends FController
     public function actionCreate()
     {
         $model = new OrderUserProfit();
+        $model->setScenario(OrderUserProfit::SCENARIO_CRUD);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'oup_order_id' => $model->oup_order_id, 'oup_user_id' => $model->oup_user_id]);
@@ -90,8 +91,9 @@ class OrderUserProfitCrudController extends FController
     public function actionUpdate($oup_order_id, $oup_user_id)
     {
         $model = $this->findModel($oup_order_id, $oup_user_id);
+		$model->setScenario(OrderUserProfit::SCENARIO_CRUD);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save(true)) {
             return $this->redirect(['view', 'oup_order_id' => $model->oup_order_id, 'oup_user_id' => $model->oup_user_id]);
         }
 

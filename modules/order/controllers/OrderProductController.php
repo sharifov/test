@@ -6,6 +6,8 @@ use frontend\controllers\FController;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderProduct\OrderProductRepository;
+use modules\order\src\services\CreateOrderDTO;
+use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
@@ -22,13 +24,18 @@ use yii\web\Response;
 /**
  * @property OrderProductRepository $orderProductRepository
  * @property EventDispatcher $eventDispatcher
+ * @property OrderManageService $orderManageService
  */
 class OrderProductController extends FController
 {
     private $orderProductRepository;
     private $eventDispatcher;
+	/**
+	 * @var OrderManageService
+	 */
+	private $orderManageService;
 
-    /**
+	/**
      * OrderProductController constructor.
      * @param $id
      * @param $module
@@ -36,12 +43,13 @@ class OrderProductController extends FController
      * @param EventDispatcher $eventDispatcher
      * @param array $config
      */
-    public function __construct($id, $module, OrderProductRepository $orderProductRepository, EventDispatcher $eventDispatcher, $config = [])
+    public function __construct($id, $module, OrderProductRepository $orderProductRepository, OrderManageService $orderManageService, EventDispatcher $eventDispatcher, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->orderProductRepository = $orderProductRepository;
         $this->eventDispatcher = $eventDispatcher;
-    }
+		$this->orderManageService = $orderManageService;
+	}
 
 
     /**
@@ -107,17 +115,8 @@ class OrderProductController extends FController
 
             } else {
 
-                $order = new Order();
-                $order->initCreate();
-                // $offer->of_gid = Offer::generateGid();
-                // $offer->of_uid = Offer::generateUid();
-                $order->or_lead_id = $productQuote->pqProduct->pr_lead_id;
-                $order->or_name = $order->generateName();
-                // $offer->of_status_id = Offer::STATUS_NEW;
+				$order = $this->orderManageService->createOrder((new CreateOrderDTO($productQuote->pqProduct->pr_lead_id)));
 
-                if (!$order->save()) {
-                    throw new Exception('Product Quote ID ('.$productQuoteId.'), Order ID ('.$orderId.'): ' . VarDumper::dumpAsString($order->errors), 17);
-                }
             }
 
             $orderProduct = OrderProduct::create($order->or_id, $productQuoteId);

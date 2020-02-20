@@ -10,6 +10,7 @@ use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\user\entity\payroll\UserPayroll;
 use sales\model\user\entity\payroll\UserPayrollQuery;
+use sales\model\user\entity\profit\service\OrderUserProfitCreateUpdateDTO;
 use yii\behaviors\TimestampBehavior;
 use yii\bootstrap4\Html;
 use yii\db\ActiveQuery;
@@ -246,6 +247,27 @@ class UserProfit extends \yii\db\ActiveRecord
 	public function getRowClass()
 	{
 		return self::STATUS_CLASS_LIST[$this->up_status_id] ?? null;
+	}
+
+	public function updateProfit(OrderUserProfitCreateUpdateDTO $dto): void
+	{
+		$this->up_percent = $dto->percent;
+		$this->up_profit = $dto->profit;
+		$this->up_split_percent = $dto->splitPercent;
+	}
+
+	public function create(OrderUserProfitCreateUpdateDTO $dto)
+	{
+
+		$this->up_user_id = $dto->userId;
+		$this->up_lead_id = $dto->leadId;
+		$this->up_order_id = $dto->orderId;
+		$this->up_product_quote_id = $dto->productQuoteId;
+		$this->up_percent = $dto->percent;
+		$this->up_profit = $dto->profit;
+		$this->up_status_id = $dto->statusId;
+		$this->up_payroll_id = $dto->payrollId;
+		$this->up_type_id = $dto->typeId;
 	}
 
     /**

@@ -48,6 +48,13 @@ use yii\bootstrap4\Html;
                         'data-gid' => $order->or_gid,
                     ]) ?>
 
+					<?= Html::a('<i class="fas fa-dollar-sign text-success"></i> Split Profit', null, [
+						'class' => 'dropdown-item text-success btn-split-profit',
+						'data-url' => \yii\helpers\Url::to(['/order/order-user-profit/ajax-manage-order-user-profit']),
+						'data-order-id' => $order->or_id,
+
+					]) ?>
+
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
                         'class' => 'dropdown-item text-danger btn-delete-order',
                         'data-order-id' => $order->or_id,

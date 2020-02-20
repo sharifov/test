@@ -5,6 +5,8 @@ namespace modules\order\src\entities\orderUserProfit;
 use common\models\Employee;
 use common\models\query\EmployeeQuery;
 use modules\order\src\entities\order\Order;
+use modules\product\src\entities\productQuote\events\ProductQuoteCalculateUserProfitEvent;
+use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -29,10 +31,21 @@ use yii\db\ActiveRecord;
  */
 class OrderUserProfit extends \yii\db\ActiveRecord
 {
-	private const MAX_PERCENT = 100;
-	private const MIN_PERCENT = 0;
+	use EventTrait;
 
-    /**
+	public const MAX_PERCENT = 100;
+	public const MIN_PERCENT = 0;
+
+	public const SCENARIO_CRUD = 'crud';
+
+	public function scenarios()
+	{
+		$scenarios = parent::scenarios();
+		$scenarios[self::SCENARIO_CRUD] = ['oup_percent'];
+		return $scenarios;
+	}
+
+	/**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -76,7 +89,7 @@ class OrderUserProfit extends \yii\db\ActiveRecord
             [['oup_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['oup_order_id' => 'or_id']],
             [['oup_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['oup_updated_user_id' => 'id']],
             [['oup_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['oup_user_id' => 'id']],
-			[['oup_percent'], 'checkPercentForAllUsersByOrder']
+			[['oup_percent'], 'checkPercentForAllUsersByOrder', 'on' => 'crud']
         ];
     }
 

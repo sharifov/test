@@ -39,17 +39,20 @@ class OrderManageService
 	}
 
 	/**
-	 * @param OrderForm $orderForm
+	 * @param CreateOrderDTO $dto
+	 * @return Order
 	 * @throws \Throwable
 	 */
-	public function createOrder(OrderForm $orderForm): void
+	public function createOrder(CreateOrderDTO $dto): Order
 	{
-		$this->transactionManager->wrap(function () use ($orderForm) {
-			$newOrder = (new Order)->create($orderForm);
+		return $this->transactionManager->wrap(function () use ($dto) {
+			$newOrder = (new Order)->create($dto);
 			$orderId = $this->orderRepository->save($newOrder);
 
-			$newOrderUserProfit = (new OrderUserProfit())->create($orderId, $newOrder->or_owner_user_id, 100);
+			$newOrderUserProfit = (new OrderUserProfit())->create($orderId, $newOrder->or_owner_user_id, 100, $newOrder->or_profit_amount);
 			$this->orderUserProfitRepository->save($newOrderUserProfit);
+
+			return $newOrder;
 		});
 	}
 }

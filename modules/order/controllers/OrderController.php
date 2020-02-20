@@ -5,6 +5,7 @@ namespace modules\order\controllers;
 use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\order\src\forms\OrderForm;
+use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
 use Yii;
 use modules\order\src\entities\order\Order;
@@ -69,7 +70,7 @@ class OrderController extends FController
             if ($model->validate()) {
 
             	try {
-            		$this->orderManageService->createOrder($model);
+            		$this->orderManageService->createOrder((new CreateOrderDTO($model->or_lead_id)));
 
 					return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
 				} catch (\Throwable $e) {

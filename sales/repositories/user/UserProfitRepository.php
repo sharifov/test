@@ -59,4 +59,19 @@ class UserProfitRepository extends Repository
 		}
 		return $userProfits->all();
 	}
+
+	/**
+	 * @param int $userId
+	 * @param int $orderId
+	 * @param int $productQuoteId
+	 * @return UserProfit
+	 */
+	public function findOrCreate(int $userId, int $orderId, int $productQuoteId): UserProfit
+	{
+		$userProfit = UserProfit::findOne(['up_user_id' => $userId, 'up_order_id' => $orderId, 'up_product_quote_id' => $productQuoteId]);
+		if ($userProfit === null) {
+			$userProfit = new UserProfit();
+		}
+		return $userProfit;
+	}
 }

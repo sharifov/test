@@ -28,14 +28,6 @@ use yii\widgets\ActiveForm;
         </div>
     </div>
 
-<!--    --><?//= $form->field($model, 'oup_created_dt')->textInput() ?>
-<!---->
-<!--    --><?//= $form->field($model, 'oup_updated_dt')->textInput() ?>
-<!---->
-<!--    --><?//= $form->field($model, 'oup_created_user_id')->textInput() ?>
-<!---->
-<!--    --><?//= $form->field($model, 'oup_updated_user_id')->textInput() ?>
-
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

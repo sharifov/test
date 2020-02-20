@@ -7,7 +7,8 @@ use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\orderProduct\OrderProduct;
-use modules\order\src\forms\OrderForm;
+use modules\order\src\entities\orderUserProfit\OrderUserProfit;
+use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
@@ -52,6 +53,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuote[] $productQuotesActive
  * @property float $orderTotalCalcSum
  * @property ProductQuote[] $productQuotes
+ * @property OrderUserProfit[] $orderUserProfit
  */
 class Order extends ActiveRecord
 {
@@ -134,27 +136,13 @@ class Order extends ActiveRecord
         ];
     }
 
-    /**
-     * Order init create
-     */
-    public function initCreate(): void
-    {
-        $this->or_gid = self::generateGid();
-        $this->or_uid = self::generateUid();
-        $this->or_status_id = OrderStatus::PENDING;
-
-        if ($this->orLead && $this->orLead->employee_id) {
-        	$this->or_owner_user_id = $this->orLead->employee_id;
-		}
-    }
-
-    public function create(OrderForm $orderForm): self
+    public function create(CreateOrderDTO $dto): self
 	{
 		$this->or_gid = self::generateGid();
 		$this->or_uid = self::generateUid();
-		$this->or_status_id = OrderStatus::PENDING;
-		$this->or_lead_id = $orderForm->or_lead_id;
-		$this->or_name = $orderForm->or_name;
+		$this->or_status_id = $dto->status;
+		$this->or_lead_id = $dto->leadId;
+		$this->or_name = $this->generateName();
 		if ($this->orLead && $this->orLead->employee_id) {
 			$this->or_owner_user_id = $this->orLead->employee_id;
 		}
@@ -231,6 +219,11 @@ class Order extends ActiveRecord
     {
         return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])->viaTable('order_product', ['orp_order_id' => 'or_id']);
     }
+
+    public function getOrderUserProfit(): ActiveQuery
+	{
+		return $this->hasMany(OrderUserProfit::class, ['oup_order_id' => 'or_id']);
+	}
 
     /**
      * @return ActiveQuery
@@ -342,4 +335,32 @@ class Order extends ActiveRecord
         return $changed;
     }
 
+    public function isProcessing()
+	{
+		return $this->or_status_id === OrderStatus::PROCESSING;
+	}
+
+    public function processing(): void
+	{
+		// ToDo: need to log status
+		if (!$this->isProcessing()) {
+			OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
+			foreach ($this->productQuotes as $productQuote) {
+				if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
+					$this->setStatus(OrderStatus::PROCESSING);
+					break;
+				}
+			}
+		}
+	}
+
+	private function setStatus(int $status): void
+	{
+		if (!array_key_exists($status, OrderStatus::getList())) {
+			throw new \InvalidArgumentException('Invalid Status');
+		}
+		OrderStatus::guard($this->or_status_id, $status);
+
+		$this->or_status_id = $status;
+	}
 }
