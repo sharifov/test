@@ -3,10 +3,10 @@
 namespace modules\order\controllers;
 
 use common\models\Lead;
-use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\order\src\forms\OrderForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
+use modules\product\src\entities\productQuote\ProductQuote;
 use Yii;
 use modules\order\src\entities\order\Order;
 use frontend\controllers\FController;
@@ -201,9 +201,9 @@ class OrderController extends FController
             if ($orders) {
                 foreach ($orders as $order) {
 
-                    $exist = OrderProduct::find()->where(['orp_order_id' => $order->or_id, 'orp_product_quote_id' => $productQuoteId])->exists();
+                    $exist = ProductQuote::find()->where(['pq_order_id' => $order->or_id, 'pq_id' => $productQuoteId])->exists();
 
-                    $offerList[] = Html::a(($exist ? '<i class="fa fa-check-square-o success"></i> ' : '<i class="fa fa-square-o"></i> ') . $order->or_name, null, [
+                    $offerList[] = Html::a(($exist ? '<i class="fa fa-check-square-o success"></i> ' : '') . $order->or_name, null, [
                         'class' => 'dropdown-item btn-add-quote-to-order ', // . ($exist ? 'disabled' : ''),
                         'title' => 'ID: ' . $order->or_id . ', UID: ' . \yii\helpers\Html::encode($order->or_uid),
                         'data-product-quote-id' => $productQuoteId,

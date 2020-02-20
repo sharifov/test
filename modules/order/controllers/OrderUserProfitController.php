@@ -12,6 +12,7 @@ use sales\model\user\entity\profit\service\OrderUserProfitService;
 use yii\base\Model;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -83,7 +84,7 @@ class OrderUserProfitController extends FController
 						$form->addError('orderUserProfits.0.oup_user_id', $e->getMessage());
 					} catch (\Throwable $e) {
 						$form->addError('orderUserProfits.0.oup_user_id', 'Internal Server Error');
-						\Yii::error($e->getMessage(), 'OrderUserProfitController::actionAjaxManageOrderUserProfit::Throwable');
+						\Yii::error($e->getMessage() . $e->getTraceAsString(), 'OrderUserProfitController::actionAjaxManageOrderUserProfit::Throwable');
 					}
 				}
 			}

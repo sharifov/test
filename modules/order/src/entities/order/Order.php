@@ -6,7 +6,7 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
-use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -48,7 +48,6 @@ use yii\db\ActiveRecord;
  * @property Employee $orCreatedUser
  * @property Employee $orOwnerUser
  * @property Employee $orUpdatedUser
- * @property OrderProduct[] $orderProducts
  * @property ProductQuote[] $orpProductQuotes
  * @property ProductQuote[] $productQuotesActive
  * @property float $orderTotalCalcSum
@@ -204,15 +203,6 @@ class Order extends ActiveRecord
 
     /**
      * @return ActiveQuery
-     */
-    public function getOrderProducts(): ActiveQuery
-    {
-        return $this->hasMany(OrderProduct::class, ['orp_order_id' => 'or_id']);
-    }
-
-
-    /**
-     * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
     public function getOrpProductQuotes(): ActiveQuery
@@ -231,8 +221,7 @@ class Order extends ActiveRecord
      */
     public function getProductQuotesActive(): ActiveQuery
     {
-        return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])
-            ->viaTable(OrderProduct::tableName(), ['orp_order_id' => 'or_id'])
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])
             ->where(['not', ['pq_status_id' => ProductQuoteStatus::CANCEL_GROUP]]);
     }
 
@@ -280,15 +269,23 @@ class Order extends ActiveRecord
     public function getOrderTotalCalcSum(): float
     {
         $sum = 0;
-        $orderProducts = $this->orderProducts;
-        if ($orderProducts) {
-            foreach ($orderProducts as $orderProduct) {
-                if ($quote = $orderProduct->orpProductQuote) {
-                    $sum += $quote->totalCalcSum;
-                }
-            }
-            $sum = round($sum, 2);
-        }
+//        $orderProducts = $this->orderProducts;
+		$quotes = $this->productQuotes;
+		if($quotes) {
+			foreach ($quotes as $quote) {
+				$sum += $quote->totalCalcSum;
+			}
+			$sum = round($sum, 2);
+		}
+
+//        if ($orderProducts) {
+//            foreach ($orderProducts as $orderProduct) {
+//                if ($quote = $orderProduct->orpProductQuote) {
+//                    $sum += $quote->totalCalcSum;
+//                }
+//            }
+//            $sum = round($sum, 2);
+//        }
         return $sum;
     }
 

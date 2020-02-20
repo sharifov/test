@@ -76,7 +76,7 @@ use yii\bootstrap4\Html;
         ?>
 
         <table class="table table-bordered">
-            <?php if ($order->orderProducts):
+            <?php if ($order->productQuotes):
 
 
                 ?>
@@ -92,9 +92,8 @@ use yii\bootstrap4\Html;
                     <th>Client Price</th>
                     <th></th>
                 </tr>
-                <?php if ($order->orderProducts):?>
-                <?php foreach ($order->orderProducts as $product):
-                    $quote = $product->orpProductQuote;
+                <?php foreach ($order->productQuotes as $productQuote):
+                    $quote = $productQuote;
                     $ordTotalPrice += $quote->pq_price;
                     $ordTotalFee += $quote->pq_service_fee_sum;
                     $ordClientTotalPrice += $quote->pq_client_price;
@@ -161,7 +160,6 @@ use yii\bootstrap4\Html;
                     <th class="text-right"><?=number_format($order->or_client_total, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
-            <?php endif; ?>
             <?php endif; ?>
         </table>
 

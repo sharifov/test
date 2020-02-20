@@ -5,50 +5,51 @@ namespace modules\order\controllers;
 use frontend\controllers\FController;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
-use modules\order\src\entities\orderProduct\OrderProductRepository;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
-use modules\order\src\entities\orderProduct\OrderProduct;
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\VarDumper;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
- * @property OrderProductRepository $orderProductRepository
+ * @property ProductQuoteRepository $productQuoteRepository
  * @property EventDispatcher $eventDispatcher
  * @property OrderManageService $orderManageService
  */
 class OrderProductController extends FController
 {
-    private $orderProductRepository;
     private $eventDispatcher;
 	/**
 	 * @var OrderManageService
 	 */
 	private $orderManageService;
+	/**
+	 * @var ProductQuoteRepository
+	 */
+	private $productQuoteRepository;
 
 	/**
-     * OrderProductController constructor.
-     * @param $id
-     * @param $module
-     * @param OrderProductRepository $orderProductRepository
-     * @param EventDispatcher $eventDispatcher
-     * @param array $config
-     */
-    public function __construct($id, $module, OrderProductRepository $orderProductRepository, OrderManageService $orderManageService, EventDispatcher $eventDispatcher, $config = [])
+	 * OrderProductController constructor.
+	 * @param $id
+	 * @param $module
+	 * @param ProductQuoteRepository $productQuoteRepository
+	 * @param OrderManageService $orderManageService
+	 * @param EventDispatcher $eventDispatcher
+	 * @param array $config
+	 */
+    public function __construct($id, $module, ProductQuoteRepository $productQuoteRepository, OrderManageService $orderManageService, EventDispatcher $eventDispatcher, $config = [])
     {
         parent::__construct($id, $module, $config);
-        $this->orderProductRepository = $orderProductRepository;
         $this->eventDispatcher = $eventDispatcher;
 		$this->orderManageService = $orderManageService;
+		$this->productQuoteRepository = $productQuoteRepository;
 	}
 
 
@@ -99,32 +100,19 @@ class OrderProductController extends FController
                     throw new Exception('Order (' . $orderId . ') not found', 5);
                 }
 
-                $orderProduct = OrderProduct::find()->where(['orp_order_id' => $order->or_id, 'orp_product_quote_id' => $productQuoteId])->one();
-
-                if ($orderProduct) {
-
-                    if (!$orderProduct->delete()) {
-//                        throw new Exception('Product Quote ID (' . $productQuoteId . ') is already exist in Offer ID (' . $offerId . ')',
-//                            15);
-                        throw new Exception('Product Quote ID (' . $productQuoteId . ') & Order ID (' . $orderId . ') not deleted',
-                            15);
-                    }
-
-                    return ['message' => 'Successfully deleted Product Quote ID ('.$productQuoteId.') from order: "'.Html::encode($order->or_name).'" ('.$order->or_id.')'];
-                }
+                if ($productQuote->isRelatedWithOrder() && $productQuote->isTheSameOrder($orderId)) {
+                	$productQuote->removeOrderRelation();
+                	$this->productQuoteRepository->save($productQuote);
+					return ['message' => 'Successfully deleted Product Quote ID ('.$productQuoteId.') from order: "'.Html::encode($order->or_name).'" ('.$order->or_id.')'];
+				}
 
             } else {
-
 				$order = $this->orderManageService->createOrder((new CreateOrderDTO($productQuote->pqProduct->pr_lead_id)));
-
             }
 
-            $orderProduct = OrderProduct::create($order->or_id, $productQuoteId);
-            $this->orderProductRepository->save($orderProduct);
+            $productQuote->setOrderRelation($order->or_id);
+            $this->productQuoteRepository->save($productQuote);
 
-            if (!$orderProduct->save()) {
-                throw new Exception('Product Quote ID ('.$productQuoteId.'), Order ID ('.$orderId.'): ' . VarDumper::dumpAsString($orderProduct->errors), 16);
-            }
 
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),'OrderProductController:' . __FUNCTION__  );
@@ -145,9 +133,13 @@ class OrderProductController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $model = $this->orderProductRepository->find($orderId, $productQuoteId);
-            $this->orderProductRepository->remove($model);
-            $this->eventDispatcher->dispatchAll([new OrderRecalculateProfitAmountEvent([$model->orpOrder])]);
+			$model = $this->productQuoteRepository->find($productQuoteId);
+			$order = $model->pqOrder;
+			$model->removeOrderRelation();
+			$this->productQuoteRepository->save($model);
+			if ($order) {
+            	$this->eventDispatcher->dispatchAll([new OrderRecalculateProfitAmountEvent([$order])]);
+			}
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
@@ -156,20 +148,5 @@ class OrderProductController extends FController
         }
 
         return ['message' => 'Successfully removed product quote (' . $productQuoteId . ') from order (' . $orderId . ')'];
-    }
-
-    /**
-     * @param $orp_order_id
-     * @param $orp_product_quote_id
-     * @return OrderProduct
-     * @throws NotFoundHttpException
-     */
-    protected function findModel($orp_order_id, $orp_product_quote_id): OrderProduct
-    {
-        if (($model = OrderProduct::findOne(['orp_order_id' => $orp_order_id, 'orp_product_quote_id' => $orp_product_quote_id])) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

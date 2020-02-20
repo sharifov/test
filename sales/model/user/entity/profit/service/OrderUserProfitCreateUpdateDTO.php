@@ -21,43 +21,43 @@ class OrderUserProfitCreateUpdateDTO
 	/**
 	 * @var int|null
 	 */
-	private $userId;
+	public $userId;
 	/**
 	 * @var int|null
 	 */
-	private $leadId;
+	public $leadId;
 	/**
 	 * @var int|null
 	 */
-	private $orderId;
+	public $orderId;
 	/**
 	 * @var int|null
 	 */
-	private $productQuoteId;
+	public $productQuoteId;
 	/**
 	 * @var int|null
 	 */
-	private $percent;
+	public $percent;
 	/**
 	 * @var float|null
 	 */
-	private $profit;
+	public $profit;
 	/**
 	 * @var int|null
 	 */
-	private $splitPercent;
+	public $splitPercent;
 	/**
 	 * @var int|null
 	 */
-	private $statusId;
+	public $statusId;
 	/**
 	 * @var int|null
 	 */
-	private $payrollId;
+	public $payrollId;
 	/**
 	 * @var int|null
 	 */
-	private $typeId;
+	public $typeId;
 
 	public function __construct(
 		?int $userId,
