@@ -141,10 +141,8 @@ $user = Yii::$app->user->identity;
 
             <div class="col-sm-3">
                 <?= $form->field($modelLeadCallExpert, 'lce_product_id')->dropDownList(
-                    ArrayHelper::merge(
-                        ['' => '---'],
-                        ArrayHelper::map($lead->products, 'pr_id', 'pr_name')
-                    )
+                    ArrayHelper::map($lead->products, 'pr_id', 'pr_name'),
+                    ['prompt' => 'Select product', 'id' => 'lce_product_id']
                 ) ?>
             </div>
 
@@ -156,6 +154,12 @@ $user = Yii::$app->user->identity;
                 <div class="form-group text-center">
                     <?= Html::submitButton('<i class="fa fa-plus"></i> Create call Expert', ['class' => 'btn btn-success', 'id' => 'btn-submit-call-expert']) ?>
                     <?= Html::button('<i class="fa fa-copy"></i>', ['title' => 'Past from Lead Notes', 'class' => 'btn btn-primary', 'onclick' => '$("#lce_request_text").val($("#lead-notes_for_experts").val())']) ?>
+                    <?= Html::button('<i class="fas fa-copy"></i>',
+                        [
+                            'title' => 'Past from product description',
+                            'class' => 'btn btn-primary btn-product-description d-none',
+                        ]
+                    ) ?>
                 </div>
             </div>
         </div>
@@ -165,6 +169,30 @@ $user = Yii::$app->user->identity;
     </div>
 </div>
 <?php yii\widgets\Pjax::end() ?>
+
+
+<?php
+$js = <<<JS
+    $(document).on('change', '#lce_product_id', function() {
+        let productId = $(this).val();
+        
+        if (isNaN(parseInt(productId, 10))) {
+            $('.btn-product-description').addClass('d-none');
+        } else {
+            $('.btn-product-description').removeClass('d-none'); 
+        }       
+    }); 
+    
+    $(document).on('click', '.btn-product-description', function() {
+        let productId = $('#lce_product_id').val();
+        let description = $('#product_description_' + productId).data('content');
+        
+        $('#lce_request_text').append(description);
+    });     
+JS;
+
+$this->registerJs($js);
+?>
 
 <?php
 $this->registerJs(

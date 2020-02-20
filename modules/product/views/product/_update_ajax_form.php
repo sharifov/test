@@ -4,6 +4,7 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\forms\ProductUpdateForm;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
+use yii\web\View;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
@@ -27,7 +28,7 @@ $pjaxId = 'update-product-pjax';
     <?= $form->field($formModel, 'pr_description')->textarea(['rows' => 4]) ?>
 
     <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success', 'data-product' => $model->pr_id]) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
@@ -42,7 +43,8 @@ $js = <<<JS
       let btnSubmit = $(this).find(':submit');
       btnSubmit.prop('disabled', true);
       btnSubmit.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');
-      
+      let productId = $(btnSubmit).data('product'); 
+            
       $.ajax({
           url: $(this).attr('action'),
           type: $(this).attr('method'),
@@ -62,10 +64,8 @@ $js = <<<JS
                   });
               } else {
                   $.pjax.reload({
-                      container: '#pjax-lead-products-wrap',
-                      timeout: 5000,
-                      async: false,
-                  });
+                      container: '#pjax-product-' + productId
+                  }); 
                   $('#modal-sm').modal('hide');
               }
           })
@@ -79,4 +79,4 @@ $js = <<<JS
   });
 JS;
 
-$this->registerJs($js, \yii\web\View::POS_READY);
+$this->registerJs($js, View::POS_READY);

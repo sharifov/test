@@ -19,20 +19,26 @@ $params = Yii::$app->request->queryParams;
 $params['HotelQuoteSearch']['hq_hotel_id'] = $model->ph_id;
 $dataProviderQuotes = $searchModel->searchProduct($params);*/
 
+$pjaxId = 'pjax-product-' . $product->pr_id;
 ?>
-<?php //php \yii\widgets\Pjax::begin(['id' => 'pjax-product-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 10000])?>
+<?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 2000])?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
                 <a class="collapse-link">
                     <i class="fas fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                    <?php if ($product->pr_description):?>
-                        <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
-                    <?php endif;?>
                     <?php if ($product->productQuotes):?>
                         <sup title="Number of quotes">(<?=count($product->productQuotes)?>)</sup>
                     <?php endif;?>
                 </a>
+                <?php if ($product->pr_description):?>
+                    <a  id="product_description_<?=$product->pr_id?>"
+                        class="popover-class fa fa-info-circle text-info"
+                        data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top"
+                        data-container="body" title="<?=Html::encode($product->pr_name)?>"
+                        data-content='<?=Html::encode($product->pr_description)?>'
+                    ></a>
+                <?php endif; ?>
             </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?php //php if ($is_manager) : ?>
@@ -133,7 +139,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
             <?php //php endif; ?>
         </div>
     </div>
-<?php //php \yii\widgets\Pjax::end()?>
+<?php \yii\widgets\Pjax::end()?>
 
 
 
