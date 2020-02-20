@@ -478,6 +478,11 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('span', Html::encode($name));
     }
 
+    public function asPercentInteger($value): string
+	{
+    	return $value . ' %';
+	}
+
     /**
      * @param $value
      * @return string
