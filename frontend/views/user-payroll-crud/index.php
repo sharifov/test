@@ -57,9 +57,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             <?php ActiveForm::end(); ?>
         </div>
-        <div class="col-md-4">
-            <?= Html::a('Calculate Payroll', ['calculate-user-payroll'], ['class' => 'btn btn-warning calc', 'data-action' => 1]) ?>
-            <?= Html::a('Recalculate Payroll', ['calculate-user-payroll'], ['class' => 'btn btn-info calc', 'data-action' => 2]) ?>
+        <div class="col-md-4 d-flex align-items-end">
+            <?= Html::a('Calculate Payroll', ['calculate-user-payroll'], ['class' => 'btn btn-warning calc', 'data-action' => 1, 'style' => 'margin-bottom: 10px;']) ?>
+            <?= Html::a('Recalculate Payroll', ['calculate-user-payroll'], ['class' => 'btn btn-info calc', 'data-action' => 2, 'style' => 'margin-bottom: 10px;']) ?>
         </div>
     </div>
 
