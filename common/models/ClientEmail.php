@@ -230,15 +230,15 @@ class ClientEmail extends \yii\db\ActiveRecord
 
     /**
      * @param int $clientId
-     * @param int $type
+     * @param array $excludeTypes
      * @return array
      */
-    public static function getEmailListByClient(int $clientId, int $type = self::EMAIL_VALID): array
+    public static function getEmailListByClient(int $clientId, array $excludeTypes = [self::EMAIL_INVALID]): array
     {
         return (new Query())->select(['email'])->distinct()
 			->from(self::tableName())
 			->where(['client_id' => $clientId])
-			->andWhere(['type' => $type])
+			->andWhere(['NOT IN', 'type', $excludeTypes])
 			->column();
     }
 }

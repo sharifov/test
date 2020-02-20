@@ -291,15 +291,15 @@ class ClientPhone extends \yii\db\ActiveRecord
 
     /**
      * @param int $clientId
-     * @param int $type
+     * @param int $excludeTypes
      * @return array
      */
-    public static function getPhoneListByClient(int $clientId, int $type = self::PHONE_VALID): array
+    public static function getPhoneListByClient(int $clientId, array $excludeTypes = [self::PHONE_INVALID]): array
     {
         return (new Query())->select(['phone'])->distinct()
 			->from(self::tableName())
 			->where(['client_id' => $clientId])
-			->andWhere(['type' => $type])
+			->andWhere(['NOT IN', 'type', $excludeTypes])
 			->column();
     }
 }
