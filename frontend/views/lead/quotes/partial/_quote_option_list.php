@@ -18,7 +18,7 @@ $totalExtraMarkupOption = 0;
 
 
 <?php if ($productQuote->productQuoteOptions): ?>
-    <h2>Hotel Options</h2>
+    <h2>Options</h2>
     <table class="table table-striped table-bordered">
         <tr>
             <th>ID</th>
@@ -47,21 +47,31 @@ $totalExtraMarkupOption = 0;
                 <td class="text-right"><?=number_format($quoteOption->pqo_price, 2)?> USD</td>
                 <td class="text-right"><?=number_format($quoteOption->pqo_client_price, 2)?> <?=Html::encode($productQuote->pq_client_currency)?></td>
                 <td>
-                    <?php
-                    echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i>', null, [
-                        'class' => 'btn-update-product-quote-option',
-                        'data-url' => Url::to(['/product/product-quote-option/update-ajax', 'id' => $quoteOption->pqo_id])
-                    ]);
-                    ?>
 
-                    <?php
-                    echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
-                        'data-pqo-id' => $quoteOption->pqo_id,
-                        'data-product-id' => $productQuote->pq_product_id,
-                        'class' => 'btn-delete-product-quote-option',
-                        'data-url' => Url::to(['/product/product-quote-option/delete-ajax'])
-                    ]);
-                    ?>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <?php
+                            echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i> Update', null, [
+                                'class' => 'dropdown-item btn-update-product-quote-option',
+                                'data-url' => Url::to(['/product/product-quote-option/update-ajax', 'id' => $quoteOption->pqo_id])
+                            ]);
+                            ?>
+                            <div class="dropdown-divider"></div>
+                            <?php
+                            echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Delete', null, [
+                                'data-pqo-id' => $quoteOption->pqo_id,
+                                'data-product-id' => $productQuote->pq_product_id,
+                                'class' => 'dropdown-item btn-delete-product-quote-option',
+                                'data-url' => Url::to(['/product/product-quote-option/delete-ajax'])
+                            ]);
+                            ?>
+                        </div>
+                    </div>
+
+
                 </td>
             </tr>
         <?php endforeach; ?>
