@@ -19,6 +19,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'api_key')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'sort_order')->input('number', ['min' => 1, 'max' => 20, 'step' => 1, 'class' => 'form-control w-25']) ?>
+
         <?php //= $form->field($model, 'contact_info')->textarea(['rows' => 6]) ?>
 
         <?php
