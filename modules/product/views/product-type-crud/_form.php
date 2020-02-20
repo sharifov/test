@@ -49,9 +49,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pt_enabled')->checkbox() ?>
 
-        <? //= $form->field($model, 'pt_created_dt')->textInput() ?>
+        <?php //= $form->field($model, 'pt_created_dt')->textInput() ?>
 
-        <? //= $form->field($model, 'pt_updated_dt')->textInput() ?>
+        <?php //= $form->field($model, 'pt_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

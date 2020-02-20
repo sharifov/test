@@ -49,7 +49,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pq_owner_user_id')->textInput() ?>
 
-        <? /*= $form->field($model, 'pq_created_user_id')->textInput() ?>
+        <?php /*= $form->field($model, 'pq_created_user_id')->textInput() ?>
 
     <?= $form->field($model, 'pq_updated_user_id')->textInput() ?>
 

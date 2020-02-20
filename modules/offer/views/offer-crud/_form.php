@@ -39,7 +39,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'of_profit_amount')->textInput() ?>
 
-        <? /*= $form->field($model, 'of_created_user_id')->textInput() ?>
+        <?php /*= $form->field($model, 'of_created_user_id')->textInput() ?>
 
         <?= $form->field($model, 'of_updated_user_id')->textInput() ?>
 

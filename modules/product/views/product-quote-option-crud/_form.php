@@ -31,13 +31,13 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pqo_extra_markup')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 
-        <!--    --><? //= $form->field($model, 'pqo_created_user_id')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'pqo_created_user_id')->textInput() ?>
         <!---->
-        <!--    --><? //= $form->field($model, 'pqo_updated_user_id')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'pqo_updated_user_id')->textInput() ?>
         <!---->
-        <!--    --><? //= $form->field($model, 'pqo_created_dt')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'pqo_created_dt')->textInput() ?>
         <!---->
-        <!--    --><? //= $form->field($model, 'pqo_updated_dt')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'pqo_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

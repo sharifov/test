@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'op_created_user_id')->dropDownList((new ListsAccess(Auth::id()))->getEmployees(), ['prompt' => 'Select user']) ?>
 
-        <? //= $form->field($model, 'op_created_dt')->textInput() ?>
+        <?php //= $form->field($model, 'op_created_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

@@ -25,7 +25,7 @@ $list = (new ListsAccess(Auth::id()));
 
         <?= $form->field($model, 'orp_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
 
-        <? //= $form->field($model, 'orp_created_dt')->textInput() ?>
+        <?php //= $form->field($model, 'orp_created_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
