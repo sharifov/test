@@ -127,20 +127,24 @@ class CasesQSearch extends Cases
     public function searchInbox($params, Employee $user): ActiveDataProvider
     {
         $query = $this->casesQRepository->getInboxQuery($user);
-        $query->innerJoin(Project::tableName() . ' as project', 'project.id = cases.cs_project_id');
-        $query->orderBy(
-            [
-                'sort_order' => SORT_DESC,
-                'cs_id' => SORT_ASC,
-            ]
-        );
+        $query->joinWith('project', true, 'INNER JOIN');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => [
+                'sort_order' => SORT_DESC,
+                'cs_id' => SORT_ASC
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
+
+        $dataProvider->sort->attributes['sort_order'] = [
+            'asc' => ['sort_order' => SORT_ASC],
+            'desc' => ['sort_order' => SORT_DESC],
+        ];
 
         $this->load($params);
 

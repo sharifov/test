@@ -43,7 +43,7 @@ class Project extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['sort_order'], 'integer', 'min' => 0, 'max' => 20],
+            [['sort_order'], 'integer', 'min' => 0, 'max' => 100],
             [['contact_info','custom_data'], 'string'],
             [['closed'], 'boolean'],
             [['last_update'], 'safe'],
