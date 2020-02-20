@@ -20,6 +20,7 @@ use yii\httpclient\CurlTransport;
  * @property boolean $closed
  * @property string $last_update
  * @property string $custom_data
+ * @property int $sort_order
  *
  * @property Sources[] $sources
  * @property ContactInfo $contactInfo
@@ -42,6 +43,7 @@ class Project extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['sort_order'], 'integer', 'min' => 0, 'max' => 100],
             [['contact_info','custom_data'], 'string'],
             [['closed'], 'boolean'],
             [['last_update'], 'safe'],
@@ -63,6 +65,7 @@ class Project extends \yii\db\ActiveRecord
             'closed' => 'Closed',
             'last_update' => 'Last Update',
             'custom_data' => 'Custom Data',
+            'sort_order' => 'Sort',
         ];
     }
 
