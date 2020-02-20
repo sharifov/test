@@ -14,6 +14,8 @@ use yii\widgets\Pjax;
 
 $flightQuote = FlightQuote::findByProductQuoteId($model);
 
+$totalAmountQuote = 0.0;
+
 ?>
 
 <div class="x_panel" id="quote-<?=$model->pq_id?>">
@@ -462,6 +464,12 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                     <p style="margin: 20px 0;">Not found quote data</p>
                 </div>
             <?php endif; ?>
+
+            <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model]) ?>
+
+            <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model]) ?>
+
+
 
     </div>
 </div>
