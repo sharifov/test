@@ -79,6 +79,7 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             'qpp_client_currency' => 'Client Currency',
             'qpp_client_fare' => 'Client Fare',
             'qpp_client_tax' => 'Client Tax',
+            'qpp_cnt' => 'Count',
             'qpp_created_dt' => 'Created Dt',
             'qpp_updated_dt' => 'Updated Dt',
         ];
