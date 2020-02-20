@@ -18,7 +18,7 @@ $totalExtraMarkupOption = 0;
 
 
 <?php if ($productQuote->productQuoteOptions): ?>
-    <h2>Hotel Options</h2>
+    <h2>Options</h2>
     <table class="table table-striped table-bordered">
         <tr>
             <th>ID</th>
