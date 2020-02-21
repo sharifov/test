@@ -179,4 +179,12 @@ class OrderUserProfit extends \yii\db\ActiveRecord
 
 		return $this;
 	}
+
+	/**
+	 * @param float $profitAmount
+	 */
+	public function updateAmount(float $profitAmount): void
+	{
+		$this->oup_amount = $profitAmount;
+	}
 }

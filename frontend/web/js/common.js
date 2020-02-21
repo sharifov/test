@@ -49,6 +49,30 @@
         });
     });
 
+    window.pjaxReload = function (obj) {
+        if (typeof obj !== 'object') {
+            console.error('Type of provided param is not Object');
+            return false;
+        }
+
+        var defaultOptions = {
+            container: '',
+            push: false,
+            replace: false,
+            async: false,
+            timeout: 2000
+        };
+
+        var options = $.extend(defaultOptions, obj);
+
+        if (!options.container) {
+            console.error('Pjax container is not provided');
+            return false;
+        }
+
+        $.pjax.reload({container: '#pjax-lead-orders', push: false, replace: false, async: false, timeout: 2000});
+    };
+
 })(window, $);
 
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {

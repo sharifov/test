@@ -7,6 +7,7 @@ use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -48,7 +49,6 @@ use yii\db\ActiveRecord;
  * @property Employee $orCreatedUser
  * @property Employee $orOwnerUser
  * @property Employee $orUpdatedUser
- * @property ProductQuote[] $orpProductQuotes
  * @property ProductQuote[] $productQuotesActive
  * @property float $orderTotalCalcSum
  * @property ProductQuote[] $productQuotes
@@ -201,15 +201,6 @@ class Order extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'or_updated_user_id']);
     }
 
-    /**
-     * @return ActiveQuery
-     * @throws \yii\base\InvalidConfigException
-     */
-    public function getOrpProductQuotes(): ActiveQuery
-    {
-        return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])->viaTable('order_product', ['orp_order_id' => 'or_id']);
-    }
-
     public function getOrderUserProfit(): ActiveQuery
 	{
 		return $this->hasMany(OrderUserProfit::class, ['oup_order_id' => 'or_id']);
@@ -328,6 +319,7 @@ class Order extends ActiveRecord
         if ($profitNew !== $profitOld) {
             $this->or_profit_amount = $profitNew;
             $changed = true;
+            $this->recordEvent((new OrderUserProfitUpdateProfitAmountEvent($this)));
         }
         return $changed;
     }

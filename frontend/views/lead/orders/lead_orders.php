@@ -166,7 +166,7 @@ $js = <<<JS
                         hide: true
                     });
               } else {
-                  $.pjax.reload({container: '#pjax-lead-orders'});
+                  $.pjax.reload({container: '#pjax-lead-orders', push: false, replace: false, async: false, timeout: 2000});
                   new PNotify({
                         title: 'The order was successfully removed',
                         type: 'success',

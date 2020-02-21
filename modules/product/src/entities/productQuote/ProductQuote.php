@@ -235,7 +235,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function getOrpOrders(): ActiveQuery
     {
-        return $this->hasMany(Order::class, ['or_id' => 'orp_order_id'])->viaTable('order_product', ['orp_product_quote_id' => 'pq_id']);
+        return $this->hasMany(Order::class, ['or_id' => 'pq_order_id']);
     }
 
     /**
@@ -553,7 +553,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         );
         if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
             $this->setStatus(ProductQuoteStatus::BOOKED);
-            $this->recordEvent((new OrderChangeStatusProcessingEvent($this)));
+//            $this->recordEvent((new OrderChangeStatusProcessingEvent($this)));
         }
     }
 
