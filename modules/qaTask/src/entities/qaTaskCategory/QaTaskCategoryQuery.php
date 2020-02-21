@@ -49,4 +49,12 @@ class QaTaskCategoryQuery
     {
         return QaTaskCategory::find()->list()->enabled()->all();
     }
+
+    public static function getCategoryIdByKey(string $key): ?int
+    {
+        if ($category = QaTaskCategory::find()->select(['tc_id'])->byKey($key)->limit(1)->one()) {
+            return $category['tc_id'];
+        }
+        return null;
+    }
 }

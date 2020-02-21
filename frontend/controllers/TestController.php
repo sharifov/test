@@ -50,6 +50,7 @@ use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\QaTaskCreateLeadProcessingQualityService;
 use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateForm;
 use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateService;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
@@ -182,14 +183,20 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $skill = 1;
-        $count = UserProfile::find()->select('count(*)')->andWhere([
-            'up_user_id' =>
-                UserConnection::find()->select(['uc_user_id'])->indexBy('uc_user_id')->distinct()
-        ])
-        ->andWhere('up_skill >= ' . $skill)->count();
+        $params = [
+            'calls_per_frame' => 2,
+            'out_min_duration' => 5,
+            'in_min_rec_duration' => 30,
+            'include_in_calls' => true,
+            'hour_offset' => 12,
+            'hour_frame_1' => 24,
+            'hour_frame_2' => 48,
+            'hour_frame_3' => 72,
+        ];
 
-        VarDumper::dump($count);
+
+        $service = Yii::createObject(QaTaskCreateLeadProcessingQualityService::class);
+        $service->handle(new \modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\Rule($params));
         die;
 
         return $this->render('blank');
