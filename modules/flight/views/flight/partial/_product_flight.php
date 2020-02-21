@@ -21,7 +21,8 @@ $searchModel = new HotelQuoteSearch();
 $params = Yii::$app->request->queryParams;
 $params['HotelQuoteSearch']['hq_hotel_id'] = $model->ph_id;
 $dataProviderQuotes = $searchModel->searchProduct($params);*/
-$pjaxId = 'pjax-product-' . $product->flight->fl_id;
+
+$pjaxId = 'pjax-product-' . $product->pr_id;
 $pjaxRequest = $pjaxRequest ?? false;
 
 $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
