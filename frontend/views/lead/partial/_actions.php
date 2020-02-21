@@ -31,142 +31,142 @@ $user = Yii::$app->user->identity;
 ?>
 <?php
 
-$buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
-    'lead/take',
-    'gid' => $leadModel->gid,
-    'over' => true
-], [
-    'class' => 'take-processing-btn btn btn-sm btn-info',
-    'data-status' => $leadModel->status
-]);
+    $buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
+        'lead/take',
+        'gid' => $leadModel->gid,
+        'over' => true
+    ], [
+        'class' => 'take-processing-btn btn btn-sm btn-info',
+        'data-status' => $leadModel->status
+    ]);
 
-$buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
-    'lead/take',
-    'gid' => $leadModel->gid
-],[
-    'class' => 'btn btn-sm btn-info',
-]);
+    $buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
+        'lead/take',
+        'gid' => $leadModel->gid
+    ],[
+        'class' => 'btn btn-sm btn-info',
+    ]);
 
-$buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
-    'id' => 'clone-lead',
-    'class' => 'btn btn-primary',
-    'data-url' => Url::to(['lead/clone', 'id' => $leadModel->id])
-]);
+    $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
+        'id' => 'clone-lead',
+        'class' => 'btn btn-primary',
+        'data-url' => Url::to(['lead/clone', 'id' => $leadModel->id])
+    ]);
 
-$buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
-    'class' => 'add-reason btn btn-primary',
-    'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadModel->gid]),
-    'title' => 'Follow Up'
-]);
+    $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
+        'class' => 'add-reason btn btn-primary text-warning',
+        'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadModel->gid]),
+        'title' => 'Follow Up'
+    ]);
 
-$buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
-    'class' => 'add-reason btn btn-danger',
-    'data-url' => Url::to(['lead-change-state/trash', 'gid' => $leadModel->gid]),
-    'title' => 'Trash'
-]);
+    $buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
+        'class' => 'add-reason btn btn-danger',
+        'data-url' => Url::to(['lead-change-state/trash', 'gid' => $leadModel->gid]),
+        'title' => 'Trash'
+    ]);
 
-$buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
-    'class' => 'add-reason btn btn-primary',
-    'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadModel->gid]),
-    'title' => 'Snooze'
-]);
+    $buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
+        'class' => 'add-reason btn btn-primary',
+        'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadModel->gid]),
+        'title' => 'Snooze'
+    ]);
 
 
-$buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
-    'lead/take',
-    'class' => 'btn btn-primary',
-    'gid' => $leadModel->gid
-]));
+    $buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
+        'lead/take',
+        'class' => 'btn btn-primary',
+        'gid' => $leadModel->gid
+    ]));
 
-$buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
-    'class' => 'add-reason btn btn-primary',
-    'data-url' => \yii\helpers\Url::to(['lead-change-state/return', 'gid' => $leadModel->gid]),
-    'title' => 'Return Lead'
-]);
+    $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
+        'class' => 'add-reason btn btn-primary',
+        'data-url' => \yii\helpers\Url::to(['lead-change-state/return', 'gid' => $leadModel->gid]),
+        'title' => 'Return Lead'
+    ]);
 
-$buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
-    'class' => 'add-reason btn btn-primary',
-    'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadModel->gid]),
-    'title' => 'Reject'
-]);
+    $buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
+        'class' => 'add-reason btn btn-primary',
+        'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadModel->gid]),
+        'title' => 'Reject'
+    ]);
 
-$buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadModel->l_answered ? 'UnAnswered' : 'Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadModel->id], [
-    'class' => 'add-comment btn btn-default',
-    //'data-url' => Url::to(['lead/update2', 'act' => 'answer', 'id' => $leadModel->id]),
-    'data-pjax' => 0
-]);
+    //$buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadModel->l_answered ? 'UnAnswered' : 'Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadModel->id], [
+    //    'class' => 'add-comment btn btn-default',
+    //    //'data-url' => Url::to(['lead/update2', 'act' => 'answer', 'id' => $leadModel->id]),
+    //    'data-pjax' => 0
+    //]);
 
-$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
-$buttonsSubAction = [];
+    $viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
+    $buttonsSubAction = [];
 
-$takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isPending() || $leadModel->isProcessing()) && $leadModel->getAppliedAlternativeQuotes() === null);
-$processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
+    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isPending() || $leadModel->isProcessing()) && $leadModel->getAppliedAlternativeQuotes() === null);
+    $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
-if($processingConditions){
-    if ($user->isAdmin() || $user->isSupervision()) {
-        $buttonsSubAction[] = $buttonAnswer;
-    }
-    //$buttonsSubAction[] = $buttonHoldOn;
-    $buttonsSubAction[] = $buttonFollowUp;
-    $buttonsSubAction[] = $buttonSnooze;
-    $buttonsSubAction[] = $buttonTrash;
-    if ($leadModel->isSold()) {
-        if ($user->isAdmin()) {
+    if($processingConditions){
+    //    if ($user->isAdmin() || $user->isSupervision()) {
+    //        $buttonsSubAction[] = $buttonAnswer;
+    //    }
+        //$buttonsSubAction[] = $buttonHoldOn;
+        $buttonsSubAction[] = $buttonFollowUp;
+        $buttonsSubAction[] = $buttonSnooze;
+        $buttonsSubAction[] = $buttonTrash;
+        if ($leadModel->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
             $buttonsSubAction[] = $buttonClone;
         }
-    } else {
-        $buttonsSubAction[] = $buttonClone;
     }
-}
-if ($leadModel->isSnooze()) {
-    $buttonsSubAction[] = $buttonOnWake;
-}
-if ($leadModel->isTrash()) {
-    $buttonsSubAction[] = $buttonReturnLead;
-    $buttonsSubAction[] = $buttonReject;
-}
-if ($viwModeSuperAdminCondition){
-    if ($leadModel->isSold()) {
-        if ($user->isAdmin()) {
+    if ($leadModel->isSnooze()) {
+        $buttonsSubAction[] = $buttonOnWake;
+    }
+    if ($leadModel->isTrash()) {
+        $buttonsSubAction[] = $buttonReturnLead;
+        $buttonsSubAction[] = $buttonReject;
+    }
+    if ($viwModeSuperAdminCondition){
+        if ($leadModel->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
             $buttonsSubAction[] = $buttonClone;
         }
-    } else {
-        $buttonsSubAction[] = $buttonClone;
     }
-}
 
-if ($user->isAgent() && ($leadModel->isBooked() || $leadModel->isSold())) {
-    if ($leadModel->isSold()) {
-        if ($user->isAdmin()) {
+    if ($user->isAgent() && ($leadModel->isBooked() || $leadModel->isSold())) {
+        if ($leadModel->isSold()) {
+            if ($user->isAdmin()) {
+                $buttonsSubAction[] = $buttonClone;
+            }
+        } else {
             $buttonsSubAction[] = $buttonClone;
         }
-    } else {
-        $buttonsSubAction[] = $buttonClone;
     }
-}
 
 
 
-$project = $leadModel->project;
-$projectStyles = '';
-if($project){
-    $projectCustomData = $project->custom_data;
-    if(!empty($projectCustomData)){
-        $projectCustomDataArr = json_decode($projectCustomData, true);
-        if(!empty($projectCustomDataArr)){
-            $stylesArr = [];
-            foreach ($projectCustomDataArr as $styleKey => $styleEntry){
-                if(!empty($styleEntry)){
-                    $stylesArr[] = $styleKey.':'.$styleEntry;
+    $project = $leadModel->project;
+    $projectStyles = '';
+    if($project){
+        $projectCustomData = $project->custom_data;
+        if(!empty($projectCustomData)){
+            $projectCustomDataArr = json_decode($projectCustomData, true);
+            if(!empty($projectCustomDataArr)){
+                $stylesArr = [];
+                foreach ($projectCustomDataArr as $styleKey => $styleEntry){
+                    if(!empty($styleEntry)){
+                        $stylesArr[] = $styleKey.':'.$styleEntry;
+                    }
+                }
+                $stylesArr[] = 'background-image:url(https://communication.travelinsides.com/imgs/'. strtolower($project->name).'/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
+                if(!empty($stylesArr)){
+                    $projectStyles = ' style="'.implode(';',$stylesArr).'"';
                 }
             }
-            $stylesArr[] = 'background-image:url(https://communication.travelinsides.com/imgs/'. strtolower($project->name).'/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
-            if(!empty($stylesArr)){
-                $projectStyles = ' style="'.implode(';',$stylesArr).'"';
-            }
         }
     }
-}
 
 ?>
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
@@ -223,11 +223,32 @@ if($project){
 
 
         <?php if($user->isAdmin() || $user->isSupervision()): ?>
-            <?= Html::a('<i class="fa fa-bars"></i> Status Logs', null, [
-                'id' => 'view-flow-transition',
-                'class' => 'btn btn-default',
-                'title' => 'Status Logs LeadID #' . $leadForm->lead->id
-            ]) ?>
+
+
+
+            &nbsp; <div class="dropdown">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-bars"></i> Actions
+                </button>
+                <div class="dropdown-menu">
+                    <?= Html::a('<i class="fa fa-bars"></i> Status Logs', null, [
+                        'id' => 'view-flow-transition',
+                        'class' => 'dropdown-item',
+                        'title' => 'Status Logs LeadID #' . $leadForm->lead->id
+                    ]) ?>
+
+                    <?= Html::a('<i class="fa fa-list"></i> Data Logs', null, [
+                        'id' => 'btn-general-lead-log',
+                        'class' => 'dropdown-item showModalButton',
+                        'data-modal_id' => 'client-large',
+                        'title' => 'General Lead Log #' . $leadForm->lead->id,
+                        'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
+                    ]) ?>
+                </div>
+            </div>
+
+
+
 
             <?php
 //                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadModel->id])->count();
@@ -239,13 +260,6 @@ if($project){
 //                    ]);
             ?>
 
-            <?= Html::a('<i class="fa fa-list"></i> Data Logs', null, [
-                'id' => 'btn-general-lead-log',
-                'class' => 'btn btn-default showModalButton',
-                'data-modal_id' => 'client-large',
-                'title' => 'General Lead Log #' . $leadForm->lead->id,
-                'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
-            ]) ?>
         <?php endif; ?>
 
 
