@@ -1,7 +1,7 @@
 <?php
 
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
-use yii\bootstrap4\ActiveForm;
+use sales\yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\web\View;
 
@@ -34,33 +34,3 @@ $form = ActiveForm::begin([
 <?php
 
 ActiveForm::end();
-
-$reasonId = Html::getInputId($model, 'reasonId');
-$description = Html::getInputId($model, 'description');
-
-$js = <<<JS
-
-(function () {
-    let reason = $('#{$reasonId}');
-    let description = $('#{$description}');
-    
-    reason.on('change', function () {
-        resetForm();
-    });
-    
-    description.on('input',function(e){
-        resetForm();
-    });
-    
-    function resetForm() {
-        $("#{$formId}").find(".alert.alert-danger").hide();
-        $("#{$formId} .is-invalid").each(function (index, el) {
-            $(el).removeClass('is-invalid');
-        });
-        $("#{$formId}").find('.invalid-feedback').html('');
-    }
-})()
-
-JS;
-
-$this->registerJs($js);

@@ -1,7 +1,7 @@
 <?php
 
 use modules\qaTask\src\useCases\qaTask\decide\noAction\QaTaskDecideNoActionForm;
-use yii\bootstrap4\ActiveForm;
+use sales\yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\web\View;
 
@@ -32,28 +32,3 @@ $form = ActiveForm::begin([
 <?php
 
 ActiveForm::end();
-
-$description = Html::getInputId($model, 'description');
-
-$js = <<<JS
-
-(function () {
-    let description = $('#{$description}');
-    let form = $("#{$formId}");
-    
-    description.on('input',function(e){
-        resetForm();
-    });
-    
-    function resetForm() {
-        form.find(".alert.alert-danger").hide();
-        form.find(".is-invalid").each(function (index, el) {
-            $(el).removeClass('is-invalid');
-        });
-        form.find('.invalid-feedback').html('');
-    }
-})()
-
-JS;
-
-$this->registerJs($js);

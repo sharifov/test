@@ -1,7 +1,7 @@
 <?php
 
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateForm;
-use yii\bootstrap4\ActiveForm;
+use sales\yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\web\View;
 
@@ -36,40 +36,3 @@ $form = ActiveForm::begin([
 <?php
 
 ActiveForm::end();
-
-$reasonId = Html::getInputId($model, 'reasonId');
-$description = Html::getInputId($model, 'description');
-$rating = Html::getInputId($model, 'rating');
-
-$js = <<<JS
-
-(function () {
-    let reason = $('#{$reasonId}');
-    let description = $('#{$description}');
-    let rating = $('#{$rating}');
-    let form = $("#{$formId}");
-    
-    reason.on('change', function () {
-        resetForm();
-    });
-    
-    description.on('input',function(e){
-        resetForm();
-    });
-    
-    rating.on('change', function () {
-        resetForm();
-    });
-    
-    function resetForm() {
-        form.find(".alert.alert-danger").hide();
-        form.find(".is-invalid").each(function (index, el) {
-            $(el).removeClass('is-invalid');
-        });
-        form.find('.invalid-feedback').html('');
-    }
-})()
-
-JS;
-
-$this->registerJs($js);

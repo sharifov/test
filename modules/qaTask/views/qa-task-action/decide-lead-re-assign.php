@@ -1,7 +1,7 @@
 <?php
 
 use modules\qaTask\src\useCases\qaTask\decide\lead\reAssign\QaTaskDecideLeadReAssignForm;
-use yii\bootstrap4\ActiveForm;
+use sales\yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\web\View;
 
@@ -32,28 +32,3 @@ $form = ActiveForm::begin([
 <?php
 
 ActiveForm::end();
-
-$assignUser = Html::getInputId($model, 'assignUserId');
-
-$js = <<<JS
-
-(function () {
-    let assignUser = $('#{$assignUser}');
-    let form = $("#{$formId}");
-    
-    assignUser.on('change', function () {
-        resetForm();
-    });
-        
-    function resetForm() {
-        form.find(".alert.alert-danger").hide();
-        form.find(".is-invalid").each(function (index, el) {
-            $(el).removeClass('is-invalid');
-        });
-        form.find('.invalid-feedback').html('');
-    }
-})()
-
-JS;
-
-$this->registerJs($js);
