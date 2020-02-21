@@ -656,7 +656,8 @@ $js = <<<JS
                             });
                       } else {
                           
-                          $.pjax.reload({container: '#pjax-lead-orders', timout: 8000});
+                          // $.pjax.reload({container: '#pjax-lead-orders', timout: 2000});
+                          pjaxReload({container: '#pjax-lead-orders'});
                           new PNotify({
                                 title: 'Quote was successfully deleted',
                                 type: 'success',

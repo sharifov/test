@@ -235,7 +235,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function getOrpOrders(): ActiveQuery
     {
-        return $this->hasMany(Order::class, ['or_id' => 'orp_order_id'])->viaTable('order_product', ['orp_product_quote_id' => 'pq_id']);
+        return $this->hasMany(Order::class, ['or_id' => 'pq_order_id']);
     }
 
     /**
@@ -531,7 +531,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function inProgress(?int $creatorId, ?string $description = ''): void
+    public function inProgress(?int $creatorId = null, ?string $description = null): void
     {
         $this->recordEvent(
             new ProductQuoteInProgressEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
@@ -546,14 +546,14 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function booked(?int $creatorId, ?string $description = ''): void
+    public function booked(?int $creatorId = null, ?string $description = null): void
     {
         $this->recordEvent(
             new ProductQuoteBookedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
         );
         if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
             $this->setStatus(ProductQuoteStatus::BOOKED);
-            $this->recordEvent((new OrderChangeStatusProcessingEvent($this)));
+//            $this->recordEvent((new OrderChangeStatusProcessingEvent($this)));
         }
     }
 
@@ -561,7 +561,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function error(?int $creatorId, ?string $description = ''): void
+    public function error(?int $creatorId = null, ?string $description = null): void
     {
         $this->recordEvent(
             new ProductQuoteErrorEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
@@ -575,7 +575,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function cancelled(?int $creatorId, ?string $description = ''): void
+    public function cancelled(?int $creatorId = null, ?string $description = null): void
     {
         $this->recordEvent(
             new ProductQuoteCanceledEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
@@ -590,7 +590,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function declined(?int $creatorId, ?string $description = ''): void
+    public function declined(?int $creatorId = null, ?string $description = null): void
     {
        $this->recordEvent(
             new ProductQuoteDeclinedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
@@ -605,7 +605,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      * @param int|null $creatorId
      * @param string|null $description
      */
-    public function expired(?int $creatorId, ?string $description = ''): void
+    public function expired(?int $creatorId = null, ?string $description = null): void
     {
         $this->recordEvent(
             new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
@@ -620,7 +620,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 	 * @param int|null $creatorId
 	 * @param string|null $description
 	 */
-    public function sold(?int $creatorId, ?string $description = ''): void
+    public function sold(?int $creatorId = null, ?string $description = null): void
 	{
 		$this->recordEvent(
 			new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)

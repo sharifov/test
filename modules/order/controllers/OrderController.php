@@ -72,7 +72,7 @@ class OrderController extends FController
             	try {
             		$this->orderManageService->createOrder((new CreateOrderDTO($model->or_lead_id)));
 
-					return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
+					return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
 				} catch (\Throwable $e) {
                 	Yii::error(VarDumper::dumpAsString($e->getMessage()), 'OrderController:CreateAjax:orderManageService:createOrder');
 				}
@@ -135,7 +135,7 @@ class OrderController extends FController
                 //$modelOrder->or_client_currency_rate = $model->or_client_currency_rate;
 
                 if ($modelOrder->save()) {
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
+                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
                 }
 
                 Yii::error(VarDumper::dumpAsString($modelOrder->errors), 'OrderController:actionUpdateAjax:Order:save');

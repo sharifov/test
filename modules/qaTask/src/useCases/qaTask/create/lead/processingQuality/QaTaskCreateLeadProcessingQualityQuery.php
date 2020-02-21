@@ -40,6 +40,7 @@ class QaTaskCreateLeadProcessingQualityQuery
                 . ' AND lfs.created > \'' . (new \DateTimeImmutable())->modify('-' . ($rule->hour_frame_3 + $rule->hour_offset) . ' hour')->format('Y-m-d H:i:s') . '\''
             )
             ->andWhere(['l.status' => Lead::STATUS_PROCESSING])
+            ->andWhere(['l.l_type_create' => [Lead::TYPE_CREATE_API, Lead::TYPE_CREATE_INCOMING_CALL]])
             ->andWhere(
                 ' ( '
                 . LeadFlow::find()->alias('lf')->select(new Expression("concat(lf.lf_from_status_id, '-', lf.status)"))

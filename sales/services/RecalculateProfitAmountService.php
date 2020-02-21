@@ -4,6 +4,7 @@ namespace sales\services;
 
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\product\src\entities\productQuote\ProductQuote;
 
@@ -15,6 +16,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
  * @property Offer[] $changedOffers
  * @property Order[] $orders
  * @property Order[] $changedOrders
+ * @property OrderRepository $orderRepository
  */
 class RecalculateProfitAmountService
 {
@@ -24,9 +26,14 @@ class RecalculateProfitAmountService
 
     public $changedOffers = [];
     public $changedOrders = [];
+	/**
+	 * @var OrderRepository
+	 */
+	private $orderRepository;
 
-    public function __construct()
+	public function __construct(OrderRepository $orderRepository)
 	{
+		$this->orderRepository = $orderRepository;
 	}
 
 	/**
@@ -156,9 +163,9 @@ class RecalculateProfitAmountService
     {
         $result = [];
         foreach ($this->changedOrders as $order) {
-            $saved = $order->save(false);
-            if ($saved) {
-                $result[] = $order->or_id;
+            $orderId = $this->orderRepository->save($order);
+            if ($orderId) {
+                $result[] = $orderId;
             } else {
                 throw new \RuntimeException('Order not saved');
             }
