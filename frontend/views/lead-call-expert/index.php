@@ -1,6 +1,7 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
+use modules\product\src\entities\productType\ProductType;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
@@ -77,7 +78,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             'lce_request_text:ntext',
-            //'lce_request_dt',
+            [
+                'label' => 'Product',
+                'attribute' => 'lce_product_id',
+                'value' => static function (\common\models\LeadCallExpert $model) {
+                    return $model->product ? 'ID: ' . $model->product->pr_id . ' Name: ' . $model->product->pr_name : '-';
+                },
+            ],
             [
                 'attribute' => 'lce_request_dt',
                 'value' => static function (\common\models\LeadCallExpert $model) {
