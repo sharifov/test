@@ -46,7 +46,7 @@ use yii\web\View;
 						'size'=>'sm',
 						'inputType' => Editable::INPUT_TEXT,
 						'buttonsTemplate' => '{submit}',
-						'pluginEvents' => ["editableSuccess" => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-quote_prices-{$flightQuote->fq_id}', async: false}); $('#quote_profit_{$flightQuote->fq_id}').popover('hide').popover('dispose');$.pjax.reload({container: '#pjax-quote_estimation_profit-{$flightQuote->fq_id}', async: false});$('#quote_profit_{$flightQuote->fq_id}').popover();}",],
+						'pluginEvents' => ["editableSuccess" => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-quote_prices-{$flightQuote->fq_id}', async: false}); $('#quote_profit_{$flightQuote->fq_id}').popover('hide').popover('dispose');$.pjax.reload({container: '#pjax-quote_estimation_profit-{$flightQuote->fq_id}', async: false});$('#quote_profit_{$flightQuote->fq_id}').popover();$.pjax.reload({container: '#pjax-product_total-{$flightQuote->fqProductQuote->pq_id}', async: false});}",],
 						'inlineSettings' => [
 							'templateBefore' => '<div class="editable-pannel">{loading}',
 							'templateAfter' => '{buttons}{close}</div>'],
