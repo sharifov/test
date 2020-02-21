@@ -102,6 +102,7 @@ class LeadCallExpertSearch extends LeadCallExpert
             'lce_status_id' => $this->lce_status_id,
             'lce_agent_user_id' => $this->lce_agent_user_id,
             'lce_expert_user_id' => $this->lce_expert_user_id,
+            'lce_product_id' => $this->lce_product_id,
         ]);
 
         $query->andFilterWhere(['like', 'lce_request_text', $this->lce_request_text])
