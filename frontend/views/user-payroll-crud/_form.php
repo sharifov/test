@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'ups_user_id')->dropDownList(Employee::getList()) ?>
 
-            <?= $form->field($model, 'ups_month')->input('number') ?>
+            <?= $form->field($model, 'ups_month')->dropDownList(\sales\helpers\DateHelper::getMonthList(), ['prompt' => '--']) ?>
 
 			<?= $form->field($model, 'ups_year')->input('number') ?>
 
