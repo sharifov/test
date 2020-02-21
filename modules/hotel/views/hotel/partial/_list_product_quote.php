@@ -12,6 +12,7 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use yii\data\ArrayDataProvider;
 use yii\web\View;
 use yii\helpers\Html;
+use yii\widgets\Pjax;
 
 ?>
 
@@ -134,6 +135,7 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 
+<?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
 
@@ -357,5 +359,6 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
     </div>
 </div>
+<?php Pjax::end(); ?>
 
 <?php endif; ?>
