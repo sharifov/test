@@ -41,7 +41,7 @@ return [
         'cacheFile' => [
             'class' => 'yii\caching\FileCache',
             'defaultDuration' => 10 * 60,
-            'gcProbability' => 100000,
+            'gcProbability' => 100,
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
