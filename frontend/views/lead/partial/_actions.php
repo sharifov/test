@@ -98,57 +98,55 @@ $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadMode
 
 $viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
 $buttonsSubAction = [];
-$takeConditions = false;
-if (!$leadModel->isNewRecord) {
 
-    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isPending() || $leadModel->isProcessing()) && $leadModel->getAppliedAlternativeQuotes() === null);
-    $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
+$takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isPending() || $leadModel->isProcessing()) && $leadModel->getAppliedAlternativeQuotes() === null);
+$processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
-    if($processingConditions){
-        if ($user->isAdmin() || $user->isSupervision()) {
-            $buttonsSubAction[] = $buttonAnswer;
-        }
-        //$buttonsSubAction[] = $buttonHoldOn;
-        $buttonsSubAction[] = $buttonFollowUp;
-        $buttonsSubAction[] = $buttonSnooze;
-        $buttonsSubAction[] = $buttonTrash;
-        if ($leadModel->isSold()) {
-            if ($user->isAdmin()) {
-                $buttonsSubAction[] = $buttonClone;
-            }
-        } else {
+if($processingConditions){
+    if ($user->isAdmin() || $user->isSupervision()) {
+        $buttonsSubAction[] = $buttonAnswer;
+    }
+    //$buttonsSubAction[] = $buttonHoldOn;
+    $buttonsSubAction[] = $buttonFollowUp;
+    $buttonsSubAction[] = $buttonSnooze;
+    $buttonsSubAction[] = $buttonTrash;
+    if ($leadModel->isSold()) {
+        if ($user->isAdmin()) {
             $buttonsSubAction[] = $buttonClone;
         }
+    } else {
+        $buttonsSubAction[] = $buttonClone;
     }
-    if ($leadModel->isSnooze()) {
-        $buttonsSubAction[] = $buttonOnWake;
-    }
-    if ($leadModel->isTrash()) {
-        $buttonsSubAction[] = $buttonReturnLead;
-        $buttonsSubAction[] = $buttonReject;
-    }
-    if ($viwModeSuperAdminCondition){
-        if ($leadModel->isSold()) {
-            if ($user->isAdmin()) {
-                $buttonsSubAction[] = $buttonClone;
-            }
-        } else {
-            $buttonsSubAction[] = $buttonClone;
-        }
-    }
-
-    if ($user->isAgent() && ($leadModel->isBooked() || $leadModel->isSold())) {
-        if ($leadModel->isSold()) {
-            if ($user->isAdmin()) {
-                $buttonsSubAction[] = $buttonClone;
-            }
-        } else {
-            $buttonsSubAction[] = $buttonClone;
-        }
-    }
-
-
 }
+if ($leadModel->isSnooze()) {
+    $buttonsSubAction[] = $buttonOnWake;
+}
+if ($leadModel->isTrash()) {
+    $buttonsSubAction[] = $buttonReturnLead;
+    $buttonsSubAction[] = $buttonReject;
+}
+if ($viwModeSuperAdminCondition){
+    if ($leadModel->isSold()) {
+        if ($user->isAdmin()) {
+            $buttonsSubAction[] = $buttonClone;
+        }
+    } else {
+        $buttonsSubAction[] = $buttonClone;
+    }
+}
+
+if ($user->isAgent() && ($leadModel->isBooked() || $leadModel->isSold())) {
+    if ($leadModel->isSold()) {
+        if ($user->isAdmin()) {
+            $buttonsSubAction[] = $buttonClone;
+        }
+    } else {
+        $buttonsSubAction[] = $buttonClone;
+    }
+}
+
+
+
 $project = $leadModel->project;
 $projectStyles = '';
 if($project){
@@ -198,29 +196,13 @@ if($project){
             }
         }?>
 
-                <?php if ($buttonsSubAction): ?>
-                    <?php foreach ($buttonsSubAction as $btn):?>
-                        <?= $btn ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+        <?php if ($buttonsSubAction): ?>
+            <?php foreach ($buttonsSubAction as $btn):?>
+                <?= $btn ?>
+            <?php endforeach; ?>
+        <?php endif; ?>
 
 
-
-<!--    	--><?php //if(count($buttonsSubAction) > 1):?>
-<!--    	<div class="dropdown inline-block">-->
-<!--            --><?php //= Html::a('<i class="fa fa-ellipsis-v"></i> Action', null, [
-//                'class' => 'btn btn-default',
-//                'data-toggle' => 'dropdown'
-//            ]) ?>
-<!--            <ul class="dropdown-menu" aria-labelledby="dLabel">-->
-<!--                --><?php //foreach ($buttonsSubAction as $button):?>
-<!--                <li>--><?php //= $button?><!--</li>-->
-<!--                --><?php //endforeach;?>
-<!--            </ul>-->
-<!--        </div>-->
-<!--        --><?php //elseif (count($buttonsSubAction) == 1):?>
-<!--        	--><?php //= $buttonsSubAction[0];?>
-<!--    	--><?php //endif;?>
 
         <?php  if (!empty($leadModel->bo_flight_id) && $leadModel->isOwner($user->id) && $leadModel->isBooked()) {
             $title = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr)
@@ -240,7 +222,7 @@ if($project){
 
 
 
-        <?php if(!$leadModel->isNewRecord && ($user->isAdmin() || $user->isSupervision())): ?>
+        <?php if($user->isAdmin() || $user->isSupervision()): ?>
             <?= Html::a('<i class="fa fa-bars"></i> Status Logs', null, [
                 'id' => 'view-flow-transition',
                 'class' => 'btn btn-default',
@@ -248,13 +230,13 @@ if($project){
             ]) ?>
 
             <?php
-                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadModel->id])->count();
-                echo Html::a('Old Data Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
-                    [
-                        'id' => 'btn-lead-logs',
-                        'class' => 'btn btn-default',
-                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadModel->id])
-                    ]);
+//                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadModel->id])->count();
+//                echo Html::a('Old Data Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
+//                    [
+//                        'id' => 'btn-lead-logs',
+//                        'class' => 'btn btn-default',
+//                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadModel->id])
+//                    ]);
             ?>
 
             <?= Html::a('<i class="fa fa-list"></i> Data Logs', null, [
