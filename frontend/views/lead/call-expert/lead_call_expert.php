@@ -45,7 +45,7 @@ $user = Yii::$app->user->identity;
         }
         ?>&nbsp;
 
-        <h2><i class="fa fa-bell-o <?=$label?>"></i> Call Expert (<?=$dataProvider->count?>)
+        <h2><i class="fa fa-bell-o <?=$label?>"></i> BO Expert (<?=$dataProvider->count?>)
 
             <?php
                 if($lastModel) {
@@ -68,7 +68,7 @@ $user = Yii::$app->user->identity;
                 <?php if($lead->leadFlightSegmentsCount):?>
                     <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
                         <?php if($user->isEnableCallExpert() && $lead->isProcessing()): ?>
-                            <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                            <?=Html::a('<i class="fa fa-plus-circle success"></i> New Call', null, ['id' => 'btn-call-expert-form'])?>
                         <?php endif; ?>
                     <?php endif; ?>
                 <?php else: ?>
@@ -93,6 +93,7 @@ $user = Yii::$app->user->identity;
         </ul>
         <div class="clearfix"></div>
     </div>
+
     <div class="x_content" style="display: <?=Yii::$app->request->isPjax ? 'block' : 'none';?>">
 
                 <?= \yii\widgets\ListView::widget([
@@ -139,12 +140,15 @@ $user = Yii::$app->user->identity;
 
         <div class="row" style="display: <?=$modelLeadCallExpert->hasErrors() ? 'block' : 'none'?>" id="div-call-expert-form">
 
-            <div class="col-sm-3">
-                <?= $form->field($modelLeadCallExpert, 'lce_product_id')->dropDownList(
-                    ArrayHelper::map($lead->products, 'pr_id', 'pr_name'),
-                    ['prompt' => 'Select product', 'id' => 'lce_product_id']
-                ) ?>
-            </div>
+            <?php $products = (new Product())->getByLeadAndType($lead->id) ?>
+            <?php if ($products):?>
+                <div class="col-sm-3">
+                    <?= $form->field($modelLeadCallExpert, 'lce_product_id')->dropDownList(
+                        ArrayHelper::map($products, 'pr_id', 'pr_name'),
+                        ['prompt' => 'Select product', 'id' => 'lce_product_id']
+                    ) ?>
+                </div>
+            <?php endif ?>
 
             <div class="col-md-12">
                 <?= $form->field($modelLeadCallExpert, 'lce_request_text')->textarea(['rows' => 8, 'id' => 'lce_request_text'])->label('Request Message') ?>

@@ -33,6 +33,10 @@ class ProductType extends \yii\db\ActiveRecord
 
     public const PROCESSING_FEE_AMOUNT = 25.00;
 
+    public const ALLOW_CALL_EXPERT = [
+        self::PRODUCT_FLIGHT,
+    ];
+
     public static function tableName(): string
     {
         return 'product_type';

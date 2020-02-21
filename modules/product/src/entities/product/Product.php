@@ -269,4 +269,16 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         $this->pr_description = $description;
         return $this;
     }
+
+    /**
+     * @param int $leadId
+     * @param array $typeIds
+     * @return array|ActiveRecord[]
+     */
+    public function getByLeadAndType(int $leadId, array $typeIds = ProductType::ALLOW_CALL_EXPERT)
+    {
+        return self::find()->where(['pr_lead_id' => $leadId])
+            ->andWhere(['IN', 'pr_type_id', $typeIds])
+            ->all();
+    }
 }
