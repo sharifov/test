@@ -194,8 +194,15 @@ $js = <<<JS
     
     $(document).on('click', '.btn-product-description', function() {
         let productId = $('#lce_product_id').val();
+        let productDescriptionElement = $('#product_description_' + productId);
+        
+        if (productDescriptionElement.length == 0) {
+            new PNotify({title: 'Error', text: 'Description is empty.', type: 'error'});
+            return false;
+        }
+        
         let requestText = $('#lce_request_text').val();
-        let description = $('#product_description_' + productId).data('content');
+        let description = productDescriptionElement.data('content');
         let textNew = description;
         
         if (requestText.length > 0) {
