@@ -3,8 +3,10 @@
 namespace modules\order\controllers;
 
 use common\models\Lead;
-use modules\order\src\entities\orderProduct\OrderProduct;
 use modules\order\src\forms\OrderForm;
+use modules\order\src\services\CreateOrderDTO;
+use modules\order\src\services\OrderManageService;
+use modules\product\src\entities\productQuote\ProductQuote;
 use Yii;
 use modules\order\src\entities\order\Order;
 use frontend\controllers\FController;
@@ -17,9 +19,26 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
+/**
+ * Class OrderController
+ * @package modules\order\controllers
+ *
+ * @property OrderManageService $orderManageService
+ */
 class OrderController extends FController
 {
-    /**
+	/**
+	 * @var OrderManageService
+	 */
+	private $orderManageService;
+
+	public function __construct($id, $module, OrderManageService $orderManageService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->orderManageService = $orderManageService;
+	}
+
+	/**
      * @return array
      */
     public function behaviors(): array
@@ -49,28 +68,16 @@ class OrderController extends FController
             //Yii::$app->response->format = Response::FORMAT_JSON;
 
             if ($model->validate()) {
-                $order = new Order();
-                //$order->attributes = $model->attributes;
-                $order->initCreate();
 
-                $order->or_lead_id = $model->or_lead_id;
-                $order->or_name = $model->or_name;
+            	try {
+            		$this->orderManageService->createOrder((new CreateOrderDTO($model->or_lead_id)));
 
-                if (!$order->or_name && $order->or_lead_id) {
-                    $order->or_name = $order->generateName();
-                }
-
-                $order->updateOrderTotalByCurrency();
-
-                if ($order->save()) {
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
-                }
-
-                //$model->errors = $offer->errors;
-                Yii::error(VarDumper::dumpAsString($order->errors), 'OrderController:CreateAjax:Order:save');
+					return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders"});</script>';
+				} catch (\Throwable $e) {
+                	Yii::error(VarDumper::dumpAsString($e->getMessage()), 'OrderController:CreateAjax:orderManageService:createOrder');
+				}
 
             }
-            //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
         } else {
 
             $leadId = (int) Yii::$app->request->get('id');
@@ -194,9 +201,9 @@ class OrderController extends FController
             if ($orders) {
                 foreach ($orders as $order) {
 
-                    $exist = OrderProduct::find()->where(['orp_order_id' => $order->or_id, 'orp_product_quote_id' => $productQuoteId])->exists();
+                    $exist = ProductQuote::find()->where(['pq_order_id' => $order->or_id, 'pq_id' => $productQuoteId])->exists();
 
-                    $offerList[] = Html::a(($exist ? '<i class="fa fa-check-square-o success"></i> ' : '<i class="fa fa-square-o"></i> ') . $order->or_name, null, [
+                    $offerList[] = Html::a(($exist ? '<i class="fa fa-check-square-o success"></i> ' : '') . $order->or_name, null, [
                         'class' => 'dropdown-item btn-add-quote-to-order ', // . ($exist ? 'disabled' : ''),
                         'title' => 'ID: ' . $order->or_id . ', UID: ' . \yii\helpers\Html::encode($order->or_uid),
                         'data-product-quote-id' => $productQuoteId,

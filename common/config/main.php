@@ -37,10 +37,11 @@ return [
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
-            'keyPrefix' => 'FileCache'
         ],
         'cacheFile' => [
             'class' => 'yii\caching\FileCache',
+            'defaultDuration' => 10 * 60,
+            'gcProbability' => 100,
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',

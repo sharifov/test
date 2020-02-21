@@ -9,6 +9,7 @@ use common\models\Project;
 //use sales\entities\cases\Cases;
 use sales\entities\cases\CasesCategory;
 //use sales\entities\cases\CasesStatus;
+use sales\entities\cases\CasesSourceType;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 //use yii\helpers\Html;
@@ -23,6 +24,7 @@ use yii\helpers\ArrayHelper;
  * @property string $clientPhone
  * @property string $clientEmail
  * @property int $depId
+ * @property int $sourceTypeId
  *
  * @property Employee $user
  */
@@ -36,6 +38,7 @@ class CasesCreateByWebForm extends Model
     public $clientPhone;
     public $clientEmail;
     public $depId;
+    public $sourceTypeId;
 
     private $user;
     private $cache_projects;
@@ -88,7 +91,17 @@ class CasesCreateByWebForm extends Model
             ['clientEmail', 'filter', 'filter' => static function($value) {
                 return mb_strtolower(trim($value));
             }],
+            
+            ['sourceTypeId', 'required'],
+            ['sourceTypeId', 'integer'],
+            ['sourceTypeId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['sourceTypeId', 'in', 'range' => array_keys($this->getSourceTypeList())],
         ];
+    }
+
+    public function getSourceTypeList(): array
+    {
+        return CasesSourceType::getList();
     }
 
     public function phoneOrEmailRequired(): void
@@ -182,6 +195,7 @@ class CasesCreateByWebForm extends Model
             'category' => 'Category',
             'clientPhone' => 'Phone',
             'clientEmail' => 'Email',
+            'sourceTypeId' => 'Source type',
         ];
     }
 

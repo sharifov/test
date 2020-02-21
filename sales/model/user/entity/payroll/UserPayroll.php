@@ -193,7 +193,7 @@ class UserPayroll extends \yii\db\ActiveRecord
 	 * @param int $statusId
 	 * @return string|null
 	 */
-	public static function getAgentStatusName(int $statusId): ?string
+	public static function getAgentStatusName(?int $statusId): ?string
 	{
 		return self::getAgentStatusList()[$statusId] ?? null;
 	}
@@ -206,7 +206,7 @@ class UserPayroll extends \yii\db\ActiveRecord
 		return self::STATUS_LIST;
 	}
 
-	public static function getStatusName(int $statusId): ?string
+	public static function getStatusName(?int $statusId): ?string
 	{
 		return self::getStatusList()[$statusId] ?? null;
 	}

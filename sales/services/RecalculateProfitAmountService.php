@@ -4,6 +4,7 @@ namespace sales\services;
 
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\product\src\entities\productQuote\ProductQuote;
 
 /**
@@ -24,7 +25,11 @@ class RecalculateProfitAmountService
     public $changedOffers = [];
     public $changedOrders = [];
 
-    /**
+    public function __construct()
+	{
+	}
+
+	/**
      * @param ProductQuote $productQuote
      * @return RecalculateProfitAmountService
      */

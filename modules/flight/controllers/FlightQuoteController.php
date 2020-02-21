@@ -236,6 +236,10 @@ class FlightQuoteController extends FController
 			],
 		]);
 
+		if (empty($pjaxId)) {
+            $pjaxId = 'pjax-product-' . $flight->fl_product_id;
+		}
+
 		$viewData['quotes'] = $quotes;
 		$viewData['dataProvider'] = $dataProvider;
 		$viewData['flightId'] = $flight->fl_id;

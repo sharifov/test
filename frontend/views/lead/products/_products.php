@@ -560,7 +560,7 @@ $js = <<<JS
                             });
                       } else {
                           
-                          $.pjax.reload({container: '#pjax-lead-orders', timout: 8000});
+                          $.pjax.reload({container: '#pjax-lead-orders', timout: 2000, push: false, relplace: false, async: false});
                           new PNotify({
                                 title: 'Quote was successfully added',
                                 type: 'success',

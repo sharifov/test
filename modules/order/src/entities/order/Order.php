@@ -6,7 +6,9 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
-use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\order\src\entities\orderUserProfit\OrderUserProfit;
+use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
@@ -46,11 +48,11 @@ use yii\db\ActiveRecord;
  * @property Employee $orCreatedUser
  * @property Employee $orOwnerUser
  * @property Employee $orUpdatedUser
- * @property OrderProduct[] $orderProducts
  * @property ProductQuote[] $orpProductQuotes
  * @property ProductQuote[] $productQuotesActive
  * @property float $orderTotalCalcSum
  * @property ProductQuote[] $productQuotes
+ * @property OrderUserProfit[] $orderUserProfit
  */
 class Order extends ActiveRecord
 {
@@ -133,15 +135,23 @@ class Order extends ActiveRecord
         ];
     }
 
-    /**
-     * Order init create
-     */
-    public function initCreate(): void
-    {
-        $this->or_gid = self::generateGid();
-        $this->or_uid = self::generateUid();
-        $this->or_status_id = OrderStatus::PENDING;
-    }
+    public function create(CreateOrderDTO $dto): self
+	{
+		$this->or_gid = self::generateGid();
+		$this->or_uid = self::generateUid();
+		$this->or_status_id = $dto->status;
+		$this->or_lead_id = $dto->leadId;
+		$this->or_name = $this->generateName();
+		if ($this->orLead && $this->orLead->employee_id) {
+			$this->or_owner_user_id = $this->orLead->employee_id;
+		}
+		if (!$this->or_name && $this->or_lead_id) {
+			$this->or_name = $this->generateName();
+		}
+		$this->updateOrderTotalByCurrency();
+
+		return $this;
+	}
 
     /**
      * @return ActiveQuery
@@ -193,15 +203,6 @@ class Order extends ActiveRecord
 
     /**
      * @return ActiveQuery
-     */
-    public function getOrderProducts(): ActiveQuery
-    {
-        return $this->hasMany(OrderProduct::class, ['orp_order_id' => 'or_id']);
-    }
-
-
-    /**
-     * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
     public function getOrpProductQuotes(): ActiveQuery
@@ -209,14 +210,18 @@ class Order extends ActiveRecord
         return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])->viaTable('order_product', ['orp_order_id' => 'or_id']);
     }
 
+    public function getOrderUserProfit(): ActiveQuery
+	{
+		return $this->hasMany(OrderUserProfit::class, ['oup_order_id' => 'or_id']);
+	}
+
     /**
      * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
     public function getProductQuotesActive(): ActiveQuery
     {
-        return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])
-            ->viaTable(OrderProduct::tableName(), ['orp_order_id' => 'or_id'])
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])
             ->where(['not', ['pq_status_id' => ProductQuoteStatus::CANCEL_GROUP]]);
     }
 
@@ -264,15 +269,23 @@ class Order extends ActiveRecord
     public function getOrderTotalCalcSum(): float
     {
         $sum = 0;
-        $orderProducts = $this->orderProducts;
-        if ($orderProducts) {
-            foreach ($orderProducts as $orderProduct) {
-                if ($quote = $orderProduct->orpProductQuote) {
-                    $sum += $quote->totalCalcSum;
-                }
-            }
-            $sum = round($sum, 2);
-        }
+//        $orderProducts = $this->orderProducts;
+		$quotes = $this->productQuotes;
+		if($quotes) {
+			foreach ($quotes as $quote) {
+				$sum += $quote->totalCalcSum;
+			}
+			$sum = round($sum, 2);
+		}
+
+//        if ($orderProducts) {
+//            foreach ($orderProducts as $orderProduct) {
+//                if ($quote = $orderProduct->orpProductQuote) {
+//                    $sum += $quote->totalCalcSum;
+//                }
+//            }
+//            $sum = round($sum, 2);
+//        }
         return $sum;
     }
 
@@ -319,4 +332,32 @@ class Order extends ActiveRecord
         return $changed;
     }
 
+    public function isProcessing()
+	{
+		return $this->or_status_id === OrderStatus::PROCESSING;
+	}
+
+    public function processing(): void
+	{
+		// ToDo: need to log status
+		if (!$this->isProcessing()) {
+			OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
+			foreach ($this->productQuotes as $productQuote) {
+				if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
+					$this->setStatus(OrderStatus::PROCESSING);
+					break;
+				}
+			}
+		}
+	}
+
+	private function setStatus(int $status): void
+	{
+		if (!array_key_exists($status, OrderStatus::getList())) {
+			throw new \InvalidArgumentException('Invalid Status');
+		}
+		OrderStatus::guard($this->or_status_id, $status);
+
+		$this->or_status_id = $status;
+	}
 }

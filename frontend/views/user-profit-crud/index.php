@@ -58,9 +58,9 @@ $this->params['breadcrumbs'][] = $this->title;
 				},
 				'format' => 'raw'
 			],
-            'up_percent:percent',
+            'up_percent:percentInteger',
             'up_profit',
-            'up_split_percent:percent',
+            'up_split_percent:percentInteger',
             'up_amount',
             [
                 'attribute' => 'up_status_id',

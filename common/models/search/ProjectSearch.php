@@ -18,7 +18,7 @@ class ProjectSearch extends Project
     public function rules()
     {
         return [
-            [['id', 'closed'], 'integer'],
+            [['id', 'closed', 'sort_order'], 'integer'],
             [['name', 'link', 'api_key', 'contact_info', 'last_update', 'custom_data'], 'safe'],
         ];
     }

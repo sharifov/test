@@ -14,8 +14,11 @@ use yii\widgets\Pjax;
 
 $flightQuote = FlightQuote::findByProductQuoteId($model);
 
+$totalAmountQuote = 0.0;
+
 ?>
 
+<?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel" id="quote-<?=$model->pq_id?>">
     <div class="x_title">
 
@@ -284,12 +287,8 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                             <strong><?= $flightQuote->getEmployeeName() ?></strong>
                         </span>
                     </td>*/ ?>
-
-
-
                         <?php Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                             <?php $priceData = FlightQuoteHelper::getPricesData($flightQuote); ?>
-
                             <?php /*if($model->isApplied() && $model->pqProduct->prLead->final_profit !== null): ?>
                             <td>
                                 Agent Profit:
@@ -307,12 +306,11 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                                 </a>
                             </td>
                             <?php endif;*/?>
-                        <td>
-                            <span class="<?=$model->pq_profit_amount < 0 ? 'danger' : ($model->pq_profit_amount > 0 ? 'success' : 'default') ?>" title="Profit amount: <?= number_format($model->pq_profit_amount, 2) ?> $" data-toggle="tooltip">
-                                <i class="fas fa-donate"></i> <?= number_format($model->pq_profit_amount, 2) ?>
-                            </span>
-                        </td>
-
+                            <td>
+                                <span class="<?=$model->pq_profit_amount < 0 ? 'danger' : ($model->pq_profit_amount > 0 ? 'success' : 'default') ?>" title="Profit amount: <?= number_format($model->pq_profit_amount, 2) ?> $" data-toggle="tooltip">
+                                    <i class="fas fa-donate"></i> <?= number_format($model->pq_profit_amount, 2) ?>
+                                </span>
+                            </td>
                         <?php Pjax::end(); ?>
 
                         <td class="text-right">
@@ -463,5 +461,12 @@ $flightQuote = FlightQuote::findByProductQuoteId($model);
                 </div>
             <?php endif; ?>
 
+            <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model]) ?>
+
+            <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model]) ?>
+
+
+
     </div>
 </div>
+<?php Pjax::end(); ?>

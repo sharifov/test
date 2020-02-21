@@ -50,6 +50,7 @@ use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\QaTaskCreateLeadProcessingQualityService;
 use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateForm;
 use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateService;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
@@ -182,8 +183,20 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $id = LeadQuery::getLastActiveUserId(325682);
-        VarDumper::dump($id);
+        $params = [
+            'calls_per_frame' => 2,
+            'out_min_duration' => 5,
+            'in_min_rec_duration' => 30,
+            'include_in_calls' => true,
+            'hour_offset' => 12,
+            'hour_frame_1' => 24,
+            'hour_frame_2' => 48,
+            'hour_frame_3' => 72,
+        ];
+
+
+        $service = Yii::createObject(QaTaskCreateLeadProcessingQualityService::class);
+        $service->handle(new \modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\Rule($params));
         die;
 
         return $this->render('blank');

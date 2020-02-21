@@ -1,5 +1,7 @@
 <?php
 
+use modules\qaTask\src\entities\qaTask\QaTask;
+use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 ?>
@@ -22,7 +24,19 @@ use yii\widgets\DetailView;
                         'attributes' => [
                             'project:projectName',
                             't_object_type_id:qaTaskObjectType',
-                            't_object_id',
+                            [
+                                'attribute' => 't_object_id',
+                                'value' => function (QaTask $model) {
+                                    return Html::a($model->t_object_id,
+                                        ['/qa-task/qa-task/view-object', 'typeId' => $model->t_object_type_id, 'id' => $model->t_object_id],
+                                        [
+                                            'target' => '_blank',
+                                            'data-pjax' => 0,
+                                            'title' => 'View Object',
+                                        ]);
+                                },
+                                'format' => 'raw',
+                            ],
                             't_status_id:qaTaskStatus',
                             't_create_type_id:qaTaskCreatedType',
                             'category.tc_name',

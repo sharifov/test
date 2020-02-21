@@ -60,12 +60,12 @@ $this->params['breadcrumbs'][] = $this->title;
 			[
 				'class' => UserColumn::class,
 				'attribute' => 'upt_created_user_id',
-				'relation' => 'uptAssignedUser'
+				'relation' => 'uptCreatedUser'
 			],
 			[
 				'class' => UserColumn::class,
 				'attribute' => 'upt_updated_user_id',
-				'relation' => 'uptAssignedUser'
+				'relation' => 'uptUpdatedUser'
 			],
             [
                 'class' => DateTimeColumn::class,

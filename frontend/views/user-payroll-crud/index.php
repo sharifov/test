@@ -1,6 +1,7 @@
 <?php
 
 use sales\yii\grid\DateTimeColumn;
+use sales\yii\grid\MonthColumn;
 use yii\grid\ActionColumn;
 use sales\model\user\entity\payroll\UserPayroll;
 use sales\model\user\entity\profit\search\UserProfitSearch;
@@ -57,9 +58,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             <?php ActiveForm::end(); ?>
         </div>
-        <div class="col-md-4">
-            <?= Html::a('Calculate Payroll', ['calculate-user-payroll'], ['class' => 'btn btn-warning calc', 'data-action' => 1]) ?>
-            <?= Html::a('Recalculate Payroll', ['calculate-user-payroll'], ['class' => 'btn btn-info calc', 'data-action' => 2]) ?>
+        <div class="col-md-4 d-flex align-items-end">
+            <?= Html::a('Calculate Payroll', ['calculate-user-payroll'], ['class' => 'btn btn-warning calc', 'data-action' => 1, 'style' => 'margin-bottom: 10px;']) ?>
+            <?= Html::a('Recalculate Payroll', ['calculate-user-payroll'], ['class' => 'btn btn-info calc', 'data-action' => 2, 'style' => 'margin-bottom: 10px;']) ?>
         </div>
     </div>
 
@@ -111,7 +112,11 @@ $this->params['breadcrumbs'][] = $this->title;
 				},
 				'format' => 'raw'
 			],
-            'ups_month:MonthNameByMonthNumber',
+            [
+				'class' => MonthColumn::class,
+				'attribute' => 'ups_month',
+            ],
+//            'ups_month:MonthNameByMonthNumber',
             'ups_year',
             'ups_base_amount',
             'ups_profit_amount',

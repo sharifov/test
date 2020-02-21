@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model modules\qaTask\src\entities\qaTask\QaTask */
 
-$this->title = 'Task ' . $model->t_id . ' [' . $model->t_gid . ']';
+$this->title = 'Task ' . $model->t_id;
 $this->params['breadcrumbs'][] = ['label' => 'Qa Tasks', 'url' => ['/qa-task/qa-task-queue/search']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <?= $this->render('partial/general_info', [
                 'model' => $model,
             ])
