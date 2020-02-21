@@ -112,7 +112,7 @@ class UserProfit extends \yii\db\ActiveRecord
             [['up_user_id'], 'required'],
             [['up_id', 'up_user_id', 'up_lead_id', 'up_order_id', 'up_product_quote_id', 'up_percent', 'up_status_id', 'up_payroll_id', 'up_type_id'], 'integer'],
             [['up_profit', 'up_split_percent', 'up_amount'], 'number'],
-            [['up_profit', 'up_split_percent', 'up_amount'], 'filter', 'filter' => 'intval'],
+            [['up_split_percent', 'up_percent'], 'filter', 'filter' => 'intval'],
             [['up_created_dt', 'up_updated_dt'], 'safe'],
             [['up_id'], 'unique'],
 			[['up_percent', 'up_split_percent'], 'number', 'max' => 100, 'min' => 0],
@@ -256,9 +256,8 @@ class UserProfit extends \yii\db\ActiveRecord
 		$this->up_split_percent = $dto->splitPercent;
 	}
 
-	public function create(OrderUserProfitCreateUpdateDTO $dto)
+	public function create(OrderUserProfitCreateUpdateDTO $dto): void
 	{
-
 		$this->up_user_id = $dto->userId;
 		$this->up_lead_id = $dto->leadId;
 		$this->up_order_id = $dto->orderId;
@@ -268,6 +267,7 @@ class UserProfit extends \yii\db\ActiveRecord
 		$this->up_status_id = $dto->statusId;
 		$this->up_payroll_id = $dto->payrollId;
 		$this->up_type_id = $dto->typeId;
+//		$this->up_amount = $this->up_profit
 	}
 
     /**
