@@ -28,4 +28,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['tc_object_type_id' => $typeId]);
     }
+
+    public function byKey(string $key): self
+    {
+        return $this->andWhere(['tc_key' => $key]);
+    }
 }

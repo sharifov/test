@@ -14,6 +14,7 @@ class QaTaskActions
     public const ESCALATE = 6;
     public const RETURN = 7;
     public const CREATE = 8;
+    public const CREATE_LEAD_PROCESSING_QUALITY = 9;
 
     private const LIST = [
         self::TAKE => 'Take',
@@ -24,6 +25,7 @@ class QaTaskActions
         self::ESCALATE => 'Escalate',
         self::RETURN => 'Return',
         self::CREATE => 'Create',
+        self::CREATE_LEAD_PROCESSING_QUALITY => 'Rule: Lead Processing Quality',
     ];
 
     public static function getList(): array
