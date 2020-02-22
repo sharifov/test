@@ -74,12 +74,20 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
 
                 <div class="row ">
                     <div class="col-sm-2">
+                        <?= $form->field($itineraryForm, 'fl_stops')->input('number', ['min' => 0, 'max' => 9]) ?>
+                    </div>
+                    <div class="col-sm-2">
+                        <?= $form->field($itineraryForm, 'fl_delayed_charge')->dropDownList([1 => 'Yes', 0 => 'No']) ?>
+                    </div>
+                </div>
+
+                <div class="row ">
+                    <div class="col-sm-2">
                         <?= $form->field($itineraryForm, 'pr_market_price')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
                     </div>
                     <div class="col-sm-2">
                         <?= $form->field($itineraryForm, 'pr_client_budget')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
                     </div>
-
                 </div>
 
                 <div class="btn-wrapper text-center" style="margin-top: 10px;">

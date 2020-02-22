@@ -167,6 +167,15 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                 <div class="col-md-12">
                     <div class="col-md-6">
                         <?= DetailView::widget([
+                            'model' => $product->flight,
+                            'attributes' => [
+                                'fl_stops',
+                                'fl_delayed_charge:booleanByLabel',
+                            ],
+                        ]) ?>
+                    </div>
+                    <div class="col-md-6">
+                        <?= DetailView::widget([
                             'model' => $product,
                             'attributes' => [
                                 'pr_market_price',

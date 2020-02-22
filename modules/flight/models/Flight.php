@@ -2,6 +2,8 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\entities\flight\events\FlightChangedDelayedChargeEvent;
+use modules\flight\src\entities\flight\events\FlightChangedStopsEvent;
 use modules\flight\src\entities\flight\serializer\FlightSerializer;
 use modules\product\src\entities\product\Product;
 use modules\flight\models\query\FlightQuery;
@@ -21,6 +23,8 @@ use yii\db\ActiveQuery;
  * @property int|null $fl_children
  * @property int|null $fl_infants
  * @property string|null $fl_request_hash_key
+ * @property int|null $fl_stops
+ * @property bool|null $fl_delayed_charge
  * *
  * @property Product $flProduct
  * @property FlightPax[] $flightPaxes
@@ -96,6 +100,12 @@ class Flight extends \yii\db\ActiveRecord implements Productable
             [['fl_cabin_class'], 'string', 'max' => 1],
             [['fl_request_hash_key'], 'string', 'max' => 32],
             [['fl_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['fl_product_id' => 'pr_id']],
+
+            ['fl_stops', 'default', 'value' => null],
+            ['fl_stops', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['fl_stops', 'integer', 'max' => 9],
+
+            ['fl_delayed_charge', 'boolean'],
         ];
     }
 
@@ -113,6 +123,8 @@ class Flight extends \yii\db\ActiveRecord implements Productable
             'fl_children' => 'Children',
             'fl_infants' => 'Infants',
             'fl_request_hash_key' => 'Request Hash key',
+            'fl_stops' => 'Stops',
+            'fl_delayed_charge' => 'Delayed charge',
         ];
     }
 
@@ -220,20 +232,47 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         return self::CABIN_CLASS_LIST[$this->fl_cabin_class] ?? '-';
     }
 
-	/**
-	 * @param string $cabin
-	 * @param int $adults
-	 * @param int $children
-	 * @param int $infants
-	 */
-    public function editItinerary(string $cabin, int $adults, int $children, int $infants): void
-	{
-		if ($this->fl_cabin_class !== $cabin) {
-			$this->recordEvent(new FlightRequestUpdateEvent($this), FlightRequestUpdateEvent::EVENT_KEY);
-		}
-		$this->fl_cabin_class = $cabin;
-		$this->editPassengers($adults, $children, $infants);
-	}
+    /**
+     * @param string $cabin
+     * @param int $adults
+     * @param int $children
+     * @param int $infants
+     * @param int $stops
+     * @param bool $delayedCharge
+     */
+    public function editItinerary(
+        string $cabin,
+        int $adults,
+        int $children,
+        int $infants,
+        ?int $stops,
+        bool $delayedCharge
+    ): void
+    {
+        if ($this->fl_cabin_class !== $cabin) {
+            $this->recordEvent(new FlightRequestUpdateEvent($this), FlightRequestUpdateEvent::EVENT_KEY);
+        }
+        $this->fl_cabin_class = $cabin;
+        $this->editPassengers($adults, $children, $infants);
+        $this->updateStops($stops);
+        $this->updateDelayedCharge($delayedCharge);
+    }
+
+	public function updateStops(?int $value)
+    {
+        if ($this->fl_stops !== $value) {
+            $this->recordEvent(new FlightChangedStopsEvent($this));
+        }
+        $this->fl_stops = $value;
+    }
+
+	public function updateDelayedCharge(bool $value)
+    {
+        if ($this->fl_delayed_charge !== $value) {
+            $this->recordEvent(new FlightChangedDelayedChargeEvent($this));
+        }
+        $this->fl_delayed_charge = $value;
+    }
 
 	/**
 	 * @param int $adults

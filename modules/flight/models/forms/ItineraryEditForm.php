@@ -22,6 +22,8 @@ use sales\forms\CompositeForm;
  * @property FlightSegmentEditForm[] $segments
  * @property $pr_market_price
  * @property $pr_client_budget
+ * @property int|null $fl_stops
+ * @property bool|null $fl_delayed_charge
  */
 class ItineraryEditForm extends CompositeForm
 {
@@ -34,6 +36,8 @@ class ItineraryEditForm extends CompositeForm
 	public $tripType;
 	public $pr_market_price;
 	public $pr_client_budget;
+	public $fl_stops;
+	public $fl_delayed_charge;
 
 //	public $segments;
 
@@ -54,6 +58,8 @@ class ItineraryEditForm extends CompositeForm
 		$this->tripType = $flight->fl_trip_type_id;
 		$this->pr_market_price = $flight->flProduct->pr_market_price;
 		$this->pr_client_budget = $flight->flProduct->pr_client_budget;
+		$this->fl_stops = $flight->fl_stops;
+		$this->fl_delayed_charge = $flight->fl_delayed_charge;
 
 		$this->segments = array_map(static function ($segment) {
 			return new FlightSegmentEditForm($segment);
@@ -113,6 +119,13 @@ class ItineraryEditForm extends CompositeForm
 
             ['pr_client_budget', 'default', 'value' => null],
             ['pr_client_budget', 'number'],
+
+            ['fl_stops', 'default', 'value' => null],
+            ['fl_stops', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['fl_stops', 'integer', 'max' => 9],
+
+            ['fl_delayed_charge', 'required'],
+            ['fl_delayed_charge', 'boolean'],
 		];
 	}
 
@@ -121,6 +134,8 @@ class ItineraryEditForm extends CompositeForm
         return [
             'pr_market_price' => 'Market price',
             'pr_client_budget' => 'Client budget',
+            'fl_stops' => 'Stops',
+            'fl_delayed_charge' => 'Delayed charge',
         ];
     }
 

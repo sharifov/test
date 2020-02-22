@@ -54,7 +54,9 @@ class FlightManageService
 			$form->cabin,
 			$form->adults,
 			$form->children,
-			$form->infants
+			$form->infants,
+            $form->fl_stops,
+            $form->fl_delayed_charge
 		);
 
 		$this->transaction->wrap(function () use ($flight, $form) {
