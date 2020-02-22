@@ -7,7 +7,7 @@ use sales\yii\bootstrap4\assets\ActiveFormAsset;
 /**
  * Class ActiveForm
  *
- * @property bool $removeBt4ErrorsOnChangeElements
+ * @property bool $removeErrorsOnChangeElements
  */
 class ActiveForm extends \yii\bootstrap4\ActiveForm
 {
@@ -18,6 +18,11 @@ class ActiveForm extends \yii\bootstrap4\ActiveForm
     public function registerClientScript(): void
     {
         parent::registerClientScript();
+
+        if (!$this->removeErrorsOnChangeElements) {
+            return;
+        }
+
         $view = $this->getView();
         ActiveFormAsset::register($view);
         $clientOptions = $this->getClientOptions();
