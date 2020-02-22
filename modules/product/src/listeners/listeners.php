@@ -1,5 +1,7 @@
 <?php
 
+use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
+use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteExpiredEvent;
@@ -34,4 +36,6 @@ return [
     ProductQuoteRecalculateProfitAmountEvent::class => [ProductQuoteRecalculateProfitAmountListener::class],
     ProductQuoteRecalculateChildrenProfitAmountEvent::class => [ProductQuoteRecalculateChildrenProfitAmountListener::class],
 	UserProfitRecalculateEvent::class => [UserProfitRecalculateEventListener::class],
+    ProductMarketPriceChangedEvent::class => [],
+    ProductClientBudgetChangedEvent::class => [],
 ];

@@ -151,7 +151,21 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
             </div>
     </div>
 
-<!--    <div class="row">-->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-6">
+                <?= DetailView::widget([
+                    'model' => $model->phProduct,
+                    'attributes' => [
+                        'pr_market_price',
+                        'pr_client_budget',
+                    ],
+                ]) ?>
+            </div>
+        </div>
+    </div>
+
+    <!--    <div class="row">-->
 <!--        <div class="col-md-12">-->
 <!--            <p>-->
 <!--                --><?php //= Html::a('<i class="fa fa-search"></i> Search Quotes', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote/search-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-warning btn-search-hotel-quotes']) ?>

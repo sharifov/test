@@ -2,15 +2,15 @@
 
 use dosamigos\datepicker\DatePicker;
 use kartik\select2\Select2;
-use modules\hotel\models\forms\HotelForm;
 use modules\hotel\models\Hotel;
+use modules\hotel\src\useCases\request\update\HotelUpdateRequestForm;
 use yii\web\View;
 use yii\helpers\Html;
 use yii\bootstrap4\ActiveForm;
 use yii\web\JsExpression;
 
 /* @var $this yii\web\View */
-/* @var $model HotelForm */
+/* @var $model HotelUpdateRequestForm */
 
 $pjaxId = 'pjax-hotel-update'
 ?>
@@ -23,7 +23,7 @@ $pjaxId = 'pjax-hotel-update'
         <?php
         $form = ActiveForm::begin([
             'options' => ['data-pjax' => true],
-            'action' => ['/hotel/hotel/update-ajax', 'id' => $model->ph_id],
+            'action' => ['/hotel/hotel/update-ajax', 'id' => $model->getHotelId()],
             'method' => 'post',
             'enableClientValidation' => false
         ]);
@@ -112,8 +112,14 @@ $pjaxId = 'pjax-hotel-update'
                 <div class="col-md-6">
                     <?= $form->field($model, 'ph_max_price_rate')->input('number', ['min' => 0]) ?>
                 </div>
-            </div>
 
+                <div class="col-md-6">
+                    <?= $form->field($model, 'pr_market_price')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'pr_client_budget')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
+                </div>
+            </div>
 
             <?= $form->field($model, 'ph_destination_code')->hiddenInput([
                 'id' => 'ph_destination_code'

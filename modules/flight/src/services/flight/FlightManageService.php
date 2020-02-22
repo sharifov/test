@@ -10,43 +10,36 @@ use modules\flight\src\dto\flightSegment\SegmentDTO;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
 use modules\flight\src\services\flight\calculator\FlightTripTypeCalculator;
+use modules\product\src\entities\product\ProductRepository;
 use sales\services\TransactionManager;
 
 /**
  * Class FlightManageService
- * @package modules\flight\src\services
  *
  * @property FlightRepository $flightRepository
  * @property FlightSegmentRepository $segmentRepository
  * @property TransactionManager $transaction
+ * @property ProductRepository $productRepository
  */
 class FlightManageService
 {
-	/**
-	 * @var FlightRepository
-	 */
 	private $flightRepository;
-	/**
-	 * @var TransactionManager
-	 */
 	private $transaction;
-	/**
-	 * @var FlightSegmentRepository
-	 */
 	private $segmentRepository;
+    private $productRepository;
 
-	/**
-	 * FlightManageService constructor.
-	 * @param FlightRepository $flightRepository
-	 * @param FlightSegmentRepository $segmentRepository
-	 * @param TransactionManager $transaction
-	 */
-	public function __construct(FlightRepository $flightRepository, FlightSegmentRepository $segmentRepository, TransactionManager $transaction)
+	public function __construct(
+	    FlightRepository $flightRepository,
+        FlightSegmentRepository $segmentRepository,
+        TransactionManager $transaction,
+        ProductRepository $productRepository
+    )
 	{
 		$this->flightRepository = $flightRepository;
 		$this->transaction = $transaction;
 		$this->segmentRepository = $segmentRepository;
-	}
+        $this->productRepository = $productRepository;
+    }
 
 	/**
 	 * @param int $id
@@ -77,6 +70,12 @@ class FlightManageService
 			$this->flightRepository->save($flight);
 
 			$flight->updateLastAction();
+
+			$product = $flight->flProduct;
+            $product->changeMarketPrice($form->pr_market_price);
+            $product->changeClientBudget($form->pr_client_budget);
+            $this->productRepository->save($product);
+
 		});
 	}
 

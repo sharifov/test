@@ -2,7 +2,9 @@
 
 namespace modules\hotel\models;
 
+use modules\hotel\src\entities\hotel\events\HotelUpdateRequestEvent;
 use modules\hotel\src\entities\hotel\serializer\HotelSerializer;
+use modules\hotel\src\useCases\request\update\HotelUpdateRequestForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuery;
@@ -55,6 +57,12 @@ class Hotel extends ActiveRecord implements Productable
         $hotel = new static();
         $hotel->ph_product_id = $productId;
         return $hotel;
+	}
+
+    public function updateRequest(HotelUpdateRequestForm $form): void
+    {
+        $this->attributes = $form->attributes;
+        $this->recordEvent(new HotelUpdateRequestEvent($this));
 	}
 
     /**
