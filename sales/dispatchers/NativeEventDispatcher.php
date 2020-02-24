@@ -6,7 +6,7 @@ use yii\helpers\VarDumper;
 
 class NativeEventDispatcher
 {
-	public static $queue = [];
+	private static $queue = [];
 
 	public static function recordEvent(string $eventClass, string $eventName, array $handlerCallable, $params = null): self
 	{
@@ -54,7 +54,6 @@ class NativeEventDispatcher
 
 	public static function triggerAll(): void
 	{
-		\Yii::warning(VarDumper::dumpAsString(self::$queue));
 		foreach (self::$queue as $key => $eventClass) {
 			if (is_array($eventClass)) {
 				foreach ($eventClass as $eventName) {
