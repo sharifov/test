@@ -289,9 +289,12 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
                 ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
-                ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
-                ['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
-                ['label' => 'Orders User Profit', 'url' => ['/order/order-user-profit-crud/index']],
+                ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
+					['label' => 'Orders', 'url' => ['/order/order-crud/index']],
+					['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
+					['label' => 'Orders User Profit', 'url' => ['/order/order-user-profit-crud/index']],
+					['label' => 'Orders Tips', 'url' => ['/order/order-tips-crud/index']],
+                ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],
                 ['label' => 'Offers View Log', 'url' => ['/offer/offer-view-log-crud/index']],
@@ -305,10 +308,10 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Payment Methods', 'url' => ['/payment-method/index']],
                 ['label' => 'Transactions', 'url' => ['/transaction/index']],
                 ['label' => 'Payroll', 'url' => 'javascript:', 'items' => [
-                        ['label' => 'User Payment', 'url' => '/user-payment-crud/index'],
-                        ['label' => 'User Payment Category', 'url' => '/user-payment-category-crud/index'],
-                        ['label' => 'User Payroll', 'url' => '/user-payroll-crud/index'],
-                        ['label' => 'User Profit', 'url' => '/user-profit-crud/index'],
+                    ['label' => 'User Payment', 'url' => '/user-payment-crud/index'],
+                    ['label' => 'User Payment Category', 'url' => '/user-payment-category-crud/index'],
+                    ['label' => 'User Payroll', 'url' => '/user-payroll-crud/index'],
+                    ['label' => 'User Profit', 'url' => '/user-profit-crud/index'],
                 ], 'hasChild' => true]
             ]
         ];
