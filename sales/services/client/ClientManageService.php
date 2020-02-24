@@ -257,6 +257,10 @@ class ClientManageService
         } catch (\DomainException $e) {
             $client = $this->getOrCreateByEmails($emails, $clientForm);
         }
+
+        $this->addPhones($client, $phones);
+        $this->addEmails($client, $emails);
+
         return $client;
     }
 
