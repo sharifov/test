@@ -25,7 +25,9 @@ use yii\db\ActiveQuery;
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
+ * @property ClientPhone[] $clientPhonesByType
  * @property Lead[] $leads
+ * @method clientPhonesByType(array $array)
  */
 class Client extends ActiveRecord
 {
@@ -113,11 +115,29 @@ class Client extends ActiveRecord
     }
 
     /**
+     * @param array $types
+     * @return array
+     */
+    public function getClientEmailsByType(array $types = []): array
+    {
+        return $this->hasMany(ClientEmail::class, ['client_id' => 'id'])->select(['email'])->andFilterWhere(['IN', 'type', $types])->column();
+    }
+
+    /**
      * @return ActiveQuery
      */
     public function getClientPhones(): ActiveQuery
     {
         return $this->hasMany(ClientPhone::class, ['client_id' => 'id']);
+    }
+
+    /**
+     * @param array $types
+     * @return array
+     */
+    public function getClientPhonesByType(array $types = []): array
+    {
+        return $this->hasMany(ClientPhone::class, ['client_id' => 'id'])->select(['phone'])->andFilterWhere(['IN', 'type', $types])->column();
     }
 
     /**

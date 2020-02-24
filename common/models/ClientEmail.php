@@ -227,18 +227,4 @@ class ClientEmail extends \yii\db\ActiveRecord
 		}
 		return '';
 	}
-
-    /**
-     * @param int $clientId
-     * @param array $types
-     * @return array
-     */
-    public static function getEmailListByClient(int $clientId, array $types = []): array
-    {
-        return (new Query())->select(['email'])->distinct()
-			->from(self::tableName())
-			->where(['client_id' => $clientId])
-			->andFilterWhere(['IN', 'type', $types])
-			->column();
-    }
 }

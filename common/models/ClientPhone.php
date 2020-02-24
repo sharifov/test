@@ -288,18 +288,4 @@ class ClientPhone extends \yii\db\ActiveRecord
 		}
 		return '';
 	}
-
-    /**
-     * @param int $clientId
-     * @param array $types
-     * @return array
-     */
-    public static function getPhoneListByClient(int $clientId, array $types = []): array
-    {
-        return (new Query())->select(['phone'])->distinct()
-			->from(self::tableName())
-			->where(['client_id' => $clientId])
-            ->andFilterWhere(['IN', 'type', $types])
-            ->column();
-    }
 }
