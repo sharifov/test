@@ -8,7 +8,7 @@ use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\forms\OrderUserProfitFormComposite;
 use sales\forms\CompositeForm;
 use sales\forms\CompositeFormHelper;
-use sales\model\user\entity\profit\service\OrderUserProfitService;
+use modules\order\src\services\OrderUserProfitService;
 use yii\base\Model;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -72,26 +72,24 @@ class OrderUserProfitController extends FController
 			);
 			$orderUserProfits = OrderUserProfit::find()->where(['oup_order_id' => $orderId])->all();
 			$form = new OrderUserProfitFormComposite($orderUserProfits, count($data['post']['OrderUserProfit']));
+			$order = $this->orderRepository->find($orderId);
 
-			if ($form->load($data['post'])) {
-				if ($form->validate()) {
-					try {
-						$order = $this->orderRepository->find($orderId);
-						$this->orderUserProfitService->updateMultiple($form, $order);
+			if ($form->load($data['post']) && $form->validate()) {
+				try {
+					$this->orderUserProfitService->updateMultiple($form, $order);
 
-						\Yii::$app->session->setFlash('success', 'Order User Profit updated successfully');
-					} catch (\RuntimeException $e) {
-						$form->addError('orderUserProfits.0.oup_user_id', $e->getMessage());
-					} catch (\Throwable $e) {
-						$form->addError('orderUserProfits.0.oup_user_id', 'Internal Server Error');
-						\Yii::error($e->getMessage() . $e->getTraceAsString(), 'OrderUserProfitController::actionAjaxManageOrderUserProfit::Throwable');
-					}
+					\Yii::$app->session->setFlash('success', 'Order User Profit updated successfully');
+				} catch (\RuntimeException $e) {
+					$form->addError('orderUserProfits.0.oup_user_id', $e->getMessage());
+				} catch (\Throwable $e) {
+					$form->addError('orderUserProfits.0.oup_user_id', 'Internal Server Error');
+					\Yii::error($e->getMessage() . $e->getTraceAsString(), 'OrderUserProfitController::actionAjaxManageOrderUserProfit::Throwable');
 				}
 			}
 
 			return $this->renderAjax('order_user_profit_view', [
 				'model' => $form,
-				'orderId' => $orderId
+				'order' => $order
 			]);
 		}
 		throw new NotFoundHttpException('Page not found', 404);

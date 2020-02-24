@@ -1,6 +1,7 @@
 <?php
 
 use common\widgets\Alert;
+use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\forms\OrderUserProfitFormComposite;
 use yii\helpers\Html;
@@ -10,7 +11,7 @@ use yii\widgets\ActiveForm;
 /* @var $this View */
 /* @var $model OrderUserProfitFormComposite */
 /* @var $form ActiveForm */
-/* @var $orderId int */
+/* @var $order Order */
 ?>
 <div class="modules-order-src-forms">
 
@@ -26,7 +27,7 @@ use yii\widgets\ActiveForm;
 			[
 				'name' => 'oup_order_id',
 				'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_HIDDEN_INPUT,
-				'defaultValue' => $orderId,
+				'defaultValue' => $order->or_id,
 			],
 			[
 				'name' => 'oup_user_id',
@@ -42,16 +43,17 @@ use yii\widgets\ActiveForm;
 				'title' => 'Percent',
 				'options' => [
 					'type' => 'number',
-//                                'min' => 0,
-//                                'max' => 100
+                    'min' => 0,
+                    'max' => 100
 				]
 			],
 			[
 				'name' => 'oup_amount',
 				'title' => 'Profit Amount',
+				'defaultValue' => $order->or_profit_amount ?? 0,
 				'options' => [
 					'readonly' => true,
-					'disabled' => true
+					'disabled' => true,
 				]
 			]
 		]
@@ -59,7 +61,7 @@ use yii\widgets\ActiveForm;
 
 	?>
 
-	<?= Html::hiddenInput('orderId', $orderId) ?>
+	<?= Html::hiddenInput('orderId', $order->or_id) ?>
 
 	<?= Alert::widget() ?>
 

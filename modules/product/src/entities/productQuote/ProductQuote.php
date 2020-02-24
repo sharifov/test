@@ -8,6 +8,7 @@ use modules\flight\models\FlightQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCalculateUserProfitEvent;
@@ -379,7 +380,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
         if ($profitOld !== $profitNew) {
             $this->pq_profit_amount = $profitNew;
-            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this));
+            $this->recordEvent(new ProductQuoteRecalculateProfitAmountEvent($this, true));
             $isChanged = true;
         }
         return $isChanged;

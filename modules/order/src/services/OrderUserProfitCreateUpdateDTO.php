@@ -1,9 +1,9 @@
 <?php
-namespace sales\model\user\entity\profit\service;
+namespace modules\order\src\services;
 
 /**
  * Class OrderUserProfitCreateUpdateDTO
- * @package sales\model\user\entity\profit\service
+ * @package modules\order\src\services
  *
  * @property int|null $userId
  * @property int|null $leadId
