@@ -116,13 +116,13 @@ $js = <<<JS
         });
      });
 
-    $('body').on('click', '.btn-delete-product', function(e) {
+    $('#product-accordion').on('click',  '.btn-delete-product', function(e) {
+      e.preventDefault();
         
         if(!confirm('Are you sure you want to delete this product?')) {
             return '';
         }
         
-      e.preventDefault();
       $('#preloader').removeClass('d-none');
       let productId = $(this).data('product-id');
       
@@ -153,9 +153,7 @@ $js = <<<JS
                         hide: true
                     });
               } else {
-                  $.pjax.reload({
-                      container: '#product-accordion'
-                  });
+                  pjaxReload({container: '#product-accordion'});
                   new PNotify({
                         title: 'The product was successfully removed',
                         type: 'success',
