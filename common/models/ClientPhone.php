@@ -300,6 +300,7 @@ class ClientPhone extends \yii\db\ActiveRecord
 			->from(self::tableName())
 			->where(['client_id' => $clientId])
 			->andWhere(['NOT IN', 'type', $excludeTypes])
+			->orWhere(['AND', ['type' => null], ['client_id' => $clientId]])
 			->column();
     }
 }
