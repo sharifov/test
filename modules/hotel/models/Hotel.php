@@ -181,7 +181,7 @@ class Hotel extends ActiveRecord implements Productable
     {
         if ($this->hotelQuotes) {
             foreach ($this->hotelQuotes as $quote) {
-                if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuoteStatus::DONE) {
+                if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuoteStatus::DELIVERED) {
                     $creatorId = Auth::id();
                     $description = 'Find invalid request quotes and update status';
                     $quote->hqProductQuote->declined($creatorId, $description);
