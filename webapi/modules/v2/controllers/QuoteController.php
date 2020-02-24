@@ -458,8 +458,22 @@ class QuoteController extends ApiBaseController
                 'first_name' => $lead->client->first_name,
                 'middle_name' => $lead->client->middle_name,
                 'last_name' => $lead->client->last_name,
-                'phones' => ClientPhone::getPhoneListByClient($lead->client_id),
-                'emails' => ClientEmail::getEmailListByClient($lead->client_id),
+                'phones' => ClientPhone::getPhoneListByClient($lead->client_id,
+                    [
+                        null,
+                        ClientPhone::PHONE_VALID,
+                        ClientPhone::PHONE_NOT_SET,
+                        ClientPhone::PHONE_FAVORITE,
+                    ]
+                ),
+                'emails' => ClientEmail::getEmailListByClient($lead->client_id,
+                    [
+                        null,
+                        ClientEmail::EMAIL_NOT_SET,
+                        ClientEmail::EMAIL_FAVORITE,
+                        ClientEmail::EMAIL_VALID,
+                    ]
+                ),
             ];
 
             $response['quote'] = $model->attributes;
