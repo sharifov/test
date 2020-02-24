@@ -114,15 +114,17 @@ class ChangeMarkup extends Model
             $result['actual']['sellingPrice'] = round(($result['actual']['sellingPrice'] / $cnt), 2);
 
             //Add logs after changed model attributes
-            $leadLog = new LeadLog((new LeadLogMessage()));
-            $leadLog->logMessage->oldParams = $changedAttributes;
-            $newParams['selling'] = round($result['total']['sellingPrice'], 2);
-            $leadLog->logMessage->newParams = $newParams;
-            $leadLog->logMessage->title = 'Update';
-            $leadLog->logMessage->model = sprintf('%s (%s)', $this->quote->formName(), $this->quote->uid);
-            $leadLog->addLog([
-                'lead_id' => $this->quote->lead_id,
-            ]);
+
+            //todo
+//            $leadLog = new LeadLog((new LeadLogMessage()));
+//            $leadLog->logMessage->oldParams = $changedAttributes;
+//            $newParams['selling'] = round($result['total']['sellingPrice'], 2);
+//            $leadLog->logMessage->newParams = $newParams;
+//            $leadLog->logMessage->title = 'Update';
+//            $leadLog->logMessage->model = sprintf('%s (%s)', $this->quote->formName(), $this->quote->uid);
+//            $leadLog->addLog([
+//                'lead_id' => $this->quote->lead_id,
+//            ]);
 
             if (!empty($errors)) {
                 $this->addError('quote_uid', $errors);

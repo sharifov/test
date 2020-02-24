@@ -610,16 +610,18 @@ class QuoteController extends FController
 
 
                             //Add logs after changed model attributes
-                            $leadLog = new LeadLog((new LeadLogMessage()));
-                            $leadLog->logMessage->oldParams = $changedAttributes;
-                            $newParams = array_intersect_key($quote->attributes, $changedAttributes);
-                            $newParams['selling'] = round($selling, 2);
-                            $leadLog->logMessage->newParams = $newParams;
-                            $leadLog->logMessage->title = ($quote->isNewRecord) ? 'Create' : 'Update';
-                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
-                            $leadLog->addLog([
-                                'lead_id' => $quote->lead_id,
-                            ]);
+
+                            // todo
+//                            $leadLog = new LeadLog((new LeadLogMessage()));
+//                            $leadLog->logMessage->oldParams = $changedAttributes;
+//                            $newParams = array_intersect_key($quote->attributes, $changedAttributes);
+//                            $newParams['selling'] = round($selling, 2);
+//                            $leadLog->logMessage->newParams = $newParams;
+//                            $leadLog->logMessage->title = ($quote->isNewRecord) ? 'Create' : 'Update';
+//                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+//                            $leadLog->addLog([
+//                                'lead_id' => $quote->lead_id,
+//                            ]);
 
                             $quote->createQuoteTrips();
 

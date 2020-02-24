@@ -183,22 +183,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $params = [
-            'calls_per_frame' => 2,
-            'out_min_duration' => 5,
-            'in_min_rec_duration' => 30,
-            'include_in_calls' => true,
-            'hour_offset' => 12,
-            'hour_frame_1' => 24,
-            'hour_frame_2' => 48,
-            'hour_frame_3' => 72,
-        ];
-
-
-        $service = Yii::createObject(QaTaskCreateLeadProcessingQualityService::class);
-        $service->handle(new \modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\Rule($params));
-        die;
-
         return $this->render('blank');
     }
 

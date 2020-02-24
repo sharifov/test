@@ -121,22 +121,23 @@ class LeadCloneQuoteService
             $this->eventDispatcher->dispatch(new LeadQuoteCloneEvent($quote));
         }
 
-        $oldParams = $currentQuote->attributes;
-        $oldParams['selling'] = '';
-
-        $newParams = $quote->attributes;
-        $newParams['selling'] = round($selling, 2);
-
-        $message = new LeadLogMessage([
-            'title' => 'Created ' . $quote->id . ' (Clone from ' . $currentQuote->id . ')',
-            'model' => $quote->formName() . ' (' . $quote->uid . ')',
-            'oldParams' => $oldParams,
-            'newParams' => $newParams
-        ]);
-        $leadLog = new LeadLog($message);
-        $leadLog->addLog([
-            'lead_id' => $quote->lead_id,
-        ]);
+        // todo
+//        $oldParams = $currentQuote->attributes;
+//        $oldParams['selling'] = '';
+//
+//        $newParams = $quote->attributes;
+//        $newParams['selling'] = round($selling, 2);
+//
+//        $message = new LeadLogMessage([
+//            'title' => 'Created ' . $quote->id . ' (Clone from ' . $currentQuote->id . ')',
+//            'model' => $quote->formName() . ' (' . $quote->uid . ')',
+//            'oldParams' => $oldParams,
+//            'newParams' => $newParams
+//        ]);
+//        $leadLog = new LeadLog($message);
+//        $leadLog->addLog([
+//            'lead_id' => $quote->lead_id,
+//        ]);
 
     }
 

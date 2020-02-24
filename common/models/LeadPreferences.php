@@ -133,25 +133,4 @@ class LeadPreferences extends \yii\db\ActiveRecord
 
         return parent::beforeValidate();
     }
-
-    /**
-     * @param bool $insert
-     * @param array $changedAttributes
-     * @throws \yii\base\InvalidConfigException
-     */
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-
-        //Add logs after changed model attributes
-        $leadLog = new LeadLog((new LeadLogMessage()));
-        $leadLog->logMessage->oldParams = $changedAttributes;
-        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
-        $leadLog->logMessage->title = ($insert)
-            ? 'Create' : 'Update';
-        $leadLog->logMessage->model = $this->formName();
-        $leadLog->addLog([
-            'lead_id' => $this->lead_id,
-        ]);
-    }
 }

@@ -133,7 +133,6 @@ use yii\helpers\VarDumper;
  * @property Offer[] $offers
  * @property Order[] $orders
  * @property Product[] $products
- * @property LeadLog[] $leadLogs
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
  * @property LeadPreferences $leadPreferences
@@ -1705,15 +1704,6 @@ class Lead extends ActiveRecord implements Objectable
     /**
      * @return ActiveQuery
      */
-    public function getLeadLogs()
-    {
-        return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
-    }
-
-
-    /**
-     * @return ActiveQuery
-     */
     public function getSms(): ActiveQuery
     {
         return $this->hasMany(Sms::class, ['s_lead_id' => 'id']);
@@ -2830,6 +2820,8 @@ Reason: {reason}
 
         if ($this->enableActiveRecordEvents) {
 
+            Yii::error('Lead afterSave enable', 'Lead:AfterSave');
+
             if ($insert) {
                 LeadFlow::addStateFlow($this);
 
@@ -2998,18 +2990,6 @@ Reason: {reason}
             }
 
         }
-
-
-        //Add logs after changed model attributes
-        $leadLog = new LeadLog(new LeadLogMessage());
-        $leadLog->logMessage->oldParams = $changedAttributes;
-        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
-        $leadLog->logMessage->title = ($insert)
-            ? 'Create' : 'Update';
-        $leadLog->logMessage->model = $this->formName();
-        $leadLog->addLog([
-            'lead_id' => $this->id,
-        ]);
     }
 
     /**
@@ -3217,16 +3197,6 @@ Reason: {reason}
                 Quote::STATUS_APPLIED]
             ])->all();
         return count($data);
-    }
-
-    /**
-     * @return array|null|\yii\db\ActiveRecord
-     */
-    public function lastLog()
-    {
-        return LeadLog::find()->where([
-            'lead_id' => $this->id,
-        ])->orderBy('id DESC')->one();
     }
 
     /**

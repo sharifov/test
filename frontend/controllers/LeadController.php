@@ -186,14 +186,15 @@ class LeadController extends FController
                             $quote = Quote::findOne(['id' => $quoteId]);
                             $priceData = $quote->getPricesData();
                             //log messages
-                            $leadLog = new LeadLog((new LeadLogMessage()));
-                            $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
-                            $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
-                            $leadLog->logMessage->title = 'Update';
-                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
-                            $leadLog->addLog([
-                                'lead_id' => $lead->id,
-                            ]);
+                            // todo
+//                            $leadLog = new LeadLog((new LeadLogMessage()));
+//                            $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
+//                            $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
+//                            $leadLog->logMessage->title = 'Update';
+//                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+//                            $leadLog->addLog([
+//                                'lead_id' => $lead->id,
+//                            ]);
 
                             if ($lead->called_expert) {
                                 $data = $quote->getQuoteInformationForExpert(true);

@@ -506,16 +506,18 @@ class QuoteController extends ApiBaseController
                     $transaction->commit();
 
                     //Add logs after changed model attributes
-                    $leadLog = new LeadLog((new LeadLogMessage()));
-                    $leadLog->logMessage->oldParams = $changedAttributes;
-                    $newParams = array_intersect_key($model->attributes, $changedAttributes);
-                    $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
-                    $leadLog->logMessage->newParams = $newParams;
-                    $leadLog->logMessage->title = 'Update';
-                    $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
-                    $leadLog->addLog([
-                        'lead_id' => $model->lead_id,
-                    ]);
+
+                    //todo
+//                    $leadLog = new LeadLog((new LeadLogMessage()));
+//                    $leadLog->logMessage->oldParams = $changedAttributes;
+//                    $newParams = array_intersect_key($model->attributes, $changedAttributes);
+//                    $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
+//                    $leadLog->logMessage->newParams = $newParams;
+//                    $leadLog->logMessage->title = 'Update';
+//                    $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
+//                    $leadLog->addLog([
+//                        'lead_id' => $model->lead_id,
+//                    ]);
 
                 } else {
                     $response['errors'][] = $model->getErrors();
@@ -754,16 +756,17 @@ class QuoteController extends ApiBaseController
                 $transaction->commit();
 
                 //Add logs after changed model attributes
-                $leadLog = new LeadLog((new LeadLogMessage()));
-                $leadLog->logMessage->oldParams = $changedAttributes;
-                $newParams = array_intersect_key($model->attributes, $changedAttributes);
-                $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
-                $leadLog->logMessage->newParams = $newParams;
-                $leadLog->logMessage->title = 'Create';
-                $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
-                $leadLog->addLog([
-                    'lead_id' => $model->lead_id,
-                ]);
+                //todo
+//                $leadLog = new LeadLog((new LeadLogMessage()));
+//                $leadLog->logMessage->oldParams = $changedAttributes;
+//                $newParams = array_intersect_key($model->attributes, $changedAttributes);
+//                $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
+//                $leadLog->logMessage->newParams = $newParams;
+//                $leadLog->logMessage->title = 'Create';
+//                $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
+//                $leadLog->addLog([
+//                    'lead_id' => $model->lead_id,
+//                ]);
 
             } else {
                 $response['errors'][] = $model->getErrors();
