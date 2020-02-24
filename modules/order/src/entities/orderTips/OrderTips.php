@@ -14,9 +14,11 @@ use yii\db\ActiveRecord;
  * @property int|null $ot_order_id
  * @property float|null $ot_client_amount
  * @property float|null $ot_amount
+ * @property int|null $ot_user_profit_percent
  * @property float|null $ot_user_profit
  * @property string|null $ot_description
  * @property string|null $ot_created_dt
+ * @property string|null $ot_updated_dt
  *
  * @property Order $otOrder
  */
@@ -41,7 +43,8 @@ class OrderTips extends \yii\db\ActiveRecord
 			'timestamp' => [
 				'class' => TimestampBehavior::class,
 				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ot_created_dt'],
+					ActiveRecord::EVENT_BEFORE_INSERT => ['ot_created_dt', 'ot_updated_dt'],
+					ActiveRecord::EVENT_BEFORE_UPDATE => ['ot_updated_dt'],
 				],
 				'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
 			]
@@ -55,9 +58,10 @@ class OrderTips extends \yii\db\ActiveRecord
     {
         return [
             [['ot_order_id'], 'required'],
-            [['ot_order_id'], 'integer'],
+            [['ot_order_id', 'ot_user_profit_percent'], 'integer'],
+            [['ot_user_profit_percent'], 'number', 'max' => 100, 'min' => 0],
             [['ot_client_amount', 'ot_amount', 'ot_user_profit'], 'number'],
-            [['ot_created_dt'], 'safe'],
+            [['ot_created_dt', 'ot_updated_dt'], 'safe'],
             [['ot_description'], 'string', 'max' => 500],
             [['ot_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['ot_order_id' => 'or_id']],
         ];
@@ -74,8 +78,10 @@ class OrderTips extends \yii\db\ActiveRecord
             'ot_client_amount' => 'Client Amount',
             'ot_amount' => 'Amount',
             'ot_user_profit' => 'User Profit',
+            'ot_user_profit_percent' => 'User Profit Percent',
             'ot_description' => 'Description',
             'ot_created_dt' => 'Created Dt',
+            'ot_updated_dt' => 'Updated Dt',
             'otOrder' => 'Order',
         ];
     }

@@ -41,9 +41,11 @@ class m200224_142142_create_tbl_order_tips extends Migration
 			'ot_order_id' => $this->integer(),
 			'ot_client_amount' => $this->decimal(8,2 ),
 			'ot_amount' => $this->decimal(8, 2),
+			'ot_user_profit_percent' => $this->smallInteger(3),
 			'ot_user_profit' => $this->decimal(8,2 ),
 			'ot_description' => $this->string(500),
-			'ot_created_dt' => $this->dateTime()
+			'ot_created_dt' => $this->dateTime(),
+			'ot_updated_dt' => $this->dateTime(),
 		],$tableOptions);
 
 		$this->addForeignKey('FK-order_tips-ot_order_id', '{{%order_tips}}', 'ot_order_id','{{%order}}', 'or_id', 'SET NULL', 'CASCADE');

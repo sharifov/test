@@ -37,9 +37,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'ot_client_amount',
             'ot_amount',
             'ot_user_profit',
+			'ot_user_profit_percent:percentInteger',
 			[
 				'class' => DateTimeColumn::class,
 				'attribute' => 'ot_created_dt',
+			],
+			[
+				'class' => DateTimeColumn::class,
+				'attribute' => 'ot_updated_dt',
 			],
 
             ['class' => 'yii\grid\ActionColumn'],

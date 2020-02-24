@@ -34,8 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'ot_client_amount',
             'ot_amount',
             'ot_user_profit',
+            'ot_user_profit_percent:percentInteger',
             'ot_description:ntext',
             'ot_created_dt:ByUserDateTime',
+            'ot_updated_dt:ByUserDateTime',
         ],
     ]) ?>
 

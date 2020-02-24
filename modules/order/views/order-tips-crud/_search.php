@@ -28,6 +28,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ot_user_profit') ?>
 
+	<?= $form->field($model, 'ot_user_profit_percent') ?>
+
     <?php // echo $form->field($model, 'ot_description') ?>
 
     <?php // echo $form->field($model, 'ot_created_dt') ?>

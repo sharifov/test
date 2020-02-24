@@ -17,9 +17,9 @@ class OrderTipsSearch extends OrderTips
     public function rules()
     {
         return [
-            [['ot_id', 'ot_order_id'], 'integer'],
+            [['ot_id', 'ot_order_id', 'ot_user_profit_percent'], 'integer'],
             [['ot_client_amount', 'ot_amount', 'ot_user_profit'], 'number'],
-            [['ot_description', 'ot_created_dt'], 'safe'],
+            [['ot_description', 'ot_created_dt', 'ot_updated_dt'], 'safe'],
         ];
     }
 
@@ -41,7 +41,7 @@ class OrderTipsSearch extends OrderTips
      */
     public function search($params)
     {
-        $query = OrderTips::find()->with(['otOrder']);
+        $query = OrderTips::find();
 
         // add conditions that should always apply here
 
@@ -63,8 +63,10 @@ class OrderTipsSearch extends OrderTips
             'ot_order_id' => $this->ot_order_id,
             'ot_client_amount' => $this->ot_client_amount,
             'ot_amount' => $this->ot_amount,
-            'ot_user_profit' => $this->ot_user_profit,
+			'ot_user_profit_percent' => $this->ot_user_profit_percent,
+			'ot_user_profit' => $this->ot_user_profit,
             'date_format(ot_created_dt, "%Y-%m-%d")' => $this->ot_created_dt,
+            'date_format(ot_updated_dt, "%Y-%m-%d")' => $this->ot_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'ot_description', $this->ot_description]);
