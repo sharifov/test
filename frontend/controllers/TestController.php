@@ -183,6 +183,7 @@ class TestController extends FController
 
     public function actionTest()
     {
+        VarDumper::dump(Auth::user()->userProfile->up_skill);die;
         return $this->render('blank');
     }
 

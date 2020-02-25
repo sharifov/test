@@ -2,7 +2,7 @@
 namespace common\models\local;
 
 use common\components\BackOffice;
-use common\models\LeadLog;
+//use common\models\LeadLog;
 use common\models\Quote;
 use yii\base\Exception;
 use yii\base\Model;
@@ -14,6 +14,9 @@ use yii\base\Model;
  * @property string $pax_type
  * @property string $value
  * @property Quote $quote
+ *
+ *
+ * todo delete
  */
 class ChangeMarkup extends Model
 {
@@ -115,7 +118,7 @@ class ChangeMarkup extends Model
 
             //Add logs after changed model attributes
 
-            //todo
+            //todo delete
 //            $leadLog = new LeadLog((new LeadLogMessage()));
 //            $leadLog->logMessage->oldParams = $changedAttributes;
 //            $newParams['selling'] = round($result['total']['sellingPrice'], 2);

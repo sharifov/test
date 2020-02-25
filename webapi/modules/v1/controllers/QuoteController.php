@@ -4,17 +4,22 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
 use common\models\EmployeeContactInfo;
+use common\models\GlobalLog;
 use common\models\Lead;
-use common\models\LeadLog;
+//use common\models\LeadLog;
 use common\models\local\LeadLogMessage;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use modules\lead\src\entities\lead\LeadQuery;
+use sales\auth\Auth;
+use sales\logger\db\GlobalLogInterface;
+use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
 use Yii;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -519,6 +524,19 @@ class QuoteController extends ApiBaseController
 //                        'lead_id' => $model->lead_id,
 //                    ]);
 
+                    (\Yii::createObject(GlobalLogInterface::class))->log(
+                        new LogDTO(
+                            get_class($model),
+                            $model->id,
+                            \Yii::$app->id,
+                            null,
+                            Json::encode(['selling' => $changedAttributes['selling'] ?? 0]),
+                            Json::encode(['selling' => round($model->getPricesData()['total']['selling'], 2)]),
+                            null,
+                            GlobalLog::ACTION_TYPE_UPDATE
+                        )
+                    );
+
                 } else {
                     $response['errors'][] = $model->getErrors();
                     $transaction->rollBack();
@@ -767,6 +785,19 @@ class QuoteController extends ApiBaseController
 //                $leadLog->addLog([
 //                    'lead_id' => $model->lead_id,
 //                ]);
+
+                (\Yii::createObject(GlobalLogInterface::class))->log(
+                    new LogDTO(
+                        get_class($model),
+                        $model->id,
+                        \Yii::$app->id,
+                        null,
+                        Json::encode(['selling' => $changedAttributes['selling'] ?? 0]),
+                        Json::encode(['selling' => round($model->getPricesData()['total']['selling'], 2)]),
+                        null,
+                        GlobalLog::ACTION_TYPE_UPDATE
+                    )
+                );
 
             } else {
                 $response['errors'][] = $model->getErrors();
