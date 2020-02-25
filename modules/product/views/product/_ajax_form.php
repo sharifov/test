@@ -84,6 +84,8 @@ $js = <<<JS
                       timeout: 5000,
                       async: false,
                   });
+                  $.pjax.reload({ container: '#pjax-lead-call-expert', timeout: 5000, async: false });
+                  
                   $('#modal-sm').modal('hide');
               }
               // btnSubmit.prop('disabled', false);

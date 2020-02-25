@@ -25,7 +25,7 @@ class LeadCallExpertSearch extends LeadCallExpert
         return [
             [['datetime_start', 'datetime_end', 'employeeRole'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['lce_id', 'lce_lead_id', 'lce_status_id', 'lce_agent_user_id', 'lce_expert_user_id'], 'integer'],
+            [['lce_id', 'lce_lead_id', 'lce_status_id', 'lce_agent_user_id', 'lce_expert_user_id', 'lce_product_id'], 'integer'],
             [['lce_request_text', 'lce_request_dt', 'lce_response_text', 'lce_response_lead_quotes', 'lce_response_dt', 'lce_expert_username', 'lce_updated_dt'], 'safe'],
         ];
     }
@@ -102,6 +102,7 @@ class LeadCallExpertSearch extends LeadCallExpert
             'lce_status_id' => $this->lce_status_id,
             'lce_agent_user_id' => $this->lce_agent_user_id,
             'lce_expert_user_id' => $this->lce_expert_user_id,
+            'lce_product_id' => $this->lce_product_id,
         ]);
 
         $query->andFilterWhere(['like', 'lce_request_text', $this->lce_request_text])

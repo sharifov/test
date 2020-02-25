@@ -4,7 +4,9 @@ namespace common\models;
 
 use common\components\BackOffice;
 use common\models\query\LeadCallExpertQuery;
+use modules\product\src\entities\product\Product;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "lead_call_expert".
@@ -21,9 +23,11 @@ use Yii;
  * @property int $lce_expert_user_id
  * @property string $lce_expert_username
  * @property string $lce_updated_dt
+ * @property int $lce_product_id
  *
  * @property Employee $lceAgentUser
  * @property Lead $lceLead
+ * @property Product $product
  */
 class LeadCallExpert extends \yii\db\ActiveRecord
 {
@@ -66,7 +70,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
     {
         return [
             [['lce_lead_id', 'lce_request_text'], 'required'],
-            [['lce_lead_id', 'lce_status_id', 'lce_agent_user_id', 'lce_expert_user_id'], 'integer'],
+            [['lce_lead_id', 'lce_status_id', 'lce_agent_user_id', 'lce_expert_user_id', 'lce_product_id'], 'integer'],
             [['lce_request_text', 'lce_response_text', 'lce_response_lead_quotes'], 'string'],
             [['lce_request_dt', 'lce_response_dt', 'lce_updated_dt'], 'safe'],
             [['lce_expert_username'], 'string', 'max' => 30],
@@ -143,6 +147,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
             'lce_expert_user_id' => 'Expert User ID',
             'lce_expert_username' => 'Expert Username',
             'lce_updated_dt' => 'Updated Dt',
+            'lce_product_id' => 'Product',
         ];
     }
 
@@ -160,6 +165,14 @@ class LeadCallExpert extends \yii\db\ActiveRecord
     public function getLceLead()
     {
         return $this->hasOne(Lead::class, ['id' => 'lce_lead_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProduct(): ActiveQuery
+    {
+        return $this->hasOne(Product::class, ['pr_id' => 'lce_product_id']);
     }
 
     /**
