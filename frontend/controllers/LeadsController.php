@@ -147,23 +147,6 @@ class LeadsController extends FController
     }
 
     /**
-     * @return string
-     * @throws NotFoundHttpException
-     */
-    public function actionAjaxActivityLogs() : string
-    {
-        $lead_id = Yii::$app->request->get('id');
-        $lead = $this->findModel($lead_id);
-        $logs = $lead->leadLogs;
-
-        return $this->renderPartial('activity-logs', [
-            'logs' => $logs
-            //'searchModel' => $searchModel,
-            //'dataProvider' => $dataProvider,
-        ]);
-	}
-
-    /**
      * Lists all Lead models.
      * @return mixed
      */
