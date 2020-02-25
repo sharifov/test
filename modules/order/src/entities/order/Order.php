@@ -260,7 +260,6 @@ class Order extends ActiveRecord
     public function getOrderTotalCalcSum(): float
     {
         $sum = 0;
-//        $orderProducts = $this->orderProducts;
 		$quotes = $this->productQuotes;
 		if($quotes) {
 			foreach ($quotes as $quote) {
@@ -268,15 +267,6 @@ class Order extends ActiveRecord
 			}
 			$sum = round($sum, 2);
 		}
-
-//        if ($orderProducts) {
-//            foreach ($orderProducts as $orderProduct) {
-//                if ($quote = $orderProduct->orpProductQuote) {
-//                    $sum += $quote->totalCalcSum;
-//                }
-//            }
-//            $sum = round($sum, 2);
-//        }
         return $sum;
     }
 

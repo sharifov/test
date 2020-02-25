@@ -138,10 +138,6 @@ class LeadManageService
 
 		$lead->processing($employeeId, $creatorId, $reason);
 
-		$this->clientManageService->addPhones($client, [$form->phone]);
-
-		$this->clientManageService->addEmails($client, [$form->email]);
-
 		$hash = $this->leadHashGenerator->generate(
 			null,
 			$form->projectId,

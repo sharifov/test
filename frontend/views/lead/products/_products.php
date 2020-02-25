@@ -89,6 +89,7 @@ JS;
 <?php
 
 $ajaxDeleteProductUrl = \yii\helpers\Url::to(['/product/product/delete-ajax']);
+$ajaxUpdateProductUrl = \yii\helpers\Url::to(['/product/product/update-ajax']);
 $ajaxDeleteProductQuoteUrl = \yii\helpers\Url::to(['/product/product-quote/delete-ajax']);
 $ajaxCloneProductQuoteUrl = \yii\helpers\Url::to(['/product/product-quote/clone']);
 
@@ -116,13 +117,13 @@ $js = <<<JS
         });
      });
 
-    $('body').on('click', '.btn-delete-product', function(e) {
+    $('#product-accordion').on('click',  '.btn-delete-product', function(e) {
+      e.preventDefault();
         
         if(!confirm('Are you sure you want to delete this product?')) {
             return '';
         }
         
-      e.preventDefault();
       $('#preloader').removeClass('d-none');
       let productId = $(this).data('product-id');
       
@@ -153,9 +154,7 @@ $js = <<<JS
                         hide: true
                     });
               } else {
-                  $.pjax.reload({
-                      container: '#product-accordion'
-                  });
+                  pjaxReload({container: '#product-accordion'});
                   new PNotify({
                         title: 'The product was successfully removed',
                         type: 'success',
@@ -173,6 +172,30 @@ $js = <<<JS
             $('#preloader').addClass('d-none');
         });
       // return false;
+    });
+    
+    $('body').on('click', '.btn-update-product', function(e) {        
+        
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let productId = $(this).data('product-id');
+        
+        let modal = $('#modal-sm');
+        $('#modal-sm-label').html('Update product');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load('/product/product/update-ajax?id=' + productId , function(response, status, xhr ) {
+                    
+            $('#preloader').addClass('d-none');
+                        
+            if (status == 'error') {                
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            } 
+        });  
     });
 
 

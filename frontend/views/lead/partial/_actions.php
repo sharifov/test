@@ -247,19 +247,6 @@ $user = Yii::$app->user->identity;
                 </div>
             </div>
 
-
-
-
-            <?php
-//                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadModel->id])->count();
-//                echo Html::a('Old Data Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
-//                    [
-//                        'id' => 'btn-lead-logs',
-//                        'class' => 'btn btn-default',
-//                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadModel->id])
-//                    ]);
-            ?>
-
         <?php endif; ?>
 
 

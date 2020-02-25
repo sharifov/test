@@ -12,6 +12,7 @@ use frontend\models\LeadForm;
 use sales\access\ClientInfoAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\LeadPreferencesAccess;
+use sales\auth\Auth;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\LeadPreferencesForm;
@@ -684,7 +685,7 @@ class LeadViewController extends FController
         $form = new CloneQuoteByUidForm();
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $this->leadCloneQuoteService->cloneByUid($form->uid, $form->leadGid);
+                $this->leadCloneQuoteService->cloneByUid($form->uid, $form->leadGid, Auth::id());
             } catch (\DomainException $e) {
                 Yii::warning($e->getMessage());
                 return ['success' => false, 'message' => $e->getMessage()];

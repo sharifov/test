@@ -88,7 +88,10 @@ class QaTaskCreateLeadProcessingQualityQuery
         $callAttempt = Call::find()->select('count(*)')
             ->andWhere('c_lead_id = l.id')
             ->andWhere('c_created_dt > lfs.created')
-            ->andWhere(['!=', 'c_source_type_id', Call::SOURCE_TRANSFER_CALL])
+            ->andWhere(['OR',
+                ['!=', 'c_source_type_id', Call::SOURCE_TRANSFER_CALL],
+                ['IS', 'c_source_type_id', null],
+            ])
             ->andWhere(['IS NOT', 'c_parent_id', null])
             ->andWhere(['OR',
                 ['AND',

@@ -636,7 +636,7 @@
             "version": "v4.7.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/FortAwesome/Font-Awesome.git",
+                "url": "git@github.com:FortAwesome/Font-Awesome.git",
                 "reference": "a8386aae19e200ddb0f6845b5feeee5eb7013687"
             },
             "dist": {
@@ -692,7 +692,7 @@
             "version": "3.4.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jquery/jquery-dist.git",
+                "url": "git@github.com:jquery/jquery-dist.git",
                 "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d"
             },
             "dist": {
@@ -2372,16 +2372,16 @@
         },
         {
             "name": "jms/serializer",
-            "version": "3.4.0",
+            "version": "3.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/serializer.git",
-                "reference": "e2d3c49d9322a08ee32221a5623c898160dada79"
+                "reference": "0e286681396d8139406e596c6c802d37ab0b2124"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/e2d3c49d9322a08ee32221a5623c898160dada79",
-                "reference": "e2d3c49d9322a08ee32221a5623c898160dada79",
+                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/0e286681396d8139406e596c6c802d37ab0b2124",
+                "reference": "0e286681396d8139406e596c6c802d37ab0b2124",
                 "shasum": ""
             },
             "require": {
@@ -2403,7 +2403,7 @@
                 "ext-pdo_sqlite": "*",
                 "jackalope/jackalope-doctrine-dbal": "^1.1.5",
                 "ocramius/proxy-manager": "^1.0|^2.0",
-                "phpunit/phpunit": "^7.5||^8.0",
+                "phpunit/phpunit": "^7.5||^8.0||^9.0",
                 "psr/container": "^1.0",
                 "symfony/dependency-injection": "^3.0|^4.0|^5.0",
                 "symfony/expression-language": "^3.0|^4.0|^5.0",
@@ -2422,7 +2422,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.4-dev"
+                    "dev-master": "3.5-dev"
                 }
             },
             "autoload": {
@@ -2453,7 +2453,7 @@
                 "serialization",
                 "xml"
             ],
-            "time": "2019-12-14T20:49:23+00:00"
+            "time": "2020-02-22T21:06:01+00:00"
         },
         {
             "name": "kartik-v/bootstrap-popover-x",
@@ -2727,12 +2727,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-editable.git",
-                "reference": "1617a4749788d0c94b5a417c965893949a4239bf"
+                "reference": "8268f92ff7ed2a87006c96f3db874825b67bc31e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-editable/zipball/1617a4749788d0c94b5a417c965893949a4239bf",
-                "reference": "1617a4749788d0c94b5a417c965893949a4239bf",
+                "url": "https://api.github.com/repos/kartik-v/yii2-editable/zipball/8268f92ff7ed2a87006c96f3db874825b67bc31e",
+                "reference": "8268f92ff7ed2a87006c96f3db874825b67bc31e",
                 "shasum": ""
             },
             "require": {
@@ -2772,7 +2772,7 @@
                 "popover-x",
                 "widget"
             ],
-            "time": "2019-05-25T07:13:53+00:00"
+            "time": "2020-02-21T03:44:29+00:00"
         },
         {
             "name": "kartik-v/yii2-export",
@@ -3833,10 +3833,10 @@
         },
         {
             "name": "npm-asset/jsoneditor",
-            "version": "8.5.3",
+            "version": "8.6.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/jsoneditor/-/jsoneditor-8.5.3.tgz"
+                "url": "https://registry.npmjs.org/jsoneditor/-/jsoneditor-8.6.1.tgz"
             },
             "require": {
                 "npm-asset/ace-builds": ">=1.4.8,<2.0.0",
@@ -6047,6 +6047,7 @@
                 "functional testing",
                 "unit testing"
             ],
+            "abandoned": true,
             "time": "2019-04-24T11:36:34+00:00"
         },
         {

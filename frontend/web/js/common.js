@@ -70,7 +70,7 @@
             return false;
         }
 
-        $.pjax.reload({container: '#pjax-lead-orders', push: false, replace: false, async: false, timeout: 2000});
+        $.pjax.reload(options);
     };
 
 })(window, $);

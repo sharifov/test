@@ -4,7 +4,8 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\GTTGlobal;
-use common\models\LeadLog;
+use common\models\GlobalLog;
+//use common\models\LeadLog;
 use common\models\local\ChangeMarkup;
 use common\models\Lead;
 use common\models\local\LeadLogMessage;
@@ -12,10 +13,14 @@ use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\search\QuotePriceSearch;
 use common\models\search\QuoteSearch;
+use sales\auth\Auth;
+use sales\logger\db\GlobalLogInterface;
+use sales\logger\db\LogDTO;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\BadRequestHttpException;
@@ -419,19 +424,20 @@ class QuoteController extends FController
         return $result;
     }
 
-    public function actionExtraPrice()
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $result = [];
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $model = new ChangeMarkup();
-            $model->attributes = Yii::$app->request->post();
-            if ($model->validate()) {
-                $result = $model->change();
-            }
-        }
-        return $result;
-    }
+    //todo delete
+//    public function actionExtraPrice()
+//    {
+//        Yii::$app->response->format = Response::FORMAT_JSON;
+//        $result = [];
+//        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+//            $model = new ChangeMarkup();
+//            $model->attributes = Yii::$app->request->post();
+//            if ($model->validate()) {
+//                $result = $model->change();
+//            }
+//        }
+//        return $result;
+//    }
 
     public function actionCalcPrice($quoteId)
     {
@@ -610,16 +616,31 @@ class QuoteController extends FController
 
 
                             //Add logs after changed model attributes
-                            $leadLog = new LeadLog((new LeadLogMessage()));
-                            $leadLog->logMessage->oldParams = $changedAttributes;
-                            $newParams = array_intersect_key($quote->attributes, $changedAttributes);
-                            $newParams['selling'] = round($selling, 2);
-                            $leadLog->logMessage->newParams = $newParams;
-                            $leadLog->logMessage->title = ($quote->isNewRecord) ? 'Create' : 'Update';
-                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
-                            $leadLog->addLog([
-                                'lead_id' => $quote->lead_id,
-                            ]);
+
+                            // todo
+//                            $leadLog = new LeadLog((new LeadLogMessage()));
+//                            $leadLog->logMessage->oldParams = $changedAttributes;
+//                            $newParams = array_intersect_key($quote->attributes, $changedAttributes);
+//                            $newParams['selling'] = round($selling, 2);
+//                            $leadLog->logMessage->newParams = $newParams;
+//                            $leadLog->logMessage->title = ($quote->isNewRecord) ? 'Create' : 'Update';
+//                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+//                            $leadLog->addLog([
+//                                'lead_id' => $quote->lead_id,
+//                            ]);
+
+                            (\Yii::createObject(GlobalLogInterface::class))->log(
+                                new LogDTO(
+                                    get_class($quote),
+                                    $quote->id,
+                                    \Yii::$app->id,
+                                    Auth::id(),
+                                    Json::encode(['selling' => $changedAttributes['selling'] ?? 0]),
+                                    Json::encode(['selling' => round($selling, 2)]),
+                                    null,
+                                    GlobalLog::ACTION_TYPE_UPDATE
+                                )
+                            );
 
                             $quote->createQuoteTrips();
 

@@ -2,8 +2,9 @@
 
 namespace sales\services\lead;
 
+use common\models\GlobalLog;
 use common\models\Lead;
-use common\models\LeadLog;
+//use common\models\LeadLog;
 use common\models\local\LeadLogMessage;
 use common\models\Quote;
 use common\models\QuotePrice;
@@ -14,6 +15,8 @@ use common\models\QuoteSegmentStop;
 use common\models\QuoteTrip;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\events\lead\LeadQuoteCloneEvent;
+use sales\logger\db\GlobalLogInterface;
+use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\quote\QuotePriceRepository;
 use sales\repositories\quote\QuoteRepository;
@@ -23,6 +26,7 @@ use sales\repositories\quote\QuoteSegmentRepository;
 use sales\repositories\quote\QuoteSegmentStopRepository;
 use sales\repositories\quote\QuoteTripRepository;
 use sales\services\TransactionManager;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
 /**
@@ -81,10 +85,11 @@ class LeadCloneQuoteService
     /**
      * @param string $quoteUid
      * @param string $leadGid
+     * @param int $userId
      * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
      */
-    public function cloneByUid(string $quoteUid, string $leadGid): void
+    public function cloneByUid(string $quoteUid, string $leadGid, int $userId): void
     {
         $currentQuote = $this->quoteRepository->findByUid($quoteUid);
         $lead = $this->leadRepository->findByGid($leadGid);
@@ -121,23 +126,36 @@ class LeadCloneQuoteService
             $this->eventDispatcher->dispatch(new LeadQuoteCloneEvent($quote));
         }
 
-        $oldParams = $currentQuote->attributes;
-        $oldParams['selling'] = '';
+        // todo delete
+//        $oldParams = $currentQuote->attributes;
+//        $oldParams['selling'] = '';
+//
+//        $newParams = $quote->attributes;
+//        $newParams['selling'] = round($selling, 2);
+//
+//        $message = new LeadLogMessage([
+//            'title' => 'Created ' . $quote->id . ' (Clone from ' . $currentQuote->id . ')',
+//            'model' => $quote->formName() . ' (' . $quote->uid . ')',
+//            'oldParams' => $oldParams,
+//            'newParams' => $newParams
+//        ]);
+//        $leadLog = new LeadLog($message);
+//        $leadLog->addLog([
+//            'lead_id' => $quote->lead_id,
+//        ]);
 
-        $newParams = $quote->attributes;
-        $newParams['selling'] = round($selling, 2);
-
-        $message = new LeadLogMessage([
-            'title' => 'Created ' . $quote->id . ' (Clone from ' . $currentQuote->id . ')',
-            'model' => $quote->formName() . ' (' . $quote->uid . ')',
-            'oldParams' => $oldParams,
-            'newParams' => $newParams
-        ]);
-        $leadLog = new LeadLog($message);
-        $leadLog->addLog([
-            'lead_id' => $quote->lead_id,
-        ]);
-
+        (\Yii::createObject(GlobalLogInterface::class))->log(
+            new LogDTO(
+                get_class($quote),
+                $quote->id,
+                \Yii::$app->id,
+                $userId,
+                null,
+                Json::encode(['selling' => round($selling, 2)]),
+                null,
+                GlobalLog::ACTION_TYPE_UPDATE
+            )
+        );
     }
 
     /**

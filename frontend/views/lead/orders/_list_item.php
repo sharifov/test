@@ -139,7 +139,7 @@ use yii\bootstrap4\Html;
 
                 ?>
                 <tr>
-                    <th class="text-right" colspan="5">Sub Total: </th>
+                    <th class="text-right" colspan="5">Order Amount: </th>
                     <th class="text-right"><?=number_format($ordOptionTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($ordTotalFee, 2)?></th>
                     <th class="text-right"><?=number_format($ordTotalPrice, 2)?></th>
@@ -148,7 +148,7 @@ use yii\bootstrap4\Html;
                 </tr>
                 <tr>
                     <th class="text-right" colspan="5">Calc Total: </th>
-                    <td class="text-center" colspan="2">(price + opt + fee)</td>
+                    <td class="text-center" colspan="2">(price + opt)</td>
                     <th class="text-right"><?=number_format($calcTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>

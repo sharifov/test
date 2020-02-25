@@ -3,7 +3,7 @@ namespace sales\model\user\entity\profit\listener;
 
 use modules\product\src\entities\productQuote\events\ProductQuoteCalculateUserProfitEvent;
 use sales\model\user\entity\profit\event\UserProfitRecalculateEvent;
-use sales\model\user\entity\profit\service\OrderUserProfitService;
+use modules\order\src\services\OrderUserProfitService;
 
 /**
  * Class UserProfitRecalculateEventListener
@@ -26,7 +26,7 @@ class UserProfitRecalculateEventListener
 	public function handle(UserProfitRecalculateEvent $event): void
 	{
 		foreach ($event->order->productQuotes as $productQuote) {
-			$this->orderUserProfitService->calculateUserProfit($productQuote->pq_id, $event->order);
+			$this->orderUserProfitService->calculateUserProfit($productQuote, $event->order);
 		}
 	}
 }

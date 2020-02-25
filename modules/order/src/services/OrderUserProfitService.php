@@ -1,22 +1,26 @@
 <?php
-namespace sales\model\user\entity\profit\service;
+namespace modules\order\src\services;
 
+use common\models\UserProductType;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\order\src\forms\OrderUserProfitFormComposite;
+use modules\product\src\entities\productQuote\ProductQuote;
 use sales\dispatchers\EventDispatcher;
 use sales\model\user\entity\profit\event\UserProfitRecalculateEvent;
 use sales\model\user\entity\profit\UserProfit;
+use sales\model\user\entity\userProductType\UserProductTypeRepository;
 use sales\repositories\user\UserProfitRepository;
 use sales\services\TransactionManager;
 
 /**
  * Class OrderUserProfitService
- * @package sales\model\user\entity\profit\service
+ * @package modules\order\src\services
  *
  * @property UserProfitRepository $userProfitRepository
  * @property OrderUserProfitRepository $orderUserProfitRepository
+ * @property UserProductTypeRepository $userProductTypeRepository
  * @property TransactionManager $transactionManager
  * @property EventDispatcher $eventDispatcher
  */
@@ -38,27 +42,45 @@ class OrderUserProfitService
 	 * @var EventDispatcher
 	 */
 	private $eventDispatcher;
+	/**
+	 * @var UserProductTypeRepository
+	 */
+	private $userProductTypeRepository;
 
-	public function __construct(UserProfitRepository $userProfitRepository, OrderUserProfitRepository $orderUserProfitRepository, TransactionManager $transactionManager, EventDispatcher $eventDispatcher)
-	{
+	public function __construct(
+		UserProfitRepository $userProfitRepository,
+		OrderUserProfitRepository $orderUserProfitRepository,
+		UserProductTypeRepository $userProductTypeRepository,
+		TransactionManager $transactionManager,
+		EventDispatcher $eventDispatcher
+	){
 		$this->userProfitRepository = $userProfitRepository;
 		$this->orderUserProfitRepository = $orderUserProfitRepository;
 		$this->transactionManager = $transactionManager;
 		$this->eventDispatcher = $eventDispatcher;
+		$this->userProductTypeRepository = $userProductTypeRepository;
 	}
 
-	public function calculateUserProfit(int $productQuoteId, Order $order): void
+	public function calculateUserProfit(ProductQuote $productQuote, Order $order): void
 	{
 		foreach ($order->orderUserProfit as $profit) {
-			$userProfit = $this->userProfitRepository->findOrCreate($profit->oup_user_id, $profit->oup_order_id, $productQuoteId);
+			$userProfit = $this->userProfitRepository->findOrCreate($profit->oup_user_id, $profit->oup_order_id, $productQuote->pq_id);
+
+			$userProductType = UserProductType::findOne(['upt_user_id' => $profit->oup_user_id, 'upt_product_type_id' => $productQuote->pqProduct->pr_type_id]);
+
+			$userProductCommission = 0;
+			if ($userProductType) {
+				$userProductCommission = $userProductType->upt_commission_percent;
+			}
+
 			if ($userProfit->up_id) {
 				$userProfit->updateProfit((new OrderUserProfitCreateUpdateDTO(
 					null,
 					null,
-					null,
-					null,
-					null,
-					$order->or_profit_amount,
+					$order->or_id,
+					$productQuote->pq_id,
+					$userProductCommission,
+					$productQuote->pq_profit_amount,
 					$profit->oup_percent
 				)));
 			} else {
@@ -66,9 +88,9 @@ class OrderUserProfitService
 					$profit->oup_user_id,
 					$order->or_lead_id,
 					$order->or_id,
-					$productQuoteId,
-					null,
-					$order->or_profit_amount,
+					$productQuote->pq_id,
+					$userProductCommission,
+					$productQuote->pq_profit_amount,
 					$profit->oup_percent,
 					UserProfit::STATUS_PENDING
 				)));
@@ -95,6 +117,7 @@ class OrderUserProfitService
 
 				foreach ($orderUserProfits as $row) {
 					$row->insert();
+					$row->oup_amount = $order->or_profit_amount;
 					$this->orderUserProfitRepository->save($row);
 				}
 

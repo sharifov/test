@@ -39,7 +39,7 @@ class OrderUserProfit extends \yii\db\ActiveRecord
 	public function scenarios()
 	{
 		$scenarios = parent::scenarios();
-		$scenarios[self::SCENARIO_CRUD] = ['oup_percent'];
+		$scenarios[self::SCENARIO_CRUD] = ['oup_percent', 'oup_order_id', 'oup_user_id'];
 		return $scenarios;
 	}
 

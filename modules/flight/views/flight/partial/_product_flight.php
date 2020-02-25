@@ -34,13 +34,18 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
             <h2>
                 <a class="collapse-link">
                     <i class="fa fa-plane" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                    <?php if ($product->pr_description):?>
-                        <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
-                    <?php endif;?>
                     <?php if ($product->flight->flightQuotes): ?>
                         <sup title="Number of quotes">(<?=count($product->flight->flightQuotes)?>)</sup>
                     <?php endif;?>
                 </a>
+                <?php if ($product->pr_description):?>
+                    <a  id="product_description_<?=$product->pr_id?>"
+                        class="popover-class fa fa-info-circle text-info"
+                        data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top"
+                        data-container="body" title="<?=Html::encode($product->pr_name)?>"
+                        data-content='<?=Html::encode($product->pr_description)?>'
+                    ></a>
+                <?php endif; ?>
             </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?php //php if ($is_manager) : ?>
@@ -139,7 +144,10 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                             ]) ?>
 
                             <div class="dropdown-divider"></div>
-
+                            <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [
+                                'class' => 'dropdown-item text-warning btn-update-product',
+                                'data-product-id' => $product->pr_id,
+                            ]) ?>
                             <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Flight',
                                 null, [
                                     'class' => 'dropdown-item text-danger btn-delete-product',

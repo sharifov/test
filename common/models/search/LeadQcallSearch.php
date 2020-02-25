@@ -299,8 +299,10 @@ class LeadQcallSearch extends LeadQcall
             ]);
 
             $skillSettings = (int)Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'];
+            $userSkill = $user->userProfile ? (int) $user->userProfile->up_skill : 0;
+
             $query->addSelect(['redial_business_flight_leads_skill_current_user' =>
-                new Expression('if (' . $user->userProfile->up_skill . ' >= ' . $skillSettings . ', 1, 0) ')
+                new Expression('if (' . $userSkill . ' >= ' . $skillSettings . ', 1, 0) ')
             ]);
 
             $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
