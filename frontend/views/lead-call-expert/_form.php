@@ -23,6 +23,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'lce_agent_user_id')->textInput() ?>
 
+        <?= $form->field($model, 'lce_product_id')->textInput() ?>
+
     </div>
 
     <div class="col-md-4">
@@ -37,6 +39,7 @@ use yii\widgets\ActiveForm;
         <?= $form->field($model, 'lce_expert_user_id')->textInput() ?>
 
         <?= $form->field($model, 'lce_expert_username')->textInput(['maxlength' => true]) ?>
+
     </div>
 
     <?php //= $form->field($model, 'lce_updated_dt')->textInput() ?>

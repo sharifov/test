@@ -161,7 +161,7 @@ class LeadsController extends FController
             //'searchModel' => $searchModel,
             //'dataProvider' => $dataProvider,
         ]);
-    }
+	}
 
     /**
      * Lists all Lead models.
