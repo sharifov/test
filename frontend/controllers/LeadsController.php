@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use common\models\Reason;
 use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
@@ -146,25 +145,6 @@ class LeadsController extends FController
             'isAgent' => $isAgent,
         ]);
     }
-
-    /**
-     * @return string
-     */
-    public function actionAjaxReasonList()
-    {
-        $status_id = Yii::$app->request->post('status_id');
-        $data = Reason::getReasonListByStatus($status_id);
-
-        $str = '<option value="">-</option>';
-        if($data) {
-            foreach ($data as $reasonId => $reasonName) {
-                $str .= '<option value="' . $reasonId . '">' . $reasonName . '</option>';
-            }
-        }
-
-        return $str;
-    }
-
 
     /**
      * @return string

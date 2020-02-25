@@ -179,7 +179,6 @@ use yii\helpers\VarDumper;
  * @property null|string $additionalInformationFormFirstElementPnr
  * @property string $statusLabelClass
  * @property array $paxTypes
- * @property ActiveQuery $reasons
  * @property mixed $bookedQuote
  * @property null $departure
  * @property ActiveQuery $tsUsers
@@ -1770,14 +1769,6 @@ class Lead extends ActiveRecord implements Objectable
 
     /**
      * @return ActiveQuery
-     */
-    public function getReasons()
-    {
-        return $this->hasMany(Reason::class, ['lead_id' => 'id']);
-    }
-
-    /**
-     * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
     public function getTsUsers(): ActiveQuery
@@ -2903,12 +2894,13 @@ Reason: {reason}
                     } elseif ($this->status == self::STATUS_FOLLOW_UP) {
 
                         if ($this->status_description) {
-                            $reason = new Reason();
-                            $reason->lead_id = $this->id;
-                            $reason->employee_id = $this->employee_id;
-                            $reason->created = date('Y-m-d H:i:s');
-                            $reason->reason = $this->status_description;
-                            $reason->save();
+                            //todo delete
+//                            $reason = new Reason();
+//                            $reason->lead_id = $this->id;
+//                            $reason->employee_id = $this->employee_id;
+//                            $reason->created = date('Y-m-d H:i:s');
+//                            $reason->reason = $this->status_description;
+//                            $reason->save();
                         }
 
                         /*if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
@@ -2917,12 +2909,13 @@ Reason: {reason}
                     } elseif ($this->status == self::STATUS_SNOOZE) {
 
                         if ($this->status_description) {
-                            $reason = new Reason();
-                            $reason->lead_id = $this->id;
-                            $reason->employee_id = $this->employee_id;
-                            $reason->created = date('Y-m-d H:i:s');
-                            $reason->reason = $this->status_description;
-                            $reason->save();
+                            //todo delete
+//                            $reason = new Reason();
+//                            $reason->lead_id = $this->id;
+//                            $reason->employee_id = $this->employee_id;
+//                            $reason->created = date('Y-m-d H:i:s');
+//                            $reason->reason = $this->status_description;
+//                            $reason->save();
                         }
 
 
@@ -3001,15 +2994,15 @@ Reason: {reason}
 
 
         //Add logs after changed model attributes
-        $leadLog = new LeadLog(new LeadLogMessage());
-        $leadLog->logMessage->oldParams = $changedAttributes;
-        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
-        $leadLog->logMessage->title = ($insert)
-            ? 'Create' : 'Update';
-        $leadLog->logMessage->model = $this->formName();
-        $leadLog->addLog([
-            'lead_id' => $this->id,
-        ]);
+//        $leadLog = new LeadLog(new LeadLogMessage());
+//        $leadLog->logMessage->oldParams = $changedAttributes;
+//        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
+//        $leadLog->logMessage->title = ($insert)
+//            ? 'Create' : 'Update';
+//        $leadLog->logMessage->model = $this->formName();
+//        $leadLog->addLog([
+//            'lead_id' => $this->id,
+//        ]);
     }
 
     /**
