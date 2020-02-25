@@ -10,11 +10,12 @@ use common\models\ClientPhone;
 use common\models\Department;
 use common\models\Email;
 use common\models\EmailTemplateType;
+use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
 use common\models\LeadFlow;
-use common\models\LeadLog;
+//use common\models\LeadLog;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
@@ -42,6 +43,8 @@ use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\logger\db\GlobalLogInterface;
+use sales\logger\db\LogDTO;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -54,6 +57,7 @@ use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
@@ -186,14 +190,28 @@ class LeadController extends FController
                             $quote = Quote::findOne(['id' => $quoteId]);
                             $priceData = $quote->getPricesData();
                             //log messages
-                            $leadLog = new LeadLog((new LeadLogMessage()));
-                            $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
-                            $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
-                            $leadLog->logMessage->title = 'Update';
-                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
-                            $leadLog->addLog([
-                                'lead_id' => $lead->id,
-                            ]);
+                            // todo delete
+//                            $leadLog = new LeadLog((new LeadLogMessage()));
+//                            $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
+//                            $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
+//                            $leadLog->logMessage->title = 'Update';
+//                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+//                            $leadLog->addLog([
+//                                'lead_id' => $lead->id,
+//                            ]);
+
+                            (\Yii::createObject(GlobalLogInterface::class))->log(
+                                new LogDTO(
+                                    get_class($quote),
+                                    $quote->id,
+                                    \Yii::$app->id,
+                                    $user->id,
+                                    Json::encode(['selling' => $sellingOld]),
+                                    Json::encode(['selling' => $priceData['total']['selling']]),
+                                    null,
+                                    GlobalLog::ACTION_TYPE_UPDATE
+                                )
+                            );
 
                             if ($lead->called_expert) {
                                 $data = $quote->getQuoteInformationForExpert(true);

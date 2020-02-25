@@ -10,6 +10,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
 use common\models\Quote;
+use common\models\QuotePrice;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use yii\base\BootstrapInterface;
@@ -27,6 +28,7 @@ class Logger implements BootstrapInterface
 		LeadPreferences::class,
 		LeadFlightSegment::class,
 		Quote::class,
+        QuotePrice::class,
 	];
 
 	/**

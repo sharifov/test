@@ -334,17 +334,6 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                 ])->execute();
             }
         }
-
-        //Add logs after changed model attributes
-        $leadLog = new LeadLog((new LeadLogMessage()));
-        $leadLog->logMessage->oldParams = $changedAttributes;
-        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
-        $leadLog->logMessage->title = ($insert)
-            ? 'Create' : 'Update';
-        $leadLog->logMessage->model = $this->formName();
-        $leadLog->addLog([
-            'lead_id' => $this->lead_id,
-        ]);
     }
 
     /**
