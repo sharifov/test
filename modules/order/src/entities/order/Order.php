@@ -75,6 +75,7 @@ class Order extends ActiveRecord
             [['or_uid'], 'string', 'max' => 15],
             [['or_name'], 'string', 'max' => 40],
             [['or_client_currency'], 'string', 'max' => 3],
+            [['or_client_currency'], 'default', 'value' => null],
             [['or_gid'], 'unique'],
             [['or_uid'], 'unique'],
             [['or_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['or_client_currency' => 'cur_code']],

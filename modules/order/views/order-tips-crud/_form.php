@@ -22,12 +22,6 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'ot_client_amount')->input('number', ['maxlength' => true, 'step' => 0.01]) ?>
 
-            <?= $form->field($model, 'ot_amount')->input('number', ['maxlength' => true, 'step' => 0.01]) ?>
-
-            <?= $form->field($model, 'ot_user_profit')->input('number', ['maxlength' => true, 'step' => 0.01]) ?>
-
-            <?= $form->field($model, 'ot_user_profit_percent')->input('number', ['maxlength' => true, 'minlength' => true, 'step' => 1, 'min' => 0, 'max' => 100]) ?>
-
             <?= $form->field($model, 'ot_description')->textarea(['maxlength' => true]) ?>
 
         </div>

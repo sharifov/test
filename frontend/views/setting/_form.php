@@ -54,7 +54,18 @@ use yii\widgets\ActiveForm;
             }
 
             else {
-                echo $form->field($model, 's_value')->textInput(['maxlength' => true])->label($model->s_name);
+//                echo $form->field($model, 's_value')->textInput(['maxlength' => true])->label($model->s_name);
+				echo $form->field($model, 's_value')->widget(
+					\kdn\yii2\JsonEditor::class,
+					[
+						'clientOptions' => [
+							'modes' => ['code', 'form', 'tree', 'view'], //'text',
+							'mode' => 'tree'
+						],
+						//'collapseAll' => ['view'],
+						'expandAll' => ['tree', 'form'],
+					]
+				);
             }
         ?>
 
