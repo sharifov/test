@@ -1073,5 +1073,12 @@ class TestController extends FController
         VarDumper::dump($result, 10, true);
     }
 
+    public function actionPhone()
+    {
+        $phone = '+12015559999';
+        //$phone = '+12015550122';
+        $result = PhoneBlacklist::find()->isExists($phone);
 
+        \yii\helpers\VarDumper::dump([$phone, $result], 10, true); exit();  /* FOR DEBUG:: must by remove */
+    }
 }

@@ -18,6 +18,7 @@ use yii\db\ActiveRecord;
  * @property string|null $pbl_created_dt
  * @property string|null $pbl_updated_dt
  * @property int|null $pbl_updated_user_id
+ * @property string|null $pbl_expiration_date
  *
  * @property Employee $updatedUser
  */
@@ -71,7 +72,7 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
             }, 'skipOnError' => true],
 
             ['pbl_enabled', 'boolean'],
-
+            ['pbl_expiration_date', 'date', 'format' => 'php:Y-m-d'],
             ['pbl_description', 'string', 'max' => 255],
         ];
     }
@@ -89,6 +90,7 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
             'pbl_created_dt' => 'Created',
             'pbl_updated_dt' => 'Updated',
             'pbl_updated_user_id' => 'Updated User',
+            'pbl_expiration_date' => 'Expiration date',
         ];
     }
 
