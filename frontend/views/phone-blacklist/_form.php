@@ -14,13 +14,15 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'pbl_phone')->widget(PhoneInput::class, [
+    <?/*= $form->field($model, 'pbl_phone')->widget(PhoneInput::class, [
         'jsOptions' => [
             'nationalMode' => false,
             'preferredCountries' => ['us'],
             'customContainer' => 'intl-tel-input'
         ]
-    ])->label(false); ?>
+    ])->label(false); */?>
+
+    <?= $form->field($model, 'pbl_phone')->textInput() ?>
 
     <?= $form->field($model, 'pbl_description')->textarea() ?>
 

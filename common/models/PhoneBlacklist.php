@@ -69,8 +69,7 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
             ['pbl_phone', 'filter', 'filter' => static function($value) {
                 return $value === null ? null : str_replace(['-', ' '], '', trim($value));
             }, 'skipOnError' => true],
-            ['pbl_phone', 'match', 'pattern' => '/^\+[0-9]+$/', 'message' => 'The format of {attribute} is invalid.'],
-
+            ['pbl_phone', 'match', 'pattern' => '/^\+[0-9\.\*]+$/', 'message' => 'The format of "{attribute}" is invalid'],
             ['pbl_enabled', 'boolean'],
             ['pbl_expiration_date', 'date', 'format' => 'php:Y-m-d'],
             ['pbl_description', 'string', 'max' => 255],

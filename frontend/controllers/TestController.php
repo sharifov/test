@@ -1075,8 +1075,11 @@ class TestController extends FController
 
     public function actionPhone()
     {
-        $phone = '+12015559999';
-        //$phone = '+12015550122';
+       // $phone = '+111'; // valid not exist
+       // $phone = '+12015559999'; // valid by Exp Date
+       // $phone = '+12015550122'; // not valid
+       $phone = '+12015550333'; // not valid (Exp Date is null)
+
         $result = PhoneBlacklist::find()->isExists($phone);
 
         \yii\helpers\VarDumper::dump([$phone, $result], 10, true); exit();  /* FOR DEBUG:: must by remove */
