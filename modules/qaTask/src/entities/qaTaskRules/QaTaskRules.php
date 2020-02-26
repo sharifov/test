@@ -100,10 +100,9 @@ class QaTaskRules extends \yii\db\ActiveRecord
         return new Scopes(static::class);
     }
 
-    public static function getRule(string $key, ?string $subKey = null)
+    public static function getRule(string $key, ?string $subKey = null): ?QaTaskRule
     {
-        $value = null;
-        if ($rule = self::find()->select(['tr_parameters'])->byKey($key)->asArray()->one()) {
+        if ($rule = self::find()->select(['tr_parameters', 'tr_enabled'])->byKey($key)->asArray()->one()) {
             $parameters = $rule['tr_parameters'];
             try {
                 $value = Json::decode($parameters, true);
@@ -124,11 +123,14 @@ class QaTaskRules extends \yii\db\ActiveRecord
                     }
                 }
 
+                return new QaTaskRule($rule['tr_enabled'], $value);
+
             } catch (\Throwable $e) {
                 \Yii::error('Key: ' . $key . PHP_EOL . $e, 'QaTaskRules:getRule');
-                $value = null;
+                return null;
             }
         }
-        return $value;
+        \Yii::error('Key: ' . $key . ' not found', 'QaTaskRules:getRule');
+        return null;
     }
 }
