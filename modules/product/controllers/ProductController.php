@@ -8,6 +8,7 @@ use modules\product\src\forms\ProductUpdateForm;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\helpers\app\AppHelper;
+use sales\yii\bootstrap4\ActiveForm;
 use Yii;
 use common\models\Lead;
 use modules\product\src\entities\product\Product;
@@ -17,11 +18,8 @@ use yii\base\Exception;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
-use yii\web\ForbiddenHttpException;
-use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use yii\widgets\ActiveForm;
 
 /**
  * Class ProductController
@@ -116,53 +114,41 @@ class ProductController extends FController
     }
 
     /**
-     * @return array|string
-     * @throws BadRequestHttpException
+     * @param $id
+     * @return array|string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdateAjax()
+    public function actionUpdateAjax($id)
     {
-        $id = (int) Yii::$app->request->get('id');
-        if (!$id) {
-            throw new BadRequestHttpException('Param ID required');
-        }
-        $form = new ProductUpdateForm();
-        $model = $this->findModel($id);
+        $model = $this->findModel((int)$id);
 
-        if (Yii::$app->request->isPost) {
+        $form = new ProductUpdateForm($model);
 
-            if ($form->load(Yii::$app->request->post())) {
+        if ($form->load(Yii::$app->request->post())) {
 
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                $result = ['status' => 0, 'message' => ''];
-
-                if (!$form->validate()) {
-                    $result['message'] = ActiveForm::validate($form);
-                    return $result;
-                }
-
+            if ($form->validate()) {
                 try {
                     $model->setName($form->pr_name)
-                          ->setDescription($form->pr_description);
+                        ->setDescription($form->pr_description);
 
                     $this->productRepository->save($model);
 
-                    $result['status'] = 1;
-                    $result['message'] = 'Product updated';
-                    return $result;
+                    return $this->asJson([
+                        'success' => true,
+                        'message' => 'Product updated'
+                    ]);
                 } catch (\Throwable $throwable) {
                     Yii::error(AppHelper::throwableFormatter($throwable), 'ProductController:' . __FUNCTION__ );
                     return ['message' => $throwable->getMessage()];
                 }
             }
-        } else {
-            $form->pr_name = $model->pr_name;
-            $form->pr_description = $model->pr_description;
+
+            return $this->asJson(ActiveForm::formatError($form));
+
         }
 
         return $this->renderAjax('_update_ajax_form', [
-            'formModel' => $form,
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
