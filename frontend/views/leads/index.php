@@ -392,6 +392,14 @@ $this->registerJs($js);
             ]
         ],
 
+        [
+            'label' => 'Pnr',
+            'value' => static function (Lead $model) {
+                return '<code>' . implode('<br>',  $model->getAdditionalInformationMultiplePnr()) . '</code>';
+            },
+            'format' => 'raw',
+        ],
+
         /*[
             'attribute' => 'adults',
             'value' => static function (Lead $model) {
