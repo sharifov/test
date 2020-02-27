@@ -81,15 +81,6 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                     </div>
                 </div>
 
-                <div class="row ">
-                    <div class="col-sm-2">
-                        <?= $form->field($itineraryForm, 'pr_market_price')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
-                    </div>
-                    <div class="col-sm-2">
-                        <?= $form->field($itineraryForm, 'pr_client_budget')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
-                    </div>
-                </div>
-
                 <div class="btn-wrapper text-center" style="margin-top: 10px;">
 
 					<?= Html::submitButton('<i class="fa fa-check"></i> Save flight request', [

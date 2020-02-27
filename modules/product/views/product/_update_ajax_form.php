@@ -1,6 +1,6 @@
 <?php
 
-use modules\product\src\forms\ProductUpdateForm;
+use modules\product\src\useCases\product\update\ProductUpdateForm;
 use sales\yii\bootstrap4\ActiveForm;
 use sales\yii\bootstrap4\ClientBeforeSubmit;
 use yii\helpers\Html;
@@ -25,6 +25,7 @@ $modalId = 'modal-sm';
                     true,
                     'modal-sm',
                 '$.pjax.reload({container: \'#pjax-product-\' + \'' . $model->productId . '\'}); ',
+                null,
                 null
             ),
         ]);
@@ -32,6 +33,11 @@ $modalId = 'modal-sm';
 
         <?= $form->field($model, 'pr_name')->textInput(['maxlength' => true]) ?>
         <?= $form->field($model, 'pr_description')->textarea(['rows' => 4]) ?>
+
+        <div class="row">
+            <div class="col-md-6"><?= $form->field($model, 'pr_market_price')->input('number', ['min' => 0, 'max' => 999999, 'step' => 0.01]) ?></div>
+            <div class="col-md-6"><?= $form->field($model, 'pr_client_budget')->input('number', ['min' => 0, 'max' => 999999, 'step' => 0.01]) ?></div>
+        </div>
 
         <div class="form-group text-center">
             <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>

@@ -20,8 +20,6 @@ use sales\forms\CompositeForm;
  * @property int $infants
  * @property int $tripType
  * @property FlightSegmentEditForm[] $segments
- * @property $pr_market_price
- * @property $pr_client_budget
  * @property int|null $fl_stops
  * @property bool|null $fl_delayed_charge
  */
@@ -34,8 +32,6 @@ class ItineraryEditForm extends CompositeForm
 	public $children;
 	public $infants;
 	public $tripType;
-	public $pr_market_price;
-	public $pr_client_budget;
 	public $fl_stops;
 	public $fl_delayed_charge;
 
@@ -56,8 +52,6 @@ class ItineraryEditForm extends CompositeForm
 		$this->children = $flight->fl_children;
 		$this->infants = $flight->fl_infants;
 		$this->tripType = $flight->fl_trip_type_id;
-		$this->pr_market_price = $flight->flProduct->pr_market_price;
-		$this->pr_client_budget = $flight->flProduct->pr_client_budget;
 		$this->fl_stops = $flight->fl_stops;
 		$this->fl_delayed_charge = $flight->fl_delayed_charge;
 
@@ -114,12 +108,6 @@ class ItineraryEditForm extends CompositeForm
 				}
 			}],
 
-            ['pr_market_price', 'default', 'value' => null],
-            ['pr_market_price', 'number'],
-
-            ['pr_client_budget', 'default', 'value' => null],
-            ['pr_client_budget', 'number'],
-
             ['fl_stops', 'default', 'value' => null],
             ['fl_stops', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['fl_stops', 'integer', 'max' => 9],
@@ -132,8 +120,6 @@ class ItineraryEditForm extends CompositeForm
     public function attributeLabels(): array
     {
         return [
-            'pr_market_price' => 'Market price',
-            'pr_client_budget' => 'Client budget',
             'fl_stops' => 'Stops',
             'fl_delayed_charge' => 'Delayed charge',
         ];

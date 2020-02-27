@@ -67,6 +67,12 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         return $product;
     }
 
+    public function updateInfo(?string $name, ?string $description)
+    {
+        $this->pr_name = $name;
+        $this->pr_description = $description;
+    }
+
     public function changeMarketPrice($value)
     {
         if ($this->pr_market_price !== $value) {
@@ -273,26 +279,6 @@ class Product extends \yii\db\ActiveRecord implements Serializable
 	public function serialize(): array
     {
         return (new ProductSerializer($this))->getData();
-    }
-
-    /**
-     * @param string $name
-     * @return $this
-     */
-    public function setName(string $name): self
-    {
-        $this->pr_name = $name;
-        return $this;
-    }
-
-    /**
-     * @param string $description
-     * @return $this
-     */
-    public function setDescription(string $description): self
-    {
-        $this->pr_description = $description;
-        return $this;
     }
 
     /**

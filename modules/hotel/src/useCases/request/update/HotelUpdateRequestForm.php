@@ -20,9 +20,6 @@ use yii\base\Model;
  * @property int|null $ph_max_price_rate
  * @property int|null $ph_min_price_rate
  *
- * @property int|null $pr_market_price
- * @property int|null $pr_client_budget
- *
  * @property int $hotelId
  */
 class HotelUpdateRequestForm extends Model
@@ -37,9 +34,6 @@ class HotelUpdateRequestForm extends Model
     public $ph_max_star_rate;
     public $ph_max_price_rate;
     public $ph_min_price_rate;
-
-    public $pr_market_price;
-    public $pr_client_budget;
 
     private $hotelId;
 
@@ -86,12 +80,6 @@ class HotelUpdateRequestForm extends Model
 
             ['ph_hotel_code', 'integer'],
             ['ph_hotel_code', 'string', 'max' => 11],
-
-            ['pr_market_price', 'default', 'value' => null],
-            ['pr_market_price', 'number'],
-
-            ['pr_client_budget', 'default', 'value' => null],
-            ['pr_client_budget', 'number'],
 		];
     }
 
@@ -108,8 +96,6 @@ class HotelUpdateRequestForm extends Model
 			'ph_max_star_rate' => 'Max. Rate',
 			'ph_max_price_rate' => 'Max Price Rate',
 			'ph_min_price_rate' => 'Min Price Rate',
-            'pr_market_price' => 'Market price',
-            'pr_client_budget' => 'Client budget',
 		];
     }
 

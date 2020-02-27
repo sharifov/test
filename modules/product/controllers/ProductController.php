@@ -4,9 +4,10 @@ namespace modules\product\controllers;
 
 use frontend\controllers\FController;
 use modules\product\src\entities\product\ProductRepository;
-use modules\product\src\forms\ProductUpdateForm;
+use modules\product\src\useCases\product\update\ProductUpdateForm;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
+use modules\product\src\useCases\product\update\ProductUpdateService;
 use sales\helpers\app\AppHelper;
 use sales\yii\bootstrap4\ActiveForm;
 use Yii;
@@ -26,25 +27,26 @@ use yii\web\Response;
  *
  * @property ProductCreateService $productCreateService
  * @property ProductRepository $productRepository
+ * @property ProductUpdateService $productUpdateService
  */
 class ProductController extends FController
 {
     private $productCreateService;
     private $productRepository;
+    private $productUpdateService;
 
-    /**
-     * ProductController constructor.
-     * @param $id
-     * @param $module
-     * @param ProductCreateService $productCreateService
-     * @param ProductRepository $productRepository
-     * @param array $config
-     */
-    public function __construct($id, $module, ProductCreateService $productCreateService, ProductRepository $productRepository, $config = [])
+    public function __construct(
+        $id,
+        $module,
+        ProductCreateService $productCreateService,
+        ProductRepository $productRepository,
+        ProductUpdateService $productUpdateService,
+        $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->productCreateService = $productCreateService;
         $this->productRepository = $productRepository;
+        $this->productUpdateService = $productUpdateService;
     }
 
     /**
@@ -125,26 +127,18 @@ class ProductController extends FController
         $form = new ProductUpdateForm($model);
 
         if ($form->load(Yii::$app->request->post())) {
-
             if ($form->validate()) {
                 try {
-                    $model->setName($form->pr_name)
-                        ->setDescription($form->pr_description);
-
-                    $this->productRepository->save($model);
-
-                    return $this->asJson([
-                        'success' => true,
-                        'message' => 'Product updated'
-                    ]);
-                } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableFormatter($throwable), 'ProductController:' . __FUNCTION__ );
-                    return ['message' => $throwable->getMessage()];
+                    $this->productUpdateService->update($form);
+                    return $this->asJson(['success' => true, 'message' => 'Product updated']);
+                } catch (\DomainException $e) {
+                    return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+                } catch (\Throwable $e) {
+                    Yii::error(AppHelper::throwableFormatter($e), 'ProductController:' . __FUNCTION__ );
+                    return $this->asJson(['success' => false, 'message' => 'Server error']);
                 }
             }
-
             return $this->asJson(ActiveForm::formatError($form));
-
         }
 
         return $this->renderAjax('_update_ajax_form', [
