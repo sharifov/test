@@ -43,6 +43,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pr_description:ntext',
             'pr_status_id',
             'pr_service_fee_percent',
+            'pr_market_price',
+            'pr_client_budget',
             'pr_created_user_id:userName',
             'pr_updated_user_id:userName',
             'pr_created_dt:byUserDateTime',

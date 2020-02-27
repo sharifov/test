@@ -2,7 +2,9 @@
 
 namespace modules\hotel\models;
 
+use modules\hotel\src\entities\hotel\events\HotelUpdateRequestEvent;
 use modules\hotel\src\entities\hotel\serializer\HotelSerializer;
+use modules\hotel\src\useCases\request\update\HotelUpdateRequestForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuery;
@@ -55,6 +57,12 @@ class Hotel extends ActiveRecord implements Productable
         $hotel = new static();
         $hotel->ph_product_id = $productId;
         return $hotel;
+	}
+
+    public function updateRequest(HotelUpdateRequestForm $form): void
+    {
+        $this->attributes = $form->attributes;
+        $this->recordEvent(new HotelUpdateRequestEvent($this));
 	}
 
     /**
@@ -173,7 +181,7 @@ class Hotel extends ActiveRecord implements Productable
     {
         if ($this->hotelQuotes) {
             foreach ($this->hotelQuotes as $quote) {
-                if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuoteStatus::DONE) {
+                if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuoteStatus::DELIVERED) {
                     $creatorId = Auth::id();
                     $description = 'Find invalid request quotes and update status';
                     $quote->hqProductQuote->declined($creatorId, $description);

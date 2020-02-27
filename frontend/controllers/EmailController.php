@@ -6,6 +6,7 @@ use common\components\CommunicationService;
 use common\models\Employee;
 use common\models\UserProjectParams;
 use http\Url;
+use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
 use Yii;
 use common\models\Email;
@@ -314,7 +315,14 @@ class EmailController extends FController
         if(!$roleAccess) {
             $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => $user->id])->exists();
             if(!$userAccess) {
-                throw new ForbiddenHttpException('Access Denied. Email ID:'.$model->e_id);
+                if ($model->e_case_id) {
+                    $userAccess = Cases::find()->where(['cs_id' => $model->e_case_id, 'cs_user_id' => $user->id])->exists();
+                    if(!$userAccess) {
+                        throw new ForbiddenHttpException('Access Denied. Case: '.$model->e_case_id.', Email ID:'.$model->e_id);
+                    }
+                } else {
+                    throw new ForbiddenHttpException('Access Denied. Email ID:' . $model->e_id);
+                }
             }
         }
 
