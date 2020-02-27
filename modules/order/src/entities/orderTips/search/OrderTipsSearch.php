@@ -17,7 +17,7 @@ class OrderTipsSearch extends OrderTips
     public function rules()
     {
         return [
-            [['ot_id', 'ot_order_id', 'ot_user_profit_percent'], 'integer'],
+            [['ot_order_id', 'ot_user_profit_percent'], 'integer'],
             [['ot_client_amount', 'ot_amount', 'ot_user_profit'], 'number'],
             [['ot_description', 'ot_created_dt', 'ot_updated_dt'], 'safe'],
         ];
@@ -59,7 +59,6 @@ class OrderTipsSearch extends OrderTips
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'ot_id' => $this->ot_id,
             'ot_order_id' => $this->ot_order_id,
             'ot_client_amount' => $this->ot_client_amount,
             'ot_amount' => $this->ot_amount,

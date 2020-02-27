@@ -3,7 +3,6 @@
 namespace modules\order\src\entities\orderTips;
 
 use common\models\Currency;
-use common\models\Setting;
 use modules\order\src\entities\order\Order;
 use sales\entities\EventTrait;
 use yii\behaviors\TimestampBehavior;
@@ -67,7 +66,8 @@ class OrderTips extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['ot_order_id'], 'required'],
+            [['ot_order_id', 'ot_client_amount'], 'required'],
+            [['ot_order_id'], 'unique'],
             [['ot_order_id', 'ot_user_profit_percent'], 'integer'],
             [['ot_user_profit_percent'], 'number', 'max' => 100, 'min' => 0],
             [['ot_client_amount', 'ot_amount', 'ot_user_profit'], 'number'],
@@ -83,7 +83,6 @@ class OrderTips extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'ot_id' => 'ID',
             'ot_order_id' => 'Order ID',
             'ot_client_amount' => 'Client Amount',
             'ot_amount' => 'Amount',

@@ -14,10 +14,10 @@ class OrderEvent extends Component
 	 */
 	private static $orderRepository;
 
-	public function __construct(OrderRepository $orderRepository, $config = [])
+	public function __construct(OrderRepository $orderTipsRepository, $config = [])
 	{
 		parent::__construct($config);
-		self::$orderRepository = $orderRepository;
+		self::$orderRepository = $orderTipsRepository;
 	}
 
 	public function linkOrderOwner($params): void

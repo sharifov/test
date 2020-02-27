@@ -28,7 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
 
-            'ot_id',
 			[
 				'class' => OrderColumn::class,
 				'attribute' => 'ot_order_id',

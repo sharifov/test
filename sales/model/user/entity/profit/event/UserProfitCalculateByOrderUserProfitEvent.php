@@ -5,17 +5,18 @@ namespace sales\model\user\entity\profit\event;
 use modules\order\src\entities\order\Order;
 
 /**
- * Class UserProfitRecalculateEvent
+ * Class UserProfitCalculateByOrderUserProfitEvent
  * @package sales\model\user\entity\profit\event
  *
  * @property Order $order
+ * @property int $userProfitType
  */
-class UserProfitRecalculateEvent
+class UserProfitCalculateByOrderUserProfitEvent
 {
 	public $order;
 
 	/**
-	 * UserProfitRecalculateEvent constructor.
+	 * UserProfitCalculateByOrderUserProfitEvent constructor.
 	 * @param Order $order
 	 */
 	public function __construct(Order $order)

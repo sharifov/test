@@ -46,13 +46,13 @@ class CasesCreateByWebForm extends Model
 
     /**
      * CasesCreateByWebForm constructor.
-     * @param Employee $user
+     * @param Employee $tipsUser
      * @param array $config
      */
-    public function __construct(Employee $user, $config = [])
+    public function __construct(Employee $tipsUser, $config = [])
     {
         parent::__construct($config);
-        $this->user = $user;
+        $this->user = $tipsUser;
     }
 
     /**

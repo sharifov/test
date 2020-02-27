@@ -11,7 +11,6 @@ use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
-use modules\product\src\entities\productQuote\events\ProductQuoteCalculateUserProfitEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
@@ -628,7 +627,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 		);
 		if ($this->pq_status_id !== ProductQuoteStatus::SOLD) {
 			$this->setStatus(ProductQuoteStatus::SOLD);
-			$this->recordEvent((new ProductQuoteCalculateUserProfitEvent($this)));
 		}
 	}
 

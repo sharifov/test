@@ -2,32 +2,35 @@
 
 namespace modules\order\controllers;
 
+use frontend\controllers\FController;
+use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use Yii;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderTipsUserProfit\search\OrderTipsUserProfitSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * OrderTipsUserProfitCrudController implements the CRUD actions for OrderTipsUserProfit model.
  */
-class OrderTipsUserProfitCrudController extends Controller
+class OrderTipsUserProfitCrudController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
+	/**
+	 * @return array
+	 */
+	public function behaviors(): array
+	{
+		$behaviors = [
+			'verbs' => [
+				'class' => VerbFilter::class,
+				'actions' => [
+					'delete-ajax' => ['POST'],
+				],
+			],
+		];
+		return ArrayHelper::merge(parent::behaviors(), $behaviors);
+	}
 
     /**
      * Lists all OrderTipsUserProfit models.
@@ -66,8 +69,9 @@ class OrderTipsUserProfitCrudController extends Controller
     public function actionCreate()
     {
         $model = new OrderTipsUserProfit();
+		$model->setScenario(OrderUserProfit::SCENARIO_CRUD);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'otup_order_id' => $model->otup_order_id, 'otup_user_id' => $model->otup_user_id]);
         }
 
@@ -87,8 +91,9 @@ class OrderTipsUserProfitCrudController extends Controller
     public function actionUpdate($otup_order_id, $otup_user_id)
     {
         $model = $this->findModel($otup_order_id, $otup_user_id);
+		$model->setScenario(OrderUserProfit::SCENARIO_CRUD);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+		if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'otup_order_id' => $model->otup_order_id, 'otup_user_id' => $model->otup_user_id]);
         }
 

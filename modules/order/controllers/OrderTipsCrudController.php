@@ -3,6 +3,7 @@
 namespace modules\order\controllers;
 
 use frontend\controllers\FController;
+use modules\order\src\services\OrderTipsManageService;
 use Yii;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTips\search\OrderTipsSearch;
@@ -12,9 +13,23 @@ use yii\filters\VerbFilter;
 
 /**
  * OrderTipsCrudController implements the CRUD actions for OrderTips model.
+ *
+ * @property OrderTipsManageService $orderTipsManageService
  */
 class OrderTipsCrudController extends FController
 {
+
+	/**
+	 * @var OrderTipsManageService
+	 */
+	private $orderTipsManageService;
+
+	public function __construct($id, $module, OrderTipsManageService $orderTipsManageService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->orderTipsManageService = $orderTipsManageService;
+	}
+
 	/**
 	 * @return array
 	 */
@@ -68,8 +83,19 @@ class OrderTipsCrudController extends FController
     {
         $model = new OrderTips();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ot_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+			try {
+				$this->orderTipsManageService->create($model);
+
+            	return $this->redirect(['view', 'id' => $model->ot_order_id]);
+			} catch (\RuntimeException $e) {
+				$model->addError('runtimeError', $e->getMessage());
+			} catch (\Throwable $e) {
+				Yii::error($e->getMessage(), 'OrderTipsCrudController::actionCreate::Throwable');
+				$model->addError('internalServerError', 'Internal Server Error');
+			}
+
         }
 
         return $this->render('create', [
@@ -88,8 +114,19 @@ class OrderTipsCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ot_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+        	try {
+        		$this->orderTipsManageService->update($model);
+
+            	return $this->redirect(['view', 'id' => $model->ot_order_id]);
+			} catch (\RuntimeException $e) {
+				$model->addError('runtimeError', $e->getMessage());
+			} catch (\Throwable $e) {
+				Yii::error($e->getMessage(), 'OrderTipsCrudController::actionCreate::Throwable');
+				$model->addError('internalServerError', 'Internal Server Error');
+			}
+
         }
 
         return $this->render('update', [

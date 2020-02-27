@@ -76,10 +76,10 @@ class MultipleUpdateForm extends Model
 
     private $authUser;
 
-    public function __construct(Employee $authUser, $config = [])
+    public function __construct(Employee $authTipsUser, $config = [])
     {
         parent::__construct($config);
-        $this->authUser = $authUser;
+        $this->authUser = $authTipsUser;
     }
 
     public function rules(): array

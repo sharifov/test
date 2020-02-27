@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'ot_id') ?>
+<!--    --><?//= $form->field($model, 'ot_id') ?>
 
     <?= $form->field($model, 'ot_order_id') ?>
 
