@@ -29,9 +29,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'n_popup_show')->checkbox() ?>
 
-    <?//= $form->field($model, 'n_read_dt')->textInput() ?>
+    <?php //= $form->field($model, 'n_read_dt')->textInput() ?>
 
-    <?//= $form->field($model, 'n_created_dt')->textInput() ?>
+    <?php //= $form->field($model, 'n_created_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? Yii::t('notifications', 'Create') : Yii::t('notifications', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

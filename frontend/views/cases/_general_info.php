@@ -22,7 +22,7 @@ use yii\widgets\DetailView;
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
-            <?/*<li class="dropdown">
+            <?php /*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <ul class="dropdown-menu" role="menu">
                     <li><a href="#">Settings 1</a>
@@ -71,6 +71,7 @@ use yii\widgets\DetailView;
                             },
                             'format' => 'raw'
                         ],
+                        'cs_source_type_id:casesSourceType',
                         //'cs_subject',
                         //'cs_description:ntext',
                     ],

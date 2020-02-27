@@ -14,9 +14,9 @@ $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.
     <li>
         <a href="javascript:;" class="info-number" title="Online Connection" id="online-connection-indicator">
             <i class="fa fa-plug"></i>
-            <?/*//php if($newCount): ?>
+            <?php /*//php if($newCount): ?>
                 <span class="badge" title="Open tabs"></span>
-            <?//php endif;*/?>
+            <?php //php endif;*/?>
         </a>
     </li>
 <?php

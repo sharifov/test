@@ -34,7 +34,7 @@ use yii\widgets\ActiveForm;
         </div>
     </div>
 
-    <?/*=$form->field($model, 'processing_filter')->dropDownList([
+    <?php /*=$form->field($model, 'processing_filter')->dropDownList([
         'snooze' => 'Leads in snooze',
         'without_email' => 'Leads without email',
         'with_email' => 'Leads with email',

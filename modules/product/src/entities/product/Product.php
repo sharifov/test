@@ -10,6 +10,7 @@ use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
 use modules\product\src\entities\product\events\ProductCreateEvent;
+use modules\product\src\interfaces\Productable;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
@@ -42,10 +43,14 @@ use yii\db\ActiveRecord;
  * @property ProductType $prType
  * @property Employee $prUpdatedUser
  * @property ProductQuote[] $productQuotes
+ *
+ * @property Productable|null $childProduct
  */
 class Product extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
+
+    private $childProduct;
 
     public static function create(ProductCreateForm $form): self
     {
@@ -66,6 +71,17 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function isHotel(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_HOTEL;
+    }
+
+    public function getChildProduct(): ?Productable
+    {
+        if ($this->childProduct !== null) {
+            return $this->childProduct;
+        }
+
+        $finder = [ProductClasses::getClass($this->pr_type_id), 'findByProduct'];
+        $this->childProduct =  $finder($this->pr_id);
+        return $this->childProduct;
     }
 
     public static function tableName(): string

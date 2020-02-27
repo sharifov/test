@@ -16,7 +16,7 @@ use yii\helpers\Html; ?>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
 
-            <?/*<li class="dropdown">
+            <?php /*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
 
 

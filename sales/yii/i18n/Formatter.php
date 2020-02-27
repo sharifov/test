@@ -30,11 +30,83 @@ use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
-use Mpdf\Tag\P;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
+use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\entities\qaTask\QaTaskCreateType;
+use modules\qaTask\src\entities\qaTask\QaTaskRating;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
+use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
+use sales\entities\cases\CasesSourceType;
+use sales\model\user\entity\paymentCategory\UserPaymentCategory;
+use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asQaTaskRating($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskRating::asFormat($value);
+    }
+
+    public function asCasesSourceType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return CasesSourceType::asFormat($value);
+    }
+
+    public function asQaTask(?QaTask $task): string
+    {
+        if ($task === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskFormatter::asQaTask($task);
+    }
+
+    public function asQaTaskAction($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskActions::asFormat($value);
+    }
+
+    public function asQaTaskStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskStatus::asFormat($value);
+    }
+
+    public function asQaTaskCreatedType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskCreateType::asFormat($value);
+    }
+
+    public function asQaTaskObjectType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return QaTaskObjectType::asFormat($value);
+    }
+
     public function asOfferSendLogType($value): string
     {
         if ($value === null) {
@@ -179,6 +251,18 @@ class Formatter extends \yii\i18n\Formatter
         return ProductQuoteFormatter::asProductQuote($productQuote);
     }
 
+    public function asPayroll($userPayrollId): string
+	{
+		if ($userPayrollId === null) {
+			return $this->nullDisplay;
+		}
+		return Html::a(
+			$userPayrollId,
+			['/user-payroll-crud/view', 'id' => $userPayrollId],
+			['target' => '_blank', 'data-pjax' => 0]
+		);
+	}
+
     public function asProduct(?Product $product): string
     {
         if ($product === null) {
@@ -244,6 +328,34 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('span', Quote::getTypeName($value), ['class' => $class]);
     }
 
+	/**
+	 * @param $categoryId
+	 * @return string|null
+	 */
+    public function asUserPaymentCategoryName($categoryId): ?string
+	{
+		$category = UserPaymentCategory::findOne(['upc_id' => $categoryId]);
+
+		if ($category) {
+			return $category->upc_name ?? '--';
+		}
+		return '--';
+	}
+
+	/**
+	 * @param $statusId
+	 * @return string|null
+	 */
+	public function asUserPaymentStatusName($statusId): ?string
+	{
+		$statusName = UserPaymentCategory::getStatusName($statusId);
+
+		if ($statusName) {
+			return $statusName;
+		}
+		return '--';
+	}
+
     /**
      * @param $dateTime
      * @return string
@@ -284,6 +396,25 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
     }
 
+	/**
+	 * @param $numberOfMonth
+	 * @return string
+	 */
+    public function asMonthNameByMonthNumber($numberOfMonth)
+	{
+		return \DateTime::createFromFormat('!m', $numberOfMonth)->format('F');
+	}
+
+	public function asUserPayrollAgentStatusName($agentStatusId): ?string
+	{
+		return UserPayroll::getAgentStatusName($agentStatusId);
+	}
+
+	public function asUserPayrollStatusName($statusId): ?string
+	{
+		return UserPayroll::getStatusName($statusId);
+	}
+
     /**
      * @param Department|int|string|null $value
      * @return string
@@ -311,6 +442,15 @@ class Formatter extends \yii\i18n\Formatter
         return Html::encode($name);
     }
 
+    public function asDepartment($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return Department::asFormat($value);
+    }
+
     /**
      * @param Project|int|string|null $value
      * @return string
@@ -335,8 +475,13 @@ class Formatter extends \yii\i18n\Formatter
             throw new \InvalidArgumentException('value must be Project|int|string|null');
         }
 
-        return Html::tag('span', Html::encode($name), ['class' => 'badge']);
+        return Html::tag('span', Html::encode($name));
     }
+
+    public function asPercentInteger($value): string
+	{
+    	return $value . ' %';
+	}
 
     /**
      * @param $value

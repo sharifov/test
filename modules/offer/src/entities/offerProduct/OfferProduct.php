@@ -3,6 +3,7 @@
 namespace modules\offer\src\entities\offerProduct;
 
 use common\models\Employee;
+use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\offer\src\entities\offer\Offer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\EventTrait;
@@ -10,6 +11,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
+use yii\db\StaleObjectException;
 
 /**
  * This is the model class for table "offer_product".
@@ -79,6 +81,24 @@ class OfferProduct extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @param int $offerId
+     * @param int $productQuoteId
+     * @return static
+     */
+    public static function create(int $offerId, int $productQuoteId): self
+    {
+        $model = new static();
+        $model->op_offer_id = $offerId;
+        $model->op_product_quote_id = $productQuoteId;
+        $model->recordEvent(new OfferRecalculateProfitAmountEvent([$model->opOffer]));
+
+        return $model;
+    }
+
+    /**
+     * @return ActiveQuery
+     */
     public function getOpCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'op_created_user_id']);

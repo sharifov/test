@@ -138,7 +138,7 @@ class LeadSearch extends Lead
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
-            [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id',
+            [['uid', 'hybrid_uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id',
                 'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter', 'l_init_price', 'l_last_action_dt'], 'safe'],
             ['l_init_price', 'filter', 'filter' => function($value) {
                 return $value ? filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : null;
@@ -384,7 +384,8 @@ class LeadSearch extends Lead
             //->andFilterWhere(['like', 'request_ip', $this->request_ip])
             ->andFilterWhere(['like', 'request_ip_detail', $this->request_ip_detail])
             ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
-            ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
+            ->andFilterWhere(['like', 'discount_id', $this->discount_id])
+            ->andFilterWhere(['like', 'hybrid_uid', $this->hybrid_uid]);
 
         if(!empty($this->origin_airport)){
             $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','origin',$this->origin_airport]);

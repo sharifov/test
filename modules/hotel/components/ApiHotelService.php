@@ -8,7 +8,12 @@
 
 namespace modules\hotel\components;
 
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
+use modules\hotel\src\helpers\HotelApiDataHelper;
+use modules\hotel\src\helpers\HotelApiMessageHelper;
 use yii\base\Component;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
@@ -30,6 +35,7 @@ class ApiHotelService extends Component
     public $url;
     public $username;
     public $password;
+    public $options = [CURLOPT_ENCODING => 'gzip'];
 
     private $request;
 
@@ -81,30 +87,29 @@ class ApiHotelService extends Component
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
     {
         $url = $this->url . $action;
-
-        //$options = ['RETURNTRANSFER' => 1];
-
+        /* @var $this->request Client */
         $this->request->setMethod($method)
             ->setUrl($url)
             ->setData($data);
 
-        if (strtolower($method) === 'post') {
-			$this->request->setFormat(Client::FORMAT_JSON);
-		}
-
+        $this->setFormatJson($method);
+        $this->request->setOptions(ArrayHelper::merge($this->options, $options));
         if ($headers) {
             $this->request->addHeaders($headers);
         }
-
-        $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
-
-        if ($options) {
-            $this->request->setOptions($options);
-        }
-
         return $this->request->send();
     }
 
+    /**
+     * @param string $method
+     */
+    protected function setFormatJson(string $method): void
+    {
+        $method = strtolower($method);
+        if ($method === 'post' || $method === 'delete') {
+			$this->request->setFormat(Client::FORMAT_JSON);
+		}
+    }
 
     /**
      * @param string $checkIn
@@ -132,12 +137,15 @@ class ApiHotelService extends Component
             $response = $this->sendRequest('booking/search', $data, 'post');
             // VarDumper::dump($response->data, 10, true); exit;
 
-            if ($response->isOk) {
+            if ($response->isOk && !isset($response->data['error'])) {
                 if (isset($response->data['hotels'])) {
                     $out['data'] = $response->data;
                 } else {
                     $out['error'] = 'Not found in response array data key [hotels]';
                 }
+            } elseif (isset($response->data['error'])) {
+                $out['error'] = 'Not found in response array data key [hotels]';
+                \Yii::error(VarDumper::dumpAsString($response->data['error'], 10), 'Component:ApiHotelService::search');
             } else {
                 $out['error'] = 'Error ('.$response->statusCode.'): ' . $response->content;
                 \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService::search');
@@ -199,4 +207,59 @@ class ApiHotelService extends Component
 		return self::DESTINATION_AVAILABLE_TYPE;
 	}
 
+    /**
+     * @param string $urlAction
+     * @param array $params
+     * @param string $method
+     * @return array
+     */
+    public function requestBookingHandler(string $urlAction, array $params, string $method = 'post'): array
+    {
+        $result = ['statusApi' => HotelQuoteServiceLogStatus::STATUS_ERROR, 'message' => '', 'data' => []];
+        $urlMethod = $urlAction . '_' . $method;
+        $url = $this->url . $urlAction;
+        $resultMessage = new HotelApiMessageHelper($urlMethod, func_get_args());
+
+        try {
+            $response = $this->sendRequest($urlAction, $params, $method);
+
+            if ($response->isOk) {
+                if ((new HotelApiDataHelper())->checkDataResponse($urlMethod, $response->data)) {
+
+                    $result['data'] = (new HotelApiDataHelper())->prepareDataResponse($urlMethod, $response->data);
+                    $result['data']['logData'] = $response->data;
+                    $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_SUCCESS;
+                    $resultMessage->message = 'Process('. $resultMessage->urlMethodMap[$urlMethod] .') completed successfully';
+
+                } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
+
+                    $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_FAIL_WITH_ERROR;
+                    $result['data']['logData'] = $response->data;
+                    $resultMessage->message = $response->data['error']['message'];
+
+                } else {
+                    $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_FAIL;
+                    $result['data']['logData'] = $response;
+                    $resultMessage->message = $resultMessage->getErrorMessageByCode($response->statusCode, $url, $method);
+                }
+            } else {
+                $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_ERROR_RESPONSE;
+                $result['data']['logData'] = $response;
+                $resultMessage->message = $resultMessage->getErrorMessageByCode($response->statusCode, $url, $method);
+            }
+        } catch (\Throwable $throwable) {
+            $resultMessage->title = HotelQuoteServiceLogStatus::getTitle(HotelQuoteServiceLogStatus::STATUS_ERROR);
+            $resultMessage->message = $throwable->getMessage();
+            $resultMessage->code = $throwable->getCode();
+
+            $result['data']['logData'] = $resultMessage->prepareMessage()->forLog;
+            \Yii::error(VarDumper::dumpAsString($result['data']['logData']),
+                'ApiHotelService error:' . $resultMessage->urlMethodMap[$urlMethod]);
+        }
+
+        $resultMessage->title = HotelQuoteServiceLogStatus::getTitle($result['statusApi']);
+        $result['message'] = $resultMessage->prepareMessage()->forHuman;
+
+		return $result;
+	}
 }

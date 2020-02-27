@@ -51,7 +51,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     ]);
     ?>
 
-    <?/*= Html::label( Yii::t('frontend', 'Page size: '), 'pagesize', array( 'style' => 'margin-left:10px; margin-top:8px;' ) ) ?>
+    <?php /*= Html::label( Yii::t('frontend', 'Page size: '), 'pagesize', array( 'style' => 'margin-left:10px; margin-top:8px;' ) ) ?>
     <?= Html::dropDownList(
         'pagesize',
         ( isset($_GET['pagesize']) ? $_GET['pagesize'] : 20 ),  // set the default value for the dropdown list
@@ -72,12 +72,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
     <?php if($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
-            <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+            <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
         </p>
     <?php endif; ?>
 
-    <?/*php if($isAdmin):?>
+    <?php /*php if($isAdmin):?>
             <p>
                 <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
             </p>

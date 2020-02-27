@@ -33,14 +33,14 @@ use yii\widgets\ActiveForm;
             </div>
         </div>
 
-        <?//= $form->field($model, 'cc_display_number')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'cc_display_number')->textInput(['maxlength' => true]) ?>
 
 
 
         <div class="row">
             <div class="col-md-5">
                 <?= $form->field($model, 'cc_expiration')->textInput(['id' => 'cc_expiration', 'maxlength' => 7]) ?>
-<!--                --><?//= $form->field($model, 'cc_expiration_month')->dropDownList(array_combine(range(1, 12), range(1, 12)), ['prompt' => '-']) ?>
+<!--                --><?php //= $form->field($model, 'cc_expiration_month')->dropDownList(array_combine(range(1, 12), range(1, 12)), ['prompt' => '-']) ?>
 <!--            </div>-->
 <!--            <div class="col-md-5">-->
 <!--                --><?php
@@ -48,7 +48,7 @@ use yii\widgets\ActiveForm;
 //                    $max = (int) date('Y', strtotime('+5 year'));
 //                    $range = range($min, $max);
 //                ?>
-<!--                --><?//= $form->field($model, 'cc_expiration_year')->dropDownList(array_combine($range, $range), ['prompt' => '-']) ?>
+<!--                --><?php //= $form->field($model, 'cc_expiration_year')->dropDownList(array_combine($range, $range), ['prompt' => '-']) ?>
             </div>
             <div class="col-md-2">
                 <?= $form->field($model, 'cc_cvv')->passwordInput(['id' => 'cc_cvv', 'maxlength' => 4]) ?>
@@ -68,13 +68,13 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cc_is_expired')->checkbox() ?>
 
-    <!--    --><?//= $form->field($model, 'cc_created_user_id')->textInput() ?>
+    <!--    --><?php //= $form->field($model, 'cc_created_user_id')->textInput() ?>
     <!---->
-    <!--    --><?//= $form->field($model, 'cc_updated_user_id')->textInput() ?>
+    <!--    --><?php //= $form->field($model, 'cc_updated_user_id')->textInput() ?>
     <!---->
-    <!--    --><?//= $form->field($model, 'cc_created_dt')->textInput() ?>
+    <!--    --><?php //= $form->field($model, 'cc_created_dt')->textInput() ?>
     <!---->
-    <!--    --><?//= $form->field($model, 'cc_updated_dt')->textInput() ?>
+    <!--    --><?php //= $form->field($model, 'cc_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>

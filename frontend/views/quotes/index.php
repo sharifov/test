@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
     <p>
-        <?//= Html::a('Create Quote', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('Create Quote', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <div class="row">

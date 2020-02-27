@@ -96,25 +96,25 @@ $this->registerJs($js);
 
                 <div class="col-md-2">
                     <div class="checkbox">
-                        <?/*= Html::checkbox('final_profit', true, ['id' => 'finalProfit', 'label' => 'AGENT BY FINAL PROFIT']) */?>
+                        <?php /*= Html::checkbox('final_profit', true, ['id' => 'finalProfit', 'label' => 'AGENT BY FINAL PROFIT']) */?>
                     </div>
                 </div>
 
                 <div class="col-md-2">
                     <div class="checkbox">
-                        <?/*= Html::checkbox('sold_leads', true, ['id' => 'soldLeads', 'label' => 'AGENT BY SOLD LEADS']) */?>
+                        <?php /*= Html::checkbox('sold_leads', true, ['id' => 'soldLeads', 'label' => 'AGENT BY SOLD LEADS']) */?>
                     </div>
                 </div>
 
                 <div class="col-md-2">
                     <div class="checkbox">
-                        <?/*= Html::checkbox('per_pax', true, ['id' => 'perPax', 'label' => 'AGENT BY PROFIT PER PAX']) */?>
+                        <?php /*= Html::checkbox('per_pax', true, ['id' => 'perPax', 'label' => 'AGENT BY PROFIT PER PAX']) */?>
                     </div>
                 </div>
 
                 <div class="col-md-2">
                     <div class="checkbox">
-                        <?/*= Html::checkbox('tips', true, ['id' => 'tips', 'label' => 'AGENT BY TIPS']) */?>
+                        <?php /*= Html::checkbox('tips', true, ['id' => 'tips', 'label' => 'AGENT BY TIPS']) */?>
                     </div>
                 </div>
 

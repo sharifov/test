@@ -178,7 +178,7 @@ class FlightController extends FController
 				$this->service->editItinerary($id, $form);
 				Yii::$app->session->setFlash('success', 'Segments saved.');
 
-				return '<script>$("#modal-md").modal("hide"); $.pjax.reload({container: "#'.$pjaxIdWrap.'", url: "/flight/flight/pjax-flight-request-view?pr_id='.$flight->fl_product_id.'", push: false, replace: false})</script>';
+				return '<script>$("#modal-md").modal("hide"); $.pjax.reload({container: "#'.$pjaxIdWrap.'", url: "/flight/flight/pjax-flight-request-view?pr_id='.$flight->fl_product_id.'", pushState: false, replace: false, timeout: 2000})</script>';
 			} catch (\Exception | \Throwable $e) {
 				Yii::$app->errorHandler->logException($e);
 				Yii::$app->session->setFlash('error', $e->getMessage());

@@ -2,11 +2,19 @@
 
 namespace modules\product\controllers;
 
+use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChildrenProfitAmountEvent;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
 use Yii;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\search\ProductQuoteCrudSearch;
 use frontend\controllers\FController;
+use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -14,9 +22,36 @@ use yii\web\Response;
 
 /**
  * ProductQuoteController implements the CRUD actions for ProductQuote model.
+ *
+ * @property EventDispatcher $eventDispatcher
+ * @property ProductQuoteRepository $productQuoteRepository
  */
 class ProductQuoteCrudController extends FController
 {
+    /**
+	 * @var EventDispatcher
+	 */
+    private $eventDispatcher;
+    /**
+	 * @var ProductQuoteRepository
+	 */
+	private $productQuoteRepository;
+
+    /**
+     * ProductQuoteCrudController constructor.
+     * @param $id
+     * @param $module
+     * @param EventDispatcher $eventDispatcher
+     * @param ProductQuoteRepository $productQuoteRepository
+     * @param array $config
+     */
+    public function __construct($id, $module, EventDispatcher $eventDispatcher, ProductQuoteRepository $productQuoteRepository, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->eventDispatcher = $eventDispatcher;
+        $this->productQuoteRepository = $productQuoteRepository;
+    }
+
     /**
      * @return array
      */
@@ -66,7 +101,16 @@ class ProductQuoteCrudController extends FController
     {
         $model = new ProductQuote();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $model->recalculateProfitAmount();
+                $this->productQuoteRepository->save($model);
+                $transaction->commit();
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+            }
             return $this->redirect(['view', 'id' => $model->pq_id]);
         }
 
@@ -84,7 +128,23 @@ class ProductQuoteCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+
+            $recalculateProfitAmount = ($model->isAttributeChanged('pq_status_id') || $model->isAttributeChanged('pq_profit_amount'));
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                if (!$model->save()) {
+                    throw new \RuntimeException('ProductQuote not saved');
+                }
+                if ($recalculateProfitAmount) {
+                    $this->eventDispatcher->dispatchAll([new ProductQuoteRecalculateChildrenProfitAmountEvent($model)]);
+                }
+                $transaction->commit();
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+            }
             return $this->redirect(['view', 'id' => $model->pq_id]);
         }
 
@@ -102,7 +162,17 @@ class ProductQuoteCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $model = $this->productQuoteRepository->find($id);
+            $model->prepareRemove();
+            $this->productQuoteRepository->remove($model);
+            $transaction->commit();
+
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+        }
 
         return $this->redirect(['index']);
     }

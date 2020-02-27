@@ -9,26 +9,8 @@ namespace modules\hotel\models\query;
  */
 class HotelQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
+    public function byProduct(int $productId): self
     {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
-    /**
-     * {@inheritdoc}
-     * @return \modules\hotel\models\Hotel[]|array
-     */
-    public function all($db = null)
-    {
-        return parent::all($db);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return \modules\hotel\models\Hotel|array|null
-     */
-    public function one($db = null)
-    {
-        return parent::one($db);
+        return $this->andWhere(['ph_product_id' => $productId]);
     }
 }

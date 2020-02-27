@@ -71,6 +71,9 @@ use frontend\extensions\DatePicker;
                 <div class="col-md-4">
                     <?= $form->field($model, 'l_answered')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
                 </div>
+                <div class="col-md-4">
+                    <?= $form->field($model, 'hybrid_uid') ?>
+                </div>
             </div>
 
 

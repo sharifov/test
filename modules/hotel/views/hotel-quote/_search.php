@@ -26,8 +26,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'hq_product_quote_id') ?>
 
-    <?= $form->field($model, 'hq_json_response') ?>
-
     <?php // echo $form->field($model, 'hq_destination_name') ?>
 
     <?php // echo $form->field($model, 'hq_hotel_name') ?>

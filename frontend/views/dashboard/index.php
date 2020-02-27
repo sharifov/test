@@ -30,7 +30,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
 
 
 ?>
-<?/*<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>*/?>
+<?php /*<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>*/?>
 
 <?php
 
@@ -110,6 +110,20 @@ $user = Yii::$app->user->identity;
                                     $projectsValue = implode(' ', $groupsValueArr);
                                 }
                                 echo $projectsValue;
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>My Product Types:</th>
+                            <td><i class="fa fa-list"></i>
+                                <?php
+                                    if ($productTypeList = Yii::$app->user->identity->productType) {
+                                        $productTypeValue = '';
+                                        foreach ($productTypeList as $productType) {
+                                            $productTypeValue .= Html::tag('span', Html::encode($productType->pt_name), ['class' => 'label label-default']) . ' ';
+                                        }
+                                        echo $productTypeValue;
+                                    }
                                 ?>
                             </td>
                         </tr>
@@ -561,7 +575,7 @@ JS;
 
                     <div class="form-group">
                         <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-primary']) ?>
-                        <?//= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                        <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
                     </div>
                     <?php ActiveForm::end(); ?>
                 </div>

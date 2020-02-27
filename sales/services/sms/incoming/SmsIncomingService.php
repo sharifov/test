@@ -117,6 +117,10 @@ class SmsIncomingService
                     $this->findSource($form->si_project_id)
                 );
                 $leadId = $lead->id;
+            } else {
+                if ($lead = Lead::find()->findLastSalesLeadByClient($clientId, $form->si_project_id)->one()) {
+                    $leadId = $lead->id;
+                }
             }
         } else {
             $leadId = $lead->id;
@@ -145,6 +149,10 @@ class SmsIncomingService
                     $form->si_project_id
                 );
                 $caseId = $case->cs_id;
+            } else {
+                if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $form->si_project_id)->one()) {
+                    $caseId = $case->cs_id;
+                }
             }
         } else {
             $caseId = $case->cs_id;
@@ -173,6 +181,10 @@ class SmsIncomingService
                     $form->si_project_id
                 );
                 $caseId = $case->cs_id;
+            } else {
+                if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
+                    $caseId = $case->cs_id;
+                }
             }
         } else {
             $caseId = $case->cs_id;
@@ -225,6 +237,10 @@ class SmsIncomingService
                 $form->si_project_id
             );
             $caseId = $case->cs_id;
+        } else {
+            if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $form->si_project_id)->one()) {
+                $caseId = $case->cs_id;
+            }
         }
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);

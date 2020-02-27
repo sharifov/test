@@ -15,6 +15,7 @@ use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
 use sales\events\lead\LeadPendingEvent;
+use sales\events\lead\LeadPreferencesUpdateCurrencyEvent;
 use sales\events\lead\LeadProcessingEvent;
 use sales\events\lead\LeadQuoteCloneEvent;
 use sales\events\lead\LeadRejectEvent;
@@ -38,6 +39,7 @@ use sales\listeners\lead\LeadFollowUpEventLogListener;
 use sales\listeners\lead\LeadFollowUpNotificationsListener;
 use sales\listeners\lead\LeadOwnerChangedNotificationsListener;
 use sales\listeners\lead\LeadPendingEventLogListener;
+use sales\listeners\lead\LeadPreferencesUpdateCurrencyEventListener;
 use sales\listeners\lead\LeadProcessingEventLogListener;
 use sales\listeners\lead\LeadQcallAddListener;
 use sales\listeners\lead\LeadQuoteCloneEventListener;
@@ -98,4 +100,5 @@ return [
     ],
 
     LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
+	LeadPreferencesUpdateCurrencyEvent::class => [LeadPreferencesUpdateCurrencyEventListener::class]
 ];

@@ -1,5 +1,6 @@
 <?php
 
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -16,6 +17,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pq_gid')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'pq_clone_id')->textInput() ?>
+
         <?= $form->field($model, 'pq_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'pq_product_id')->textInput() ?>
@@ -24,7 +27,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pq_description')->textarea(['rows' => 6]) ?>
 
-        <?= $form->field($model, 'pq_status_id')->textInput() ?>
+        <?= $form->field($model, 'pq_status_id')->dropDownList(ProductQuoteStatus::getList(), ['prompt' => 'Select status']) ?>
 
         <?= $form->field($model, 'pq_price')->textInput(['maxlength' => true]) ?>
 
@@ -42,9 +45,11 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pq_client_currency_rate')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'pq_profit_amount')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'pq_owner_user_id')->textInput() ?>
 
-        <? /*= $form->field($model, 'pq_created_user_id')->textInput() ?>
+        <?php /*= $form->field($model, 'pq_created_user_id')->textInput() ?>
 
     <?= $form->field($model, 'pq_updated_user_id')->textInput() ?>
 

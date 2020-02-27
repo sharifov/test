@@ -6,6 +6,7 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
 use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
+use modules\product\src\entities\productType\ProductType;
 use sales\access\EmployeeGroupAccess;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
@@ -67,6 +68,7 @@ use yii\web\NotFoundHttpException;
  * @property int $callExpertCount
  *
  * @property Access $access
+ * @property \yii\db\ActiveQuery $productType
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -288,6 +290,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return in_array(self::ROLE_USER_MANAGER, $this->getRoles(true), true);
     }
 
+    public function isAnySenior(): bool
+    {
+        return
+            in_array(self::ROLE_SALES_SENIOR, $this->getRoles(true), true)
+            || in_array(self::ROLE_EXCHANGE_SENIOR, $this->getRoles(true), true)
+            || in_array(self::ROLE_SUPPORT_SENIOR, $this->getRoles(true), true);
+    }
+
     /**
      * @param string $key
      * @return mixed|null
@@ -390,7 +400,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(DepartmentPhoneProject::class, ['dpp_updated_user_id' => 'id']);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -407,6 +416,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(Department::class, ['dep_id' => 'ud_dep_id'])->viaTable('user_department', ['ud_user_id' => 'id']);
     }
 
+    /**
+     * @return bool
+     */
     public function isActive()
     {
         return $this->status === self::STATUS_ACTIVE;
@@ -659,6 +671,18 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(Project::class, ['id' => 'project_id'])->viaTable('project_employee_access', ['employee_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getProductType(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ProductType::class, ['pt_id' => 'upt_product_type_id'])
+            ->viaTable(UserProductType::tableName(), ['upt_user_id' => 'id'], static function ($query) {
+            /* @var \yii\db\ActiveQuery $query */
+            $query->andWhere(['upt_product_enabled' => true]);
+        });
+    }
 
     /**
      * @inheritdoc
@@ -754,7 +778,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        if(!$user->isAdmin() && !$user->isSuperAdmin()) {
+        if((!$user->isAdmin() && !$user->isSuperAdmin()) || $user->isAnySenior()) {
             if(isset($roles[self::ROLE_ADMIN])) {
                 unset($roles[self::ROLE_ADMIN]);
             }
@@ -966,6 +990,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $data = self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'id', 'username');
     }
+
+	/**
+	 * @param array $role
+	 * @return array
+	 */
+	public static function getListSplitProfitByRole(array $role = ['agent']): array
+	{
+		$data = self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['in', 'auth_assignment.item_name', $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
+		return ArrayHelper::map($data, 'id', 'username');
+	}
 
     /**
      * @param int $userId
@@ -2079,5 +2113,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public static function find(): EmployeeQuery
     {
         return new EmployeeQuery(static::class);
+    }
+
+    /**
+     * @param string $default
+     * @return string
+     */
+    public function getGravatarUrl(string $default = 'identicon'): string
+    {
+        if($this->email) {
+            $url = '//www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?d=' . $default . '&s=128';
+        } else {
+            $url = '//www.gravatar.com/avatar/?d=' . $default . '&s=60';
+        }
+        return $url;
     }
 }

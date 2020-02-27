@@ -22,9 +22,9 @@ use \common\models\Call;
         <tr class="<?=$trClass?>">
             <td class="text-center" style="width:50px">
                 <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
-                <?//= $model->c_parent_id ? 'p:' . Html::a($model->c_parent_id, ['call/view', 'id' => $model->c_parent_id], ['target' => '_blank', 'data-pjax' => 0]) . '<br>' : ''?>
+                <?php //= $model->c_parent_id ? 'p:' . Html::a($model->c_parent_id, ['call/view', 'id' => $model->c_parent_id], ['target' => '_blank', 'data-pjax' => 0]) . '<br>' : ''?>
 
-                <?/*php if ($model->isIn()):?>
+                <?php /*php if ($model->isIn()):?>
                     <?=Html::tag('i', '', ['class' => 'fa fa-arrow-circle-o-right fa-lg text-success'])?>
                 <?php else: ?>
                     <?=Html::tag('i', '', ['class' => 'fa fa-arrow-circle-o-left fa-lg text-info'])?>
@@ -93,9 +93,9 @@ use \common\models\Call;
                 <?php if($model->c_lead_id && $model->cLead):?>
                     <i>l:<?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?>
 
-                        <?//=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?>
+                        <?php //=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?>
                     </i><br>
-                    <?/*php
+                    <?php /*php
                         $segments = $model->cLead->leadFlightSegments;
                         $segmentData = [];
                         if ($segments) {
@@ -109,7 +109,7 @@ use \common\models\Call;
                     ?>
 
 
-                    <?//=$model->c_lead_id?>
+                    <?php //=$model->c_lead_id?>
                 <?php endif; ?>
 
                 <?php if($model->c_case_id && $model->cCase):?>
@@ -128,9 +128,9 @@ use \common\models\Call;
             </td>
             <td class="text-center">
 
-<!--                sid: <b>--><?//=$model->c_call_sid?><!--</b><br>-->
+<!--                sid: <b>--><?php //=$model->c_call_sid?><!--</b><br>-->
 <!--                --><?php //if($model->c_parent_call_sid):?>
-<!--                    pid: --><?//=$model->c_parent_call_sid?><!--<br>-->
+<!--                    pid: --><?php //=$model->c_parent_call_sid?><!--<br>-->
 <!--                --><?php //endif; ?>
 
                 <?=$model->getStatusIcon()?>  <?=$model->getStatusName()?><br>
@@ -147,11 +147,11 @@ use \common\models\Call;
                 ?>
 
                 <?php if ($model->isEnded()):?>
-                    <span class="badge badge-default"><?=gmdate('i:s', $sec)?></span> <?//data-sec="<?=$sec" data-control="pause" data-format="%M:%S"?>
+                    <span class="badge badge-default"><?=gmdate('i:s', $sec)?></span> <?php //data-sec="<?=$sec" data-control="pause" data-format="%M:%S"?>
                     <?php if ($model->c_recording_url):?>
                         <small><i class="fa fa-play-circle-o"></i></small>
                     <?php endif;?>
-                    <?//=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
+                    <?php //=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
                 <?php else: ?>
                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
                 <?php endif;?>

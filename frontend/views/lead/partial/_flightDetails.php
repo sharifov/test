@@ -118,7 +118,7 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                         </table>
                     </div>
 
-                    <?/*= Html::a('<i class="fa fa-edit"></i> Edit',
+                    <?php /*= Html::a('<i class="fa fa-edit"></i> Edit',
                         ['/lead-itinerary/view-edit-form'],
                         ['class' => 'btn btn-default', 'data' => ['method' => 'post', 'params'=> ['id'=> $itineraryForm->leadId]]])*/ ?>
 

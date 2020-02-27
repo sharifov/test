@@ -1,4 +1,4 @@
-<?php
+    <?php
 /* @var $this yii\web\View */
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
@@ -21,31 +21,42 @@ use yii\bootstrap4\Html;
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
 
+        <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
+
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
             <!--            </li>-->
             <li>
-                <?= Html::a('<i class="fa fa-edit warning"></i> Update order', null, [
-                    'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
-                    'class' => 'btn-update-order'
-                ])?>
+                <?= Html::a('<i class="fas fa-dollar-sign text-success"></i> Split Profit', null, [
+                    'class' => 'text-success btn-split-profit',
+                    'data-url' => \yii\helpers\Url::to(['/order/order-user-profit/ajax-manage-order-user-profit']),
+                    'data-order-id' => $order->or_id,
+                ]) ?>
             </li>
 
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
+                <a href="#" class="dropdown-toggle text-warning" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars"></i> Actions</a>
                 <div class="dropdown-menu" role="menu">
-                    <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+                    <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
 
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-success"></i> Status log', null, [
-                        'class' => 'dropdown-item text-success btn-order-status-log',
+                    <?= Html::a('<i class="fa fa-edit"></i> Update order', null, [
+                        'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
+                        'class' => 'dropdown-item text-warning btn-update-order'
+                    ])?>
+
+                    <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                        'class' => 'dropdown-item btn-order-status-log',
                         'data-url' => \yii\helpers\Url::to(['/order/order-status-log/show', 'gid' => $order->or_gid]),
                         'data-gid' => $order->or_gid,
                     ]) ?>
 
+
+
+                    <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
                         'class' => 'dropdown-item text-danger btn-delete-order',
                         'data-order-id' => $order->or_id,
@@ -65,7 +76,7 @@ use yii\bootstrap4\Html;
         ?>
 
         <table class="table table-bordered">
-            <?php if ($order->orderProducts):
+            <?php if ($order->productQuotes):
 
 
                 ?>
@@ -81,9 +92,8 @@ use yii\bootstrap4\Html;
                     <th>Client Price</th>
                     <th></th>
                 </tr>
-                <?php if ($order->orderProducts):?>
-                <?php foreach ($order->orderProducts as $product):
-                    $quote = $product->orpProductQuote;
+                <?php foreach ($order->productQuotes as $productQuote):
+                    $quote = $productQuote;
                     $ordTotalPrice += $quote->pq_price;
                     $ordTotalFee += $quote->pq_service_fee_sum;
                     $ordClientTotalPrice += $quote->pq_client_price;
@@ -96,7 +106,7 @@ use yii\bootstrap4\Html;
                             <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
                         </td>
 
-                        <!--                    <td>--><?//=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
+                        <!--                    <td>--><?php //=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
 
                         <td><?=Html::encode($quote->pq_name)?></td>
                         <td><?=ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
@@ -129,7 +139,7 @@ use yii\bootstrap4\Html;
 
                 ?>
                 <tr>
-                    <th class="text-right" colspan="5">Sub Total: </th>
+                    <th class="text-right" colspan="5">Order Amount: </th>
                     <th class="text-right"><?=number_format($ordOptionTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($ordTotalFee, 2)?></th>
                     <th class="text-right"><?=number_format($ordTotalPrice, 2)?></th>
@@ -138,7 +148,7 @@ use yii\bootstrap4\Html;
                 </tr>
                 <tr>
                     <th class="text-right" colspan="5">Calc Total: </th>
-                    <td class="text-center" colspan="2">(price + opt + fee)</td>
+                    <td class="text-center" colspan="2">(price + opt)</td>
                     <th class="text-right"><?=number_format($calcTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
@@ -150,7 +160,6 @@ use yii\bootstrap4\Html;
                     <th class="text-right"><?=number_format($order->or_client_total, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
-            <?php endif; ?>
             <?php endif; ?>
         </table>
 
@@ -176,7 +185,7 @@ use yii\bootstrap4\Html;
                         <th>Created</th>
                         <th title="Amount, USD">Amount, USD</th>
                         <th>Client Amount</th>
-                        <th></th>
+                        <th style="width: 60px"></th>
                     </tr>
                     <?php if ($order->invoices):?>
                     <?php foreach ($order->invoices as $invoice):
@@ -195,29 +204,41 @@ use yii\bootstrap4\Html;
                             <td class="text-right" title="Currency Rate: <?=$invoice->inv_currency_rate?>"><?=number_format($invoice->inv_client_sum, 2)?> <?=Html::encode($invoice->inv_client_currency)?></td>
                             <td>
 
-                                <?php
-                                echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i>', null, [
-                                    'class' => 'btn-update-invoice',
-                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice/update-ajax', 'id' => $invoice->inv_id])
-                                ]);
-                                ?>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-bars"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
 
-                                <?php
-                                echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
-                                    'data-invoice-id' => $invoice->inv_id,
-                                    'data-order-id' => $invoice->inv_order_id,
-                                    'class' => 'btn-delete-invoice',
-                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice/delete-ajax'])
-                                ]);
-                                ?>
+                                        <?php
+                                        echo Html::a('<i class="fa fa-edit text-warning" title="Update"></i> Update', null, [
+                                            'class' => 'dropdown-item btn-update-invoice',
+                                            'data-url' => \yii\helpers\Url::to(['/invoice/invoice/update-ajax', 'id' => $invoice->inv_id])
+                                        ]);
+                                        ?>
 
-                                <?php
-                                echo Html::a('<i class="glyphicon glyphicon-remove-circle text-success" title="Status log"></i>', null, [
-                                    'class' => 'btn-invoice-status-log',
-                                    'data-url' => \yii\helpers\Url::to(['/invoice/invoice-status-log/show', 'gid' => $invoice->inv_gid]),
-                                    'data-gid' => $invoice->inv_gid,
-                                ]);
-                                ?>
+                                        <?php
+                                        echo Html::a('<i class="fa fa-list" title="Status log"></i> Status Log', null, [
+                                            'class' => 'dropdown-item btn-invoice-status-log',
+                                            'data-url' => \yii\helpers\Url::to(['/invoice/invoice-status-log/show', 'gid' => $invoice->inv_gid]),
+                                            'data-gid' => $invoice->inv_gid,
+                                        ]);
+                                        ?>
+                                        <div class="dropdown-divider"></div>
+                                        <?php
+                                        echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i> Delete', null, [
+                                            'data-invoice-id' => $invoice->inv_id,
+                                            'data-order-id' => $invoice->inv_order_id,
+                                            'class' => 'dropdown-item btn-delete-invoice',
+                                            'data-url' => \yii\helpers\Url::to(['/invoice/invoice/delete-ajax'])
+                                        ]);
+                                        ?>
+
+
+                                    </div>
+                                </div>
+
+
                             </td>
                         </tr>
                     <?php endforeach; ?>

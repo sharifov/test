@@ -27,7 +27,7 @@ $pjaxId = 'pjax-invoice-form';
 
     <?php echo $form->errorSummary($model) ?>
 
-    <?//= $form->field($model, 'inv_id')->hiddenInput()->label(false) ?>
+    <?php //= $form->field($model, 'inv_id')->hiddenInput()->label(false) ?>
 
     <?= $form->field($model, 'inv_order_id')->hiddenInput()->label(false) ?>
 

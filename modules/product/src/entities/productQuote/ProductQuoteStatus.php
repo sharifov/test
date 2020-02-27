@@ -18,7 +18,7 @@ class ProductQuoteStatus
     public const DECLINED		 = 10;
     public const CANCELED		 = 11;
 
-    private const LIST        = [
+    public const LIST        = [
     	self::NEW			 => 'New',
         self::PENDING        => 'Pending',
 		self::APPLIED		 => 'Applied',
@@ -33,11 +33,11 @@ class ProductQuoteStatus
     ];
 
     private const CLASS_LIST        = [
-    	self::NEW			 => 'default',
+    	self::NEW			 => 'info',
         self::PENDING        => 'warning',
         self::APPLIED        => 'warning',
         self::IN_PROGRESS    => 'warning',
-        self::BOOKED    	 => 'warning',
+        self::BOOKED    	 => 'info',
         self::SOLD           => 'success',
         self::DELIVERED      => 'success',
         self::ERROR          => 'danger',
@@ -52,6 +52,70 @@ class ProductQuoteStatus
 		self::DECLINED => 'status-declined',
 		self::PENDING => 'status-send',
 		self::IN_PROGRESS => 'status-opened'
+	];
+
+	public const ROUTE_RULES = [
+        null => [
+            self::NEW,
+            self::PENDING,
+            self::APPLIED,
+            self::IN_PROGRESS,
+        ],
+        self::NEW => [
+            self::PENDING,
+            self::APPLIED,
+            self::CANCELED,
+            self::EXPIRED,
+            self::DECLINED,
+        ],
+        self::PENDING => [
+            self::IN_PROGRESS,
+            self::APPLIED,
+            self::CANCELED,
+            self::EXPIRED,
+            self::DECLINED,
+            self::ERROR,
+        ],
+        self::APPLIED => [
+            self::IN_PROGRESS,
+            self::CANCELED,
+            self::EXPIRED,
+            self::DECLINED,
+        ],
+        self::IN_PROGRESS => [
+            self::BOOKED,
+            self::ERROR,
+            self::CANCELED,
+        ],
+        self::BOOKED => [
+            self::SOLD,
+            self::ERROR,
+            self::CANCELED,
+        ],
+        self::SOLD => [
+            self::DELIVERED,
+            self::ERROR,
+            self::CANCELED,
+        ],
+        self::DELIVERED => [
+            self::ERROR,
+            self::CANCELED,
+        ],
+        self::ERROR => [
+            self::IN_PROGRESS,
+            self::BOOKED,
+            self::SOLD,
+            self::DELIVERED,
+        ],
+        self::CANCELED => [
+            self::IN_PROGRESS,
+        ]
+    ];
+
+    public CONST CANCEL_GROUP = [
+		self::EXPIRED,
+		self::DECLINED,
+		self::CANCELED,
 	];
 
     public static function getList(): array
@@ -90,4 +154,39 @@ class ProductQuoteStatus
 
 		return '<span id="q-status-' . $productQuote->pq_id . '" class="quote__status '.$class.'" title="' . \Yii::$app->formatter->asDatetime($productQuote->pq_updated_dt) . '" data-toggle="tooltip"><i class="fa fa-circle"></i> <span>'.$label.'</span></span>';
 	}
+
+	/**
+	 * @param int $status
+	 * @return bool
+	 */
+	public static function isNews(int $status): bool
+	{
+		return $status === self::NEW;
+	}
+
+    /**
+     * @param int $status
+     * @return bool
+     */
+    public static function isBookable(int $status): bool
+    {
+        return in_array($status, [
+            self::NEW,
+            self::PENDING,
+        ]);
+    }
+
+    /**
+     * @param int|null $fromStatus
+     * @param int $toStatus
+     */
+    public static function guard(?int $fromStatus, int $toStatus): void
+    {
+        if (!isset(self::ROUTE_RULES[$fromStatus])) {
+            throw new \DomainException('Disallow transfer from ' . self::getName($fromStatus));
+        }
+        if (!in_array($toStatus, self::ROUTE_RULES[$fromStatus], true)) {
+            throw new \DomainException('Disallow transfer from ' . self::getName($fromStatus) . ' to ' . self::getName($toStatus));
+        }
+    }
 }

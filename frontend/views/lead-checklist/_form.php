@@ -21,7 +21,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'lc_notes')->textInput(['maxlength' => true]) ?>
 
-        <?/*= $form->field($model, 'lc_created_dt')->textInput()*/ ?>
+        <?php /*= $form->field($model, 'lc_created_dt')->textInput()*/ ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

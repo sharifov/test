@@ -170,7 +170,7 @@ $lead = $leadForm->getLead();
             <?php endif;?>
 
 
-            <?//php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
+            <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
 
 
 
@@ -197,7 +197,7 @@ $lead = $leadForm->getLead();
 <!--                        --><?php //if(!$lead->l_answered): ?>
 <!---->
 <!--                            --><?php //if($lead->isProcessing()):?>
-<!--                                --><?//= Html::a(($lead->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $lead->id, 'act' => 'answer'], [
+<!--                                --><?php //= Html::a(($lead->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $lead->id, 'act' => 'answer'], [
 //                                    'class' => 'btn '.($lead->l_answered ? 'btn-success' : 'btn-info'),
 //                                    'data-pjax' => false,
 //                                    'data' => [
@@ -223,7 +223,7 @@ $lead = $leadForm->getLead();
 
 
 
-<!--                --><?//= $this->render('quotes/quote_list', [
+<!--                --><?php //= $this->render('quotes/quote_list', [
 //                    'dataProvider' => $quotesProvider,
 //                    'lead' => $lead,
 //                    'leadForm' => $leadForm,

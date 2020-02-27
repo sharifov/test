@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ugs_group_id')->dropDownList(\common\models\UserGroup::getList()) ?>
 
-        <?//= $form->field($model, 'ugs_updated_dt')->textInput() ?>
+        <?php //= $form->field($model, 'ugs_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

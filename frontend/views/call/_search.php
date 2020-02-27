@@ -17,7 +17,7 @@ use \kartik\form\ActiveForm;
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
 
-                <?/*<li class="dropdown">
+                <?php /*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
 
 
@@ -40,7 +40,7 @@ use \kartik\form\ActiveForm;
                 ],
             ]); ?>
 
-            <?/*= $form->field($model, 'c_id') ?>
+            <?php /*= $form->field($model, 'c_id') ?>
 
     <?= $form->field($model, 'c_call_sid') ?>
 

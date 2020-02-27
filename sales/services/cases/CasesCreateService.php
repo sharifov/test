@@ -111,7 +111,8 @@ class CasesCreateService
                 $form->depId,
                 $form->subject,
                 $form->description,
-                $creatorId
+                $creatorId,
+                $form->sourceTypeId
             );
             $this->casesRepository->save($case);
 

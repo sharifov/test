@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
 
-                <?/*<li class="dropdown">
+                <?php /*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
 
 
@@ -69,7 +69,7 @@ use yii\widgets\ActiveForm;
             </div>
 
 <!--            <div class="col-md-1">-->
-<!--                --><?//= $form->field($model, 'usa_id') ?>
+<!--                --><?php //= $form->field($model, 'usa_id') ?>
 <!--            </div>-->
 <!---->
             <div class="col-md-2">
@@ -77,11 +77,11 @@ use yii\widgets\ActiveForm;
             </div>
 <!---->
 <!--            <div class="col-md-2">-->
-<!--                --><?//= $form->field($model, 'usa_request_url') ?>
+<!--                --><?php //= $form->field($model, 'usa_request_url') ?>
 <!--            </div>-->
 <!---->
 <!--            <div class="col-md-2">-->
-<!--                --><?//= $form->field($model, 'usa_page_url') ?>
+<!--                --><?php //= $form->field($model, 'usa_page_url') ?>
 <!--            </div>-->
 
 

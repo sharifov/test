@@ -21,6 +21,8 @@ use yii\bootstrap4\Html;
              <?= OfferStatus::asFormat($offer->of_status_id) ?>
              <?= OfferFormatter::asSentView($offer) ?>
 
+             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $offer->of_profit_amount ?>
+
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
@@ -35,7 +37,7 @@ use yii\bootstrap4\Html;
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                 <div class="dropdown-menu" role="menu">
-                    <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+                    <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
@@ -106,7 +108,7 @@ use yii\bootstrap4\Html;
                             <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
                         </td>
 
-    <!--                    <td>--><?//=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
+    <!--                    <td>--><?php //=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
 
                         <td><?=Html::encode($quote->pq_name)?></td>
                         <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
@@ -139,7 +141,7 @@ use yii\bootstrap4\Html;
                     <th class="text-right" colspan="5">Total: </th>
                     <td class="text-right" colspan="2">(price + opt + fee)</td>
                     <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice + $totalFee, 2)?></th>
-                    <th class="text-right"><?//=number_format($clientTotalPrice, 2)?> <?=Html::encode($quote->pq_client_currency)?></th>
+                    <th class="text-right"><?php //=number_format($clientTotalPrice, 2)?> <?=Html::encode($quote->pq_client_currency)?></th>
                     <th></th>
                 </tr>
             <?php endif; ?>

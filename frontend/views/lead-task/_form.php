@@ -25,7 +25,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'lt_completed_dt')->input('datetime') ?>
 
-    <?//= $form->field($model, 'lt_updated_dt')->textInput() ?>
+    <?php //= $form->field($model, 'lt_updated_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

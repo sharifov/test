@@ -148,7 +148,7 @@ function renderChildCallsRecursive2($calls): void {
     <?php Pjax::begin(['id' => 'pjax-call-list']); ?>
 
         <div class="row">
-            <?/*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
+            <?php /*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-users"></i></div>
                     <div class="count">
@@ -163,7 +163,7 @@ function renderChildCallsRecursive2($calls): void {
             </div>*/?>
 
 
-            <?/*<div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
+            <?php /*<div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-phone"></i></div>
                     <div class="count">
@@ -187,7 +187,7 @@ function renderChildCallsRecursive2($calls): void {
                 </div>
             </div>*/?>
 
-            <?/*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
+            <?php /*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -199,7 +199,7 @@ function renderChildCallsRecursive2($calls): void {
                 </div>
             </div>*/?>
 
-            <?/*<div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
+            <?php /*<div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -212,7 +212,7 @@ function renderChildCallsRecursive2($calls): void {
             </div>*/?>
 
 
-            <?/*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
+            <?php /*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -240,7 +240,7 @@ function renderChildCallsRecursive2($calls): void {
 
         <div class="row">
             <div class="col-md-2">
-                <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
+                <?php /*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
 
 
 
@@ -308,7 +308,7 @@ function renderChildCallsRecursive2($calls): void {
 
                 <?php if($dataProviderOnline):?>
                 <div class="card card-default">
-<!--                    <div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?//=$dataProviderOnline->totalCount?><!--)</div>-->
+<!--                    <div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?php //=$dataProviderOnline->totalCount?><!--)</div>-->
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnline,
@@ -350,7 +350,7 @@ function renderChildCallsRecursive2($calls): void {
             </div>
 
             <div class="col-md-5">
-                <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
+                <?php /*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-list"></i> Last <?=$dataProvider2->count?> ended Calls</div>
                     <div class="card-body">

@@ -31,6 +31,11 @@ class ProductQuoteOptionStatus
         self::CANCELED => 'danger',
     ];
 
+    public CONST CANCEL_GROUP = [
+		self::DECLINED,
+		self::CANCELED,
+	];
+
     public static function getList(): array
     {
         return self::LIST;

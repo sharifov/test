@@ -4,6 +4,7 @@ namespace sales\entities\cases;
 
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Project;
 use sales\repositories\cases\CasesQRepository;
 use yii\data\ActiveDataProvider;
 use Yii;
@@ -126,16 +127,24 @@ class CasesQSearch extends Cases
     public function searchInbox($params, Employee $user): ActiveDataProvider
     {
         $query = $this->casesQRepository->getInboxQuery($user);
-
-        // add conditions that should always apply here
+        $query->joinWith('project', true, 'INNER JOIN');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => [
+                'sort_order' => SORT_DESC,
+                'cs_id' => SORT_ASC
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
+
+        $dataProvider->sort->attributes['sort_order'] = [
+            'asc' => ['sort_order' => SORT_ASC],
+            'desc' => ['sort_order' => SORT_DESC],
+        ];
 
         $this->load($params);
 

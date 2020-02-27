@@ -21,13 +21,13 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
 ?>
 <div class="hotel-view-search">
 
-<!--    <h2>Hotel Request ID: --><?//= Html::encode($model->ph_id) ?><!--</h2>-->
+<!--    <h2>Hotel Request ID: --><?php //= Html::encode($model->ph_id) ?><!--</h2>-->
 
 
     <div class="row">
         <div class="col-md-5">
 <!--        <p>-->
-<!--            --><?//= Html::a('<i class="fa fa-edit"></i> Update Request', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel/update-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-warning btn-update-hotel-request']) ?>
+<!--            --><?php //= Html::a('<i class="fa fa-edit"></i> Update Request', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel/update-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-warning btn-update-hotel-request']) ?>
 <!--        </p>-->
         <?= DetailView::widget([
             'model' => $model,
@@ -46,7 +46,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
     </div>
         <div class="col-md-7">
 <!--        <p>-->
-<!--            --><?//= Html::a('<i class="fa fa-plus"></i> Add Room', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel-room/create-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-success btn-add-hotel-room']) ?>
+<!--            --><?php //= Html::a('<i class="fa fa-plus"></i> Add Room', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel-room/create-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-success btn-add-hotel-room']) ?>
 <!--        </p>-->
         <?php Pjax::begin(['id' => 'pjax-hotel-rooms-' . $model->ph_id]); ?>
 
@@ -65,10 +65,10 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
                                 'data-url' => \yii\helpers\Url::to(['/hotel/hotel-room/update-ajax', 'id' => $room->hr_id]),
                                 'class' => 'btn-update-hotel-room'
                             ])?>
-                            <?//=\yii\bootstrap4\Html::a('<i class="fa fa-remove"></i>', ['hotel-room/delete-ajax', 'id' => $room->hr_id], ['class' => 'btn btn-danger btn-sm'])?>
+                            <?php //=\yii\bootstrap4\Html::a('<i class="fa fa-remove"></i>', ['hotel-room/delete-ajax', 'id' => $room->hr_id], ['class' => 'btn btn-danger btn-sm'])?>
                         </li>
 
-                        <?//php if ($is_manager) : ?>
+                        <?php //php if ($is_manager) : ?>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                             <div class="dropdown-menu" role="menu">
@@ -83,7 +83,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
 
                             </div>
                         </li>
-                        <?//php endif; ?>
+                        <?php //php endif; ?>
                         <li>
                             <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                         </li>
@@ -130,7 +130,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
 <!--    <div class="row">-->
 <!--        <div class="col-md-12">-->
 <!--            <p>-->
-<!--                --><?//= Html::a('<i class="fa fa-search"></i> Search Quotes', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote/search-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-warning btn-search-hotel-quotes']) ?>
+<!--                --><?php //= Html::a('<i class="fa fa-search"></i> Search Quotes', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote/search-ajax', 'id' => $model->ph_id]), 'data-hotel-id' => $model->ph_id, 'class' => 'btn btn-warning btn-search-hotel-quotes']) ?>
 <!--            </p>-->
 <!--        </div>-->
 <!--    </div>-->

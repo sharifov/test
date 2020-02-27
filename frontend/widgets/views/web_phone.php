@@ -21,7 +21,7 @@ use yii\helpers\Html;
         <div id="web-phone-token" style="display: none"><?=$token?></div>
             <table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
                 <tr>
-                    <?/*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
+                    <?php /*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
                     <td style="width: 100px"><i class="fa fa-user"></i> <span><?=$clientId?></span></td>
                     <td>From: <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
                     <td>To: <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
@@ -61,7 +61,7 @@ use yii\helpers\Html;
 <!--                                --><?php //if($supportGeneralPhones): ?>
 <!--                                    --><?php //foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
 <!--                                        <li>-->
-<!--                                            <a href="#" class="btn-transfer" data-type="number" data-value="--><?//=Html::encode($projectPhone)?><!--">--><?php //echo Html::encode($projectName) . ' ('.Html::encode($projectPhone).')';?><!--</a>-->
+<!--                                            <a href="#" class="btn-transfer" data-type="number" data-value="--><?php //=Html::encode($projectPhone)?><!--">--><?php //echo Html::encode($projectName) . ' ('.Html::encode($projectPhone).')';?><!--</a>-->
 <!--                                        </li>-->
 <!--                                    --><?php //endforeach; ?>
 <!--                                --><?php //endif;?>
@@ -73,7 +73,7 @@ use yii\helpers\Html;
                         </div>
 
 
-                        <?/*=Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
+                        <?php /*=Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
                         <div id="call-controls2" style="display: none;">
                             <div class="btn-group">
                                 <?=Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
@@ -92,13 +92,13 @@ use yii\helpers\Html;
                     <tr>
                         <td style="width: 250px">
                             <div id="info">
-                                <?/*<div id="client-name"></div>*/ ?>
+                                <?php /*<div id="client-name"></div>*/ ?>
                                 <div id="output-selection">
                                     <label>Ringtone Devices</label>
                                     <select id="ringtone-devices" multiple></select>
                                     <label>Speaker Devices</label>
                                     <select id="speaker-devices" multiple></select><br/>
-                                    <?/*<a id="get-devices">Seeing unknown devices?</a>*/?>
+                                    <?php /*<a id="get-devices">Seeing unknown devices?</a>*/?>
                                 </div>
                             </div>
                         </td>

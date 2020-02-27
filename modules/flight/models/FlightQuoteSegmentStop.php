@@ -99,6 +99,18 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
 		return $stop;
 	}
 
+    public static function clone(FlightQuoteSegmentStop $stop, int $segmentId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $stop->attributes;
+
+        $clone->qss_id = null;
+        $clone->qss_quote_segment_id = $segmentId;
+
+        return $clone;
+	}
+
 	/**
 	 * @return \yii\db\ActiveQuery
 	 */

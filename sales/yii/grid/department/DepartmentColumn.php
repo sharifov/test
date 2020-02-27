@@ -20,7 +20,7 @@ use yii\grid\DataColumn;
  */
 class DepartmentColumn extends DataColumn
 {
-    public $format = 'departmentName';
+    public $format = 'department';
 
     public $relation;
 
@@ -39,9 +39,9 @@ class DepartmentColumn extends DataColumn
 
     public function getDataCellValue($model, $key, $index)
     {
-        if ($model->{$this->attribute} && ($entity = $model->{$this->relation})) {
-            /** @var Department $entity */
-            return $entity->dep_name;
+        if ($model->{$this->attribute} && ($department = $model->{$this->relation})) {
+            /** @var Department $department */
+            return $department->dep_id;
         }
 
         return null;

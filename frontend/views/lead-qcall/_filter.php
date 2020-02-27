@@ -20,7 +20,7 @@ use dosamigos\datetimepicker\DateTimePicker;
     ]); ?>
 
         <div class="col-md-2">
-            <?//= $form->field($model, 'current_dt') ?>
+            <?php //= $form->field($model, 'current_dt') ?>
 
             <?= $form->field($model, 'current_dt')->widget(DateTimePicker::class, [
                 'language' => 'en',

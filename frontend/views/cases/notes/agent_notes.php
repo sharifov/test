@@ -24,7 +24,7 @@ $user = Yii::$app->user->identity;
                 <li>
                     <?php if($caseModel->cs_user_id === $user->id || $user->isAdmin()): ?>
                         <?php if(Yii::$app->request->get('act') === 'add-note-form'): ?>
-                            <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['cases/view', 'gid' => $caseModel->gid])*/?>
+                            <?php /*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['cases/view', 'gid' => $caseModel->gid])*/?>
                         <?php else: ?>
                             <?php if($caseModel->isProcessing()):?>
                             <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['cases/view', 'gid' => $caseModel->cs_gid, 'act' => 'add-note-form'], ['id' => 'btn-notes-form'])?>

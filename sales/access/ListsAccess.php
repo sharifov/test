@@ -4,16 +4,17 @@ namespace sales\access;
 
 use common\models\Employee;
 use common\models\Project;
+use modules\product\src\entities\productType\ProductType;
 use sales\helpers\user\UserFinder;
 
 /**
  * Class UserLists
  *
  * @property Employee $user
- * @property array $projects
- * @property array $sources
- * @property array $departments
- * @property array $employees
+ * @property array|null $projects
+ * @property array|null $sources
+ * @property array|null $departments
+ * @property array|null $employees
  */
 class ListsAccess
 {
@@ -111,5 +112,4 @@ class ListsAccess
         }
         return $this->employees;
     }
-
 }

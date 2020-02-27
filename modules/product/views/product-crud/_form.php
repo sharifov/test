@@ -26,11 +26,11 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pr_service_fee_percent')->textInput(['maxlength' => true]) ?>
 
-        <? //= $form->field($model, 'pr_created_user_id')->textInput() ?>
+        <?php //= $form->field($model, 'pr_created_user_id')->textInput() ?>
 
-        <? //= $form->field($model, 'pr_updated_user_id')->textInput() ?>
+        <?php //= $form->field($model, 'pr_updated_user_id')->textInput() ?>
 
-        <? //= $form->field($model, 'pr_created_dt')->textInput() ?>
+        <?php //= $form->field($model, 'pr_created_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

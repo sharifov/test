@@ -2,6 +2,8 @@
 
 namespace common\models\search;
 
+use common\models\UserConnection;
+use common\models\UserProfile;
 use sales\helpers\query\QueryHelper;
 use sales\services\lead\qcall\DayTimeHours;
 use Yii;
@@ -32,6 +34,8 @@ use yii\helpers\VarDumper;
  */
 class LeadQcallSearch extends LeadQcall
 {
+    private const PROJECT_ARANGRANT = 7;
+
     public $current_dt;
     public $projectId;
     public $leadStatus;
@@ -284,6 +288,37 @@ class LeadQcallSearch extends LeadQcall
             $defaultOrder = array_merge($defaultOrder, [
                 'is_in_day_time_hours' => SORT_DESC
             ]);
+        }
+
+        if (($settingsMinute = (int)Yii::$app->params['settings']['redial_business_flight_leads_skill_priority_time']) > 0) {
+
+            $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
+
+            $query->addSelect(['redial_business_flight_leads_over_created_time' =>
+                new Expression('if (' . $expression . ' > ' . $settingsMinute . ', 1, 0) ')
+            ]);
+
+            $skillSettings = (int)Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'];
+            $userSkill = $user->userProfile ? (int) $user->userProfile->up_skill : 0;
+
+            $query->addSelect(['redial_business_flight_leads_skill_current_user' =>
+                new Expression('if (' . $userSkill . ' >= ' . $skillSettings . ', 1, 0) ')
+            ]);
+
+            $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
+                'up_user_id' =>
+                    UserConnection::find()->select(['uc_user_id'])->indexBy('uc_user_id')->distinct()
+            ])->andWhere('up_skill >= ' . $skillSettings)->count();
+            $query->addSelect(['redial_business_flight_leads_skill_online_user' =>
+                new Expression('if (' . $countUsers . ' < 1, 1, 0) ')
+            ]);
+
+            $query->andHaving(
+                new Expression(
+                    '(redial_business_flight_leads_over_created_time OR redial_business_flight_leads_skill_current_user OR redial_business_flight_leads_skill_online_user)' .
+                    'OR (' . Lead::tableName() . '.project_id <> ' . self::PROJECT_ARANGRANT . ' AND ' . Lead::tableName() . '.cabin NOT IN ("' . Lead::CABIN_BUSINESS . '", "' . Lead::CABIN_FIRST . '")) '
+                )
+            );
         }
 
 //        $query->addOrderBy([

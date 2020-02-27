@@ -35,15 +35,19 @@ use yii\helpers\Html;
                     <div class="page-header__general-item">
                         <strong>UID:</strong>
                         <span><?= Html::encode($lead->uid)?></span>
-                        <?//= Html::a($lead->uid, '#', ['id' => 'view-flow-transition']) ?>
+                        <?php //= Html::a($lead->uid, '#', ['id' => 'view-flow-transition']) ?>
                     </div>
 
                     <div class="page-header__general-item">
                         <strong>Market:</strong>
                         <span><?= Html::encode(($lead->project ? $lead->project->name : '') . ($lead->source ? ' - ' . $lead->source->name : ''))?></span>
                     </div>
+                    <div class="page-header__general-item">
+                        <strong title="Hybrid UID">HUID:</strong>
+                        <span><?= Html::encode($lead->hybrid_uid)?></span>
+                    </div>
 <!--                    <div class="page-header__general-item">-->
-<!--                        --><?//= $this->render('_rating', [
+<!--                        --><?php //= $this->render('_rating', [
 //                            'lead' => $lead
 //                        ]) ?>
 <!--                    </div>-->

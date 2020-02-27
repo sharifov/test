@@ -116,4 +116,13 @@ class EmployeeProjectAccess
         return false;
     }
 
+    public static function guard(?int $projectId, ?int $userId = null, ?array $roles = [], array $excludeRoles = [], array $includeRoles = []): void
+    {
+        if ($projectId === null) {
+            return;
+        }
+        if (!self::isInProject($projectId, $userId, $roles, $excludeRoles, $includeRoles)) {
+            throw new \DomainException('Access denied for this project.');
+        }
+    }
 }

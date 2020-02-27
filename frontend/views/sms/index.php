@@ -34,7 +34,7 @@ if($user->isAdmin() || $user->isQa()) {
         <div class="row">
             <div class="col-md-3">
                 <p>
-                    <?/*= Html::a('Create Sms', ['create'], ['class' => 'btn btn-success'])*/?>
+                    <?php /*= Html::a('Create Sms', ['create'], ['class' => 'btn btn-success'])*/?>
                 </p>
             </div>
             <?php /*<div class="col-md-9">

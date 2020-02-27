@@ -260,14 +260,10 @@ class LeadManageService
 
         $lead->processing($employeeId, $creatorId, $reason);
 
-        $this->clientManageService->addPhones($client, $form->phones);
-
         $phones = [];
         foreach ($form->phones as $phone) {
             $phones[] = $phone->phone;
         }
-
-        $this->clientManageService->addEmails($client, $form->emails);
 
         $segments = $this->getSegments($form->segments);
 

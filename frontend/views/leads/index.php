@@ -1,6 +1,7 @@
 <?php
 
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use sales\auth\Auth;
 use yii\helpers\Url;
 use common\models\Email;
@@ -53,7 +54,22 @@ $gridId = 'leads-grid-id';
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="multiple-update-summary"></div>
+    <div class="card multiple-update-summary" style="margin-bottom: 10px; display: none">
+        <div class="card-header">
+            <span class="pull-right clickable close-icon"><i class="fa fa-times"></i></span>
+            Processing result log:
+        </div>
+        <div class="card-body"></div>
+    </div>
+
+<?php
+$js = <<<JS
+    $('.close-icon').on('click', function(){    
+        $('.multiple-update-summary').slideUp();
+    })
+JS;
+$this->registerJs($js);
+?>
 
 
     <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
@@ -80,6 +96,17 @@ $gridId = 'leads-grid-id';
             'gridId' => $gridId,
             'buttonClass' => 'multiple-update-btn',
             'buttonText' => 'Multiple update',
+        ]) ?>
+    <?php endif;?>
+
+    <?php if (Auth::can('leads/index_Create_QA_Tasks')): ?>
+        <?= MultipleUpdateButtonWidget::widget([
+            'modalId' => 'modal-df',
+            'showUrl' => Url::to(['/qa-task/qa-task-multiple/create-lead']),
+            'gridId' => $gridId,
+            'buttonClass' => 'qa-task-multiple-create',
+            'buttonText' => 'Create QA Tasks',
+            'headerText' => 'Create QA Tasks',
         ]) ?>
     <?php endif;?>
 

@@ -16,7 +16,7 @@ $view = $this;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?//    = Html::a('Create Global Log', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //    = Html::a('Create Global Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php Pjax::begin(); ?>

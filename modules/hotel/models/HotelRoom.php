@@ -3,6 +3,7 @@
 namespace modules\hotel\models;
 
 use modules\hotel\models\query\HotelRoomQuery;
+use sales\entities\EventTrait;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -21,6 +22,8 @@ use yii\db\ActiveQuery;
  */
 class HotelRoom extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     private $_adults    = null;
     private $_children  = null;
 

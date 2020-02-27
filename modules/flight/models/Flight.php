@@ -5,7 +5,7 @@ namespace modules\flight\models;
 use modules\flight\src\entities\flight\serializer\FlightSerializer;
 use modules\product\src\entities\product\Product;
 use modules\flight\models\query\FlightQuery;
-use modules\flight\src\events\FlightCountPassengersChangedEvent;
+use modules\flight\src\events\FlightRequestUpdateEvent;
 use modules\product\src\interfaces\Productable;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
@@ -228,6 +228,9 @@ class Flight extends \yii\db\ActiveRecord implements Productable
 	 */
     public function editItinerary(string $cabin, int $adults, int $children, int $infants): void
 	{
+		if ($this->fl_cabin_class !== $cabin) {
+			$this->recordEvent(new FlightRequestUpdateEvent($this), FlightRequestUpdateEvent::EVENT_KEY);
+		}
 		$this->fl_cabin_class = $cabin;
 		$this->editPassengers($adults, $children, $infants);
 	}
@@ -240,7 +243,7 @@ class Flight extends \yii\db\ActiveRecord implements Productable
 	public function editPassengers(int $adults, int $children, int $infants): void
 	{
 		if ($this->fl_adults !== $adults || $this->fl_children !== $children || $this->fl_infants !== $infants) {
-			$this->recordEvent(new FlightCountPassengersChangedEvent($this));
+			$this->recordEvent(new FlightRequestUpdateEvent($this), FlightRequestUpdateEvent::EVENT_KEY);
 		}
 		$this->fl_adults = $adults;
 		$this->fl_children = $children;
@@ -248,18 +251,21 @@ class Flight extends \yii\db\ActiveRecord implements Productable
 	}
 
 	/**
-	 * @param string|null $type
+	 * @param int|null $type
 	 */
-	public function setTripType(string $type = null): void
+	public function setTripType(?int $type = null): void
 	{
-		if ($type) {
-			$list = self::getTripTypeList();
-			if (isset($list[$type])) {
-				$this->fl_trip_type_id = $type;
-				return;
+		$list = self::getTripTypeList();
+		if (isset($list[$type])) {
+			if ($this->fl_trip_type_id !== $type) {
+				$this->recordEvent((new FlightRequestUpdateEvent($this)), FlightRequestUpdateEvent::EVENT_KEY);
 			}
+
+			$this->fl_trip_type_id = $type;
+		} else {
+			$this->fl_trip_type_id = null;
+			$this->recordEvent((new FlightRequestUpdateEvent($this)), FlightRequestUpdateEvent::EVENT_KEY);
 		}
-		$this->fl_trip_type_id = null;
 	}
 
 	/**
@@ -312,4 +318,14 @@ class Flight extends \yii\db\ActiveRecord implements Productable
     {
         return (new FlightSerializer($this))->getData();
 	}
+
+    public function getId(): int
+    {
+        return $this->fl_id;
+	}
+
+	public static function findByProduct(int $productId): ?Productable
+    {
+        return self::find()->byProduct($productId)->limit(1)->one();
+    }
 }

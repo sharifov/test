@@ -25,18 +25,18 @@ $user = Yii::$app->user->identity;
 
             </li>
             <li>
-                <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?//php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
+                <?php //=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
+                <?php //php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
 
                 <?php if($lead->isProcessing() && ($lead->isOwner($user->id) || $user->isAdmin())): ?>
                     <?php if(Yii::$app->request->get('act') === 'add-checklist-form'): ?>
-                        <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
+                        <?php /*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
                     <?php else: ?>
                         <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['lead/view', 'gid' => $lead->gid, 'act' => 'add-checklist-form'], ['id' => 'btn-checklist-form2'])?>
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <?//php endif; ?>
+                <?php //php endif; ?>
             </li>
             <?php if($user->isAdmin()):?>
                 <li>
@@ -47,7 +47,7 @@ $user = Yii::$app->user->identity;
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
 
-            <?/*<li class="dropdown">
+            <?php /*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
 
 

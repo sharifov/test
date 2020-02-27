@@ -15,7 +15,7 @@ use \common\models\Call;
     $fromType = 'client';
 ?>
 
-<?//php \yii\helpers\VarDumper::dump($model, 10, true) ?>
+<?php //php \yii\helpers\VarDumper::dump($model, 10, true) ?>
 
 <?php if($model['type'] === 'voice'):
 

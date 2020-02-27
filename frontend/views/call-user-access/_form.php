@@ -19,9 +19,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cua_status_id')->dropDownList(\common\models\CallUserAccess::getStatusTypeList()) ?>
 
-    <?//= $form->field($model, 'cua_created_dt')->textInput() ?>
+    <?php //= $form->field($model, 'cua_created_dt')->textInput() ?>
 
-    <?//= $form->field($model, 'cua_updated_dt')->textInput() ?>
+    <?php //= $form->field($model, 'cua_updated_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

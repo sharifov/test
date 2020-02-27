@@ -128,6 +128,9 @@ class EmailIncomingService
             );
             return $lead->id;
         }
+        if ($lead = Lead::find()->findLastSalesLeadByClient($clientId, $projectId)->one()) {
+            return $lead->id;
+        }
         Yii::warning('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new lead creation allowed on email.', 'EmailIncomingService');
         return null;
     }
@@ -148,6 +151,9 @@ class EmailIncomingService
             $case = $this->casesCreateService->createExchangeByIncomingEmail($clientId, $projectId);
             return $case->cs_id;
         }
+        if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $projectId)->one()) {
+            return $case->cs_id;
+        }
         Yii::warning('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new exchange case creation allowed on Email.', 'EmailIncomingService');
         return null;
     }
@@ -166,6 +172,9 @@ class EmailIncomingService
         }
         if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
             $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
+            return $case->cs_id;
+        }
+        if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
             return $case->cs_id;
         }
         Yii::warning('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'EmailIncomingService');
@@ -194,6 +203,9 @@ class EmailIncomingService
                 $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
                 return new Process(null, $case->cs_id);
             } else {
+                if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
+                    return $case->cs_id;
+                }
                 Yii::warning('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'EmailIncomingService');
             }
         }

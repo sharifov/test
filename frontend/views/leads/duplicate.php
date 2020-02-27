@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="row">
         <div class="col-md-4">
-        <?//php Pjax::begin(); ?>
+        <?php //php Pjax::begin(); ?>
         <?php
 
         echo GridView::widget([
@@ -72,12 +72,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
         ]); ?>
 
-        <?//php Pjax::end(); ?>
+        <?php //php Pjax::end(); ?>
         </div>
 
 
         <div class="col-md-4">
-            <?//php Pjax::begin(); ?>
+            <?php //php Pjax::begin(); ?>
             <?php
 
             echo GridView::widget([
@@ -132,11 +132,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ]); ?>
 
-            <?//php Pjax::end(); ?>
+            <?php //php Pjax::end(); ?>
         </div>
 
         <div class="col-md-4">
-            <?//php Pjax::begin(); ?>
+            <?php //php Pjax::begin(); ?>
             <?php
 
             echo GridView::widget([
@@ -189,7 +189,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ]); ?>
 
-            <?//php Pjax::end(); ?>
+            <?php //php Pjax::end(); ?>
         </div>
 
     </div>

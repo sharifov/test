@@ -6,9 +6,14 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
-use modules\order\src\entities\orderProduct\OrderProduct;
+use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
+use modules\order\src\entities\orderUserProfit\OrderUserProfit;
+use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -36,6 +41,7 @@ use yii\db\ActiveRecord;
  * @property int|null $or_updated_user_id
  * @property string|null $or_created_dt
  * @property string|null $or_updated_dt
+ * @property float|null $or_profit_amount
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -43,10 +49,10 @@ use yii\db\ActiveRecord;
  * @property Employee $orCreatedUser
  * @property Employee $orOwnerUser
  * @property Employee $orUpdatedUser
- * @property OrderProduct[] $orderProducts
- * @property ProductQuote[] $orpProductQuotes
+ * @property ProductQuote[] $productQuotesActive
  * @property float $orderTotalCalcSum
  * @property ProductQuote[] $productQuotes
+ * @property OrderUserProfit[] $orderUserProfit
  */
 class Order extends ActiveRecord
 {
@@ -63,7 +69,7 @@ class Order extends ActiveRecord
             [['or_gid', 'or_lead_id'], 'required'],
             [['or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id'], 'integer'],
             [['or_description'], 'string'],
-            [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate'], 'number'],
+            [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate', 'or_profit_amount'], 'number'],
             [['or_created_dt', 'or_updated_dt'], 'safe'],
             [['or_gid'], 'string', 'max' => 32],
             [['or_uid'], 'string', 'max' => 15],
@@ -102,6 +108,7 @@ class Order extends ActiveRecord
             'or_updated_user_id' => 'Updated User',
             'or_created_dt' => 'Created Dt',
             'or_updated_dt' => 'Updated Dt',
+            'or_profit_amount' => 'Profit amount',
         ];
     }
 
@@ -128,15 +135,23 @@ class Order extends ActiveRecord
         ];
     }
 
-    /**
-     * Order init create
-     */
-    public function initCreate(): void
-    {
-        $this->or_gid = self::generateGid();
-        $this->or_uid = self::generateUid();
-        $this->or_status_id = OrderStatus::PENDING;
-    }
+    public function create(CreateOrderDTO $dto): self
+	{
+		$this->or_gid = self::generateGid();
+		$this->or_uid = self::generateUid();
+		$this->or_status_id = $dto->status;
+		$this->or_lead_id = $dto->leadId;
+		$this->or_name = $this->generateName();
+		if ($this->orLead && $this->orLead->employee_id) {
+			$this->or_owner_user_id = $this->orLead->employee_id;
+		}
+		if (!$this->or_name && $this->or_lead_id) {
+			$this->or_name = $this->generateName();
+		}
+		$this->updateOrderTotalByCurrency();
+
+		return $this;
+	}
 
     /**
      * @return ActiveQuery
@@ -186,22 +201,19 @@ class Order extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'or_updated_user_id']);
     }
 
-    /**
-     * @return ActiveQuery
-     */
-    public function getOrderProducts(): ActiveQuery
-    {
-        return $this->hasMany(OrderProduct::class, ['orp_order_id' => 'or_id']);
-    }
-
+    public function getOrderUserProfit(): ActiveQuery
+	{
+		return $this->hasMany(OrderUserProfit::class, ['oup_order_id' => 'or_id']);
+	}
 
     /**
      * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
-    public function getOrpProductQuotes(): ActiveQuery
+    public function getProductQuotesActive(): ActiveQuery
     {
-        return $this->hasMany(ProductQuote::class, ['pq_id' => 'orp_product_quote_id'])->viaTable('order_product', ['orp_order_id' => 'or_id']);
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])
+            ->where(['not', ['pq_status_id' => ProductQuoteStatus::CANCEL_GROUP]]);
     }
 
     /**
@@ -248,15 +260,13 @@ class Order extends ActiveRecord
     public function getOrderTotalCalcSum(): float
     {
         $sum = 0;
-        $orderProducts = $this->orderProducts;
-        if ($orderProducts) {
-            foreach ($orderProducts as $orderProduct) {
-                if ($quote = $orderProduct->orpProductQuote) {
-                    $sum += $quote->totalCalcSum;
-                }
-            }
-            $sum = round($sum, 2);
-        }
+		$quotes = $this->productQuotes;
+		if($quotes) {
+			foreach ($quotes as $quote) {
+				$sum += $quote->totalCalcSum;
+			}
+			$sum = round($sum, 2);
+		}
         return $sum;
     }
 
@@ -269,4 +279,67 @@ class Order extends ActiveRecord
 
         $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
     }
+
+    /**
+     * @return float
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function profitCalc(): float
+    {
+        $sum = 0;
+        if ($productQuotes = $this->productQuotesActive) {
+            foreach ($productQuotes as $productQuote) {
+                /** @var ProductQuote $productQuote */
+                $sum += $productQuote->pq_profit_amount;
+            }
+        }
+        return $sum;
+    }
+
+    /**
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function recalculateProfitAmount(): bool
+    {
+        $changed = false;
+        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
+        $profitOld = ProductQuoteHelper::roundPrice((float) $this->or_profit_amount);
+
+        if ($profitNew !== $profitOld) {
+            $this->or_profit_amount = $profitNew;
+            $changed = true;
+            $this->recordEvent((new OrderUserProfitUpdateProfitAmountEvent($this)));
+        }
+        return $changed;
+    }
+
+    public function isProcessing()
+	{
+		return $this->or_status_id === OrderStatus::PROCESSING;
+	}
+
+    public function processing(): void
+	{
+		// ToDo: need to log status
+		if (!$this->isProcessing()) {
+			OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
+			foreach ($this->productQuotes as $productQuote) {
+				if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
+					$this->setStatus(OrderStatus::PROCESSING);
+					break;
+				}
+			}
+		}
+	}
+
+	private function setStatus(int $status): void
+	{
+		if (!array_key_exists($status, OrderStatus::getList())) {
+			throw new \InvalidArgumentException('Invalid Status');
+		}
+		OrderStatus::guard($this->or_status_id, $status);
+
+		$this->or_status_id = $status;
+	}
 }
