@@ -119,6 +119,8 @@ $list = new ListsAccess($user->id);
 
 $nextUrl = Url::to(['lead-redial/next']);
 
+$blockSeconds = (int)(Yii::$app->params['settings']['call_redial_delay_time'] ?? 0);
+
 $js = <<<JS
 
 function loadRedialCallBoxBlock(type, url, data) {
@@ -153,8 +155,60 @@ $("body").on("click", ".lead-redial-btn", function(e) {
 });
 
 $("body").on("click", ".lead-next-btn", function(e) {
+    
+    if ({$blockSeconds}) {
+        if (blockLeadRedialNextButton($(this), {$blockSeconds})) {
+            return;
+        }    
+    }
+    
     loadRedialCallBoxBlock('post', '{$nextUrl}');
 });
+
+if ({$blockSeconds}) {
+    checkForEnabledLeadRedialNextButton();    
+} 
+
+function blockLeadRedialNextButton(obj, duration) {
+    let now = (new Date).getTime();
+    let end = +localStorage.getItem("lead_redial_end")||0;
+    duration = duration * 1E3;
+    let d = duration;
+    let isBlocked = false;
+    
+    if (end && end > now) {
+          d = end - now;
+          isBlocked = true;
+    } else {
+       localStorage.setItem("lead_redial_end", now + duration);
+    }
+    
+    d = d/1000 | 0;
+         
+    leadRedialNextButtonTimer(obj, d);    
+    
+    return isBlocked;
+}
+
+function leadRedialNextButtonTimer(obj, d) {
+    let that = obj.text('Processing... ' + d).prop('disabled', true),
+    timer = setInterval(function() {
+        that.text('Processing... ' + --d);
+        if (d <= 0 ) {
+            clearInterval(timer);
+            localStorage.setItem("lead_redial_end", 0);
+            that.html('<i class="fa fa-phone"></i> Call Next').prop('disabled', false);
+        }
+    }, 1000);    
+} 
+
+function checkForEnabledLeadRedialNextButton() {
+    let now = (new Date).getTime();
+    let end = +localStorage.getItem("lead_redial_end")||0;
+    if (end && end > now) {
+          leadRedialNextButtonTimer($('.lead-next-btn'), ((end - now)/1000 | 0));    
+    }
+}
 
 JS;
 
