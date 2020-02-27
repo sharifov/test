@@ -317,7 +317,8 @@ $isSuperAdmin = $user->isSuperAdmin();
 
                 ['label' => 'KPI', 'url' => 'javascript:', 'items' => [
 					['label' => 'KPI User Performance', 'url' => '/kpi-user-performance-crud/index'],
-                ], 'hasChild' => true       ],
+					['label' => 'KPI Product Commission', 'url' => '/kpi-product-commission-crud/index'],
+                ], 'hasChild' => true],
             ]
         ];
 

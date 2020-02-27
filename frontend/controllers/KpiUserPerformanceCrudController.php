@@ -5,29 +5,30 @@ namespace frontend\controllers;
 use Yii;
 use sales\model\kpi\entity\KpiUserPerformance;
 use sales\model\kpi\entity\search\KpiUserPerformanceSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * KpiUserPerformanceCrudController implements the CRUD actions for KpiUserPerformance model.
  */
-class KpiUserPerformanceCrudController extends Controller
+class KpiUserPerformanceCrudController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
+	/**
+	 * @return array
+	 */
+	public function behaviors(): array
+	{
+		$behaviors = [
+			'verbs' => [
+				'class' => VerbFilter::class,
+				'actions' => [
+					'delete' => ['POST'],
+				],
+			],
+		];
+		return ArrayHelper::merge(parent::behaviors(), $behaviors);
+	}
 
     /**
      * Lists all KpiUserPerformance models.
