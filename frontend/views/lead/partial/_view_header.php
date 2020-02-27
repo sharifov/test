@@ -32,6 +32,7 @@ use yii\helpers\Html;
                         <strong>Client:</strong>
                         <?= \sales\formatters\client\ClientTimeFormatter::format($lead->getClientTime2(), $lead->offset_gmt); ?>
                     </div>
+
                     <div class="page-header__general-item">
                         <strong>UID:</strong>
                         <span><?= Html::encode($lead->uid)?></span>
@@ -42,10 +43,12 @@ use yii\helpers\Html;
                         <strong>Market:</strong>
                         <span><?= Html::encode(($lead->project ? $lead->project->name : '') . ($lead->source ? ' - ' . $lead->source->name : ''))?></span>
                     </div>
+
                     <div class="page-header__general-item">
-                        <strong title="Hybrid UID">HUID:</strong>
+                        <strong title="Hybrid UID">Booking ID:</strong>
                         <span><?= Html::encode($lead->hybrid_uid)?></span>
                     </div>
+
 <!--                    <div class="page-header__general-item">-->
 <!--                        --><?php //= $this->render('_rating', [
 //                            'lead' => $lead

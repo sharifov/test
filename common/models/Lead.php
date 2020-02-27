@@ -704,6 +704,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->request_ip = $form->request_ip;
         $lead->discount_id = $form->discount_id;
         $lead->uid = $form->uid ?: $lead->uid;
+        $lead->hybrid_uid = $form->uid;
         $lead->status = $form->status;
         $lead->bo_flight_id = $form->flight_id;
         $lead->l_dep_id = Department::DEPARTMENT_SALES;
@@ -1600,7 +1601,7 @@ class Lead extends ActiveRecord implements Objectable
             'l_last_action_dt' => 'Last Action',
             'l_dep_id' => 'Department ID',
             'l_delayed_charge' => 'Delayed charge',
-
+            'hybrid_uid' => 'Booking ID',
         ];
     }
 
