@@ -37,6 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'closed:boolean',
             'last_update',
             'custom_data:ntext',
+            'sort_order'
         ],
     ]) ?>
 

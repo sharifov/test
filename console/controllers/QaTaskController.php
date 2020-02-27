@@ -28,7 +28,13 @@ class QaTaskController extends Controller
         printf(PHP_EOL . ' --- Start ---' . PHP_EOL . PHP_EOL);
 
         try {
-            $rule = new Rule(QaTaskRules::getRule('qa_lead_processing_quality'));
+            if (!$parameters = QaTaskRules::getRule(QaTaskCreateLeadProcessingQualityService::CATEGORY_KEY)) {
+                return;
+            }
+            if (!$parameters->isEnabled()) {
+                return;
+            }
+            $rule = new Rule($parameters->getValue());
             $log = $this->createLeadProcessingQuality->handle($rule);
             printf(' --- Count Leads: %s ---' . PHP_EOL, $this->ansiFormat($log->getCount(), Console::FG_YELLOW));
             printf(' --- Count created Tasks: %s ---' . PHP_EOL, $this->ansiFormat($log->getValidCount(), Console::FG_YELLOW));

@@ -20,7 +20,7 @@ use sales\dispatchers\EventDispatcher;
  */
 class QaTaskCreateLeadProcessingQualityService
 {
-    private const CATEGORY_KEY = 'lead_processing_quality';
+    public const CATEGORY_KEY = 'lead_processing_quality';
 
     private $qaTaskRepository;
     private $eventDispatcher;
