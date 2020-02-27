@@ -1,8 +1,8 @@
 <?php
 
-namespace sales\yii\bootstrap4;
+namespace sales\yii\bootstrap4\activeForm;
 
-use sales\yii\bootstrap4\assets\ActiveFormAsset;
+use sales\yii\bootstrap4\activeForm\assets\ActiveFormAsset;
 use Webmozart\Assert\Assert;
 use yii\base\Model;
 use yii\bootstrap4\Html;

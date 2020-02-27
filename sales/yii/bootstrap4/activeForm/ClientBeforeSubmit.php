@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\yii\bootstrap4;
+namespace sales\yii\bootstrap4\activeForm;
 
 /**
  * Class ClientBeforeSubmit
