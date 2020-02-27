@@ -44,7 +44,7 @@ use kartik\form\ActiveForm;
                     ])->widget(DateRangePicker::class, [
                         'startAttribute' => 'sold_date_from',
                         'endAttribute' => 'sold_date_to',
-                    ])->label('Created DateTime Range');
+                    ])->label('Sold Date');
                     ?>
                 </div>
 
