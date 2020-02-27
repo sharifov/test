@@ -104,6 +104,31 @@ $js = <<<JS
         });
     });
     
+     $('body').off('click', '.btn-split-profit').on('click', '.btn-split-profit', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let orderId = $(this).data('order-id');
+                
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Order User Profit');
+        modal.find('.modal-body').load(url, {orderId: orderId}, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                let message = xhr.status === 403 ? xhr.responseText : 'Internal Server Error.';
+                new PNotify({
+                    title: 'Error',
+                    text: message,
+                    type: 'error'
+                 })
+            } else {
+                modal.modal({
+                  show: true
+                });
+            }
+        });
+    });
+    
     
     
     $('body').off('click', '.btn-delete-order').on('click', '.btn-delete-order', function(e) {
@@ -141,7 +166,7 @@ $js = <<<JS
                         hide: true
                     });
               } else {
-                  $.pjax.reload({container: '#pjax-lead-orders'});
+                  $.pjax.reload({container: '#pjax-lead-orders', push: false, replace: false, async: false, timeout: 2000});
                   new PNotify({
                         title: 'The order was successfully removed',
                         type: 'success',

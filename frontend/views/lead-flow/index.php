@@ -29,7 +29,7 @@ if($user->isAdmin()) {
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?//= Html::a('Create Lead Flow', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('Create Lead Flow', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([

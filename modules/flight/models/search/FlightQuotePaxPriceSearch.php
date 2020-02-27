@@ -17,7 +17,7 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
     public function rules()
     {
         return [
-            [['qpp_id', 'qpp_flight_quote_id', 'qpp_flight_pax_code_id'], 'integer'],
+            [['qpp_id', 'qpp_flight_quote_id', 'qpp_flight_pax_code_id', 'qpp_cnt'], 'integer'],
             [['qpp_fare', 'qpp_tax', 'qpp_system_mark_up', 'qpp_agent_mark_up', 'qpp_origin_fare', 'qpp_origin_tax', 'qpp_client_fare', 'qpp_client_tax'], 'number'],
             [['qpp_origin_currency', 'qpp_client_currency', 'qpp_created_dt', 'qpp_updated_dt'], 'safe'],
         ];
@@ -74,6 +74,7 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
             'qpp_origin_tax' => $this->qpp_origin_tax,
             'qpp_client_fare' => $this->qpp_client_fare,
             'qpp_client_tax' => $this->qpp_client_tax,
+            'qpp_cnt' => $this->qpp_cnt,
             'qpp_created_dt' => $this->qpp_created_dt,
             'qpp_updated_dt' => $this->qpp_updated_dt,
         ]);

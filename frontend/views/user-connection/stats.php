@@ -29,7 +29,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     <div class="card-header">Users Stats</div>
     <div class="card-body">
         <div class="row mb-20">
-            <?/*<div class="col-md-6">
+            <?php /*<div class="col-md-6">
                 <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Create new User', 'create', [
                     'class' => 'btn-success btn',
                 ]) ?>

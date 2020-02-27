@@ -34,13 +34,13 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'po_enabled')->checkbox() ?>
 
-        <!--    --><? //= $form->field($model, 'po_created_user_id')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'po_created_user_id')->textInput() ?>
         <!---->
-        <!--    --><? //= $form->field($model, 'po_updated_user_id')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'po_updated_user_id')->textInput() ?>
         <!---->
-        <!--    --><? //= $form->field($model, 'po_created_dt')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'po_created_dt')->textInput() ?>
         <!---->
-        <!--    --><? //= $form->field($model, 'po_updated_dt')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'po_updated_dt')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

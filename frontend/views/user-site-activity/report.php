@@ -23,8 +23,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?//= Html::a('Create User Site Activity', ['create'], ['class' => 'btn btn-success']) ?>
-        <?//= Html::a('<i class="fa fa-remove"></i> Clear Logs ('.(Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? '-').' days limit)', ['user-site-activity/clear-logs'], ['class' => 'btn btn-danger']) ?>
+        <?php //= Html::a('Create User Site Activity', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('<i class="fa fa-remove"></i> Clear Logs ('.(Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? '-').' days limit)', ['user-site-activity/clear-logs'], ['class' => 'btn btn-danger']) ?>
     </p>
 
     <?php Pjax::begin(); ?>

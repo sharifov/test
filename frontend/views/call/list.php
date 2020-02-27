@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?//= Html::a('Create Call', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('Create Call', ['create'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('<i class="fa fa-check"></i> Make View All', ['all-read'], [
             'class' => 'btn btn-info',
             'data' => [
@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
 
-        <?/*= Html::a('<i class="fa fa-times"></i> Delete All', ['all-delete'], [
+        <?php /*= Html::a('<i class="fa fa-times"></i> Delete All', ['all-delete'], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete all SMS?',
@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ])*/ ?>
     </p>
 
-    <?/*
+    <?php /*
     <div class="row top_tiles">
 
         <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">

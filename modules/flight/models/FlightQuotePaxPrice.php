@@ -55,6 +55,8 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             [['qpp_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['qpp_client_currency' => 'cur_code']],
             [['qpp_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['qpp_flight_quote_id' => 'fq_id']],
             [['qpp_origin_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['qpp_origin_currency' => 'cur_code']],
+
+            ['qpp_cnt', 'integer'],
         ];
     }
 
@@ -64,21 +66,22 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'qpp_id' => 'Qpp ID',
-            'qpp_flight_quote_id' => 'Qpp Flight Quote ID',
-            'qpp_flight_pax_code_id' => 'Qpp Flight Pax Code ID',
-            'qpp_fare' => 'Qpp Fare',
-            'qpp_tax' => 'Qpp Tax',
-            'qpp_system_mark_up' => 'Qpp System Mark Up',
-            'qpp_agent_mark_up' => 'Qpp Agent Mark Up',
-            'qpp_origin_fare' => 'Qpp Origin Fare',
-            'qpp_origin_currency' => 'Qpp Origin Currency',
-            'qpp_origin_tax' => 'Qpp Origin Tax',
-            'qpp_client_currency' => 'Qpp Client Currency',
-            'qpp_client_fare' => 'Qpp Client Fare',
-            'qpp_client_tax' => 'Qpp Client Tax',
-            'qpp_created_dt' => 'Qpp Created Dt',
-            'qpp_updated_dt' => 'Qpp Updated Dt',
+            'qpp_id' => 'ID',
+            'qpp_flight_quote_id' => 'Flight Quote',
+            'qpp_flight_pax_code_id' => 'Flight Pax Code',
+            'qpp_fare' => 'Fare',
+            'qpp_tax' => 'Tax',
+            'qpp_system_mark_up' => 'System Mark Up',
+            'qpp_agent_mark_up' => 'Agent Mark Up',
+            'qpp_origin_fare' => 'Origin Fare',
+            'qpp_origin_currency' => 'Origin Currency',
+            'qpp_origin_tax' => 'Origin Tax',
+            'qpp_client_currency' => 'Client Currency',
+            'qpp_client_fare' => 'Client Fare',
+            'qpp_client_tax' => 'Client Tax',
+            'qpp_cnt' => 'Count',
+            'qpp_created_dt' => 'Created Dt',
+            'qpp_updated_dt' => 'Updated Dt',
         ];
     }
 
@@ -138,6 +141,26 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
 		$paxPrice->qpp_client_tax = $dto->clientTax;
 
 		return $paxPrice;
+	}
+
+    public static function clone(FlightQuotePaxPrice $paxPrice, int $quoteId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $paxPrice->attributes;
+
+        $clone->qpp_id = null;
+        $clone->qpp_flight_quote_id = $quoteId;
+
+        return $clone;
+	}
+
+	/**
+	 * @param string $currencyCode
+	 */
+	public function updateClientCurrency(string $currencyCode): void
+	{
+		$this->qpp_client_currency = $currencyCode;
 	}
 
     public function serialize(): array

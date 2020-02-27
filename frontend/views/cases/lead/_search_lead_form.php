@@ -153,7 +153,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                 </div>
             </div>
 
-            <?//= $form->field($model, 'employee_id') ?>
+            <?php //= $form->field($model, 'employee_id') ?>
 
 
         </div>
@@ -163,7 +163,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
         <?php  // echo $form->field($model, 'offset_gmt') ?>
 
-        <?//php  echo $form->field($model, 'snooze_for') ?>
+        <?php //php  echo $form->field($model, 'snooze_for') ?>
 
             <div class="row">
                 <div class="col-md-6">
@@ -171,7 +171,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                 </div>
 
 
-                <?//php  echo $form->field($model, 'called_expert') ?>
+                <?php //php  echo $form->field($model, 'called_expert') ?>
                 <div class="col-md-6">
                     <?php  echo $form->field($model, 'request_ip') ?>
                     <?php // echo $form->field($model, 'employee_id')->dropDownList([Yii::$app->user->id => Yii::$app->user->identity->username], ['prompt' => '-']) ?>
@@ -219,7 +219,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
         <?php  //echo $form->field($model, 'notes_for_experts') ?>
 
-        <?//php  echo $form->field($model, 'bo_flight_id') ?>
+        <?php //php  echo $form->field($model, 'bo_flight_id') ?>
         </div>
     </div>
 
@@ -228,7 +228,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             <br>
             <div class="form-group text-center">
                 <?= Html::submitButton('<i class="fa fa-search"></i> Search leads', ['class' => 'btn btn-primary']) ?>
-                <?/*= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', ['leads/index'], ['class' => 'btn btn-warning'])*/ ?>
+                <?php /*= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', ['leads/index'], ['class' => 'btn btn-warning'])*/ ?>
                 <?php //= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-warning']) ?>
             </div>
         </div>

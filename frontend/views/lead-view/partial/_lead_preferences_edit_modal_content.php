@@ -90,6 +90,8 @@ $('#lead-preferences-edit-form').on('beforeSubmit', function (e) {
                 
                 type = 'success';
                 title = 'Lead preferences successfully updated';
+                
+                $.pjax.reload({container: '#pjax-lead-products-wrap', async: false, replace: false, pushState: false});
             }
             
             new PNotify({

@@ -97,11 +97,11 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
 <!--                    <div class="nav" style="padding-top: 14px; float: left" >-->
 <!--                        --><?php //if (Yii::$app->user->can('/lead/create')): ?>
-<!--                            --><?//=Html::a('<i class="fa fa-plus"></i> new Lead', ['/lead/create'], ['class' => 'btn btn-sm btn-primary', 'style' => 'margin:0'])?>
+<!--                            --><?php //=Html::a('<i class="fa fa-plus"></i> new Lead', ['/lead/create'], ['class' => 'btn btn-sm btn-primary', 'style' => 'margin:0'])?>
 <!--                        --><?php //endif; ?>
 <!---->
 <!--                        --><?php //if (Yii::$app->user->can('/lead/create')): ?>
-<!--                            --><?//=Html::a('<i class="fa fa-plus"></i> new Case', ['/cases/create'], ['class' => 'btn btn-sm btn-primary', 'style' => 'margin:0'])?>
+<!--                            --><?php //=Html::a('<i class="fa fa-plus"></i> new Case', ['/cases/create'], ['class' => 'btn btn-sm btn-primary', 'style' => 'margin:0'])?>
 <!--                        --><?php //endif; ?>
 <!--                    </div>-->
 
@@ -140,7 +140,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
 
 
-                        <?/*php if($isAdmin):*/ ?>
+                        <?php /*php if($isAdmin):*/ ?>
                             <?= frontend\widgets\OnlineConnection::widget() ?>
                             <?= frontend\widgets\Notifications::widget() ?>
 
@@ -150,7 +150,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                             </a>
                         </li>
 
-                        <?/*php endif;*/?>
+                        <?php /*php endif;*/?>
 
 
                     </ul>

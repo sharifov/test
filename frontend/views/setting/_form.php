@@ -16,11 +16,11 @@ use yii\widgets\ActiveForm;
 
     <div class="col-md-3">
 
-        <?//= $form->field($model, 's_key')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 's_key')->textInput(['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 's_name')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 's_name')->textInput(['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 's_type')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 's_type')->textInput(['maxlength' => true]) ?>
 
         <?php
             if($model->s_type === \common\models\Setting::TYPE_BOOL) {
@@ -58,11 +58,11 @@ use yii\widgets\ActiveForm;
             }
         ?>
 
-        <?//= $form->field($model, 's_value')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 's_value')->textInput(['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 's_updated_dt')->textInput() ?>
+        <?php //= $form->field($model, 's_updated_dt')->textInput() ?>
 
-        <?//= $form->field($model, 's_updated_user_id')->textInput() ?>
+        <?php //= $form->field($model, 's_updated_user_id')->textInput() ?>
 
         <?= $form->field($model, 's_category_id')->dropDownList(SettingCategory::getList(), ['prompt' => 'Select category', 'style'=>'width: 320px']) ?>
 

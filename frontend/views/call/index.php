@@ -32,7 +32,7 @@ if($user->isAdmin()) {
     <?php Pjax::begin(['timeout' => 10000]); ?>
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
     <p>
-        <?/*= Html::a('Create Call', ['create'], ['class' => 'btn btn-success'])*/ ?>
+        <?php /*= Html::a('Create Call', ['create'], ['class' => 'btn btn-success'])*/ ?>
     </p>
 
     <?= GridView::widget([

@@ -46,7 +46,7 @@ $user = Yii::$app->user->identity;
 
     <h1>
         <?=$model->department ? '<i class="fa fa-sitemap"></i>  <span class="badge badge-warning">' . Html::encode($model->department->dep_name) . '</span>': ''?>
-        <?/*=$model->project ? ' <span class="label label-warning">' . Html::encode($model->project->name) . '</span>': ''*/?>
+        <?php /*=$model->project ? ' <span class="label label-warning">' . Html::encode($model->project->name) . '</span>': ''*/?>
 
     <?=$model->category ? Html::encode($model->category->cc_name) : '' ?>: <?= Html::encode($this->title) ?></h1>
 
@@ -57,7 +57,7 @@ $user = Yii::$app->user->identity;
                 <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
                 <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->casesStatusLogs ? '(' . count($model->casesStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
                 <?= CasesViewRenderHelper::renderTakeButton($model, $user) ?>
-                <?/*= Html::a('Update', ['update', 'id' => $model->cs_id], ['class' => 'btn btn-primary']) ?>
+                <?php /*= Html::a('Update', ['update', 'id' => $model->cs_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->cs_id], [
             'class' => 'btn btn-danger',
             'data' => [

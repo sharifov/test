@@ -65,14 +65,14 @@ use yii\widgets\Pjax; ?>
                     <?=\yii\helpers\Html::img('/img/user.png')?>
                 </div>
                 <span id="call_box_client_name"><?=\yii\helpers\Html::encode($client_name)?></span> <br>  <span class="agent" id="call_box_client_phone"><?=\yii\helpers\Html::encode($client_phone)?></span>
-                <?/*<span class="online">
+                <?php /*<span class="online">
                     <?php if($lastCall):?>
                         <?=$lastCall->c_lead_id ? \yii\helpers\Html::a('LeadId: '.$lastCall->c_lead_id, ['lead/view', 'id' => $lastCall->c_lead_id], ['target' => '_blank', 'data-pjax' => 0]) : ''?>
                     <?php endif; ?>
                 </span>*/?>
-                <?/* <i class="fa fa-phone"></i>*/?>
+                <?php /* <i class="fa fa-phone"></i>*/?>
 
-                <?/*
+                <?php /*
                 <span id="call_box_fullscreen_loader" class="call_box_fullscreen_loader"><i class="fullscreen fa fa-window-maximize"></i></span>
                 */?>
 
@@ -83,7 +83,7 @@ use yii\widgets\Pjax; ?>
             <?php if($lastCall):?>
                 <h4 title="<?=$lastCall->c_updated_dt ? Yii::$app->formatter->asDatetime(strtotime($lastCall->c_updated_dt)) : '-'?>">
                     <?=$lastCall->getStatusLabel()?>
-                    <?/*Id: <?=$lastCall->c_id?> [<?=date('H:i:s')?>]*/ ?>
+                    <?php /*Id: <?=$lastCall->c_id?> [<?=date('H:i:s')?>]*/ ?>
                 </h4>
                 <h4 id="call_box_call_status">
                     <span class="badge"><?=$lastCall->cProject ? \yii\helpers\Html::encode($lastCall->cProject->name) : '-'?></span>,
@@ -116,7 +116,7 @@ use yii\widgets\Pjax; ?>
             <?php endif; ?>
 
 
-            <?/*<a id="call_box_first_screen2" class="fab"><i class="fa fa-arrow-right"></i></a>*/ ?>
+            <?php /*<a id="call_box_first_screen2" class="fab"><i class="fa fa-arrow-right"></i></a>*/ ?>
             <div style="padding: 0 10px 0 10px">
                 <hr>
                 <div class="row">
@@ -129,13 +129,13 @@ use yii\widgets\Pjax; ?>
                             ['class' => 'form-control', 'id' => 'user-call-status-select']);
                         ?>
 
-                        <?/*=\yii\helpers\Html::button('<i class="fa fa-search"></i> Show Details', ['class' => 'btn btn-sm btn-info', 'id' => 'call_box_first_screen'])*/?>
+                        <?php /*=\yii\helpers\Html::button('<i class="fa fa-search"></i> Show Details', ['class' => 'btn btn-sm btn-info', 'id' => 'call_box_first_screen'])*/?>
                     </div>
                     <br><br>
                 </div>
 
 
-                <?/*php if($lastCalls): $n = 1; ?>
+                <?php /*php if($lastCalls): $n = 1; ?>
                     <h5>Last Calls:</h5>
                 <table class="table table-bordered">
                     <?php foreach ($lastCalls as $call):?>
@@ -172,13 +172,13 @@ use yii\widgets\Pjax; ?>
                     ])?>
 
 
-                    <?//php if($countMissedCalls): ?>
+                    <?php //php if($countMissedCalls): ?>
                         <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Missed' . ($countMissedCalls ? ' (' . $countMissedCalls .')' : '') , [
                             'class' => 'btn btn-xs btn-danger',
                             'title' => 'Missed Calls' . ($countMissedCalls ? ' (' . $countMissedCalls .')' : ''),
                             'id' => 'btn-missed-calls'
                         ])?>
-                    <?//php endif; ?>
+                    <?php //php endif; ?>
 
                 <?php endif; ?>
 
@@ -187,14 +187,14 @@ use yii\widgets\Pjax; ?>
             </div>
 
 
-            <?//=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Is Ready', ['class' => 'btn btn-sm btn-success'])?>
+            <?php //=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Is Ready', ['class' => 'btn btn-sm btn-success'])?>
 
-            <?/*<div class="btn-group" role="group" aria-label="...">
+            <?php /*<div class="btn-group" role="group" aria-label="...">
                 <button type="button" class="btn btn-success"><i class="fa fa-phone"></i> Is Ready</button>
                 <button type="button" class="btn btn-danger">Occupied</button>
             </div>*/?>
 
-            <?/*
+            <?php /*
             <div class="dropup">
                 <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span id="span-update-call-status"><?=($userCallStatus ? $userCallStatus->getStatusTypeName() : 'Update my Call Status')?></span>
@@ -212,7 +212,7 @@ use yii\widgets\Pjax; ?>
         </div>
 
 
-        <?/*
+        <?php /*
         <div class="text-right">
             <div id="call_box_body" class="call_box_body">
                 <div class="call_box_category">
@@ -227,13 +227,13 @@ use yii\widgets\Pjax; ?>
 
 
         <div class="fab_field">
-            <?/*<a id="fab_camera" class="fab"><i class="zmdi zmdi-camera"></i></a>
+            <?php /*<a id="fab_camera" class="fab"><i class="zmdi zmdi-camera"></i></a>
         <a id="fab_send" class="fab"><i class="zmdi zmdi-mail-send"></i></a>
         <textarea id="call_boxSend" name="call_box_message" placeholder="Send a message" class="call_box_field call_box_message"></textarea>*/?>
         </div>
     </div>
     <a id="prime" class="fab <?=($userCallStatus && $userCallStatus->us_type_id === \common\models\UserCallStatus::STATUS_TYPE_OCCUPIED ? 'call-status-occupied' : 'call-status-ready')?>">
-        <?/*<i class="prime fa fa-list"></i>*/?>
+        <?php /*<i class="prime fa fa-list"></i>*/?>
         <?php
             $iconClass = 'fa fa-list';
 
@@ -341,10 +341,10 @@ use yii\widgets\Pjax; ?>
 </script>
 
 <?php
-$callStatusUrl = \yii\helpers\Url::to(['user-call-status/update-status']);
-$clientInfoUrl = \yii\helpers\Url::to(['client/ajax-get-info']);
-$missedCallsUrl = \yii\helpers\Url::to(['call/ajax-missed-calls']);
-$callInfoUrl = \yii\helpers\Url::to(['call/ajax-call-info']);
+$callStatusUrl = \yii\helpers\Url::to(['/user-call-status/update-status']);
+$clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
+$missedCallsUrl = \yii\helpers\Url::to(['/call/ajax-missed-calls']);
+$callInfoUrl = \yii\helpers\Url::to(['/call/ajax-call-info']);
 
 $userId = Yii::$app->user->id;
 
@@ -430,7 +430,7 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 
 //if(Yii::$app->controller->uniqueId)
-/*if(in_array(Yii::$app->controller->action->uniqueId, ['orders/create'])) {
+/*if(in_array(Yii::$app->controller->action->uniqueId, ['/orders/create'])) {
 
 } else {*/
 

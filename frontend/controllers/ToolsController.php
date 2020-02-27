@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Quote;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -90,5 +91,19 @@ class ToolsController extends FController
          //exit;
 
         return $this->render('supervisor');
+    }
+
+    public function actionCheckFlightDump()
+    {
+        $data = [];
+        $dump = Yii::$app->request->post('dump');
+        if ($dump) {
+
+            $data = Quote::parseDump($dump, true);
+
+
+        }
+
+        return $this->render('check-flight-dump', ['dump' => $dump, 'data' => $data]);
     }
 }

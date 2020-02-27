@@ -19,7 +19,7 @@ class HotelQuoteSearch extends HotelQuote
         return [
             [['hq_id', 'hq_hotel_id', 'hq_product_quote_id', 'hq_hotel_list_id'], 'integer'],
             [['hq_request_hash'], 'string'],
-            [['hq_hash_key', 'hq_json_response', 'hq_destination_name', 'hq_hotel_name'], 'safe'],
+            [['hq_hash_key', 'hq_destination_name', 'hq_hotel_name'], 'safe'],
         ];
     }
 
@@ -67,7 +67,6 @@ class HotelQuoteSearch extends HotelQuote
         ]);
 
         $query->andFilterWhere(['like', 'hq_hash_key', $this->hq_hash_key])
-            ->andFilterWhere(['like', 'hq_json_response', $this->hq_json_response])
             ->andFilterWhere(['like', 'hq_destination_name', $this->hq_destination_name])
             ->andFilterWhere(['like', 'hq_hotel_name', $this->hq_hotel_name]);
 
@@ -107,7 +106,6 @@ class HotelQuoteSearch extends HotelQuote
         $query->innerJoinWith('hqProductQuote')->with('hqProductQuote');
 
 //        $query->andFilterWhere(['like', 'hq_hash_key', $this->hq_hash_key])
-//            ->andFilterWhere(['like', 'hq_json_response', $this->hq_json_response])
 //            ->andFilterWhere(['like', 'hq_destination_name', $this->hq_destination_name])
 //            ->andFilterWhere(['like', 'hq_hotel_name', $this->hq_hotel_name]);
 

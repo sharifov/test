@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: block;">
-            <?/*<h1><?= Html::encode($this->title) ?></h1>*/?>
+            <?php /*<h1><?= Html::encode($this->title) ?></h1>*/?>
             <?php $form = ActiveForm::begin([
                 'enableClientValidation' => false,
                 'enableAjaxValidation' => true,
@@ -48,6 +48,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]) ?>
 
                 <?= $form->field($model, 'category')->dropDownList([], ['prompt' => 'Choose a category']) ?>
+
+                <?= $form->field($model, 'sourceTypeId')->dropDownList($model->getSourceTypeList(), ['prompt' => 'Choose a source type']) ?>
 
                 <?= $form->field($model, 'clientPhone')->widget(PhoneInput::class, [
                     'name' => 'phone',

@@ -206,7 +206,7 @@ $user = Yii::$app->user->identity;
                         /
                         <?=\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->cache(600)->count()?>
                     </div>
-<!--                    <h3>Calls Out (--><?//=number_format(\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->sum('c_price'), 3)?><!-- $) / In</h3>-->
+<!--                    <h3>Calls Out (--><?php //=number_format(\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->sum('c_price'), 3)?><!-- $) / In</h3>-->
                     <h3>Calls Out / In</h3>
                     <p>Today count of Calls Outgoing / Incoming</p>
                 </div>
@@ -220,7 +220,7 @@ $user = Yii::$app->user->identity;
                         /
                         <?=\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_INBOX])->cache(600)->count()?>
                     </div>
-<!--                    <h3>--><?//=Html::a('SMS', ['sms/index'])?><!-- Out (--><?//=number_format(\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_OUTBOX])->sum('s_tw_price'), 3)?><!-- $) / In</h3>-->
+<!--                    <h3>--><?php //=Html::a('SMS', ['sms/index'])?><!-- Out (--><?php //=number_format(\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_OUTBOX])->sum('s_tw_price'), 3)?><!-- $) / In</h3>-->
                     <h3><?=Html::a('SMS', ['sms/index'])?> Out / In</h3>
                     <p>Today count of SMS Outgoing / Incoming</p>
                 </div>
@@ -273,7 +273,7 @@ $user = Yii::$app->user->identity;
                             ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['trash_count']?>, <?=$item['pending_count']?>, <?=$item['proc_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?='--'?>'],
                             <?php endforeach;?>
 
-                            <?//=$item['sum_price'].'$'?>
+                            <?php //=$item['sum_price'].'$'?>
                         ]);
 
                         var options = {
@@ -462,7 +462,7 @@ $user = Yii::$app->user->identity;
 
                 <div class="form-group">
                     <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-primary']) ?>
-                    <?//= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                    <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
                 </div>
 
                 <?php ActiveForm::end(); ?>

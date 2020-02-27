@@ -5,7 +5,6 @@ namespace modules\product\src\entities\productQuote\serializer;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productType\ProductType;
 use sales\entities\serializer\Serializer;
 
 /**
@@ -50,16 +49,8 @@ class ProductQuoteSerializer extends Serializer
     {
         $quoteData = $this->toArray();
 
-        if ($this->model->pqProduct->isFlight()) {
-            $quote = FlightQuote::find()->where(['fq_product_quote_id' => $this->model->pq_id])->one();
-            if ($quote) {
-                $quoteData['data'] = $quote->serialize();
-            }
-        } elseif ($this->model->pqProduct->isHotel()) {
-            $quote = HotelQuote::find()->where(['hq_product_quote_id' => $this->model->pq_id])->one();
-            if ($quote) {
-                $quoteData['data'] = $quote->serialize();
-            }
+        if (!$quote = $this->model->getChildQuote()) {
+            $quoteData['data'] = $quote->serialize();
         }
 
         return $quoteData;

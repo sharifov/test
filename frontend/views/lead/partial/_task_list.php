@@ -71,7 +71,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
         <ul class="nav navbar-right panel_toolbox">
             <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
-            <?/*<li class="dropdown">
+            <?php /*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <ul class="dropdown-menu" role="menu">
                     <li><a href="#">Settings 1</a>
@@ -131,7 +131,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                     ?>
 
                     <li class="<?=($active ? 'active' : '')?> nav-item">
-                        <?/*<div class="hidden">
+                        <?php /*<div class="hidden">
                             Active: <?=($active ? 'true' : 'false')?><br>
                             activeShown: <?=($activeShown ? 'true' : 'false')?><br>
                             dayTS: <?=($dayTS)?><br>
@@ -176,9 +176,9 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                     ?>
 
 
-                    <?/*<h4><i class="fa fa-calendar"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?> - Day #<?=$dDiff->days+1?> </h4>*/?>
+                    <?php /*<h4><i class="fa fa-calendar"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?> - Day #<?=$dDiff->days+1?> </h4>*/?>
 
-                    <?//=\yii\helpers\Html::a('Refresh', '/lead/processing/12001', ['class' => 'btn btn-warning']) ?>
+                    <?php //=\yii\helpers\Html::a('Refresh', '/lead/processing/12001', ['class' => 'btn btn-warning']) ?>
                     <p>
                         <?php foreach ($taskByDate[$date] as $user_id => $userTasks):
 

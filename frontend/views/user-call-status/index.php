@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?//= Html::a('Create User Call Status', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('Create User Call Status', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <div class="row">

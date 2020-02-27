@@ -37,9 +37,24 @@ use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
 use modules\hotel\HotelModule;
+use modules\lead\src\entities\lead\LeadQuery;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteClasses;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
+use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\services\ProductQuoteStatusLogService;
+use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
+use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
+use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
+use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\QaTaskCreateLeadProcessingQualityService;
+use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateForm;
+use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateService;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
+use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\EmployeeAccessHelper;
@@ -47,6 +62,8 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\access\EmployeeSourceAccess;
+use sales\access\ListsAccess;
+use sales\auth\Auth;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
@@ -66,6 +83,7 @@ use sales\helpers\user\UserFinder;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\SegmentForm;
+use sales\model\notification\events\NotificationEvents;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
@@ -165,63 +183,23 @@ class TestController extends FController
 
     public function actionTest()
     {
-
-        $service = Yii::createObject(ProductQuoteStatusLogService::class);
-        $service->log(new CreateDto(4, 3,  5, 'etr', 295, 295));
-
-        die;
-
-        $data = [
-            'client' => [
-                'phone' => '+37369636963',
-            ],
-            'uid' => '346g6142wdg22rhdf',
-            'status' => Lead::STATUS_BOOK_FAILED,
-            'sub_sources_code' => 'JIVOCH',
-            'cabin' => 'E',
-            'adults' => 2,
-            'children' => 2,
-            'infants' => 2,
-            'segments' => [
-                [
-                    'origin' => 'NYC',
-                    'destination' => 'LON',
-                    'departure' => '2019-12-16',
-                ],
-                [
-                    'origin' => 'LON',
-                    'destination' => 'NYC',
-                    'departure' => '2019-12-17',
-                ],
-                [
-                    'origin' => 'LON',
-                    'destination' => 'NYC',
-                    'departure' => '2019-12-18',
-                ],
-            ],
+        $params = [
+            'calls_per_frame' => 2,
+            'out_min_duration' => 5,
+            'in_min_rec_duration' => 30,
+            'include_in_calls' => true,
+            'hour_offset' => 12,
+            'hour_frame_1' => 24,
+            'hour_frame_2' => 48,
+            'hour_frame_3' => 72,
         ];
 
-        $form = new LeadForm();
-        if ($form->load($data, '') && $form->validate()) {
-            $handler = Yii::createObject(Handler::class);
-            $handler->handle($form);
-        } else {
-            VarDumper::dump($form->errors);
-        }
 
-die;
-
-
-        VarDumper::dump($ids);
+        $service = Yii::createObject(QaTaskCreateLeadProcessingQualityService::class);
+        $service->handle(new \modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\Rule($params));
         die;
-        VarDumper::dump(count($idsCommongroups));
-        $user = Employee::findOne(500);
-        $idsGroups = array_keys($user->getUserGroupList());
-        VarDumper::dump($idsGroups);
 
-        die;
         return $this->render('blank');
-
     }
 
     private function getPathForTable($actions, $controller, &$batchTmpTableItem, &$batchTmpTableItemChild, $role)
@@ -1034,6 +1012,78 @@ die;
         $result = AppHelper::filterByRange($array, 'price', null, 3);
         $result = AppHelper::filterByRange($array, 'price', 2, 3);
         $result = AppHelper::filterByArray($array, 'gds', ['A', 'B']);
+
+        VarDumper::dump($result, 10, true);
+    }
+
+    public function actionTestEvents()
+    {
+
+        $result = [];
+
+        $db = \Yii::$app->db;
+
+        $transaction = $db->beginTransaction();
+
+        try {
+
+            $user = Employee::findOne(\Yii::$app->user->id);
+
+            if ($user) {
+                $user->save(false);
+            }
+
+            $notify = Notifications::findOne(1);
+
+            if ($notify) {
+                $notify->addEvent(NotificationEvents::NOTIFY_SENT, [NotificationEvents::class, 'send'],
+                    $notify->n_title);
+
+                //Event::on(Notifications::class, NotificationEvents::EVENT_NOTIFY, [NotificationEvents::class, 'send'], $notify->n_title);
+
+
+                $notify->changeTitle('title ' . random_int(1, 100) . ' - ' . date('H:i:s'));
+
+                $notify->addEvent(NotificationEvents::NOTIFY_UPDATE, [NotificationEvents::class, 'send2'], $notify->n_title);
+                $notify->addEvent(NotificationEvents::NOTIFY_UPDATE, [NotificationEvents::class, 'send']);
+
+                $notify->save();
+                $notify->addEvent(NotificationEvents::NOTIFY_DELETE, [NotificationEvents::class, 'send'], $notify->attributes);
+            }
+
+
+
+            //$notify->on(NotificationEvents::EVENT_NOTIFY_DELETE, [NotificationEvents::class, 'send'], $notify->attributes);
+
+
+            /*$rows = $db->createCommand('SELECT * FROM notifications WHERE n_id = 1')->queryAll();
+
+            $rows = $db->createCommand('SELECT * FROM notifications WHERE n_id = 2')->queryAll();
+
+
+            $db->createCommand("UPDATE notifications SET n_title='demo2' WHERE n_id = 1")->execute();*/
+
+            //$db->createCommand("UPDATE notifications SET n_title2='demo2' WHERE n_id = 1")->execute();
+
+            $transaction->commit();
+
+            //$notify->trigger(NotificationEvents::EVENT_MESSAGE_SENT, new Event(['sender' => $user]));
+
+            $result = $notify->triggerEvents();
+
+            //$notify->trigger(NotificationEvents::EVENT_NOTIFY);
+
+
+
+        } catch(\Exception $e) {
+            $transaction->rollBack();
+            VarDumper::dump($e->getMessage());
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            VarDumper::dump($e->getMessage());
+        }
+
+        //\Yii::$app->trigger('bar', new Event(['notify' => new Notifications()]));
 
         VarDumper::dump($result, 10, true);
     }

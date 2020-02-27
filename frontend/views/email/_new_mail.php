@@ -20,7 +20,7 @@ use yii\widgets\ActiveForm;
                 <button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Forward"><i class="fa fa-share"></i></button>
                 <button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Print"><i class="fa fa-print"></i></button>*/ ?>
 
-                <?/*= Html::a('<i class="fa fa-trash-o"></i>', ['delete', 'id' => $model->e_id], [
+                <?php /*= Html::a('<i class="fa fa-trash-o"></i>', ['delete', 'id' => $model->e_id], [
                     'class' => 'btn btn-sm btn-default',
                     'data-placement' => 'top',
                     'data-toggle' => 'tooltip',
@@ -60,13 +60,13 @@ use yii\widgets\ActiveForm;
 
         <?php echo $form->errorSummary($model)?>
 
-        <?//= $form->field($model, 'e_reply_id')->textInput() ?>
-        <?//= $form->field($model, 'e_lead_id')->textInput() ?>
+        <?php //= $form->field($model, 'e_reply_id')->textInput() ?>
+        <?php //= $form->field($model, 'e_lead_id')->textInput() ?>
 
-        <?//= $form->field($model, 'e_project_id')->textInput() ?>
+        <?php //= $form->field($model, 'e_project_id')->textInput() ?>
 
         <?= $form->field($model, 'e_id')->hiddenInput()->label(false); ?>
-        <?//= $form->field($model, 'e_message_id')->hiddenInput()->label(false); ?>
+        <?php //= $form->field($model, 'e_message_id')->hiddenInput()->label(false); ?>
         <?= $form->field($model, 'e_ref_message_id')->hiddenInput()->label(false); ?>
 
 
@@ -80,7 +80,7 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'e_email_from')->dropDownList($mailList, ['prompt' => '--- select email ---']) ?>
                 <?php endif; ?>
 
-                <?//= $form->field($model, 'e_email_from')->textInput(['maxlength' => true]) ?>
+                <?php //= $form->field($model, 'e_email_from')->textInput(['maxlength' => true]) ?>
 
             </div>
             <div class="col-md-4">
@@ -88,14 +88,14 @@ use yii\widgets\ActiveForm;
             </div>
         </div>
         <div class="clearfix"></div>
-        <?//= $form->field($model, 'e_email_cc')->textInput(['maxlength' => true]) ?>
-        <?//= $form->field($model, 'e_email_bc')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'e_email_cc')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'e_email_bc')->textInput(['maxlength' => true]) ?>
 
         <div class="row">
             <div class="col-md-8">
                 <?= $form->field($model, 'e_email_subject')->textInput(['maxlength' => true]) ?>
             </div>
-            <?/*
+            <?php /*
             <div class="col-md-4">
                 <?= $form->field($model, 'e_message_id')->textInput(['readonly' => true]) ?>
             </div>*/?>
@@ -117,39 +117,39 @@ use yii\widgets\ActiveForm;
             ]
         ]) ?>
 
-        <?//= $form->field($model, 'e_email_body_text')->textarea(['rows' => 6]) ?>
+        <?php //= $form->field($model, 'e_email_body_text')->textarea(['rows' => 6]) ?>
 
-        <?//= $form->field($model, 'e_attach')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'e_attach')->textInput(['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 'e_email_data')->textarea(['rows' => 6]) ?>
+        <?php //= $form->field($model, 'e_email_data')->textarea(['rows' => 6]) ?>
 
-        <?//= $form->field($model, 'e_type_id')->textInput() ?>
+        <?php //= $form->field($model, 'e_type_id')->textInput() ?>
 
-        <?//= $form->field($model, 'e_template_type_id')->textInput() ?>
+        <?php //= $form->field($model, 'e_template_type_id')->textInput() ?>
 
-        <?//= $form->field($model, 'e_language_id')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'e_language_id')->textInput(['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 'e_communication_id')->textInput() ?>
+        <?php //= $form->field($model, 'e_communication_id')->textInput() ?>
 
-        <?//= $form->field($model, 'e_is_deleted')->textInput() ?>
+        <?php //= $form->field($model, 'e_is_deleted')->textInput() ?>
 
-        <?//= $form->field($model, 'e_is_new')->textInput() ?>
+        <?php //= $form->field($model, 'e_is_new')->textInput() ?>
 
-        <?//= $form->field($model, 'e_delay')->textInput() ?>
+        <?php //= $form->field($model, 'e_delay')->textInput() ?>
 
-        <?//= $form->field($model, 'e_priority')->textInput() ?>
+        <?php //= $form->field($model, 'e_priority')->textInput() ?>
 
-        <?//= $form->field($model, 'e_status_id')->textInput() ?>
+        <?php //= $form->field($model, 'e_status_id')->textInput() ?>
 
-        <?//= $form->field($model, 'e_status_done_dt')->textInput() ?>
+        <?php //= $form->field($model, 'e_status_done_dt')->textInput() ?>
 
-        <?//= $form->field($model, 'e_read_dt')->textInput() ?>
+        <?php //= $form->field($model, 'e_read_dt')->textInput() ?>
 
-        <?//= $form->field($model, 'e_error_message')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'e_error_message')->textInput(['maxlength' => true]) ?>
 
 
         <div class="form-group text-center">
-            <?/*= Html::submitButton('<i class="fa fa-edit"></i> Save', ['class' => 'btn btn-warning'])*/ ?>
+            <?php /*= Html::submitButton('<i class="fa fa-edit"></i> Save', ['class' => 'btn btn-warning'])*/ ?>
             <?= Html::submitButton('<i class="fa fa-send"></i> Send Message', ['class' => 'btn btn-success', 'onclick' => '$("#e_send").val(1)']) ?>
         </div>
 

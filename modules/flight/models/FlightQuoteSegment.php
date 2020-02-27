@@ -223,6 +223,19 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
 		return $segment;
 	}
 
+    public static function clone(FlightQuoteSegment $segment, int $quoteId, ?int $tripId): self
+    {
+        $clone = new self();
+
+        $clone->attributes = $segment->attributes;
+
+        $clone->fqs_id = null;
+        $clone->fqs_flight_quote_id = $quoteId;
+        $clone->fqs_flight_quote_trip_id = $tripId;
+
+        return $clone;
+	}
+
 	/**
 	 * @return string
 	 */

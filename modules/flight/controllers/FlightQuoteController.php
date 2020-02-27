@@ -204,7 +204,7 @@ class FlightQuoteController extends FController
 
 			if ($quotes === false) {
 				$quotes = $this->quoteSearchService->search($flight, $gds);
-				if ($quotes['results']) {
+				if (!empty($quotes['results'])) {
 					\Yii::$app->cacheFile->set($flight->fl_request_hash_key, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
 				}
 			}
@@ -235,6 +235,10 @@ class FlightQuoteController extends FController
 				'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
 			],
 		]);
+
+		if (empty($pjaxId)) {
+            $pjaxId = 'pjax-product-' . $flight->fl_product_id;
+		}
 
 		$viewData['quotes'] = $quotes;
 		$viewData['dataProvider'] = $dataProvider;
@@ -320,7 +324,7 @@ class FlightQuoteController extends FController
 
 		return $this->renderPartial('partial/_quote_view_details', [
 			'productQuote' => $productQuote,
-			'flightQuote' => FlightQuote::findByProductQuote($productQuote)
+			'flightQuote' => FlightQuote::findByProductQuoteId($productQuote)
 		]);
 	}
 
@@ -366,7 +370,7 @@ class FlightQuoteController extends FController
 		}
 		try {
 			$quote = $this->productQuoteRepository->find($productQuoteId);
-			$flightQuote = FlightQuote::findByProductQuote($quote);
+			$flightQuote = FlightQuote::findByProductQuoteId($quote);
 		} catch (\Throwable $e) {
 			throw new BadRequestHttpException($e->getMessage());
 		}

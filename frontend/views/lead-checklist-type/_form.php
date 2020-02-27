@@ -23,7 +23,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'lct_sort_order')->input('number', ['min' => 0, 'step' => 1]) ?>
 
-    <?/*= $form->field($model, 'lct_updated_dt')->textInput() ?>
+    <?php /*= $form->field($model, 'lct_updated_dt')->textInput() ?>
 
     <?= $form->field($model, 'lct_updated_user_id')->textInput()*/ ?>
 

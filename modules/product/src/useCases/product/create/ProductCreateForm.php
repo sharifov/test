@@ -5,6 +5,8 @@ namespace modules\product\src\useCases\product\create;
 use common\models\Lead;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\guards\ProductAvailableGuard;
+use sales\access\EmployeeProductAccess;
+use sales\access\ListsAccess;
 use yii\base\Model;
 
 /**
@@ -35,7 +37,7 @@ class ProductCreateForm extends Model
             ['pr_type_id', 'required'],
             ['pr_type_id', 'integer'],
             ['pr_type_id', 'filter', 'filter' => 'intval'],
-            ['pr_type_id', 'in', 'range' => [ProductType::PRODUCT_FLIGHT, ProductType::PRODUCT_HOTEL]],
+            ['pr_type_id', 'in', 'range' => (new EmployeeProductAccess(\Yii::$app->user))->getProductListId()],
             ['pr_type_id', function () {
                 try {
                     ProductAvailableGuard::check($this->pr_type_id);

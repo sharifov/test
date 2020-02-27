@@ -26,7 +26,7 @@ $pjaxId = 'pjax-hotel-room-form';
 
         <?php echo $form->errorSummary($model) ?>
 
-        <?//= $form->field($model, 'hr_hotel_id')->textInput() ?>
+        <?php //= $form->field($model, 'hr_hotel_id')->textInput() ?>
 
         <?= $form->field($model, 'hr_room_name')->textInput(['maxlength' => true]) ?>
 
@@ -73,7 +73,7 @@ $pjaxId = 'pjax-hotel-room-form';
                     'name' => 'hrp_id',
                     'type' =>  \unclead\multipleinput\MultipleInputColumn::TYPE_HIDDEN_INPUT,
                     'value' => static function ($data) {
-                        return $data['hrp_id'];
+                        return $data['hrp_id'] ?? '';
                     },
                 ],
                 [
@@ -82,7 +82,7 @@ $pjaxId = 'pjax-hotel-room-form';
                     'type' => \unclead\multipleinput\MultipleInputColumn::TYPE_DROPDOWN,
                     'title' => 'Pax type',
                     'value' => static function ($data) {
-                        return $data['hrp_type_id'];
+                        return $data['hrp_type_id'] ?? '';
                     },
                     'items' => \yii\helpers\ArrayHelper::merge(['' => '---'], \modules\hotel\models\HotelRoomPax::getPaxTypeList()),
                     'headerOptions' => [
@@ -94,7 +94,7 @@ $pjaxId = 'pjax-hotel-room-form';
                     'type' =>  \unclead\multipleinput\MultipleInputColumn::TYPE_TEXT_INPUT,
                     'title' => 'Age',
                     'value' => static function ($data) {
-                        return $data['hrp_age'];
+                        return $data['hrp_age'] ?? '';
                     },
                     //'items' => \modules\hotel\models\HotelRoomPax::getPaxTypeList(),
                     'headerOptions' => [
@@ -110,7 +110,7 @@ $pjaxId = 'pjax-hotel-room-form';
                     'type'  => \dosamigos\datepicker\DatePicker::class,
                     'title' => 'Date of birth',
                     'value' => static function ($data) {
-                        return $data['hrp_dob'];
+                        return $data['hrp_dob'] ?? '';
                     },
                     'options' => [
                         'clientOptions' => [
@@ -144,7 +144,7 @@ $pjaxId = 'pjax-hotel-room-form';
         ])->label(false) ?>
 
         <div class="form-group text-center">
-            <?//php \yii\helpers\VarDumper::dump(\yii\helpers\ArrayHelper::merge(['' => '---'], \modules\hotel\models\HotelRoomPax::getPaxTypeList())) ?>
+            <?php //php \yii\helpers\VarDumper::dump(\yii\helpers\ArrayHelper::merge(['' => '---'], \modules\hotel\models\HotelRoomPax::getPaxTypeList())) ?>
             <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
         </div>
 

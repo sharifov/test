@@ -28,7 +28,7 @@ class PreferencesCreateForm extends Model
     {
         return [
 
-            [['marketPrice', 'clientsBudget'], 'number', 'min' => 500, 'max' => 99000],
+            [['marketPrice', 'clientsBudget'], 'number', 'min' => 0, 'max' => 99000],
 
             ['numberStops', 'integer'],
             [['currency'], 'string', 'max' => 3],

@@ -42,6 +42,7 @@ use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
@@ -1835,7 +1836,36 @@ class LeadController extends FController
         return $this->render('create', ['leadForm' => $form]);
     }
 
-    /**
+	/**
+	 * @throws NotFoundHttpException
+	 */
+	public function actionCreate2()
+	{
+		if (Yii::$app->request->isAjax || Yii::$app->request->isPjax) {
+			$data = CompositeFormHelper::prepareDataForMultiInput(
+				Yii::$app->request->post(),
+				'LeadManageForm',
+				[]
+			);
+			$form = new LeadManageForm(0);
+			$form->assignDep(Department::DEPARTMENT_SALES);
+			if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
+				try {
+					$leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
+					$lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+					Yii::$app->session->setFlash('success', 'Lead save');
+					return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
+				} catch (\Throwable $e) {
+					Yii::$app->errorHandler->logException($e);
+					Yii::$app->session->setFlash('error', $e->getMessage());
+				}
+			}
+			return $this->renderAjax('partial/_lead_create', ['leadForm' => $form]);
+		}
+		throw new NotFoundHttpException('Page not exist');
+	}
+
+	/**
      * @return string|Response
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException

@@ -22,7 +22,7 @@
         if($model):
             foreach ($model as $n => $item): ?>
             <li>
-                <a href="<?=\yii\helpers\Url::to(['notifications/view2', 'id' => $item->n_id])?>" data-pjax="0">
+                <a href="<?=\yii\helpers\Url::to(['/notifications/view2', 'id' => $item->n_id])?>" data-pjax="0">
                     <span class="glyphicon glyphicon-info-sign"> <?php //remove-sign, ok-sign, question-sign ?>
                     </span>
                     <span>
@@ -31,8 +31,6 @@
                     </span>
                     <span class="message">
                         <?=\yii\helpers\StringHelper::truncate(\common\models\Email::strip_html_tags($item->n_message), 80, '...');?><br>
-                        <?/*=$item->n_created_dt?><br>
-                        <?= Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))*/?>
                     </span>
                 </a>
                 <?php
@@ -99,7 +97,7 @@
         <?php endif;?>
         <li>
             <div class="text-center">
-                <?=\yii\helpers\Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['notifications/list'], ['data-pjax' => 0])?>
+                <?=\yii\helpers\Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['/notifications/list'], ['data-pjax' => 0])?>
             </div>
 
             <?php

@@ -44,13 +44,13 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_lead_id')->textInput() ?>
 
-    <?//= $form->field($model, 'c_created_user_id')->textInput() ?>
+    <?php //= $form->field($model, 'c_created_user_id')->textInput() ?>
 
-    <?//= $form->field($model, 'c_created_dt')->textInput() ?>
+    <?php //= $form->field($model, 'c_created_dt')->textInput() ?>
 
     <?= $form->field($model, 'c_com_call_id')->textInput() ?>
 
-    <?//= $form->field($model, 'c_updated_dt')->textInput() ?>
+    <?php //= $form->field($model, 'c_updated_dt')->textInput() ?>
 
     <?= $form->field($model, 'c_project_id')->dropDownList(\common\models\Project::getList()) ?>
 

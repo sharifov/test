@@ -5,6 +5,7 @@ namespace common\models;
 use common\models\query\DepartmentQuery;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\bootstrap4\Html;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -25,7 +26,6 @@ use yii\helpers\ArrayHelper;
  */
 class Department extends \yii\db\ActiveRecord
 {
-
     public const DEPARTMENT_SALES       = 1;
     public const DEPARTMENT_EXCHANGE    = 2;
     public const DEPARTMENT_SUPPORT     = 3;
@@ -35,6 +35,26 @@ class Department extends \yii\db\ActiveRecord
         self::DEPARTMENT_EXCHANGE   => 'Exchange',
         self::DEPARTMENT_SUPPORT    => 'Support',
     ];
+
+    private const CSS_CLASS_LIST = [
+        self::DEPARTMENT_SALES      => 'success',
+        self::DEPARTMENT_EXCHANGE   => 'warning',
+        self::DEPARTMENT_SUPPORT    => 'info',
+    ];
+
+    private static function getCssClass(?int $value): string
+    {
+        return self::CSS_CLASS_LIST[$value] ?? 'secondary';
+    }
+
+    public static function asFormat(?int $value): string
+    {
+        return Html::tag(
+            'span',
+            self::getName($value),
+            ['class' => 'badge badge-' . self::getCssClass($value)]
+        );
+    }
 
     /**
      * @return bool

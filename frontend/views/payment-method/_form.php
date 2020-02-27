@@ -21,9 +21,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pm_enabled')->checkbox() ?>
 
-<!--    --><?//= $form->field($model, 'pm_updated_user_id')->textInput() ?>
+<!--    --><?php //= $form->field($model, 'pm_updated_user_id')->textInput() ?>
 <!---->
-<!--    --><?//= $form->field($model, 'pm_updated_dt')->textInput() ?>
+<!--    --><?php //= $form->field($model, 'pm_updated_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

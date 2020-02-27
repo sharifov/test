@@ -64,6 +64,17 @@ class QCallService
         }
     }
 
+    public function createByDefault(Lead $lead): ?int
+    {
+        return $this->create(
+            $lead->id,
+            new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+            new FindWeightParams($lead->project_id, $lead->status),
+            $lead->offset_gmt,
+            new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+        );
+    }
+
     /**
      * @param int $leadId
      * @param Config $config

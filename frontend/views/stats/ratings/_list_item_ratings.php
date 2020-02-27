@@ -15,7 +15,7 @@ $class = 'text-success';
             <?=($index + 1)?>.
         </div>
         <div class="col-md-6">
-            <?/*=Html::tag('i', '', ['class' => 'fa ' . $iconClass . ' fa-lg ' . $class, 'title' => $model['username']])*/?>
+            <?php /*=Html::tag('i', '', ['class' => 'fa ' . $iconClass . ' fa-lg ' . $class, 'title' => $model['username']])*/?>
             <?=Html::encode($model['username'])?>
         </div>
         <div class="col-md-4">

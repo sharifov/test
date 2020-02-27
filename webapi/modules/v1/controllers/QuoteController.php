@@ -11,6 +11,7 @@ use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
+use modules\lead\src\entities\lead\LeadQuery;
 use sales\repositories\lead\LeadRepository;
 use Yii;
 use yii\helpers\Html;
@@ -173,6 +174,7 @@ class QuoteController extends ApiBaseController
      * "lead_delayed_charge": 0,
      * "lead_status": "sold",
      * "booked_quote_uid": "5b8ddfc56a15c",
+     * "source_code":"38T556",
      * "agentName": "admin",
      * "agentEmail": "assistant@wowfare.com",
      * "agentDirectLine": "+1 888 946 3882",
@@ -251,6 +253,7 @@ class QuoteController extends ApiBaseController
             $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;
+            $response['source_code'] = ($model->lead && isset($model->lead->source)) ? $model->lead->source->cid : null;
             $response['gdsOfferId'] = $model->gds_offer_id;
 
             if(in_array($model->lead->status,[10,12])){
@@ -486,7 +489,11 @@ class QuoteController extends ApiBaseController
                         if (!$model->lead->isBooked()) {
                             try {
                                 $repo = Yii::createObject(LeadRepository::class);
-                                $model->lead->booked($model->lead->employee_id, null);
+                                $newOwner = $model->lead->employee_id;
+                                if (!$newOwner) {
+                                    $newOwner = LeadQuery::getLastActiveUserId($model->lead->id);
+                                }
+                                $model->lead->booked($newOwner, null);
                                 $repo->save($model->lead);
                             } catch (\Throwable $e) {
                                 Yii::error($e->getMessage(), 'API:Quote:Lead:Booked');

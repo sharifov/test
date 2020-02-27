@@ -9,7 +9,6 @@ use yii\widgets\ActiveForm;
 
 
 //$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
-
 ?>
 
 <div class="lead-search">
@@ -22,7 +21,7 @@ use yii\widgets\ActiveForm;
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
 
-                <?/*<li class="dropdown">
+                <?php /*<li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
 
 
@@ -48,7 +47,6 @@ use yii\widgets\ActiveForm;
 
             <div class="row">
                 <div class="col-md-4">
-
                     <div class="row">
                         <div class="col-md-4">
                             <?= $form->field($model, 'sale_id')->input('number', ['min' => 1]) ?>
@@ -56,15 +54,12 @@ use yii\widgets\ActiveForm;
                         <div class="col-md-4">
                             <?= $form->field($model, 'ticket_number')->textInput(['maxlength' => true]) ?>
                         </div>
-
                         <div class="col-md-4">
                             <?= $form->field($model, 'pnr')->textInput(['maxlength' => true]) ?>
                         </div>
-
                     </div>
 
                     <div class="row">
-
                         <div class="col-md-6">
                             <?= $form->field($model, 'acn')->textInput(['maxlength' => true]) ?>
                         </div>
@@ -93,14 +88,13 @@ use yii\widgets\ActiveForm;
                             <?= $form->field($model, 'email')->input('email') ?>
                         </div>
                         <div class="col-md-6">
-                            <?= $form->field($model, 'phone')->textInput(['maxlength' => true]) ?>
+                            <?= $form->field($model, 'phone', ['enableClientValidation' => false])->textInput(['maxlength' => true]) ?>
                         </div>
 <!--                        <div class="col-md-4">-->
-<!--                            --><?////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>
+<!--                            --><?php ////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>
 <!--                        </div>-->
                     </div>
                 </div>
-
             </div>
 
             <div class="row">

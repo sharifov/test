@@ -1,5 +1,6 @@
 <?php
 
+use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use \yii\helpers\Url;
 
 /* @var $this \yii\web\View */
@@ -38,7 +39,8 @@ $isSuperAdmin = $user->isSuperAdmin();
 
         $menuLItems = [];
 
-        $menuLItems[] = ['label' => 'Create new Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        $menuLItems[] = ['label' => 'Create New Lead', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create New Lead']];
         $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
         $menuLItems[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase text-info'];
 
@@ -197,8 +199,6 @@ $isSuperAdmin = $user->isSuperAdmin();
             ]
         ];
 
-
-
         $menuItems[] = [
             'label' => 'Users',
             'url' => 'javascript:',
@@ -210,7 +210,12 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
                 ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
                 ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
-
+                [
+                    'label' => 'User Product Type',
+                    'url' => ['/user-product-type/index'],
+                    'icon' => 'list',
+                    'visible' => Yii::$app->user->can('user-product-type/list')
+                ],
             ]
         ];
 
@@ -286,12 +291,12 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
                 ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
                 ['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
+                ['label' => 'Orders User Profit', 'url' => ['/order/order-user-profit-crud/index']],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],
                 ['label' => 'Offers View Log', 'url' => ['/offer/offer-view-log-crud/index']],
                 ['label' => 'Offers Status Log', 'url' => ['/offer/offer-status-log-crud/index']],
                 ['label' => 'Offer Products', 'url' => ['/offer/offer-product-crud/index']],
-                ['label' => 'Order Products', 'url' => ['/order/order-product-crud/index']],
                 ['label' => 'Invoices', 'url' => ['/invoice/invoice-crud/index']],
                 ['label' => 'Invoices Status Log', 'url' => ['/invoice/invoice-status-log-crud/index']],
                 ['label' => 'Billing Info', 'url' => ['/billing-info/index']],
@@ -299,6 +304,31 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Payments', 'url' => ['/payment/index']],
                 ['label' => 'Payment Methods', 'url' => ['/payment-method/index']],
                 ['label' => 'Transactions', 'url' => ['/transaction/index']],
+                ['label' => 'Payroll', 'url' => 'javascript:', 'items' => [
+                        ['label' => 'User Payment', 'url' => '/user-payment-crud/index'],
+                        ['label' => 'User Payment Category', 'url' => '/user-payment-category-crud/index'],
+                        ['label' => 'User Payroll', 'url' => '/user-payroll-crud/index'],
+                        ['label' => 'User Profit', 'url' => '/user-profit-crud/index'],
+                ], 'hasChild' => true]
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'Qa Task',
+            'url' => 'javascript:',
+            'icon' => 'list',
+            'items' => [
+                ['label' => 'Search', 'url' => ['/qa-task/qa-task-queue/search']],
+                ['label' => 'Pending <span id="qa-task-q-pending" data-type="pending" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PENDING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/pending']],
+                ['label' => 'Processing <span id="qa-task-q-processing" data-type="processing" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PROCESSING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/processing']],
+                ['label' => 'Escalated <span id="qa-task-q-escalated" data-type="escalated" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::ESCALATED).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/escalated']],
+                ['label' => 'Closed <span id="qa-task-q-closed" data-type="closed" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::CLOSED).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/closed']],
+                ['label' => 'Tasks', 'url' => ['/qa-task/qa-task-crud/index']],
+                ['label' => 'Categories', 'url' => ['/qa-task/qa-task-category-crud/index']],
+                ['label' => 'Statuses', 'url' => ['/qa-task/qa-task-status-crud/index']],
+                ['label' => 'Action Reasons', 'url' => ['/qa-task/qa-task-action-reason-crud/index']],
+                ['label' => 'Status log', 'url' => ['/qa-task/qa-task-status-log-crud/index']],
+                ['label' => 'Rules', 'url' => ['/qa-task/qa-task-rules/index']],
             ]
         ];
 
@@ -341,6 +371,12 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
 				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
+                [
+                    'label' => Yii::t('language', 'Tools'), 'url' => 'javascript:', 'icon' => 'cog',
+                    'items' => [
+                        ['label' => Yii::t('language', 'Check Flight Dump'), 'url' => ['/tools/check-flight-dump']],
+                    ]
+                ],
             ]
         ];
 
@@ -362,7 +398,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'items' => $menuItems,
             'encodeLabels' => false,
             'activateParents' => true,
-            'linkTemplate' => '<a href="{url}">{icon}<span>{label}</span>{badge}</a>'
+            'linkTemplate' => '<a href="{url}" {attributes}>{icon}<span>{label}</span>{badge}</a>'
         ]);
 
         function ensureVisibility(&$items)
@@ -422,7 +458,6 @@ $isSuperAdmin = $user->isSuperAdmin();
 
 $js =<<<JS
 function updateCounters(url, className, idName) {
-    
     var types = [];
     $("." + className).each(function(i) {
         types.push($(this).data('type'));
@@ -459,3 +494,49 @@ if (Yii::$app->user->can('caseSection')) {
     $urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
     $this->registerJs("updateCounters('$urlCasesQCount', 'cases-q-info', 'cases-q');", $this::POS_LOAD);
 }
+if (Yii::$app->user->can('/qa-task/qa-task-queue/count')) {
+    $urlQaTaskCount = Url::to(['/qa-task/qa-task-queue/count']);
+    $this->registerJs("updateCounters('$urlQaTaskCount', 'qa-task-info', 'qa-task-q');", $this::POS_LOAD);
+}
+
+$js = <<<JS
+$('.nav.side-menu [data-ajax-link]').on('click', function (e) {
+    e.preventDefault();
+    let ajaxLink = $(this).data('ajax-link');
+    let modalTitle = $(this).data('modal-title');
+    
+    if (ajaxLink) {
+        let url = $(this).attr('href');
+        
+        var modal = $('#modal-md');
+        $.ajax({
+            type: 'post',
+            url: url,
+            data: {},
+            dataType: 'html',
+            beforeSend: function () {
+                modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+                modal.find('.modal-title').html(modalTitle);
+                modal.modal('show');
+            },
+            success: function (data) {
+                modal.find('.modal-body').html(data);
+                modal.find('.modal-title').html(modalTitle);
+                $('#preloader').addClass('d-none');
+            },
+            error: function () {
+                new PNotify({
+                    title: 'Error',
+                    type: 'error',
+                    text: 'Internal Server Error. Try again letter.',
+                    hide: true
+                });
+                setTimeout(function () {
+                    $('#modal-md').modal('hide');
+                }, 300)
+            },
+        })
+    }
+});
+JS;
+$this->registerJs($js);

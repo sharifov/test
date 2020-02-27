@@ -27,13 +27,13 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'css_sale_data')->textInput() ?>
 
-    <?//= $form->field($model, 'css_created_user_id')->textInput() ?>
+    <?php //= $form->field($model, 'css_created_user_id')->textInput() ?>
 
-    <?//= $form->field($model, 'css_updated_user_id')->textInput() ?>
+    <?php //= $form->field($model, 'css_updated_user_id')->textInput() ?>
 
-    <?//= $form->field($model, 'css_created_dt')->textInput() ?>
+    <?php //= $form->field($model, 'css_created_dt')->textInput() ?>
 
-    <?//= $form->field($model, 'css_updated_dt')->textInput() ?>
+    <?php //= $form->field($model, 'css_updated_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

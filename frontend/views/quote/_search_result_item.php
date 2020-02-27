@@ -407,7 +407,7 @@ if (!empty($baggagePerSegment)) {
 
         <div class="quote__footer-left">
 <!--            --><?php //if(isset($result['tickets']) && $result['tickets']):?>
-<!--                <span class="fa fa-warning warning"></span> Separate Ticket (--><?//=count($result['tickets'])?><!--)-->
+<!--                <span class="fa fa-warning warning"></span> Separate Ticket (--><?php //=count($result['tickets'])?><!--)-->
 <!--            --><?php //endif;?>
         </div>
         <div class="quote__footer-right">

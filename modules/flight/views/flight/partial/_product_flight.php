@@ -21,7 +21,8 @@ $searchModel = new HotelQuoteSearch();
 $params = Yii::$app->request->queryParams;
 $params['HotelQuoteSearch']['hq_hotel_id'] = $model->ph_id;
 $dataProviderQuotes = $searchModel->searchProduct($params);*/
-$pjaxId = 'pjax-product-' . $product->flight->fl_id;
+
+$pjaxId = 'pjax-product-' . $product->pr_id;
 $pjaxRequest = $pjaxRequest ?? false;
 
 $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
@@ -30,14 +31,27 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
     <div class="x_panel">
         <div class="x_title">
             <h2>
-                <i class="fas fa-plane" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                <?php if ($product->pr_description):?>
-                    <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
-                <?php endif;?>
-                (<?=count($product->flight->flightQuotes)?>)
+                <a class="collapse-link">
+                    <i class="fa fa-plane" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
+                    <?php if ($product->pr_description):?>
+                        <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
+                    <?php endif;?>
+                    <?php if ($product->flight->flightQuotes): ?>
+                        <sup title="Number of quotes">(<?=count($product->flight->flightQuotes)?>)</sup>
+                    <?php endif;?>
+                </a>
             </h2>
             <ul class="nav navbar-right panel_toolbox">
-                <?//php if ($is_manager) : ?>
+                <?php //php if ($is_manager) : ?>
+                    <li>
+                        <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
+                             <?php if ($segments = $product->flight->flightSegments):?>
+                                 <?php if (isset($segments[0]) && $segments[0]->fs_origin_iata): ?>
+                                     (<b><?= Html::encode($segments[0]->fs_origin_iata) ?></b>)
+                                 <?php endif; ?>
+                             <?php endif; ?>
+                        </span>
+                    </li>
                     <li>
                         <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
                             <?php
@@ -52,8 +66,14 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                             }
                             ?>
                             <i class="<?=$iconClass?> text-success" aria-hidden="true" style="margin-right: 10px;"></i>
-                            <?= FlightFormatHelper::tripTypeName($product->flight->fl_trip_type_id) ?> •
-                            <b><?= FlightFormatHelper::cabinName($product->flight->fl_cabin_class) ?></b> •
+                            <?php if ($product->flight->fl_trip_type_id):?>
+                                <?= FlightFormatHelper::tripTypeName($product->flight->fl_trip_type_id) ?> •&nbsp;
+                            <?php endif; ?>
+
+                            <?php if ($product->flight->fl_cabin_class):?>
+                                <b><?= FlightFormatHelper::cabinName($product->flight->fl_cabin_class) ?></b>&nbsp;•&nbsp;
+                            <?php endif; ?>
+
                             <?= (int)$product->flight->fl_adults + (int)$product->flight->fl_children + (int)$product->flight->fl_infants ?> pax
                         </span>
                     </li>
@@ -76,22 +96,27 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                                 <?php endif; ?>
                         </span>
                     </li>
+                    <li>
+                            <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
+                                 <?php if ($segments = $product->flight->flightSegments):?>
+                                     <?php if (isset($segments[0]) && $segments[0]->fs_departure_date): ?>
+                                         <b><?= Yii::$app->formatter->asDate(strtotime($segments[0]->fs_departure_date)) ?></b>
+                                     <?php endif; ?>
+                                 <?php endif; ?>
+                            </span>
+                    </li>
+                    <li>
+                        <div style="margin-right: 50px"></div>
+                    </li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars warning"></i> <span class="text-warning">Actions</span></a>
                         <div class="dropdown-menu" role="menu">
-                            <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
+                            <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
 
-                            <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
-                                'data-url' => \yii\helpers\Url::to([
-                                    '/flight/flight-quote/ajax-search-quote',
-                                    'id' => $product->flight->fl_id
-                                ]),
-								'data-pjax-id' => $pjaxId,
-								'class' => 'dropdown-item text-success btn-search-flight-quotes'
-                            ]) ?>
+                            <h6 class="dropdown-header">P<?=$product->pr_id?> - F<?=$product->flight->fl_id?></h6>
 
                             <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
                                 'data-url' => Url::to([
@@ -103,6 +128,17 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                                 'class' => 'dropdown-item text-warning btn-update-flight-request'
                             ]) ?>
 
+                            <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
+                                'data-url' => \yii\helpers\Url::to([
+                                    '/flight/flight-quote/ajax-search-quote',
+                                    'id' => $product->flight->fl_id
+                                ]),
+								'data-pjax-id' => $pjaxId,
+								'class' => 'dropdown-item text-success btn-search-flight-quotes'
+                            ]) ?>
+
+                            <div class="dropdown-divider"></div>
+
                             <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Flight',
                                 null, [
                                     'class' => 'dropdown-item text-danger btn-delete-product',
@@ -111,7 +147,7 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
 
                         </div>
                     </li>
-                <?//php endif; ?>
+                <?php //php endif; ?>
                 <li>
                     <a class="collapse-link"><i class="<?= $chevronClass ?>"></i></a>
                 </li>

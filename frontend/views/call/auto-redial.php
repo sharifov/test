@@ -285,7 +285,7 @@ $duration = 10;
         </div>
 
 
-        <?//=date('Y-m-d H:i:s')?>
+        <?php //=date('Y-m-d H:i:s')?>
 
         <?php
             //\yii\helpers\VarDumper::dump(Yii::$app->request->get(), 10, true);
@@ -294,7 +294,7 @@ $duration = 10;
 
         <p>
 
-            <?//= Html::a('<i class="fa fa-refresh"></i> Auto Redial INIT', ['auto-redial', 'act' => 'init'], ['class' => 'btn btn-info click_after_call_update', 'id' => 'btn-auto-redial-init']) ?>
+            <?php //= Html::a('<i class="fa fa-refresh"></i> Auto Redial INIT', ['auto-redial', 'act' => 'init'], ['class' => 'btn btn-info click_after_call_update', 'id' => 'btn-auto-redial-init']) ?>
 
             <?php if($isActionFind && $leadModel):?>
                 <div class="text-center badge badge-warning" style="font-size: 35px">
@@ -317,16 +317,16 @@ $duration = 10;
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <strong>Sorry! No lead was found.</strong> Last request time: <?=Yii::$app->formatter->asTime(time())?>
                     </div>
-                    <?/*<p>Last request time: <?=Yii::$app->formatter->asTime(time())?></p>*/?>
+                    <?php /*<p>Last request time: <?=Yii::$app->formatter->asTime(time())?></p>*/?>
                 <?php endif; ?>
 
-                <?/*<div class="countdown text-center badge badge-warning" style="font-size: 35px">
+                <?php /*<div class="countdown text-center badge badge-warning" style="font-size: 35px">
                     <i class="fa fa-clock-o"></i>
                     <span id="clock">00:00</span>
                 </div>*/?>
             <?php endif; ?>
 
-            <?//=$this->registerJs('startTimer(10);');?>
+            <?php //=$this->registerJs('startTimer(10);');?>
 
 
         </p>
@@ -348,14 +348,14 @@ $duration = 10;
                             <?php if($callData): ?>
 
                                 <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
-                                <?//=$this->registerJs('autoredialInit(); startAutoTake();');?>
-                                <?//=$this->registerJs('startTimer(20);');?>
+                                <?php //=$this->registerJs('autoredialInit(); startAutoTake();');?>
+                                <?php //=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>
 
                         <?php endif; ?>
 
                         <div class="hidden">
-                            <?//php \yii\helpers\VarDumper::dump($callData, 10, true) ?>
+                            <?php //php \yii\helpers\VarDumper::dump($callData, 10, true) ?>
                         </div>
 
                         <div class="row">
@@ -591,7 +591,7 @@ $duration = 10;
                         </div>
 
                     <?php else: ?>
-                        <?/*php
+                        <?php /*php
                             if(!Yii::$app->request->isPjax || Yii::$app->request->get('act') === 'start') {
                                 $this->registerJs('startTimer(10);');
                             } else {
@@ -602,7 +602,7 @@ $duration = 10;
 
                 </div>
                 <div class="col-md-6">
-                    <?/*<h3>Call status: <span class="badge badge-info" id="call_autoredial_status"><?=$callModel ? $callModel->getStatusName() : '-'?></span></h3>*/?>
+                    <?php /*<h3>Call status: <span class="badge badge-info" id="call_autoredial_status"><?=$callModel ? $callModel->getStatusName() : '-'?></span></h3>*/?>
                     <?php if($callModel): ?>
                         <div class="x_panel">
                             <div class="x_title">
@@ -612,7 +612,7 @@ $duration = 10;
                             <div class="x_content">
 
 
-                                <?/*<div class="countdown text-center badge badge-warning" style="font-size: 15px">
+                                <?php /*<div class="countdown text-center badge badge-warning" style="font-size: 15px">
                                     <i class="fa fa-clock-o"></i>
                                     <span id="clock">00:<?=(time() - strtotime($callModel->c_created_dt))?></span>
                                 </div>*/?>
@@ -732,7 +732,7 @@ $duration = 10;
                         <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?=Yii::$app->formatter->asTime(time())?>)
                     </div>
 
-                    <?/*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
+                    <?php /*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
                 <?php echo date('Y-m-d H:i:s')*/?>
                 </div>
             <?php endif; ?>

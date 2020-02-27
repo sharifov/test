@@ -1,5 +1,8 @@
 <?php
 
+use common\models\UserProductType;
+use modules\product\src\entities\productType\ProductType;
+use sales\auth\Auth;
 use yii\web\View;
 use yii\grid\ActionColumn;
 
@@ -10,6 +13,7 @@ use yii\grid\ActionColumn;
  */
 /* @var $searchModel common\models\search\UserProjectParamsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $dataUserProductType yii\data\ActiveDataProvider */
 /* @var $model common\models\Employee */
 
 use sales\access\EmployeeProjectAccess;
@@ -72,7 +76,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <div class="row">
                     <div class="col-sm-6">
                         <?php if($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()): ?>
-                            <?//= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
+                            <?php //= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
 
                             <?php
                                 echo $form->field($model, 'form_roles')->widget(\kartik\select2\Select2::class, [
@@ -222,7 +226,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
                         </div>
                         <div class="col-md-6">
-                            <?//= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+                            <?php //= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
                             <?php
                             echo $form->field($modelUserParams, 'up_timezone')->widget(\kartik\select2\Select2::class, [
                                 'data' => Employee::timezoneList(true),
@@ -386,7 +390,7 @@ JS;
             <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
             <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-upp']); ?>
             <p>
-                <?//= Html::a('Create User Project Params', ['user-project-params/create'], ['class' => 'btn btn-success']) ?>
+                <?php //= Html::a('Create User Project Params', ['user-project-params/create'], ['class' => 'btn btn-success']) ?>
 
                 <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Create Project Params',null,
                     [
@@ -499,7 +503,75 @@ JS;
             <?php \yii\widgets\Pjax::end(); ?>
         </div>
 
+        <?php if (Auth::can('user-product-type/list')) :?>
+            <div class="user-product-type">
+                <h4>Product Type</h4>
+                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-product-type']); ?>
 
+                <?php if (Auth::can('user-product-type/create')) :?>
+                    <p>
+                        <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Add Product Type',null,
+                            [
+                                'class' => 'btn btn-success btn-xs add-product-type',
+                                'title' => 'Add Product Type',
+                                'data-user_id' => $model->id,
+                                'data-user_name' => $model->username,
+                                'data-pjax' => '0',
+                            ]
+                        )?>
+                    </p>
+                <?php endif ?>
+
+                <?= \yii\grid\GridView::widget([
+                    'dataProvider' => $dataUserProductType,
+                    'columns' => [
+                        [
+                            'attribute' => 'upt_product_type_id',
+                            'value' => function(UserProductType $model) {
+                                return $model->productType->pt_name;
+                            },
+                        ],
+                        'upt_commission_percent',
+                        'upt_product_enabled:booleanByLabel',
+                        [
+                            'class' => ActionColumn::class,
+                            'template' => '{update} {delete}',
+                            'controller' => 'user-product-type',
+                            'buttons' => [
+                                'update' => static function ($key) {
+                                    if (Auth::can('user-product-type/update')) {
+                                        $updateButton = Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
+                                            'class' => 'update-product-type',
+                                            'title' => 'Update Product Type',
+                                            'data-id' => $key,
+                                            'data-pjax' => '0',
+                                        ]);
+                                    } else {
+                                        $updateButton = Html::tag('span', '', [
+                                            'class' => 'glyphicon glyphicon-edit text-secondary',
+                                            'title' => 'No access'
+                                        ]);
+                                    }
+                                    return $updateButton;
+                                },
+                                'delete' => static function ($url) {
+                                    if (Auth::can('user-product-type/delete')) {
+                                        $deleteButton = Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, []);
+                                    } else {
+                                        $deleteButton = Html::tag('span', '', [
+                                            'class' => 'glyphicon glyphicon-trash text-secondary',
+                                            'title' => 'No access'
+                                        ]);
+                                    }
+                                    return $deleteButton;
+                                },
+                            ],
+                        ],
+                    ],
+                ]); ?>
+                <?php \yii\widgets\Pjax::end(); ?>
+            </div>
+        <?php endif ?>
 
         <?php /*
         <div class="card card-default">
@@ -519,7 +591,7 @@ JS;
 
 
     <?php endif; ?>
-    <?/*= $this->render('partial/_activities', [
+    <?php /*= $this->render('partial/_activities', [
         'model' => $model
     ])*/ ?>
 
@@ -539,6 +611,7 @@ $js = <<<JS
 
     $('#modal-df').on('hidden.bs.modal', function () {
         $.pjax.reload({container:'#pjax-grid-upp'});
+        $.pjax.reload({container: "#pjax-grid-product-type"});
         
         /*new PNotify({
             title: 'Params successfully updated',
@@ -595,6 +668,31 @@ $js = <<<JS
             }
         );
     });
-
+    
+    $(document).on('click', '.add-product-type', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-df');
+        let userName = $(this).data('user_name');
+        $.get('/user-product-type/create-ajax', {user_id: $(this).data('user_id')},
+            function (data) {
+                modal.find('.modal-title').html('Add Product Type for ' + userName);
+                modal.find('.modal-body').html(data);
+                modal.modal();
+            }
+        );
+    });
+    
+    $(document).on('click', '.update-product-type', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-df');
+        
+        $.get('/user-product-type/update-ajax', {data : $(this).closest('tr').data('key')},
+            function (data) {
+                modal.find('.modal-title').html('Update Product Type');
+                modal.find('.modal-body').html(data);
+                modal.modal();
+            }
+        );
+    });
 JS;
 $this->registerJs($js);

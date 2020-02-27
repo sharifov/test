@@ -54,8 +54,8 @@ class OfferController extends FController
                 $offer->of_lead_id = $model->of_lead_id;
                 $offer->of_name = $model->of_name;
 
-                $offer->of_client_currency = $model->of_client_currency;
-                $offer->of_client_currency_rate = $model->of_client_currency_rate;
+                $offer->of_client_currency = $model->of_client_currency ?: null;
+                $offer->of_client_currency_rate = $model->of_client_currency_rate ?: null;
                 $offer->of_app_total = $model->of_app_total;
 
 //                $offer->of_client_total = $model->of_client_total;
@@ -73,7 +73,7 @@ class OfferController extends FController
                 $offer->updateOfferTotalByCurrency();
 
                 if ($offer->save()) {
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-offers", timout: 8000});</script>';
+                    return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-lead-offers"})</script>';
                 }
 
                 //$model->errors = $offer->errors;

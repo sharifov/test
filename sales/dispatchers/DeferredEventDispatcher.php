@@ -45,6 +45,11 @@ class DeferredEventDispatcher implements EventDispatcher
         foreach ($this->queue as $i => $event) {
             $this->next->dispatch($event);
             unset($this->queue[$i]);
+
+			if (property_exists($event, 'resetDispatcherQueue') && $event->resetDispatcherQueue) {
+            	reset($this->queue);
+				$this->release();
+			}
         }
         $this->defer = false;
     }

@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'qpp_client_currency',
             'qpp_client_fare',
             'qpp_client_tax',
+            'qpp_cnt',
             'qpp_created_dt',
             'qpp_updated_dt',
 

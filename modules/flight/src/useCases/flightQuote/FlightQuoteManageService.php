@@ -8,6 +8,7 @@ use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuoteStatusLog;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
+use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -179,6 +180,7 @@ class FlightQuoteManageService
 
 			$flightQuote = $flightQuotePaxPrice->qppFlightQuote;
 			$productQuote = $flightQuote->fqProductQuote;
+            $productQuote->recalculateProfitAmount();
 
 			$this->calcProductQuotePrice($productQuote, $flightQuote);
 		});
@@ -192,10 +194,14 @@ class FlightQuoteManageService
 	{
 		$priceData = FlightQuoteHelper::getPricesData($flightQuote);
 
-		$productQuote->pq_origin_price = ProductQuoteHelper::roundPrice((float)$priceData['total']['net']);
-		$productQuote->pq_price = ProductQuoteHelper::calcSystemPrice($priceData['total']['selling'], $productQuote->pq_origin_currency);
-		$productQuote->pq_client_price = ProductQuoteHelper::roundPrice($productQuote->pq_price * $productQuote->pq_client_currency_rate);
-		$productQuote->pq_service_fee_sum = ProductQuoteHelper::roundPrice((float)$priceData['total']['service_fee_sum']);
+		$systemPrice = ProductQuoteHelper::calcSystemPrice($priceData->total->selling, $productQuote->pq_origin_currency);
+		$productQuote->setQuotePrice(
+			ProductQuoteHelper::roundPrice((float)$priceData->total->net),
+			$systemPrice,
+			ProductQuoteHelper::roundPrice($systemPrice * $productQuote->pq_client_currency_rate),
+			ProductQuoteHelper::roundPrice((float)$priceData->total->serviceFeeSum)
+		);
+        $productQuote->recalculateProfitAmount();
 
 		$this->productQuoteRepository->save($productQuote);
 	}
@@ -228,7 +234,7 @@ class FlightQuoteManageService
 			$tripNr = (int)$tripKey + 1;
 			$segmentNr = 1;
 
-			$flightTrip = FlightQuoteTrip::create($flightQuote, $quote['totalDuration']);
+			$flightTrip = FlightQuoteTrip::create($flightQuote, $trip['duration']);
 			$this->flightQuoteTripRepository->save($flightTrip);
 
 			$this->createSegment($trip, $flightQuote, $flightTrip, $tripNr, $segmentNr);

@@ -33,7 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'hq_hotel_id',
             'hq_hash_key',
             'hq_product_quote_id',
-            'hq_json_response',
             'hq_destination_name',
             'hq_hotel_name',
             'hq_hotel_list_id',

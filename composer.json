@@ -68,7 +68,8 @@
 		"rmrevin/yii2-fontawesome": "3.4.0",
       	"ext-openssl": "*",
 		"soundasleep/html2text": "~1.1",
-		"ext-zlib": "*"
+		"ext-zlib": "*",
+		"webmozart/assert": "^1.7"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

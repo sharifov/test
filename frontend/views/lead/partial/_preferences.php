@@ -32,7 +32,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
             <?= $formPreferences->field($leadForm->getLeadPreferences(), 'clients_budget')->input('number', ['min' => 0, 'max' => 99000])->label('Budget, $') ?>
         </div>
         <div class="col-md-3">
-            <?/*= $formPreferences->field($leadForm->getLeadPreferences(), 'number_stops')
+            <?php /*= $formPreferences->field($leadForm->getLeadPreferences(), 'number_stops')
             ->textInput([
                 'class' => 'form-control lead-form-input-element',
                 'type' => 'number',

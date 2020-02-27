@@ -18,8 +18,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'hq_product_quote_id')->textInput() ?>
 
-    <?= $form->field($model, 'hq_json_response')->textInput() ?>
-
     <?= $form->field($model, 'hq_destination_name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'hq_hotel_name')->textInput(['maxlength' => true]) ?>

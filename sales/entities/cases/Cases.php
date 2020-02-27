@@ -21,6 +21,7 @@ use sales\entities\cases\events\CasesSolvedStatusEvent;
 use sales\entities\cases\events\CasesStatusChangeEvent;
 use sales\entities\cases\events\CasesTrashStatusEvent;
 use sales\entities\EventTrait;
+use sales\interfaces\Objectable;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
@@ -44,6 +45,7 @@ use Yii;
  * @property string $cs_updated_dt
  * @property string $cs_gid
  * @property string $cs_last_action_dt
+ * @property int|null $cs_source_type_id
  *
  * @property CasesCategory $category
  * @property Department $department
@@ -56,7 +58,7 @@ use Yii;
  * @property CasesStatusLog[] $casesStatusLogs
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  */
-class Cases extends ActiveRecord
+class Cases extends ActiveRecord implements Objectable
 {
 
     use EventTrait;
@@ -84,6 +86,7 @@ class Cases extends ActiveRecord
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_source_type_id = CasesSourceType::SMS;
         $case->pending(null, 'Created by incoming sms');
         return $case;
     }
@@ -99,6 +102,7 @@ class Cases extends ActiveRecord
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_source_type_id = CasesSourceType::SMS;
         $case->pending(null, 'Created by incoming sms');
         return $case;
     }
@@ -114,6 +118,7 @@ class Cases extends ActiveRecord
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_source_type_id = CasesSourceType::MAIL;
         $case->pending(null, 'Created by incoming email');
         return $case;
     }
@@ -129,6 +134,7 @@ class Cases extends ActiveRecord
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_source_type_id = CasesSourceType::MAIL;
         $case->pending(null, 'Created by incoming email');
         return $case;
     }
@@ -147,6 +153,7 @@ class Cases extends ActiveRecord
         $case->cs_call_id = $callId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = $depId;
+        $case->cs_source_type_id = CasesSourceType::CALL;
         $case->pending(null, 'Created by call');
         return $case;
     }
@@ -159,6 +166,7 @@ class Cases extends ActiveRecord
      * @param string|null $subject
      * @param string|null $description
      * @param int|null $creatorId
+     * @param int|null $sourceTypeId
      * @return Cases
      */
     public static function createByWeb(
@@ -168,7 +176,8 @@ class Cases extends ActiveRecord
         int $depId,
         ?string $subject,
         ?string $description,
-        ?int $creatorId
+        ?int $creatorId,
+        ?int $sourceTypeId
     ): self
     {
         $case = self::create();
@@ -178,6 +187,7 @@ class Cases extends ActiveRecord
         $case->cs_dep_id = $depId;
         $case->cs_subject = $subject;
         $case->cs_description = $description;
+        $case->cs_source_type_id = $sourceTypeId;
         $case->pending($creatorId, 'Created by web');
         return $case;
     }
@@ -507,6 +517,7 @@ class Cases extends ActiveRecord
             'cs_created_dt' => 'Created',
             'cs_updated_dt' => 'Updated',
             'cs_last_action_dt' => 'Last Action',
+            'cs_source_type_id' => 'Source type',
         ];
     }
 
@@ -564,5 +575,15 @@ class Cases extends ActiveRecord
     public function updateLastAction(): int
     {
         return self::updateAll(['cs_last_action_dt' => date('Y-m-d H:i:s')], ['cs_id' => $this->cs_id]);
+    }
+
+    public function getProjectId(): ?int
+    {
+        return $this->cs_project_id;
+    }
+
+    public function getDepartmentId(): ?int
+    {
+        return $this->cs_dep_id;
     }
 }

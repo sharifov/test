@@ -36,7 +36,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
 
     <p>
-        <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
 

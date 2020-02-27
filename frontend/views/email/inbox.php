@@ -26,7 +26,7 @@ $is_admin = $user->isAdmin();
 
 <div class="">
 
-    <?/*<div class="page-title">
+    <?php /*<div class="page-title">
         <div class="title_left">
             <h3>Email Inbox <small></small></h3>
         </div>
@@ -74,7 +74,7 @@ $is_admin = $user->isAdmin();
 
 
 
-                    <?/*php $form = Form::begin([
+                    <?php /*php $form = Form::begin([
                         'action' => ['index'],
                         'method' => 'get',
                         'options' => [
@@ -90,7 +90,7 @@ $is_admin = $user->isAdmin();
 
                                     <!-- Split button -->
                                     <div class="btn-group">
-                                        <?//=Html::a('<i class="fa fa-envelope"></i> Create', \yii\helpers\Url::current(['id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']), ['class' => 'btn btn-sm btn-success'])?>
+                                        <?php //=Html::a('<i class="fa fa-envelope"></i> Create', \yii\helpers\Url::current(['id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']), ['class' => 'btn btn-sm btn-success'])?>
                                         <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <i class="fa fa-envelope"></i> Create NEW <span class="caret"></span>
 
@@ -192,7 +192,7 @@ $is_admin = $user->isAdmin();
 </div>
 
 
-<?/*php Pjax::begin(['id' => 'pjax-view-mail']); ?>
+<?php /*php Pjax::begin(['id' => 'pjax-view-mail']); ?>
 <?php Pjax::end();*/ ?>
 
 

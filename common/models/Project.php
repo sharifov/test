@@ -20,6 +20,7 @@ use yii\httpclient\CurlTransport;
  * @property boolean $closed
  * @property string $last_update
  * @property string $custom_data
+ * @property int $sort_order
  *
  * @property Sources[] $sources
  * @property ContactInfo $contactInfo
@@ -42,6 +43,7 @@ class Project extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['sort_order'], 'integer', 'min' => 0, 'max' => 100],
             [['contact_info','custom_data'], 'string'],
             [['closed'], 'boolean'],
             [['last_update'], 'safe'],
@@ -63,6 +65,7 @@ class Project extends \yii\db\ActiveRecord
             'closed' => 'Closed',
             'last_update' => 'Last Update',
             'custom_data' => 'Custom Data',
+            'sort_order' => 'Sort',
         ];
     }
 
@@ -128,51 +131,57 @@ class Project extends \yii\db\ActiveRecord
         ];
 
         $projectsData = self::getProjectListBO();
-        if($projectsData && $projectsData['data']) {
-            if(isset($projectsData['data']['data']) && $projectsData['data']['data']) {
-                foreach ($projectsData['data']['data'] as $projectItem) {
-                    $pr = self::findOne($projectItem['id']);
-                    if(!$pr) {
-                        $pr = new self();
-                        $pr->id = $projectItem['id'];
-                        $data['created'][] = $projectItem['id'];
-                        //$pr->custom_data = @json_encode(['name' => $projectItem['name'], 'phone' => '', 'email' => '']);
+        if($projectsData) {
+            if ($projectsData['error']) {
+                $data['error'] = 'Error: ' . $projectsData['error'];
+            } else {
+                if (isset($projectsData['data']['data']) && $projectsData['data']['data']) {
+                    foreach ($projectsData['data']['data'] as $projectItem) {
+                        $pr = self::findOne($projectItem['id']);
+                        if (!$pr) {
+                            $pr = new self();
+                            $pr->id = $projectItem['id'];
+                            $data['created'][] = $projectItem['id'];
+                            //$pr->custom_data = @json_encode(['name' => $projectItem['name'], 'phone' => '', 'email' => '']);
 
-                    } else {
-                        $data['updated'][] = $projectItem['id'];
-                    }
-
-                    $pr->attributes = $projectItem;
-
-                    $pr->name = $projectItem['name'];
-                    $pr->link = $projectItem['link'];
-                    $pr->closed = (bool) $projectItem['closed'];
-                    $pr->last_update = date('Y-m-d H:i:s');
-                    /*if(isset(Yii::$app->user) && Yii::$app->user->id) {
-                        $pr->pr_updated_user_id = Yii::$app->user->id;
-                    }*/
-                    if(!$pr->save()) {
-                        Yii::error(VarDumper::dumpAsString($pr->errors), 'Project:synchronizationProjects:Project:save');
-                    } else {
-
-                        if($projectItem['sources']) {
-                            foreach ($projectItem['sources'] as $sourceId => $sourceAttr) {
-                                $source = Sources::findOne(['id' => $sourceId]);
-
-                                if (!$source) {
-                                    $source = new Sources();
-                                    $source->project_id = $pr->id;
-                                }
-
-                                $source->scenario = Sources::SCENARIO_SYNCH;
-
-                                $source->attributes = $sourceAttr;
-                                if (!$source->save()) {
-                                    Yii::error(VarDumper::dumpAsString($source->errors), 'Project:synchronizationProjects:Sources:save');
-                                }
-                            }
+                        } else {
+                            $data['updated'][] = $projectItem['id'];
                         }
 
+                        $pr->attributes = $projectItem;
+
+                        $pr->name = $projectItem['name'];
+                        $pr->link = $projectItem['link'];
+                        $pr->closed = (bool)$projectItem['closed'];
+                        $pr->last_update = date('Y-m-d H:i:s');
+                        /*if(isset(Yii::$app->user) && Yii::$app->user->id) {
+                            $pr->pr_updated_user_id = Yii::$app->user->id;
+                        }*/
+                        if (!$pr->save()) {
+                            Yii::error(VarDumper::dumpAsString($pr->errors),
+                                'Project:synchronizationProjects:Project:save');
+                        } else {
+
+                            if ($projectItem['sources']) {
+                                foreach ($projectItem['sources'] as $sourceId => $sourceAttr) {
+                                    $source = Sources::findOne(['id' => $sourceId]);
+
+                                    if (!$source) {
+                                        $source = new Sources();
+                                        $source->project_id = $pr->id;
+                                    }
+
+                                    $source->scenario = Sources::SCENARIO_SYNCH;
+
+                                    $source->attributes = $sourceAttr;
+                                    if (!$source->save()) {
+                                        Yii::error(VarDumper::dumpAsString($source->errors),
+                                            'Project:synchronizationProjects:Sources:save');
+                                    }
+                                }
+                            }
+
+                        }
                     }
                 }
             }
@@ -240,7 +249,7 @@ class Project extends \yii\db\ActiveRecord
         if ($response->isOk) {
             $out['data'] = $response->data;
         } else {
-            $out['error'] = print_r($response->data, true);
+            $out['error'] = VarDumper::dumpAsString($response->content, 10);
         }
 
         return $out;

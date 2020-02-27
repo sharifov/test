@@ -37,6 +37,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\interfaces\Objectable;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
@@ -108,6 +109,7 @@ use yii\helpers\VarDumper;
  * @property int|null $l_delayed_charge
  * @property int|null $l_type_create
  * @property int $l_is_test
+ * @property string|null $hybrid_uid
  *
  * @property float $finalProfit
  * @property int $quotesCount
@@ -202,7 +204,7 @@ use yii\helpers\VarDumper;
  * @property $quoteType
  *
  */
-class Lead extends ActiveRecord
+class Lead extends ActiveRecord implements Objectable
 {
     use EventTrait;
 
@@ -466,6 +468,7 @@ class Lead extends ActiveRecord
             [['final_profit', 'tips', 'agents_processing_fee', 'l_init_price'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
+            [['hybrid_uid'], 'string', 'max' => 15],
             [['cabin'], 'string', 'max' => 1],
             [['gid', 'l_request_hash'], 'string', 'max' => 32],
             [['l_client_first_name', 'l_client_last_name'], 'string', 'max' => 50],
@@ -4484,4 +4487,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 		return $this->status === self::STATUS_TRASH;
 	}
 
+    public function getProjectId(): ?int
+    {
+        return $this->project_id;
+    }
+
+    public function getDepartmentId(): ?int
+    {
+        return $this->l_dep_id;
+    }
 }

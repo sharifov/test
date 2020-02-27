@@ -3,7 +3,6 @@
 namespace console\migrations;
 
 use Yii;
-use yii\helpers\VarDumper;
 use yii\rbac\Role;
 use yii2mod\rbac\models\RouteModel;
 
@@ -27,6 +26,8 @@ class RbacMigrationService
     public function up(array $routes, array $roles): void
     {
         $auth = $this->getAuth();
+
+        $routes = $this->createRoutes($routes);
 
         foreach ($routes as $route) {
 
@@ -55,6 +56,8 @@ class RbacMigrationService
     {
         $auth = $this->getAuth();
 
+        $routes = $this->createRoutes($routes);
+
         foreach ($routes as $route) {
             foreach ($roles as $role) {
                 if ($permission = $auth->getPermission($route)) {
@@ -68,6 +71,41 @@ class RbacMigrationService
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
+    }
+
+    private function createRoutes(array $routes): array
+    {
+        $out = [];
+        foreach ($routes as $key => $item) {
+            if ($key === 'crud') {
+                foreach ($item as $crudRoute) {
+                    foreach ($this->createCrudRoutesFromGeneralRoute($crudRoute) as $crudItem) {
+                        $out[] = $crudItem;
+                    }
+                }
+            } else {
+                $out[] = $item;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * /path/* --> [/path/index, /path/view, /path/create...]
+     */
+    private function createCrudRoutesFromGeneralRoute(string $route): array
+    {
+        if (substr($route, -2) !== '/*' ) {
+            throw new \InvalidArgumentException('2 last symbols of route must be: /* ');
+        }
+        $generalRoute = substr($route, 0, (strlen($route) - 2));
+        return [
+            $generalRoute . '/index',
+            $generalRoute . '/view',
+            $generalRoute . '/create',
+            $generalRoute . '/update',
+            $generalRoute . '/delete',
+        ];
     }
 
     /**
