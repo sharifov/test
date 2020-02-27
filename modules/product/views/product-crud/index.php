@@ -46,6 +46,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pr_description:ntext',
             'pr_status_id',
             'pr_service_fee_percent',
+            'pr_market_price',
+            'pr_client_budget',
             [
                 'class' => UserColumn::class,
                 'attribute' => 'pr_created_user_id',

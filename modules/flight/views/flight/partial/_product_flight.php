@@ -7,6 +7,7 @@ use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\helpers\FlightFormatHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $product Product */
@@ -170,7 +171,31 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
             </div>
             <?= $this->render('_view_flight_request', [ 'itineraryForm' => (new ItineraryEditForm($product->flight)) ]) ?>
 
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-6">
+                        <?= DetailView::widget([
+                            'model' => $product->flight,
+                            'attributes' => [
+                                'fl_stops',
+                                'fl_delayed_charge:booleanByLabel',
+                            ],
+                        ]) ?>
+                    </div>
+                    <div class="col-md-6">
+                        <?= DetailView::widget([
+                            'model' => $product,
+                            'attributes' => [
+                                'pr_market_price',
+                                'pr_client_budget',
+                            ],
+                        ]) ?>
+                    </div>
+                </div>
+            </div>
+
             <?= $this->render('../../flight-quote/partial/_quote_list', ['product' => $product]) ?>
+
         </div>
     </div>
 <?php \yii\widgets\Pjax::end()?>

@@ -38,6 +38,10 @@ class ProductCrudSearch extends Product
 
             ['pr_service_fee_percent', 'number'],
 
+            ['pr_market_price', 'number'],
+
+            ['pr_client_budget', 'number'],
+
             ['pr_name', 'string', 'max' => 40],
 
             ['pr_created_dt', 'date', 'format' => 'php:Y-m-d'],
@@ -77,6 +81,8 @@ class ProductCrudSearch extends Product
             'pr_lead_id' => $this->pr_lead_id,
             'pr_status_id' => $this->pr_status_id,
             'pr_service_fee_percent' => $this->pr_service_fee_percent,
+            'pr_market_price' => $this->pr_market_price,
+            'pr_client_budget' => $this->pr_client_budget,
             'pr_created_user_id' => $this->pr_created_user_id,
             'pr_updated_user_id' => $this->pr_updated_user_id,
         ]);

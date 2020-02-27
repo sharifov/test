@@ -1,12 +1,12 @@
 <?php
 
-namespace sales\yii\bootstrap4\assets;
+namespace sales\yii\bootstrap4\activeForm\assets;
 
 use yii\web\AssetBundle;
 
 class ActiveFormAsset extends AssetBundle
 {
-    public $sourcePath = '@sales/yii/bootstrap4/assets';
+    public $sourcePath = '@sales/yii/bootstrap4/activeForm/assets';
     public $js = [
         'yii.activeForm.js',
     ];

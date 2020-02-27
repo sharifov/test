@@ -4,10 +4,12 @@ namespace modules\product\controllers;
 
 use frontend\controllers\FController;
 use modules\product\src\entities\product\ProductRepository;
-use modules\product\src\forms\ProductUpdateForm;
+use modules\product\src\useCases\product\update\ProductUpdateForm;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
+use modules\product\src\useCases\product\update\ProductUpdateService;
 use sales\helpers\app\AppHelper;
+use sales\yii\bootstrap4\activeForm\ActiveForm;
 use Yii;
 use common\models\Lead;
 use modules\product\src\entities\product\Product;
@@ -17,36 +19,34 @@ use yii\base\Exception;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
-use yii\web\ForbiddenHttpException;
-use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use yii\widgets\ActiveForm;
 
 /**
  * Class ProductController
  *
  * @property ProductCreateService $productCreateService
  * @property ProductRepository $productRepository
+ * @property ProductUpdateService $productUpdateService
  */
 class ProductController extends FController
 {
     private $productCreateService;
     private $productRepository;
+    private $productUpdateService;
 
-    /**
-     * ProductController constructor.
-     * @param $id
-     * @param $module
-     * @param ProductCreateService $productCreateService
-     * @param ProductRepository $productRepository
-     * @param array $config
-     */
-    public function __construct($id, $module, ProductCreateService $productCreateService, ProductRepository $productRepository, $config = [])
+    public function __construct(
+        $id,
+        $module,
+        ProductCreateService $productCreateService,
+        ProductRepository $productRepository,
+        ProductUpdateService $productUpdateService,
+        $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->productCreateService = $productCreateService;
         $this->productRepository = $productRepository;
+        $this->productUpdateService = $productUpdateService;
     }
 
     /**
@@ -116,53 +116,33 @@ class ProductController extends FController
     }
 
     /**
-     * @return array|string
-     * @throws BadRequestHttpException
+     * @param $id
+     * @return array|string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdateAjax()
+    public function actionUpdateAjax($id)
     {
-        $id = (int) Yii::$app->request->get('id');
-        if (!$id) {
-            throw new BadRequestHttpException('Param ID required');
-        }
-        $form = new ProductUpdateForm();
-        $model = $this->findModel($id);
+        $model = $this->findModel((int)$id);
 
-        if (Yii::$app->request->isPost) {
+        $form = new ProductUpdateForm($model);
 
-            if ($form->load(Yii::$app->request->post())) {
-
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                $result = ['status' => 0, 'message' => ''];
-
-                if (!$form->validate()) {
-                    $result['message'] = ActiveForm::validate($form);
-                    return $result;
-                }
-
+        if ($form->load(Yii::$app->request->post())) {
+            if ($form->validate()) {
                 try {
-                    $model->setName($form->pr_name)
-                          ->setDescription($form->pr_description);
-
-                    $this->productRepository->save($model);
-
-                    $result['status'] = 1;
-                    $result['message'] = 'Product updated';
-                    return $result;
-                } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableFormatter($throwable), 'ProductController:' . __FUNCTION__ );
-                    return ['message' => $throwable->getMessage()];
+                    $this->productUpdateService->update($form);
+                    return $this->asJson(['success' => true, 'message' => 'Product updated']);
+                } catch (\DomainException $e) {
+                    return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+                } catch (\Throwable $e) {
+                    Yii::error(AppHelper::throwableFormatter($e), 'ProductController:' . __FUNCTION__ );
+                    return $this->asJson(['success' => false, 'message' => 'Server error']);
                 }
             }
-        } else {
-            $form->pr_name = $model->pr_name;
-            $form->pr_description = $model->pr_description;
+            return $this->asJson(ActiveForm::formatError($form));
         }
 
         return $this->renderAjax('_update_ajax_form', [
-            'formModel' => $form,
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 

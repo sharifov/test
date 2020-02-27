@@ -2,8 +2,9 @@
 
 namespace modules\hotel\controllers;
 
+use modules\hotel\src\useCases\request\update\HotelUpdateRequestForm;
+use modules\hotel\src\useCases\request\update\HotelRequestUpdateService;
 use modules\product\src\entities\productType\ProductType;
-use modules\hotel\models\forms\HotelForm;
 use modules\hotel\src\helpers\HotelFormatHelper;
 use Yii;
 use modules\hotel\models\Hotel;
@@ -18,9 +19,19 @@ use yii\web\Response;
 
 /**
  * HotelController implements the CRUD actions for Hotel model.
+ *
+ * @property HotelRequestUpdateService $hotelRequestUpdateService
  */
 class HotelController extends FController
 {
+    private $hotelRequestUpdateService;
+
+    public function __construct($id, $module, HotelRequestUpdateService $hotelRequestUpdateService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->hotelRequestUpdateService = $hotelRequestUpdateService;
+    }
+
     /**
      * @return array
      */
@@ -103,63 +114,39 @@ class HotelController extends FController
         ]);
     }
 
-
-
     public function actionUpdateAjax()
     {
-
         $id = Yii::$app->request->get('id');
 
         try {
-            $modelHotel = $this->findModel($id);
+            $hotel = $this->findModel($id);
         } catch (\Throwable $throwable) {
-            //Yii::$app->response->format = Response::FORMAT_JSON;
-            //return ['error' => 'Error: ' . $throwable->getMessage()];
-            return '<script>alert("'.$throwable->getMessage().'")</script>'; //['message' => 'Successfully updated Hotel request'];
+            return '<script>alert("' . $throwable->getMessage() . '")</script>';
         }
 
-        $model = new HotelForm();
-        $model->ph_id = $modelHotel->ph_id;
+        $form = new HotelUpdateRequestForm($hotel);
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-            if ($model->validate()) {
-
-                //$modelHotel->attributes = $model->attributes;
-
-                $modelHotel->ph_zone_code = $model->ph_zone_code;
-                $modelHotel->ph_hotel_code = $model->ph_hotel_code;
-                $modelHotel->ph_destination_code = $model->ph_destination_code;
-                $modelHotel->ph_destination_label = $model->ph_destination_label;
-                $modelHotel->ph_check_in_date = $model->ph_check_in_date;
-                $modelHotel->ph_check_out_date = $model->ph_check_out_date;
-
-                $modelHotel->ph_max_price_rate = $model->ph_max_price_rate;
-                $modelHotel->ph_min_price_rate = $model->ph_min_price_rate;
-
-                $modelHotel->ph_max_star_rate = $model->ph_max_star_rate;
-                $modelHotel->ph_min_star_rate = $model->ph_min_star_rate;
-
-                //VarDumper::dump($modelHotel->attributes); exit;
-                if ($modelHotel->save()) {
-                    return '<script>$("#modal-sm").modal("hide"); $.pjax.reload({container: "#pjax-product-search-' . $modelHotel->ph_product_id . '"});</script>';
-                }
-
-                Yii::error($modelHotel->errors, 'Module:HotelController:actionUpdateAjax:Hotel:save');
-
-
-              //  return ['errors' => \yii\widgets\ActiveForm::validate($modelProduct)];
+            $out = '<script>$("#modal-sm").modal("hide"); $.pjax.reload({container: "#pjax-product-search-' . $hotel->ph_product_id . '"});';
+            try {
+                $this->hotelRequestUpdateService->update($form);
+                $out .= 'new PNotify({title: "Hotel update request", type: "success", text: "Success" , hide: true});';
+            } catch (\DomainException $e) {
+                $out .= 'new PNotify({title: "Hotel update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
+            } catch (\Throwable $e) {
+                $out .= 'new PNotify({title: "Hotel update request", type: "error", text: "Server error" , hide: true});';
+                Yii::error($e, 'HotelController:actionUpdateAjax');
             }
-            //return ['errors' => $model->errors];
-        } else {
-            $model->attributes = $modelHotel->attributes;
+
+            return $out . '</script>';
+
         }
 
         return $this->renderAjax('update_ajax', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
-
 
     /**
      * @return array

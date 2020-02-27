@@ -19,6 +19,9 @@ class FlightSearch extends Flight
         return [
             [['fl_id', 'fl_product_id', 'fl_trip_type_id', 'fl_adults', 'fl_children', 'fl_infants'], 'integer'],
             [['fl_cabin_class', 'fl_request_hash_key'], 'safe'],
+
+            ['fl_delayed_charge', 'boolean'],
+            ['fl_stops', 'integer'],
         ];
     }
 
@@ -68,6 +71,8 @@ class FlightSearch extends Flight
             'fl_adults' => $this->fl_adults,
             'fl_children' => $this->fl_children,
             'fl_infants' => $this->fl_infants,
+            'fl_stops' => $this->fl_stops,
+            'fl_delayed_charge' => $this->fl_delayed_charge,
             'fl_request_hash_key' => $this->fl_request_hash_key,
         ]);
 
