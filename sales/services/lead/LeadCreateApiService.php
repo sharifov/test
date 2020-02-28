@@ -3,6 +3,7 @@
 namespace sales\services\lead;
 
 use common\models\LeadFlow;
+use common\models\VisitorLog;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\lead\LeadSegmentRepository;
@@ -19,6 +20,8 @@ use sales\services\client\ClientManageService;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use webapi\models\ApiLead;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\UnprocessableEntityHttpException;
 
 /**
@@ -61,7 +64,7 @@ class LeadCreateApiService
      */
     public function createByApi(ApiLead $modelLead, $apiProject): Lead
     {
-
+        /** @var Lead $lead */
         $lead = $this->transactionManager->wrap(function() use ($modelLead, $apiProject) {
 
             $lead = Lead::createByApi();
@@ -169,7 +172,42 @@ class LeadCreateApiService
             return $lead;
         });
 
+        $this->addVisitorLogs($modelLead, $lead);
+
         return $lead;
+    }
+
+    private function addVisitorLogs(ApiLead $modelLead, Lead $lead): void
+    {
+        $lastLogId = null;
+        foreach ($modelLead->visitor_log as $visitorLog) {
+            $log = new VisitorLog([
+                'vl_project_id' => $lead->project_id,
+                'vl_client_id' => $lead->client_id,
+                'vl_lead_id' => $lead->id,
+            ]);
+            if ($log->load($visitorLog, '')) {
+                if (!$log->save()) {
+                    Yii::error(
+                        'Cant save visitor_log. LeadId: ' . $lead->id
+                        . ' log: ' . VarDumper::dumpAsString($visitorLog)
+                        . ' Errors: ' . VarDumper::dumpAsString($log->getErrors()), 'API:LeadCreateApiService:createByApi:visitor:log:save');
+                } else {
+                    $lastLogId = $log->vl_id;
+                }
+            } else {
+                Yii::error('Cant load visitor_log. LeadId: ' . $lead->id . ' log: ' . VarDumper::dumpAsString($visitorLog), 'API:LeadCreateApiService:createByApi:visitor:log:load');
+            }
+        }
+
+        if ($lastLogId) {
+            try {
+                $lead->l_visitor_log_id = $lastLogId;
+                $this->leadRepository->save($lead);
+            } catch (\Throwable $e) {
+                Yii::error('Cant update lead. ' . $e, 'API:LeadCreateApiService:createByApi:lead:update:visitor_log');
+            }
+        }
     }
 
     /**

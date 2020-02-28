@@ -244,6 +244,14 @@ $user = Yii::$app->user->identity;
                         'title' => 'General Lead Log #' . $leadForm->lead->id,
                         'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
                     ]) ?>
+
+                    <?php if (Auth::can('/visitor-log/index')): ?>
+                        <?= Html::a('<i class="fa fa-list"></i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
+                            'class' => 'dropdown-item',
+                            'title' => 'Visitor log #' . $leadForm->lead->id,
+                        ]) ?>
+                    <?php endif; ?>
+
                 </div>
             </div>
 

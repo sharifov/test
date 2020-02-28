@@ -3,7 +3,9 @@
 namespace common\models;
 
 use common\models\query\VisitorLogQuery;
-use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "{{%visitor_log}}".
@@ -13,7 +15,7 @@ use Yii;
  * @property string|null $vl_source_cid
  * @property string|null $vl_ga_client_id
  * @property string|null $vl_ga_user_id
- * @property int|null $vl_user_id
+ * @property int|null $vl_customer_id
  * @property int|null $vl_client_id
  * @property int|null $vl_lead_id
  * @property string|null $vl_gclid
@@ -30,45 +32,96 @@ use Yii;
  * @property string|null $vl_visit_dt
  * @property string|null $vl_created_dt
  *
- * @property Client $vlClient
- * @property Lead $vlLead
- * @property Project $vlProject
+ * @property Client $client
+ * @property Lead $lead
+ * @property Project $project
  */
 class VisitorLog extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+    public const SCENARIO_API_CREATE = 'api_create';
+
+    public static function tableName(): string
     {
         return '{{%visitor_log}}';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['vl_project_id', 'vl_user_id', 'vl_client_id', 'vl_lead_id'], 'integer'],
-            [['vl_visit_dt', 'vl_created_dt'], 'safe'],
-            [['vl_source_cid'], 'string', 'max' => 10],
-            [['vl_ga_client_id', 'vl_ga_user_id'], 'string', 'max' => 36],
-            [['vl_gclid'], 'string', 'max' => 100],
-            [['vl_dclid'], 'string', 'max' => 255],
-            [['vl_utm_source', 'vl_utm_medium', 'vl_utm_campaign', 'vl_utm_term', 'vl_utm_content'], 'string', 'max' => 50],
-            [['vl_referral_url', 'vl_location_url', 'vl_user_agent'], 'string', 'max' => 500],
-            [['vl_ip_address'], 'string', 'max' => 39],
-            [['vl_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::className(), 'targetAttribute' => ['vl_client_id' => 'id']],
-            [['vl_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::className(), 'targetAttribute' => ['vl_lead_id' => 'id']],
-            [['vl_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::className(), 'targetAttribute' => ['vl_project_id' => 'id']],
+            ['vl_project_id', 'required'],
+            ['vl_project_id', 'integer'],
+            ['vl_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['vl_project_id' => 'id']],
+
+            ['vl_customer_id', 'integer'],
+
+            ['vl_client_id', 'integer'],
+            ['vl_client_id', 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['vl_client_id' => 'id']],
+
+            ['vl_lead_id', 'required'],
+            ['vl_lead_id', 'integer'],
+            ['vl_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['vl_lead_id' => 'id']],
+
+            ['vl_visit_dt', 'required'],
+            ['vl_visit_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['vl_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['vl_source_cid', 'string', 'max' => 10],
+
+            ['vl_ga_client_id', 'required'],
+            ['vl_ga_client_id', 'string', 'max' => 36],
+
+            ['vl_ga_user_id', 'string', 'max' => 36],
+
+            ['vl_gclid', 'string', 'max' => 100],
+
+            ['vl_dclid', 'string', 'max' => 255],
+
+            ['vl_utm_source', 'string', 'max' => 50],
+
+            ['vl_utm_medium', 'string', 'max' => 50],
+
+            ['vl_utm_campaign', 'string', 'max' => 50],
+
+            ['vl_utm_term', 'string', 'max' => 50],
+
+            ['vl_utm_content', 'string', 'max' => 50],
+
+            ['vl_referral_url', 'string', 'max' => 500],
+
+            ['vl_location_url', 'string', 'max' => 500],
+
+            ['vl_user_agent', 'string', 'max' => 500],
+
+            ['vl_ip_address', 'string', 'max' => 39],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['vl_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
+    public function scenarios(): array
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_API_CREATE] = [
+            'vl_source_cid', 'vl_ga_client_id', 'vl_ga_user_id', 'vl_customer_id', 'vl_gclid', 'vl_dclid',
+            'vl_utm_source', 'vl_utm_medium', 'vl_utm_campaign', 'vl_utm_term', 'vl_utm_content', 'vl_referral_url',
+            'vl_location_url', 'vl_user_agent', 'vl_ip_address', 'vl_visit_dt',
+        ];
+        return $scenarios;
+    }
+
+    public function attributeLabels(): array
     {
         return [
             'vl_id' => 'ID',
@@ -77,7 +130,7 @@ class VisitorLog extends \yii\db\ActiveRecord
             'vl_source_cid' => 'Source Cid',
             'vl_ga_client_id' => 'Ga Client ID',
             'vl_ga_user_id' => 'Ga User ID',
-            'vl_user_id' => 'User ID',
+            'vl_customer_id' => 'Customer ID',
             'vl_client_id' => 'Client ID',
             'vl_lead_id' => 'Lead ID',
             'vl_gclid' => 'Gclid',
@@ -96,42 +149,28 @@ class VisitorLog extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * Gets query for [[VlClient]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getVlClient()
+    public function getClient(): ActiveQuery
     {
-        return $this->hasOne(Client::className(), ['id' => 'vl_client_id']);
+        return $this->hasOne(Client::class, ['id' => 'vl_client_id']);
     }
 
-    /**
-     * Gets query for [[VlLead]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getVlLead()
+    public function getLead(): ActiveQuery
     {
-        return $this->hasOne(Lead::className(), ['id' => 'vl_lead_id']);
+        return $this->hasOne(Lead::class, ['id' => 'vl_lead_id']);
     }
 
-    /**
-     * Gets query for [[VlProject]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getVlProject()
+    public function getProject(): ActiveQuery
     {
-        return $this->hasOne(Project::className(), ['id' => 'vl_project_id']);
+        return $this->hasOne(Project::class, ['id' => 'vl_project_id']);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return VisitorLogQuery the active query used by this AR class.
-     */
-    public static function find()
+    public static function getVisitorLogsByLead(int $leadId): array
     {
-        return new VisitorLogQuery(get_called_class());
+        return self::find()->andWhere(['vl_lead_id' => $leadId])->asArray()->all();
+    }
+
+    public static function find(): VisitorLogQuery
+    {
+        return new VisitorLogQuery(static::class);
     }
 }

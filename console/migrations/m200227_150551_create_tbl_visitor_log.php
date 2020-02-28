@@ -24,7 +24,7 @@ class m200227_150551_create_tbl_visitor_log extends Migration
             'vl_source_cid' => $this->string(10)->null(),
             'vl_ga_client_id' => $this->string(36)->null(),
             'vl_ga_user_id' => $this->string(36)->null(),
-            'vl_user_id' => $this->integer()->null(),
+            'vl_customer_id' => $this->integer()->null(),
             'vl_client_id' => $this->integer()->null(),
             'vl_lead_id' => $this->integer()->null(),
             'vl_gclid' => $this->string(100)->null(),

@@ -12,6 +12,7 @@ use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
+use common\models\VisitorLog;
 use modules\lead\src\entities\lead\LeadQuery;
 use sales\auth\Auth;
 use sales\logger\db\GlobalLogInterface;
@@ -330,6 +331,7 @@ class QuoteController extends ApiBaseController
 
 
         $responseData = $response;
+        $responseData['visitor_log'] = VisitorLog::getVisitorLogsByLead($model->lead_id);
         $responseData = $apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {

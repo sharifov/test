@@ -2,41 +2,38 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use common\models\VisitorLog;
 use common\models\search\VisitorLogSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
-/**
- * VisitorLogController implements the CRUD actions for VisitorLog model.
- */
-class VisitorLogController extends Controller
+class VisitorLogController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
+    public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
-     * Lists all VisitorLog models.
-     * @return mixed
+     * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new VisitorLogSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -45,12 +42,11 @@ class VisitorLogController extends Controller
     }
 
     /**
-     * Displays a single VisitorLog model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
      */
-    public function actionView($id)
+    public function actionView($id): string
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -58,9 +54,7 @@ class VisitorLogController extends Controller
     }
 
     /**
-     * Creates a new VisitorLog model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|Response
      */
     public function actionCreate()
     {
@@ -76,11 +70,9 @@ class VisitorLogController extends Controller
     }
 
     /**
-     * Updates an existing VisitorLog model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return string|Response
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
@@ -96,13 +88,13 @@ class VisitorLogController extends Controller
     }
 
     /**
-     * Deletes an existing VisitorLog model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
-    public function actionDelete($id)
+    public function actionDelete($id): Response
     {
         $this->findModel($id)->delete();
 
@@ -110,13 +102,11 @@ class VisitorLogController extends Controller
     }
 
     /**
-     * Finds the VisitorLog model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return VisitorLog the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return VisitorLog
+     * @throws NotFoundHttpException
      */
-    protected function findModel($id)
+    protected function findModel($id): VisitorLog
     {
         if (($model = VisitorLog::findOne($id)) !== null) {
             return $model;

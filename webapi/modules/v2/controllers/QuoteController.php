@@ -9,6 +9,7 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\UserProjectParams;
+use common\models\VisitorLog;
 use Yii;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -532,6 +533,7 @@ class QuoteController extends ApiBaseController
 
 
         $responseData = $response;
+        $responseData['visitor_log'] = VisitorLog::getVisitorLogsByLead($model->lead_id);
         $responseData = $apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {

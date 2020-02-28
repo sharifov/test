@@ -1,5 +1,7 @@
 <?php
 
+use modules\lead\src\grid\columns\LeadColumn;
+use sales\yii\grid\DateTimeColumn;
 use sales\yii\grid\project\ProjectColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -27,13 +29,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
             'vl_id',
             [
                 'class' => ProjectColumn::class,
                 'attribute' => 'vl_project_id',
-                'relation' => 'vlProject',
+                'relation' => 'project',
+            ],
+            [
+                'class' => LeadColumn::class,
+                'attribute' => 'vl_lead_id',
+                'relation' => 'lead',
             ],
             'vl_source_cid',
             'vl_ga_client_id',
@@ -52,8 +57,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'vl_location_url:url',
             //'vl_user_agent',
             //'vl_ip_address',
-            //'vl_visit_dt',
-            //'vl_created_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'vl_visit_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'vl_created_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

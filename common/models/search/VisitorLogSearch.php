@@ -2,69 +2,97 @@
 
 namespace common\models\search;
 
-use yii\base\Model;
+use common\models\Client;
+use common\models\Employee;
+use common\models\Lead;
+use common\models\Project;
+use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use common\models\VisitorLog;
 
-/**
- * VisitorLogSearch represents the model behind the search form of `common\models\VisitorLog`.
- */
 class VisitorLogSearch extends VisitorLog
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['vl_id', 'vl_project_id', 'vl_user_id', 'vl_client_id', 'vl_lead_id'], 'integer'],
-            [['vl_source_cid', 'vl_ga_client_id', 'vl_ga_user_id', 'vl_gclid', 'vl_dclid', 'vl_utm_source', 'vl_utm_medium', 'vl_utm_campaign', 'vl_utm_term', 'vl_utm_content', 'vl_referral_url', 'vl_location_url', 'vl_user_agent', 'vl_ip_address', 'vl_visit_dt', 'vl_created_dt'], 'safe'],
+            ['vl_project_id', 'integer'],
+            ['vl_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['vl_project_id' => 'id']],
+
+            ['vl_customer_id', 'integer'],
+
+            ['vl_client_id', 'integer'],
+            ['vl_client_id', 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['vl_client_id' => 'id']],
+
+            ['vl_lead_id', 'integer'],
+            ['vl_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['vl_lead_id' => 'id']],
+
+            ['vl_source_cid', 'string', 'max' => 10],
+
+            ['vl_ga_client_id', 'string', 'max' => 36],
+
+            ['vl_ga_user_id', 'string', 'max' => 36],
+
+            ['vl_gclid', 'string', 'max' => 100],
+
+            ['vl_dclid', 'string', 'max' => 255],
+
+            ['vl_utm_source', 'string', 'max' => 50],
+
+            ['vl_utm_medium', 'string', 'max' => 50],
+
+            ['vl_utm_campaign', 'string', 'max' => 50],
+
+            ['vl_utm_term', 'string', 'max' => 50],
+
+            ['vl_utm_content', 'string', 'max' => 50],
+
+            ['vl_referral_url', 'string', 'max' => 500],
+
+            ['vl_location_url', 'string', 'max' => 500],
+
+            ['vl_user_agent', 'string', 'max' => 500],
+
+            ['vl_ip_address', 'string', 'max' => 39],
+
+            ['vl_visit_dt', 'date', 'format' => 'php:Y-m-d'],
+
+            ['vl_created_dt', 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
-    }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = VisitorLog::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['vl_id' => SORT_DESC],
+            ]
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->vl_visit_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'vl_visit_dt', $this->vl_visit_dt, $user->timezone);
+        }
+
+        if ($this->vl_created_dt) {
+            QueryHelper::dayEqualByUserTZ($query, 'vl_created_dt', $this->vl_created_dt, $user->timezone);
         }
 
         // grid filtering conditions
         $query->andFilterWhere([
             'vl_id' => $this->vl_id,
             'vl_project_id' => $this->vl_project_id,
-            'vl_user_id' => $this->vl_user_id,
+            'vl_customer_id' => $this->vl_customer_id,
             'vl_client_id' => $this->vl_client_id,
             'vl_lead_id' => $this->vl_lead_id,
-            'vl_visit_dt' => $this->vl_visit_dt,
-            'vl_created_dt' => $this->vl_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'vl_source_cid', $this->vl_source_cid])
