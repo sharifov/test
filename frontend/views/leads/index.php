@@ -392,6 +392,21 @@ $this->registerJs($js);
             ]
         ],
 
+        [
+            'label' => 'PNR',
+            'value' => static function (Lead $model) {
+            $allPnr = $model->getAdditionalInformationMultiplePnr();
+            if($allPnr[0]){
+                return '<code>' . implode('<br>',  $allPnr) . '</code>';
+            }
+                return '-';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
+        ],
+
         /*[
             'attribute' => 'adults',
             'value' => static function (Lead $model) {

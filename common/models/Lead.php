@@ -437,6 +437,18 @@ class Lead extends ActiveRecord implements Objectable
     }
 
     /**
+     * @return array|null
+     */
+    public function getAdditionalInformationMultiplePnr(): array
+    {
+        $data = [];
+        foreach ($this->getAdditionalInformationForm() as $key => $obj){
+            array_push($data, $obj->pnr);
+        }
+        return $data;
+    }
+
+    /**
      * @param string|null $pnr
      */
     public function setAdditionalInformationFormFirstElementPnr(?string $pnr): void

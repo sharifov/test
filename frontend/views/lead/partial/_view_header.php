@@ -43,6 +43,7 @@ use yii\helpers\Html;
                         <strong>Market:</strong>
                         <span><?= Html::encode(($lead->project ? $lead->project->name : '') . ($lead->source ? ' - ' . $lead->source->name : ''))?></span>
                     </div>
+
                     <?php if (Yii::$app->user->can('lead/view_HybridUid_View', ['lead' => $lead])) : ?>
                         <div class="page-header__general-item">
                             <strong title="Hybrid UID">Booking ID:</strong>
@@ -50,6 +51,17 @@ use yii\helpers\Html;
                         </div>
                     <?php endif ?>
 
+                    <div class="page-header__general-item">
+                        <strong>PNR:</strong>
+                        <span>
+                            <?= implode('&#9900', $lead->getAdditionalInformationMultiplePnr()) ?>
+                        </span>
+                    </div>
+
+                    <div class="page-header__general-item">
+                        <strong title="Hybrid UID">HUID:</strong>
+                        <span><?= Html::encode($lead->hybrid_uid)?></span>
+                    </div>
 <!--                    <div class="page-header__general-item">-->
 <!--                        --><?php //= $this->render('_rating', [
 //                            'lead' => $lead

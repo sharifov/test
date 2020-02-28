@@ -127,6 +127,8 @@ SearchResult = function(props) {
                                 $(this).removeClass('d-none');
                                 $(this).addClass('filtered');
                                 filterApplied = true;
+                            } else {
+                                $(this).removeClass('filtered');
                             }
                         });
                         break;
@@ -160,6 +162,8 @@ SearchResult = function(props) {
                                 $(obj).removeClass('d-none');
                                 $(obj).addClass('filtered');
                                 filterApplied = true;
+                            } else {
+                                $(obj).removeClass('filtered');
                             }
                         });
                         break;
@@ -173,6 +177,8 @@ SearchResult = function(props) {
                                 $(obj).removeClass('d-none');
                                 $(obj).addClass('filtered');
                                 filterApplied = true;
+                            } else {
+                                $(obj).removeClass('filtered');
                             }
                         });
                         break;
@@ -215,11 +221,17 @@ SearchResult = function(props) {
                         });
                         break;
                     case 'airline':
-                        filterList[filter].forEach(function(airline) {
-                            var obj = $(selector+'[data-airline="'+airline+'"]');
-                            $(obj).removeClass('d-none');
-                            $(obj).addClass('filtered');
-                            filterApplied = true;
+                        var airlines = filterList[filter];
+                        $(selector).each(function (i, elem) {
+                            var objAirline = $(elem).data('airline');
+
+                            if (airlines.includes(objAirline)) {
+                                $(elem).removeClass('d-none');
+                                $(elem).addClass('filtered');
+                                filterApplied = true;
+                            } else {
+                                $(elem).removeClass('filtered');
+                            }
                         });
                         break;
                     case 'travelTime':
