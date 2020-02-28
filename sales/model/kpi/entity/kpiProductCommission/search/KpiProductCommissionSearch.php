@@ -46,7 +46,7 @@ class KpiProductCommissionSearch extends KpiProductCommission
 
         $dataProvider = new ActiveDataProvider([
 			'query' => $query,
-			'sort'=> ['defaultOrder' => ['pc_product_type_id' => SORT_DESC, 'pc_performance' => SORT_DESC, 'pc_commission_percent' => SORT_DESC]],
+			'sort'=> ['defaultOrder' => ['pc_created_dt' => SORT_DESC, 'pc_updated_dt' => SORT_DESC]],
 			'pagination' => [
 				'pageSize' => 30,
 			],

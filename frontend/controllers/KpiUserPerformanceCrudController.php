@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\kpi\entity\KpiUserPerformance;
-use sales\model\kpi\entity\search\KpiUserPerformanceSearch;
+use sales\model\kpi\entity\kpiUserPerformance\KpiUserPerformance;
+use sales\model\kpi\entity\kpiUserPerformance\search\KpiUserPerformanceSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

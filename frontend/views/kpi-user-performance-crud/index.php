@@ -7,7 +7,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\kpi\entity\search\KpiUserPerformanceSearch */
+/* @var $searchModel \sales\model\kpi\entity\kpiUserPerformance\search\KpiUserPerformanceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Kpi User Performances';
@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => MonthColumn::class,
 				'attribute' => 'up_month',
 			],
-            'up_performance',
+            'up_performance:percentInteger',
 			[
 				'class' => UserColumn::class,
 				'attribute' => 'up_created_user_id',

@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\kpi\entity;
+namespace sales\model\kpi\entity\kpiUserPerformance;
 
 /**
  * This is the ActiveQuery class for [[KpiUserPerformance]].

@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'upc_user_id:userName',
             'upc_year',
             'upc_month:MonthNameByMonthNumber',
-            'upc_performance',
+            'upc_performance:percentInteger',
             'upc_commission_percent:percentInteger',
             'upc_created_user_id:UserName',
             'upc_updated_user_id:UserName',

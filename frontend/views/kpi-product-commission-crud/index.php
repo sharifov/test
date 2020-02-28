@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => ProductTypeColumn::class,
 				'attribute' => 'pc_product_type_id',
 			],
-            'pc_performance',
+            'pc_performance:percentInteger',
             'pc_commission_percent:percentInteger',
 			[
 				'class' => UserColumn::class,

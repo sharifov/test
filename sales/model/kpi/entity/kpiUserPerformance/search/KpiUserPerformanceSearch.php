@@ -1,10 +1,10 @@
 <?php
 
-namespace sales\model\kpi\entity\search;
+namespace sales\model\kpi\entity\kpiUserPerformance\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use sales\model\kpi\entity\KpiUserPerformance;
+use sales\model\kpi\entity\kpiUserPerformance\KpiUserPerformance;
 
 /**
  * KpiUserPerformanceSearch represents the model behind the search form of `sales\model\kpi\entity\KpiUserPerformance`.
@@ -46,7 +46,7 @@ class KpiUserPerformanceSearch extends KpiUserPerformance
 
         $dataProvider = new ActiveDataProvider([
 			'query' => $query,
-			'sort'=> ['defaultOrder' => ['up_user_id' => SORT_DESC, 'up_year' => SORT_DESC, 'up_month' => SORT_DESC]],
+			'sort'=> ['defaultOrder' => ['up_created_dt' => SORT_DESC, 'up_updated_dt' => SORT_DESC]],
 			'pagination' => [
 				'pageSize' => 30,
 			],

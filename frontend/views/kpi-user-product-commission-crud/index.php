@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => MonthColumn::class,
 				'attribute' => 'upc_month',
 			],
-            'upc_performance',
+            'upc_performance:percentInteger',
             'upc_commission_percent:percentInteger',
 			[
 				'class' => UserColumn::class,

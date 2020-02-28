@@ -67,7 +67,7 @@ class KpiProductCommission extends \yii\db\ActiveRecord
             [['pc_product_type_id', 'pc_performance', 'pc_commission_percent'], 'required'],
             [['pc_product_type_id', 'pc_performance', 'pc_commission_percent', 'pc_created_user_id', 'pc_updated_user_id'], 'integer'],
             [['pc_created_dt', 'pc_updated_dt'], 'safe'],
-            [['pc_commission_percent'], 'number' , 'min' => 0, 'max' => 100],
+            [['pc_commission_percent', 'pc_performance'], 'number' , 'min' => 0, 'max' => 100],
             [['pc_product_type_id', 'pc_performance', 'pc_commission_percent'], 'unique', 'targetAttribute' => ['pc_product_type_id', 'pc_performance', 'pc_commission_percent']],
             [['pc_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pc_created_user_id' => 'id']],
             [['pc_product_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductType::class, 'targetAttribute' => ['pc_product_type_id' => 'pt_id']],

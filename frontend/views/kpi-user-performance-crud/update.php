@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\kpi\entity\KpiUserPerformance */
+/* @var $model \sales\model\kpi\entity\kpiUserPerformance\KpiUserPerformance */
 
 $this->title = 'Update Kpi User Performance: ' . $model->up_user_id;
 $this->params['breadcrumbs'][] = ['label' => 'Kpi User Performances', 'url' => ['index']];

@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'pc_product_type_id:productType',
-            'pc_performance',
+            'pc_performance:percentInteger',
             'pc_commission_percent:percentInteger',
             'pc_created_user_id:UserName',
             'pc_updated_user_id:UserName',

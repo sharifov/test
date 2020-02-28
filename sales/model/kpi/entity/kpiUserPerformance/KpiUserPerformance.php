@@ -1,10 +1,9 @@
 <?php
 
-namespace sales\model\kpi\entity;
+namespace sales\model\kpi\entity\kpiUserPerformance;
 
 use common\models\Employee;
 use common\models\query\EmployeeQuery;
-use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -67,6 +66,10 @@ class KpiUserPerformance extends \yii\db\ActiveRecord
             [['up_user_id', 'up_year', 'up_month'], 'required'],
             [['up_user_id', 'up_year', 'up_month', 'up_performance', 'up_created_user_id', 'up_updated_user_id'], 'integer'],
             [['up_created_dt', 'up_updated_dt'], 'safe'],
+			[['up_month'], 'number', 'max' => 12, 'min' => 1],
+			[['up_year'], 'string', 'max' => 4],
+			[['up_year'], 'number', 'min' => 0],
+			[['up_performance'], 'number', 'min' => 0, 'max' => 100],
             [['up_user_id', 'up_year', 'up_month'], 'unique', 'targetAttribute' => ['up_user_id', 'up_year', 'up_month']],
             [['up_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_created_user_id' => 'id']],
             [['up_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_updated_user_id' => 'id']],

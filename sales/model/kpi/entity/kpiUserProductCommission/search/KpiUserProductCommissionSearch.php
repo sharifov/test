@@ -45,7 +45,11 @@ class KpiUserProductCommissionSearch extends KpiUserProductCommission
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+			'query' => $query,
+			'sort'=> ['defaultOrder' => ['upc_created_dt' => SORT_DESC, 'upc_updated_dt' => SORT_DESC]],
+			'pagination' => [
+				'pageSize' => 30,
+			],
         ]);
 
         $this->load($params);
