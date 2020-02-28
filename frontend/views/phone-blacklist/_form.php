@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?/*= $form->field($model, 'pbl_phone')->widget(PhoneInput::class, [
+    <?php /*= $form->field($model, 'pbl_phone')->widget(PhoneInput::class, [
         'jsOptions' => [
             'nationalMode' => false,
             'preferredCountries' => ['us'],
