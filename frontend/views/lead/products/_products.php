@@ -239,7 +239,7 @@ $js = <<<JS
                         hide: true
                     });
               } else {
-                  $.pjax.reload({
+                  pjaxReload({
                       container: '#pjax-product-quote-list-' + productId
                   });
                   new PNotify({
@@ -301,7 +301,7 @@ $js = <<<JS
                         hide: true
                     });
               } else {
-                  $.pjax.reload({
+                  pjaxReload({
                       container: '#pjax-product-quote-list-' + productId
                   });
                   new PNotify({
@@ -406,7 +406,7 @@ $js = <<<JS
                         hide: true
                   });
                   
-                  $.pjax.reload({
+                  pjaxReload({
                       container: '#pjax-product-quote-list-' + productId
                   });
               }
@@ -516,7 +516,7 @@ $js = <<<JS
                             });
                       } else {
                           
-                          $.pjax.reload({container: '#pjax-lead-offers', timout: 8000});
+                          pjaxReload({container: '#pjax-lead-offers', timout: 8000});
                           new PNotify({
                                 title: 'Quote was successfully added',
                                 type: 'success',
@@ -558,7 +558,7 @@ $js = <<<JS
                             });
                       } else {
                           
-                          $.pjax.reload({container: '#pjax-lead-orders', timout: 2000, push: false, relplace: false, async: false});
+                          pjaxReload({container: '#pjax-lead-orders', timout: 2000, push: false, relplace: false, async: false});
                           new PNotify({
                                 title: 'Quote was successfully added',
                                 type: 'success',
@@ -606,7 +606,7 @@ $js = <<<JS
                             });
                       } else {
                           
-                          $.pjax.reload({container: '#pjax-lead-offers', timout: 8000});
+                          pjaxReload({container: '#pjax-lead-offers', timout: 8000});
                           new PNotify({
                                 title: 'Quote was successfully deleted',
                                 type: 'success',
@@ -654,7 +654,7 @@ $js = <<<JS
                             });
                       } else {
                           
-                          // $.pjax.reload({container: '#pjax-lead-orders', timout: 2000});
+                          // pjaxReload({container: '#pjax-lead-orders', timout: 2000});
                           pjaxReload({container: '#pjax-lead-orders'});
                           new PNotify({
                                 title: 'Quote was successfully deleted',
@@ -742,7 +742,7 @@ $js = <<<JS
                             });
                       } else {
                           
-                          $.pjax.reload({container: '#pjax-order-invoice-' + orderId, timout: 8000});
+                          pjaxReload({container: '#pjax-order-invoice-' + orderId, timout: 8000});
                           new PNotify({
                                 title: 'Invoice was successfully deleted',
                                 type: 'success',

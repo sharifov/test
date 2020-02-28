@@ -45,7 +45,7 @@ $js = <<<JS
                     text: data.message,
                     hide: true
                 });
-                $.pjax.reload({
+                pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
             } else {
@@ -55,7 +55,7 @@ $js = <<<JS
                     text: data.message,
                     hide: true
                 });
-                $.pjax.reload({
+                pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
             }
@@ -92,7 +92,7 @@ $js = <<<JS
                     text: data.message,
                     hide: true
                 });
-                $.pjax.reload({
+                pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
             } else {
@@ -102,7 +102,7 @@ $js = <<<JS
                     text: data.message,
                     hide: true
                 });
-                $.pjax.reload({
+                pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
             }
@@ -343,12 +343,12 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     <td class="text-right"></td>
 
                     <?php
-                        $originPrice = round((float) $model->hqProductQuote->pq_origin_price, 2);
+                        $price = round((float) $model->hqProductQuote->pq_price, 2);
                         $totalAmountRoom = round($totalAmountRoom, 2);
                     ?>
 
-                    <td class="text-right <?=( $totalAmountRoom !== $originPrice) ? 'danger': ''?>">
-                        <b title="<?=$totalAmountRoom?> & <?=$originPrice?>"><?=number_format($originPrice, 2)?> USD</b>
+                    <td class="text-right <?=( $totalAmountRoom !== $price) ? 'danger': ''?>">
+                        <b title="<?=$totalAmountRoom?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
                     </td>
                 </tr>
             </table>
