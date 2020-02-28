@@ -19,12 +19,9 @@ class PhoneBlacklistSearch extends PhoneBlacklist
     {
         return [
             [['pbl_id', 'pbl_updated_user_id'], 'integer'],
-
             ['pbl_enabled', 'boolean'],
-
             [['pbl_phone', 'pbl_description'], 'string'],
-
-            [['pbl_created_dt', 'pbl_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['pbl_created_dt', 'pbl_updated_dt', 'pbl_expiration_date'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -61,6 +58,7 @@ class PhoneBlacklistSearch extends PhoneBlacklist
             'pbl_id' => $this->pbl_id,
             'pbl_enabled' => $this->pbl_enabled,
             'pbl_updated_user_id' => $this->pbl_updated_user_id,
+            'pbl_expiration_date' => $this->pbl_expiration_date,
         ]);
 
         $query->andFilterWhere(['like', 'pbl_phone', $this->pbl_phone])
