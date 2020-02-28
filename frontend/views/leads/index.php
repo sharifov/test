@@ -437,7 +437,7 @@ $this->registerJs($js);
             'filter' => array_combine(range(0, 9), range(0, 9)),
             'contentOptions' => ['class' => 'text-center'],
         ],*/
-        [
+        /*[
             // 'header' => 'Grade',
             'attribute' => 'l_answered',
             'value' => static function (Lead $model) {
@@ -453,7 +453,7 @@ $this->registerJs($js);
             'format' => 'raw'
 
             // 'visible' => !$isAgent
-        ],
+        ], */
 
         /*[
             'header' => 'Task Info',
@@ -469,7 +469,14 @@ $this->registerJs($js);
                 'style' => 'width:200px'
             ]
         ],*/
-
+        [
+            'attribute' => 'hybrid_uid',
+            'label' => '<span title="Hybrid UID">Booking ID</span>',
+            'encodeLabel' => false,
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
+        ],
         [
             'header' => 'CheckList',
             'value' => static function (Lead $model) {
