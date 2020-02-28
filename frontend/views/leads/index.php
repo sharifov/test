@@ -393,11 +393,18 @@ $this->registerJs($js);
         ],
 
         [
-            'label' => 'Pnr',
+            'label' => 'PNR',
             'value' => static function (Lead $model) {
-                return '<code>' . implode('<br>',  $model->getAdditionalInformationMultiplePnr()) . '</code>';
+            $allPnr = $model->getAdditionalInformationMultiplePnr();
+            if($allPnr[0]){
+                return '<code>' . implode('<br>',  $allPnr) . '</code>';
+            }
+                return '-';
             },
             'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
         ],
 
         /*[
