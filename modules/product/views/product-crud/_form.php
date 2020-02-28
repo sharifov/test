@@ -26,6 +26,10 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pr_service_fee_percent')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'pr_market_price')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
+
+        <?= $form->field($model, 'pr_client_budget')->input('number', ['min' => 0, 'max' => 100000, 'step' => 0.01]) ?>
+
         <?php //= $form->field($model, 'pr_created_user_id')->textInput() ?>
 
         <?php //= $form->field($model, 'pr_updated_user_id')->textInput() ?>

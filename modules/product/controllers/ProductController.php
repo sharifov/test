@@ -3,8 +3,13 @@
 namespace modules\product\controllers;
 
 use frontend\controllers\FController;
+use modules\product\src\entities\product\ProductRepository;
+use modules\product\src\useCases\product\update\ProductUpdateForm;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
+use modules\product\src\useCases\product\update\ProductUpdateService;
+use sales\helpers\app\AppHelper;
+use sales\yii\bootstrap4\activeForm\ActiveForm;
 use Yii;
 use common\models\Lead;
 use modules\product\src\entities\product\Product;
@@ -14,8 +19,6 @@ use yii\base\Exception;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
-use yii\web\ForbiddenHttpException;
-use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -23,17 +26,32 @@ use yii\web\Response;
  * Class ProductController
  *
  * @property ProductCreateService $productCreateService
+ * @property ProductRepository $productRepository
+ * @property ProductUpdateService $productUpdateService
  */
 class ProductController extends FController
 {
     private $productCreateService;
+    private $productRepository;
+    private $productUpdateService;
 
-    public function __construct($id, $module, ProductCreateService $productCreateService, $config = [])
+    public function __construct(
+        $id,
+        $module,
+        ProductCreateService $productCreateService,
+        ProductRepository $productRepository,
+        ProductUpdateService $productUpdateService,
+        $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->productCreateService = $productCreateService;
+        $this->productRepository = $productRepository;
+        $this->productUpdateService = $productUpdateService;
     }
 
+    /**
+     * @return array
+     */
     public function behaviors(): array
     {
         $behaviors = [
@@ -93,6 +111,37 @@ class ProductController extends FController
         }
 
         return $this->renderAjax('_ajax_form', [
+            'model' => $form,
+        ]);
+    }
+
+    /**
+     * @param $id
+     * @return array|string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdateAjax($id)
+    {
+        $model = $this->findModel((int)$id);
+
+        $form = new ProductUpdateForm($model);
+
+        if ($form->load(Yii::$app->request->post())) {
+            if ($form->validate()) {
+                try {
+                    $this->productUpdateService->update($form);
+                    return $this->asJson(['success' => true, 'message' => 'Product updated']);
+                } catch (\DomainException $e) {
+                    return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+                } catch (\Throwable $e) {
+                    Yii::error(AppHelper::throwableFormatter($e), 'ProductController:' . __FUNCTION__ );
+                    return $this->asJson(['success' => false, 'message' => 'Server error']);
+                }
+            }
+            return $this->asJson(ActiveForm::formatError($form));
+        }
+
+        return $this->renderAjax('_update_ajax_form', [
             'model' => $form,
         ]);
     }

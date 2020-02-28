@@ -1302,16 +1302,6 @@ class Quote extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if (!$insert) {
-            //Add logs after changed model attributes
-            $leadLog = new LeadLog(new LeadLogMessage());
-            $leadLog->logMessage->oldParams = $changedAttributes;
-            $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
-            $leadLog->logMessage->title = $insert ? 'Create' : 'Update';
-            $leadLog->logMessage->model = sprintf('%s (%s)', $this->formName(), $this->uid);
-            $leadLog->addLog([
-                'lead_id' => $this->lead_id,
-            ]);
-
             if (isset($changedAttributes['status'])) {
                 if ($this->lead->called_expert &&
                     $changedAttributes['status'] != $this->status &&

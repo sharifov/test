@@ -7,6 +7,7 @@ use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\helpers\FlightFormatHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $product Product */
@@ -33,13 +34,18 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
             <h2>
                 <a class="collapse-link">
                     <i class="fa fa-plane" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                    <?php if ($product->pr_description):?>
-                        <i class="fa fa-info-circle text-info" title="<?=Html::encode($product->pr_description)?>"></i>
-                    <?php endif;?>
                     <?php if ($product->flight->flightQuotes): ?>
                         <sup title="Number of quotes">(<?=count($product->flight->flightQuotes)?>)</sup>
                     <?php endif;?>
                 </a>
+                <?php if ($product->pr_description):?>
+                    <a  id="product_description_<?=$product->pr_id?>"
+                        class="popover-class fa fa-info-circle text-info"
+                        data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top"
+                        data-container="body" title="<?=Html::encode($product->pr_name)?>"
+                        data-content='<?=Html::encode($product->pr_description)?>'
+                    ></a>
+                <?php endif; ?>
             </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?php //php if ($is_manager) : ?>
@@ -138,7 +144,10 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
                             ]) ?>
 
                             <div class="dropdown-divider"></div>
-
+                            <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [
+                                'class' => 'dropdown-item text-warning btn-update-product',
+                                'data-product-id' => $product->pr_id,
+                            ]) ?>
                             <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Flight',
                                 null, [
                                     'class' => 'dropdown-item text-danger btn-delete-product',
@@ -162,7 +171,31 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
             </div>
             <?= $this->render('_view_flight_request', [ 'itineraryForm' => (new ItineraryEditForm($product->flight)) ]) ?>
 
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-6">
+                        <?= DetailView::widget([
+                            'model' => $product->flight,
+                            'attributes' => [
+                                'fl_stops',
+                                'fl_delayed_charge:booleanByLabel',
+                            ],
+                        ]) ?>
+                    </div>
+                    <div class="col-md-6">
+                        <?= DetailView::widget([
+                            'model' => $product,
+                            'attributes' => [
+                                'pr_market_price',
+                                'pr_client_budget',
+                            ],
+                        ]) ?>
+                    </div>
+                </div>
+            </div>
+
             <?= $this->render('../../flight-quote/partial/_quote_list', ['product' => $product]) ?>
+
         </div>
     </div>
 <?php \yii\widgets\Pjax::end()?>

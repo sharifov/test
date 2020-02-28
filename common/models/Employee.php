@@ -77,6 +77,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const ROLE_AGENT = 'agent';
     public const ROLE_SUPERVISION = 'supervision';
     public const ROLE_QA = 'qa';
+    public const ROLE_QA_SUPER = 'qa_super';
     public const ROLE_USER_MANAGER = 'userManager';
     public const ROLE_SUP_AGENT = 'sup_agent';
     public const ROLE_SUP_SUPER = 'sup_super';
@@ -271,7 +272,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isAnySupervision(): bool
     {
-        return $this->isSupervision() || $this->isExSuper() || $this->isSupSuper();
+        return $this->isSupervision() || $this->isExSuper() || $this->isSupSuper() || $this->isQaSuper();
+    }
+
+    public function isQaSuper(): bool
+    {
+        return in_array(self::ROLE_QA_SUPER, $this->getRoles(true), true);
     }
 
     /**

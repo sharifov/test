@@ -14,7 +14,6 @@ use sales\services\TransactionManager;
 
 /**
  * Class FlightManageService
- * @package modules\flight\src\services
  *
  * @property FlightRepository $flightRepository
  * @property FlightSegmentRepository $segmentRepository
@@ -22,31 +21,20 @@ use sales\services\TransactionManager;
  */
 class FlightManageService
 {
-	/**
-	 * @var FlightRepository
-	 */
 	private $flightRepository;
-	/**
-	 * @var TransactionManager
-	 */
 	private $transaction;
-	/**
-	 * @var FlightSegmentRepository
-	 */
 	private $segmentRepository;
 
-	/**
-	 * FlightManageService constructor.
-	 * @param FlightRepository $flightRepository
-	 * @param FlightSegmentRepository $segmentRepository
-	 * @param TransactionManager $transaction
-	 */
-	public function __construct(FlightRepository $flightRepository, FlightSegmentRepository $segmentRepository, TransactionManager $transaction)
+	public function __construct(
+	    FlightRepository $flightRepository,
+        FlightSegmentRepository $segmentRepository,
+        TransactionManager $transaction
+    )
 	{
 		$this->flightRepository = $flightRepository;
 		$this->transaction = $transaction;
 		$this->segmentRepository = $segmentRepository;
-	}
+    }
 
 	/**
 	 * @param int $id
@@ -61,7 +49,9 @@ class FlightManageService
 			$form->cabin,
 			$form->adults,
 			$form->children,
-			$form->infants
+			$form->infants,
+            $form->fl_stops,
+            $form->fl_delayed_charge
 		);
 
 		$this->transaction->wrap(function () use ($flight, $form) {
@@ -77,6 +67,7 @@ class FlightManageService
 			$this->flightRepository->save($flight);
 
 			$flight->updateLastAction();
+
 		});
 	}
 

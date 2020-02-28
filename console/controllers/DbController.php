@@ -9,7 +9,7 @@ use common\models\Email;
 use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\LeadFlow;
-use common\models\LeadLog;
+//use common\models\LeadLog;
 use common\models\LeadQcall;
 use common\models\Project;
 use common\models\ProjectWeight;
@@ -377,104 +377,107 @@ ORDER BY lf.lead_id, id';
 	 *
 	 * @param int $limit
 	 * @throws InvalidConfigException
+     *
+     *
+     * todo delete
 	 */
-    public function actionMigrateOldLeadLogsInGlobalLog($limit = 1000): void
-	{
-		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-		$time_start = microtime(true);
-		\Yii::$app->db->pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-
-		$leadLog = LeadLog::find()->where(['>=', 'created', '2019-06-01 00:00:00'])->asArray();
-		$leadLogCount = $leadLog->count();
-
-		printf("\n --- Message: %s ---\n", $this->ansiFormat('Total rows: ' . $leadLogCount, Console::FG_GREEN));
-
-		$globalLog = Yii::createObject(GlobalLogInterface::class);
-
-		$c = 0;
-
-		$iter = (int)($leadLogCount / $limit);
-
-		$offset = 0;
-
-		for($i = 0; $i <= $iter; $i++) {
-			foreach (($leadLog->limit($limit)->offset($offset)->all()) as $log) {
-				if (($c % $limit) === 0) {
-					if ($leadLogCount > 0) {
-						$percent = round($c * 100 / $leadLogCount, 1);
-					} else {
-						$percent = 0;
-					}
-
-					$memory = Yii::$app->formatter->asShortSize(memory_get_usage(), 1);
-
-					printf(" --- [%s] (%s) %s ---\n", $percent . '%', $memory, $this->ansiFormat( 'Current processed rows: ' . $c . ' of ' . $leadLogCount, Console::FG_PURPLE));
-				}
-
-				$message = json_decode($log['message'], true);
-
-				$modelPath = $this->getModelPath($message['model']);
-
-				if (!$modelPath) {
-					echo 'Log will not be inserted, because the model ' . $message['model'] . ' was not found.' . PHP_EOL;
-					continue;
-				}
-
-				$action = array_search($message['title'], GlobalLog::getActionTypeList(), false);
-
-				$this->removeDuplicatesFromOldNewAttributes($message['oldParams'], $message['newParams']);
-
-				$c++;
-				if (empty($message['oldParams']) && empty($message['newParams'])) {
-					continue;
-				}
-
-				if ($message['model'] !== 'Lead') {
-					if(!isset($message['newParams']['id'])) {
-						if (preg_match('/\((.*?)\)/si', $message['model'], $output)) {
-							$modelRowHashId = $output[1];
-
-							$modelRowId = $this->findModelRowId($modelPath, $modelRowHashId, $log['lead_id']);
-
-							if (!$modelRowId) {
-								continue;
-							}
-						} else {
-							continue;
-						}
-					} else {
-						$modelRowId = $message['newParams']['id'];
-					}
-				} else {
-					$modelRowId = $log['lead_id'];
-				}
-
-				$formattedAttr = $this->globalLogFormatAttrService->formatAttr($modelPath, json_encode($message['oldParams']), json_encode($message['newParams']));
-
-				if (empty($formattedAttr)) {
-					continue;
-				}
-
-				$globalLog->log(new LogDTO(
-					$modelPath,
-					$modelRowId,
-					$log['employee_id'] ? 'app-frontend' : 'app-webapi',
-					$log['employee_id'] ?? null,
-					json_encode($message['oldParams']),
-					json_encode($message['newParams']),
-					$formattedAttr,
-					$action ?: null,
-					$log['created'] ?? null
-				));
-			}
-			$offset += $limit;
-		}
-
-		$time_end = microtime(true);
-		$time = number_format(round($time_end - $time_start, 2), 2);
-		printf("\nExecute Time: %s, count Old Logs: " . $leadLogCount, $this->ansiFormat($time . ' s', Console::FG_RED));
-		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-	}
+//    public function actionMigrateOldLeadLogsInGlobalLog($limit = 1000): void
+//	{
+//		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+//		$time_start = microtime(true);
+//		\Yii::$app->db->pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+//
+//		$leadLog = LeadLog::find()->where(['>=', 'created', '2019-06-01 00:00:00'])->asArray();
+//		$leadLogCount = $leadLog->count();
+//
+//		printf("\n --- Message: %s ---\n", $this->ansiFormat('Total rows: ' . $leadLogCount, Console::FG_GREEN));
+//
+//		$globalLog = Yii::createObject(GlobalLogInterface::class);
+//
+//		$c = 0;
+//
+//		$iter = (int)($leadLogCount / $limit);
+//
+//		$offset = 0;
+//
+//		for($i = 0; $i <= $iter; $i++) {
+//			foreach (($leadLog->limit($limit)->offset($offset)->all()) as $log) {
+//				if (($c % $limit) === 0) {
+//					if ($leadLogCount > 0) {
+//						$percent = round($c * 100 / $leadLogCount, 1);
+//					} else {
+//						$percent = 0;
+//					}
+//
+//					$memory = Yii::$app->formatter->asShortSize(memory_get_usage(), 1);
+//
+//					printf(" --- [%s] (%s) %s ---\n", $percent . '%', $memory, $this->ansiFormat( 'Current processed rows: ' . $c . ' of ' . $leadLogCount, Console::FG_PURPLE));
+//				}
+//
+//				$message = json_decode($log['message'], true);
+//
+//				$modelPath = $this->getModelPath($message['model']);
+//
+//				if (!$modelPath) {
+//					echo 'Log will not be inserted, because the model ' . $message['model'] . ' was not found.' . PHP_EOL;
+//					continue;
+//				}
+//
+//				$action = array_search($message['title'], GlobalLog::getActionTypeList(), false);
+//
+//				$this->removeDuplicatesFromOldNewAttributes($message['oldParams'], $message['newParams']);
+//
+//				$c++;
+//				if (empty($message['oldParams']) && empty($message['newParams'])) {
+//					continue;
+//				}
+//
+//				if ($message['model'] !== 'Lead') {
+//					if(!isset($message['newParams']['id'])) {
+//						if (preg_match('/\((.*?)\)/si', $message['model'], $output)) {
+//							$modelRowHashId = $output[1];
+//
+//							$modelRowId = $this->findModelRowId($modelPath, $modelRowHashId, $log['lead_id']);
+//
+//							if (!$modelRowId) {
+//								continue;
+//							}
+//						} else {
+//							continue;
+//						}
+//					} else {
+//						$modelRowId = $message['newParams']['id'];
+//					}
+//				} else {
+//					$modelRowId = $log['lead_id'];
+//				}
+//
+//				$formattedAttr = $this->globalLogFormatAttrService->formatAttr($modelPath, json_encode($message['oldParams']), json_encode($message['newParams']));
+//
+//				if (empty($formattedAttr)) {
+//					continue;
+//				}
+//
+//				$globalLog->log(new LogDTO(
+//					$modelPath,
+//					$modelRowId,
+//					$log['employee_id'] ? 'app-frontend' : 'app-webapi',
+//					$log['employee_id'] ?? null,
+//					json_encode($message['oldParams']),
+//					json_encode($message['newParams']),
+//					$formattedAttr,
+//					$action ?: null,
+//					$log['created'] ?? null
+//				));
+//			}
+//			$offset += $limit;
+//		}
+//
+//		$time_end = microtime(true);
+//		$time = number_format(round($time_end - $time_start, 2), 2);
+//		printf("\nExecute Time: %s, count Old Logs: " . $leadLogCount, $this->ansiFormat($time . ' s', Console::FG_RED));
+//		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+//	}
 
 	public function actionTruncateGlobalLog(): void
 	{

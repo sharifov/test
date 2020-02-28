@@ -4,7 +4,6 @@ namespace frontend\widgets\multipleUpdate\lead;
 
 use common\models\Employee;
 use common\models\Lead;
-use common\models\Reason;
 use frontend\widgets\multipleUpdate\IdsValidator;
 use sales\access\ListsAccess;
 use yii\base\Model;
@@ -23,6 +22,48 @@ use yii\base\Model;
  */
 class MultipleUpdateForm extends Model
 {
+    public const STATUS_REASON_LIST = [
+        Lead::STATUS_TRASH => [
+            1 => 'Purchased elsewhere',
+            2 => 'Duplicate',
+            3 => 'Travel dates passed',
+            4 => 'Invalid phone number',
+            5 => 'Canceled trip',
+            6 => 'Test',
+            0 => 'Other'
+        ],
+        Lead::STATUS_REJECT => [
+            1 => 'Purchased elsewhere',
+            2 => 'Flight date > 10 months',
+            3 => 'Not interested',
+            4 => 'Duplicate',
+            5 => 'Too late',
+            6 => 'Test',
+            0 => 'Other'
+        ],
+        Lead::STATUS_FOLLOW_UP => [
+            1 => 'Proper Follow Up Done',
+            2 => "Didn't get in touch",
+            0 => 'Other'
+        ],
+        Lead::STATUS_PROCESSING => [
+            1 => 'N/A',
+            2 => 'No Available',
+            3 => 'Voice Mail Send',
+            4 => 'Will call back',
+            5 => 'Waiting the option',
+            0 => 'Other'
+        ],
+        Lead::STATUS_ON_HOLD => [
+            0 => 'Other'
+        ],
+        Lead::STATUS_SNOOZE => [
+            1 => 'Travelling dates > 12 months',
+            2 => 'Not ready to buy now',
+            0 => 'Other'
+        ],
+    ];
+
     public const REDIAL_ADD = 1;
     public const REDIAL_REMOVE = 2;
 
@@ -83,7 +124,7 @@ class MultipleUpdateForm extends Model
 
         if (!$this->hasErrors()) {
             if ($this->reason && !$this->message) {
-                $this->message = Reason::getReasonByStatus($this->statusId, $this->reason);
+                $this->message = $this->getReasonByStatus($this->statusId, $this->reason);
             }
         }
     }
@@ -153,7 +194,12 @@ class MultipleUpdateForm extends Model
 
     public function reasonList(): array
     {
-        return Reason::STATUS_REASON_LIST;
+        return self::STATUS_REASON_LIST;
+    }
+
+    public function getReasonByStatus($status_id = 0, $reason_id = 0): string
+    {
+        return $this->reasonList()[$status_id][$reason_id] ?? '-';
     }
 
     public function reasonOther(): string
