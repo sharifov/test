@@ -39,7 +39,6 @@ $this->params['breadcrumbs'][] = $this->title;
 				'attribute' => 'up_month',
 			],
             'up_performance',
-            'up_created_user_id',
 			[
 				'class' => UserColumn::class,
 				'attribute' => 'up_created_user_id',
