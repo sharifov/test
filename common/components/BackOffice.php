@@ -4,6 +4,7 @@ namespace common\components;
 use http\Client\Request;
 use http\Client\Response;
 use Yii;
+use yii\base\Exception;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
 
@@ -107,5 +108,40 @@ class BackOffice
         $expired = time() + 3600;
         $md5 = md5(sprintf('%s:%s:%s', $apiKey, $version, $expired));
         return implode('.', [md5($md5), $expired, $md5]);
+    }
+
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public static function webHook(array $data)
+    {
+
+        $settings = \Yii::$app->params['settings'];
+        if (isset($settings['bo_web_hook_url'], $settings['bo_web_hook_enable']) && $settings['bo_web_hook_url']) {
+            if ($settings['bo_web_hook_enable']) {
+
+                try {
+                    $response = BackOffice::sendRequest2($settings['bo_web_hook_url'], $data);
+
+                    if ($response->isOk) {
+                        $result = $response->data;
+                        if ($result && is_array($result)) {
+                            return $result;
+                        }
+                    } else {
+                        throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+                    }
+
+                } catch (\Throwable $exception) {
+                    //throw new BadRequestHttpException($exception->getMessage());
+                    \Yii::error($exception->getMessage(), 'UserGroupEvents:webHook');
+                }
+            }
+
+        } else {
+            \Yii::warning('Not isset or empty site settings: bo_web_hook_url, bo_web_hook_enable', 'UserGroupEvents:webHook');
+        }
     }
 }
