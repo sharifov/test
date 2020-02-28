@@ -58,10 +58,6 @@ use yii\helpers\Html;
                         </span>
                     </div>
 
-                    <div class="page-header__general-item">
-                        <strong title="Hybrid UID">HUID:</strong>
-                        <span><?= Html::encode($lead->hybrid_uid)?></span>
-                    </div>
 <!--                    <div class="page-header__general-item">-->
 <!--                        --><?php //= $this->render('_rating', [
 //                            'lead' => $lead
