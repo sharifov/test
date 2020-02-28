@@ -3,8 +3,13 @@
 namespace common\models;
 
 use common\models\query\UserGroupQuery;
+use sales\dispatchers\NativeEventDispatcher;
+use sales\model\user\entity\userGroup\events\UserGroupEvents;
 use Yii;
+use yii\base\Event;
+use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -18,31 +23,32 @@ use yii\helpers\ArrayHelper;
  * @property int $ug_disable
  * @property string $ug_updated_dt
  * @property int $ug_processing_fee
- * @property boolean $ug_on_leaderboard
+ * @property bool $ug_on_leaderboard
  * @property int $ug_user_group_set_id
  *
  * @property UserGroupAssign[] $userGroupAssigns
  * @property Employee[] $ugsUsers
  * @property UserGroupSet $userGroupSet
  */
-class UserGroup extends \yii\db\ActiveRecord
+class UserGroup extends ActiveRecord
 {
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'user_group';
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
         return [
             [['ug_key', 'ug_name'], 'required'],
-            [['ug_disable', 'ug_processing_fee'], 'integer'],
+            [['ug_processing_fee', 'ug_disable'], 'integer'],
+            [['ug_disable'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['ug_updated_dt'], 'safe'],
             [['ug_key', 'ug_name'], 'string', 'max' => 100],
             [['ug_description'], 'string', 'max' => 255],
@@ -53,9 +59,9 @@ class UserGroup extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'ug_id' => 'ID',
@@ -70,6 +76,9 @@ class UserGroup extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return array
+     */
     public function behaviors(): array
     {
         return [
@@ -78,43 +87,122 @@ class UserGroup extends \yii\db\ActiveRecord
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['ug_updated_dt'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['ug_updated_dt'],
+//                    ActiveRecord::EVENT_AFTER_UPDATE => [[$object, 'sendWebHook']],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
     }
 
+//    /**
+//     * @return array
+//     */
+//    public function events(): array
+//    {
+//        return [
+//            ActiveRecord::EVENT_AFTER_INSERT => [[$this, 'sendWebHook']],
+//            ActiveRecord::EVENT_AFTER_UPDATE => [[$this, 'sendWebHook']],
+//        ];
+//    }
+
+//    /**
+//     * @param Event $event
+//     */
+//    public function sendWebHook(Event $event): void
+//    {
+//        Yii::warning('Changed 4Id: ' . $this->ug_id, 'User-Group: event');
+//
+//        if ($this->isAttributeChanged($this->ug_disable) || $this->isAttributeChanged($this->ug_name) || $this->isAttributeChanged($this->ug_key)) {
+//            Yii::warning('Changed 5Id: ' . $this->ug_id, 'User-Group: event');
+//        }
+//    }
+
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getUserGroupSet()
+    public function getUserGroupSet(): ActiveQuery
     {
         return $this->hasOne(UserGroupSet::class, ['ugs_id' => 'ug_user_group_set_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getUserGroupAssigns()
+    public function getUserGroupAssigns(): ActiveQuery
     {
         return $this->hasMany(UserGroupAssign::class, ['ugs_group_id' => 'ug_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
+     * @throws InvalidConfigException
      */
-    public function getUgsUsers()
+    public function getUgsUsers(): ActiveQuery
     {
         return $this->hasMany(Employee::class, ['id' => 'ugs_user_id'])->viaTable('user_group_assign', ['ugs_group_id' => 'ug_id']);
     }
 
     /**
-     * {@inheritdoc}
      * @return UserGroupQuery the active query used by this AR class.
      */
-    public static function find()
+    public static function find(): UserGroupQuery
     {
         return new UserGroupQuery(static::class);
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            NativeEventDispatcher::recordEvent(UserGroupEvents::class, UserGroupEvents::INSERT, [UserGroupEvents::class, 'webHookInsert'], $this->exportData());
+            NativeEventDispatcher::trigger(UserGroupEvents::class, UserGroupEvents::INSERT);
+        } else {
+
+            if (isset($changedAttributes['ug_name']) || isset($changedAttributes['ug_key']) || isset($changedAttributes['ug_disable'])) {
+                NativeEventDispatcher::recordEvent(UserGroupEvents::class, UserGroupEvents::UPDATE,
+                    [UserGroupEvents::class, 'webHookUpdate'], $this->exportData());
+                NativeEventDispatcher::trigger(UserGroupEvents::class, UserGroupEvents::UPDATE);
+            }
+        }
+
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        NativeEventDispatcher::recordEvent(UserGroupEvents::class, UserGroupEvents::DELETE, [UserGroupEvents::class, 'webHookDelete'], $this->exportData());
+        return true;
+    }
+
+
+    /**
+     *
+     */
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        NativeEventDispatcher::trigger(UserGroupEvents::class, UserGroupEvents::DELETE);
+    }
+
+    /**
+     * @return array
+     */
+    public function exportData(): array
+    {
+        return [
+            'ug_id' => $this->ug_id,
+            'ug_key' => $this->ug_key,
+            'ug_name' => $this->ug_name,
+            'ug_disable' => $this->ug_disable,
+            'ug_updated_dt' => $this->ug_updated_dt
+        ];
     }
 
     /**

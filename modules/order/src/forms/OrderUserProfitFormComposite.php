@@ -10,20 +10,21 @@ class OrderUserProfitFormComposite extends CompositeForm
 {
 	/**
 	 * OrderUserProfitFormComposite constructor.
+	 * @param array $orderTipsUserProfits
 	 * @param int $countOrderUserProfits
 	 * @param array $config
 	 */
-	public function __construct(array $orderUserProfits, int $countOrderUserProfits, $config = [])
+	public function __construct(array $orderTipsUserProfits, int $countOrderUserProfits, $config = [])
 	{
 		if ($countOrderUserProfits) {
 			$cnt = $countOrderUserProfits;
 		} else {
-			$cnt = count($orderUserProfits) ?: 1;
+			$cnt = count($orderTipsUserProfits) ?: 1;
 		}
 		$orderUserProfitsResult = [];
 		for($i = 0; $i < $cnt; $i++) {
-			if (isset($orderUserProfits[$i])) {
-				$orderUserProfitsResult[] = $orderUserProfits[$i];
+			if (isset($orderTipsUserProfits[$i])) {
+				$orderUserProfitsResult[] = $orderTipsUserProfits[$i];
 			} else {
 				$orderUserProfitsResult[] = new OrderUserProfit();
 			}

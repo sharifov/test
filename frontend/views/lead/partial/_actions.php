@@ -222,7 +222,7 @@ $user = Yii::$app->user->identity;
 
 
 
-        <?php if($user->isAdmin() || $user->isSupervision()): ?>
+        <?php if($user->isAdmin() || $user->isSupervision() || $user->isQaSuper()): ?>
 
 
 

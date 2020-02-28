@@ -263,7 +263,7 @@ $js = <<<JS
                         hide: true
                     });
               } else {
-                  $.pjax.reload({
+                  pjaxReload({
                       container: '#pjax-hotel-rooms-' + hotelId
                   });
                   new PNotify({

@@ -252,7 +252,7 @@ class LeadSearch extends Lead
             'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
             'l_init_price'  => $this->l_init_price,
             'request_ip'    => $this->request_ip,
-			'l_is_test'		=> $this->l_is_test
+			'l_is_test'		=> $this->l_is_test,
         ]);
 
         if($this->statuses) {

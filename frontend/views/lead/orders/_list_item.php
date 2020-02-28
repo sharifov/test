@@ -3,8 +3,8 @@
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
 
-use modules\invoice\src\entities\invoice\InvoiceStatus;
-use modules\order\src\entities\order\Order;
+	use common\models\Currency;
+	use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -29,11 +29,23 @@ use yii\bootstrap4\Html;
             <!--            </li>-->
             <li>
                 <?= Html::a('<i class="fas fa-dollar-sign text-success"></i> Split Profit', null, [
-                    'class' => 'text-success btn-split-profit',
+                    'class' => 'text-success btn-split',
                     'data-url' => \yii\helpers\Url::to(['/order/order-user-profit/ajax-manage-order-user-profit']),
                     'data-order-id' => $order->or_id,
-                ]) ?>
+					'data-title' => 'Order User Profit',
+				]) ?>
             </li>
+
+			<?php if($order->orderTips): ?>
+                <li>
+                    <?= Html::a('<i class="fas fa-dollar-sign text-success"></i> Split Tips', null, [
+                        'class' => 'text-success btn-split',
+                        'data-url' => \yii\helpers\Url::to(['/order/order-tips-user-profit/ajax-manage-order-tips-user-profit']),
+                        'data-order-id' => $order->or_id,
+                        'data-title' => 'Order User Tips',
+                    ]) ?>
+                </li>
+            <?php endif; ?>
 
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle text-warning" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars"></i> Actions</a>
@@ -134,7 +146,7 @@ use yii\bootstrap4\Html;
                     $ordTotalFee = round($ordTotalFee, 2);
 
 
-                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice + $ordTotalFee, 2);
+                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice, 2);
                     $calcClientTotalPrice = round($calcTotalPrice * $order->or_client_currency_rate, 2);
 
                 ?>
@@ -150,7 +162,7 @@ use yii\bootstrap4\Html;
                     <th class="text-right" colspan="5">Calc Total: </th>
                     <td class="text-center" colspan="2">(price + opt)</td>
                     <th class="text-right"><?=number_format($calcTotalPrice, 2)?></th>
-                    <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <th class="text-right"><?=number_format($ordClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
                 <tr>
@@ -255,6 +267,28 @@ use yii\bootstrap4\Html;
                 <?php endif; ?>
                 <?php endif; ?>
             </table>
+
+        <?php if($order->orderTips): ?>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Client Amount</th>
+                        <th>Amount</th>
+                        <th>User Profit</th>
+                        <th>User Profit Percent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?= $order->orderTips->ot_client_amount ?> (<?= $order->orClientCurrency ? $order->orClientCurrency->cur_code : Currency::getDefaultCurrencyCode() ?>)</td>
+                        <td><?= $order->orderTips->ot_amount ?> (<?= Currency::getDefaultCurrencyCode() ?>)</td>
+                        <td><?= $order->orderTips->ot_user_profit ?> (<?= Currency::getDefaultCurrencyCode() ?>)</td>
+                        <td><?= $order->orderTips->ot_user_profit_percent ?>%</td>
+                    </tr>
+                </tbody>
+            </table>
+        <?php endif; ?>
 
 
             <?php if ($invTotalPrice !== $ordTotalPrice):

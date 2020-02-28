@@ -60,14 +60,15 @@ class UserPayrollService
 
 				try {
 					$payrollId = $this->userPayrollRepository->save($newPayroll);
-				} catch (\RuntimeException $e) {
-					continue;
-				}
-				$this->userProfitRepository->linkPayroll($newPayroll);
 
-				$payment = $this->userPaymentRepository->findById($profit->payment_id);
-				$payment->upt_payroll_id = $payrollId;
-				$this->userPaymentRepository->save($payment);
+					$this->userProfitRepository->linkPayroll($newPayroll);
+
+					$payment = $this->userPaymentRepository->findById($profit->payment_id);
+					$payment->upt_payroll_id = $payrollId;
+					$this->userPaymentRepository->save($payment);
+				} catch (\RuntimeException $e) {
+					\Yii::warning($e->getMessage(), 'UserPayrollService::calcUserPayrollByYearMonth');
+				}
 			}
 		});
 	}

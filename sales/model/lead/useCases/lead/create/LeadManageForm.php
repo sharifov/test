@@ -48,10 +48,10 @@ class LeadManageForm extends CompositeForm
 
 	/**
 	 * LeadCreateForm constructor.
-	 * @param int|null $userId
+	 * @param int|null $tipsUserId
 	 * @param array $config
 	 */
-	public function __construct(?int $userId = null, $config = [])
+	public function __construct(?int $tipsUserId = null, $config = [])
 	{
 		$this->status = Lead::STATUS_PROCESSING;
 
@@ -63,7 +63,7 @@ class LeadManageForm extends CompositeForm
 
 		$this->preferences = new PreferencesCreateForm();
 
-		$this->userId = $userId;
+		$this->userId = $tipsUserId;
 
 		parent::__construct($config);
 	}
