@@ -43,21 +43,6 @@ use yii\helpers\Html;
                         <strong>Market:</strong>
                         <span><?= Html::encode(($lead->project ? $lead->project->name : '') . ($lead->source ? ' - ' . $lead->source->name : ''))?></span>
                     </div>
-                    <?php
-
-                        $user = Yii::$app->user->identity;
-                        $is_admin = $user->isAdmin();
-
-                        /*
-                        \yii\helpers\VarDumper::dump(
-                        [
-                            'is_admin' => $is_admin,
-                            'can' => Yii::$app->user->can('lead/view_HybridUid_View'),
-                        ],
-                        10, true); exit();  /* FOR DEBUG:: must by remove */
-                        
-
-                    ?>
                     <?php if (Yii::$app->user->can('lead/view_HybridUid_View', ['lead' => $lead])) : ?>
                         <div class="page-header__general-item">
                             <strong title="Hybrid UID">Booking ID:</strong>

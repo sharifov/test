@@ -29,62 +29,50 @@ class m200227_130234_add_permissions_hybrid_uid_in_lead_view extends Migration
         Employee::ROLE_SUPPORT_SENIOR,
     ];
 
-    /** @var ManagerInterface $authManager */
-    private $authManager;
-
-    public function init()
-    {
-        parent::init();
-        $this->authManager = Yii::$app->authManager;
-    }
-
     public function safeUp(): void
     {
-        $leadViewHybridUidPermission = $this->authManager->createPermission('lead/view_HybridUid_View');
+        $authManager = Yii::$app->authManager;
+
+        $leadViewHybridUidPermission = $authManager->createPermission('lead/view_HybridUid_View');
         $leadViewHybridUidPermission->description = 'Lead View HybridUid';
-        $this->authManager->add($leadViewHybridUidPermission);
+        $authManager->add($leadViewHybridUidPermission);
 
-        if ($admin = $this->authManager->getRole(Employee::ROLE_ADMIN)) {
-            $this->authManager->addChild($admin, $leadViewHybridUidPermission);
-        }
-        /*
         $leadViewHybridUidByStatusRule = new LeadViewHybridUidByStatusRule();
-        $this->authManager->add($leadViewHybridUidByStatusRule);
+        $authManager->add($leadViewHybridUidByStatusRule);
 
-        $leadViewHybridUidByStatusPermission = $this->authManager->createPermission('lead/view_HybridUid_ViewByStatus');
+        $leadViewHybridUidByStatusPermission = $authManager->createPermission('lead/view_HybridUid_ViewByStatus');
         $leadViewHybridUidByStatusPermission->description = 'Lead View HybridUid View By Lead Status';
         $leadViewHybridUidByStatusPermission->ruleName = $leadViewHybridUidByStatusRule->name;
 
-        $this->authManager->add($leadViewHybridUidByStatusPermission);
-        $this->authManager->addChild($leadViewHybridUidByStatusPermission, $leadViewHybridUidPermission);
+        $authManager->add($leadViewHybridUidByStatusPermission);
+        $authManager->addChild($leadViewHybridUidByStatusPermission, $leadViewHybridUidPermission);
 
         foreach ($this->rolesAdmin as $admin) {
-            if ($role = $this->authManager->getRole($admin)) {
-                $this->authManager->addChild($role, $leadViewHybridUidPermission);
+            if ($role = $authManager->getRole($admin)) {
+                $authManager->addChild($role, $leadViewHybridUidPermission);
             }
         }
         foreach ($this->rolesSimple as $simple) {
-            if ($role = $this->authManager->getRole($simple)) {
-                $this->authManager->addChild($role, $leadViewHybridUidByStatusPermission);
+            if ($role = $authManager->getRole($simple)) {
+                $authManager->addChild($role, $leadViewHybridUidByStatusPermission);
             }
         }
-        */
     }
 
     public function safeDown(): void
     {
-        /*
-        if ($leadViewHybridUidByStatusRule = $this->authManager->getRule('lead/view_HybridUid_ViewByStatusRule')) {
-            $this->authManager->remove($leadViewHybridUidByStatusRule);
+        $authManager = Yii::$app->authManager;
+
+        if ($leadViewHybridUidByStatusRule = $authManager->getRule('lead/view_HybridUid_ViewByStatusRule')) {
+            $authManager->remove($leadViewHybridUidByStatusRule);
         }
-        */
-        if ($leadViewHybridUidPermission = $this->authManager->getPermission('lead/view_HybridUid_View')) {
-            $this->authManager->remove($leadViewHybridUidPermission);
+
+        if ($leadViewHybridUidPermission = $authManager->getPermission('lead/view_HybridUid_View')) {
+            $authManager->remove($leadViewHybridUidPermission);
         }
-        /*
-        if ($leadViewHybridUidByStatusPermission = $this->authManager->getPermission('lead/view_HybridUid_ViewByStatus')) {
-            $this->authManager->remove($leadViewHybridUidByStatusPermission);
+
+        if ($leadViewHybridUidByStatusPermission = $authManager->getPermission('lead/view_HybridUid_ViewByStatus')) {
+            $authManager->remove($leadViewHybridUidByStatusPermission);
         }
-        */
     }
 }
