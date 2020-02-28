@@ -119,11 +119,14 @@ class BackOffice
     {
 
         $settings = \Yii::$app->params['settings'];
-        if (isset($settings['bo_web_hook_url'], $settings['bo_web_hook_enable']) && $settings['bo_web_hook_url']) {
+
+        $uri = Yii::$app->params['backOffice']['serverUrl'] ? Yii::$app->params['backOffice']['serverUrl'] . '/' . (Yii::$app->params['backOffice']['webHookEndpoint'] ?? '') : '';
+
+        if (isset($settings['bo_web_hook_enable']) && $uri) {
             if ($settings['bo_web_hook_enable']) {
 
                 try {
-                    $response = BackOffice::sendRequest2($settings['bo_web_hook_url'], $data);
+                    $response = self::sendRequest2($uri, $data);
 
                     if ($response->isOk) {
                         $result = $response->data;
@@ -131,17 +134,17 @@ class BackOffice
                             return $result;
                         }
                     } else {
-                        throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+                        throw new Exception('Url: ' . $uri .' , BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
                     }
 
                 } catch (\Throwable $exception) {
                     //throw new BadRequestHttpException($exception->getMessage());
-                    \Yii::error($exception->getMessage(), 'UserGroupEvents:webHook');
+                    \Yii::error($exception->getMessage(), 'BackOffice:webHook');
                 }
             }
 
         } else {
-            \Yii::warning('Not isset or empty site settings: bo_web_hook_url, bo_web_hook_enable', 'UserGroupEvents:webHook');
+            \Yii::warning('Not isset settings bo_web_hook_enable or empty params webHookEndpoint', 'UserGroupEvents:webHook');
         }
     }
 }
