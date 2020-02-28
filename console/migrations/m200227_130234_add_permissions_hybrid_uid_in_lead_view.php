@@ -57,22 +57,28 @@ class m200227_130234_add_permissions_hybrid_uid_in_lead_view extends Migration
                 $authManager->addChild($role, $leadViewHybridUidByStatusPermission);
             }
         }
+
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
     public function safeDown(): void
     {
         $authManager = Yii::$app->authManager;
 
+        if ($leadViewHybridUidByStatusPermission = $authManager->getPermission('lead/view_HybridUid_ViewByStatus')) {
+            $authManager->remove($leadViewHybridUidByStatusPermission);
+        }
         if ($leadViewHybridUidByStatusRule = $authManager->getRule('lead/view_HybridUid_ViewByStatusRule')) {
             $authManager->remove($leadViewHybridUidByStatusRule);
         }
-
         if ($leadViewHybridUidPermission = $authManager->getPermission('lead/view_HybridUid_View')) {
             $authManager->remove($leadViewHybridUidPermission);
         }
 
-        if ($leadViewHybridUidByStatusPermission = $authManager->getPermission('lead/view_HybridUid_ViewByStatus')) {
-            $authManager->remove($leadViewHybridUidByStatusPermission);
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
         }
     }
 }
