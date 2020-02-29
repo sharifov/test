@@ -166,7 +166,12 @@ class VisitorLog extends \yii\db\ActiveRecord
 
     public static function getVisitorLogsByLead(int $leadId): array
     {
-        return self::find()->andWhere(['vl_lead_id' => $leadId])->asArray()->all();
+        return self::find()->limitFields()->byLead($leadId)->asArray()->all();
+    }
+
+    public static function getVisitorLog(int $id): array
+    {
+        return self::find()->limitFields()->byId($id)->asArray()->one();
     }
 
     public static function find(): VisitorLogQuery
