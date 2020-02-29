@@ -196,6 +196,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'LF Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+                ['label' => 'Lead Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
             ]
         ];
 
