@@ -119,11 +119,15 @@ class CasesManageService
      * @param int|Cases $case
      * @param int|null $creatorId
      * @param string|null $description
+     * @param string|null $deadline
      */
-    public function followUp($case, ?int $creatorId, ?string $description = ''): void
+    public function followUp($case, ?int $creatorId, ?string $description, ?string $deadline): void
     {
         $case = $this->finder->caseFind($case);
         $case->followUp($creatorId, $description);
+        if ($deadline !== null) {
+            $case->setDeadline($deadline);
+        }
         $this->casesRepository->save($case);
     }
 

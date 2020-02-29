@@ -8,7 +8,7 @@ use yii\grid\DataColumn;
 /**
  * Class DurationColumn
  *
- * @property string $startAttribute
+ * @property string|null $startAttribute
  *
  * Ex.
         [

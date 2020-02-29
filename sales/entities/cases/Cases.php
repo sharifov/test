@@ -35,7 +35,7 @@ use Yii;
  * @property string $cs_description
  * @property string $cs_category
  * @property int $cs_status
- * @property int $cs_user_id
+ * @property int|null $cs_user_id
  * @property int $cs_lead_id
  * @property int $cs_call_id
  * @property int $cs_dep_id
@@ -46,6 +46,7 @@ use Yii;
  * @property string $cs_gid
  * @property string $cs_last_action_dt
  * @property int|null $cs_source_type_id
+ * @property string|null $cs_deadline_dt
  *
  * @property CasesCategory $category
  * @property Department $department
@@ -408,6 +409,11 @@ class Cases extends ActiveRecord implements Objectable
         $this->cs_description = $description;
     }
 
+    public function setDeadline(string $deadline)
+    {
+        $this->cs_deadline_dt = $deadline;
+    }
+
     /**
      * @return ActiveQuery
      */
@@ -518,6 +524,7 @@ class Cases extends ActiveRecord implements Objectable
             'cs_updated_dt' => 'Updated',
             'cs_last_action_dt' => 'Last Action',
             'cs_source_type_id' => 'Source type',
+            'cs_deadline_dt' => 'Deadline',
         ];
     }
 
