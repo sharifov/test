@@ -86,108 +86,131 @@ class QuoteController extends ApiBaseController
      *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *
-     *
+     * HTTP/1.1 200 OK
      * {
-     * "status": "Success",
-     * "itinerary": {
-     * "tripType": "OW",
-     * "mainCarrier": "WOW air",
-     * "trips": [
-     * {
-     * "segments": [
-     * {
-     * "carrier": "WW",
-     * "airlineName": "WOW air",
-     * "departureAirport": "BOS",
-     * "arrivalAirport": "KEF",
-     * "departureDateTime": {
-     * "date": "2018-09-19 19:00:00.000000",
-     * "timezone_type": 3,
-     * "timezone": "UTC"
-     * },
-     * "arrivalDateTime": {
-     * "date": "2018-09-20 04:30:00.000000",
-     * "timezone_type": 3,
-     * "timezone": "UTC"
-     * },
-     * "flightNumber": "126",
-     * "bookingClass": "O",
-     * "departureCity": "Boston",
-     * "arrivalCity": "Reykjavik",
-     * "flightDuration": 330,
-     * "layoverDuration": 0,
-     * "cabin": "E",
-     * "departureCountry": "United States",
-     * "arrivalCountry": "Iceland"
-     * },
-     * {
-     * "carrier": "WW",
-     * "airlineName": "WOW air",
-     * "departureAirport": "KEF",
-     * "arrivalAirport": "LGW",
-     * "departureDateTime": {
-     * "date": "2018-09-20 15:30:00.000000",
-     * "timezone_type": 3,
-     * "timezone": "UTC"
-     * },
-     * "arrivalDateTime": {
-     * "date": "2018-09-20 19:50:00.000000",
-     * "timezone_type": 3,
-     * "timezone": "UTC"
-     * },
-     * "flightNumber": "814",
-     * "bookingClass": "N",
-     * "departureCity": "Reykjavik",
-     * "arrivalCity": "London",
-     * "flightDuration": 200,
-     * "layoverDuration": 660,
-     * "cabin": "E",
-     * "departureCountry": "Iceland",
-     * "arrivalCountry": "United Kingdom"
-     * }
-     * ],
-     * "totalDuration": 1190,
-     * "routing": "BOS-KEF-LGW",
-     * "title": "Boston - London"
-     * }
-     * ],
-     * "price": {
-     * "detail": {
-     * "ADT": {
-     * "selling": 350.2,
-     * "fare": 237,
-     * "taxes": 113.2,
-     * "tickets": 1
-     * }
-     * },
-     * "tickets": 1,
-     * "selling": 350.2,
-     * "amountPerPax": 350.2,
-     * "fare": 237,
-     * "mark_up": 0,
-     * "taxes": 113.2,
-     * "currency": "USD",
-     * "isCC": false
-     * }
-     * },
-     * "errors": [],
-     * "uid": "5b7424e858e91",
-     * "lead_id": 123456,
-     * "lead_uid": "00jhk0017",
-     * "client_id": 1034,
-     * "lead_delayed_charge": 0,
-     * "lead_status": "sold",
-     * "booked_quote_uid": "5b8ddfc56a15c",
-     * "source_code":"38T556",
-     * "agentName": "admin",
-     * "agentEmail": "assistant@wowfare.com",
-     * "agentDirectLine": "+1 888 946 3882",
-     * "action": "v1/quote/get-info",
-     * "response_id": 173,
-     * "request_dt": "2018-08-16 06:42:03",
-     * "response_dt": "2018-08-16 06:42:03"
+     *   "status": "Success",
+     *   "itinerary": {
+     *       "tripType": "OW",
+     *       "mainCarrier": "WOW air",
+     *       "trips": [
+     *           {
+     *               "segments": [
+     *                   {
+     *                       "carrier": "WW",
+     *                       "airlineName": "WOW air",
+     *                       "departureAirport": "BOS",
+     *                       "arrivalAirport": "KEF",
+     *                       "departureDateTime": {
+     *                           "date": "2018-09-19 19:00:00.000000",
+     *                           "timezone_type": 3,
+     *                           "timezone": "UTC"
+     *                       },
+     *                       "arrivalDateTime": {
+     *                           "date": "2018-09-20 04:30:00.000000",
+     *                           "timezone_type": 3,
+     *                           "timezone": "UTC"
+     *                       },
+     *                       "flightNumber": "126",
+     *                       "bookingClass": "O",
+     *                       "departureCity": "Boston",
+     *                       "arrivalCity": "Reykjavik",
+     *                       "flightDuration": 330,
+     *                       "layoverDuration": 0,
+     *                       "cabin": "E",
+     *                       "departureCountry": "United States",
+     *                       "arrivalCountry": "Iceland"
+     *                   },
+     *                   {
+     *                       "carrier": "WW",
+     *                       "airlineName": "WOW air",
+     *                       "departureAirport": "KEF",
+     *                       "arrivalAirport": "LGW",
+     *                       "departureDateTime": {
+     *                           "date": "2018-09-20 15:30:00.000000",
+     *                           "timezone_type": 3,
+     *                           "timezone": "UTC"
+     *                       },
+     *                       "arrivalDateTime": {
+     *                           "date": "2018-09-20 19:50:00.000000",
+     *                           "timezone_type": 3,
+     *                           "timezone": "UTC"
+     *                       },
+     *                       "flightNumber": "814",
+     *                       "bookingClass": "N",
+     *                       "departureCity": "Reykjavik",
+     *                       "arrivalCity": "London",
+     *                       "flightDuration": 200,
+     *                       "layoverDuration": 660,
+     *                       "cabin": "E",
+     *                       "departureCountry": "Iceland",
+     *                       "arrivalCountry": "United Kingdom"
+     *                   }
+     *               ],
+     *               "totalDuration": 1190,
+     *               "routing": "BOS-KEF-LGW",
+     *               "title": "Boston - London"
+     *           }
+     *       ],
+     *       "price": {
+     *           "detail": {
+     *               "ADT": {
+     *                   "selling": 350.2,
+     *                   "fare": 237,
+     *                   "taxes": 113.2,
+     *                   "tickets": 1
+     *               }
+     *           },
+     *           "tickets": 1,
+     *           "selling": 350.2,
+     *           "amountPerPax": 350.2,
+     *           "fare": 237,
+     *           "mark_up": 0,
+     *           "taxes": 113.2,
+     *           "currency": "USD",
+     *           "isCC": false
+     *       }
+     *   },
+     *   "errors": [],
+     *   "uid": "5b7424e858e91",
+     *   "lead_id": 123456,
+     *   "lead_uid": "00jhk0017",
+     *   "client_id": 1034,
+     *   "lead_delayed_charge": 0,
+     *   "lead_status": "sold",
+     *   "booked_quote_uid": "5b8ddfc56a15c",
+     *   "source_code": "38T556",
+     *   "agentName": "admin",
+     *   "agentEmail": "assistant@wowfare.com",
+     *   "agentDirectLine": "+1 888 946 3882",
+     *   "visitor_log": [
+     *       {
+     *           "vl_id": "59",
+     *           "vl_project_id": "6",
+     *           "vl_source_cid": "string_abc",
+     *           "vl_ga_client_id": "35009a79-1a05-49d7-b876-2b884d0f825b",
+     *           "vl_ga_user_id": "35009a79-1a05-49d7-b876-2b884d0f825b",
+     *           "vl_customer_id": "3",
+     *           "vl_client_id": "332109",
+     *           "vl_lead_id": "370500",
+     *           "vl_gclid": "gclid=TeSter-123#bookmark",
+     *           "vl_dclid": "CJKu8LrQxd4CFQ1qwQodmJIElw",
+     *           "vl_utm_source": "newsletter4",
+     *           "vl_utm_medium": "string_abc",
+     *           "vl_utm_campaign": "string_abc",
+     *           "vl_utm_term": "string_abc",
+     *           "vl_utm_content": "string_abc",
+     *           "vl_referral_url": "string_abc",
+     *           "vl_location_url": "string_abc",
+     *           "vl_user_agent": "string_abc",
+     *           "vl_ip_address": "127.0.0.1",
+     *           "vl_visit_dt": "2020-02-14 12:00:00",
+     *           "vl_created_dt": "2020-02-28 17:17:33"
+     *       }
+     *   ],
+     *   "action": "v1/quote/get-info",
+     *   "response_id": 173,
+     *   "request_dt": "2018-08-16 06:42:03",
+     *   "response_dt": "2018-08-16 06:42:03"
      * }
      *
      *
