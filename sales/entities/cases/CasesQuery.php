@@ -36,7 +36,7 @@ class CasesQuery extends ActiveQuery
     {
         return $this->findLastCaseByClient($clientId, $projectId)
             ->andWhere(['NOT IN', 'cs_status', [
-                CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH
+                CasesStatus::STATUS_SOLVED
             ]]);
     }
 

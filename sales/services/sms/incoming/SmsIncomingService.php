@@ -3,6 +3,7 @@
 namespace sales\services\sms\incoming;
 
 use sales\entities\cases\Cases;
+use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesCreateService;
 use sales\services\internalContact\InternalContactService;
 use Yii;
@@ -24,6 +25,7 @@ use sales\services\client\ClientManageService;
  * @property TransactionManager $transactionManager
  * @property CasesCreateService $casesCreate
  * @property InternalContactService $internalContactService
+ * @property CasesCommunicationService $casesCommunicationService
  */
 class SmsIncomingService
 {
@@ -33,6 +35,7 @@ class SmsIncomingService
     private $transactionManager;
     private $casesCreate;
     private $internalContactService;
+    private $casesCommunicationService;
 
     public function __construct(
         ClientManageService $clients,
@@ -40,7 +43,8 @@ class SmsIncomingService
         SmsRepository $smsRepository,
         TransactionManager $transactionManager,
         CasesCreateService $casesCreate,
-        InternalContactService $internalContactService
+        InternalContactService $internalContactService,
+        CasesCommunicationService $casesCommunicationService
     )
     {
         $this->clients = $clients;
@@ -49,6 +53,7 @@ class SmsIncomingService
         $this->transactionManager = $transactionManager;
         $this->casesCreate = $casesCreate;
         $this->internalContactService = $internalContactService;
+        $this->casesCommunicationService = $casesCommunicationService;
     }
 
     /**
@@ -152,10 +157,12 @@ class SmsIncomingService
             } else {
                 if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $form->si_project_id)->one()) {
                     $caseId = $case->cs_id;
+                    $this->casesCommunicationService->processIncoming($case);
                 }
             }
         } else {
             $caseId = $case->cs_id;
+            $this->casesCommunicationService->processIncoming($case);
         }
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
@@ -184,10 +191,12 @@ class SmsIncomingService
             } else {
                 if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
                     $caseId = $case->cs_id;
+                    $this->casesCommunicationService->processIncoming($case);
                 }
             }
         } else {
             $caseId = $case->cs_id;
+            $this->casesCommunicationService->processIncoming($case);
         }
         $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
@@ -211,8 +220,10 @@ class SmsIncomingService
             $leadId = $lead->id;
         } elseif ($case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $form->si_project_id)->one()) {
             $caseId = $case->cs_id;
+            $this->casesCommunicationService->processIncoming($case);
         } elseif ($case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
             $caseId = $case->cs_id;
+            $this->casesCommunicationService->processIncoming($case);
         } else {
             return $this->createSmsBySupportDefault($form, $clientId, $ownerId);
         }
@@ -240,6 +251,7 @@ class SmsIncomingService
         } else {
             if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $form->si_project_id)->one()) {
                 $caseId = $case->cs_id;
+                $this->casesCommunicationService->processIncoming($case);
             }
         }
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
