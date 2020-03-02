@@ -341,7 +341,7 @@ class Cases extends ActiveRecord implements Objectable
         $this->cs_user_id = $userId;
     }
 
-    private function freedOwner(): void
+    public function freedOwner(): void
     {
         if ($this->isFreedOwner()) {
             throw new \DomainException('Case is already freed owner');
@@ -353,7 +353,7 @@ class Cases extends ActiveRecord implements Objectable
     /**
      * @return bool
      */
-    private function isFreedOwner(): bool
+    public function isFreedOwner(): bool
     {
         return $this->cs_user_id === null;
     }
