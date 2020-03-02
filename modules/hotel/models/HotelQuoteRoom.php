@@ -35,6 +35,7 @@ use yii\db\ActiveRecord;
  * @property string|null $hqr_rate_comments_id
  * @property string|null $hqr_rate_comments
  * @property int $hqr_type
+ * @property int $hqr_service_fee_percent
  *
  * @property Currency $hqrCurrency
  * @property HotelQuote $hqrHotelQuote
@@ -79,7 +80,7 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
         return [
             [['hqr_hotel_quote_id', 'hqr_type'], 'required'],
             [['hqr_hotel_quote_id', 'hqr_rooms', 'hqr_adults', 'hqr_children', 'hqr_type'], 'integer'],
-            [['hqr_amount', 'hqr_cancel_amount'], 'number'],
+            [['hqr_amount', 'hqr_cancel_amount', 'hqr_service_fee_percent'], 'number'],
             [['hqr_cancel_from_dt'], 'safe'],
             [['hqr_room_name'], 'string', 'max' => 150],
             [['hqr_key'], 'string', 'max' => 255],
@@ -117,6 +118,7 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
             'hqr_rooms' => 'Rooms',
             'hqr_adults' => 'Adults',
             'hqr_children' => 'Children',
+            'hqr_service_fee_percent' => 'Service Fee Percent',
         ];
     }
 
@@ -124,7 +126,7 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
     public function afterFind()
     {
         parent::afterFind();
-        $this->hqr_amount                     = $this->hqr_amount === null ? null : (float) $this->hqr_amount;
+        $this->hqr_amount = $this->hqr_amount === null ? null : (float) $this->hqr_amount;
     }
 
     /**

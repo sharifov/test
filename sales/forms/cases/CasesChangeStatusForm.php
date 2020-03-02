@@ -7,6 +7,7 @@ use sales\access\ListsAccess;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusTransferList;
+use sales\helpers\user\UserDateTimeHelper;
 use yii\base\Model;
 use yii\helpers\Json;
 
@@ -19,6 +20,7 @@ use yii\helpers\Json;
  * @property int $userId
  * @property array $statusList
  * @property string $caseGid
+ * @property string|null $deadline
  * @property Cases $case
  * @property Employee $user
  */
@@ -28,6 +30,7 @@ class CasesChangeStatusForm extends Model
     public $reason;
     public $message;
     public $userId;
+    public $deadline;
 
     public $caseGid;
 
@@ -68,7 +71,23 @@ class CasesChangeStatusForm extends Model
             ['userId', 'required', 'when' =>  function() {
                 return $this->isProcessing();
             }, 'skipOnEmpty' => false],
+
+            ['deadline', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            ['deadline', function () {
+                if (strtotime($this->deadline) < time()) {
+                    $this->addError('deadline', 'Deadline should be later than now.');
+                }
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
+    }
+
+    public function getConvertedDeadline(): ?string
+    {
+        if ($this->deadline === null) {
+            return null;
+        }
+
+        return (UserDateTimeHelper::convertUserTimeToUtc($this->deadline, $this->user->timezone))->format('Y-m-d H:i:s');
     }
 
     public function afterValidate()
@@ -139,6 +158,11 @@ class CasesChangeStatusForm extends Model
     public function statusProcessingId(): int
     {
         return CasesStatus::STATUS_PROCESSING;
+    }
+
+    public function statusFollowUpId(): int
+    {
+        return CasesStatus::STATUS_FOLLOW_UP;
     }
 
     private function getReasonList(): array

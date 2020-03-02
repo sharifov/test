@@ -1,7 +1,8 @@
 <?php
 
 use frontend\widgets\multipleUpdate\cases\MultipleUpdateForm;
-use yii\bootstrap4\ActiveForm;
+use sales\widgets\DateTimePicker;
+use sales\yii\bootstrap4\activeForm\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\web\View;
 
@@ -48,6 +49,10 @@ $form = ActiveForm::begin([
 
     </div>
 
+    <div class="deadline-wrapper d-none">
+        <?= $form->field($updateForm, 'deadline')->widget(DateTimePicker::class) ?>
+    </div>
+
     <div class="user-wrapper d-none">
         <?= $form->field($updateForm, 'userId')->dropDownList($updateForm->userList(), ['prompt' => 'Select employee']) ?>
     </div>
@@ -63,6 +68,7 @@ $statusId = Html::getInputId($updateForm, 'statusId');
 $reasonId = Html::getInputId($updateForm, 'reason');
 $messageId = Html::getInputId($updateForm, 'message');
 $userId = Html::getInputId($updateForm, 'userId');
+$deadlineId = Html::getInputId($updateForm, 'deadline');
 $reasons = $updateForm->reasonList();
 
 $js = <<<JS
@@ -74,6 +80,7 @@ var user = $('#{$userId}');
 var reasonWrapper = $('.reason-wrapper');
 var messageWrapper = $('.message-wrapper');
 var userWrapper = $('.user-wrapper');
+var deadlineWrapper = $('.deadline-wrapper');
 reason.parent().addClass('required');
 message.parent().addClass('required');
 user.parent().addClass('required');
@@ -87,11 +94,14 @@ $('body').find('#{$statusId}').on('change', function () {
              reason.append('<option value="'+i+'">' + elem +'</select>');
          });
          reasonWrapper.removeClass('d-none');
-         return;
     }
     if (val == '{$updateForm->statusProcessingId()}') {
         userWrapper.removeClass('d-none');
-        return;
+    }
+    if (val == '{$updateForm->statusFollowUpId()}') {
+        deadlineWrapper.removeClass('d-none');
+    } else {
+        deadlineWrapper.addClass('d-none');
     }
 })
 
@@ -111,6 +121,7 @@ function resetMultiUpdateForm() {
      reasonWrapper.addClass('d-none');
      messageWrapper.addClass('d-none');
      userWrapper.addClass('d-none');
+     deadlineWrapper.addClass('d-none');
      user[0].selectedIndex = 0;
 }
 

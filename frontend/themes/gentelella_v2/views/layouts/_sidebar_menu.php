@@ -314,7 +314,13 @@ $isSuperAdmin = $user->isSuperAdmin();
                     ['label' => 'User Payment Category', 'url' => '/user-payment-category-crud/index'],
                     ['label' => 'User Payroll', 'url' => '/user-payroll-crud/index'],
                     ['label' => 'User Profit', 'url' => '/user-profit-crud/index'],
-                ], 'hasChild' => true]
+                ], 'hasChild' => true],
+
+                ['label' => 'KPI', 'url' => 'javascript:', 'items' => [
+					['label' => 'KPI User Performance', 'url' => '/kpi-user-performance-crud/index'],
+					['label' => 'KPI Product Commission', 'url' => '/kpi-product-commission-crud/index'],
+					['label' => 'KPI User Product Commission', 'url' => '/kpi-user-product-commission-crud/index'],
+                ], 'hasChild' => true],
             ]
         ];
 

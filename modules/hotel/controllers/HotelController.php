@@ -128,7 +128,7 @@ class HotelController extends FController
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-            $out = '<script>$("#modal-sm").modal("hide"); $.pjax.reload({container: "#pjax-product-search-' . $hotel->ph_product_id . '"});';
+            $out = '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $hotel->ph_product_id . '"});';
             try {
                 $this->hotelRequestUpdateService->update($form);
                 $out .= 'new PNotify({title: "Hotel update request", type: "success", text: "Success" , hide: true});';

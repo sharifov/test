@@ -45,7 +45,7 @@ $list = new ListsAccess($user->id);
 
                 <div id="redial-call-box-wrapper">
                     <div id="redial-call-box">
-                       <?php /* <div class="text-center badge badge-warning call-status" style="font-size: 35px">
+                        <?php /* <div class="text-center badge badge-warning call-status" style="font-size: 35px">
                             <span id="text-status-call">Ready</span>
                         </div> */ ?>
                     </div>
@@ -84,30 +84,30 @@ $list = new ListsAccess($user->id);
             <?php if ($user->isAdmin()) : ?>
 
                 <?= MultipleUpdateWidget::widget([
-                        'gridId' => 'redialGrid',
-                        'script' => "let pjax = $('#lead-redial-pjax'); if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }",
-                        'actionUrl' => Url::to(['lead-redial/multiple-update']),
-                        'validationUrl' => Url::to(['lead-redial/multiple-update-validate']),
-                        'reportWrapperId' => 'redial-call-box-wrapper'
+                    'gridId' => 'redialGrid',
+                    'script' => "let pjax = $('#lead-redial-pjax'); if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }",
+                    'actionUrl' => Url::to(['lead-redial/multiple-update']),
+                    'validationUrl' => Url::to(['lead-redial/multiple-update-validate']),
+                    'reportWrapperId' => 'redial-call-box-wrapper'
                 ]) ?>
 
                 <?= UpdateAllWidget::widget([
-                        'modalId' => 'modal-df',
-                        'showUrl' => Url::to(['/lead-redial/update-all-show']),
+                    'modalId' => 'modal-df',
+                    'showUrl' => Url::to(['/lead-redial/update-all-show']),
                 ]) ?>
 
             <?php endif; ?>
 
             <?php Pjax::begin(['id' => 'lead-redial-pjax', 'enablePushState' => false, 'enableReplaceState' => true]); ?>
 
-                <?= $this->render('_redial_list', [
-                    'dataProvider' => $dataProvider,
-                    'searchModel' => $searchModel,
-                    'list' => $list,
-                    'userIsFreeForCall' => $userIsFreeForCall,
-                    'user' => $user,
-                    'guard' => $guard
-                ]) ?>
+            <?= $this->render('_redial_list', [
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+                'list' => $list,
+                'userIsFreeForCall' => $userIsFreeForCall,
+                'user' => $user,
+                'guard' => $guard
+            ]) ?>
 
             <?php Pjax::end(); ?>
 

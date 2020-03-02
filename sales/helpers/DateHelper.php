@@ -20,4 +20,13 @@ class DateHelper
 			11 => 'November',
 			12 => 'December'];
 	}
+
+	/**
+	 * @param int $monthNumber
+	 * @return mixed|null
+	 */
+	public static function getMonthName(int $monthNumber)
+	{
+		return self::getMonthList()[$monthNumber] ?? null;
+	}
 }

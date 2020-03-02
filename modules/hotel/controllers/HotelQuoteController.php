@@ -184,6 +184,7 @@ class HotelQuoteController extends FController
 
 
         } catch (\Throwable $throwable) {
+        	Yii::warning(VarDumper::dumpAsString($throwable->getTraceAsString()), 'app');
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 

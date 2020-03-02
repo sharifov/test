@@ -10,6 +10,9 @@
                 $(this).on('input', function () {
                     activeFormRemoveErrorsMessages(form, errorSummaryCssClass, errorCssClass, fieldErrorCssClass);
                 });
+                $(this).on('change', function () {
+                    activeFormRemoveErrorsMessages(form, errorSummaryCssClass, errorCssClass, fieldErrorCssClass);
+                });
             } else if ($(this).is("select")) {
                 $(this).on('change', function () {
                     activeFormRemoveErrorsMessages(form, errorSummaryCssClass, errorCssClass, fieldErrorCssClass);
