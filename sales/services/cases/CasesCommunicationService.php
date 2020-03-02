@@ -19,6 +19,9 @@ use Yii;
  */
 class CasesCommunicationService
 {
+    public const TYPE_PROCESSING_EMAIL = 'email';
+    public const TYPE_PROCESSING_SMS = 'sms';
+    public const TYPE_PROCESSING_CALL = 'call';
 
     private $casesRepository;
     private $clientManageService;
@@ -88,7 +91,7 @@ class CasesCommunicationService
         return $content_data;
     }
 
-    public function processIncoming(Cases $case): void
+    public function processIncoming(Cases $case, string $typeProcessing): void
     {
         if ($case->isTrash() || $case->isFollowUp()) {
             try {
@@ -98,7 +101,7 @@ class CasesCommunicationService
                 $case->pending(null, null);
                 $this->casesRepository->save($case);
             } catch (\Throwable $e) {
-                Yii::error($e, 'CasesCommunicationService:processIncoming');
+                Yii::error($e, 'CasesCommunicationService:processIncoming' . ':type:' . $typeProcessing);
             }
         }
     }
