@@ -2824,8 +2824,6 @@ Reason: {reason}
 
         if ($this->enableActiveRecordEvents) {
 
-            Yii::error('Lead afterSave enable', 'Lead:AfterSave');
-
             if ($insert) {
                 LeadFlow::addStateFlow($this);
 
@@ -2855,10 +2853,12 @@ Reason: {reason}
 
             } else {
 
-
-
+                Yii::error('Lead afterSave enable. point 0', 'Lead:AfterSave');
 
                 if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+
+                    Yii::error('Lead afterSave enable. point 1', 'Lead:AfterSave');
+
                     LeadFlow::addStateFlow($this);
 
                     if($this->called_expert && ($this->status == self::STATUS_TRASH || $this->status == self::STATUS_FOLLOW_UP || $this->status == self::STATUS_SNOOZE || $this->status == self::STATUS_PROCESSING)) {
@@ -2871,6 +2871,9 @@ Reason: {reason}
 
 
                 if ($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
+
+                    Yii::error('Lead afterSave enable. point 2', 'Lead:AfterSave');
+
                     //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
 
                     if (isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP)) {
@@ -2884,6 +2887,8 @@ Reason: {reason}
                 }
 
                 if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+
+                    Yii::error('Lead afterSave enable. point 3', 'Lead:AfterSave');
 
 
                     if ($this->status == self::STATUS_SOLD) {
@@ -2939,6 +2944,8 @@ Reason: {reason}
                 (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)
             )
             {
+                Yii::error('Lead afterSave enable. point 4', 'Lead:AfterSave');
+
                 LeadTask::deleteUnnecessaryTasks($this->id);
 
                 if($this->l_answered) {
@@ -2953,6 +2960,9 @@ Reason: {reason}
             }
 
             if (!$insert) {
+
+                Yii::error('Lead afterSave enable. point 5', 'Lead:AfterSave');
+
                 foreach (['updated', 'created'] as $item) {
                     if (in_array($item, array_keys($changedAttributes))) {
                         unset($changedAttributes[$item]);
