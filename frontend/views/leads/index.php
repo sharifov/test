@@ -396,7 +396,7 @@ $this->registerJs($js);
             'label' => 'PNR',
             'value' => static function (Lead $model) {
             $allPnr = $model->getAdditionalInformationMultiplePnr();
-            if($allPnr[0]){
+            if(!empty($allPnr) && isset($allPnr[0])){
                 return '<code>' . implode('<br>',  $allPnr) . '</code>';
             }
                 return '-';
