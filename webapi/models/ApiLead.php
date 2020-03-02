@@ -8,6 +8,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use common\models\VisitorLog;
 use Yii;
 use yii\base\Model;
 
@@ -45,6 +46,8 @@ use yii\base\Model;
  * @property string $client_last_name
  * @property string $user_agent
  * @property string $user_language
+ * @property array $visitor_log
+ * @property array $visitorLogErrors
  *
  */
 class ApiLead extends Model
@@ -86,6 +89,9 @@ class ApiLead extends Model
     public $client_middle_name;
     public $user_agent;
     public $user_language;
+    public $visitor_log;
+
+    public $visitorLogErrors = [];
 
 
     public function formName()
@@ -138,6 +144,8 @@ class ApiLead extends Model
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['flights'], 'checkIsFlights'],
+
+            ['visitor_log', 'checkVisitorLog', 'skipOnEmpty' => false],
         ];
     }
 
@@ -150,6 +158,40 @@ class ApiLead extends Model
         return $scenarios;
     }
 
+    public function checkVisitorLog(): void
+    {
+        if (empty($this->visitor_log)) {
+            $this->visitor_log = [];
+            return;
+        }
+
+        if (!is_array($this->visitor_log)) {
+            $this->visitorLogErrors[] = 'visitor_log must be array.';
+            $this->visitor_log = [];
+            return;
+        }
+
+        foreach ($this->visitor_log as $key => $visitorLog) {
+            $log = new VisitorLog(['scenario' => VisitorLog::SCENARIO_API_CREATE]);
+            if ($log->load($visitorLog, '')) {
+                if ($log->validate()) {
+                    $activeAttributes = $log->activeAttributes();
+                    $this->visitor_log[$key] = array_filter($log->getAttributes(), static function ($k) use ($activeAttributes) {
+                        if (in_array($k, $activeAttributes, true)) {
+                            return true;
+                        }
+                        return false;
+                    }, ARRAY_FILTER_USE_KEY);
+                    continue;
+                } else {
+                    $this->visitorLogErrors[$key] = $log->getErrors();
+                }
+            } else {
+                $this->visitorLogErrors[$key] = 'Cant load visitor log';
+            }
+            unset($this->visitor_log[$key]);
+        }
+    }
 
     public function checkIsFlights($attribute, $params)
     {

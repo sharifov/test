@@ -110,6 +110,7 @@ use yii\helpers\VarDumper;
  * @property int|null $l_type_create
  * @property int $l_is_test
  * @property string|null $hybrid_uid
+ * @property int|null $l_visitor_log_id
  *
  * @property float $finalProfit
  * @property int $quotesCount
@@ -499,6 +500,9 @@ class Lead extends ActiveRecord implements Objectable
             ['l_delayed_charge', 'default', 'value' => false],
 
             ['l_type_create', 'in', 'range' => array_keys(self::TYPE_CREATE_LIST)],
+
+            ['l_visitor_log_id', 'integer'],
+            ['l_visitor_log_id', 'exist', 'skipOnError' => true, 'targetClass' => VisitorLog::class, 'targetAttribute' => ['l_visitor_log_id' => 'vl_id']],
         ];
     }
 

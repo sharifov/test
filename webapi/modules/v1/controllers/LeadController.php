@@ -10,6 +10,7 @@ use common\models\LeadCallExpert;
 use common\models\LeadFlightSegment;
 use common\models\Notifications;
 use common\models\Sources;
+use common\models\VisitorLog;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
@@ -20,6 +21,7 @@ use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
 use Yii;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
@@ -349,9 +351,7 @@ class LeadController extends ApiBaseController
 
         $response = [];
 
-
         $lead = $this->leadCreateApiService->createByApi($modelLead, $this->apiProject);
-
 
 //        $transaction = Yii::$app->db->beginTransaction();
 //
@@ -646,7 +646,11 @@ class LeadController extends ApiBaseController
             $responseData['message']    = '';*/
 
             $responseData['status'] = 'Success';
-            $responseData['errors'] = [];
+            if (!empty($modelLead->visitorLogErrors)) {
+                $responseData['errors']['visitor_log'] = $modelLead->visitorLogErrors;
+            } else {
+                $responseData['errors'] = [];
+            }
             $responseData['lead_id'] = $lead->id;
             $responseData['client_id'] = $lead->client_id;
         }
