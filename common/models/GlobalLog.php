@@ -37,7 +37,7 @@ class GlobalLog extends ActiveRecord
 	public const MODEL_CLIENT_LEAD_PREFERENCES 		= 'common\models\LeadPreferences';
 	public const MODEL_LEAD_FLIGHT_SEGMENTS	= 'common\models\LeadFlightSegment';
 	public const MODEL_QUOTE	= 'common\models\Quote';
-	/*public const MODEL_SETTING	= 'common\models\Setting';*/
+	public const MODEL_SETTING	= 'common\models\Setting';
 
 	public const MODEL_LIST 		= [
 		self::MODEL_CLIENT			=> 'Client',
@@ -47,7 +47,7 @@ class GlobalLog extends ActiveRecord
 		self::MODEL_CLIENT_LEAD_PREFERENCES	=> 'Lead Preferences',
 		self::MODEL_LEAD_FLIGHT_SEGMENTS => 'LeadFlightSegment',
 		self::MODEL_QUOTE => 'Quote',
-		/*self::MODEL_SETTING => 'Setting',*/
+		self::MODEL_SETTING => 'Setting',
 	];
 
 	public const APP_CONSOLE 	= 'app-console';

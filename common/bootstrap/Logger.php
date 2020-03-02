@@ -51,13 +51,12 @@ class Logger implements BootstrapInterface
 					}
 
 					$log = \Yii::createObject(GlobalLogInterface::class);
-					//$pkName = $event->sender::primaryKey()[0];
+					$pkName = $event->sender::primaryKey()[0];
 
 					$log->log(
 						new LogDTO(
 							get_class($event->sender),
-							//$event->sender->attributes[$pkName],
-							$event->sender->attributes['id'],
+							$event->sender->attributes[$pkName],
 							\Yii::$app->id,
 							\Yii::$app->user->id ?? null,
 							$oldAttr,

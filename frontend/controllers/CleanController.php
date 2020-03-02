@@ -72,12 +72,12 @@ class CleanController extends FController
     }*/
 
 
-
     /**
+     * @param int $schema
      * @return \yii\web\Response
      * @throws \yii\base\ErrorException
      */
-    public function actionCache() : Response
+    public function actionCache(int $schema = 1) : Response
     {
         $successItems = [];
         $warningItems = [];
@@ -88,8 +88,10 @@ class CleanController extends FController
             $warningItems[] = 'Cache is not flushed!';
         }
 
-        Yii::$app->db->schema->refresh();
-        $successItems[] = 'DB schema refreshed!';
+        if ($schema) {
+            Yii::$app->db->schema->refresh();
+            $successItems[] = 'DB schema refreshed!';
+        }
 
         foreach ($this->runtimePaths as $path) {
             $dir = Yii::getAlias($path) . '/cache';
