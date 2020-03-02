@@ -34,13 +34,9 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
     ]); ?>
 
-
-
     <p>
         <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
-
 
     <?php
 
@@ -162,7 +158,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         ],
 
-
         [
             'header' => 'Origin City Code',
             'value' => function(\common\models\Lead $model) {
@@ -185,7 +180,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 return $originCode;
             },
         ],
-
 
         [
             'header' => 'Destination City Code',
@@ -249,7 +243,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             },
         ],
 
-
         [
             'header' => 'Destination City, full name',
             'value' => function(\common\models\Lead $model) {
@@ -277,8 +270,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 if($airport && $airport->city) {
                     $city = $airport->city;
                 }
-
-
 
                 return $city;
             },
@@ -315,7 +306,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 return $country;
             },
         ],
-
 
         [
             'header' => 'Destination Country',
@@ -498,8 +488,30 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
     ];
 
-
     Yii::$app->state = Yii::$app::STATE_END;
+
+    $pdfHeader = [
+        'L'    => [
+            'content' => 'Sales Engine',
+        ],
+        'C'    => [
+            'content' => 'LEADS REPORT',
+        ],
+        'R'    => [
+            'content' => 'Generated: ' . date('Y-m-d H:i'),
+        ],
+        'line' => true,
+    ];
+
+    $pdfFooter = [
+        'L'    => [
+            'content'     => '',
+        ],
+        'C'    => [
+            'content' => '',
+        ],
+        'line' => false,
+    ];
 
     $fullExportMenu = ExportMenu::widget([
         'dataProvider' => $dataProvider,
@@ -509,6 +521,10 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 'pdfConfig' => [
                     'mode' => 'c',
                     'format' => 'A4-L',
+                    /*'methods' => [
+                        'SetHeader' => ['Test Export'],
+                        'SetFooter' => ['{PAGENO}']
+                    ],*/
                 ]
             ]
         ],
@@ -531,9 +547,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
     ?>
 
-    <?php
-
-    echo GridView::widget([
+    <?php echo GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         //'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
@@ -559,13 +573,13 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                         'title' => 'Exported Leads in PDF',
                     ],
                     'methods' => [
-                        //'SetHeader' => ['Exported Leads: ' . date('Y-m-d H:i')],
                         'SetHeader' => [
-                                'L' => [
-                                    'content' => 'Sales Engine'
-                                ]
+                            ['odd' => $pdfHeader, 'even' => $pdfHeader],
                         ],
-                    ]
+                        'SetFooter' => [
+                            ['odd' => $pdfFooter, 'even' => $pdfFooter],
+                        ],
+                    ],
                 ]
             ],
             'json' => [],
