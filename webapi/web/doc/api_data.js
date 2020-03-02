@@ -2037,7 +2037,7 @@ define({ "api": [
     "groupTitle": "Quotes"
   },
   {
-    "type": "post",
+    "type": "get",
     "url": "/v2/user-group/list",
     "title": "Get User Groups",
     "version": "0.2.0",
@@ -2065,6 +2065,11 @@ define({ "api": [
           "title": "Header-Example:",
           "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
           "type": "json"
+        },
+        {
+          "title": "Header-Example (If-Modified-Since):",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\",\n    \"If-Modified-Since\": \"Mon, 23 Dec 2019 08:17:54 GMT\"\n}",
+          "type": "json"
         }
       ]
     },
@@ -2074,6 +2079,11 @@ define({ "api": [
           "title": "Success-Response:",
           "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n          \"user-group\": [\n              {\n                  \"ug_id\": 1,\n                  \"ug_key\": \"ug1\",\n                  \"ug_name\": \"Bucuresti Team\",\n                 \"ug_disable\": 0,\n                  \"ug_updated_dt\": \"2018-12-18 09:17:45\"\n              },\n              {\n                  \"ug_id\": 2,\n                  \"ug_key\": \"ug2\",\n                  \"ug_name\": \"100J Team\",\n                 \"ug_disable\": 0,\n                  \"ug_updated_dt\": \"2018-12-18 09:17:59\"\n              },\n              {\n                  \"ug_id\": 3,\n                  \"ug_key\": \"ug3\",\n                  \"ug_name\": \"Pro Team\",\n                  \"ug_disable\": 1,\n                  \"ug_updated_dt\": \"2018-12-18 09:18:10\"\n              },\n          ]\n      },\n      \"technical\": {\n          \"action\": \"v2/user-group/list\",\n          \"response_id\": 8080269,\n          \"request_dt\": \"2020-02-27 15:00:43\",\n          \"response_dt\": \"2020-02-27 15:00:43\",\n          \"execution_time\": 0.006,\n          \"memory_usage\": 189944\n      },\n      \"request\": []\n  }",
           "type": "json"
+        },
+        {
+          "title": "Redirection-Response (304):",
+          "content": "\nHTTP/1.1 304 Not Modified\nCache-Control: public, max-age=3600\nLast-Modified: Mon, 23 Dec 2019 08:17:53 GMT",
+          "type": "json"
         }
       ]
     },
@@ -2081,7 +2091,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response (405):",
-          "content": "\nHTTP/1.1 405 Method Not Allowed\n  {\n      \"name\": \"Method Not Allowed\",\n      \"message\": \"Method Not Allowed. This URL can only handle the following request methods: POST.\",\n      \"code\": 0,\n      \"status\": 405,\n      \"type\": \"yii\\\\web\\\\MethodNotAllowedHttpException\"\n  }",
+          "content": "\nHTTP/1.1 405 Method Not Allowed\n  {\n      \"name\": \"Method Not Allowed\",\n      \"message\": \"Method Not Allowed. This URL can only handle the following request methods: GET.\",\n      \"code\": 0,\n      \"status\": 405,\n      \"type\": \"yii\\\\web\\\\MethodNotAllowedHttpException\"\n  }",
           "type": "json"
         }
       ]
