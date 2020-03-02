@@ -93,6 +93,23 @@ class LeadController extends ApiBaseController
      * @apiParam {string{3..100}}       [lead.client_last_name]                             Client last name
      * @apiParam {string{3..100}}       [lead.client_middle_name]                           Client middle name
      *
+     * @apiParam {object[]}             lead.visitor_log                                    Array of Visitor log
+     * @apiParam {string{10}}           lead.visitor_log.vl_source_cid
+     * @apiParam {string{36}}           lead.visitor_log.vl_ga_client_id
+     * @apiParam {string{36}}           lead.visitor_log.vl_ga_user_id
+     * @apiParam {int}                  lead.visitor_log.vl_customer_id
+     * @apiParam {string{100}}          lead.visitor_log.vl_gclid
+     * @apiParam {string{255}}          lead.visitor_log.vl_dclid
+     * @apiParam {string{50}}           lead.visitor_log.vl_utm_source
+     * @apiParam {string{50}}           lead.visitor_log.vl_utm_medium
+     * @apiParam {string{50}}           lead.visitor_log.vl_utm_campaign
+     * @apiParam {string{50}}           lead.visitor_log.vl_utm_term
+     * @apiParam {string{50}}           lead.visitor_log.vl_utm_content
+     * @apiParam {string{500}}          lead.visitor_log.vl_referral_url
+     * @apiParam {string{500}}          lead.visitor_log.vl_location_url
+     * @apiParam {string{500}}          lead.visitor_log.vl_user_agent
+     * @apiParam {string{39}}           lead.visitor_log.vl_ip_address
+     * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  lead.visitor_log.vl_visit_dt
      *
      *
      * @apiParamExample {json} Request-Example:
@@ -123,7 +140,45 @@ class LeadController extends ApiBaseController
      *        "sub_sources_code": "BBM101",
      *        "adults": 1,
      *        "client_first_name": "Alexandr",
-     *        "client_last_name": "Freeman"
+     *        "client_last_name": "Freeman",
+     *        "visitor_log": [
+     *               {
+     *                   "vl_source_cid": "string_abc",
+     *                   "vl_ga_client_id": "35009a79-1a05-49d7-b876-2b884d0f825b",
+     *                   "vl_ga_user_id": "35009a79-1a05-49d7-b876-2b884d0f825b",
+     *                   "vl_customer_id": "3",
+     *                   "vl_gclid": "gclid=TeSter-123#bookmark",
+     *                   "vl_dclid": "CJKu8LrQxd4CFQ1qwQodmJIElw",
+     *                   "vl_utm_source": "newsletter4",
+     *                   "vl_utm_medium": "string_abc",
+     *                   "vl_utm_campaign": "string_abc",
+     *                   "vl_utm_term": "string_abc",
+     *                   "vl_utm_content": "string_abc",
+     *                   "vl_referral_url": "string_abc",
+     *                   "vl_location_url": "string_abc",
+     *                   "vl_user_agent": "string_abc",
+     *                   "vl_ip_address": "127.0.0.1",
+     *                   "vl_visit_dt": "2020-02-14 12:00:00"
+     *               },
+     *               {
+     *                   "vl_source_cid": "string_abc",
+     *                   "vl_ga_client_id": "35009a79-1a05-49d7-b876-2b884d0f825b",
+     *                   "vl_ga_user_id": "35009a79-1a05-49d7-b876-2b884d0f825b",
+     *                   "vl_customer_id": "3",
+     *                   "vl_gclid": "gclid=TeSter-123#bookmark",
+     *                   "vl_dclid": "CJKu8LrQxd4CFQ1qwQodmJIElw",
+     *                   "vl_utm_source": "newsletter4",
+     *                   "vl_utm_medium": "string_abc",
+     *                   "vl_utm_campaign": "string_abc",
+     *                   "vl_utm_term": "string_abc",
+     *                   "vl_utm_content": "string_abc",
+     *                   "vl_referral_url": "string_abc",
+     *                   "vl_location_url": "string_abc",
+     *                   "vl_user_agent": "string_abc",
+     *                   "vl_ip_address": "127.0.0.1",
+     *                   "vl_visit_dt": "2020-02-14 12:00:00"
+     *               }
+     *        ]
      *    }
      * }
      *
@@ -135,104 +190,104 @@ class LeadController extends ApiBaseController
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      * {
-     * "status": 200,
-     * "name": "Success",
-     * "code": 0,
-     * "message": "",
-     * "data": {
-     * "response": {
-     * "lead": {
-     * "client_id": 11,
-     * "employee_id": null,
-     * "status": 1,
-     * "uid": "5b73b80eaf69b",
-     * "gid": "65df1546edccce15518e929e5af1a4",
-     * "project_id": 6,
-     * "source_id": "38",
-     * "trip_type": "RT",
-     * "cabin": "E",
-     * "adults": "1",
-     * "children": 0,
-     * "infants": 0,
-     * "notes_for_experts": null,
-     * "created": "2018-08-15 05:20:14",
-     * "updated": "2018-08-15 05:20:14",
-     * "request_ip": "127.0.0.1",
-     * "request_ip_detail": "{\"ip\":\"127.0.0.1\",\"city\":\"North Pole\",\"postal\":\"99705\",\"state\":\"Alaska\",\"state_code\":\"AK\",\"country\":\"United States\",\"country_code\":\"US\",\"location\":\"64.7548317,-147.3431046\",\"timezone\":{\"id\":\"America\\/Anchorage\",\"location\":\"61.21805,-149.90028\",\"country_code\":\"US\",\"country_name\":\"United States of America\",\"iso3166_1_alpha_2\":\"US\",\"iso3166_1_alpha_3\":\"USA\",\"un_m49_code\":\"840\",\"itu\":\"USA\",\"marc\":\"xxu\",\"wmo\":\"US\",\"ds\":\"USA\",\"phone_prefix\":\"1\",\"fifa\":\"USA\",\"fips\":\"US\",\"gual\":\"259\",\"ioc\":\"USA\",\"currency_alpha_code\":\"USD\",\"currency_country_name\":\"UNITED STATES\",\"currency_minor_unit\":\"2\",\"currency_name\":\"US Dollar\",\"currency_code\":\"840\",\"independent\":\"Yes\",\"capital\":\"Washington\",\"continent\":\"NA\",\"tld\":\".us\",\"languages\":\"en-US,es-US,haw,fr\",\"geoname_id\":\"6252001\",\"edgar\":\"\"},\"datetime\":{\"date\":\"08\\/14\\/2018\",\"date_time\":\"08\\/14\\/2018 21:20:15\",\"date_time_txt\":\"Tuesday, August 14, 2018 21:20:15\",\"date_time_wti\":\"Tue, 14 Aug 2018 21:20:15 -0800\",\"date_time_ymd\":\"2018-08-14T21:20:15-08:00\",\"time\":\"21:20:15\",\"month\":\"8\",\"month_wilz\":\"08\",\"month_abbr\":\"Aug\",\"month_full\":\"August\",\"month_days\":\"31\",\"day\":\"14\",\"day_wilz\":\"14\",\"day_abbr\":\"Tue\",\"day_full\":\"Tuesday\",\"year\":\"2018\",\"year_abbr\":\"18\",\"hour_12_wolz\":\"9\",\"hour_12_wilz\":\"09\",\"hour_24_wolz\":\"21\",\"hour_24_wilz\":\"21\",\"hour_am_pm\":\"pm\",\"minutes\":\"20\",\"seconds\":\"15\",\"week\":\"33\",\"offset_seconds\":\"-28800\",\"offset_minutes\":\"-480\",\"offset_hours\":\"-8\",\"offset_gmt\":\"-08:00\",\"offset_tzid\":\"America\\/Anchorage\",\"offset_tzab\":\"AKDT\",\"offset_tzfull\":\"Alaska Daylight Time\",\"tz_string\":\"AKST+9AKDT,M3.2.0\\/2,M11.1.0\\/2\",\"dst\":\"true\",\"dst_observes\":\"true\",\"timeday_spe\":\"evening\",\"timeday_gen\":\"evening\"}}",
-     * "offset_gmt": "-08.00",
-     * "snooze_for": null,
-     * "rating": null,
-     * "id": 7
-     * },
-     * "flights": [
-     * {
-     * "origin": "BOS",
-     * "destination": "LGW",
-     * "departure": "2018-09-19"
-     * },
-     * {
-     * "origin": "LGW",
-     * "destination": "BOS",
-     * "departure": "2018-09-22"
-     * }
-     * ],
-     * "emails": [
-     * "chalpet@gmail.com",
-     * "chalpet2@gmail.com"
-     * ],
-     * "phones": [
-     * "+373-69-98-698",
-     * "+373-69-98-698"
-     * ]
-     * },
-     * "request": {
-     * "client_id": null,
-     * "employee_id": null,
-     * "status": null,
-     * "uid": null,
-     * "project_id": 6,
-     * "source_id": "38",
-     * "trip_type": null,
-     * "cabin": null,
-     * "adults": "1",
-     * "children": null,
-     * "infants": null,
-     * "notes_for_experts": null,
-     * "created": null,
-     * "updated": null,
-     * "request_ip": null,
-     * "request_ip_detail": null,
-     * "offset_gmt": null,
-     * "snooze_for": null,
-     * "rating": null,
-     * "flights": [
-     * {
-     * "origin": "BOS",
-     * "destination": "LGW",
-     * "departure": "2018-09-19"
-     * },
-     * {
-     * "origin": "LGW",
-     * "destination": "BOS",
-     * "departure": "2018-09-22"
-     * }
-     * ],
-     * "emails": [
-     * "chalpet@gmail.com",
-     * "chalpet2@gmail.com"
-     * ],
-     * "phones": [
-     * "+373-69-98-698",
-     * "+373-69-98-698"
-     * ],
-     * "client_first_name": "Alexandr",
-     * "client_last_name": "Freeman"
-     * }
-     * },
-     * "action": "v1/lead/create",
-     * "response_id": 42,
-     * "request_dt": "2018-08-15 05:20:14",
-     * "response_dt": "2018-08-15 05:20:15"
+     *   "status": 200,
+     *   "name": "Success",
+     *   "code": 0,
+     *   "message": "",
+     *   "data": {
+     *       "response": {
+     *           "lead": {
+     *               "client_id": 11,
+     *               "employee_id": null,
+     *               "status": 1,
+     *               "uid": "5b73b80eaf69b",
+     *               "gid": "65df1546edccce15518e929e5af1a4",
+     *               "project_id": 6,
+     *               "source_id": "38",
+     *               "trip_type": "RT",
+     *               "cabin": "E",
+     *               "adults": "1",
+     *               "children": 0,
+     *               "infants": 0,
+     *               "notes_for_experts": null,
+     *               "created": "2018-08-15 05:20:14",
+     *               "updated": "2018-08-15 05:20:14",
+     *               "request_ip": "127.0.0.1",
+     *               "request_ip_detail": "{\"ip\":\"127.0.0.1\",\"city\":\"North Pole\",\"postal\":\"99705\",\"state\":\"Alaska\",\"state_code\":\"AK\",\"country\":\"United States\",\"country_code\":\"US\",\"location\":\"64.7548317,-147.3431046\",\"timezone\":{\"id\":\"America\\/Anchorage\",\"location\":\"61.21805,-149.90028\",\"country_code\":\"US\",\"country_name\":\"United States of America\",\"iso3166_1_alpha_2\":\"US\",\"iso3166_1_alpha_3\":\"USA\",\"un_m49_code\":\"840\",\"itu\":\"USA\",\"marc\":\"xxu\",\"wmo\":\"US\",\"ds\":\"USA\",\"phone_prefix\":\"1\",\"fifa\":\"USA\",\"fips\":\"US\",\"gual\":\"259\",\"ioc\":\"USA\",\"currency_alpha_code\":\"USD\",\"currency_country_name\":\"UNITED STATES\",\"currency_minor_unit\":\"2\",\"currency_name\":\"US Dollar\",\"currency_code\":\"840\",\"independent\":\"Yes\",\"capital\":\"Washington\",\"continent\":\"NA\",\"tld\":\".us\",\"languages\":\"en-US,es-US,haw,fr\",\"geoname_id\":\"6252001\",\"edgar\":\"\"},\"datetime\":{\"date\":\"08\\/14\\/2018\",\"date_time\":\"08\\/14\\/2018 21:20:15\",\"date_time_txt\":\"Tuesday, August 14, 2018 21:20:15\",\"date_time_wti\":\"Tue, 14 Aug 2018 21:20:15 -0800\",\"date_time_ymd\":\"2018-08-14T21:20:15-08:00\",\"time\":\"21:20:15\",\"month\":\"8\",\"month_wilz\":\"08\",\"month_abbr\":\"Aug\",\"month_full\":\"August\",\"month_days\":\"31\",\"day\":\"14\",\"day_wilz\":\"14\",\"day_abbr\":\"Tue\",\"day_full\":\"Tuesday\",\"year\":\"2018\",\"year_abbr\":\"18\",\"hour_12_wolz\":\"9\",\"hour_12_wilz\":\"09\",\"hour_24_wolz\":\"21\",\"hour_24_wilz\":\"21\",\"hour_am_pm\":\"pm\",\"minutes\":\"20\",\"seconds\":\"15\",\"week\":\"33\",\"offset_seconds\":\"-28800\",\"offset_minutes\":\"-480\",\"offset_hours\":\"-8\",\"offset_gmt\":\"-08:00\",\"offset_tzid\":\"America\\/Anchorage\",\"offset_tzab\":\"AKDT\",\"offset_tzfull\":\"Alaska Daylight Time\",\"tz_string\":\"AKST+9AKDT,M3.2.0\\/2,M11.1.0\\/2\",\"dst\":\"true\",\"dst_observes\":\"true\",\"timeday_spe\":\"evening\",\"timeday_gen\":\"evening\"}}",
+     *               "offset_gmt": "-08.00",
+     *               "snooze_for": null,
+     *               "rating": null,
+     *               "id": 7
+     *           },
+     *           "flights": [
+     *               {
+     *                   "origin": "BOS",
+     *                   "destination": "LGW",
+     *                   "departure": "2018-09-19"
+     *               },
+     *               {
+     *                   "origin": "LGW",
+     *                   "destination": "BOS",
+     *                   "departure": "2018-09-22"
+     *               }
+     *           ],
+     *           "emails": [
+     *               "chalpet@gmail.com",
+     *               "chalpet2@gmail.com"
+     *           ],
+     *           "phones": [
+     *               "+373-69-98-698",
+     *               "+373-69-98-698"
+     *           ]
+     *       },
+     *       "request": {
+     *           "client_id": null,
+     *           "employee_id": null,
+     *           "status": null,
+     *           "uid": null,
+     *           "project_id": 6,
+     *           "source_id": "38",
+     *           "trip_type": null,
+     *           "cabin": null,
+     *           "adults": "1",
+     *           "children": null,
+     *           "infants": null,
+     *           "notes_for_experts": null,
+     *           "created": null,
+     *           "updated": null,
+     *           "request_ip": null,
+     *           "request_ip_detail": null,
+     *           "offset_gmt": null,
+     *           "snooze_for": null,
+     *           "rating": null,
+     *           "flights": [
+     *               {
+     *                   "origin": "BOS",
+     *                   "destination": "LGW",
+     *                   "departure": "2018-09-19"
+     *               },
+     *               {
+     *                   "origin": "LGW",
+     *                   "destination": "BOS",
+     *                   "departure": "2018-09-22"
+     *               }
+     *           ],
+     *           "emails": [
+     *               "chalpet@gmail.com",
+     *               "chalpet2@gmail.com"
+     *           ],
+     *           "phones": [
+     *               "+373-69-98-698",
+     *               "+373-69-98-698"
+     *           ],
+     *           "client_first_name": "Alexandr",
+     *           "client_last_name": "Freeman"
+     *       }
+     *   },
+     *   "action": "v1/lead/create",
+     *   "response_id": 42,
+     *   "request_dt": "2018-08-15 05:20:14",
+     *   "response_dt": "2018-08-15 05:20:15"
      * }
      *
      * @apiError UserNotFound The id of the User was not found.
@@ -247,13 +302,11 @@ class LeadController extends ApiBaseController
      *          "type": "yii\\web\\UnprocessableEntityHttpException"
      *      }
      *
-     *
-     * @return mixed
+     * @return array
      * @throws BadRequestHttpException
      * @throws UnprocessableEntityHttpException
-     * @throws \yii\db\Exception
+     * @throws \Throwable
      */
-
     public function actionCreate()
     {
 
