@@ -898,6 +898,8 @@ class LeadSearch extends Lead
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"'.$this->quote_pnr.'"%\'')]);
         }
 
+        $query->andFilterWhere(['like', 'hybrid_uid', $this->hybrid_uid]);
+
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */
 
