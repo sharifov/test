@@ -2057,6 +2057,20 @@
             "optional": false,
             "field": "Authorization",
             "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "If-Modified-Since",
+            "description": "<p>Format <code> day-name, day month year hour:minute:second GMT</code></p>"
           }
         ]
       },
@@ -2081,7 +2095,7 @@
           "type": "json"
         },
         {
-          "title": "Redirection-Response (304):",
+          "title": "Not Modified-Response (304):",
           "content": "\nHTTP/1.1 304 Not Modified\nCache-Control: public, max-age=3600\nLast-Modified: Mon, 23 Dec 2019 08:17:53 GMT",
           "type": "json"
         }

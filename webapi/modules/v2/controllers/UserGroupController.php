@@ -40,6 +40,8 @@ class UserGroupController extends BaseController
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeader {string} Accept-Encoding
+     * @apiHeader {string} If-Modified-Since  Format <code> day-name, day month year hour:minute:second GMT</code>
      * @apiHeaderExample {json} Header-Example:
      *  {
      *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
@@ -95,7 +97,7 @@ class UserGroupController extends BaseController
      *       "request": []
      *   }
      *
-     * @apiSuccessExample {json} Redirection-Response (304):
+     * @apiSuccessExample {json} Not Modified-Response (304):
      *
      * HTTP/1.1 304 Not Modified
      * Cache-Control: public, max-age=3600
