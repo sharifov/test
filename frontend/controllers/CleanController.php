@@ -79,7 +79,6 @@ class CleanController extends FController
      */
     public function actionCache() : Response
     {
-
         $successItems = [];
         $warningItems = [];
 
@@ -103,16 +102,14 @@ class CleanController extends FController
             }
         }
 
-
         if($successItems) {
             Yii::$app->session->setFlash('success', implode('<br>', $successItems));
         }
-
         if($warningItems) {
             Yii::$app->session->setFlash('warning', implode('<br>', $warningItems));
         }
 
-        return $this->redirect(['index']); //Yii::$app->request->referrer
+        return $this->redirect(Yii::$app->request->referrer ?? ['index']);
     }
 
 

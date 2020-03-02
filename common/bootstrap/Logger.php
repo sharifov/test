@@ -11,6 +11,7 @@ use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
 use common\models\Quote;
 use common\models\QuotePrice;
+use common\models\Setting;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use yii\base\BootstrapInterface;
@@ -29,6 +30,7 @@ class Logger implements BootstrapInterface
 		LeadFlightSegment::class,
 		Quote::class,
         QuotePrice::class,
+        Setting::class,
 	];
 
 	/**
@@ -49,10 +51,12 @@ class Logger implements BootstrapInterface
 					}
 
 					$log = \Yii::createObject(GlobalLogInterface::class);
+					//$pkName = $event->sender::primaryKey()[0];
 
 					$log->log(
 						new LogDTO(
 							get_class($event->sender),
+							//$event->sender->attributes[$pkName],
 							$event->sender->attributes['id'],
 							\Yii::$app->id,
 							\Yii::$app->user->id ?? null,
