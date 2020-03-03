@@ -113,6 +113,18 @@ class SettingController extends FController
     }
 
     /**
+     * @return \yii\web\Response
+     */
+    public function actionClean(): \yii\web\Response
+    {
+        $cache = Yii::$app->cache;
+        $cache->delete('site_settings');
+        Yii::$app->session->setFlash('success', 'Cache is flushed');
+
+        return $this->redirect(Yii::$app->request->referrer ?? ['index']);
+    }
+
+    /**
      * Finds the Setting model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
