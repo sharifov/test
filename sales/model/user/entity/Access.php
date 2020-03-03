@@ -10,124 +10,71 @@ use common\models\UserGroup;
 /**
  * Class Access
  *
- * @property array $groups
- * @property array $groupsList
- * @property array $projects
- * @property array $projectsList
- * @property array $departments
- * @property array $departmentsList
+ * @property Employee $user
+ * @property array|null $projects
+ * @property array|null $departments
+ * @property array|null $groups
  */
 class Access
 {
+    private $user;
     private $groups;
-    private $groupsList;
-
     private $projects;
-    private $projectsList;
-
     private $departments;
-    private $departmentsList;
 
-    /**
-     * @param Employee $employee
-     */
-     public function __construct(Employee $employee)
+     public function __construct(Employee $user)
     {
-        $this->groups = $employee->ugsGroups;
-        $this->projects = $employee->projects;
-        $this->departments = $employee->departments;
+        $this->user = $user;
     }
 
-    /**
-     * @return array
-     */
-    public function getGroupsList(): array
+    public function getProjects(): array
     {
-        if ($this->groupsList !== null) {
-            return $this->groupsList;
+        if ($this->projects !== null) {
+            return $this->projects;
         }
 
-        $this->groupsList = [];
+        $this->projects = [];
 
-        /** @var UserGroup $item */
-        foreach ($this->groups as $item) {
-            $this->groupsList[$item->ug_id] = $item->ug_name;
+        $alias = Project::tableName();
+
+        foreach ($this->user->getProjects()->select([$alias . '.name'])->active()->indexBy($alias . '.id')->column() as $key => $item) {
+            $this->projects[$key] = $item;
         }
 
-        return $this->groupsList;
+        return $this->projects;
     }
 
-    /**
-     * @param int $groupId
-     * @return bool
-     */
-    public function inGroup(int $groupId): bool
+    public function getDepartments(): array
     {
-        if (!$this->getGroupsList()) {
-            return false;
+        if ($this->departments !== null) {
+            return $this->departments;
         }
-        return array_key_exists($groupId, $this->getGroupsList());
+
+        $this->departments = [];
+
+        $alias = Department::tableName();
+
+        foreach ($this->user->getUdDeps()->select([$alias . '.dep_name'])->indexBy($alias . '.dep_id')->column() as $key => $item) {
+            $this->departments[$key] = $item;
+        }
+
+        return $this->departments;
     }
 
-    /**
-     * @return array
-     */
-    public function getProjectsList(): array
+    public function getGroups(): array
     {
-        if ($this->projectsList !== null) {
-            return $this->projectsList;
+        if ($this->groups !== null) {
+            return $this->groups;
         }
 
-        $this->projectsList = [];
+        $this->groups = [];
 
-        /** @var Project $item */
-        foreach ($this->projects as $item) {
-            $this->projectsList[$item->id] = $item->name;
+        $alias = UserGroup::tableName();
+
+        foreach ($this->user->getUgsGroups()->select([$alias . '.ug_name'])->enabled()->indexBy($alias . '.ug_id')->column() as $key => $item) {
+            $this->groups[$key] = $item;
         }
 
-        return $this->projectsList;
-    }
-
-    /**
-     * @param int $projectId
-     * @return bool
-     */
-    public function inProject(int $projectId): bool
-    {
-        if (!$this->getProjectsList()) {
-            return false;
-        }
-        return array_key_exists($projectId, $this->getProjectsList());
-    }
-
-    /**
-     * @return array
-     */
-    public function getDepartmentsList(): array
-    {
-        if ($this->departmentsList !== null) {
-            return $this->departmentsList;
-        }
-
-        $this->departmentsList = [];
-
-        /** @var Department $item */
-        foreach ($this->departments as $item) {
-            $this->departmentsList[$item->dep_id] = $item->dep_name;
-        }
-
-        return $this->departmentsList;
-    }
-
-    /**
-     * @param int $departmentId
-     * @return bool
-     */
-    public function inDepartment(int $departmentId): bool
-    {
-        if (!$this->getDepartmentsList()) {
-            return false;
-        }
-        return array_key_exists($departmentId, $this->getDepartmentsList());
+        return $this->groups;
     }
 }

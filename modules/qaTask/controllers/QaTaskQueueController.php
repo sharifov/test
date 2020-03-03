@@ -9,6 +9,8 @@ use modules\qaTask\src\entities\qaTask\search\queue\QaTaskSearchEscalatedSearch;
 use modules\qaTask\src\entities\qaTask\search\queue\QaTaskSearchProcessingSearch;
 use modules\qaTask\src\entities\qaTask\search\queue\QaTaskSearchSearch;
 use sales\access\ListsAccess;
+use sales\access\ProjectAccessService;
+use sales\access\QueryAccessService;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTask\search\queue\QaTaskSearchPendingSearch;
@@ -20,11 +22,28 @@ use yii\web\Response;
  *
  * @property array|null $availableProjects
  * @property array|null $availableUsers
+ * @property ProjectAccessService $projectAccessService
+ * @property QueryAccessService $queryAccessService
  */
 class QaTaskQueueController extends FController
 {
     private $availableProjects;
     private $availableUsers;
+    private $projectAccessService;
+    private $queryAccessService;
+
+    public function __construct(
+        $id,
+        $module,
+        ProjectAccessService $projectAccessService,
+        QueryAccessService $queryAccessService,
+        $config = []
+    )
+    {
+        parent::__construct($id, $module, $config);
+        $this->projectAccessService = $projectAccessService;
+        $this->queryAccessService = $queryAccessService;
+    }
 
     public function behaviors(): array
     {
@@ -52,6 +71,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
+            'queryAccessService' => $this->queryAccessService,
         ]));
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -67,6 +87,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
+            'queryAccessService' => $this->queryAccessService,
         ]));
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -82,6 +103,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
+            'queryAccessService' => $this->queryAccessService,
         ]));
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -97,6 +119,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
+            'queryAccessService' => $this->queryAccessService,
         ]));
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -112,6 +135,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => $this->getAvailableUsers(),
+            'queryAccessService' => $this->queryAccessService,
         ]));
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -166,7 +190,7 @@ class QaTaskQueueController extends FController
         if ($this->availableProjects !== null) {
             return $this->availableProjects;
         }
-        $this->availableProjects = (new ListsAccess(Auth::id()))->getProjects();
+        $this->availableProjects = $this->projectAccessService->getProjects(Auth::user());
         return $this->availableProjects;
     }
 
@@ -188,6 +212,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => [],
+            'queryAccessService' => $this->queryAccessService,
         ])))->search([])->query->count();
     }
 
@@ -200,6 +225,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => [],
+            'queryAccessService' => $this->queryAccessService,
         ])))->search([])->query->count();
     }
 
@@ -212,6 +238,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => [],
+            'queryAccessService' => $this->queryAccessService,
         ])))->search([])->query->count();
     }
 
@@ -224,6 +251,7 @@ class QaTaskQueueController extends FController
             'user' => Auth::user(),
             'projectList' => $this->getAvailableProjects(),
             'userList' => [],
+            'queryAccessService' => $this->queryAccessService,
         ])))->search([])->query->count();
     }
 }

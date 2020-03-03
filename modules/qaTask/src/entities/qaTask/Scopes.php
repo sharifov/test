@@ -3,11 +3,12 @@
 namespace modules\qaTask\src\entities\qaTask;
 
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use sales\access\ProjectQueryInterface;
 
 /**
  * @see QaTask
  */
-class Scopes extends \yii\db\ActiveQuery
+class Scopes extends \yii\db\ActiveQuery implements ProjectQueryInterface
 {
     public function active(): self
     {

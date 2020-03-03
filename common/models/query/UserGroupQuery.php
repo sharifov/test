@@ -5,32 +5,14 @@ namespace common\models\query;
 use common\models\UserGroup;
 
 /**
- * This is the ActiveQuery class for [[UserGroup]].
+ * Class UserGroupQuery
  *
  * @see UserGroup
  */
 class UserGroupQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
+    public function enabled(): self
     {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
-    /**
-     * {@inheritdoc}
-     * @return UserGroup[]|array
-     */
-    public function all($db = null)
-    {
-        return parent::all($db);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return UserGroup|array|null
-     */
-    public function one($db = null)
-    {
-        return parent::one($db);
+        return $this->andWhere(['ug_disable' => 0]);
     }
 }

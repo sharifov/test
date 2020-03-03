@@ -10,6 +10,7 @@ use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\helpers\formatters\QaTaskCategoryFormatter;
+use sales\access\QueryAccessService;
 use Webmozart\Assert\Assert;
 use yii\base\BaseObject;
 
@@ -25,6 +26,7 @@ use yii\base\BaseObject;
  * @property array|null $createdTypeList
  * @property array|null $departmentList
  * @property array|null $categoryList
+ * @property QueryAccessService|null $queryAccessService
  */
 class CreateDto extends BaseObject
 {
@@ -37,6 +39,7 @@ class CreateDto extends BaseObject
     public $createdTypeList;
     public $departmentList;
     public $categoryList;
+    public $queryAccessService;
 
     public function init(): void
     {
@@ -56,6 +59,13 @@ class CreateDto extends BaseObject
             throw new \InvalidArgumentException('userList must be set.');
         }
         Assert::isArray($this->userList);
+
+        if ($this->queryAccessService === null) {
+            throw new \InvalidArgumentException('queryAccessService must be set.');
+        }
+        if (!$this->queryAccessService instanceof QueryAccessService) {
+            throw new \InvalidArgumentException('queryAccessService must be instance of ' . QueryAccessService::class);
+        }
 
         if ($this->objectTypeList === null) {
             $this->objectTypeList = QaTaskObjectType::getList();

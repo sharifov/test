@@ -5,6 +5,7 @@ namespace modules\qaTask\src\entities\qaTask\search\queue;
 use modules\qaTask\src\entities\qaTask\search\CreateDto;
 use modules\qaTask\src\entities\qaTask\search\QaTaskSearch;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use sales\auth\Auth;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
@@ -70,14 +71,14 @@ class QaTaskSearchProcessingSearch extends QaTaskSearch
     {
         $query = static::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
-        $query->projects(array_keys($this->getProjectList()));
+        $this->getQueryAccessService()->processProject($this->getUser(), $query);
 
         $query->statuses(array_keys($this->getStatusList()));
 
         $query->anyAssigned();
 
-        if (\Yii::$app->user->can('qa-task/qa-task-queue/processing_Current')) {
-            $query->assigned($this->user->id);
+        if (Auth::can('qa-task/qa-task-queue/processing_Current')) {
+            $query->assigned($this->getUser()->id);
         }
 
         $dataProvider = new ActiveDataProvider([
@@ -94,15 +95,15 @@ class QaTaskSearchProcessingSearch extends QaTaskSearch
         }
 
         if ($this->t_created_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $this->user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $this->getUser()->timezone);
         }
 
         if ($this->t_updated_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $this->user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $this->getUser()->timezone);
         }
 
         if ($this->t_deadline_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $this->user->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $this->getUser()->timezone);
         }
 
         // grid filtering conditions

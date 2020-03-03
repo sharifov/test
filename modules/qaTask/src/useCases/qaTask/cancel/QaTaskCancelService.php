@@ -2,11 +2,13 @@
 
 namespace modules\qaTask\src\useCases\qaTask\cancel;
 
+use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use sales\access\EmployeeProjectAccess;
+use sales\access\ProjectAccessService;
+use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\user\UserRepository;
 use yii\web\ForbiddenHttpException;
@@ -17,22 +19,26 @@ use yii\web\ForbiddenHttpException;
  * @property QaTaskRepository $taskRepository
  * @property UserRepository $userRepository
  * @property EventDispatcher $eventDispatcher
+ * @property ProjectAccessService $projectAccessService
  */
 class QaTaskCancelService
 {
     private $taskRepository;
     private $userRepository;
     private $eventDispatcher;
+    private $projectAccessService;
 
     public function __construct(
         QaTaskRepository $taskRepository,
         UserRepository $userRepository,
-        EventDispatcher $eventDispatcher
+        EventDispatcher $eventDispatcher,
+        ProjectAccessService $projectAccessService
     )
     {
         $this->taskRepository = $taskRepository;
         $this->userRepository = $userRepository;
         $this->eventDispatcher = $eventDispatcher;
+        $this->projectAccessService = $projectAccessService;
     }
 
     public function cancel(QaTaskCancelForm $form): void
@@ -40,7 +46,7 @@ class QaTaskCancelService
         $task = $this->taskRepository->find($form->getTaskId());
         $user = $this->userRepository->find($form->getUserId());
 
-        self::businessGuard($task, $user->id);
+        $this->businessGuard($task, $user);
 
         $startStatusId = $task->t_status_id;
 
@@ -62,9 +68,9 @@ class QaTaskCancelService
         ));
     }
 
-    private static function businessGuard(QaTask $task, int $userId): void
+    private function businessGuard(QaTask $task, Employee $user): void
     {
-        EmployeeProjectAccess::guard($task->t_project_id, $userId);
+        $this->projectAccessService->guard($user, $task->t_project_id);
 
         if ($task->isCanceled()) {
             throw new \DomainException('Task is already is canceled.');
@@ -77,16 +83,17 @@ class QaTaskCancelService
      */
     public static function permissionGuard(QaTask $task): void
     {
-        if (!\Yii::$app->user->can('qa-task/qa-task-action/cancel', ['task' => $task])) {
+        if (!Auth::can('qa-task/qa-task-action/cancel', ['task' => $task])) {
             throw new ForbiddenHttpException('Access denied.');
         }
     }
 
-    public static function can(QaTask $task, int $userId): bool
+    public static function can(QaTask $task, Employee $user): bool
     {
+        $service = \Yii::createObject(static::class);
         try {
             self::permissionGuard($task);
-            self::businessGuard($task, $userId);
+            $service->businessGuard($task, $user);
         } catch (\Throwable $e) {
             return false;
         }

@@ -63,6 +63,8 @@ use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\access\EmployeeSourceAccess;
 use sales\access\ListsAccess;
+use sales\access\project\ProjectAccessService;
+use sales\access\QueryAccessService;
 use sales\auth\Auth;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
@@ -84,6 +86,7 @@ use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\SegmentForm;
 use sales\model\notification\events\NotificationEvents;
+use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
@@ -183,7 +186,22 @@ class TestController extends FController
 
     public function actionTest()
     {
-        VarDumper::dump(Auth::user()->userProfile->up_skill);die;
+
+        $user = Auth::user();
+        $access = new Access($user);
+        VarDumper::dump($access->getProjects());
+//        VarDumper::dump($access->getDepartments());
+//        VarDumper::dump($access->getGroups());
+//
+//        VarDumper::dump(array_key_exists(10, $user->access->getProjects()));
+
+        $pa = Yii::createObject(QueryAccessService::class);
+        $query = Lead::find()->where(['client_id' => 1]);
+        $pa->processProject($user, $query, 'project_id');
+        $pa->processDepartments($user, $query, 'l_dep_id');
+        VarDumper::dump($query->createCommand()->getRawSql());
+        die;
+
         return $this->render('blank');
     }
 
