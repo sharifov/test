@@ -69,9 +69,9 @@ class LoggerController extends Controller
 				if (!$log->save()) {
 					\Yii::error('Error: ' . VarDumper::dumpAsString($log->errors), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
 				}
-			} /*else if (!$log->delete()) {
+			} else if (!$log->delete()) {
 				\Yii::error('Error while deleting log: ' . $this->getParsedErrors($log->getErrors()), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
-			}*/
+			}
 		}
 		$time_end = microtime(true);
 		$time = number_format(round($time_end - $time_start, 2), 2);
