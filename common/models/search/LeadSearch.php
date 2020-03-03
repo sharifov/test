@@ -253,6 +253,7 @@ class LeadSearch extends Lead
             'l_init_price'  => $this->l_init_price,
             'request_ip'    => $this->request_ip,
 			'l_is_test'		=> $this->l_is_test,
+			'hybrid_uid' => $this->hybrid_uid,
         ]);
 
         if($this->statuses) {
@@ -384,8 +385,7 @@ class LeadSearch extends Lead
             //->andFilterWhere(['like', 'request_ip', $this->request_ip])
             ->andFilterWhere(['like', 'request_ip_detail', $this->request_ip_detail])
             ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
-            ->andFilterWhere(['like', 'discount_id', $this->discount_id])
-            ->andFilterWhere(['like', 'hybrid_uid', $this->hybrid_uid]);
+            ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
 
         if(!empty($this->origin_airport)){
             $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','origin',$this->origin_airport]);
@@ -788,16 +788,13 @@ class LeadSearch extends Lead
             return $dataProvider;
         }
 
+        $additionalRestriction = ($this->id || $this->client_email || $this->client_phone || $this->hybrid_uid || $this->quote_pnr);
+
         $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
 
-        /*'id' => ''
-        'uid' => ''
-        'client_id' => ''
-        'client_name' => ''
-        'client_email' => ''
-        'client_phone' => ''
-        'bo_flight_id' => ''
-        'employee_id' => ''*/
+        if (!$additionalRestriction) {
+            $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
+        }
 
         if($this->id || $this->uid || $this->gid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id || $this->request_ip) {
 
@@ -805,9 +802,6 @@ class LeadSearch extends Lead
             $this->employee_id = Yii::$app->user->id;
         }
 
-        //VarDumper::dump($params, 10, true); exit;
-
-        // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'gid' => $this->gid,
@@ -830,13 +824,13 @@ class LeadSearch extends Lead
             'cabin' => $this->cabin,
             'request_ip' => $this->request_ip,
             'discount_id' => $this->discount_id,
-            'l_answered'    => $this->l_answered
+            'l_answered'    => $this->l_answered,
+            'hybrid_uid' => $this->hybrid_uid,
         ]);
 
         if($this->statuses) {
             $query->andWhere(['status' => $this->statuses]);
         }
-        $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
 
         if($this->created_date_from || $this->created_date_to) {
 
@@ -897,11 +891,6 @@ class LeadSearch extends Lead
 
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"'.$this->quote_pnr.'"%\'')]);
         }
-
-        $query->andFilterWhere(['like', 'hybrid_uid', $this->hybrid_uid]);
-
-        /*  $sqlRaw = $query->createCommand()->getRawSql();
-         VarDumper::dump($sqlRaw, 10, true); exit; */
 
         return $dataProvider;
     }
