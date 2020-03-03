@@ -153,8 +153,8 @@ class LeadSearch extends Lead
             }, 'skipOnEmpty' => true],
 			['l_is_test', 'in', 'range' => [0,1]],
             ['l_call_status_id', 'integer'],
-            [['defaultUserTz', 'reportTimezone', 'timeFrom', 'timeTo'], 'string']
-
+            [['defaultUserTz', 'reportTimezone', 'timeFrom', 'timeTo'], 'string'],
+            [['quote_pnr'], 'string', 'min' => 5],
         ];
     }
 
@@ -770,8 +770,6 @@ class LeadSearch extends Lead
         $query = Lead::find();
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
@@ -790,15 +788,9 @@ class LeadSearch extends Lead
 
         $additionalRestriction = ($this->id || $this->client_email || $this->client_phone || $this->hybrid_uid || $this->quote_pnr);
 
-        $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
-
         if (!$additionalRestriction) {
             $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
-        }
-
-        if($this->id || $this->uid || $this->gid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id || $this->request_ip) {
-
-        } else {
+            $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
             $this->employee_id = Yii::$app->user->id;
         }
 
