@@ -73,12 +73,12 @@ class CleanController extends FController
 
 
     /**
-     * @param int $schema
      * @return \yii\web\Response
      * @throws \yii\base\ErrorException
      */
-    public function actionCache(int $schema = 1) : Response
+    public function actionCache() : Response
     {
+
         $successItems = [];
         $warningItems = [];
 
@@ -88,10 +88,8 @@ class CleanController extends FController
             $warningItems[] = 'Cache is not flushed!';
         }
 
-        if ($schema) {
-            Yii::$app->db->schema->refresh();
-            $successItems[] = 'DB schema refreshed!';
-        }
+        Yii::$app->db->schema->refresh();
+        $successItems[] = 'DB schema refreshed!';
 
         foreach ($this->runtimePaths as $path) {
             $dir = Yii::getAlias($path) . '/cache';
@@ -104,14 +102,16 @@ class CleanController extends FController
             }
         }
 
+
         if($successItems) {
             Yii::$app->session->setFlash('success', implode('<br>', $successItems));
         }
+
         if($warningItems) {
             Yii::$app->session->setFlash('warning', implode('<br>', $warningItems));
         }
 
-        return $this->redirect(Yii::$app->request->referrer ?? ['index']);
+        return $this->redirect(['index']); //Yii::$app->request->referrer
     }
 
 

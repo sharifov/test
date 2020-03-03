@@ -15,10 +15,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><i class="fa fa-cogs"></i> <?= Html::encode($this->title) ?></h1>
 
-     <?= Html::a('Clear Caches', ['clean/cache', 'schema' => 0], [
-        'class' => 'btn btn-info',
+     <?= Html::a('Clear Caches', ['clean'], [
+        'class' => 'btn btn-warning',
         'data' => [
-            'confirm' => 'Are you sure you want to clear all cache data?', 'method ' => 'post',
+            'confirm' => 'Are you sure you want to clear Site Settings cache data?'
         ],
      ]) ?>
 
