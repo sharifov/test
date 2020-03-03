@@ -16,6 +16,10 @@ class UserGroupEvents extends Component
     public const UPDATE_KEY         = 'update.key';
     public const UPDATE_DISABLE     = 'update.disable';
 
+    private const UPDATE_LISTENERS = [
+    	self::UPDATE => [[UserGroupEvents::class, 'webHookUpdate']]
+	];
+
     /**
      * @param $params
      */
@@ -61,8 +65,9 @@ class UserGroupEvents extends Component
         //\Yii::warning(VarDumper::dumpAsString($params->data), 'UserGroupEvents:webHookDelete');
     }
 
-
-
-
+	public static function updateListeners(): array
+	{
+		return self::UPDATE_LISTENERS;
+	}
 
 }

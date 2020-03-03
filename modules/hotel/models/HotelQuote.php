@@ -237,14 +237,15 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $qRoom->hqr_payment_type = $room['paymentType'] ?? null;
                     $qRoom->hqr_board_code = $room['boardCode'] ?? null;
                     $qRoom->hqr_board_name = $room['boardName'] ?? null;
-                    $qRoom->hqr_amount = $room['amount'] ?? null;
+                    $qRoom->hqr_amount = $room['amount']-$room['markup'] ?? null;
                     $qRoom->hqr_rate_comments = $qRoom->prepareRateComments($room);
                     $qRoom->hqr_currency = $currency;
                     $qRoom->hqr_service_fee_percent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($hQuote->hqProductQuote->pqProduct->pr_type_id) ?? (self::SERVICE_FEE * 100);
-                    $serviceFeeSum = ($qRoom->hqr_amount * $qRoom->hqr_service_fee_percent / 100);
+                    $qRoom->hqr_system_mark_up = $room['markup'] ?? null;
+                    $qRoom->hqr_agent_mark_up = 0;
+                    $serviceFeeSum = (($qRoom->hqr_amount + $qRoom->hqr_system_mark_up) * $qRoom->hqr_service_fee_percent / 100);
                     $totalServiceFeeSum += $serviceFeeSum;
-                    $qRoom->hqr_amount += $serviceFeeSum;
-                    $totalSystemPrice += $qRoom->hqr_amount;
+                    $totalSystemPrice += $qRoom->hqr_amount + $serviceFeeSum + $qRoom->hqr_system_mark_up;
 
 
                     if (isset($room['cancellationPolicies'][0]['amount'])) {

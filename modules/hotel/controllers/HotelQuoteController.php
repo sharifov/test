@@ -147,20 +147,14 @@ class HotelQuoteController extends FController
                 throw new Exception('Quote key param not found', 4);
             }
 
-            $modelHotel = Hotel::findOne($hotelId);
-            if (!$modelHotel) {
-                throw new Exception('Hotel Request ('.$hotelId.') not found in DB', 5);
-            }
+			$hotel = $this->hotelRepository->find($hotelId);
 
-            $productId = $modelHotel->ph_product_id;
+            $productId = $hotel->ph_product_id;
 
-            $result = $modelHotel->getSearchData();
+            $result = $hotel->getSearchData();
 
             $hotelData = Hotel::getHotelDataByCode($result, $hotelCode);
             $quoteData = Hotel::getHotelQuoteDataByKey($result, $hotelCode, $quoteKey);
-
-            //VarDumper::dump($hotelData); exit;
-            //VarDumper::dump($roomData); exit;
 
             if (!$hotelData) {
                 throw new Exception('Not found quote - hotel code ('.$hotelCode.')', 6);
@@ -174,7 +168,7 @@ class HotelQuoteController extends FController
 
             $currency = $hotelData['currency'] ?? 'USD';
 
-            $hotelQuote = HotelQuote::findOrCreateByData($quoteData, $hotelModel, $modelHotel, $currency);
+            $hotelQuote = HotelQuote::findOrCreateByData($quoteData, $hotelModel, $hotel, $currency);
 
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);

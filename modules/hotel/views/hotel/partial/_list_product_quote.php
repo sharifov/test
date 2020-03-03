@@ -280,78 +280,87 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             $totalAmountRoom = 0;
             $adlTotalCount = 0;
             $chdTotalCount = 0;
+            $totalNp = 0;
+            $totalMkp = 0;
+            $totalExMkp = 0;
             ?>
-            <table class="table table-striped table-bordered">
-                <?php foreach ($model->hotelQuoteRooms as $room):
+            <div class="overflow_auto" style="overflow: auto">
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <th>ID</th>
+                        <th>Room Name</th>
+                        <th>Board Name</th>
+                        <th>Adult</th>
+                        <th>Children</th>
+                        <th>Cancel Amount</th>
+                        <th>NP, $</th>
+                        <th>Mkp, $</th>
+                        <th>Ex Mkp, $</th>
+                        <th>SFP, %</th>
+                        <th>SFS, $</th>
+                        <th>SP, $</th>
+                    </tr>
+                    <?php foreach ($model->hotelQuoteRooms as $room):
 
-                    $totalAmountRoom += (float) $room->hqr_amount;
-                    $adlTotalCount += $room->hqr_adults;
-                    $chdTotalCount += $room->hqr_children;
-                    ?>
+                        $totalAmountRoom += (float) $room->hqr_amount;
+                        $adlTotalCount += $room->hqr_adults;
+                        $chdTotalCount += $room->hqr_children;
+                        $totalNp += $room->hqr_amount;
+                        $totalMkp += $room->hqr_system_mark_up;
+                        $totalExMkp += $room->hqr_agent_mark_up;
 
-<!--                    'hqr_id',-->
-<!--                    'hqr_hotel_quote_id',-->
-<!--                    'hqr_room_name',-->
-<!--                    'hqr_key',-->
-<!--                    'hqr_code',-->
-<!--                    'hqr_class',-->
-<!--                    'hqr_amount',-->
-<!--                    'hqr_currency',-->
-<!--                    'hqr_cancel_amount',-->
-<!--                    'hqr_cancel_from_dt',-->
-<!--                    'hqr_payment_type',-->
-<!--                    'hqr_board_code',-->
-<!--                    'hqr_board_name',-->
-<!--                    'hqr_rooms',-->
-<!--                    'hqr_adults',-->
-<!--                    'hqr_children',-->
+                        $sfs = round(($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up) * $room->hqr_service_fee_percent / 100, 2);
+                        ?>
 
-                <tr>
-<!--                    <td>-->
-<!--                        --><?php ////=Html::encode($room->hqr_id)?>
-<!--                        --><?php
-//                            //\yii\helpers\VarDumper::dump($room->attributes, 10, true);
-//                        ?>
-<!--                    </td>-->
+                    <tr>
 
-                    <td title="<?=Html::encode($room->hqr_key)?>"><?=Html::encode($room->hqr_id)?></td>
-                    <td title="code: <?=Html::encode($room->hqr_code)?>, class: <?=Html::encode($room->hqr_class)?>"><?=Html::encode($room->hqr_room_name)?></td>
+                        <td title="<?=Html::encode($room->hqr_key)?>"><?=Html::encode($room->hqr_id)?></td>
+                        <td title="code: <?=Html::encode($room->hqr_code)?>, class: <?=Html::encode($room->hqr_class)?>"><?=Html::encode($room->hqr_room_name)?></td>
 
+                        <td title="code: <?=Html::encode($room->hqr_board_code)?>">
+                            <?=Html::encode($room->hqr_board_name)?>
+                            <?php if ($room->hqr_rate_comments):?>
+                                <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode($room->hqr_rate_comments)?>"></i>
+                            <?php endif;?>
+                        </td>
+                        <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
+                        <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
+                        <td>
+                            <?php if ($room->hqr_cancel_amount): ?>
+                            <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= Html::encode($room->hqr_amount) ?></td>
+                        <td><?= Html::encode($room->hqr_system_mark_up) ?></td>
+                        <td><?= Html::encode($room->hqr_agent_mark_up) ?></td>
+                        <td><?= Html::encode($room->hqr_service_fee_percent) ?>%</td>
+                        <td><?= $sfs ?></td>
+    <!--                    <td>--><?php ////=Html::encode($room->hqr_id)?><!--</td>-->
+                        <td class="text-right"><?=number_format($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up + $sfs, 2)?> <?=Html::encode($room->hqr_currency)?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <tr>
+                        <td colspan="3" class="text-right">Room Total: </td>
+                        <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> '. $adlTotalCount : '-'?></td>
+                        <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> '. $chdTotalCount : '-'?></td>
+                        <td class="text-right"></td>
+                        <td class="text-right"><?= number_format($totalNp, 2) ?></td>
+                        <td class="text-right"><?= number_format($totalMkp, 2) ?></td>
+                        <td class="text-right"><?= number_format($totalExMkp, 2) ?></td>
+                        <td class="text-right"></td>
+                        <td class="text-right"><?= number_format($model->hqProductQuote->pq_service_fee_sum, 2) ?></td>
 
-<!--                    <td>--><?php //=Html::encode($room->hqr_payment_type)?><!--</td>-->
-                    <td title="code: <?=Html::encode($room->hqr_board_code)?>">
-                        <?=Html::encode($room->hqr_board_name)?>
-                        <?php if ($room->hqr_rate_comments):?>
-                            <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode($room->hqr_rate_comments)?>"></i>
-                        <?php endif;?>
-                    </td>
-                    <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
-                    <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
-                    <td>
-                        <?php if ($room->hqr_cancel_amount): ?>
-                        <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
-                        <?php endif; ?>
-                    </td>
-<!--                    <td>--><?php ////=Html::encode($room->hqr_id)?><!--</td>-->
-                    <td class="text-right"><?=number_format($room->hqr_amount, 2)?> <?=Html::encode($room->hqr_currency)?></td>
-                </tr>
-                <?php endforeach; ?>
-                <tr>
-                    <td colspan="3" class="text-right">Room Total: </td>
-                    <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> '. $adlTotalCount : '-'?></td>
-                    <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> '. $chdTotalCount : '-'?></td>
-                    <td class="text-right"></td>
+                        <?php
+                            $price = round((float) $model->hqProductQuote->pq_price, 2);
+                            $totalAmountRoom = round($totalAmountRoom, 2);
+                        ?>
 
-                    <?php
-                        $price = round((float) $model->hqProductQuote->pq_price, 2);
-                        $totalAmountRoom = round($totalAmountRoom, 2);
-                    ?>
-
-                    <td class="text-right <?=( $totalAmountRoom !== $price) ? 'danger': ''?>">
-                        <b title="<?=$totalAmountRoom?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
-                    </td>
-                </tr>
-            </table>
+                        <td class="text-right <?=( $totalAmountRoom !== $price) ? 'danger': ''?>">
+                            <b title="<?=$totalAmountRoom?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         <?php endif; ?>
 
         <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model->hqProductQuote]) ?>
