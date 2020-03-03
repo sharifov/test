@@ -3,7 +3,6 @@
 namespace sales\access;
 
 use common\models\Employee;
-use yii\db\ActiveQuery;
 
 /**
  * Class QueryAccessService
@@ -30,8 +29,8 @@ class QueryAccessService
         $this->projectAccessService->processQuery($user, $query);
     }
 
-    public function processDepartments(Employee $user, ActiveQuery $query, string $fieldName): void
+    public function processDepartments(Employee $user, DepartmentQueryInterface $query): void
     {
-        $this->departmentAccessService->processQuery($user, $query, $fieldName);
+        $this->departmentAccessService->processQuery($user, $query);
     }
 }

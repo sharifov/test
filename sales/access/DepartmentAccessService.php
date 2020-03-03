@@ -4,7 +4,6 @@ namespace sales\access;
 
 use common\models\Department;
 use common\models\Employee;
-use yii\db\ActiveQuery;
 use yii\rbac\CheckAccessInterface;
 
 /**
@@ -29,7 +28,7 @@ class DepartmentAccessService
             return true;
         }
 
-        return array_key_exists($departmentId, $user->access->getDepartments());
+        return array_key_exists($departmentId, $user->getAccess()->getDepartments());
     }
 
     public function guard(Employee $user, int $departmentId): void
@@ -45,15 +44,15 @@ class DepartmentAccessService
             return Department::find()->select(['dep_name'])->indexBy('dep_id')->column();
         }
 
-        return $user->access->getDepartments();
+        return $user->getAccess()->getDepartments();
     }
 
-    public function processQuery(Employee $user, ActiveQuery $query, string $fieldName): void
+    public function processQuery(Employee $user, DepartmentQueryInterface $query): void
     {
         if ($this->accessChecker->checkAccess($user->id, self::PERMISSION)) {
             return;
         }
 
-        $query->andWhere([$fieldName => array_keys($user->access->getDepartments())]);
+        $query->departments(array_keys($user->getAccess()->getDepartments()));
     }
 }

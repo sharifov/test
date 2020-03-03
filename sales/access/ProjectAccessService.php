@@ -28,7 +28,7 @@ class ProjectAccessService
             return true;
         }
 
-        return array_key_exists($projectId, $user->access->getProjects());
+        return array_key_exists($projectId, $user->getAccess()->getActiveProjects());
     }
 
     public function guard(Employee $user, int $projectId): void
@@ -44,7 +44,7 @@ class ProjectAccessService
             return Project::find()->select(['name'])->indexBy('id')->column();
         }
 
-        return $user->access->getProjects();
+        return $user->getAccess()->getActiveProjects();
     }
 
     public function processQuery(Employee $user, ProjectQueryInterface $query): void
@@ -53,6 +53,6 @@ class ProjectAccessService
             return;
         }
 
-        $query->projects(array_keys($user->access->getProjects()));
+        $query->projects(array_keys($user->getAccess()->getActiveProjects()));
     }
 }
