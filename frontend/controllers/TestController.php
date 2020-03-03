@@ -183,7 +183,21 @@ class TestController extends FController
 
     public function actionTest()
     {
-        VarDumper::dump(Auth::user()->userProfile->up_skill);die;
+        $case = Cases::findOne(35279);
+        if ($case->isTrash() || $case->isFollowUp()) {
+            try {
+                if (!$case->isFreedOwner()) {
+                    $case->freedOwner();
+                }
+                $case->pending(null, null);
+                (Yii::createObject(CasesRepository::class))->save($case);
+            } catch (\Throwable $e) {
+                Yii::error($e, 'ReceiveEmailsJob:case to pending');
+            }
+        }
+
+        die;
+
         return $this->render('blank');
     }
 

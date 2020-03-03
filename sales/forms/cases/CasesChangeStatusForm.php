@@ -116,6 +116,12 @@ class CasesChangeStatusForm extends Model
             }
         }
 
+        if ($this->case->isTrash() || $this->case->isFollowUp()) {
+            if (isset($list[CasesStatus::STATUS_PENDING])) {
+                unset($list[CasesStatus::STATUS_PENDING]);
+            }
+        }
+
         return $list;
     }
 
