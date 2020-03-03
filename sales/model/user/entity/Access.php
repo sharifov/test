@@ -4,8 +4,6 @@ namespace sales\model\user\entity;
 
 use common\models\Department;
 use common\models\Employee;
-use common\models\Project;
-use common\models\UserGroup;
 
 /**
  * Class Access
@@ -22,12 +20,22 @@ class Access
     private $projects;
     private $departments;
 
-     public function __construct(Employee $user)
+    public function __construct(Employee $user)
     {
         $this->user = $user;
     }
 
-    public function getProjects(): array
+    public function getAllProjects(): array
+    {
+        return array_column($this->getProjects(), 'name', 'id');
+    }
+
+    public function getActiveProjects(): array
+    {
+        return array_column(array_filter($this->getProjects(), fn($v) => !$v['closed'], ARRAY_FILTER_USE_BOTH), 'name', 'id');
+    }
+
+    private function getProjects(): array
     {
         if ($this->projects !== null) {
             return $this->projects;
@@ -35,9 +43,7 @@ class Access
 
         $this->projects = [];
 
-        $alias = Project::tableName();
-
-        foreach ($this->user->getProjects()->select([$alias . '.name'])->active()->indexBy($alias . '.id')->column() as $key => $item) {
+        foreach ($this->user->getProjects()->select(['name', 'closed', 'id'])->indexBy('id')->asArray()->all() as $key => $item) {
             $this->projects[$key] = $item;
         }
 
@@ -61,7 +67,17 @@ class Access
         return $this->departments;
     }
 
-    public function getGroups(): array
+    public function getAllGroups(): array
+    {
+        return array_column($this->getGroups(), 'ug_name', 'ug_id');
+    }
+
+    public function getActiveGroups(): array
+    {
+        return array_column(array_filter($this->getGroups(), fn($v) => !$v['ug_disable'], ARRAY_FILTER_USE_BOTH), 'ug_name', 'ug_id');
+    }
+
+    private function getGroups(): array
     {
         if ($this->groups !== null) {
             return $this->groups;
@@ -69,9 +85,7 @@ class Access
 
         $this->groups = [];
 
-        $alias = UserGroup::tableName();
-
-        foreach ($this->user->getUgsGroups()->select([$alias . '.ug_name'])->enabled()->indexBy($alias . '.ug_id')->column() as $key => $item) {
+        foreach ($this->user->getUgsGroups()->select(['ug_id', 'ug_name', 'ug_disable'])->indexBy('ug_id')->asArray()->all() as $key => $item) {
             $this->groups[$key] = $item;
         }
 

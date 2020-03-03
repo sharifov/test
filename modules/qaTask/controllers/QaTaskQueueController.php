@@ -145,14 +145,12 @@ class QaTaskQueueController extends FController
         ]);
     }
 
-    public function actionCount(): array
+    public function actionCount(): Response
     {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-
         $types = Yii::$app->request->post('types');
 
         if (!is_array($types)) {
-            return [];
+            return $this->asJson([]);
         }
 
         $result = [];
@@ -182,7 +180,7 @@ class QaTaskQueueController extends FController
             }
         }
 
-        return $result;
+        return $this->asJson($result);
     }
 
     private function getAvailableProjects(): array

@@ -22,7 +22,9 @@ use sales\access\QueryAccessService;
  */
 class QaTaskSearch extends QaTask
 {
-    private $user;
+    protected $user;
+    protected $queryAccessService;
+
     private $projectList = [];
     private $userList = [];
     private $objectTypeList = [];
@@ -31,7 +33,6 @@ class QaTaskSearch extends QaTask
     private $createdTypeList = [];
     private $departmentList = [];
     private $categoryList = [];
-    private $queryAccessService;
 
     public static function createSearch(CreateDto $dto): self
     {
@@ -47,16 +48,6 @@ class QaTaskSearch extends QaTask
         $search->categoryList = $dto->categoryList;
         $search->queryAccessService = $dto->queryAccessService;
         return $search;
-    }
-
-    public function getUser(): Employee
-    {
-        return $this->user;
-    }
-
-    public function getQueryAccessService(): QueryAccessService
-    {
-        return $this->queryAccessService;
     }
 
     public function getProjectList(): array

@@ -189,7 +189,10 @@ class TestController extends FController
 
         $user = Auth::user();
         $access = new Access($user);
-        VarDumper::dump($access->getProjects());
+
+        VarDumper::dump($access->getAllGroups());
+        VarDumper::dump($access->getActiveGroups());
+        die;
 //        VarDumper::dump($access->getDepartments());
 //        VarDumper::dump($access->getGroups());
 //

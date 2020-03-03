@@ -62,7 +62,7 @@ class QaTaskSearchSearch extends QaTaskSearch
     {
         $query = static::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
-        $this->getQueryAccessService()->processProject($this->getUser(), $query);
+        $this->queryAccessService->processProject($this->user, $query);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -80,15 +80,15 @@ class QaTaskSearchSearch extends QaTaskSearch
         }
 
         if ($this->t_created_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $this->getUser()->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_created_dt', $this->t_created_dt, $this->user->timezone);
         }
 
         if ($this->t_updated_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $this->getUser()->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_updated_dt', $this->t_updated_dt, $this->user->timezone);
         }
 
         if ($this->t_deadline_dt) {
-            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $this->getUser()->timezone);
+            QueryHelper::dayEqualByUserTZ($query, 't_deadline_dt', $this->t_deadline_dt, $this->user->timezone);
         }
 
         // grid filtering conditions

@@ -3,12 +3,13 @@
 namespace modules\qaTask\src\entities\qaTask;
 
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use sales\access\DepartmentQueryInterface;
 use sales\access\ProjectQueryInterface;
 
 /**
  * @see QaTask
  */
-class Scopes extends \yii\db\ActiveQuery implements ProjectQueryInterface
+class Scopes extends \yii\db\ActiveQuery implements ProjectQueryInterface, DepartmentQueryInterface
 {
     public function active(): self
     {
@@ -23,11 +24,6 @@ class Scopes extends \yii\db\ActiveQuery implements ProjectQueryInterface
     public function byObjectId(int $value): self
     {
         return $this->andWhere(['t_object_id' => $value]);
-    }
-
-    public function projects(array $projects): self
-    {
-        return $this->andWhere(['t_project_id' => $projects]);
     }
 
     public function queueProcessing(): self
@@ -80,5 +76,15 @@ class Scopes extends \yii\db\ActiveQuery implements ProjectQueryInterface
     public function anyAssigned():self
     {
         return $this->andWhere(['IS NOT', 't_assigned_user_id',  null]);
+    }
+
+    public function projects(array $projects): self
+    {
+        return $this->andWhere(['t_project_id' => $projects]);
+    }
+
+    public function departments(array $departments): self
+    {
+        return $this->andWhere(['t_department_id' => $departments]);
     }
 }
