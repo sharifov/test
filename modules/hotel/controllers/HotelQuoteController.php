@@ -7,7 +7,7 @@ use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\search\HotelQuoteSearch;
-use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
+use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
@@ -17,6 +17,7 @@ use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 
+use modules\hotel\src\useCases\quote\HotelQuoteManageService;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\base\Exception;
@@ -26,6 +27,7 @@ use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -34,6 +36,8 @@ use yii\web\Response;
  *
  * @property HotelRepository $hotelRepository
  * @property HotelQuoteSearchService $hotelQuoteSearchService
+ * @property HotelQuoteRoomRepository $hotelQuoteRoomRepository
+ * @property HotelQuoteManageService $hotelQuoteManageService
  */
 class HotelQuoteController extends FController
 {
@@ -45,13 +49,30 @@ class HotelQuoteController extends FController
 	 * @var HotelQuoteSearchService
 	 */
 	private $hotelQuoteSearchService;
+	/**
+	 * @var HotelQuoteRoomRepository
+	 */
+	private $hotelQuoteRoomRepository;
+	/**
+	 * @var HotelQuoteManageService
+	 */
+	private $hotelQuoteManageService;
 
-	public function __construct($id, $module, HotelQuoteSearchService $hotelQuoteSearchService, HotelRepository $hotelRepository, $config = [])
-	{
+	public function __construct(
+		$id,
+		$module,
+		HotelQuoteSearchService $hotelQuoteSearchService,
+		HotelRepository $hotelRepository,
+		HotelQuoteManageService $hotelQuoteManageService,
+		HotelQuoteRoomRepository $hotelQuoteRoomRepository,
+		$config = []
+	) {
 		parent::__construct($id, $module, $config);
 
 		$this->hotelQuoteSearchService = $hotelQuoteSearchService;
 		$this->hotelRepository = $hotelRepository;
+		$this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
+		$this->hotelQuoteManageService = $hotelQuoteManageService;
 	}
 
 	/**
@@ -324,6 +345,35 @@ class HotelQuoteController extends FController
         }
         return $result;
     }
+
+	/**
+	 * @return Response
+	 * @throws BadRequestHttpException
+	 */
+    public function actionAjaxUpdateAgentMarkup(): Response
+	{
+		$extraMarkup = Yii::$app->request->post('extra_markup');
+
+		$hotelQuoteRoomId = array_key_first($extraMarkup);
+		$value = $extraMarkup[$hotelQuoteRoomId];
+
+		if ($hotelQuoteRoomId && $value !== null) {
+			try {
+				$hotelQuoteRoom = $this->hotelQuoteRoomRepository->find($hotelQuoteRoomId);
+
+				$this->hotelQuoteManageService->updateAgentMarkup($hotelQuoteRoom, $value);
+			} catch (\RuntimeException $e) {
+				return $this->asJson(['message' => $e->getMessage()]);
+			} catch (\Throwable $e) {
+				Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
+
+			}
+
+			return $this->asJson(['output' => $value]);
+		}
+
+		throw new BadRequestHttpException();
+	}
 
     /**
      * Finds the HotelQuote model based on its primary key value.

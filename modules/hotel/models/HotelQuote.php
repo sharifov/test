@@ -446,7 +446,11 @@ class HotelQuote extends ActiveRecord implements Quotable
      */
     public function getSystemMarkUp(): float
     {
-        return 0.00;
+		$result = 0.00;
+		foreach ($this->hotelQuoteRooms as $room) {
+			$result += $room->hqr_system_mark_up;
+		}
+		return $result;
     }
 
     /**
@@ -454,6 +458,10 @@ class HotelQuote extends ActiveRecord implements Quotable
      */
     public function getAgentMarkUp(): float
     {
-        return 0.00;
+		$result = 0.00;
+		foreach ($this->hotelQuoteRooms as $room) {
+			$result += $room->hqr_agent_mark_up;
+		}
+		return $result;
     }
 }
