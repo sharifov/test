@@ -14,6 +14,7 @@ use common\models\QuotePrice;
 use common\models\Setting;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\services\log\GlobalLogFormatAttrService;
 use yii\base\BootstrapInterface;
 use yii\base\Event;
 use yii\db\ActiveRecord;
@@ -39,6 +40,8 @@ class Logger implements BootstrapInterface
 	public function bootstrap($app): void
 	{
 		$func =  static function (AfterSaveEvent $event) {
+			$globalLogFormatAttrService = \Yii::createObject(GlobalLogFormatAttrService::class);
+
 			foreach (self::CLASSES as $class) {
 				if (get_class($event->sender) === $class) {
 
@@ -53,6 +56,7 @@ class Logger implements BootstrapInterface
 					$log = \Yii::createObject(GlobalLogInterface::class);
 					$pkName = $event->sender::primaryKey()[0];
 
+					$model = get_class($event->sender);
 					$log->log(
 						new LogDTO(
 							get_class($event->sender),
@@ -61,7 +65,7 @@ class Logger implements BootstrapInterface
 							\Yii::$app->user->id ?? null,
 							$oldAttr,
 							$newAttr,
-							null,
+							$globalLogFormatAttrService->formatAttr($model, $oldAttr, $newAttr),
 							GlobalLog::ACTION_TYPE_AR[$event->name] ?? null
 						)
 					);

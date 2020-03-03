@@ -17,6 +17,7 @@ use yii\console\Controller;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
 /**
@@ -52,12 +53,17 @@ class LoggerController extends Controller
 		$this->globalLogFormatAttrService = $globalLogFormatAttrService;
 	}
 
-	public function actionFormatLogManagedAttr(): void
+	public function actionFormatLogManagedAttr($limit = 1000): void
 	{
-		$logs = GlobalLog::find()->where(['gl_formatted_attr' => null])->limit(1000)->all();
+		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+		$time_start = microtime(true);
+
+		$logs = GlobalLog::find()->where(['gl_formatted_attr' => null])->limit($limit)->orderBy(['gl_id' => SORT_DESC])->all();
 
 		foreach ($logs as $log) {
 			$log->gl_formatted_attr = $this->globalLogFormatAttrService->formatAttr($log->gl_model, $log->gl_old_attr, $log->gl_new_attr);
+
+			echo '.';
 
 			if (!empty($log->gl_formatted_attr)) {
 				if (!$log->save()) {
@@ -67,5 +73,9 @@ class LoggerController extends Controller
 				\Yii::error('Error while deleting log: ' . $this->getParsedErrors($log->getErrors()), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
 			}*/
 		}
+		$time_end = microtime(true);
+		$time = number_format(round($time_end - $time_start, 2), 2);
+		printf("\nExecute Time: %s, count Old Logs: " . count($logs), $this->ansiFormat($time . ' s', Console::FG_RED));
+		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 }
