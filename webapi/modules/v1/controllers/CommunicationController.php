@@ -616,9 +616,9 @@ class CommunicationController extends ApiBaseController
 
             if (isset($callOriginalData['case_id']) && $callOriginalData['case_id']) {
                 $call->c_case_id = (int) $callOriginalData['case_id'];
-                if ($call->c_case_id && ($case = Cases::findOne($call->c_case_id))) {
-                    (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_CALL);
-                }
+//                if ($call->c_case_id && ($case = Cases::findOne($call->c_case_id))) {
+//                    (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_CALL);
+//                }
             }
 
 

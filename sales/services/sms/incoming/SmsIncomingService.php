@@ -157,12 +157,12 @@ class SmsIncomingService
             } else {
                 if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $form->si_project_id)->one()) {
                     $caseId = $case->cs_id;
-                    $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
+//                    $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
                 }
             }
         } else {
             $caseId = $case->cs_id;
-            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
+//            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         }
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
@@ -191,12 +191,12 @@ class SmsIncomingService
             } else {
                 if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
                     $caseId = $case->cs_id;
-                    $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
+//                    $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
                 }
             }
         } else {
             $caseId = $case->cs_id;
-            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
+//            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         }
         $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
@@ -220,10 +220,10 @@ class SmsIncomingService
             $leadId = $lead->id;
         } elseif ($case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $form->si_project_id)->one()) {
             $caseId = $case->cs_id;
-            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
+//            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         } elseif ($case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
             $caseId = $case->cs_id;
-            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
+//            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         } else {
             return $this->createSmsBySupportDefault($form, $clientId, $ownerId);
         }
@@ -251,7 +251,7 @@ class SmsIncomingService
         } else {
             if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $form->si_project_id)->one()) {
                 $caseId = $case->cs_id;
-                $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
+//                $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
             }
         }
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
