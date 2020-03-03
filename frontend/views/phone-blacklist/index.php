@@ -30,6 +30,16 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+
+        'rowOptions' => static function (PhoneBlacklist $model) {
+            if (!$model->pbl_enabled) {
+                return ['class' => 'danger'];
+            }
+            if ($model->pbl_expiration_date && strtotime($model->pbl_expiration_date) < time()) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             'pbl_id',
             'pbl_phone',
@@ -60,10 +70,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'pbl_created_dt',
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'pbl_created_dt',
+//            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pbl_updated_dt',

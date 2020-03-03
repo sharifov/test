@@ -32,54 +32,21 @@ class PhoneBlacklistQuery extends \yii\db\ActiveQuery
     /**
      * @param string $phone
      * @return bool
-     * @throws \yii\db\Exception
      */
     public function isExists(string $phone): bool
     {
-        $query = $this->select(['pbl_phone'])
-            ->where(['pbl_phone' => $phone]);
+        $query = $this->select(['pbl_phone']);
+            //->where(['pbl_phone' => $phone]);
 
-        if ($patternsPhone = self::getRegexPatternsPhone()) {
-            $strPatternsPhone = $this->preparePatternsPhone($patternsPhone);
-            $query->orWhere($this->checkByRegexp($phone, $strPatternsPhone));
-        }
+        // $sql = "REGEXP_LIKE(:phone, CONCAT('^', REPLACE(REPLACE(REPLACE(pbl_phone, '.', '[0-9]'), '*', '[0-9]*'), '+', '\\\\+'), '$')) = 1"; // TODO Mysql8
+        $sql = ":phone REGEXP CONCAT('^', REPLACE(REPLACE(REPLACE(pbl_phone, '.', '[0-9]'), '*', '[0-9]*'), '+', '\\\\+'), '$') = 1";
 
+
+        $query->where($sql, [':phone' => $phone]);
         $query->active()->activeByExpired();
 
         return $query->exists();
     }
 
-    /**
-     * @param string $phone
-     * @param string $pattern
-     * @return false|string|null
-     * @throws \yii\db\Exception
-     */
-    private function checkByRegexp(string $phone, string $pattern)
-    {
-        $sql = "SELECT '" . $phone . "' REGEXP '" . $pattern . "'";
-        return Yii::$app->db->createCommand($sql)->queryScalar();
-    }
 
-    /**
-     * @param array $patternsPhone
-     * @return string
-     */
-    private function preparePatternsPhone(array $patternsPhone): string
-    {
-        $result = implode('|', $patternsPhone);
-        return str_replace('+', '\\\+', $result);
-    }
-
-    /**
-     * @return array
-     */
-    private static function getRegexPatternsPhone(): array
-    {
-        return PhoneBlacklist::find()->select(['pbl_phone'])
-            ->where(['REGEXP', 'pbl_phone', '\\*|\\.'])
-            ->active()
-            ->activeByExpired()
-            ->column();
-    }
 }

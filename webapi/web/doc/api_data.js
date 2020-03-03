@@ -267,231 +267,6 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/v2/lead/create",
-    "title": "Create Lead",
-    "version": "0.2.0",
-    "name": "CreateLead",
-    "group": "Leads",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "object",
-            "optional": false,
-            "field": "lead",
-            "description": "<p>Lead data array</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "20",
-            "optional": false,
-            "field": "lead.source_code",
-            "description": "<p>Source Code</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "size": "0..9",
-            "optional": false,
-            "field": "lead.adults",
-            "description": "<p>Adult count</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "size": "0..9",
-            "optional": false,
-            "field": "lead.children",
-            "description": "<p>Children count</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "size": "0..9",
-            "optional": false,
-            "field": "lead.infants",
-            "description": "<p>Infants count</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "50",
-            "optional": true,
-            "field": "lead.request_ip",
-            "description": "<p>Request IP</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "32",
-            "optional": true,
-            "field": "lead.discount_id",
-            "description": "<p>Discount ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "40",
-            "optional": false,
-            "field": "lead.uid",
-            "description": "<p>UID value</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "text",
-            "optional": true,
-            "field": "lead.user_agent",
-            "description": "<p>User agent info</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "object[]",
-            "optional": false,
-            "field": "lead.segments",
-            "description": "<p>Segments</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "3",
-            "optional": false,
-            "field": "lead.segments.origin",
-            "description": "<p>Segment Origin location Airport IATA-code</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "3",
-            "optional": false,
-            "field": "lead.segments.destination",
-            "description": "<p>Segment Destination location Airport IATA-code</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "datetime",
-            "size": "YYYY-MM-DD",
-            "optional": false,
-            "field": "lead.segments.departure",
-            "description": "<p>Segment Departure DateTime (format YYYY-MM-DD)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "object",
-            "optional": false,
-            "field": "lead.client",
-            "description": "<p>Client</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "20",
-            "optional": false,
-            "field": "lead.client.phone",
-            "description": "<p>Client phone</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "size": "2",
-            "allowedValues": [
-              "14-BOOK_FAILED",
-              "15-ALTERNATIVE"
-            ],
-            "optional": false,
-            "field": "lead.status",
-            "description": "<p>Status</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "size": "1",
-            "allowedValues": [
-              "E-ECONOMY",
-              "B-BUSINESS",
-              "F-FIRST",
-              "P-PREMIUM"
-            ],
-            "optional": false,
-            "field": "lead.cabin",
-            "description": "<p>Cabin</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "lead.flight_id",
-            "description": "<p>BO Flight ID</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Request-Example:",
-          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"segments\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ]\n      }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"lead\": {\n              \"id\": 370949,\n              \"uid\": \"WD6q53PO3b\",\n              \"gid\": \"63e1505f4a8a87e6651048e3e3eae4e1\",\n              \"client_id\": 1034\n          }\n      }\n      \"request\": {\n          \"lead\": {\n             \"client\": {\n                  \"phone\": \"+37369636963\"\n              },\n              \"uid\": \"WD6q53PO3b\",\n              \"status\": 14,\n              \"source_code\": \"JIVOCH\",\n              \"cabin\": \"E\",\n              \"adults\": 2,\n              \"children\": 2,\n              \"infants\": 2,\n              \"request_ip\": \"12.12.12.12\",\n              \"discount_id\": \"123123\",\n              \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n              \"flight_id\": 12457,\n              \"segments\": [\n                  {\n                      \"origin\": \"NYC\",\n                      \"destination\": \"LON\",\n                      \"departure\": \"2019-12-16\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-17\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-18\"\n                  }\n              ]\n          }\n      },\n      \"technical\": {\n          \"action\": \"v2/lead/create\",\n          \"response_id\": 11930215,\n          \"request_dt\": \"2019-12-30 12:22:20\",\n          \"response_dt\": \"2019-12-30 12:22:21\",\n          \"execution_time\": 0.055,\n          \"memory_usage\": 1394416\n      }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "examples": [
-        {
-          "title": "Error-Response (422):",
-          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"children\": [\n              \"Children must be no greater than 9.\"\n          ],\n          \"segments[0][origin]\": [\n              \"IATA (NY) not found.\"\n          ],\n          \"segments[2][departure]\": [\n              \"The format of Departure is invalid.\"\n          ],\n          \"client[phone]\": [\n             \"The format of Phone is invalid.\"\n          ]\n      },\n      \"code\": 10301,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
-          "type": "json"
-        },
-        {
-          "title": "Error-Response (400):",
-          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found Lead data on POST request\"\n      ],\n      \"code\": 10300,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
-          "type": "json"
-        },
-        {
-          "title": "Error-Response (422):",
-          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Saving error\",\n      \"errors\": [\n          \"Saving error\"\n      ],\n      \"code\": 10101,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/modules/v2/controllers/LeadController.php",
-    "groupTitle": "Leads"
-  },
-  {
-    "type": "post",
     "url": "/v1/lead/create",
     "title": "Create Lead",
     "version": "0.1.0",
@@ -742,13 +517,147 @@ define({ "api": [
             "optional": true,
             "field": "lead.client_middle_name",
             "description": "<p>Client middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object[]",
+            "optional": false,
+            "field": "lead.visitor_log",
+            "description": "<p>Array of Visitor log</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "lead.visitor_log.vl_source_cid",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "36",
+            "optional": false,
+            "field": "lead.visitor_log.vl_ga_client_id",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "36",
+            "optional": false,
+            "field": "lead.visitor_log.vl_ga_user_id",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "lead.visitor_log.vl_customer_id",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": false,
+            "field": "lead.visitor_log.vl_gclid",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "255",
+            "optional": false,
+            "field": "lead.visitor_log.vl_dclid",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "lead.visitor_log.vl_utm_source",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "lead.visitor_log.vl_utm_medium",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "lead.visitor_log.vl_utm_campaign",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "lead.visitor_log.vl_utm_term",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "lead.visitor_log.vl_utm_content",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "500",
+            "optional": false,
+            "field": "lead.visitor_log.vl_referral_url",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "500",
+            "optional": false,
+            "field": "lead.visitor_log.vl_location_url",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "500",
+            "optional": false,
+            "field": "lead.visitor_log.vl_user_agent",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "39",
+            "optional": false,
+            "field": "lead.visitor_log.vl_ip_address",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "datetime",
+            "size": "YYYY-MM-DD HH:mm:ss",
+            "optional": false,
+            "field": "lead.visitor_log.vl_visit_dt",
+            "description": ""
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"flights\": [\n           {\n               \"origin\": \"KIV\",\n               \"destination\": \"DME\",\n               \"departure\": \"2018-10-13 13:50:00\",\n           },\n           {\n               \"origin\": \"DME\",\n               \"destination\": \"KIV\",\n               \"departure\": \"2018-10-18 10:54:00\",\n           }\n       ],\n       \"emails\": [\n         \"email1@gmail.com\",\n         \"email2@gmail.com\",\n       ],\n       \"phones\": [\n         \"+373-69-487523\",\n         \"022-45-7895-89\",\n       ],\n       \"source_id\": 38,\n       \"sub_sources_code\": \"BBM101\",\n       \"adults\": 1,\n       \"client_first_name\": \"Alexandr\",\n       \"client_last_name\": \"Freeman\"\n   }\n}",
+          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"flights\": [\n           {\n               \"origin\": \"KIV\",\n               \"destination\": \"DME\",\n               \"departure\": \"2018-10-13 13:50:00\",\n           },\n           {\n               \"origin\": \"DME\",\n               \"destination\": \"KIV\",\n               \"departure\": \"2018-10-18 10:54:00\",\n           }\n       ],\n       \"emails\": [\n         \"email1@gmail.com\",\n         \"email2@gmail.com\",\n       ],\n       \"phones\": [\n         \"+373-69-487523\",\n         \"022-45-7895-89\",\n       ],\n       \"source_id\": 38,\n       \"sub_sources_code\": \"BBM101\",\n       \"adults\": 1,\n       \"client_first_name\": \"Alexandr\",\n       \"client_last_name\": \"Freeman\",\n       \"visitor_log\": [\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              },\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              }\n       ]\n   }\n}",
           "type": "json"
         }
       ]
@@ -789,7 +698,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n{\n\"status\": 200,\n\"name\": \"Success\",\n\"code\": 0,\n\"message\": \"\",\n\"data\": {\n\"response\": {\n\"lead\": {\n\"client_id\": 11,\n\"employee_id\": null,\n\"status\": 1,\n\"uid\": \"5b73b80eaf69b\",\n\"gid\": \"65df1546edccce15518e929e5af1a4\",\n\"project_id\": 6,\n\"source_id\": \"38\",\n\"trip_type\": \"RT\",\n\"cabin\": \"E\",\n\"adults\": \"1\",\n\"children\": 0,\n\"infants\": 0,\n\"notes_for_experts\": null,\n\"created\": \"2018-08-15 05:20:14\",\n\"updated\": \"2018-08-15 05:20:14\",\n\"request_ip\": \"127.0.0.1\",\n\"request_ip_detail\": \"{\\\"ip\\\":\\\"127.0.0.1\\\",\\\"city\\\":\\\"North Pole\\\",\\\"postal\\\":\\\"99705\\\",\\\"state\\\":\\\"Alaska\\\",\\\"state_code\\\":\\\"AK\\\",\\\"country\\\":\\\"United States\\\",\\\"country_code\\\":\\\"US\\\",\\\"location\\\":\\\"64.7548317,-147.3431046\\\",\\\"timezone\\\":{\\\"id\\\":\\\"America\\\\/Anchorage\\\",\\\"location\\\":\\\"61.21805,-149.90028\\\",\\\"country_code\\\":\\\"US\\\",\\\"country_name\\\":\\\"United States of America\\\",\\\"iso3166_1_alpha_2\\\":\\\"US\\\",\\\"iso3166_1_alpha_3\\\":\\\"USA\\\",\\\"un_m49_code\\\":\\\"840\\\",\\\"itu\\\":\\\"USA\\\",\\\"marc\\\":\\\"xxu\\\",\\\"wmo\\\":\\\"US\\\",\\\"ds\\\":\\\"USA\\\",\\\"phone_prefix\\\":\\\"1\\\",\\\"fifa\\\":\\\"USA\\\",\\\"fips\\\":\\\"US\\\",\\\"gual\\\":\\\"259\\\",\\\"ioc\\\":\\\"USA\\\",\\\"currency_alpha_code\\\":\\\"USD\\\",\\\"currency_country_name\\\":\\\"UNITED STATES\\\",\\\"currency_minor_unit\\\":\\\"2\\\",\\\"currency_name\\\":\\\"US Dollar\\\",\\\"currency_code\\\":\\\"840\\\",\\\"independent\\\":\\\"Yes\\\",\\\"capital\\\":\\\"Washington\\\",\\\"continent\\\":\\\"NA\\\",\\\"tld\\\":\\\".us\\\",\\\"languages\\\":\\\"en-US,es-US,haw,fr\\\",\\\"geoname_id\\\":\\\"6252001\\\",\\\"edgar\\\":\\\"\\\"},\\\"datetime\\\":{\\\"date\\\":\\\"08\\\\/14\\\\/2018\\\",\\\"date_time\\\":\\\"08\\\\/14\\\\/2018 21:20:15\\\",\\\"date_time_txt\\\":\\\"Tuesday, August 14, 2018 21:20:15\\\",\\\"date_time_wti\\\":\\\"Tue, 14 Aug 2018 21:20:15 -0800\\\",\\\"date_time_ymd\\\":\\\"2018-08-14T21:20:15-08:00\\\",\\\"time\\\":\\\"21:20:15\\\",\\\"month\\\":\\\"8\\\",\\\"month_wilz\\\":\\\"08\\\",\\\"month_abbr\\\":\\\"Aug\\\",\\\"month_full\\\":\\\"August\\\",\\\"month_days\\\":\\\"31\\\",\\\"day\\\":\\\"14\\\",\\\"day_wilz\\\":\\\"14\\\",\\\"day_abbr\\\":\\\"Tue\\\",\\\"day_full\\\":\\\"Tuesday\\\",\\\"year\\\":\\\"2018\\\",\\\"year_abbr\\\":\\\"18\\\",\\\"hour_12_wolz\\\":\\\"9\\\",\\\"hour_12_wilz\\\":\\\"09\\\",\\\"hour_24_wolz\\\":\\\"21\\\",\\\"hour_24_wilz\\\":\\\"21\\\",\\\"hour_am_pm\\\":\\\"pm\\\",\\\"minutes\\\":\\\"20\\\",\\\"seconds\\\":\\\"15\\\",\\\"week\\\":\\\"33\\\",\\\"offset_seconds\\\":\\\"-28800\\\",\\\"offset_minutes\\\":\\\"-480\\\",\\\"offset_hours\\\":\\\"-8\\\",\\\"offset_gmt\\\":\\\"-08:00\\\",\\\"offset_tzid\\\":\\\"America\\\\/Anchorage\\\",\\\"offset_tzab\\\":\\\"AKDT\\\",\\\"offset_tzfull\\\":\\\"Alaska Daylight Time\\\",\\\"tz_string\\\":\\\"AKST+9AKDT,M3.2.0\\\\/2,M11.1.0\\\\/2\\\",\\\"dst\\\":\\\"true\\\",\\\"dst_observes\\\":\\\"true\\\",\\\"timeday_spe\\\":\\\"evening\\\",\\\"timeday_gen\\\":\\\"evening\\\"}}\",\n\"offset_gmt\": \"-08.00\",\n\"snooze_for\": null,\n\"rating\": null,\n\"id\": 7\n},\n\"flights\": [\n{\n\"origin\": \"BOS\",\n\"destination\": \"LGW\",\n\"departure\": \"2018-09-19\"\n},\n{\n\"origin\": \"LGW\",\n\"destination\": \"BOS\",\n\"departure\": \"2018-09-22\"\n}\n],\n\"emails\": [\n\"chalpet@gmail.com\",\n\"chalpet2@gmail.com\"\n],\n\"phones\": [\n\"+373-69-98-698\",\n\"+373-69-98-698\"\n]\n},\n\"request\": {\n\"client_id\": null,\n\"employee_id\": null,\n\"status\": null,\n\"uid\": null,\n\"project_id\": 6,\n\"source_id\": \"38\",\n\"trip_type\": null,\n\"cabin\": null,\n\"adults\": \"1\",\n\"children\": null,\n\"infants\": null,\n\"notes_for_experts\": null,\n\"created\": null,\n\"updated\": null,\n\"request_ip\": null,\n\"request_ip_detail\": null,\n\"offset_gmt\": null,\n\"snooze_for\": null,\n\"rating\": null,\n\"flights\": [\n{\n\"origin\": \"BOS\",\n\"destination\": \"LGW\",\n\"departure\": \"2018-09-19\"\n},\n{\n\"origin\": \"LGW\",\n\"destination\": \"BOS\",\n\"departure\": \"2018-09-22\"\n}\n],\n\"emails\": [\n\"chalpet@gmail.com\",\n\"chalpet2@gmail.com\"\n],\n\"phones\": [\n\"+373-69-98-698\",\n\"+373-69-98-698\"\n],\n\"client_first_name\": \"Alexandr\",\n\"client_last_name\": \"Freeman\"\n}\n},\n\"action\": \"v1/lead/create\",\n\"response_id\": 42,\n\"request_dt\": \"2018-08-15 05:20:14\",\n\"response_dt\": \"2018-08-15 05:20:15\"\n}",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"status\": 200,\n  \"name\": \"Success\",\n  \"code\": 0,\n  \"message\": \"\",\n  \"data\": {\n      \"response\": {\n          \"lead\": {\n              \"client_id\": 11,\n              \"employee_id\": null,\n              \"status\": 1,\n              \"uid\": \"5b73b80eaf69b\",\n              \"gid\": \"65df1546edccce15518e929e5af1a4\",\n              \"project_id\": 6,\n              \"source_id\": \"38\",\n              \"trip_type\": \"RT\",\n              \"cabin\": \"E\",\n              \"adults\": \"1\",\n              \"children\": 0,\n              \"infants\": 0,\n              \"notes_for_experts\": null,\n              \"created\": \"2018-08-15 05:20:14\",\n              \"updated\": \"2018-08-15 05:20:14\",\n              \"request_ip\": \"127.0.0.1\",\n              \"request_ip_detail\": \"{\\\"ip\\\":\\\"127.0.0.1\\\",\\\"city\\\":\\\"North Pole\\\",\\\"postal\\\":\\\"99705\\\",\\\"state\\\":\\\"Alaska\\\",\\\"state_code\\\":\\\"AK\\\",\\\"country\\\":\\\"United States\\\",\\\"country_code\\\":\\\"US\\\",\\\"location\\\":\\\"64.7548317,-147.3431046\\\",\\\"timezone\\\":{\\\"id\\\":\\\"America\\\\/Anchorage\\\",\\\"location\\\":\\\"61.21805,-149.90028\\\",\\\"country_code\\\":\\\"US\\\",\\\"country_name\\\":\\\"United States of America\\\",\\\"iso3166_1_alpha_2\\\":\\\"US\\\",\\\"iso3166_1_alpha_3\\\":\\\"USA\\\",\\\"un_m49_code\\\":\\\"840\\\",\\\"itu\\\":\\\"USA\\\",\\\"marc\\\":\\\"xxu\\\",\\\"wmo\\\":\\\"US\\\",\\\"ds\\\":\\\"USA\\\",\\\"phone_prefix\\\":\\\"1\\\",\\\"fifa\\\":\\\"USA\\\",\\\"fips\\\":\\\"US\\\",\\\"gual\\\":\\\"259\\\",\\\"ioc\\\":\\\"USA\\\",\\\"currency_alpha_code\\\":\\\"USD\\\",\\\"currency_country_name\\\":\\\"UNITED STATES\\\",\\\"currency_minor_unit\\\":\\\"2\\\",\\\"currency_name\\\":\\\"US Dollar\\\",\\\"currency_code\\\":\\\"840\\\",\\\"independent\\\":\\\"Yes\\\",\\\"capital\\\":\\\"Washington\\\",\\\"continent\\\":\\\"NA\\\",\\\"tld\\\":\\\".us\\\",\\\"languages\\\":\\\"en-US,es-US,haw,fr\\\",\\\"geoname_id\\\":\\\"6252001\\\",\\\"edgar\\\":\\\"\\\"},\\\"datetime\\\":{\\\"date\\\":\\\"08\\\\/14\\\\/2018\\\",\\\"date_time\\\":\\\"08\\\\/14\\\\/2018 21:20:15\\\",\\\"date_time_txt\\\":\\\"Tuesday, August 14, 2018 21:20:15\\\",\\\"date_time_wti\\\":\\\"Tue, 14 Aug 2018 21:20:15 -0800\\\",\\\"date_time_ymd\\\":\\\"2018-08-14T21:20:15-08:00\\\",\\\"time\\\":\\\"21:20:15\\\",\\\"month\\\":\\\"8\\\",\\\"month_wilz\\\":\\\"08\\\",\\\"month_abbr\\\":\\\"Aug\\\",\\\"month_full\\\":\\\"August\\\",\\\"month_days\\\":\\\"31\\\",\\\"day\\\":\\\"14\\\",\\\"day_wilz\\\":\\\"14\\\",\\\"day_abbr\\\":\\\"Tue\\\",\\\"day_full\\\":\\\"Tuesday\\\",\\\"year\\\":\\\"2018\\\",\\\"year_abbr\\\":\\\"18\\\",\\\"hour_12_wolz\\\":\\\"9\\\",\\\"hour_12_wilz\\\":\\\"09\\\",\\\"hour_24_wolz\\\":\\\"21\\\",\\\"hour_24_wilz\\\":\\\"21\\\",\\\"hour_am_pm\\\":\\\"pm\\\",\\\"minutes\\\":\\\"20\\\",\\\"seconds\\\":\\\"15\\\",\\\"week\\\":\\\"33\\\",\\\"offset_seconds\\\":\\\"-28800\\\",\\\"offset_minutes\\\":\\\"-480\\\",\\\"offset_hours\\\":\\\"-8\\\",\\\"offset_gmt\\\":\\\"-08:00\\\",\\\"offset_tzid\\\":\\\"America\\\\/Anchorage\\\",\\\"offset_tzab\\\":\\\"AKDT\\\",\\\"offset_tzfull\\\":\\\"Alaska Daylight Time\\\",\\\"tz_string\\\":\\\"AKST+9AKDT,M3.2.0\\\\/2,M11.1.0\\\\/2\\\",\\\"dst\\\":\\\"true\\\",\\\"dst_observes\\\":\\\"true\\\",\\\"timeday_spe\\\":\\\"evening\\\",\\\"timeday_gen\\\":\\\"evening\\\"}}\",\n              \"offset_gmt\": \"-08.00\",\n              \"snooze_for\": null,\n              \"rating\": null,\n              \"id\": 7\n          },\n          \"flights\": [\n              {\n                  \"origin\": \"BOS\",\n                  \"destination\": \"LGW\",\n                  \"departure\": \"2018-09-19\"\n              },\n              {\n                  \"origin\": \"LGW\",\n                  \"destination\": \"BOS\",\n                  \"departure\": \"2018-09-22\"\n              }\n          ],\n          \"emails\": [\n              \"chalpet@gmail.com\",\n              \"chalpet2@gmail.com\"\n          ],\n          \"phones\": [\n              \"+373-69-98-698\",\n              \"+373-69-98-698\"\n          ]\n      },\n      \"request\": {\n          \"client_id\": null,\n          \"employee_id\": null,\n          \"status\": null,\n          \"uid\": null,\n          \"project_id\": 6,\n          \"source_id\": \"38\",\n          \"trip_type\": null,\n          \"cabin\": null,\n          \"adults\": \"1\",\n          \"children\": null,\n          \"infants\": null,\n          \"notes_for_experts\": null,\n          \"created\": null,\n          \"updated\": null,\n          \"request_ip\": null,\n          \"request_ip_detail\": null,\n          \"offset_gmt\": null,\n          \"snooze_for\": null,\n          \"rating\": null,\n          \"flights\": [\n              {\n                  \"origin\": \"BOS\",\n                  \"destination\": \"LGW\",\n                  \"departure\": \"2018-09-19\"\n              },\n              {\n                  \"origin\": \"LGW\",\n                  \"destination\": \"BOS\",\n                  \"departure\": \"2018-09-22\"\n              }\n          ],\n          \"emails\": [\n              \"chalpet@gmail.com\",\n              \"chalpet2@gmail.com\"\n          ],\n          \"phones\": [\n              \"+373-69-98-698\",\n              \"+373-69-98-698\"\n          ],\n          \"client_first_name\": \"Alexandr\",\n          \"client_last_name\": \"Freeman\"\n      }\n  },\n  \"action\": \"v1/lead/create\",\n  \"response_id\": 42,\n  \"request_dt\": \"2018-08-15 05:20:14\",\n  \"response_dt\": \"2018-08-15 05:20:15\"\n}",
           "type": "json"
         }
       ]
@@ -814,6 +723,231 @@ define({ "api": [
       ]
     },
     "filename": "webapi/modules/v1/controllers/LeadController.php",
+    "groupTitle": "Leads"
+  },
+  {
+    "type": "post",
+    "url": "/v2/lead/create",
+    "title": "Create Lead Alternative",
+    "version": "0.2.0",
+    "name": "CreateLeadAlternative",
+    "group": "Leads",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "lead",
+            "description": "<p>Lead data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "lead.source_code",
+            "description": "<p>Source Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..9",
+            "optional": false,
+            "field": "lead.adults",
+            "description": "<p>Adult count</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..9",
+            "optional": false,
+            "field": "lead.children",
+            "description": "<p>Children count</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..9",
+            "optional": false,
+            "field": "lead.infants",
+            "description": "<p>Infants count</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "lead.request_ip",
+            "description": "<p>Request IP</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": true,
+            "field": "lead.discount_id",
+            "description": "<p>Discount ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": false,
+            "field": "lead.uid",
+            "description": "<p>UID value</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "text",
+            "optional": true,
+            "field": "lead.user_agent",
+            "description": "<p>User agent info</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object[]",
+            "optional": false,
+            "field": "lead.segments",
+            "description": "<p>Segments</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "lead.segments.origin",
+            "description": "<p>Segment Origin location Airport IATA-code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "lead.segments.destination",
+            "description": "<p>Segment Destination location Airport IATA-code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "datetime",
+            "size": "YYYY-MM-DD",
+            "optional": false,
+            "field": "lead.segments.departure",
+            "description": "<p>Segment Departure DateTime (format YYYY-MM-DD)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "lead.client",
+            "description": "<p>Client</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "lead.client.phone",
+            "description": "<p>Client phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "2",
+            "allowedValues": [
+              "14-BOOK_FAILED",
+              "15-ALTERNATIVE"
+            ],
+            "optional": false,
+            "field": "lead.status",
+            "description": "<p>Status</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "1",
+            "allowedValues": [
+              "E-ECONOMY",
+              "B-BUSINESS",
+              "F-FIRST",
+              "P-PREMIUM"
+            ],
+            "optional": false,
+            "field": "lead.cabin",
+            "description": "<p>Cabin</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "lead.flight_id",
+            "description": "<p>BO Flight ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"segments\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ]\n      }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"lead\": {\n              \"id\": 370949,\n              \"uid\": \"WD6q53PO3b\",\n              \"gid\": \"63e1505f4a8a87e6651048e3e3eae4e1\",\n              \"client_id\": 1034\n          }\n      }\n      \"request\": {\n          \"lead\": {\n             \"client\": {\n                  \"phone\": \"+37369636963\"\n              },\n              \"uid\": \"WD6q53PO3b\",\n              \"status\": 14,\n              \"source_code\": \"JIVOCH\",\n              \"cabin\": \"E\",\n              \"adults\": 2,\n              \"children\": 2,\n              \"infants\": 2,\n              \"request_ip\": \"12.12.12.12\",\n              \"discount_id\": \"123123\",\n              \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n              \"flight_id\": 12457,\n              \"segments\": [\n                  {\n                      \"origin\": \"NYC\",\n                      \"destination\": \"LON\",\n                      \"departure\": \"2019-12-16\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-17\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-18\"\n                  }\n              ]\n          }\n      },\n      \"technical\": {\n          \"action\": \"v2/lead/create\",\n          \"response_id\": 11930215,\n          \"request_dt\": \"2019-12-30 12:22:20\",\n          \"response_dt\": \"2019-12-30 12:22:21\",\n          \"execution_time\": 0.055,\n          \"memory_usage\": 1394416\n      }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"children\": [\n              \"Children must be no greater than 9.\"\n          ],\n          \"segments[0][origin]\": [\n              \"IATA (NY) not found.\"\n          ],\n          \"segments[2][departure]\": [\n              \"The format of Departure is invalid.\"\n          ],\n          \"client[phone]\": [\n             \"The format of Phone is invalid.\"\n          ]\n      },\n      \"code\": 10301,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found Lead data on POST request\"\n      ],\n      \"code\": 10300,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Saving error\",\n      \"errors\": [\n          \"Saving error\"\n      ],\n      \"code\": 10101,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/LeadController.php",
     "groupTitle": "Leads"
   },
   {
@@ -2057,6 +2191,20 @@ define({ "api": [
             "optional": false,
             "field": "Authorization",
             "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "If-Modified-Since",
+            "description": "<p>Format <code> day-name, day month year hour:minute:second GMT</code></p>"
           }
         ]
       },
@@ -2081,7 +2229,7 @@ define({ "api": [
           "type": "json"
         },
         {
-          "title": "Redirection-Response (304):",
+          "title": "Not Modified-Response (304):",
           "content": "\nHTTP/1.1 304 Not Modified\nCache-Control: public, max-age=3600\nLast-Modified: Mon, 23 Dec 2019 08:17:53 GMT",
           "type": "json"
         }
