@@ -38,7 +38,10 @@ class PhoneBlacklistQuery extends \yii\db\ActiveQuery
         $query = $this->select(['pbl_phone']);
             //->where(['pbl_phone' => $phone]);
 
-        $sql = "REGEXP_LIKE(:phone, CONCAT('^', REPLACE(REPLACE(REPLACE(pbl_phone, '.', '[0-9]'), '*', '[0-9]*'), '+', '\\\\+'), '$')) = 1";
+        // $sql = "REGEXP_LIKE(:phone, CONCAT('^', REPLACE(REPLACE(REPLACE(pbl_phone, '.', '[0-9]'), '*', '[0-9]*'), '+', '\\\\+'), '$')) = 1"; // TODO Mysql8
+        $sql = ":phone REGEXP CONCAT('^', REPLACE(REPLACE(REPLACE(pbl_phone, '.', '[0-9]'), '*', '[0-9]*'), '+', '\\\\+'), '$') = 1";
+
+
         $query->where($sql, [':phone' => $phone]);
         $query->active()->activeByExpired();
 
