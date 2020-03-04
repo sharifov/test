@@ -10,6 +10,7 @@ use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
+use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
@@ -201,6 +202,9 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //                        if ($email->e_case_id && ($case = Cases::findOne($email->e_case_id))) {
 //                            (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_EMAIL);
 //                        }
+                        if ($email->e_case_id) {
+                            (Yii::createObject(CasesManageService::class))->needAction($email->e_case_id);
+                        }
 
                         $countTotal++;
                     }

@@ -2,6 +2,7 @@
 
 namespace sales\services\sms\incoming;
 
+use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesCreateService;
@@ -26,6 +27,7 @@ use sales\services\client\ClientManageService;
  * @property CasesCreateService $casesCreate
  * @property InternalContactService $internalContactService
  * @property CasesCommunicationService $casesCommunicationService
+ * @property EventDispatcher $eventDispatcher
  */
 class SmsIncomingService
 {
@@ -36,6 +38,7 @@ class SmsIncomingService
     private $casesCreate;
     private $internalContactService;
     private $casesCommunicationService;
+    private $eventDispatcher;
 
     public function __construct(
         ClientManageService $clients,
@@ -44,7 +47,8 @@ class SmsIncomingService
         TransactionManager $transactionManager,
         CasesCreateService $casesCreate,
         InternalContactService $internalContactService,
-        CasesCommunicationService $casesCommunicationService
+        CasesCommunicationService $casesCommunicationService,
+        EventDispatcher $eventDispatcher
     )
     {
         $this->clients = $clients;
@@ -54,6 +58,7 @@ class SmsIncomingService
         $this->casesCreate = $casesCreate;
         $this->internalContactService = $internalContactService;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -80,16 +85,19 @@ class SmsIncomingService
                 if ($department->isSales()) {
                     $sms = $this->createSmsBySales($form, $client->id, $contact->userId);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
                 if ($department->isExchange()) {
                     $sms = $this->createSmsByExchange($form, $client->id, $contact->userId);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
                 if ($department->isSupport()) {
                     $sms = $this->createSmsBySupport($form, $client->id, $contact->userId);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
             }
@@ -97,6 +105,8 @@ class SmsIncomingService
             $sms = $this->createSmsByDefault($form, $client->id, $contact->userId);
             $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
             Yii::error('Incoming sms. Sms Id: ' . $sms->s_id . ' | Not found Department for phone: ' . $form->si_phone_to, 'SmsIncomingService');
+
+            $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
             return $sms;
 
         });

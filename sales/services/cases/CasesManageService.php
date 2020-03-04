@@ -53,6 +53,20 @@ class CasesManageService
         $this->finder = $finder;
     }
 
+    public function needAction(int $caseId): void
+    {
+        try {
+            $case = $this->casesRepository->find($caseId);
+            if ($case->isNeedAction()) {
+                return;
+            }
+            $case->onNeedAction();
+            $this->casesRepository->save($case);
+        } catch (\Throwable $e) {
+            \Yii::error($e, 'CasesManageService:needAction');
+        }
+    }
+
     public function markChecked(int $caseId): void
     {
         $case = $this->casesRepository->find($caseId);
