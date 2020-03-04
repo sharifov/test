@@ -68,6 +68,8 @@ class CasesQSearch extends Cases
             ['solved_date', 'string'],
 
             ['trash_date', 'string'],
+
+            ['cs_need_action', 'boolean'],
         ];
     }
 
@@ -162,6 +164,7 @@ class CasesQSearch extends Cases
             'cs_project_id' => $this->cs_project_id,
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
+            'cs_need_action' => $this->cs_need_action,
         ]);
 
         if ($this->cs_lead_id) {
@@ -190,7 +193,7 @@ class CasesQSearch extends Cases
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['cs_need_action' => SORT_DESC, 'cs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -212,6 +215,7 @@ class CasesQSearch extends Cases
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
 			'cs_user_id' => $this->cs_user_id,
+            'cs_need_action' => $this->cs_need_action,
 		]);
 
 //        if ($this->cs_user_id) {
@@ -248,6 +252,7 @@ class CasesQSearch extends Cases
             'query' => $query,
             'sort'=> [
                 'defaultOrder' => [
+                    'cs_need_action' => SORT_DESC,
                     'time_left' => SORT_ASC,
                     'cs_id' => SORT_ASC,
                 ],
@@ -262,6 +267,7 @@ class CasesQSearch extends Cases
                     'cs_created_dt',
                     'cs_user_id',
                     'time_left',
+                    'cs_need_action',
                 ],
             ],
             'pagination' => [
@@ -285,6 +291,7 @@ class CasesQSearch extends Cases
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
 			'cs_user_id' => $this->cs_user_id,
+			'cs_need_action' => $this->cs_need_action,
 		]);
 
         if ($this->cs_lead_id) {
@@ -399,7 +406,7 @@ class CasesQSearch extends Cases
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['cs_need_action' => SORT_DESC, 'cs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -421,6 +428,7 @@ class CasesQSearch extends Cases
             'cs_category' => $this->cs_category,
             'cs_dep_id' => $this->cs_dep_id,
 			'cs_user_id' => $this->cs_user_id,
+			'cs_need_action' => $this->cs_need_action,
 		]);
 
 //        if ($this->cs_user_id) {
@@ -467,6 +475,7 @@ class CasesQSearch extends Cases
             'cs_updated_dt' => 'Last Action',
             'cs_deadline_dt' => 'Deadline',
             'lastSolvedDate' => 'Solved',
+            'cs_need_action' => 'Need Action',
         ];
     }
 }

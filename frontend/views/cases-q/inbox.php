@@ -4,6 +4,7 @@ use common\models\Department;
 use common\models\Project;
 use sales\entities\cases\CasesCategory;
 use sales\entities\cases\CasesQSearch;
+use sales\yii\grid\cases\NeedActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
@@ -36,7 +37,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cs_id',
                 'label' => 'ID',
             ],
-            'cs_gid',
 			[
 				'attribute' => 'cs_project_id',
 				'value' => static function (CasesQSearch $model) {
@@ -65,6 +65,10 @@ $this->params['breadcrumbs'][] = $this->title;
 				},
 				'filter' => Department::getList()
 			],
+            [
+                'class' => NeedActionColumn::class,
+                'attribute' => 'cs_need_action',
+            ],
 			[
 				'attribute' => 'cs_created_dt',
 				'value' => static function (CasesQSearch $model) {

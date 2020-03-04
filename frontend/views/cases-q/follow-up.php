@@ -6,6 +6,7 @@ use common\models\Project;
 use sales\access\ListsAccess;
 use sales\entities\cases\CasesCategory;
 use sales\entities\cases\CasesQSearch;
+use sales\yii\grid\cases\NeedActionColumn;
 use sales\yii\grid\DeadlineColumn;
 use yii\helpers\Html;
 use dosamigos\datepicker\DatePicker;
@@ -52,7 +53,6 @@ $lists = new ListsAccess($user->id);
                 'label' => 'Time left',
                 'attribute' => 'time_left',
             ],
-            'cs_gid',
 			[
 				'attribute' => 'cs_project_id',
 				'value' => static function (CasesQSearch $model) {
@@ -81,6 +81,10 @@ $lists = new ListsAccess($user->id);
 				},
 				'filter' => Department::getList()
 			],
+            [
+                'class' => NeedActionColumn::class,
+                'attribute' => 'cs_need_action',
+            ],
 			[
 				'attribute' => 'cs_created_dt',
 				'value' => static function (CasesQSearch $model) {

@@ -140,6 +140,10 @@ $gridId = 'cases-grid-id';
                 'class' => CasesSourceTypeColumn::class,
                 'attribute' => 'cs_source_type_id',
             ],
+            [
+                'class' => \sales\yii\grid\cases\NeedActionColumn::class,
+                'attribute' => 'cs_need_action',
+            ],
             'cs_subject',
             [
                 'attribute' => 'cs_user_id',

@@ -549,6 +549,7 @@ class Cases extends ActiveRecord implements Objectable
             'cs_last_action_dt' => 'Last Action',
             'cs_source_type_id' => 'Source type',
             'cs_deadline_dt' => 'Deadline',
+            'cs_need_action' => 'Need Action',
         ];
     }
 
