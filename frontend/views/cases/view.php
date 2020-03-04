@@ -58,7 +58,10 @@ $user = Yii::$app->user->identity;
                 <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
                 <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->casesStatusLogs ? '(' . count($model->casesStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
                 <?= CasesViewRenderHelper::renderTakeButton($model, $user) ?>
-                <?= CasesViewRenderHelper::renderCheckedButton($model) ?>
+                <?php if (Auth::can('cases/view_Checked', ['case' => $model])): ?>
+                    <?= CasesViewRenderHelper::renderCheckedButton($model) ?>
+                <?php endif; ?>
+
                 <?php /*= Html::a('Update', ['update', 'id' => $model->cs_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->cs_id], [
             'class' => 'btn btn-danger',

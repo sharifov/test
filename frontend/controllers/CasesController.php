@@ -143,7 +143,7 @@ class CasesController extends FController
         $behaviors = [
             'access' => [
                 'allowActions' => [
-                    'mark',
+                    'mark-checked',
                 ],
             ],
         ];
@@ -1494,11 +1494,16 @@ class CasesController extends FController
     /**
      * @param $gid
      * @return Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    public function actionMark($gid): Response
+    public function actionMarkChecked($gid): Response
     {
         $model = $this->findModelByGid((string)$gid);
+
+        if (!Auth::can('cases/view_Checked', ['case' => $model])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
 
         try {
             $this->casesManageService->markChecked($model->cs_id);

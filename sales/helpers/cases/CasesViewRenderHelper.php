@@ -44,7 +44,7 @@ class CasesViewRenderHelper
     public static function renderCheckedButton(Cases $case): string
     {
         if ($case->isNeedAction()) {
-            return Html::a('Mark Checked', ['/cases/mark', 'gid' => $case->cs_gid], ['class' => 'btn btn-info', 'title' => 'Mark as checked']);
+            return Html::a('Mark Checked', ['/cases/mark-checked', 'gid' => $case->cs_gid], ['class' => 'btn btn-info', 'title' => 'Mark as checked']);
         }
         return Html::tag('span', 'Checked', ['class' => 'badge badge-warning', 'title' => 'Mark as checked', 'style' => 'padding:9px']);
     }
