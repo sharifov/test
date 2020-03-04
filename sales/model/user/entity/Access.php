@@ -32,7 +32,7 @@ class Access
 
     public function getActiveProjects(): array
     {
-        return array_column(array_filter($this->getProjects(), fn($v) => !$v['closed'], ARRAY_FILTER_USE_BOTH), 'name', 'id');
+        return array_column(array_filter($this->getProjects(), static function ($v) { return !$v['closed']; }, ARRAY_FILTER_USE_BOTH), 'name', 'id');
     }
 
     private function getProjects(): array
@@ -74,7 +74,7 @@ class Access
 
     public function getActiveGroups(): array
     {
-        return array_column(array_filter($this->getGroups(), fn($v) => !$v['ug_disable'], ARRAY_FILTER_USE_BOTH), 'ug_name', 'ug_id');
+        return array_column(array_filter($this->getGroups(), static function ($v) { return !$v['ug_disable']; }, ARRAY_FILTER_USE_BOTH), 'ug_name', 'ug_id');
     }
 
     private function getGroups(): array
