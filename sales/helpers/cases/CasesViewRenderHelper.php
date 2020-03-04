@@ -46,6 +46,6 @@ class CasesViewRenderHelper
         if ($case->isNeedAction()) {
             return Html::a('Mark Checked', ['/cases/mark-checked', 'gid' => $case->cs_gid], ['class' => 'btn btn-info', 'title' => 'Mark as checked']);
         }
-        return Html::tag('span', 'Checked', ['class' => 'badge badge-warning', 'title' => 'Mark as checked', 'style' => 'padding:9px']);
+        return Html::tag('span', 'Checked', ['class' => 'badge badge-warning', 'title' => 'Mark as checked', 'style' => 'padding:9px;background-color:#A9A9A9']);
     }
 }
