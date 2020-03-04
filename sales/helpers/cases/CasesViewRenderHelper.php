@@ -16,18 +16,23 @@ class CasesViewRenderHelper
             return '';
         }
         $allowActionsList = CasesStatusTransferList::getAllowTransferListByUser($model->cs_status, $user);
-        if (isset($allowActionsList[CasesStatus::STATUS_PROCESSING]) && !$model->isOwner($user->id)) {
-            if ($model->isProcessing()) {
-                return Html::a('Take over ', ['cases/take', 'gid' => $model->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take over']);
+        if (isset($allowActionsList[CasesStatus::STATUS_PROCESSING])) {
+            if (!$model->isOwner($user->id)) {
+                if ($model->isProcessing()) {
+                    return Html::a('Take over ', ['cases/take', 'gid' => $model->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take over']);
+                }
+                return Html::a('Take', ['cases/take', 'gid' => $model->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
             }
-            return Html::a('Take', ['cases/take', 'gid' => $model->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
+            if ($model->isTrash()) {
+                return Html::a('Take', ['cases/take', 'gid' => $model->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
+            }
         }
         return '';
     }
 
     public static function renderChangeStatusButton(int $status, Employee $user): string
     {
-        $list =  CasesStatusTransferList::getAllowTransferListByUser($status, $user);
+        $list = CasesStatusTransferList::getAllowTransferListByUser($status, $user);
         if (!$user->isAdmin() && !$user->isExSuper() && !$user->isSupSuper()) {
             if (isset($list[CasesStatus::STATUS_PROCESSING])) {
                 unset($list[CasesStatus::STATUS_PROCESSING]);
