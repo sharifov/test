@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
+use kartik\export\ExportMenu;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
@@ -27,19 +28,15 @@ $lists =  new ListsAccess(Yii::$app->user->id);
     <?php Pjax::begin(); ?>
 
     <?php echo $this->render('_search', [
-            'model' => $searchModel,
+        'model' => $searchModel,
         'action' => 'export',
         'lists' => new ListsAccess()
 
     ]); ?>
 
-
-
     <p>
         <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
-
 
     <?php
 
@@ -100,47 +97,47 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             },
         ],
         [
-                'attribute' => 'called_expert',
+            'attribute' => 'called_expert',
         ],
         [
-                'attribute' => 'grade',
+            'attribute' => 'grade',
         ],
         [
-                'attribute' => 'inCalls',
-                'label' => 'In Calls',
+            'attribute' => 'inCalls',
+            'label' => 'In Calls',
         ],
         [
-                'attribute' => 'inCallsDuration',
-                'label' => 'In Calls Duration',
-                'value' => static function (Lead $lead) {
-                    return $lead->inCallsDuration ?: '';
-                },
+            'attribute' => 'inCallsDuration',
+            'label' => 'In Calls Duration',
+            'value' => static function (Lead $lead) {
+                return $lead->inCallsDuration ?: '';
+            },
         ],
         [
-                'attribute' => 'outCalls',
-                'label' => 'Out Calls',
+            'attribute' => 'outCalls',
+            'label' => 'Out Calls',
         ],
         [
-                'attribute' => 'outCallsDuration',
-                'label' => 'Out Calls Duration',
-                'value' => static function (Lead $lead) {
-                    return $lead->outCallsDuration ?: '';
-                },
+            'attribute' => 'outCallsDuration',
+            'label' => 'Out Calls Duration',
+            'value' => static function (Lead $lead) {
+                return $lead->outCallsDuration ?: '';
+            },
         ],
         [
-                'attribute' => 'smsOffers',
-                'label' => 'Sms Offers',
+            'attribute' => 'smsOffers',
+            'label' => 'Sms Offers',
         ],
         [
-                'attribute' => 'emailOffers',
-                'label' => 'Email Offers',
+            'attribute' => 'emailOffers',
+            'label' => 'Email Offers',
         ],
         [
-                'attribute' => 'quoteType',
-                'label' => 'Quote Type',
-                'value' => static function (Lead $lead) {
-                    return isset($lead->quoteType) ? ($lead->quoteType ? 'Agent' : 'Expert' ) : '';
-                }
+            'attribute' => 'quoteType',
+            'label' => 'Quote Type',
+            'value' => static function (Lead $lead) {
+                return isset($lead->quoteType) ? ($lead->quoteType ? 'Agent' : 'Expert' ) : '';
+            }
         ],
         [
             'header' => 'Segments',
@@ -160,7 +157,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             },
 
         ],
-
 
         [
             'header' => 'Origin City Code',
@@ -184,7 +180,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 return $originCode;
             },
         ],
-
 
         [
             'header' => 'Destination City Code',
@@ -248,7 +243,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             },
         ],
 
-
         [
             'header' => 'Destination City, full name',
             'value' => function(\common\models\Lead $model) {
@@ -276,8 +270,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 if($airport && $airport->city) {
                     $city = $airport->city;
                 }
-
-
 
                 return $city;
             },
@@ -314,7 +306,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 return $country;
             },
         ],
-
 
         [
             'header' => 'Destination Country',
@@ -495,19 +486,48 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 return Yii::$app->formatter->asDatetime(strtotime($model->created), 'php:H:i');
             },
         ],
-
-
-
     ];
-
 
     Yii::$app->state = Yii::$app::STATE_END;
 
+    $pdfHeader = [
+        'L'    => [
+            'content' => 'Sales Engine',
+        ],
+        'C'    => [
+            'content' => 'LEADS REPORT',
+        ],
+        'R'    => [
+            'content' => 'Generated: ' . date('Y-m-d H:i'),
+        ],
+        'line' => true,
+    ];
 
+    $pdfFooter = [
+        'L'    => [
+            'content'     => '',
+        ],
+        'C'    => [
+            'content' => '',
+        ],
+        'line' => false,
+    ];
 
-    $fullExportMenu = \kartik\export\ExportMenu::widget([
+    $fullExportMenu = ExportMenu::widget([
         'dataProvider' => $dataProvider,
         'columns' => $gridColumnsExport,
+        'exportConfig' => [
+            ExportMenu::FORMAT_PDF => [
+                'pdfConfig' => [
+                    'mode' => 'c',
+                    'format' => 'A4-L',
+                    /*'methods' => [
+                        'SetHeader' => ['Test Export'],
+                        'SetFooter' => ['{PAGENO}']
+                    ],*/
+                ]
+            ]
+        ],
         'fontAwesome' => true,
         //'stream' => false, // this will automatically save file to a folder on web server
         //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
@@ -520,32 +540,17 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
         'columnSelectorOptions' => [
             'label' => 'Export Fields'
-        ]
+        ],
     ]);
 
     unset($gridColumnsExport['reason']);
 
-    /*$fullExportMenu = ExportMenu::widget([
-        'dataProvider' => $dataProvider,
-        'batchSize' => 10,
-        'columns' => $gridColumns,
-        'target' => ExportMenu::TARGET_BLANK,
-        'fontAwesome' => true,
-        'asDropdown' => false, // this is important for this case so we just need to get a HTML list
-        'dropdownOptions' => [
-            'label' => '<i class="glyphicon glyphicon-export"></i> Full'
-        ],
-    ]);*/
-
     ?>
 
-    <?php
-
-    echo GridView::widget([
+    <?php echo GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         //'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
-
         'export' => [
             'label' => 'Page',
             'fontAwesome' => true,
@@ -556,9 +561,31 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             ]*/
         ],
 
+        'exportConfig' => [
+            'html' => [],
+            'csv' => [],
+            'txt' => [],
+            'xls' => [],
+            'pdf' => [
+                'config' => [
+                    'mode' => 'c',
+                    'options' => [
+                        'title' => 'Exported Leads in PDF',
+                    ],
+                    'methods' => [
+                        'SetHeader' => [
+                            ['odd' => $pdfHeader, 'even' => $pdfHeader],
+                        ],
+                        'SetFooter' => [
+                            ['odd' => $pdfFooter, 'even' => $pdfFooter],
+                        ],
+                    ],
+                ]
+            ],
+            'json' => [],
+        ],
 
         'columns' => $gridColumnsExport,
-
         'toolbar' =>  [
             ['content'=>
             //Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
@@ -576,8 +603,8 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         'responsive' => false,
         'hover' => true,
         'floatHeader' => false,
-//        'floatHeaderOptions' => ['scrollingTop' => 20],
-        /*'showPageSummary' => true,*/
+        //'floatHeaderOptions' => ['scrollingTop' => 20],
+        //'showPageSummary' => true,
         'panel' => [
             'type' => GridView::TYPE_PRIMARY,
             'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Export Leads</h3>',

@@ -2,6 +2,7 @@
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\access\ListsAccess;
+use kartik\export\ExportMenu;
 
 $this->title = 'Leads Report';
 $this->params['breadcrumbs'][] = $this->title;
@@ -192,6 +193,14 @@ $list = new ListsAccess(Yii::$app->user->id);
     $fullExportMenu = \kartik\export\ExportMenu::widget([
         'dataProvider' => $dataProvider,
         'columns' => $gridColumns,
+        'exportConfig' => [
+            ExportMenu::FORMAT_PDF => [
+                'pdfConfig' => [
+                    'mode' => 'c',
+                    'format' => 'A4-L',
+                ]
+            ]
+        ],
         'fontAwesome' => true,
         'timeout' => 60,
         'target' => \kartik\export\ExportMenu::TARGET_BLANK,
@@ -216,6 +225,19 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         'export' => [
             'label' => 'Page'
+        ],
+        'exportConfig' => [
+            'html' => [],
+            'csv' => [],
+            'txt' => [],
+            'xls' => [],
+            'pdf' => [
+                'config' => [
+                    'mode' => 'c',
+                    'format' => 'A4-L',
+                ]
+            ],
+            'json' => [],
         ],
         'toolbar' => [
             'content' =>'<div class="btn-group">' . Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/leads-report'], ['class' => 'btn btn-outline-secondary', 'title'=>'Reset Grid']) .'</div>',

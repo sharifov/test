@@ -17,6 +17,14 @@ use sales\viewModel\call\ViewModelTotalCallGraph;
 	<?php echo ExportMenu::widget([
 		'dataProvider' => $viewModel->dataProvider,
 		'columns' => $viewModel->gridColumns,
+        'exportConfig' => [
+            ExportMenu::FORMAT_PDF => [
+                'pdfConfig' => [
+                    'mode' => 'c',
+                    'format' => 'A4-L',
+                ]
+            ]
+        ],
 		'target' => \kartik\export\ExportMenu::TARGET_BLANK,
 		'fontAwesome' => true,
 		'dropdownOptions' => [
