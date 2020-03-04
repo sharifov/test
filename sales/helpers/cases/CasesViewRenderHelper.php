@@ -40,4 +40,12 @@ class CasesViewRenderHelper
         }
         return $list ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) : '';
     }
+
+    public static function renderCheckedButton(Cases $case): string
+    {
+        if ($case->isNeedAction()) {
+            return Html::a('Mark Checked', ['/cases/mark', 'gid' => $case->cs_gid], ['class' => 'btn btn-info', 'title' => 'Mark as checked']);
+        }
+        return Html::tag('span', 'Checked', ['class' => 'badge badge-warning', 'title' => 'Mark as checked', 'style' => 'padding:9px']);
+    }
 }

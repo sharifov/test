@@ -53,6 +53,13 @@ class CasesManageService
         $this->finder = $finder;
     }
 
+    public function markChecked(int $caseId): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $case->offNeedAction();
+        $this->casesRepository->save($case);
+    }
+
     /**
      * @param int|Cases $case
      * @param int|Lead $lead
