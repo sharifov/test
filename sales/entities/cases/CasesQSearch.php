@@ -458,6 +458,80 @@ class CasesQSearch extends Cases
     }
 
     /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchNeedAction($params, Employee $user): ActiveDataProvider
+    {
+        $query = $this->casesQRepository->getNeedActionQuery($user)->addSelect(['*']);
+
+        $query->addSelect([
+            'time_left' => new Expression('if ((cs_deadline_dt IS NOT NULL), cs_deadline_dt, \'2100-01-01 00:00:00\')')
+        ]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> [
+                'defaultOrder' => [
+                    'cs_last_action_dt' => SORT_DESC,
+                    'cs_id' => SORT_ASC,
+                ],
+                'attributes' => [
+                    'cs_id',
+                    'cs_gid',
+                    'cs_project_id',
+                    'cs_subject',
+                    'cs_category',
+                    'cs_lead_id',
+                    'cs_dep_id',
+                    'cs_created_dt',
+                    'cs_user_id',
+                    'time_left',
+                    'cs_need_action',
+                    'cs_status',
+                    'cs_last_action_dt'
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
+            'cs_project_id' => $this->cs_project_id,
+            'cs_category' => $this->cs_category,
+            'cs_dep_id' => $this->cs_dep_id,
+            'cs_user_id' => $this->cs_user_id,
+            'cs_need_action' => $this->cs_need_action,
+            'cs_status' => $this->cs_status,
+        ]);
+
+        if ($this->cs_lead_id) {
+            $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
+        }
+
+        if ($this->cs_created_dt) {
+            $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
+        }
+
+        $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+
+        return $dataProvider;
+    }
+
+    /**
      * @return array
      */
     public function attributeLabels(): array

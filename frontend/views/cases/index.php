@@ -6,6 +6,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesCategory;
 use sales\yii\grid\cases\CasesSourceTypeColumn;
+use sales\yii\grid\cases\CasesStatusColumn;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\entities\cases\Cases;
@@ -119,22 +120,7 @@ $gridId = 'cases-grid-id';
                 'filter' => CasesCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
             ],
             [
-                'attribute' => 'cs_status',
-                'value' => static function (Cases $model) {
-                    $value = CasesStatus::getName($model->cs_status);
-                    $str = '<span class="label ' . CasesStatus::getClass($model->cs_status) . '">' . $value . '</span>';
-                    if ($model->lastLogRecord) {
-                        $str .= '<br><br><span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($model->lastLogRecord->csl_start_dt)) . '</span>';
-                        $str .= '<br>';
-                        $str .= $model->lastLogRecord ? Yii::$app->formatter->asRelativeTime(strtotime($model->lastLogRecord->csl_start_dt)) : '';
-                    }
-                    return $str;
-                },
-                'format' => 'raw',
-                'filter' => CasesStatus::STATUS_LIST,
-                'contentOptions' => [
-                    'class' => 'text-center'
-                ]
+                    'class' => CasesStatusColumn::class,
             ],
             [
                 'class' => CasesSourceTypeColumn::class,

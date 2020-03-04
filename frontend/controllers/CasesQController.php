@@ -5,11 +5,12 @@ namespace frontend\controllers;
 use sales\auth\Auth;
 use sales\entities\cases\CasesQSearch;
 use Yii;
+use yii\web\Controller;
 
 /**
  * Class CasesQController
  */
-class CasesQController extends FController
+class CasesQController extends Controller
 {
 
     public function actionPending()
@@ -79,6 +80,18 @@ class CasesQController extends FController
         return $this->render('trash', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionNeedAction()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchNeedAction(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('need-action', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
         ]);
     }
 }
