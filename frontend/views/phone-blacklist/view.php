@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\PhoneBlacklist */
 
-$this->title = $model->pbl_id;
+$this->title = $model->pbl_phone;
 $this->params['breadcrumbs'][] = ['label' => 'Phone Blacklists', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pbl_phone',
             'pbl_description',
             'pbl_enabled:booleanByLabel',
+            'pbl_expiration_date:date',
             'pbl_created_dt:byUserDateTime',
             'pbl_updated_dt:byUserDateTime',
             'updatedUser:userName',

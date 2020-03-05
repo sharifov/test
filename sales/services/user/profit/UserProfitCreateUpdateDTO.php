@@ -1,8 +1,8 @@
 <?php
-namespace modules\order\src\services;
+namespace sales\services\user\profit;
 
 /**
- * Class OrderUserProfitCreateUpdateDTO
+ * Class UserProfitCreateUpdateDTO
  * @package modules\order\src\services
  *
  * @property int|null $userId
@@ -16,7 +16,7 @@ namespace modules\order\src\services;
  * @property int|null $payrollId
  * @property int|null $typeId
  */
-class OrderUserProfitCreateUpdateDTO
+class UserProfitCreateUpdateDTO
 {
 	/**
 	 * @var int|null

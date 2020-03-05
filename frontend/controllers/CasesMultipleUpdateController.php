@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use frontend\widgets\multipleUpdate\cases\MultipleUpdateService;
+use sales\auth\Auth;
 use Yii;
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\cases\MultipleUpdateForm;
@@ -38,6 +39,7 @@ class CasesMultipleUpdateController extends FController
                 'modalId' => 'modal-df',
                 'ids' => Yii::$app->request->post('ids'),
                 'pjaxId' => 'cases-pjax-list',
+                'user' => Auth::user(),
             ]);
         } catch (\DomainException $e) {
             return $this->renderAjax('_error', [
@@ -55,7 +57,7 @@ class CasesMultipleUpdateController extends FController
      */
     public function actionValidation(): array
     {
-        $form = new MultipleUpdateForm();
+        $form = new MultipleUpdateForm(Auth::user());
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($form);
@@ -69,11 +71,9 @@ class CasesMultipleUpdateController extends FController
      */
     public function actionUpdate(): Response
     {
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-        $form = new MultipleUpdateForm();
+        $form = new MultipleUpdateForm(Auth::user());
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            $messages = $this->service->update($form, $user->id);
+            $messages = $this->service->update($form);
             return $this->asJson([
                 'success' => true,
                 'message' => count($messages) . ' rows affected.',

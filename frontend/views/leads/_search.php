@@ -72,7 +72,7 @@ use frontend\extensions\DatePicker;
                     <?= $form->field($model, 'l_answered')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-4">
-                    <?= $form->field($model, 'hybrid_uid') ?>
+                    <?= $form->field($model, 'hybrid_uid')->textInput(['title' => 'Hybrid UID'])->label('Booking ID') ?>
                 </div>
             </div>
 

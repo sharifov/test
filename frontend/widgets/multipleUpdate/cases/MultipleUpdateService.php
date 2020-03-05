@@ -22,7 +22,7 @@ class MultipleUpdateService
         $this->service = $service;
     }
 
-    public function update(MultipleUpdateForm $form, int $creatorId): array
+    public function update(MultipleUpdateForm $form): array
     {
         foreach ($form->ids as $id) {
             if (!$case = Cases::findOne($id)) {
@@ -30,47 +30,47 @@ class MultipleUpdateService
                 continue;
             }
             if ($form->isChangeStatus()) {
-                $this->changeStatus($form, $case, $creatorId);
+                $this->changeStatus($form, $case);
                 continue;
             }
             if ($form->isProcessing()) {
-                $this->processing($form, $case, $creatorId);
+                $this->processing($form, $case);
                 continue;
             }
         }
         return $this->messages;
     }
 
-    private function processing(MultipleUpdateForm $form, Cases $case, int $creatorId): void
+    private function processing(MultipleUpdateForm $form, Cases $case): void
     {
         try {
-            $this->service->processing($case, $form->userId, $creatorId);
+            $this->service->processing($case, $form->userId, $form->getCreatorId());
             $this->addSuccessMessage($this->movedProcessingMessage($case));
         } catch (\DomainException $e) {
             $this->addErrorMessage('ID ' . $case->cs_id . ' ' . $e->getMessage());
         }
     }
 
-    private function changeStatus(MultipleUpdateForm $form, Cases $case, int $creatorId): void
+    private function changeStatus(MultipleUpdateForm $form, Cases $case): void
     {
         try {
             if ($form->isPending()) {
-                $this->service->pending($case, $creatorId, $form->message);
+                $this->service->pending($case, $form->getCreatorId(), $form->message);
                 $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
             if ($form->isFollowUp()) {
-                $this->service->followUp($case, $creatorId, $form->message);
+                $this->service->followUp($case, $form->getCreatorId(), $form->message, $form->getConvertedDeadline());
                 $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
             if ($form->isSolved()) {
-                $this->service->solved($case, $creatorId, $form->message);
+                $this->service->solved($case, $form->getCreatorId(), $form->message);
                 $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }
             if ($form->isTrash()) {
-                $this->service->trash($case, $creatorId, $form->message);
+                $this->service->trash($case, $form->getCreatorId(), $form->message);
                 $this->addSuccessMessage($this->movedStatusMessage($case));
                 return;
             }

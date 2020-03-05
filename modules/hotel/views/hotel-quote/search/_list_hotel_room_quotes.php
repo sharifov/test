@@ -56,7 +56,7 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
             <!--            ages: --><?php //=(\yii\helpers\Html::encode($room['childrenAges'] ?? ''))?>
             <!--        </td>-->
                     <td>
-                        <?=number_format(\yii\helpers\Html::encode($room['amount']), 2)?> $
+                        <?=number_format(\yii\helpers\Html::encode($room['amount']-$room['markup']), 2)?> $
                     </td>
                 </tr>
             <?php endforeach;?>

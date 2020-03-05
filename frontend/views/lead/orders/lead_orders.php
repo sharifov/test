@@ -104,14 +104,15 @@ $js = <<<JS
         });
     });
     
-     $('body').off('click', '.btn-split-profit').on('click', '.btn-split-profit', function (e) {
+     $('body').off('click', '.btn-split').on('click', '.btn-split', function (e) {
         e.preventDefault();
         let url = $(this).data('url');
         let orderId = $(this).data('order-id');
+        let title = $(this).data('title');
                 
         let modal = $('#modal-df');
         modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Order User Profit');
+        modal.find('.modal-title').html(title);
         modal.find('.modal-body').load(url, {orderId: orderId}, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
             if (status == 'error') {

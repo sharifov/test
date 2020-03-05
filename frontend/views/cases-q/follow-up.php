@@ -6,6 +6,7 @@ use common\models\Project;
 use sales\access\ListsAccess;
 use sales\entities\cases\CasesCategory;
 use sales\entities\cases\CasesQSearch;
+use sales\yii\grid\DeadlineColumn;
 use yii\helpers\Html;
 use dosamigos\datepicker\DatePicker;
 use yii\grid\GridView;
@@ -45,6 +46,12 @@ $lists = new ListsAccess($user->id);
         'filterModel' => $searchModel,
         'columns' => [
             'cs_id',
+            [
+                'class' => DeadlineColumn::class,
+                'timeAttribute' => 'cs_deadline_dt',
+                'label' => 'Time left',
+                'attribute' => 'time_left',
+            ],
             'cs_gid',
 			[
 				'attribute' => 'cs_project_id',

@@ -18,6 +18,7 @@ use yii\db\ActiveRecord;
  * @property string|null $pbl_created_dt
  * @property string|null $pbl_updated_dt
  * @property int|null $pbl_updated_user_id
+ * @property string|null $pbl_expiration_date
  *
  * @property Employee $updatedUser
  */
@@ -65,13 +66,12 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
             ['pbl_phone', 'required'],
             ['pbl_phone', 'string', 'max' => 30],
             ['pbl_phone', 'unique'],
-            ['pbl_phone', PhoneInputValidator::class],
-            ['pbl_phone', 'filter', 'filter' => static function($value) {
-                return $value === null ? null : str_replace(['-', ' '], '', trim($value));
-            }, 'skipOnError' => true],
-
+//            ['pbl_phone', 'filter', 'filter' => static function($value) {
+//                return $value === null ? null : str_replace(['-', ' '], '', trim($value));
+//            }, 'skipOnError' => true],
+            ['pbl_phone', 'match', 'pattern' => '/^\+[0-9\.\*]+$/', 'message' => 'The format of "{attribute}" is invalid. Allowed: "+", "[0-9]", ".", "*"'],
             ['pbl_enabled', 'boolean'],
-
+            ['pbl_expiration_date', 'date', 'format' => 'php:Y-m-d'],
             ['pbl_description', 'string', 'max' => 255],
         ];
     }
@@ -89,6 +89,7 @@ class PhoneBlacklist extends \yii\db\ActiveRecord
             'pbl_created_dt' => 'Created',
             'pbl_updated_dt' => 'Updated',
             'pbl_updated_user_id' => 'Updated User',
+            'pbl_expiration_date' => 'Expiration date',
         ];
     }
 

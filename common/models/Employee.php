@@ -952,7 +952,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getRoles($onlyNames = false) : array
     {
         if ($this->rolesName === null) {
-            $this->rolesName = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
+            //todo
+            $query = (new Query())->select('b.*')
+                ->from(['a' => 'auth_assignment', 'b' => 'auth_item'])
+                ->where('{{a}}.[[item_name]]={{b}}.[[name]]')
+                ->andWhere(['a.user_id' => (string) $this->id])
+                ->andWhere(['b.type' => 1]);
+            $this->rolesName = ArrayHelper::map($query->all(), 'name', 'description');
+//            $this->rolesName = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
         }
         if ($onlyNames) {
             return array_keys($this->rolesName);

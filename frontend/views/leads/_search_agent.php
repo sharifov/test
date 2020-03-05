@@ -39,6 +39,9 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                 <div class="col-md-3">
                     <?= $form->field($model, 'gid')->textInput(['maxlength' => true]) ?>
                 </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'hybrid_uid')->textInput(['title' => 'Hybrid UID'])->label('Booking ID') ?>
+                </div>
             </div>
 
         </div>

@@ -21,8 +21,8 @@ use modules\product\src\listeners\productQuote\ProductQuoteBookedEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteCanceledEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteErrorEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteInProgressEventListener;
-use sales\model\user\entity\profit\event\UserProfitRecalculateEvent;
-use sales\model\user\entity\profit\listener\UserProfitRecalculateEventListener;
+use sales\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
+use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfitEventListener;
 
 return [
     ProductQuoteCloneCreatedEvent::class => [ProductQuoteChangeStatusLogListener::class],
@@ -35,7 +35,7 @@ return [
     ProductQuoteExpiredEvent::class => [ProductQuoteExpiredEventListener::class],
     ProductQuoteRecalculateProfitAmountEvent::class => [ProductQuoteRecalculateProfitAmountListener::class],
     ProductQuoteRecalculateChildrenProfitAmountEvent::class => [ProductQuoteRecalculateChildrenProfitAmountListener::class],
-	UserProfitRecalculateEvent::class => [UserProfitRecalculateEventListener::class],
+	UserProfitCalculateByOrderUserProfitEvent::class => [UserProfitCalculateByOrderUserProfitEventListener::class],
     ProductMarketPriceChangedEvent::class => [],
     ProductClientBudgetChangedEvent::class => [],
 ];

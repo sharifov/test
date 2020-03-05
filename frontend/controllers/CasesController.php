@@ -981,7 +981,7 @@ class CasesController extends FController
 
                 switch ((int)$statusForm->statusId) {
                     case CasesStatus::STATUS_FOLLOW_UP :
-                        $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message);
+                        $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message, $statusForm->getConvertedDeadline());
                         break;
                     case CasesStatus::STATUS_TRASH :
                         $this->casesManageService->trash($case->cs_id, $user->id, $statusForm->message);

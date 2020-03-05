@@ -1,5 +1,6 @@
 <?php
 
+use sales\widgets\DateTimePicker;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 
@@ -40,6 +41,10 @@ $formId = 'change-status-form-id';
             <?= $form->field($statusForm, 'userId')->dropDownList($statusForm->userList(), ['prompt' => 'Select employee']) ?>
         </div>
 
+        <div class="deadline-wrapper d-none">
+            <?= $form->field($statusForm, 'deadline')->widget(DateTimePicker::class) ?>
+        </div>
+
         <div class="form-group text-center">
             <?= Html::submitButton('Change Status', ['class' => 'btn btn-warning']) ?>
         </div>
@@ -54,6 +59,7 @@ $statusId = Html::getInputId($statusForm, 'statusId');
 $reasonId = Html::getInputId($statusForm, 'reason');
 $messageId = Html::getInputId($statusForm, 'message');
 $userId = Html::getInputId($statusForm, 'userId');
+$deadlineId = Html::getInputId($statusForm, 'deadline');
 $reasons = $statusForm->reasons();
 
 $js = <<<JS
@@ -62,9 +68,11 @@ var reason = $('#{$reasonId}');
 var reasons = {$reasons};
 var message = $('#{$messageId}');
 var user = $('#{$userId}');
+var deadline = $('#{$deadlineId}');
 var reasonWrapper = $('.reason-wrapper');
 var messageWrapper = $('.message-wrapper');
 var userWrapper = $('.user-wrapper');
+var deadlineWrapper = $('.deadline-wrapper');
 
 reason.parent().addClass('required');
 message.parent().addClass('required');
@@ -80,11 +88,14 @@ $('body').find('#{$statusId}').on('change', function () {
              reason.append('<option value="'+i+'">' + elem +'</select>');
          });
          reasonWrapper.removeClass('d-none');
-         return;
     }
     if (val == '{$statusForm->statusProcessingId()}') {
         userWrapper.removeClass('d-none');
-        return;
+    }
+    if (val == '{$statusForm->statusFollowUpId()}') {
+        deadlineWrapper.removeClass('d-none');
+    } else {
+        deadlineWrapper.addClass('d-none');
     }
 })
 
@@ -103,24 +114,21 @@ user.on('change', function () {
     removeStatusFormErrors();
 });
 
-message.on('input',function(e){
+message.on('input',function() {
+    removeStatusFormErrors();
+});
+
+deadline.on('change',function() {
     removeStatusFormErrors();
 });
 
 function removeStatusFormErrors() {
-    $("#{$formId}").find(".alert.alert-danger").hide();
-            
-    $("#{$statusId}").parent().find('.invalid-feedback').html('');
-    $("#{$statusId}").removeClass('is-invalid');
-    
-    reason.parent().find('.invalid-feedback').html('');
-    reason.removeClass('is-invalid');
-    
-    message.parent().find('.invalid-feedback').html('');
-    message.removeClass('is-invalid');
-    
-    user.parent().find('.invalid-feedback').html('');
-    user.removeClass('is-invalid');
+    let form = $("#{$formId}");
+    form.find('.alert.alert-danger').hide();
+    form.find('.is-invalid').each(function (index, el) {
+        $(el).removeClass('is-invalid');
+    });
+    form.find('.invalid-feedback').html('');
 }
 
 function resetStatusForm() {
@@ -129,6 +137,7 @@ function resetStatusForm() {
     reasonWrapper.addClass('d-none');
     messageWrapper.addClass('d-none');
     userWrapper.addClass('d-none');
+    deadlineWrapper.addClass('d-none');
 }
 
 JS;

@@ -212,48 +212,42 @@ class Hotel extends ActiveRecord implements Productable
      */
 	public function getSearchData(): array
 	{
-
-		$params = [];
-
-		$apiHotelService = Yii::$app->getModule('hotel')->apiService;
-		// $service = $hotel->apiService;
-
-		$rooms = [];
-
-		if ($this->hotelRooms) {
-			foreach ($this->hotelRooms as $room) {
-				$rooms[] = $room->getDataSearch();
-			}
-
-		}
-
-		/*$rooms[] = ['rooms' => 1, 'adults' => 1];
-		$rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
-			['paxType' => 1, 'age' => 6],
-			['paxType' => 1, 'age' => 14],
-		]];*/
-
-		//            if ($this->ph_max_star_rate) {
-		//
-		//            }
-
-		if ($this->ph_max_price_rate) {
-			$params['maxRate'] = $this->ph_max_price_rate;
-		}
-
-		if ($this->ph_min_price_rate) {
-			$params['minRate'] = $this->ph_min_price_rate;
-		}
-
-		// $params['maxRate'] = 120;
-		//$params['maxHotels'] = 10;
-
-		// MaxRatesPerRoom
-
 		$keyCache = $this->ph_request_hash_key;
 		$result = Yii::$app->cache->get($keyCache);
 
 		if ($result === false) {
+			$params = [];
+
+			$apiHotelService = Yii::$app->getModule('hotel')->apiService;
+			// $service = $hotel->apiService;
+
+			$rooms = [];
+
+			if ($this->hotelRooms) {
+				foreach ($this->hotelRooms as $room) {
+					$rooms[] = $room->getDataSearch();
+				}
+
+			}
+
+			/*$rooms[] = ['rooms' => 1, 'adults' => 1];
+			$rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
+				['paxType' => 1, 'age' => 6],
+				['paxType' => 1, 'age' => 14],
+			]];*/
+
+			//            if ($this->ph_max_star_rate) {
+			//
+			//            }
+
+			if ($this->ph_max_price_rate) {
+				$params['maxRate'] = $this->ph_max_price_rate;
+			}
+
+			if ($this->ph_min_price_rate) {
+				$params['minRate'] = $this->ph_min_price_rate;
+			}
+
 			$response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
 
 			if (isset($response['data']['hotels'])) {

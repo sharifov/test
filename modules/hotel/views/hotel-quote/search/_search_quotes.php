@@ -203,7 +203,7 @@ $js = <<<JS
                   $('#tr-hotel-quote-' + quoteKey).addClass('bg-warning');
               } else {
                   
-                  $.pjax.reload({
+                  pjaxReload({
                       container: '#pjax-product-quote-list-' + data.product_id,
                       push: false, replace: false, timeout: 2000
                   });

@@ -8,11 +8,12 @@ use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\order\src\forms\OrderUserProfitFormComposite;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\dispatchers\EventDispatcher;
-use sales\model\user\entity\profit\event\UserProfitRecalculateEvent;
+use sales\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
 use sales\model\user\entity\profit\UserProfit;
 use sales\model\user\entity\userProductType\UserProductTypeRepository;
 use sales\repositories\user\UserProfitRepository;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class OrderUserProfitService
@@ -61,45 +62,6 @@ class OrderUserProfitService
 		$this->userProductTypeRepository = $userProductTypeRepository;
 	}
 
-	public function calculateUserProfit(ProductQuote $productQuote, Order $order): void
-	{
-		foreach ($order->orderUserProfit as $profit) {
-			$userProfit = $this->userProfitRepository->findOrCreate($profit->oup_user_id, $profit->oup_order_id, $productQuote->pq_id);
-
-			$userProductType = UserProductType::findOne(['upt_user_id' => $profit->oup_user_id, 'upt_product_type_id' => $productQuote->pqProduct->pr_type_id]);
-
-			$userProductCommission = 0;
-			if ($userProductType) {
-				$userProductCommission = $userProductType->upt_commission_percent;
-			}
-
-			if ($userProfit->up_id) {
-				$userProfit->updateProfit((new OrderUserProfitCreateUpdateDTO(
-					null,
-					null,
-					$order->or_id,
-					$productQuote->pq_id,
-					$userProductCommission,
-					$productQuote->pq_profit_amount,
-					$profit->oup_percent
-				)));
-			} else {
-				$userProfit->create((new OrderUserProfitCreateUpdateDTO(
-					$profit->oup_user_id,
-					$order->or_lead_id,
-					$order->or_id,
-					$productQuote->pq_id,
-					$userProductCommission,
-					$productQuote->pq_profit_amount,
-					$profit->oup_percent,
-					UserProfit::STATUS_PENDING
-				)));
-			}
-
-			$this->userProfitRepository->save($userProfit);
-		}
-	}
-
 	/**
 	 * @param OrderUserProfitFormComposite $form
 	 * @param Order $order
@@ -121,7 +83,7 @@ class OrderUserProfitService
 					$this->orderUserProfitRepository->save($row);
 				}
 
-				$this->eventDispatcher->dispatch((new UserProfitRecalculateEvent($order)));
+				$this->eventDispatcher->dispatch((new UserProfitCalculateByOrderUserProfitEvent($order)));
 			}
 		});
 	}

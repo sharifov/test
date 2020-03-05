@@ -8,6 +8,7 @@ use common\models\Project;
 use sales\repositories\cases\CasesQRepository;
 use yii\data\ActiveDataProvider;
 use Yii;
+use yii\db\Expression;
 use yii\db\Query;
 
 /**
@@ -237,13 +238,32 @@ class CasesQSearch extends Cases
      */
     public function searchFollowUp($params, Employee $user): ActiveDataProvider
     {
-        $query = $this->casesQRepository->getFollowUpQuery($user);
+        $query = $this->casesQRepository->getFollowUpQuery($user)->addSelect(['*']);
 
-        // add conditions that should always apply here
+        $query->addSelect([
+            'time_left' => new Expression('if ((cs_deadline_dt IS NOT NULL), cs_deadline_dt, \'2100-01-01 00:00:00\')')
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'sort'=> [
+                'defaultOrder' => [
+                    'time_left' => SORT_ASC,
+                    'cs_id' => SORT_ASC,
+                ],
+                'attributes' => [
+                    'cs_id',
+                    'cs_gid',
+                    'cs_project_id',
+                    'cs_subject',
+                    'cs_category',
+                    'cs_lead_id',
+                    'cs_dep_id',
+                    'cs_created_dt',
+                    'cs_user_id',
+                    'time_left',
+                ],
+            ],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -445,6 +465,7 @@ class CasesQSearch extends Cases
             'cs_dep_id' => 'Department',
             'cs_created_dt' => 'Created',
             'cs_updated_dt' => 'Last Action',
+            'cs_deadline_dt' => 'Deadline',
             'lastSolvedDate' => 'Solved',
         ];
     }
