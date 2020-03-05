@@ -11,7 +11,19 @@ use yii\helpers\VarDumper;
 
 class OneTimeController extends Controller
 {
-    public function actionGenerateClientUuid(): void
+    public $limit;
+
+    public function options($actionID)
+    {
+        if ($actionID === 'generate-client-uuid') {
+            return array_merge(parent::options($actionID), [
+                'limit'
+            ]);
+        }
+        return parent::options($actionID);
+    }
+
+    public function actionGenerateClientUuid($limit): void
     {
         printf(PHP_EOL . '--- Start [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
 
@@ -19,7 +31,7 @@ class OneTimeController extends Controller
 
 //        $limit = BaseConsole::input('Enter Limit records: ');
 
-        $limit = 1000;
+        $limit = (int)$limit;
 
         $time_start = microtime(true);
 
