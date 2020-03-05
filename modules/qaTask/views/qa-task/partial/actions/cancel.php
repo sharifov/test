@@ -10,7 +10,7 @@ use yii\helpers\Url;
 
 ?>
 
-<?php if (QaTaskCancelService::can($model, Auth::id())): ?>
+<?php if (QaTaskCancelService::can(Auth::user(), $model)): ?>
     <?= Html::button(
         'Cancel',
         [

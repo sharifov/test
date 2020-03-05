@@ -59,7 +59,7 @@ class QaTaskSearchClosedSearch extends QaTaskSearch
     {
         $query = static::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
-        $query->projects(array_keys($this->getProjectList()));
+        $this->queryAccessService->processProject($this->user, $query);
 
         $query->closed();
 

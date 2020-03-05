@@ -11,7 +11,7 @@ use yii\helpers\Url;
 
 ?>
 
-<?php if (QaTaskReturnToPendingService::can($model, Auth::id())): ?>
+<?php if (QaTaskReturnToPendingService::can(Auth::user(), $model)): ?>
     <div class="btn-group" style="margin-bottom: 5px; margin-left: 7px;">
         <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
@@ -29,7 +29,7 @@ use yii\helpers\Url;
                     'data-modal-id' => 'modal-df',
                 ]
             ) ?>
-            <?php if (QaTaskReturnToEscalateService::can($model, Auth::id())): ?>
+            <?php if (QaTaskReturnToEscalateService::can(Auth::user(), $model)): ?>
                 <?= Html::a(
                     'To Escalate',
                     '#',

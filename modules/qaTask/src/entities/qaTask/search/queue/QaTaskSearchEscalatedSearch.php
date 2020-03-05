@@ -56,7 +56,7 @@ class QaTaskSearchEscalatedSearch extends QaTaskSearch
     {
         $query = static::find()->with(['createdUser', 'updatedUser', 'category', 'project']);
 
-        $query->projects(array_keys($this->getProjectList()));
+        $this->queryAccessService->processProject($this->user, $query);
 
         $query->escalated()->unAssigned();
 

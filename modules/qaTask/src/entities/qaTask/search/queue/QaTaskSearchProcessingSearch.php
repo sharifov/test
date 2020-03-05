@@ -5,6 +5,7 @@ namespace modules\qaTask\src\entities\qaTask\search\queue;
 use modules\qaTask\src\entities\qaTask\search\CreateDto;
 use modules\qaTask\src\entities\qaTask\search\QaTaskSearch;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use sales\auth\Auth;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
@@ -70,13 +71,13 @@ class QaTaskSearchProcessingSearch extends QaTaskSearch
     {
         $query = static::find()->with(['createdUser', 'updatedUser', 'assignedUser', 'category', 'project']);
 
-        $query->projects(array_keys($this->getProjectList()));
+        $this->queryAccessService->processProject($this->user, $query);
 
         $query->statuses(array_keys($this->getStatusList()));
 
         $query->anyAssigned();
 
-        if (\Yii::$app->user->can('qa-task/qa-task-queue/processing_Current')) {
+        if (Auth::can('qa-task/qa-task-queue/processing_Current')) {
             $query->assigned($this->user->id);
         }
 

@@ -2,52 +2,47 @@
 
 namespace modules\qaTask\src\useCases\qaTask\decide\lead\sendToRedialQueue;
 
+use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\useCases\qaTask\decide\QaTaskDecideService;
+use modules\qaTask\src\useCases\qaTask\QaTaskActionsService;
+use sales\access\ProjectAccessService;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
 use sales\services\lead\qcall\QCallService;
 use sales\services\TransactionManager;
+use yii\rbac\CheckAccessInterface;
 
 /**
  * Class QaTaskCloseService
  *
- * @property QaTaskRepository $taskRepository
- * @property UserRepository $userRepository
- * @property EventDispatcher $eventDispatcher
  * @property QaTaskDecideService $decideService
- * @property TransactionManager $transactionManager
  * @property LeadRepository $leadRepository
  * @property QCallService $qCallService
  */
-class QaTaskDecideLeadSendToRedialQueue
+class QaTaskDecideLeadSendToRedialQueue extends QaTaskActionsService
 {
-    private $taskRepository;
-    private $userRepository;
-    private $eventDispatcher;
-    private $decideService;
-    private $transactionManager;
-    private $leadRepository;
-    private $qCallService;
+    protected $decideService;
+    protected $leadRepository;
+    protected $qCallService;
 
     public function __construct(
         QaTaskRepository $taskRepository,
         UserRepository $userRepository,
         EventDispatcher $eventDispatcher,
-        QaTaskDecideService $decideService,
+        ProjectAccessService $projectAccessService,
+        CheckAccessInterface $accessChecker,
         TransactionManager $transactionManager,
+        QaTaskDecideService $decideService,
         LeadRepository $leadRepository,
         QCallService $qCallService
     )
     {
-        $this->taskRepository = $taskRepository;
-        $this->userRepository = $userRepository;
-        $this->eventDispatcher = $eventDispatcher;
+        parent::__construct($taskRepository, $userRepository, $eventDispatcher, $projectAccessService, $accessChecker, $transactionManager);
         $this->decideService = $decideService;
-        $this->transactionManager = $transactionManager;
         $this->leadRepository = $leadRepository;
         $this->qCallService = $qCallService;
     }
@@ -56,7 +51,7 @@ class QaTaskDecideLeadSendToRedialQueue
     {
         $task = $this->taskRepository->find($taskId);
 
-        self::businessGuard($task);
+        $this->businessGuard($task);
 
         $this->transactionManager->wrap(function () use ($task, $userId) {
 
@@ -72,18 +67,19 @@ class QaTaskDecideLeadSendToRedialQueue
         });
     }
 
-    private static function businessGuard(QaTask $task): void
+    private function businessGuard(QaTask $task): void
     {
         if (!QaTaskObjectType::isLead($task->t_object_type_id)) {
             throw new \DomainException('Task Type must be Lead.');
         }
     }
 
-    public static function can(QaTask $task, int $userId): bool
+    public static function can(Employee $user, QaTask $task): bool
     {
+        $service = \Yii::createObject(static::class);
         try {
-            QaTaskDecideService::can($task, $userId);
-            self::businessGuard($task);
+            QaTaskDecideService::can($user, $task);
+            $service->businessGuard($task);
         } catch (\Throwable $e) {
             return false;
         }

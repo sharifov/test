@@ -2,45 +2,24 @@
 
 namespace modules\qaTask\src\useCases\qaTask\take;
 
+use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use sales\access\EmployeeProjectAccess;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\user\UserRepository;
+use modules\qaTask\src\useCases\qaTask\QaTaskActionsService;
 use yii\web\ForbiddenHttpException;
 
 /**
  * Class QaTaskActionTakeService
- *
- * @property QaTaskRepository $taskRepository
- * @property UserRepository $userRepository
- * @property EventDispatcher $eventDispatcher
  */
-class QaTaskTakeService
+class QaTaskTakeService extends QaTaskActionsService
 {
-    private $taskRepository;
-    private $userRepository;
-    private $eventDispatcher;
-
-    public function __construct(
-        QaTaskRepository $taskRepository,
-        UserRepository $userRepository,
-        EventDispatcher $eventDispatcher
-    )
-    {
-        $this->taskRepository = $taskRepository;
-        $this->userRepository = $userRepository;
-        $this->eventDispatcher = $eventDispatcher;
-    }
-
     public function take(int $taskId, int $userId): void
     {
         $task = $this->taskRepository->find($taskId);
         $user = $this->userRepository->find($userId);
 
-        self::businessGuard($task, $user->id);
+        $this->businessGuard($user, $task);
 
         $startStatusId = $task->t_status_id;
 
@@ -66,9 +45,9 @@ class QaTaskTakeService
         ));
     }
 
-    private static function businessGuard(QaTask $task, int $userId): void
+    private function businessGuard(Employee $user, QaTask $task): void
     {
-        EmployeeProjectAccess::guard($task->t_project_id, $userId);
+        $this->projectAccessService->guard($user, $task->t_project_id);
 
         if (!$task->isUnAssigned()) {
             throw new \DomainException('Task is already assigned.');
@@ -79,22 +58,19 @@ class QaTaskTakeService
         }
     }
 
-    /**
-     * @param QaTask $task
-     * @throws ForbiddenHttpException
-     */
-    public static function permissionGuard(QaTask $task): void
+    public function permissionGuard($userId, QaTask $task): void
     {
-        if (!\Yii::$app->user->can('qa-task/qa-task-action/take', ['task' => $task])) {
+        if (!$this->accessChecker->checkAccess($userId, 'qa-task/qa-task-action/take', ['task' => $task])) {
             throw new ForbiddenHttpException('Access denied.');
         }
     }
 
-    public static function can(QaTask $task, int $userId): bool
+    public static function can(Employee $user, QaTask $task): bool
     {
+        $service = \Yii::createObject(static::class);
         try {
-            self::permissionGuard($task);
-            self::businessGuard($task, $userId);
+            $service->permissionGuard($user->id, $task);
+            $service->businessGuard($user, $task);
         } catch (\Throwable $e) {
             return false;
         }

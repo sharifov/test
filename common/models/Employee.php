@@ -67,7 +67,7 @@ use yii\web\NotFoundHttpException;
  * @property int $callExpertCountByShiftTime
  * @property int $callExpertCount
  *
- * @property Access $access
+ * @property Access|null $access
  * @property \yii\db\ActiveQuery $productType
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface

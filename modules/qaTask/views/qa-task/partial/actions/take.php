@@ -10,7 +10,7 @@ use yii\helpers\Url;
 
 ?>
 
-<?php if (QaTaskTakeService::can($model, Auth::id())): ?>
+<?php if (QaTaskTakeService::can(Auth::user(), $model)): ?>
     <?= Html::a(
         'Take',
         Url::to(['/qa-task/qa-task-action/take', 'gid' => $model->t_gid]),
