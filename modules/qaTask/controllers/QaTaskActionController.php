@@ -44,6 +44,7 @@ use yii\widgets\ActiveForm;
  * @property QaTaskDecideLeadSendToRedialQueue $decideLeadSendToRedialQueue
  * @property QaTaskDecideNoActionService $decideNoActionService
  * @property QaTaskDecideLeadReAssignService $decideLeadReAssignService
+ * @property QaTaskDecideService $qaTaskDecideService
  */
 class QaTaskActionController extends FController
 {
@@ -57,6 +58,7 @@ class QaTaskActionController extends FController
     private $decideLeadSendToRedialQueue;
     private $decideNoActionService;
     private $decideLeadReAssignService;
+    private $qaTaskDecideService;
 
     public function __construct(
         $id,
@@ -71,6 +73,7 @@ class QaTaskActionController extends FController
         QaTaskDecideLeadSendToRedialQueue $decideLeadSendToRedialQueue,
         QaTaskDecideNoActionService $decideNoActionService,
         QaTaskDecideLeadReAssignService $decideLeadReAssignService,
+        QaTaskDecideService $qaTaskDecideService,
         $config = []
     )
     {
@@ -85,6 +88,7 @@ class QaTaskActionController extends FController
         $this->decideLeadSendToRedialQueue = $decideLeadSendToRedialQueue;
         $this->decideNoActionService = $decideNoActionService;
         $this->decideLeadReAssignService = $decideLeadReAssignService;
+        $this->qaTaskDecideService = $qaTaskDecideService;
     }
 
     public function behaviors(): array
@@ -118,7 +122,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskTakeService::permissionGuard($task);
+        $this->takeService->permissionGuard(Auth::id(), $task);
 
         try {
             $this->takeService->take($task->t_id, Auth::id());
@@ -140,7 +144,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskTakeOverService::permissionGuard($task);
+        $this->takeOverService->permissionGuard(Auth::id(), $task);
 
         $form = new QaTaskTakeOverForm($task, Auth::user());
 
@@ -174,7 +178,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskEscalateService::permissionGuard();
+        $this->escalateService->permissionGuard(Auth::id());
 
         $form = new QaTaskEscalateForm($task, Auth::user());
 
@@ -208,7 +212,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskCloseService::permissionGuard();
+        $this->closeService->permissionGuard(Auth::id());
 
         $form = new QaTaskCloseForm($task, Auth::user());
 
@@ -242,7 +246,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskCancelService::permissionGuard($task);
+        $this->cancelService->permissionGuard(Auth::id(), $task);
 
         $form = new QaTaskCancelForm($task, Auth::user());
 
@@ -276,7 +280,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskReturnToPendingService::permissionGuard($task);
+        $this->returnToPendingService->permissionGuard(Auth::id(), $task);
 
         $form = new QaTaskReturnToPendingForm($task, Auth::user());
 
@@ -310,7 +314,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskReturnToEscalateService::permissionGuard($task);
+        $this->returnToEscalateService->permissionGuard(Auth::id(), $task);
 
         $form = new QaTaskReturnToEscalateForm($task, Auth::user());
 
@@ -344,7 +348,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskDecideService::permissionGuard();
+        $this->qaTaskDecideService->permissionGuard(Auth::id());
 
         $form = new QaTaskDecideNoActionForm($task, Auth::user());
 
@@ -378,7 +382,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskDecideService::permissionGuard();
+        $this->qaTaskDecideService->permissionGuard(Auth::id());
 
         try {
             $this->decideLeadSendToRedialQueue->handle($task->t_id, Auth::id());
@@ -400,7 +404,7 @@ class QaTaskActionController extends FController
     {
         $task = $this->findModel((string)$gid);
 
-        QaTaskDecideService::permissionGuard();
+        $this->qaTaskDecideService->permissionGuard(Auth::id());
 
         $form = new QaTaskDecideLeadReAssignForm($task, Auth::user());
 

@@ -2,6 +2,7 @@
 
 namespace modules\qaTask\src\useCases\qaTask\decide\noAction;
 
+use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\useCases\qaTask\decide\QaTaskDecideService;
 
@@ -26,8 +27,8 @@ class QaTaskDecideNoActionService
         $this->decideService->decide($form->getTaskId(), $form->getUserId(), $form->getComment());
     }
 
-    public static function can(QaTask $task, int $userId): bool
+    public static function can(Employee $user, QaTask $task): bool
     {
-        return QaTaskDecideService::can($task, $userId);
+        return QaTaskDecideService::can($user, $task);
     }
 }
