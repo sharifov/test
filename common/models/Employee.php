@@ -2104,6 +2104,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
 
+        $query->innerJoin('call AS tbl_calls_count', 'user_connection.uc_user_id = tbl_calls_count.c_created_user_id');
 
         $query->groupBy(['user_connection.uc_user_id']);
         //$query->orderBy(['tbl_calls_count' => SORT_ASC]);
@@ -2126,9 +2127,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $users = $generalQuery->all();
 
         if ($users) {
-            foreach ($users as $userItem) {
+            foreach ($users as $uk => $userItem) {
                 $user_id = (int) $userItem['tbl_user_id'];
-                $users['tbl_calls_count'] = Call::find()->select(['COUNT(*)'])
+                $users[$uk]['tbl_calls_count'] = Call::find()->select(['COUNT(*)'])
                     ->where(['c_created_user_id' =>  $user_id])
                     ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
                     ->andWhere(['c_status_id' => Call::STATUS_COMPLETED])
