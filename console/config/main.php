@@ -32,6 +32,7 @@ return [
                 'modules\order\migrations',
                 'modules\invoice\migrations',
                 'modules\qaTask\migrations',
+                'modules\rbacImportExport\migrations',
             ],
         ],
 
