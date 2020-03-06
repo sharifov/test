@@ -37,6 +37,7 @@ use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
 use PHPUnit\Framework\Warning;
+use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\CloneReasonForm;
@@ -56,6 +57,7 @@ use Yii;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -110,6 +112,19 @@ class LeadController extends FController
         $this->casesRepository = $casesRepository;
     }
 
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'view',
+                    'take',
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -142,9 +157,6 @@ class LeadController extends FController
      */
     public function actionView(string $gid)
     {
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
         $gid = mb_substr($gid, 0, 32);
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
 
@@ -152,9 +164,12 @@ class LeadController extends FController
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if ($user->isAgent() && ($lead->isTrash() || $lead->isPending())) {
-            throw new ForbiddenHttpException('Access Denied for Agent (Status Lead)');
+        if (!Auth::can('lead/view', ['lead' => $lead])) {
+            throw new ForbiddenHttpException('Access Denied.');
         }
+
+        $user = Auth::user();
+
         $itineraryForm = new ItineraryEditForm($lead);
 
         $is_admin = $user->isAdmin();
@@ -1251,10 +1266,20 @@ class LeadController extends FController
         return false;
     }
 
-
+    /**
+     * @param string $gid
+     * @return string|Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     */
     public function actionTake(string $gid)
     {
         $lead = $this->findLeadByGid($gid);
+
+        if (!Auth::can('lead/view', ['lead' => $lead])) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
 
         if (Yii::$app->request->isAjax && Yii::$app->request->get('over')) {
             if ($lead->isAvailableToTakeOver()) {

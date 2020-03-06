@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Lead;
+use sales\auth\Auth;
 use sales\forms\leadflow\FollowUpReasonForm;
 use sales\forms\leadflow\RejectReasonForm;
 use sales\forms\leadflow\ReturnReasonForm;
@@ -14,8 +15,10 @@ use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadStateService;
 use Yii;
 use sales\forms\leadflow\TakeOverReasonForm;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -58,6 +61,19 @@ class LeadChangeStateController extends FController
         $this->followUpGuard = $followUpGuard;
     }
 
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'take-over',
+                    'validate-take-over',
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     /**
      * @return Response
      * @throws NotFoundHttpException
@@ -66,6 +82,11 @@ class LeadChangeStateController extends FController
     public function actionTakeOver(): Response
     {
         $lead = $this->getLead();
+
+        if (!Auth::can('lead/view', ['lead' => $lead])) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         $form = new TakeOverReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
@@ -92,11 +113,17 @@ class LeadChangeStateController extends FController
     /**
      * @return array
      * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionValidateTakeOver(): array
     {
         $lead = $this->getLead();
+
+        if (!Auth::can('lead/view', ['lead' => $lead])) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         $form = new TakeOverReasonForm($lead);
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
