@@ -25,6 +25,16 @@ class Access
         $this->user = $user;
     }
 
+    public function getUserId(): int
+    {
+        return $this->user->id;
+    }
+
+    public function getUserName(): int
+    {
+        return $this->user->username;
+    }
+
     public function getAllProjects(): array
     {
         return array_column($this->getProjects(), 'name', 'id');

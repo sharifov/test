@@ -2,8 +2,8 @@
 
 namespace sales\access;
 
-use common\models\Employee;
 use common\models\Project;
+use sales\model\user\entity\Access;
 use yii\rbac\CheckAccessInterface;
 
 /**
@@ -22,37 +22,37 @@ class ProjectAccessService
         $this->accessChecker = $accessChecker;
     }
 
-    public function checkAccess(Employee $user, int $projectId): bool
+    public function checkAccess(Access $access, int $projectId): bool
     {
-        if ($this->accessChecker->checkAccess($user->id, self::PERMISSION)) {
+        if ($this->accessChecker->checkAccess($access->getUserId(), self::PERMISSION)) {
             return true;
         }
 
-        return array_key_exists($projectId, $user->getAccess()->getActiveProjects());
+        return array_key_exists($projectId, $access->getActiveProjects());
     }
 
-    public function guard(Employee $user, int $projectId): void
+    public function guard(Access $access, int $projectId): void
     {
-        if (!$this->checkAccess($user, $projectId)) {
-            throw new \DomainException('User: ' . $user->username . ' cant access to projectId: ' . $projectId . '.');
+        if (!$this->checkAccess($access, $projectId)) {
+            throw new \DomainException('User: ' . $access->getUserName() . ' cant access to projectId: ' . $projectId . '.');
         }
     }
 
-    public function getProjects(Employee $user): array
+    public function getProjects(Access $access): array
     {
-        if ($this->accessChecker->checkAccess($user->id, self::PERMISSION)) {
+        if ($this->accessChecker->checkAccess($access->getUserId(), self::PERMISSION)) {
             return Project::find()->select(['name'])->indexBy('id')->column();
         }
 
-        return $user->getAccess()->getActiveProjects();
+        return $access->getActiveProjects();
     }
 
-    public function processQuery(Employee $user, ProjectQueryInterface $query): void
+    public function processQuery(Access $access, ProjectQueryInterface $query): void
     {
-        if ($this->accessChecker->checkAccess($user->id, self::PERMISSION)) {
+        if ($this->accessChecker->checkAccess($access->getUserId(), self::PERMISSION)) {
             return;
         }
 
-        $query->projects(array_keys($user->getAccess()->getActiveProjects()));
+        $query->projects(array_keys($access->getActiveProjects()));
     }
 }

@@ -47,7 +47,7 @@ class QaTaskTakeService extends QaTaskActionsService
 
     private function businessGuard(Employee $user, QaTask $task): void
     {
-        $this->projectAccessService->guard($user, $task->t_project_id);
+        $this->projectAccessService->guard($user->getAccess(), $task->t_project_id);
 
         if (!$task->isUnAssigned()) {
             throw new \DomainException('Task is already assigned.');

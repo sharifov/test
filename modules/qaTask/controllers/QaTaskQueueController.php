@@ -188,7 +188,7 @@ class QaTaskQueueController extends FController
         if ($this->availableProjects !== null) {
             return $this->availableProjects;
         }
-        $this->availableProjects = $this->projectAccessService->getProjects(Auth::user());
+        $this->availableProjects = $this->projectAccessService->getProjects(Auth::user()->getAccess());
         return $this->availableProjects;
     }
 

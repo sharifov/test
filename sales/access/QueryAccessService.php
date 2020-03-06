@@ -3,6 +3,7 @@
 namespace sales\access;
 
 use common\models\Employee;
+use sales\model\user\entity\Access;
 
 /**
  * Class QueryAccessService
@@ -24,9 +25,9 @@ class QueryAccessService
         $this->departmentAccessService = $departmentAccessService;
     }
 
-    public function processProject(Employee $user, ProjectQueryInterface $query): void
+    public function processProject(Access $userAccess, ProjectQueryInterface $query): void
     {
-        $this->projectAccessService->processQuery($user, $query);
+        $this->projectAccessService->processQuery($userAccess, $query);
     }
 
     public function processDepartments(Employee $user, DepartmentQueryInterface $query): void

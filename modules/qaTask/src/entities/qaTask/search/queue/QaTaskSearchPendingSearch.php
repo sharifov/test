@@ -56,7 +56,7 @@ class QaTaskSearchPendingSearch extends QaTaskSearch
     {
         $query = static::find()->with(['createdUser', 'updatedUser', 'category', 'project']);
 
-        $this->queryAccessService->processProject($this->user, $query);
+        $this->queryAccessService->processProject($this->user->getAccess(), $query);
 
         $query->pending()->unAssigned();
 
