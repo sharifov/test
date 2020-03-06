@@ -39,7 +39,7 @@ class m200214_142333_create_tbl_order_user_profit extends Migration
 
 		$this->addForeignKey('fk-order_user_profit-oup_updated_user_id', '{{%order_user_profit}}', 'oup_updated_user_id', '{{%employees}}', 'id', 'SET NULL', 'CASCADE');
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%order_status_log}}');
+		Yii::$app->db->getSchema()->refreshTableSchema('{{%order_user_profit}}');
 
 		if (Yii::$app->cache) {
 			Yii::$app->cache->flush();
@@ -58,7 +58,7 @@ class m200214_142333_create_tbl_order_user_profit extends Migration
 
     	$this->dropTable('{{%order_user_profit}}');
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%order_status_log}}');
+		Yii::$app->db->getSchema()->refreshTableSchema('{{%order_user_profit}}');
 
 		if (Yii::$app->cache) {
 			Yii::$app->cache->flush();

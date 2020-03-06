@@ -10,7 +10,7 @@ use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\user\entity\payroll\UserPayroll;
 use sales\model\user\entity\payroll\UserPayrollQuery;
-use modules\order\src\services\OrderUserProfitCreateUpdateDTO;
+use sales\services\user\profit\UserProfitCreateUpdateDTO;
 use yii\behaviors\TimestampBehavior;
 use yii\bootstrap4\Html;
 use yii\db\ActiveQuery;
@@ -64,11 +64,13 @@ class UserProfit extends \yii\db\ActiveRecord
 	public const TYPE_SALE_COMM = 1;
 	public const TYPE_EXCHANGE_COMM = 2;
 	public const TYPE_TIPS = 3;
+	public const TYPE_USER_PROFIT = 4;
 
 	public const TYPE_LIST = [
 		self::TYPE_SALE_COMM => 'Sale commission',
 		self::TYPE_EXCHANGE_COMM => 'Exchange commission',
-		self::TYPE_TIPS => 'Tips'
+		self::TYPE_TIPS => 'Tips',
+		self::TYPE_USER_PROFIT => 'Order User Profit'
 	];
 
 	/**
@@ -249,14 +251,14 @@ class UserProfit extends \yii\db\ActiveRecord
 		return self::STATUS_CLASS_LIST[$this->up_status_id] ?? null;
 	}
 
-	public function updateProfit(OrderUserProfitCreateUpdateDTO $dto): void
+	public function updateProfit(UserProfitCreateUpdateDTO $dto): void
 	{
 		$this->up_percent = $dto->percent;
 		$this->up_profit = $dto->profit;
 		$this->up_split_percent = $dto->splitPercent;
 	}
 
-	public function create(OrderUserProfitCreateUpdateDTO $dto): void
+	public function create(UserProfitCreateUpdateDTO $dto): void
 	{
 		$this->up_user_id = $dto->userId;
 		$this->up_lead_id = $dto->leadId;

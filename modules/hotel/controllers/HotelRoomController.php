@@ -139,8 +139,8 @@ class HotelRoomController extends FController
 						}
 					}
 
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-product-search-' . $modelRoom->hrHotel->ph_product_id . '"});</script>';
-                    //return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-hotel-rooms-' . $modelRoom->hr_hotel_id . '"});</script>';
+                    return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $modelRoom->hrHotel->ph_product_id . '"});</script>';
+                    //return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-hotel-rooms-' . $modelRoom->hr_hotel_id . '"});</script>';
                 }
             }
             //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
@@ -250,7 +250,7 @@ class HotelRoomController extends FController
 
                     }
 
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-product-search-' . $modelRoom->hrHotel->ph_product_id . '"});</script>';
+                    return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $modelRoom->hrHotel->ph_product_id . '"});</script>';
                 }
 
                 Yii::error(VarDumper::dumpAsString($modelRoom->errors), 'HotelRoomController:actionUpdateAjax:HotelRoom:save');

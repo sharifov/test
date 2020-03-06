@@ -111,7 +111,7 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
                     </thead>
                     <tbody>
                     <tr>
-                        <td><?= $lead->notes_for_experts ? nl2br(Html::encode($lead->notes_for_experts)) : '-' ?></td>
+                        <td id="lead-notes_for_experts"><?= $lead->notes_for_experts ? nl2br(Html::encode($lead->notes_for_experts)) : '-' ?></td>
                     </tr>
                     </tbody>
                 </table>

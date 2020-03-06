@@ -8,12 +8,15 @@
  */
 
 use common\models\LeadCallExpert;
+use modules\product\src\entities\product\Product;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 $user = Yii::$app->user->identity;
 
 ?>
+
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-call-expert', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">
@@ -42,7 +45,7 @@ $user = Yii::$app->user->identity;
         }
         ?>&nbsp;
 
-        <h2><i class="fa fa-bell-o <?=$label?>"></i> Call Expert (<?=$dataProvider->count?>)
+        <h2><i class="fa fa-bell-o <?=$label?>"></i> BO Expert (<?=$dataProvider->count?>)
 
             <?php
                 if($lastModel) {
@@ -65,7 +68,7 @@ $user = Yii::$app->user->identity;
                 <?php if($lead->leadFlightSegmentsCount):?>
                     <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
                         <?php if($user->isEnableCallExpert() && $lead->isProcessing()): ?>
-                            <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                            <?=Html::a('<i class="fa fa-plus-circle success"></i> New Call', null, ['id' => 'btn-call-expert-form'])?>
                         <?php endif; ?>
                     <?php endif; ?>
                 <?php else: ?>
@@ -90,6 +93,7 @@ $user = Yii::$app->user->identity;
         </ul>
         <div class="clearfix"></div>
     </div>
+
     <div class="x_content" style="display: <?=Yii::$app->request->isPjax ? 'block' : 'none';?>">
 
                 <?= \yii\widgets\ListView::widget([
@@ -132,10 +136,20 @@ $user = Yii::$app->user->identity;
         ]);
 
         echo $form->errorSummary($modelLeadCallExpert);
-
         ?>
 
         <div class="row" style="display: <?=$modelLeadCallExpert->hasErrors() ? 'block' : 'none'?>" id="div-call-expert-form">
+
+            <?php $products = (new Product())->getByLeadAndType($lead->id) ?>
+            <?php if ($products):?>
+                <div class="col-sm-3">
+                    <?= $form->field($modelLeadCallExpert, 'lce_product_id')->dropDownList(
+                        ArrayHelper::map($products, 'pr_id', 'pr_name'),
+                        ['prompt' => 'Select product', 'id' => 'lce_product_id']
+                    ) ?>
+                </div>
+            <?php endif ?>
+
             <div class="col-md-12">
                 <?= $form->field($modelLeadCallExpert, 'lce_request_text')->textarea(['rows' => 8, 'id' => 'lce_request_text'])->label('Request Message') ?>
             </div>
@@ -143,7 +157,18 @@ $user = Yii::$app->user->identity;
             <div class="col-md-12">
                 <div class="form-group text-center">
                     <?= Html::submitButton('<i class="fa fa-plus"></i> Create call Expert', ['class' => 'btn btn-success', 'id' => 'btn-submit-call-expert']) ?>
-                    <?= Html::button('<i class="fa fa-copy"></i>', ['title' => 'Past from Lead Notes', 'class' => 'btn btn-primary', 'onclick' => '$("#lce_request_text").val($("#lead-notes_for_experts").val())']) ?>
+                    <?= Html::button('<i class="fa fa-copy"></i>',
+                        [
+                            'title' => 'Past from Lead Notes',
+                            'class' => 'btn-note-from-client btn btn-primary',
+                        ]
+                    ) ?>
+                    <?= Html::button('<i class="fas fa-copy"></i>',
+                        [
+                            'title' => 'Past from product description',
+                            'class' => 'btn-product-description btn btn-primary d-none',
+                        ]
+                    ) ?>
                 </div>
             </div>
         </div>
@@ -153,6 +178,55 @@ $user = Yii::$app->user->identity;
     </div>
 </div>
 <?php yii\widgets\Pjax::end() ?>
+
+
+<?php
+$js = <<<JS
+    $(document).on('change', '#lce_product_id', function() {
+        let productId = $(this).val();
+        
+        if (isNaN(parseInt(productId, 10))) {
+            $('.btn-product-description').addClass('d-none');
+        } else {
+            $('.btn-product-description').removeClass('d-none'); 
+        }       
+    }); 
+    
+    $(document).on('click', '.btn-product-description', function() {
+        let productId = $('#lce_product_id').val();
+        let productDescriptionElement = $('#product_description_' + productId);
+        
+        if (productDescriptionElement.length == 0) {
+            new PNotify({title: 'Error', text: 'Description is empty.', type: 'error'});
+            return false;
+        }
+        
+        let requestText = $('#lce_request_text').val();
+        let description = productDescriptionElement.data('content');
+        let textNew = description;
+        
+        if (requestText.length > 0) {
+            textNew = requestText + '\\n' +  description;
+        } 
+        
+        $('#lce_request_text').val(textNew);
+    });   
+    
+    $(document).on('click', '.btn-note-from-client', function() {
+        let noteFromClient = $('#lead-notes_for_experts').text();
+        let requestText = $('#lce_request_text').val();
+        let textNew = noteFromClient;
+        
+        if (requestText.length > 0) {
+            textNew = requestText + '\\n' +  noteFromClient;
+        } 
+        
+        $('#lce_request_text').val(textNew);
+    });    
+JS;
+
+$this->registerJs($js);
+?>
 
 <?php
 $this->registerJs(

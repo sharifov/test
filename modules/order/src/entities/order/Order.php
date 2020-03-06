@@ -6,8 +6,9 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
-use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
+use modules\order\src\entities\orderTips\OrderTips;
+use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -53,6 +54,8 @@ use yii\db\ActiveRecord;
  * @property float $orderTotalCalcSum
  * @property ProductQuote[] $productQuotes
  * @property OrderUserProfit[] $orderUserProfit
+ * @property OrderTips $orderTips
+ * @property OrderTipsUserProfit[] $orderTipsUserProfit
  */
 class Order extends ActiveRecord
 {
@@ -75,6 +78,7 @@ class Order extends ActiveRecord
             [['or_uid'], 'string', 'max' => 15],
             [['or_name'], 'string', 'max' => 40],
             [['or_client_currency'], 'string', 'max' => 3],
+            [['or_client_currency'], 'default', 'value' => null],
             [['or_gid'], 'unique'],
             [['or_uid'], 'unique'],
             [['or_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['or_client_currency' => 'cur_code']],
@@ -223,6 +227,16 @@ class Order extends ActiveRecord
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id']);
     }
+
+    public function getOrderTips(): ActiveQuery
+	{
+		return $this->hasOne(OrderTips::class, ['ot_order_id' => 'or_id']);
+	}
+
+	public function getOrderTipsUserProfit(): ActiveQuery
+	{
+		return $this->hasMany(OrderTipsUserProfit::class, ['otup_order_id' => 'or_id']);
+	}
 
     public static function find(): Scopes
     {

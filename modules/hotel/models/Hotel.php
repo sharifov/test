@@ -2,7 +2,9 @@
 
 namespace modules\hotel\models;
 
+use modules\hotel\src\entities\hotel\events\HotelUpdateRequestEvent;
 use modules\hotel\src\entities\hotel\serializer\HotelSerializer;
+use modules\hotel\src\useCases\request\update\HotelUpdateRequestForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuery;
@@ -55,6 +57,12 @@ class Hotel extends ActiveRecord implements Productable
         $hotel = new static();
         $hotel->ph_product_id = $productId;
         return $hotel;
+	}
+
+    public function updateRequest(HotelUpdateRequestForm $form): void
+    {
+        $this->attributes = $form->attributes;
+        $this->recordEvent(new HotelUpdateRequestEvent($this));
 	}
 
     /**
@@ -173,7 +181,7 @@ class Hotel extends ActiveRecord implements Productable
     {
         if ($this->hotelQuotes) {
             foreach ($this->hotelQuotes as $quote) {
-                if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuoteStatus::DONE) {
+                if ($quote->hq_request_hash !== $this->ph_request_hash_key && $quote->hqProductQuote && $quote->hqProductQuote->pq_status_id !== ProductQuoteStatus::DELIVERED) {
                     $creatorId = Auth::id();
                     $description = 'Find invalid request quotes and update status';
                     $quote->hqProductQuote->declined($creatorId, $description);
@@ -204,48 +212,42 @@ class Hotel extends ActiveRecord implements Productable
      */
 	public function getSearchData(): array
 	{
-
-		$params = [];
-
-		$apiHotelService = Yii::$app->getModule('hotel')->apiService;
-		// $service = $hotel->apiService;
-
-		$rooms = [];
-
-		if ($this->hotelRooms) {
-			foreach ($this->hotelRooms as $room) {
-				$rooms[] = $room->getDataSearch();
-			}
-
-		}
-
-		/*$rooms[] = ['rooms' => 1, 'adults' => 1];
-		$rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
-			['paxType' => 1, 'age' => 6],
-			['paxType' => 1, 'age' => 14],
-		]];*/
-
-		//            if ($this->ph_max_star_rate) {
-		//
-		//            }
-
-		if ($this->ph_max_price_rate) {
-			$params['maxRate'] = $this->ph_max_price_rate;
-		}
-
-		if ($this->ph_min_price_rate) {
-			$params['minRate'] = $this->ph_min_price_rate;
-		}
-
-		// $params['maxRate'] = 120;
-		//$params['maxHotels'] = 10;
-
-		// MaxRatesPerRoom
-
 		$keyCache = $this->ph_request_hash_key;
 		$result = Yii::$app->cache->get($keyCache);
 
 		if ($result === false) {
+			$params = [];
+
+			$apiHotelService = Yii::$app->getModule('hotel')->apiService;
+			// $service = $hotel->apiService;
+
+			$rooms = [];
+
+			if ($this->hotelRooms) {
+				foreach ($this->hotelRooms as $room) {
+					$rooms[] = $room->getDataSearch();
+				}
+
+			}
+
+			/*$rooms[] = ['rooms' => 1, 'adults' => 1];
+			$rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
+				['paxType' => 1, 'age' => 6],
+				['paxType' => 1, 'age' => 14],
+			]];*/
+
+			//            if ($this->ph_max_star_rate) {
+			//
+			//            }
+
+			if ($this->ph_max_price_rate) {
+				$params['maxRate'] = $this->ph_max_price_rate;
+			}
+
+			if ($this->ph_min_price_rate) {
+				$params['minRate'] = $this->ph_min_price_rate;
+			}
+
 			$response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
 
 			if (isset($response['data']['hotels'])) {

@@ -77,6 +77,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const ROLE_AGENT = 'agent';
     public const ROLE_SUPERVISION = 'supervision';
     public const ROLE_QA = 'qa';
+    public const ROLE_QA_SUPER = 'qa_super';
     public const ROLE_USER_MANAGER = 'userManager';
     public const ROLE_SUP_AGENT = 'sup_agent';
     public const ROLE_SUP_SUPER = 'sup_super';
@@ -271,7 +272,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isAnySupervision(): bool
     {
-        return $this->isSupervision() || $this->isExSuper() || $this->isSupSuper();
+        return $this->isSupervision() || $this->isExSuper() || $this->isSupSuper() || $this->isQaSuper();
+    }
+
+    public function isQaSuper(): bool
+    {
+        return in_array(self::ROLE_QA_SUPER, $this->getRoles(true), true);
     }
 
     /**
@@ -946,7 +952,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getRoles($onlyNames = false) : array
     {
         if ($this->rolesName === null) {
-            $this->rolesName = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
+            //todo
+            $query = (new Query())->select('b.*')
+                ->from(['a' => 'auth_assignment', 'b' => 'auth_item'])
+                ->where('{{a}}.[[item_name]]={{b}}.[[name]]')
+                ->andWhere(['a.user_id' => (string) $this->id])
+                ->andWhere(['b.type' => 1]);
+            $this->rolesName = ArrayHelper::map($query->all(), 'name', 'description');
+//            $this->rolesName = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
         }
         if ($onlyNames) {
             return array_keys($this->rolesName);

@@ -222,7 +222,7 @@ $user = Yii::$app->user->identity;
 
 
 
-        <?php if($user->isAdmin() || $user->isSupervision()): ?>
+        <?php if($user->isAdmin() || $user->isSupervision() || $user->isQaSuper()): ?>
 
 
 
@@ -244,21 +244,16 @@ $user = Yii::$app->user->identity;
                         'title' => 'General Lead Log #' . $leadForm->lead->id,
                         'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
                     ]) ?>
+
+                    <?php if (Auth::can('/visitor-log/index')): ?>
+                        <?= Html::a('<i class="fa fa-list"></i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
+                            'class' => 'dropdown-item',
+                            'title' => 'Visitor log #' . $leadForm->lead->id,
+                        ]) ?>
+                    <?php endif; ?>
+
                 </div>
             </div>
-
-
-
-
-            <?php
-//                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadModel->id])->count();
-//                echo Html::a('Old Data Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
-//                    [
-//                        'id' => 'btn-lead-logs',
-//                        'class' => 'btn btn-default',
-//                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadModel->id])
-//                    ]);
-            ?>
 
         <?php endif; ?>
 

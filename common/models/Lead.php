@@ -110,6 +110,7 @@ use yii\helpers\VarDumper;
  * @property int|null $l_type_create
  * @property int $l_is_test
  * @property string|null $hybrid_uid
+ * @property int|null $l_visitor_log_id
  *
  * @property float $finalProfit
  * @property int $quotesCount
@@ -133,7 +134,6 @@ use yii\helpers\VarDumper;
  * @property Offer[] $offers
  * @property Order[] $orders
  * @property Product[] $products
- * @property LeadLog[] $leadLogs
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
  * @property LeadPreferences $leadPreferences
@@ -179,7 +179,6 @@ use yii\helpers\VarDumper;
  * @property null|string $additionalInformationFormFirstElementPnr
  * @property string $statusLabelClass
  * @property array $paxTypes
- * @property ActiveQuery $reasons
  * @property mixed $bookedQuote
  * @property null $departure
  * @property ActiveQuery $tsUsers
@@ -439,6 +438,18 @@ class Lead extends ActiveRecord implements Objectable
     }
 
     /**
+     * @return array|null
+     */
+    public function getAdditionalInformationMultiplePnr(): array
+    {
+        $data = [];
+        foreach ($this->getAdditionalInformationForm() as $key => $obj){
+            array_push($data, $obj->pnr);
+        }
+        return $data;
+    }
+
+    /**
      * @param string|null $pnr
      */
     public function setAdditionalInformationFormFirstElementPnr(?string $pnr): void
@@ -489,6 +500,9 @@ class Lead extends ActiveRecord implements Objectable
             ['l_delayed_charge', 'default', 'value' => false],
 
             ['l_type_create', 'in', 'range' => array_keys(self::TYPE_CREATE_LIST)],
+
+            ['l_visitor_log_id', 'integer'],
+            ['l_visitor_log_id', 'exist', 'skipOnError' => true, 'targetClass' => VisitorLog::class, 'targetAttribute' => ['l_visitor_log_id' => 'vl_id']],
         ];
     }
 
@@ -706,6 +720,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->request_ip = $form->request_ip;
         $lead->discount_id = $form->discount_id;
         $lead->uid = $form->uid ?: $lead->uid;
+        $lead->hybrid_uid = $form->uid;
         $lead->status = $form->status;
         $lead->bo_flight_id = $form->flight_id;
         $lead->l_dep_id = Department::DEPARTMENT_SALES;
@@ -1602,7 +1617,7 @@ class Lead extends ActiveRecord implements Objectable
             'l_last_action_dt' => 'Last Action',
             'l_dep_id' => 'Department ID',
             'l_delayed_charge' => 'Delayed charge',
-
+            'hybrid_uid' => 'Booking ID',
         ];
     }
 
@@ -1705,15 +1720,6 @@ class Lead extends ActiveRecord implements Objectable
     /**
      * @return ActiveQuery
      */
-    public function getLeadLogs()
-    {
-        return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
-    }
-
-
-    /**
-     * @return ActiveQuery
-     */
     public function getSms(): ActiveQuery
     {
         return $this->hasMany(Sms::class, ['s_lead_id' => 'id']);
@@ -1766,14 +1772,6 @@ class Lead extends ActiveRecord implements Objectable
     public function getQuotes(): ActiveQuery
     {
         return $this->hasMany(Quote::class, ['lead_id' => 'id']);
-    }
-
-    /**
-     * @return ActiveQuery
-     */
-    public function getReasons()
-    {
-        return $this->hasMany(Reason::class, ['lead_id' => 'id']);
     }
 
     /**
@@ -2859,10 +2857,9 @@ Reason: {reason}
 
             } else {
 
-
-
-
                 if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+
+
                     LeadFlow::addStateFlow($this);
 
                     if($this->called_expert && ($this->status == self::STATUS_TRASH || $this->status == self::STATUS_FOLLOW_UP || $this->status == self::STATUS_SNOOZE || $this->status == self::STATUS_PROCESSING)) {
@@ -2875,6 +2872,7 @@ Reason: {reason}
 
 
                 if ($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
+
                     //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
 
                     if (isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP)) {
@@ -2889,7 +2887,6 @@ Reason: {reason}
 
                 if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
 
-
                     if ($this->status == self::STATUS_SOLD) {
                         //echo $changedAttributes['status'].' - '. $this->status; exit;
                         if ($this->employee_id && !$this->sendNotification('lead-status-sold', $this->employee_id)) {
@@ -2903,12 +2900,13 @@ Reason: {reason}
                     } elseif ($this->status == self::STATUS_FOLLOW_UP) {
 
                         if ($this->status_description) {
-                            $reason = new Reason();
-                            $reason->lead_id = $this->id;
-                            $reason->employee_id = $this->employee_id;
-                            $reason->created = date('Y-m-d H:i:s');
-                            $reason->reason = $this->status_description;
-                            $reason->save();
+                            //todo delete
+//                            $reason = new Reason();
+//                            $reason->lead_id = $this->id;
+//                            $reason->employee_id = $this->employee_id;
+//                            $reason->created = date('Y-m-d H:i:s');
+//                            $reason->reason = $this->status_description;
+//                            $reason->save();
                         }
 
                         /*if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
@@ -2917,12 +2915,13 @@ Reason: {reason}
                     } elseif ($this->status == self::STATUS_SNOOZE) {
 
                         if ($this->status_description) {
-                            $reason = new Reason();
-                            $reason->lead_id = $this->id;
-                            $reason->employee_id = $this->employee_id;
-                            $reason->created = date('Y-m-d H:i:s');
-                            $reason->reason = $this->status_description;
-                            $reason->save();
+                            //todo delete
+//                            $reason = new Reason();
+//                            $reason->lead_id = $this->id;
+//                            $reason->employee_id = $this->employee_id;
+//                            $reason->created = date('Y-m-d H:i:s');
+//                            $reason->reason = $this->status_description;
+//                            $reason->save();
                         }
 
 
@@ -2941,6 +2940,7 @@ Reason: {reason}
                 (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)
             )
             {
+
                 LeadTask::deleteUnnecessaryTasks($this->id);
 
                 if($this->l_answered) {
@@ -2955,6 +2955,7 @@ Reason: {reason}
             }
 
             if (!$insert) {
+
                 foreach (['updated', 'created'] as $item) {
                     if (in_array($item, array_keys($changedAttributes))) {
                         unset($changedAttributes[$item]);
@@ -2999,17 +3000,17 @@ Reason: {reason}
 
         }
 
-
         //Add logs after changed model attributes
-        $leadLog = new LeadLog(new LeadLogMessage());
-        $leadLog->logMessage->oldParams = $changedAttributes;
-        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
-        $leadLog->logMessage->title = ($insert)
-            ? 'Create' : 'Update';
-        $leadLog->logMessage->model = $this->formName();
-        $leadLog->addLog([
-            'lead_id' => $this->id,
-        ]);
+//        $leadLog = new LeadLog(new LeadLogMessage());
+//        $leadLog->logMessage->oldParams = $changedAttributes;
+//        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
+//        $leadLog->logMessage->title = ($insert)
+//            ? 'Create' : 'Update';
+//        $leadLog->logMessage->model = $this->formName();
+//        $leadLog->addLog([
+//            'lead_id' => $this->id,
+//        ]);
+
     }
 
     /**
@@ -3217,16 +3218,6 @@ Reason: {reason}
                 Quote::STATUS_APPLIED]
             ])->all();
         return count($data);
-    }
-
-    /**
-     * @return array|null|\yii\db\ActiveRecord
-     */
-    public function lastLog()
-    {
-        return LeadLog::find()->where([
-            'lead_id' => $this->id,
-        ])->orderBy('id DESC')->one();
     }
 
     /**

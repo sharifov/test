@@ -5,6 +5,7 @@ namespace frontend\widgets\multipleUpdate\cases;
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\IdsValidator;
 use sales\entities\cases\CasesStatus;
+use sales\helpers\user\UserDateTimeHelper;
 use yii\base\Model;
 use yii\helpers\Json;
 
@@ -14,8 +15,11 @@ use yii\helpers\Json;
  * @property int[] $ids
  * @property int|null $userId
  * @property int|null $statusId
- * @property int $reason
+ * @property $reason
  * @property string $message
+ * @property string|null $deadline
+ *
+ * @property Employee $user
  */
 class MultipleUpdateForm extends Model
 {
@@ -24,6 +28,15 @@ class MultipleUpdateForm extends Model
     public $userId;
     public $reason;
     public $message;
+    public $deadline;
+
+    private $user;
+
+    public function __construct(Employee $user, $config = [])
+    {
+        parent::__construct($config);
+        $this->user = $user;
+    }
 
     public function rules(): array
     {
@@ -53,7 +66,28 @@ class MultipleUpdateForm extends Model
             ['userId', 'required', 'when' =>  function() {
                 return $this->isProcessing();
             }, 'skipOnEmpty' => false],
+
+            ['deadline', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            ['deadline', function () {
+                if (strtotime($this->deadline) < time()) {
+                    $this->addError('deadline', 'Deadline should be later than now.');
+                }
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
+    }
+
+    public function getCreatorId(): int
+    {
+        return $this->user->id;
+    }
+
+    public function getConvertedDeadline(): ?string
+    {
+        if ($this->deadline === null) {
+            return null;
+        }
+
+        return (UserDateTimeHelper::convertUserTimeToUtc($this->deadline, $this->user->timezone))->format('Y-m-d H:i:s');
     }
 
     public function afterValidate()
@@ -122,6 +156,11 @@ class MultipleUpdateForm extends Model
     public function statusProcessingId(): int
     {
         return CasesStatus::STATUS_PROCESSING;
+    }
+
+    public function statusFollowUpId(): int
+    {
+        return CasesStatus::STATUS_FOLLOW_UP;
     }
 
     public function isFollowUp(): bool

@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'hqr_rooms',
             'hqr_adults',
             'hqr_children',
+            'hqr_service_fee_percent:percentInteger',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

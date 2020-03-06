@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Currency;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use sales\access\ListsAccess;
@@ -44,7 +45,7 @@ $list = (new ListsAccess(Auth::id()));
 
         <?= $form->field($model, 'or_client_total')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'or_client_currency')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'or_client_currency')->dropDownList(Currency::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'or_client_currency_rate')->textInput(['maxlength' => true]) ?>
 

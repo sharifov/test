@@ -2,16 +2,18 @@
 
 namespace frontend\widgets\multipleUpdate\cases;
 
+use common\models\Employee;
 use frontend\widgets\multipleUpdate\MultipleUpdateHelper;
 use yii\base\Widget;
 
 /**
  * Class MultipleUpdateWidget
  *
- * @property string $validationUrl
- * @property string $action
- * @property string $modalId
- * @property string $ids
+ * @property string|null $validationUrl
+ * @property string|null $action
+ * @property string|null $modalId
+ * @property string|null $ids
+ * @property Employee $user
  * @property string $pjaxId for reload
  * @property string $script
  * @property string $formId
@@ -25,6 +27,7 @@ class MultipleUpdateWidget extends Widget
     public $action;
     public $modalId;
     public $ids;
+    public $user;
 
     public $pjaxId;
     public $script;
@@ -49,12 +52,15 @@ class MultipleUpdateWidget extends Widget
         if ($this->ids === null) {
             throw new \InvalidArgumentException('ids must be set');
         }
+        if (!$this->user instanceof Employee) {
+            throw new \InvalidArgumentException('user must be instance of ' . Employee::class);
+        }
         MultipleUpdateHelper::validateIds($this->ids);
     }
 
     public function run(): string
     {
-        $form = new MultipleUpdateForm(['ids' => $this->ids]);
+        $form = new MultipleUpdateForm($this->user, ['ids' => $this->ids]);
 
         return $this->render('_multiple_update', [
             'updateForm' => $form,

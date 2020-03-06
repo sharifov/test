@@ -174,38 +174,41 @@ JS;
 if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
     $js = <<<JS
 
-    $(document).on('keyup','.ext-mark-up', function (event) {
-        let key = event.keyCode ? event.keyCode : event.which;
-        validatePriceField($(this), key);
-    });
 
-    $(document).on('change','.ext-mark-up', function (event) {
-        if ($(this).val().length == 0) {
-            $(this).val(0);
-        }
-        var element = $(this);
-        $.ajax({
-            type: 'post',
-            url: '$extraPriceUrl',
-            data: {'quote_uid': $(this).data('quote-uid'), 'value': $(this).val(), 'pax_type': $(this).data('pax-type')},
-            success: function (data) {
-                if (!jQuery.isEmptyObject(data)) {
-                    var sell = element.parent().parent().find('.sellingPrice-'+data.uid),
-                            totalSell = $('.total-sellingPrice-'+data.uid),
-                            totalMarkup = $('.total-markup-'+data.uid);
+// todo delete
 
-                        sell.text(data.actual.sellingPrice);
-                        totalSell.text(data.total.sellingPrice);
-                        totalMarkup.text(data.total.markup);
-
-                        $('#isChangedMarkup-'+data.uid).removeClass('hidden');
-                    }
-            },
-            error: function (error) {
-            console.log('Error: ' + error);
-            }
-        });
-    });
+//    $(document).on('keyup','.ext-mark-up', function (event) {
+//        let key = event.keyCode ? event.keyCode : event.which;
+//        validatePriceField($(this), key);
+//    });
+//
+//    $(document).on('change','.ext-mark-up', function (event) {
+//        if ($(this).val().length == 0) {
+//            $(this).val(0);
+//        }
+//        var element = $(this);
+//        $.ajax({
+//            type: 'post',
+//            url: '$extraPriceUrl',
+//            data: {'quote_uid': $(this).data('quote-uid'), 'value': $(this).val(), 'pax_type': $(this).data('pax-type')},
+//            success: function (data) {
+//                if (!jQuery.isEmptyObject(data)) {
+//                    var sell = element.parent().parent().find('.sellingPrice-'+data.uid),
+//                            totalSell = $('.total-sellingPrice-'+data.uid),
+//                            totalMarkup = $('.total-markup-'+data.uid);
+//
+//                        sell.text(data.actual.sellingPrice);
+//                        totalSell.text(data.total.sellingPrice);
+//                        totalMarkup.text(data.total.markup);
+//
+//                        $('#isChangedMarkup-'+data.uid).removeClass('hidden');
+//                    }
+//            },
+//            error: function (error) {
+//            console.log('Error: ' + error);
+//            }
+//        });
+//    });
     
     $(document).on('click', '#btn-declined-quotes', function() {
         var quotes = Array();

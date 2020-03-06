@@ -79,11 +79,13 @@ $js = <<<JS
                   });
               } else {
                   //reload pjax and close boostrap modal
-                  $.pjax.reload({
+                  pjaxReload({
                       container: '#pjax-lead-products-wrap',
                       timeout: 5000,
                       async: false,
                   });
+                  pjaxReload({ container: '#pjax-lead-call-expert', timeout: 5000, async: false });
+                  
                   $('#modal-sm').modal('hide');
               }
               // btnSubmit.prop('disabled', false);
@@ -142,7 +144,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 //
 ///*$("document").ready(function(){
 //    $("#$$pjaxId").on("pjax:end", function() {
-//        //$.pjax.reload({container:"#dictionary-grid", timeout : false });
+//        //pjaxReload({container:"#dictionary-grid", timeout : false });
 //        alert(123);
 //    });
 //});*/

@@ -63,12 +63,24 @@ class UserProfitRepository extends Repository
 	/**
 	 * @param int $userId
 	 * @param int $orderId
-	 * @param int $productQuoteId
+	 * @param int|null $productQuoteId
+	 * @param int|null $typeId
 	 * @return UserProfit
 	 */
-	public function findOrCreate(int $userId, int $orderId, int $productQuoteId): UserProfit
+	public function findOrCreate(int $userId, int $orderId, ?int $productQuoteId = null, ?int $typeId = null): UserProfit
 	{
-		$userProfit = UserProfit::findOne(['up_user_id' => $userId, 'up_order_id' => $orderId, 'up_product_quote_id' => $productQuoteId]);
+		$userProfit = UserProfit::find()->where(['up_user_id' => $userId, 'up_order_id' => $orderId]);
+
+		if ($productQuoteId) {
+			$userProfit->andWhere(['up_product_quote_id' => $productQuoteId]);
+		}
+
+		if ($typeId) {
+			$userProfit->andWhere(['up_type_id' => $typeId]);
+		}
+
+		$userProfit = $userProfit->one();
+
 		if ($userProfit === null) {
 			$userProfit = new UserProfit();
 		}

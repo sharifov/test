@@ -4,6 +4,8 @@ namespace modules\product\src\entities\product;
 
 use common\models\Employee;
 use common\models\Lead;
+use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
+use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\product\serializer\ProductSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productType\ProductType;
@@ -33,6 +35,8 @@ use yii\db\ActiveRecord;
  * @property int|null $pr_updated_user_id
  * @property string|null $pr_created_dt
  * @property string|null $pr_updated_dt
+ * @property $pr_market_price
+ * @property $pr_client_budget
  *
  * @property Flight[] $flights
  * @property Flight $flight
@@ -61,6 +65,28 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         $product->pr_description = $form->pr_description;
         $product->recordEvent(new ProductCreateEvent($product));
         return $product;
+    }
+
+    public function updateInfo(?string $name, ?string $description)
+    {
+        $this->pr_name = $name;
+        $this->pr_description = $description;
+    }
+
+    public function changeMarketPrice($value)
+    {
+        if ($this->pr_market_price !== $value) {
+            $this->recordEvent(new ProductMarketPriceChangedEvent($this));
+        }
+        $this->pr_market_price = $value;
+    }
+
+    public function changeClientBudget($value)
+    {
+        if ($this->pr_client_budget !== $value) {
+            $this->recordEvent(new ProductClientBudgetChangedEvent($this));
+        }
+        $this->pr_client_budget = $value;
     }
 
     public function isFlight(): bool
@@ -116,6 +142,9 @@ class Product extends \yii\db\ActiveRecord implements Serializable
 
             ['pr_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             ['pr_updated_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['pr_market_price', 'number'],
+            ['pr_client_budget', 'number'],
         ];
     }
 
@@ -133,6 +162,8 @@ class Product extends \yii\db\ActiveRecord implements Serializable
             'pr_updated_user_id' => 'Updated User',
             'pr_created_dt' => 'Created Dt',
             'pr_updated_dt' => 'Updated Dt',
+            'pr_market_price' => 'Market price',
+            'pr_client_budget' => 'Client budget',
         ];
     }
 
@@ -248,5 +279,17 @@ class Product extends \yii\db\ActiveRecord implements Serializable
 	public function serialize(): array
     {
         return (new ProductSerializer($this))->getData();
+    }
+
+    /**
+     * @param int $leadId
+     * @param array $typeIds
+     * @return array|ActiveRecord[]
+     */
+    public function getByLeadAndType(int $leadId, array $typeIds = ProductType::ALLOW_CALL_EXPERT)
+    {
+        return self::find()->where(['pr_lead_id' => $leadId])
+            ->andWhere(['IN', 'pr_type_id', $typeIds])
+            ->all();
     }
 }
