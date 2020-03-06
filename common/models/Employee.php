@@ -1958,7 +1958,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param array|null $exceptUserIds
      * @return array
      */
-    public static function getUsersForCallQueue(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
+    public static function getUsersForCallQueueOld(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
     {
 
         $project_id = $call->c_project_id;
@@ -2038,6 +2038,115 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $users;
     }
 
+
+
+    /**
+     * @param Call $call
+     * @param int $limit
+     * @param int $hours
+     * @param array|null $exceptUserIds
+     * @return array
+     */
+    public static function getUsersForCallQueue(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
+    {
+
+        $project_id = $call->c_project_id;
+        $department_id = $call->c_dep_id;
+
+
+        $query = UserConnection::find();
+        $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
+
+        $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
+        // $subQuery3 = Call::find()->select(['c_status_id'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
+        $subQuery3 = Call::find()->select('COUNT(*)')->where('c_created_user_id = user_connection.uc_user_id')->andWhere(['c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->limit(1);
+        $subQuery4 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
+//        $subQuery5 = Call::find()->select(['COUNT(*)'])
+//            ->where('c_created_user_id = user_connection.uc_user_id')
+//            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
+//            ->andWhere(['c_status_id' => Call::STATUS_COMPLETED])
+//            ->andWhere(['c_project_id' => $project_id])
+//            ->andWhere(['>=', 'c_created_dt', $date_time]);
+
+
+        $query->select([
+                'tbl_user_id' => 'user_connection.uc_user_id',
+                'tbl_call_status_id' => $subQuery2,
+                'tbl_calls_count_process' => $subQuery3,
+                'tbl_call_type_id' => $subQuery4,
+//                'tbl_calls_count' => $subQuery5,
+            ]
+        );
+
+        //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $project_id]);
+        //$query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
+
+        $subQuery = CallUserAccess::find()->select(['DISTINCT(cua_user_id)'])->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING]);
+        $query->andWhere(['NOT IN', 'user_connection.uc_user_id', $subQuery]);
+
+        $subQueryUpp = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['upp_project_id' => $project_id, 'upp_allow_general_line' => true]);
+        $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUpp]);
+
+        if($exceptUserIds) {
+            $query->andWhere(['NOT IN', 'user_connection.uc_user_id', $exceptUserIds]);
+        }
+
+        if($department_id) {
+            $subQueryUd = UserDepartment::find()->usersByDep($department_id);
+            $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+        }
+
+        if ($call->cugUgs) {
+            $groupIds = ArrayHelper::map($call->cugUgs, 'ug_id', 'ug_id');
+            if ($groupIds) {
+                $subQueryUGroup = UserGroupAssign::find()->select('ugs_user_id')->distinct('ugs_user_id')->where(['ugs_group_id' => $groupIds]);
+                $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUGroup]);
+            }
+        }
+
+
+        $query->groupBy(['user_connection.uc_user_id']);
+        //$query->orderBy(['tbl_calls_count' => SORT_ASC]);
+
+        $generalQuery = new Query();
+        $generalQuery->from(['tbl' => $query]);
+        // $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_status_id', [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]], ['tbl_last_status_id' => null]]);
+        $generalQuery->andWhere(['OR', ['tbl_calls_count_process' => 0], ['tbl_calls_count_process' => null]]);
+        $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
+        $generalQuery->andWhere(['AND', ['=', 'tbl_call_type_id', UserProfile::CALL_TYPE_WEB], ['IS NOT', 'tbl_call_type_id', null]]);
+        //$generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
+
+        if($limit > 0) {
+            $generalQuery->limit($limit);
+        }
+
+        //$sqlRaw = $generalQuery->createCommand()->getRawSql();
+        //echo '<pre>'.print_r($sqlRaw, true).'</pre>';  exit;
+        //VarDumper::dump($sqlRaw, 10, true); exit;
+        $users = $generalQuery->all();
+
+        if ($users) {
+            foreach ($users as $userItem) {
+                $user_id = (int) $userItem['tbl_user_id'];
+                $users['tbl_calls_count'] = Call::find()->select(['COUNT(*)'])
+                    ->where(['c_created_user_id' =>  $user_id])
+                    ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
+                    ->andWhere(['c_status_id' => Call::STATUS_COMPLETED])
+                    ->andWhere(['c_project_id' => $project_id])
+                    ->andWhere(['>=', 'c_created_dt', $date_time])
+                    ->scalar();
+            }
+
+            try {
+                array_multisort (array_column($users, 'tbl_calls_count'), SORT_ASC, $users);
+            } catch (\Throwable $exception) {
+                Yii::error($exception->getMessage(), 'Employee:getUsersForCallQueue2:array_multisort');
+            }
+
+        }
+
+        return $users;
+    }
 
     /**
      * @param int $time
