@@ -9,6 +9,7 @@ use common\models\search\EmployeeSearch;
 use modules\product\src\entities\productType\ProductType;
 use sales\access\EmployeeGroupAccess;
 use sales\model\user\entity\Access;
+use sales\model\user\entity\AccessCache;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use Yii;
@@ -138,7 +139,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if ($this->access !== null) {
             return $this->access;
         }
-        $this->access = new Access($this);
+        $this->access = new Access($this, new AccessCache($this->cache));
         return $this->access;
     }
 

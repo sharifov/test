@@ -4,11 +4,13 @@ namespace sales\model\user\entity;
 
 use common\models\Department;
 use common\models\Employee;
+use yii\helpers\VarDumper;
 
 /**
  * Class Access
  *
  * @property Employee $user
+ * @property AccessCache $cache
  * @property array|null $projects
  * @property array|null $departments
  * @property array|null $groups
@@ -16,13 +18,16 @@ use common\models\Employee;
 class Access
 {
     private $user;
+    private $cache;
+
     private $groups;
     private $projects;
     private $departments;
 
-    public function __construct(Employee $user)
+    public function __construct(Employee $user, AccessCache $cache)
     {
         $this->user = $user;
+        $this->cache = $cache;
     }
 
     public function getUserId(): int
@@ -48,6 +53,11 @@ class Access
     private function getProjects(): array
     {
         if ($this->projects !== null) {
+            return $this->projects;
+        }
+
+        if ($projects = $this->cache->getProjects()) {
+            $this->projects = $projects;
             return $this->projects;
         }
 

@@ -187,6 +187,8 @@ class TestController extends FController
     public function actionTest()
     {
 
+        VarDumper::dump(Auth::user()->getAccess()->getAllProjects());
+        die;
         return $this->render('blank');
     }
 
