@@ -1958,7 +1958,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param array|null $exceptUserIds
      * @return array
      */
-    public static function getUsersForCallQueueOld(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
+    public static function getUsersForCallQueue(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
     {
 
         $project_id = $call->c_project_id;
@@ -2047,7 +2047,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param array|null $exceptUserIds
      * @return array
      */
-    public static function getUsersForCallQueue(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
+    public static function getUsersForCallQueueNew(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
     {
 
         $project_id = $call->c_project_id;
