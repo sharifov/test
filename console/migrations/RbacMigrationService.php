@@ -3,6 +3,7 @@
 namespace console\migrations;
 
 use Yii;
+use yii\helpers\VarDumper;
 use yii\rbac\Role;
 use yii2mod\rbac\models\RouteModel;
 
@@ -36,9 +37,11 @@ class RbacMigrationService
                 $auth->add($permission);
             }
 
-            foreach ($roles as $role) {
-                if (!$auth->hasChild($auth->getRole($role), $permission)) {
-                    $auth->addChild($auth->getRole($role), $permission);
+            foreach ($roles as $item) {
+                if ($role = $auth->getRole($item)) {
+                    if (!$auth->hasChild($role, $permission)) {
+                        $auth->addChild($role, $permission);
+                    }
                 }
             }
         }
@@ -59,10 +62,12 @@ class RbacMigrationService
         $routes = $this->createRoutes($routes);
 
         foreach ($routes as $route) {
-            foreach ($roles as $role) {
-                if ($permission = $auth->getPermission($route)) {
-                    if ($auth->hasChild($auth->getRole($role), $permission)) {
-                        $auth->removeChild($auth->getRole($role), $permission);
+            foreach ($roles as $item) {
+                if ($role = $auth->getRole($item)) {
+                    if ($permission = $auth->getPermission($route)) {
+                        if ($auth->hasChild($role, $permission)) {
+                            $auth->removeChild($role, $permission);
+                        }
                     }
                 }
             }
