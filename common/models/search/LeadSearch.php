@@ -195,6 +195,7 @@ class LeadSearch extends Lead
     public function search($params)
     {
         $query = Lead::find()->with('project', 'source', 'employee', 'client');
+        $query->with(['client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // add conditions that should always apply here
@@ -768,6 +769,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(EmployeeProjectAccess::getProjects());
         $query = Lead::find();
+        $query->with(['project', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $dataProvider = new ActiveDataProvider([
