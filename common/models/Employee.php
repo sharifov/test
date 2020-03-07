@@ -12,6 +12,7 @@ use sales\model\user\entity\Access;
 use sales\model\user\entity\AccessCache;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
+use sales\model\user\entity\UserCache;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -68,7 +69,9 @@ use yii\web\NotFoundHttpException;
  * @property int $callExpertCountByShiftTime
  * @property int $callExpertCount
  *
+ * @property array $cache
  * @property Access|null $access
+ *
  * @property \yii\db\ActiveQuery $productType
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
@@ -130,6 +133,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $projectAccess = [];
 
     private $access;
+
+    public function loadCache(UserCache $cache): void
+    {
+        $this->cache = $cache->getData();
+    }
 
     /**
      * @return Access
@@ -2141,5 +2149,44 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $url = '//www.gravatar.com/avatar/?d=' . $default . '&s=60';
         }
         return $url;
+    }
+
+    public function getProjectsToArray(): array
+    {
+        $projects = [];
+        foreach ($this->projects as $project) {
+            $projects[$project->id] = [
+                'id' => $project->id,
+                'name' => $project->name,
+                'closed' => $project->closed,
+            ];
+        }
+        return $projects;
+    }
+
+    public function getDepartmentsToArray(): array
+    {
+        $departments = [];
+        foreach ($this->udDeps as $department) {
+            $departments[$department->dep_id] = [
+                'dep_id' => $department->dep_id,
+                'dep_key' => $department->dep_key,
+                'dep_name' => $department->dep_name,
+            ];
+        }
+        return $departments;
+    }
+
+    public function getGroupsToArray(): array
+    {
+        $groups = [];
+        foreach ($this->ugsGroups as $group) {
+            $groups[$group->ug_id] = [
+                'ug_id' => $group->ug_id,
+                'ug_name' => $group->ug_name,
+                'ug_disable' => $group->ug_disable,
+            ];
+        }
+        return $groups;
     }
 }

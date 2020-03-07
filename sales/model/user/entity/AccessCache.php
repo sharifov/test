@@ -25,4 +25,9 @@ class AccessCache
     {
         return $this->cache['departments'] ?? null;
     }
+
+    public function getGroups(): ?array
+    {
+        return $this->cache['groups'] ?? null;
+    }
 }

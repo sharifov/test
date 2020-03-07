@@ -66,6 +66,7 @@ use sales\access\ListsAccess;
 use sales\access\project\ProjectAccessService;
 use sales\access\QueryAccessService;
 use sales\auth\Auth;
+use sales\cache\app\AppCache;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
@@ -187,8 +188,24 @@ class TestController extends FController
     public function actionTest()
     {
 
-        VarDumper::dump(Auth::user()->getAccess()->getAllProjects());
-        die;
+       $user = Auth::user();
+
+        VarDumper::dump($user->getAccess()->getAllProjects());
+        VarDumper::dump($user->getAccess()->getDepartments());
+        VarDumper::dump($user->getAccess()->getAllGroups());
+
+//        die;
+//        $appCache = new AppCache(Yii::$app->cache);
+//
+//        $appCache->flush();
+//        $appCache->getUserGroups();
+////        VarDumper::dump($appCache->getUserGroups());
+//        VarDumper::dump($appCache->getUsersFromGroups([1,2,5,6]));
+//        die;
+//
+
+
+//        die;
         return $this->render('blank');
     }
 

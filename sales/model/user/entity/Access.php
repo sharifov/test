@@ -2,9 +2,7 @@
 
 namespace sales\model\user\entity;
 
-use common\models\Department;
 use common\models\Employee;
-use yii\helpers\VarDumper;
 
 /**
  * Class Access
@@ -61,11 +59,7 @@ class Access
             return $this->projects;
         }
 
-        $this->projects = [];
-
-        foreach ($this->user->getProjects()->select(['name', 'closed', 'id'])->indexBy('id')->asArray()->all() as $key => $item) {
-            $this->projects[$key] = $item;
-        }
+        $this->projects = $this->user->getProjectsToArray();
 
         return $this->projects;
     }
@@ -76,13 +70,12 @@ class Access
             return $this->departments;
         }
 
-        $this->departments = [];
-
-        $alias = Department::tableName();
-
-        foreach ($this->user->getUdDeps()->select([$alias . '.dep_name'])->indexBy($alias . '.dep_id')->column() as $key => $item) {
-            $this->departments[$key] = $item;
+        if ($departments = $this->cache->getDepartments()) {
+            $this->departments = $departments;
+            return $this->departments;
         }
+
+        $this->departments = $this->user->getDepartmentsToArray();
 
         return $this->departments;
     }
@@ -103,11 +96,12 @@ class Access
             return $this->groups;
         }
 
-        $this->groups = [];
-
-        foreach ($this->user->getUgsGroups()->select(['ug_id', 'ug_name', 'ug_disable'])->indexBy('ug_id')->asArray()->all() as $key => $item) {
-            $this->groups[$key] = $item;
+        if ($groups = $this->cache->getGroups()) {
+            $this->groups = $groups;
+            return $this->groups;
         }
+
+        $this->groups = $this->user->getGroupsToArray();
 
         return $this->groups;
     }

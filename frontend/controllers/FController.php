@@ -32,10 +32,9 @@ class FController extends Controller
        if(!\Yii::$app->user->isGuest){
            /** @var Employee $user */
            $user = \Yii::$app->user->identity;
-           $user->setCache('projects', [
-               1 => ['name' => '111', 'closed' => false, 'id' => 1],
-               23 => ['name' => '222', 'closed' => true, 'id' => 23],
-           ]);
+
+//           $user->loadCache(new \sales\model\user\entity\UserCache($user, \Yii::$app->cache));
+
            $timezone = $user->userParams ? $user->userParams->up_timezone : null;
            if($timezone){
                \Yii::$app->formatter->timeZone = $timezone;
