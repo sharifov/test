@@ -1917,7 +1917,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'project']);
 
         return $dataProvider;
     }
