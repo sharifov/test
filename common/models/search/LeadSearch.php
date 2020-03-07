@@ -1062,6 +1062,7 @@ class LeadSearch extends Lead
 //        $query = Lead::find()->with('project', 'source');
 
         $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source', 'employee')->joinWith('leadFlowSold' );
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $this->load($params);
         $leadTable = Lead::tableName();
 
@@ -1387,6 +1388,7 @@ class LeadSearch extends Lead
     {
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = $this->leadBadgesRepository->getFollowUpQuery($user)->with('project');
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
