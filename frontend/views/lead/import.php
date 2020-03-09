@@ -18,9 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="x_panel">
     <div class="x_title">
         <h2>Import form</h2>
-        <ul class="nav navbar-right panel_toolbox">
-            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
-        </ul>
+
         <div class="clearfix"></div>
     </div>
     <div class="x_content">
@@ -46,11 +44,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]) ?>
 
         <div class="row">
-            <div class="col-md-12 col-sm-12">
-
-            <div class="form-group field-leadcreateform-segments">
-                <?= $form->field($model, 'file')->fileInput() ?>
-            </div>
+            <div class="col-md-12 col-sm-12 text-center">
+                <div class="form-group">
+                    <?= $form->field($model, 'file')->fileInput(['multiple' => false, 'accept' => '.csv']) ?>
+                </div>
             </div>
         </div>
         <div class="col-md-12 text-center">
