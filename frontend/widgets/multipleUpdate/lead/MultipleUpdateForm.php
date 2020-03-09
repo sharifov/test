@@ -168,6 +168,9 @@ class MultipleUpdateForm extends Model
         if (isset($statusList[Lead::STATUS_BOOK_FAILED])) {
             unset($statusList[Lead::STATUS_BOOK_FAILED]);
         }
+        if (isset($statusList[Lead::STATUS_NEW])) {
+            unset($statusList[Lead::STATUS_NEW]);
+        }
         return $statusList;
     }
 

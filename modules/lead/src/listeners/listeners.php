@@ -11,6 +11,7 @@ use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadCreatedManuallyEvent;
+use sales\events\lead\LeadCreatedNewEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
@@ -34,6 +35,7 @@ use sales\listeners\lead\LeadCreatedByIncomingEmailLogListener;
 use sales\listeners\lead\LeadCreatedByIncomingSmsLogListener;
 use sales\listeners\lead\LeadCreatedCloneByUserEventListener;
 use sales\listeners\lead\LeadCreatedEventListener;
+use sales\listeners\lead\LeadCreatedNewEventLogListener;
 use sales\listeners\lead\LeadDuplicateDetectedEventListener;
 use sales\listeners\lead\LeadFollowUpEventLogListener;
 use sales\listeners\lead\LeadFollowUpNotificationsListener;
@@ -68,6 +70,9 @@ return [
     ],
     LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
     LeadCreatedByIncomingEmailEvent::class => [LeadCreatedByIncomingEmailLogListener::class],
+    LeadCreatedNewEvent::class => [
+        LeadCreatedNewEventLogListener::class,
+    ],
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [LeadOwnerChangedNotificationsListener::class],

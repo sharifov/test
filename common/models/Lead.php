@@ -23,6 +23,7 @@ use sales\events\lead\LeadCreatedByIncomingSmsEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadCreatedManuallyEvent;
+use sales\events\lead\LeadCreatedNewEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
@@ -39,6 +40,7 @@ use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\interfaces\Objectable;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
+use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\qcall\CalculateDateService;
@@ -233,6 +235,7 @@ class Lead extends ActiveRecord implements Objectable
     public const STATUS_SNOOZE      = 13;
     public const STATUS_BOOK_FAILED = 14;
     public const STATUS_ALTERNATIVE = 15;
+    public const STATUS_NEW         = 16;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -246,6 +249,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_SNOOZE         => 'Snooze',
         self::STATUS_BOOK_FAILED    => 'Book failed',
         self::STATUS_ALTERNATIVE    => 'Alternative',
+        self::STATUS_NEW            => 'New',
     ];
 
     public const STATUS_MULTIPLE_UPDATE_LIST = [
@@ -313,6 +317,7 @@ class Lead extends ActiveRecord implements Objectable
     public const TYPE_CREATE_INCOMING_SMS = 4;
     public const TYPE_CREATE_INCOMING_EMAIL = 5;
     public const TYPE_CREATE_CLONE = 6;
+    public const TYPE_CREATE_IMPORT = 7;
 
     public const TYPE_CREATE_LIST = [
         self::TYPE_CREATE_MANUALLY => 'Manually',
@@ -321,6 +326,7 @@ class Lead extends ActiveRecord implements Objectable
         self::TYPE_CREATE_INCOMING_SMS => 'Incoming sms',
         self::TYPE_CREATE_INCOMING_EMAIL => 'Incoming email',
         self::TYPE_CREATE_CLONE => 'Clone',
+        self::TYPE_CREATE_IMPORT => 'Import',
     ];
 
     public const SCENARIO_API = 'scenario_api';
@@ -731,6 +737,25 @@ class Lead extends ActiveRecord implements Objectable
     public function eventLeadCreatedByApiBOEvent(): void
     {
         $this->recordEvent(new LeadCreatedByApiBOEvent($this, $this->status));
+    }
+
+    public static function createNew(LeadImportForm $form, Client $client, ?int $creatorId): self
+    {
+        $lead = self::create();
+        $lead->status = self::STATUS_NEW;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_type_create = self::TYPE_CREATE_IMPORT;
+        $lead->project_id = $form->project_id;
+        $lead->source_id = $form->source_id;
+        $lead->client_id = $client->id;
+        $lead->l_client_first_name = $client->first_name;
+        $lead->l_client_last_name = $client->last_name;
+        $lead->l_client_email = $form->client->email;
+        $lead->l_client_phone = $form->client->phone;
+        $lead->rating = $form->rating;
+        $lead->notes_for_experts = $form->notes;
+        $lead->recordEvent(new LeadCreatedNewEvent($lead, $creatorId));
+        return $lead;
     }
 
     /**
@@ -1363,6 +1388,11 @@ class Lead extends ActiveRecord implements Objectable
         return $this->status === self::STATUS_ALTERNATIVE;
     }
 
+    public function isNew(): bool
+    {
+        return $this->status === self::STATUS_NEW;
+    }
+
     /**
      * @param int|null $newOwnerId
      * @param int|null $creatorId
@@ -1528,7 +1558,7 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function isAvailableToTake(): bool
     {
-        return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
+        return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_NEW], true);
     }
 
     /**
@@ -2322,6 +2352,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_NEW:
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
