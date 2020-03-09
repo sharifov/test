@@ -16,7 +16,8 @@ class LeadImportUploadForm extends Model
     public function rules(): array
     {
         return [
-            ['file', 'file', 'skipOnEmpty' => true],
+            [['file'], 'required'],
+            [['file'], 'file', 'skipOnEmpty' => false, 'extensions' => ['csv'], 'checkExtensionByMimeType'=>false, 'maxSize' => 1024 * 1024 * 10],
         ];
     }
 }

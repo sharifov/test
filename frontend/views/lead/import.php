@@ -13,7 +13,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 
-    <h1><?= $this->title ?></h1>
+    <h1><i class="fa fa-upload"></i> <?= $this->title ?></h1>
+
+    <div class="x_panel">
+    <div class="x_title">
+        <h2>Import form</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+        </ul>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
 
     <?php if ($log): ?>
 
@@ -32,12 +42,23 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
 
     <?php endif; ?>
+    <div class="col-md-12 col-sm-12">
+        <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]) ?>
 
-    <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]) ?>
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
 
-    <?= $form->field($model, 'file')->fileInput() ?>
-
-    <?= Html::submitButton('Submit') ?>
+            <div class="form-group field-leadcreateform-segments">
+                <?= $form->field($model, 'file')->fileInput() ?>
+            </div>
+            </div>
+        </div>
+        <div class="col-md-12 text-center">
+            <?= Html::submitButton('<i class="fa fa-upload"></i> Upload CSV file', ['class' => 'btn btn-success']) ?>
+        </div>
+    </div>
+    </div>
+    </div>
 
 <?php
 
