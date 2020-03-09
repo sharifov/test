@@ -13,6 +13,11 @@ class LeadImportParseService
         $forms = [];
         $errors = [];
 
+        if (count($rows) < 2) {
+            $errors[] = 'Data is empty or invalid parsing.';
+            return new Parse($errors, $forms);
+        }
+
         foreach ($rows as $rn => $row) {
             $rowData = explode(',', $row);
             if (!$rowData || $rn ===0) {
