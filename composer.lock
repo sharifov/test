@@ -594,7 +594,7 @@
             "version": "v3.4.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:twbs/bootstrap.git",
+                "url": "https://github.com/twbs/bootstrap.git",
                 "reference": "68b0d231a13201eb14acd3dc84e51543d16e5f7e"
             },
             "dist": {
@@ -692,7 +692,7 @@
             "version": "3.4.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:jquery/jquery-dist.git",
+                "url": "https://github.com/jquery/jquery-dist.git",
                 "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d"
             },
             "dist": {
@@ -749,7 +749,7 @@
             "version": "v1.3.2",
             "source": {
                 "type": "git",
-                "url": "git@github.com:bestiejs/punycode.js.git",
+                "url": "https://github.com/bestiejs/punycode.js.git",
                 "reference": "38c8d3131a82567bfef18da09f7f4db68c84f8a3"
             },
             "dist": {
@@ -3306,16 +3306,16 @@
         },
         {
             "name": "kdn/yii2-json-editor",
-            "version": "2.4.0",
+            "version": "2.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dmitry-kulikov/yii2-json-editor.git",
-                "reference": "6f70ccc271163d164f8a1ab00a00611f9d3bca67"
+                "reference": "bbc5f3be8cf651fe78ad2a7a53b53a2763345458"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dmitry-kulikov/yii2-json-editor/zipball/6f70ccc271163d164f8a1ab00a00611f9d3bca67",
-                "reference": "6f70ccc271163d164f8a1ab00a00611f9d3bca67",
+                "url": "https://api.github.com/repos/dmitry-kulikov/yii2-json-editor/zipball/bbc5f3be8cf651fe78ad2a7a53b53a2763345458",
+                "reference": "bbc5f3be8cf651fe78ad2a7a53b53a2763345458",
                 "shasum": ""
             },
             "require": {
@@ -3358,7 +3358,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2020-01-12T21:43:02+00:00"
+            "time": "2020-03-06T20:25:01+00:00"
         },
         {
             "name": "keltstr/yii2-simplehtmldom",
@@ -6915,16 +6915,16 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "v1.10.2",
+            "version": "v1.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "b4400efc9d206e83138e2bb97ed7f5b14b831cd9"
+                "reference": "451c3cd1418cf640de218914901e51b064abb093"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/b4400efc9d206e83138e2bb97ed7f5b14b831cd9",
-                "reference": "b4400efc9d206e83138e2bb97ed7f5b14b831cd9",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/451c3cd1418cf640de218914901e51b064abb093",
+                "reference": "451c3cd1418cf640de218914901e51b064abb093",
                 "shasum": ""
             },
             "require": {
@@ -6974,7 +6974,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2020-01-20T15:57:02+00:00"
+            "time": "2020-03-05T15:02:03+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
