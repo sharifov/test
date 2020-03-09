@@ -60,11 +60,11 @@ class LeadImportForm extends CompositeForm
     public function validateMarketingInfoId(): void
     {
         if (!$source = Sources::find()->byCid($this->marketing_info_id)->one()) {
-            $this->addError('marketingInfoId', 'marketingInfoId is invalid.');
+            $this->addError('marketing_info_id', 'Marketing Info is invalid.');
             return;
         }
         if ($this->project_id && $this->project_id !== $source->project_id) {
-            $this->addError('marketingInfoId', 'Source project_id must be equals projectId.');
+            $this->addError('project_id', 'Source project ID must be equals projectId.');
             return;
         }
         $this->source_id = $source->id;
@@ -73,5 +73,18 @@ class LeadImportForm extends CompositeForm
     protected function internalForms(): array
     {
         return ['client'];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'marketing_info_id' => 'Marketing Info',
+            'project_id' => 'Project ID',
+            'notes' => 'Notes',
+            'rating' => 'Rating',
+        ];
     }
 }
