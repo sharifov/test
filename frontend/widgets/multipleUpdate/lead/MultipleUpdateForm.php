@@ -168,9 +168,6 @@ class MultipleUpdateForm extends Model
         if (isset($statusList[Lead::STATUS_BOOK_FAILED])) {
             unset($statusList[Lead::STATUS_BOOK_FAILED]);
         }
-        if (isset($statusList[Lead::STATUS_NEW])) {
-            unset($statusList[Lead::STATUS_NEW]);
-        }
         return $statusList;
     }
 
@@ -282,5 +279,10 @@ class MultipleUpdateForm extends Model
     public function isSnooze(): bool
     {
         return $this->statusId === Lead::STATUS_SNOOZE;
+    }
+
+    public function isNew(): bool
+    {
+        return $this->statusId === Lead::STATUS_NEW;
     }
 }

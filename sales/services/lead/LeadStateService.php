@@ -171,6 +171,20 @@ class LeadStateService
     }
 
     /**
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function new($lead, $newOwner, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->new($newOwnerId, $creatorId, $reason);
+        $this->leadRepository->save($lead);
+    }
+
+    /**
      * @param $newOwner
      * @param Lead $lead
      * @return int|null

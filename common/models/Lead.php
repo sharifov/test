@@ -26,6 +26,7 @@ use sales\events\lead\LeadCreatedManuallyEvent;
 use sales\events\lead\LeadCreatedNewEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
+use sales\events\lead\LeadNewEvent;
 use sales\events\lead\LeadOwnerChangedEvent;
 use sales\events\lead\LeadCountPassengersChangedEvent;
 use sales\events\lead\LeadOwnerFreedEvent;
@@ -917,7 +918,7 @@ class Lead extends ActiveRecord implements Objectable
     /**
      * @param int $ownerId
      */
-    private function setOwner(int $ownerId): void
+    public function setOwner(int $ownerId): void
     {
         if ($this->isOwner($ownerId)) {
             throw new \DomainException('This user already is owner.');
@@ -1388,10 +1389,7 @@ class Lead extends ActiveRecord implements Objectable
         return $this->status === self::STATUS_ALTERNATIVE;
     }
 
-    public function isNew(): bool
-    {
-        return $this->status === self::STATUS_NEW;
-    }
+
 
     /**
      * @param int|null $newOwnerId
@@ -1424,6 +1422,39 @@ class Lead extends ActiveRecord implements Objectable
         if (!$this->isReject()) {
             $this->setStatus(self::STATUS_REJECT);
         }
+    }
+
+    public function new(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        self::guardStatus($this->status, self::STATUS_NEW);
+
+        if ($newOwnerId === null && !$this->hasOwner() && $this->isNew()) {
+            throw new \DomainException('Lead is already New without owner.');
+        }
+
+        if ($this->isOwner($newOwnerId) && $this->isNew()) {
+            throw new \DomainException('Lead is already New with this owner.');
+        }
+
+        $this->recordEvent(new LeadNewEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason)
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        if (!$this->isNew()) {
+            $this->setStatus(self::STATUS_NEW);
+        }
+    }
+
+    public function isNew(): bool
+    {
+        return $this->status === self::STATUS_NEW;
     }
 
     public function callPrepare(): void
