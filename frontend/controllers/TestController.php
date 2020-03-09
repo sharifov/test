@@ -86,6 +86,8 @@ use sales\helpers\user\UserFinder;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\SegmentForm;
+use sales\model\lead\useCases\lead\import\LeadImportForm;
+use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\notification\events\NotificationEvents;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
@@ -188,24 +190,29 @@ class TestController extends FController
     public function actionTest()
     {
 
-       $user = Auth::user();
-
-        VarDumper::dump($user->getAccess()->getAllProjects());
-        VarDumper::dump($user->getAccess()->getDepartments());
-        VarDumper::dump($user->getAccess()->getAllGroups());
-
-//        die;
-//        $appCache = new AppCache(Yii::$app->cache);
-//
-//        $appCache->flush();
-//        $appCache->getUserGroups();
-////        VarDumper::dump($appCache->getUserGroups());
-//        VarDumper::dump($appCache->getUsersFromGroups([1,2,5,6]));
-//        die;
-//
+        $request['LeadImportForm']['projectId'] = 6;
+        $request['LeadImportForm']['marketingInfoId'] = 'JIVOCH';
+        $request['LeadImportForm']['rating'] = 2;
+        $request['LeadImportForm']['notes'] = '1231';
+        $request['ClientForm']['firstName'] = 'First Name test';
+        $request['ClientForm']['email'] = 'test@test.t3e2331st2t11';
 
 
-//        die;
+        $form1 = new LeadImportForm();
+        $form1->load($request);
+
+        $forms = [
+            1 => $form1,
+            2 => clone $form1,
+            5 => clone $form1,
+            3 => clone $form1,
+        ];
+
+        $service = Yii::createObject(LeadImportService::class);
+        $log = $service->import($forms, 295);
+        VarDumper::dump($log);
+        die;
+
         return $this->render('blank');
     }
 

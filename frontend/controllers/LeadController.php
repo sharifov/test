@@ -47,6 +47,10 @@ use sales\forms\leadflow\TakeOverReasonForm;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
+use sales\model\lead\useCases\lead\import\LeadImportForm;
+use sales\model\lead\useCases\lead\import\LeadImportParseService;
+use sales\model\lead\useCases\lead\import\LeadImportService;
+use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
@@ -67,6 +71,7 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
+use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
 use common\models\Quote;
 use common\models\Employee;
@@ -84,6 +89,8 @@ use common\models\local\LeadLogMessage;
  * @property LeadRepository $leadRepository
   * @property LeadCloneService $leadCloneService
  * @property CasesRepository $casesRepository
+ * @property LeadImportParseService $leadImportParseService
+ * @property LeadImportService $leadImportService
  */
 class LeadController extends FController
 {
@@ -92,6 +99,8 @@ class LeadController extends FController
     private $leadRepository;
     private $leadCloneService;
     private $casesRepository;
+    private $leadImportParseService;
+    private $leadImportService;
 
     public function __construct(
         $id,
@@ -101,6 +110,8 @@ class LeadController extends FController
         LeadRepository $leadRepository,
         LeadCloneService $leadCloneService,
         CasesRepository $casesRepository,
+        LeadImportParseService $leadImportParseService,
+        LeadImportService $leadImportService,
         $config = []
     )
     {
@@ -110,6 +121,8 @@ class LeadController extends FController
         $this->leadRepository = $leadRepository;
         $this->leadCloneService = $leadCloneService;
         $this->casesRepository = $casesRepository;
+        $this->leadImportParseService = $leadImportParseService;
+        $this->leadImportService = $leadImportService;
     }
 
     public function behaviors(): array
@@ -1598,6 +1611,25 @@ class LeadController extends FController
 
     /**
      * @return string
+     */
+    public function actionNew(): string
+    {
+        $searchModel = new LeadSearch();
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        $dataProvider = $searchModel->searchNew(Yii::$app->request->queryParams, $user);
+
+        return $this->render('new', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+
+    /**
+     * @return string
      * @throws NotFoundHttpException
      */
     public function actionInbox(): string
@@ -2265,6 +2297,41 @@ class LeadController extends FController
 
         }
         return null;
+    }
+
+    public function actionImport()
+    {
+        $form = new LeadImportUploadForm();
+        $logResult = [];
+
+        if (Yii::$app->request->isPost) {
+            $form->file = UploadedFile::getInstance($form, 'file');
+            if ($form->validate()) {
+                try {
+                    $content = file_get_contents($form->file->tempName);
+                    $rows = explode("\r\n", $content);
+                    $parse = $this->leadImportParseService->parsing($rows);
+                    $log = $this->leadImportService->import($parse->getForms(), Yii::$app->user->id);
+                    foreach ($parse->getErrors() as $key => $error) {
+                        $logResult[] = 'Row: ' . $key . '. Error. Message: ' . $error . '.';
+                    }
+                    foreach ($log->getMessages() as $message) {
+                        if ($message->isValid()) {
+                            $logResult[] = 'Row: ' . $message->getRow() . '. Lead created. Lead Id: ' . $message->getLeadId();
+                        } else {
+                            $logResult[] = 'Row: ' . $message->getRow() . '. Error. Message: ' . $message->getMessage();
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    $logResult[] = $e->getMessage();
+                }
+            } else {
+                $logResult[] = VarDumper::dumpAsString($form->getErrors());
+            }
+            $form->file = null;
+        }
+
+        return $this->render('import', ['model' => $form, 'log' => $logResult]);
     }
 
     /**
