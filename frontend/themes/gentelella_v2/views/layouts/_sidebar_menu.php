@@ -159,7 +159,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
-                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
@@ -218,6 +218,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                     'icon' => 'list',
                     'visible' => Yii::$app->user->can('user-product-type/list')
                 ],
+                ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
+                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
             ]
         ];
 
