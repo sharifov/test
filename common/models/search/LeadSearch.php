@@ -195,6 +195,7 @@ class LeadSearch extends Lead
     public function search($params)
     {
         $query = Lead::find()->with('project', 'source', 'employee', 'client');
+        $query->with(['client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // add conditions that should always apply here
@@ -768,6 +769,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(EmployeeProjectAccess::getProjects());
         $query = Lead::find();
+        $query->with(['project', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $dataProvider = new ActiveDataProvider([
@@ -1060,6 +1062,7 @@ class LeadSearch extends Lead
 //        $query = Lead::find()->with('project', 'source');
 
         $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source', 'employee')->joinWith('leadFlowSold' );
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $this->load($params);
         $leadTable = Lead::tableName();
 
@@ -1385,6 +1388,7 @@ class LeadSearch extends Lead
     {
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = $this->leadBadgesRepository->getFollowUpQuery($user)->with('project');
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
@@ -1913,7 +1917,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'project']);
 
         return $dataProvider;
     }

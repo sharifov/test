@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use common\models\Employee;
 use common\models\UserConnection;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -29,7 +30,11 @@ class FController extends Controller
 //       $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main.php';
 
        if(!\Yii::$app->user->isGuest){
+           /** @var Employee $user */
            $user = \Yii::$app->user->identity;
+
+//           $user->loadCache(new \sales\model\user\entity\UserCache($user, \Yii::$app->cache));
+
            $timezone = $user->userParams ? $user->userParams->up_timezone : null;
            if($timezone){
                \Yii::$app->formatter->timeZone = $timezone;

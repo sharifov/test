@@ -2,13 +2,13 @@
 
 namespace sales\model\user\entity;
 
-use common\models\Department;
 use common\models\Employee;
 
 /**
  * Class Access
  *
  * @property Employee $user
+ * @property AccessCache $cache
  * @property array|null $projects
  * @property array|null $departments
  * @property array|null $groups
@@ -16,13 +16,16 @@ use common\models\Employee;
 class Access
 {
     private $user;
+    private $cache;
+
     private $groups;
     private $projects;
     private $departments;
 
-    public function __construct(Employee $user)
+    public function __construct(Employee $user, AccessCache $cache)
     {
         $this->user = $user;
+        $this->cache = $cache;
     }
 
     public function getUserId(): int
@@ -51,11 +54,12 @@ class Access
             return $this->projects;
         }
 
-        $this->projects = [];
-
-        foreach ($this->user->getProjects()->select(['name', 'closed', 'id'])->indexBy('id')->asArray()->all() as $key => $item) {
-            $this->projects[$key] = $item;
+        if ($projects = $this->cache->getProjects()) {
+            $this->projects = $projects;
+            return $this->projects;
         }
+
+        $this->projects = $this->user->getProjectsToArray();
 
         return $this->projects;
     }
@@ -66,13 +70,12 @@ class Access
             return $this->departments;
         }
 
-        $this->departments = [];
-
-        $alias = Department::tableName();
-
-        foreach ($this->user->getUdDeps()->select([$alias . '.dep_name'])->indexBy($alias . '.dep_id')->column() as $key => $item) {
-            $this->departments[$key] = $item;
+        if ($departments = $this->cache->getDepartments()) {
+            $this->departments = $departments;
+            return $this->departments;
         }
+
+        $this->departments = $this->user->getDepartmentsToArray();
 
         return $this->departments;
     }
@@ -93,11 +96,12 @@ class Access
             return $this->groups;
         }
 
-        $this->groups = [];
-
-        foreach ($this->user->getUgsGroups()->select(['ug_id', 'ug_name', 'ug_disable'])->indexBy('ug_id')->asArray()->all() as $key => $item) {
-            $this->groups[$key] = $item;
+        if ($groups = $this->cache->getGroups()) {
+            $this->groups = $groups;
+            return $this->groups;
         }
+
+        $this->groups = $this->user->getGroupsToArray();
 
         return $this->groups;
     }
