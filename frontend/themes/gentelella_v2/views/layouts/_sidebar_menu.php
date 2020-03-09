@@ -41,25 +41,32 @@ $isSuperAdmin = $user->isSuperAdmin();
 
         $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
         $menuLItems[] = ['label' => 'Create New Lead', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create New Lead']];
-        $menuLItems[] = ['label' => 'Import Lead', 'url' => ['/lead/import'], 'icon' => 'plus'];
-        $menuLItems[] = ['label' => 'Lead New', 'url' => ['/lead/new'], 'icon' => 'list'];
-        $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
-        $menuLItems[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase text-info'];
 
-        if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
-            $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
-        }
+
+        $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
 
         if (($profile = $user->userProfile) && $profile->up_auto_redial) {
             $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
         }
 
-        $menuLItems[] = ['label' => 'Lead Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
-        $menuLItems[] = ['label' => 'Lead Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
-        $menuLItems[] = ['label' => 'Lead Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
-        $menuLItems[] = ['label' => 'Lead Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
-        $menuLItems[] = ['label' => 'Lead Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
-        $menuLItems[] = ['label' => 'Lead Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
+        $menuLItems[] = ['label' => 'New', 'url' => ['/lead/new'], 'icon' => 'paste text-warning'];
+
+        $menuLItems[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase'];
+
+        if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
+            $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase'];
+        }
+
+
+
+        $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
+        $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
+        $menuLItems[] = ['label' => 'Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
+        $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
+        $menuLItems[] = ['label' => 'Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
+        $menuLItems[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
+
+        $menuLItems[] = ['label' => 'Import Leads', 'url' => ['/lead/import'], 'icon' => 'upload'];
 
 
         if($isAdmin) {
@@ -161,7 +168,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
-                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
@@ -220,6 +227,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                     'icon' => 'list',
                     'visible' => Yii::$app->user->can('user-product-type/list')
                 ],
+                ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
+                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
             ]
         ];
 
