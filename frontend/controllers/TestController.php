@@ -1095,4 +1095,38 @@ class TestController extends FController
         VarDumper::dump($result, 10, true);
     }
 
+    public function actionCsv()
+    {
+        $fileName = Yii::getAlias('@console/runtime/1.csv');
+        $content = file_get_contents($fileName);
+
+        $rows = explode("\r\n", $content);
+        $leads = [];
+        if ($rows) {
+            foreach ($rows as $rn => $row) {
+                $rowData = explode(',', $row);
+                if (!$rowData || $rn ===0) {
+                    continue;
+                }
+                $lead = [
+                    'first_name' => trim($rowData[0]),
+                    'last_name' => trim($rowData[1]),
+                    'email' => trim($rowData[2]),
+                    'phone' => trim(str_replace([' ', '-', '(', ')'], '', $rowData[3])),
+                    'rating' => (int) trim($rowData[4]),
+                    'notes' => str_replace('"', '', trim($rowData[5])),
+                    'source_code' => trim($rowData[6]),
+                    'project_id' => (int) trim($rowData[7]),
+                ];
+                $leads[] = $lead;
+            }
+        }
+
+
+        echo '<pre>';
+        echo VarDumper::dump($leads, 10, true);
+        echo '</pre>';
+
+    }
+
 }
