@@ -17,8 +17,10 @@ use common\models\UserProductType;
 use common\models\UserProfile;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
+use sales\model\user\entity\UserCache;
 use Yii;
 use yii\bootstrap4\Html;
+use yii\caching\Cache;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -539,6 +541,11 @@ class EmployeeController extends FController
             throw new BadRequestHttpException('Invalid request');
         }
 
+//        /** @var Cache $cache */
+//        $cache = Yii::$app->cache;
+//        $userCache = new UserCache($model, $cache);
+//        $userCache->flush();
+
 
             if (Yii::$app->request->isPost) {
                 $attr = Yii::$app->request->post($model->formName());
@@ -664,6 +671,7 @@ class EmployeeController extends FController
                     return $this->refresh();
                 }
             }
+
 
         $result = [
             'model' => $model,
