@@ -86,7 +86,7 @@ class CasesQRepository
      */
     public function getNeedActionQuery(Employee $user): ActiveQuery
     {
-        $query = CasesQSearch::find()->andWhere(['cs_need_action' => true])->andWhere(['IS NOT', 'cs_status', CasesStatus::STATUS_PENDING]);
+        $query = CasesQSearch::find()->andWhere(['cs_need_action' => true])->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
 
         if ($user->isAdmin()) {
             return $query;
