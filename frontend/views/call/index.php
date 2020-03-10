@@ -3,6 +3,7 @@
 use common\models\Call;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
+use sales\yii\grid\call\CallDurationColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -137,17 +138,7 @@ if($user->isAdmin()) {
                 'format' => 'raw'
             ],*/
 
-            [
-                'attribute' => 'c_recording_duration',
-                'label' => 'Recording',
-                'value' => static function (\common\models\Call $model) {
-                    return  $model->c_recording_url ? Html::button(gmdate('i:s', $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]) : '-';
-                },
-                'format' => 'raw',
-                'contentOptions' => ['class' => 'text-right'],
-                'options' => ['style' => 'width: 80px']
-
-            ],
+            ['class' => CallDurationColumn::class],
 
             //'c_recording_duration',
 
