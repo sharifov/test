@@ -18,6 +18,6 @@ class CasesViewCheckedOwnerRule extends Rule
         /** @var Cases $case */
         $case = $params['case'];
 
-        return $case->isOwner((int)$userId);
+        return $case->isOwner((int)$userId) || $case->isTrash() || $case->isSolved();
     }
 }
