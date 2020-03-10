@@ -16,5 +16,5 @@ function notificationInit(data) {
 }
 
 function notificationAdd(message) {
-    console.log(message);
+    $("#notification-menu").prepend('<li>we</li>');
 }
