@@ -56,7 +56,7 @@ $connectionsUser = [];
 $connectionsLead = [];
 $connectionsCase = [];
 
-$ws_worker = new Worker('websocket://0.0.0.0:8080');
+$ws_worker = new Worker('websocket://127.0.0.1:8080');
 $ws_worker->name = 'WebsocketWorker';
 $ws_worker->user = 'www-data';
 
@@ -66,7 +66,7 @@ $ws_worker::$pidFile = __DIR__ . '/../console/runtime/worker.pid';
 $ws_worker->onWorkerStart = function() use (&$user, &$userConnections, &$leadConnections, &$caseConnections)
 {
 
-    $inner_tcp_worker = new Worker('tcp://0.0.0.0:1234');
+    $inner_tcp_worker = new Worker('tcp://127.0.0.1:1234');
     $inner_tcp_worker->name = 'TcpWorker';
     //$inner_tcp_worker->user = 'www-data';
 
