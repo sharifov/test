@@ -1593,6 +1593,37 @@ class LeadController extends FController
     /**
      * @return string
      */
+    public function actionBonus(): string
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $dataProvider = $searchModel->searchBonus($params, $user);
+
+        return $this->render('bonus', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+
+    /**
+     * @return string
+     */
     public function actionPending(): string
     {
         $searchModel = new LeadSearch();
