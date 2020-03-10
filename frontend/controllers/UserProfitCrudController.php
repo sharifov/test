@@ -6,28 +6,29 @@ use common\models\Employee;
 use Yii;
 use sales\model\user\entity\profit\UserProfit;
 use sales\model\user\entity\profit\search\UserProfitSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * UserProfitCrudController implements the CRUD actions for UserProfit model.
  */
-class UserProfitCrudController extends Controller
+class UserProfitCrudController extends FController
 {
     /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

@@ -5,28 +5,29 @@ namespace frontend\controllers;
 use Yii;
 use common\models\UserOnline;
 use common\models\search\UserOnlineSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * UserOnlineController implements the CRUD actions for UserOnline model.
  */
-class UserOnlineController extends Controller
+class UserOnlineController extends FController
 {
     /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
