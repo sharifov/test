@@ -6,7 +6,6 @@ use common\models\Employee;
 use sales\repositories\cases\CasesQRepository;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
-use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use Yii;
 
