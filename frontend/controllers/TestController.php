@@ -189,11 +189,13 @@ class TestController extends FController
 
     public function actionTest()
     {
-
-       $query = Cases::find()->findLastActiveCaseByClient(200, 6)->createCommand()->getRawSql();
-       VarDumper::dump($query);
+        $lead = Lead::findOne(371172);
+        $repo = Yii::createObject(LeadRepository::class);
+        $lead->followUp();
+        $lead->processing(295);
+        $lead->followUp(294);
+        $repo->save($lead);
         die;
-
         return $this->render('blank');
     }
 
