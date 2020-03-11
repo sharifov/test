@@ -63,7 +63,10 @@ use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\access\EmployeeSourceAccess;
 use sales\access\ListsAccess;
+use sales\access\project\ProjectAccessService;
+use sales\access\QueryAccessService;
 use sales\auth\Auth;
+use sales\cache\app\AppCache;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
@@ -83,7 +86,10 @@ use sales\helpers\user\UserFinder;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\SegmentForm;
+use sales\model\lead\useCases\lead\import\LeadImportForm;
+use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\notification\events\NotificationEvents;
+use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
@@ -183,7 +189,30 @@ class TestController extends FController
 
     public function actionTest()
     {
-        VarDumper::dump(Auth::user()->userProfile->up_skill);die;
+
+        $request['LeadImportForm']['projectId'] = 6;
+        $request['LeadImportForm']['marketingInfoId'] = 'JIVOCH';
+        $request['LeadImportForm']['rating'] = 2;
+        $request['LeadImportForm']['notes'] = '1231';
+        $request['ClientForm']['firstName'] = 'First Name test';
+        $request['ClientForm']['email'] = 'test@test.t3e2331st2t11';
+
+
+        $form1 = new LeadImportForm();
+        $form1->load($request);
+
+        $forms = [
+            1 => $form1,
+            2 => clone $form1,
+            5 => clone $form1,
+            3 => clone $form1,
+        ];
+
+        $service = Yii::createObject(LeadImportService::class);
+        $log = $service->import($forms, 295);
+        VarDumper::dump($log);
+        die;
+
         return $this->render('blank');
     }
 
@@ -1071,6 +1100,40 @@ class TestController extends FController
         //\Yii::$app->trigger('bar', new Event(['notify' => new Notifications()]));
 
         VarDumper::dump($result, 10, true);
+    }
+
+    public function actionCsv()
+    {
+        $fileName = Yii::getAlias('@console/runtime/1.csv');
+        $content = file_get_contents($fileName);
+
+        $rows = explode("\r\n", $content);
+        $leads = [];
+        if ($rows) {
+            foreach ($rows as $rn => $row) {
+                $rowData = explode(',', $row);
+                if (!$rowData || $rn ===0) {
+                    continue;
+                }
+                $lead = [
+                    'first_name' => trim($rowData[0]),
+                    'last_name' => trim($rowData[1]),
+                    'email' => trim($rowData[2]),
+                    'phone' => trim(str_replace([' ', '-', '(', ')'], '', $rowData[3])),
+                    'rating' => (int) trim($rowData[4]),
+                    'notes' => str_replace('"', '', trim($rowData[5])),
+                    'source_code' => trim($rowData[6]),
+                    'project_id' => (int) trim($rowData[7]),
+                ];
+                $leads[] = $lead;
+            }
+        }
+
+
+        echo '<pre>';
+        echo VarDumper::dump($leads, 10, true);
+        echo '</pre>';
+
     }
 
 }

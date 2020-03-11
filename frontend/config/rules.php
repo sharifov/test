@@ -82,6 +82,14 @@ return [
         'route' => 'lead/booked',
     ],
     [
+        'pattern' => 'queue/new',
+        'route' => 'lead/new',
+    ],
+    [
+        'pattern' => 'queue/bonus',
+        'route' => 'lead/bonus',
+    ],
+    [
         'pattern' => '/',
         'route' => 'site/index',
     ],

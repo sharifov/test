@@ -6,6 +6,7 @@ use common\models\Project;
 use sales\access\ListsAccess;
 use sales\entities\cases\CasesCategory;
 use sales\entities\cases\CasesQSearch;
+use sales\yii\grid\cases\NeedActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
@@ -43,7 +44,6 @@ $lists = new ListsAccess($user->id);
         'filterModel' => $searchModel,
         'columns' => [
             'cs_id',
-            'cs_gid',
 			[
 				'attribute' => 'cs_project_id',
 				'value' => static function (CasesQSearch $model) {
@@ -72,6 +72,10 @@ $lists = new ListsAccess($user->id);
 				},
 				'filter' => Department::getList()
 			],
+            [
+                'class' => NeedActionColumn::class,
+                'attribute' => 'cs_need_action',
+            ],
 			[
 				'attribute' => 'cs_created_dt',
 				'value' => static function (CasesQSearch $model) {

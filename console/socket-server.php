@@ -31,6 +31,7 @@ try {
     //$options = [PDO::ATTR_TIMEOUT => 1, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
     $db = new PDO($config['components']['db']['dsn'], $config['components']['db']['username'], $config['components']['db']['password']); // , $options
     $db->exec('DELETE FROM user_connection');
+    $db->exec('DELETE FROM user_online');
 } catch (PDOException $e) {
     print 'Error!: ' . $e->getMessage() . "\r\n";
     die();
@@ -55,7 +56,7 @@ $connectionsUser = [];
 $connectionsLead = [];
 $connectionsCase = [];
 
-$ws_worker = new Worker('websocket://0.0.0.0:8080');
+$ws_worker = new Worker('websocket://127.0.0.1:8080');
 $ws_worker->name = 'WebsocketWorker';
 $ws_worker->user = 'www-data';
 
@@ -65,7 +66,7 @@ $ws_worker::$pidFile = __DIR__ . '/../console/runtime/worker.pid';
 $ws_worker->onWorkerStart = function() use (&$user, &$userConnections, &$leadConnections, &$caseConnections)
 {
 
-    $inner_tcp_worker = new Worker('tcp://0.0.0.0:1234');
+    $inner_tcp_worker = new Worker('tcp://127.0.0.1:1234');
     $inner_tcp_worker->name = 'TcpWorker';
     //$inner_tcp_worker->user = 'www-data';
 
@@ -174,6 +175,46 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
         echo 'dt: ' . date('Y-m-d H:i:s');
 
 
+
+
+        try {
+
+            $onlineData = [
+                'uo_user_id'    => $user_id,
+            ];
+
+            $sqlOnline = 'SELECT uo_user_id FROM user_online WHERE uo_user_id = :uo_user_id';
+
+            $stmt= $db->prepare($sqlOnline);
+            $stmt->execute($onlineData);
+
+            $uaRow = $stmt->fetch();
+            if (!$uaRow || !isset($uaRow['uo_user_id'])) {
+
+                //echo 'Not exist userOnline: '.$user_id.' ';
+
+                $onlineData['uo_updated_dt'] = date('Y-m-d H:i:s');
+                $sqlOnline = 'INSERT INTO user_online (uo_user_id, uo_updated_dt) VALUES (:uo_user_id, :uo_updated_dt)';
+                $stmt= $db->prepare($sqlOnline);
+                $stmt->execute($onlineData);
+            }
+//            else {
+//                //echo 'UserOnline exist '.$user_id.' ';
+//            }
+
+            //$res = $db->query($sqlOnline);
+
+            //$uc_id = $db->lastInsertId();
+
+            /*foreach($dbh->query('SELECT * from employees') as $row) {
+                print_r($row);
+            }*/
+            //$db = null;
+        } catch (PDOException $e) {
+            print 'Error!: ' . $e->getMessage() . "\r\n";
+        }
+
+
         $data = [
             'uc_connection_id'          => $connection->id,
             'uc_user_id'                => $user_id,
@@ -275,6 +316,19 @@ $ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) 
                 }
             }
         }
+
+        if (!$user[$user_id]) {
+            try {
+                $sql = 'DELETE FROM user_online WHERE uo_user_id = :user_id';
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+                $stmt->execute();
+            } catch (PDOException $e) {
+                print 'Error!: ' . $e->getMessage() . "\r\n";
+            }
+            // echo "not exist uc: " . $user_id . "\r\n";
+        }
+
 
         echo '- disconnect "'.$connection->id.'"  user: ' . $user_id . "\r\n";
     }

@@ -46,7 +46,7 @@ class MultipleUpdateForm extends Model
             ['statusId', 'required'],
             ['statusId', 'integer'],
             ['statusId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['statusId', 'in', 'range' => array_keys(CasesStatus::STATUS_LIST)],
+            ['statusId', 'in', 'range' => array_keys($this->statusList())],
 
             ['reason', 'string'],
             ['reason', 'required', 'when' => function () {

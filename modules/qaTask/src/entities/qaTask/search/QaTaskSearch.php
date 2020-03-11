@@ -4,6 +4,7 @@ namespace modules\qaTask\src\entities\qaTask\search;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
+use sales\access\QueryAccessService;
 
 /**
  * Class QaTaskSearch
@@ -17,10 +18,12 @@ use modules\qaTask\src\entities\qaTask\QaTask;
  * @property array $createdTypeList
  * @property array $departmentList
  * @property array $categoryList
+ * @property QueryAccessService $queryAccessService
  */
 class QaTaskSearch extends QaTask
 {
     protected $user;
+    protected $queryAccessService;
 
     private $projectList = [];
     private $userList = [];
@@ -43,6 +46,7 @@ class QaTaskSearch extends QaTask
         $search->createdTypeList = $dto->createdTypeList;
         $search->departmentList = $dto->departmentList;
         $search->categoryList = $dto->categoryList;
+        $search->queryAccessService = $dto->queryAccessService;
         return $search;
     }
 

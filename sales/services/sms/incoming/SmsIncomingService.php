@@ -2,7 +2,9 @@
 
 namespace sales\services\sms\incoming;
 
+use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
+use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesCreateService;
 use sales\services\internalContact\InternalContactService;
 use Yii;
@@ -24,6 +26,8 @@ use sales\services\client\ClientManageService;
  * @property TransactionManager $transactionManager
  * @property CasesCreateService $casesCreate
  * @property InternalContactService $internalContactService
+ * @property CasesCommunicationService $casesCommunicationService
+ * @property EventDispatcher $eventDispatcher
  */
 class SmsIncomingService
 {
@@ -33,6 +37,8 @@ class SmsIncomingService
     private $transactionManager;
     private $casesCreate;
     private $internalContactService;
+    private $casesCommunicationService;
+    private $eventDispatcher;
 
     public function __construct(
         ClientManageService $clients,
@@ -40,7 +46,9 @@ class SmsIncomingService
         SmsRepository $smsRepository,
         TransactionManager $transactionManager,
         CasesCreateService $casesCreate,
-        InternalContactService $internalContactService
+        InternalContactService $internalContactService,
+        CasesCommunicationService $casesCommunicationService,
+        EventDispatcher $eventDispatcher
     )
     {
         $this->clients = $clients;
@@ -49,6 +57,8 @@ class SmsIncomingService
         $this->transactionManager = $transactionManager;
         $this->casesCreate = $casesCreate;
         $this->internalContactService = $internalContactService;
+        $this->casesCommunicationService = $casesCommunicationService;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -75,16 +85,19 @@ class SmsIncomingService
                 if ($department->isSales()) {
                     $sms = $this->createSmsBySales($form, $client->id, $contact->userId);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
                 if ($department->isExchange()) {
                     $sms = $this->createSmsByExchange($form, $client->id, $contact->userId);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
                 if ($department->isSupport()) {
                     $sms = $this->createSmsBySupport($form, $client->id, $contact->userId);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
+                    $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
             }
@@ -92,6 +105,8 @@ class SmsIncomingService
             $sms = $this->createSmsByDefault($form, $client->id, $contact->userId);
             $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
             Yii::error('Incoming sms. Sms Id: ' . $sms->s_id . ' | Not found Department for phone: ' . $form->si_phone_to, 'SmsIncomingService');
+
+            $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
             return $sms;
 
         });
@@ -152,10 +167,12 @@ class SmsIncomingService
             } else {
                 if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $form->si_project_id)->one()) {
                     $caseId = $case->cs_id;
+//                    $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
                 }
             }
         } else {
             $caseId = $case->cs_id;
+//            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         }
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
@@ -184,10 +201,12 @@ class SmsIncomingService
             } else {
                 if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
                     $caseId = $case->cs_id;
+//                    $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
                 }
             }
         } else {
             $caseId = $case->cs_id;
+//            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         }
         $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
@@ -211,8 +230,10 @@ class SmsIncomingService
             $leadId = $lead->id;
         } elseif ($case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $form->si_project_id)->one()) {
             $caseId = $case->cs_id;
+//            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         } elseif ($case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
             $caseId = $case->cs_id;
+//            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         } else {
             return $this->createSmsBySupportDefault($form, $clientId, $ownerId);
         }
@@ -240,6 +261,7 @@ class SmsIncomingService
         } else {
             if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $form->si_project_id)->one()) {
                 $caseId = $case->cs_id;
+//                $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
             }
         }
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);

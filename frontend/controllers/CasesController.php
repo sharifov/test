@@ -138,6 +138,18 @@ class CasesController extends FController
         $this->caseTakeGuard = $caseTakeGuard;
     }
 
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'mark-checked',
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     /**
      * Lists all Cases models.
      * @return mixed
@@ -1477,5 +1489,32 @@ class CasesController extends FController
 		}
 
 		return $this->asJson($out);
+	}
+
+    /**
+     * @param $gid
+     * @return Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionMarkChecked($gid): Response
+    {
+        $model = $this->findModelByGid((string)$gid);
+
+        if (!Auth::can('cases/view_Checked', ['case' => $model])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        try {
+            $this->casesManageService->markChecked($model->cs_id);
+            Yii::$app->session->setFlash('success', 'Success');
+        } catch (\DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            Yii::error($e, 'CasesController:Mark');
+            Yii::$app->session->setFlash('error', 'Server error');
+        }
+
+        return $this->redirect(['/cases/view', 'gid' => $model->cs_gid]);
 	}
 }

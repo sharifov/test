@@ -180,7 +180,6 @@ class FlightQuoteManageService
 
 			$flightQuote = $flightQuotePaxPrice->qppFlightQuote;
 			$productQuote = $flightQuote->fqProductQuote;
-            $productQuote->recalculateProfitAmount();
 
 			$this->calcProductQuotePrice($productQuote, $flightQuote);
 		});

@@ -69,7 +69,8 @@
       	"ext-openssl": "*",
 		"soundasleep/html2text": "~1.1",
 		"ext-zlib": "*",
-		"webmozart/assert": "^1.7"
+		"webmozart/assert": "^1.7",
+		"thamtech/yii2-uuid": "^1.2"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

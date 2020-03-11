@@ -5,11 +5,13 @@
 /* @var $hotelProduct Hotel */
 /* @var $model HotelQuote */
 
+use kartik\editable\Editable;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Url;
 use yii\web\View;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -157,14 +159,14 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 <!--            <li>-->
 <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
 <!--            </li>-->
-            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/offer/offer/list-menu-ajax'])?>">
+            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                 <div class="dropdown-menu" role="menu">
                     <?php // ajax loaded content ?>
                 </div>
             </li>
 
-            <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/order/order/list-menu-ajax'])?>">
+            <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                 <div class="dropdown-menu" role="menu">
                     <?php // ajax loaded content ?>
@@ -210,7 +212,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
                         //'data-product-quote-id' => $model->hq_product_quote_id,
-                        'data-url' => \yii\helpers\Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
+                        'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
                     ]) ?>
 
@@ -220,7 +222,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                              null,
                             [
                                 'class' => 'dropdown-item btn-book-quote',
-                                'data-url' => \yii\helpers\Url::to('/hotel/hotel-quote/ajax-book'),
+                                'data-url' => Url::to('/hotel/hotel-quote/ajax-book'),
                                 'data-hotel-quote-id' => $model->hq_id,
                                 'data-product-id' => $model->hqProductQuote->pq_product_id,
                             ]
@@ -230,7 +232,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         <?= Html::a('<i class="fa fa-share-square"></i> Cancel Book',null,
                             [
                                 'class' => 'dropdown-item text-danger btn-cancel-book-quote',
-                                'data-url' => \yii\helpers\Url::to('/hotel/hotel-quote/ajax-cancel-book'),
+                                'data-url' => Url::to('/hotel/hotel-quote/ajax-cancel-book'),
                                 'data-hotel-quote-id' => $model->hq_id,
                                 'data-product-id' => $model->hqProductQuote->pq_product_id,
                             ]
@@ -240,7 +242,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     <?= Html::a('<i class="fa fa-list"></i> API Service Log', null,
                         [
                             'class' => 'dropdown-item text-secondary btn-product-api-service-log',
-                            'data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
+                            'data-url' => Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
                             'data-hotel-quote-id' => $model->hq_id,
                             'data-product-id' => $model->hqProductQuote->pq_product_id,
                         ]
@@ -248,7 +250,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
                     <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
                         'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
-                        'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $model->hqProductQuote->pq_gid]),
+                        'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $model->hqProductQuote->pq_gid]),
                         'data-gid' => $model->hqProductQuote->pq_gid,
                     ]) ?>
 
@@ -332,7 +334,26 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </td>
                         <td><?= Html::encode($room->hqr_amount) ?></td>
                         <td><?= Html::encode($room->hqr_system_mark_up) ?></td>
-                        <td><?= Html::encode($room->hqr_agent_mark_up) ?></td>
+                        <td>
+							<?= Editable::widget([
+								'name'=>'extra_markup['.$room->hqr_id.']',
+								'asPopover' => false,
+								'pjaxContainerId' => 'pjax-product-quote-'.$model->hqProductQuote->pq_id,
+								'value' => number_format($room->hqr_agent_mark_up, 2),
+								'header' => 'Extra markup',
+								'size'=>'sm',
+								'inputType' => Editable::INPUT_TEXT,
+								'buttonsTemplate' => '{submit}',
+								'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) { pjaxReload({container: '#pjax-product-quote-{$model->hqProductQuote->pq_id}'}); }",],
+								'inlineSettings' => [
+									'templateBefore' => '<div class="editable-pannel">{loading}',
+									'templateAfter' => '{buttons}{close}</div>'],
+								'options' => ['class'=>'form-control','style'=>'width:50px;', 'placeholder'=>'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
+								'formOptions' => [
+									'action' => Url::toRoute(['/hotel/hotel-quote/ajax-update-agent-markup'])
+								]
+							]) ?>
+                        </td>
                         <td><?= Html::encode($room->hqr_service_fee_percent) ?>%</td>
                         <td><?= $sfs ?></td>
     <!--                    <td>--><?php ////=Html::encode($room->hqr_id)?><!--</td>-->

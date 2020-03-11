@@ -886,6 +886,12 @@ class Call extends \yii\db\ActiveRecord
                 }
             }
 
+            if ($this->c_case_id) {
+                (Yii::createObject(CasesManageService::class))->needAction($this->c_case_id);
+            }
+
+
+
             //}
         }
 

@@ -19,9 +19,11 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use sales\entities\cases\Cases;
 use sales\repositories\lead\LeadRepository;
 use sales\services\call\CallDeclinedException;
 use sales\services\call\CallService;
+use sales\services\cases\CasesCommunicationService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
@@ -614,6 +616,9 @@ class CommunicationController extends ApiBaseController
 
             if (isset($callOriginalData['case_id']) && $callOriginalData['case_id']) {
                 $call->c_case_id = (int) $callOriginalData['case_id'];
+//                if ($call->c_case_id && ($case = Cases::findOne($call->c_case_id))) {
+//                    (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_CALL);
+//                }
             }
 
 

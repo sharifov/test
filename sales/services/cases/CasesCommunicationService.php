@@ -8,6 +8,7 @@ use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
+use Yii;
 
 /**
  * Class CasesCommunicationService
@@ -18,6 +19,9 @@ use sales\services\TransactionManager;
  */
 class CasesCommunicationService
 {
+    public const TYPE_PROCESSING_EMAIL = 'email';
+    public const TYPE_PROCESSING_SMS = 'sms';
+    public const TYPE_PROCESSING_CALL = 'call';
 
     private $casesRepository;
     private $clientManageService;
@@ -87,4 +91,18 @@ class CasesCommunicationService
         return $content_data;
     }
 
+    public function processIncoming(Cases $case, string $typeProcessing): void
+    {
+        if ($case->isTrash() || $case->isFollowUp()) {
+            try {
+                if (!$case->isFreedOwner()) {
+                    $case->freedOwner();
+                }
+                $case->pending(null, null);
+                $this->casesRepository->save($case);
+            } catch (\Throwable $e) {
+                Yii::error($e, 'CasesCommunicationService:processIncoming' . ':type:' . $typeProcessing);
+            }
+        }
+    }
 }

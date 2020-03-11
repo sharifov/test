@@ -10,7 +10,7 @@ use yii\helpers\Url;
 
 ?>
 
-<?php if (QaTaskCloseService::can($model, Auth::id())): ?>
+<?php if (QaTaskCloseService::can(Auth::user(), $model)): ?>
     <?= Html::button(
         'Close',
         [

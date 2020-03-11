@@ -330,6 +330,7 @@ class QuoteController extends ApiBaseController
      *   "generalEmail": "info@wowfare.com",
      *   "generalDirectLine": "+37379731662",
      *   "client": {
+     *       "uuid": "35009a79-1a05-49d7-b876-2b884d0f825b"
      *       "client_id": 331968,
      *       "first_name": "Johann",
      *       "middle_name": "Sebastian",
@@ -472,6 +473,7 @@ class QuoteController extends ApiBaseController
             /** @var Lead $lead */
             $lead = $model->lead;
             $response['client'] = [
+                'uuid' => $lead->client->uuid,
                 'client_id' => $lead->client_id,
                 'first_name' => $lead->client->first_name,
                 'middle_name' => $lead->client->middle_name,

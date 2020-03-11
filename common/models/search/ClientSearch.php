@@ -28,6 +28,7 @@ class ClientSearch extends Client
             [['id', 'not_in_client_id'], 'integer'],
             [['client_email', 'client_phone'], 'string'],
             [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
+            ['uuid', 'string', 'max' => 36],
         ];
     }
 
@@ -88,6 +89,7 @@ class ClientSearch extends Client
 
         $query->andFilterWhere(['like', 'first_name', $this->first_name])
             ->andFilterWhere(['like', 'middle_name', $this->middle_name])
+            ->andFilterWhere(['like', 'uuid', $this->uuid])
             ->andFilterWhere(['like', 'last_name', $this->last_name]);
 
         return $dataProvider;

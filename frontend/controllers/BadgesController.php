@@ -123,6 +123,11 @@ class BadgesController extends FController
                         $result['trash'] = $count;
                     }
                     break;
+                case 'bonus':
+                    if ($count = $this->getBonus()) {
+                        $result['bonus'] = $count;
+                    }
+                    break;
             }
         }
         return $result;
@@ -165,6 +170,19 @@ class BadgesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->leadBadgesRepository->getFollowUpCount($user);
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getBonus(): ?int
+    {
+        if (!Yii::$app->user->can('/lead/bonus')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->leadBadgesRepository->getBonusCount($user);
     }
 
     /**

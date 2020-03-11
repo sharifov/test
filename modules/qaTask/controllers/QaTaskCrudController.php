@@ -6,6 +6,7 @@ use common\models\Project;
 use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\search\CreateDto;
 use sales\access\ListsAccess;
+use sales\access\QueryAccessService;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTask\QaTask;
@@ -17,9 +18,19 @@ use yii\web\Response;
 
 /**
  * QaTaskCrudController implements the CRUD actions for QaTask model.
+ *
+ * @property QueryAccessService $queryAccessService
  */
 class QaTaskCrudController extends FController
 {
+    private $queryAccessService;
+
+    public function __construct($id, $module, QueryAccessService $queryAccessService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->queryAccessService = $queryAccessService;
+    }
+
     /**
      * @return array
      */
@@ -45,6 +56,7 @@ class QaTaskCrudController extends FController
             'user' => Auth::user(),
             'projectList' => Project::getList(),
             'userList' => (new ListsAccess(Auth::id()))->getEmployees(),
+            'queryAccessService' => $this->queryAccessService,
         ]));
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
