@@ -42,9 +42,13 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_sequence_number')->input('number') ?>
 
-    <?= $form->field($model, 'c_lead_id')->textInput() ?>
+    <?= $form->field($model, 'c_lead_id')->input('number', ['min' => 0]) ?>
 
-    <?php //= $form->field($model, 'c_created_user_id')->textInput() ?>
+    <?= $form->field($model, 'c_case_id')->input('number', ['min' => 0]) ?>
+
+    <?= $form->field($model, 'c_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '---']) ?>
+
+    <?php echo $form->field($model, 'c_created_user_id')->dropDownList(\common\models\Employee::getList()) ?>
 
     <?php //= $form->field($model, 'c_created_dt')->textInput() ?>
 

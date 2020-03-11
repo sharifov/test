@@ -13,6 +13,7 @@ use sales\model\user\entity\AccessCache;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\model\user\entity\UserCache;
+use sales\model\user\entity\userStatus\UserStatus;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -2298,5 +2299,49 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ];
         }
         return $groups;
+    }
+
+    /**
+     * @return UserStatus|null
+     */
+    public function initUserStatus(): ?UserStatus
+    {
+
+        $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
+        $date_time = date('Y-m-d H:i:s', strtotime('-' . $last_hours .' hours'));
+
+        $onCall = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])->exists();
+        $glCallCount = (int) Call::find()->select('COUNT(*)')->where(['c_created_user_id' => $this->id, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_status_id' => Call::STATUS_COMPLETED])
+            ->andWhere(['>=', 'c_created_dt', $date_time])
+            ->scalar();
+
+        $lastUserCallStatus = UserCallStatus::find()->where(['us_user_id' => $this->id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
+
+        if ($lastUserCallStatus && (int) $lastUserCallStatus->us_type_id === UserCallStatus::STATUS_TYPE_READY) {
+            $callPhoneStatus = true;
+        } else {
+            $callPhoneStatus = false;
+        }
+
+        $callAccess = CallUserAccess::find()->where(['cua_user_id' => $this->id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->exists();
+
+        $userStatus = UserStatus::findOne($this->id);
+
+        if (!$userStatus) {
+            $userStatus = new UserStatus();
+            $userStatus->us_user_id = $this->id;
+        }
+
+        $userStatus->us_gl_call_count = $glCallCount;
+        $userStatus->us_is_on_call = $onCall;
+        $userStatus->us_call_phone_status = $callPhoneStatus;
+        $userStatus->us_has_call_access = $callAccess;
+
+        if (!$userStatus->save()) {
+            \Yii::error(VarDumper::dumpAsString($userStatus->errors),
+                'Employee:initUserStatus:UserStatus:save');
+        }
+
+        return $userStatus;
     }
 }
