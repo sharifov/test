@@ -3,17 +3,17 @@
 namespace frontend\controllers;
 
 use Yii;
-use frontend\models\UserSiteActivity;
-use frontend\models\search\UserSiteActivitySearch;
+use sales\model\user\entity\userStatus\UserStatus;
+use sales\model\user\entity\userStatus\UserStatusSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * UserSiteActivityController implements the CRUD actions for UserSiteActivity model.
+ * UserStatusController implements the CRUD actions for UserStatus model.
  */
-class UserSiteActivityController extends FController
+class UserStatusController extends Controller
 {
     /**
      * @return array
@@ -32,12 +32,12 @@ class UserSiteActivityController extends FController
     }
 
     /**
-     * Lists all UserSiteActivity models.
+     * Lists all UserStatus models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new UserSiteActivitySearch();
+        $searchModel = new UserStatusSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -46,25 +46,8 @@ class UserSiteActivityController extends FController
         ]);
     }
 
-
     /**
-     * Lists all UserSiteActivity models.
-     * @return mixed
-     */
-    public function actionReport()
-    {
-        $searchModel = new UserSiteActivitySearch();
-        $data = $searchModel->searchReport(Yii::$app->request->queryParams);
-
-        return $this->render('report', [
-            'searchModel' => $searchModel,
-            'data' => $data,
-        ]);
-    }
-
-
-    /**
-     * Displays a single UserSiteActivity model.
+     * Displays a single UserStatus model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -77,16 +60,16 @@ class UserSiteActivityController extends FController
     }
 
     /**
-     * Creates a new UserSiteActivity model.
+     * Creates a new UserStatus model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new UserSiteActivity();
+        $model = new UserStatus();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->usa_id]);
+            return $this->redirect(['view', 'id' => $model->us_user_id]);
         }
 
         return $this->render('create', [
@@ -95,7 +78,7 @@ class UserSiteActivityController extends FController
     }
 
     /**
-     * Updates an existing UserSiteActivity model.
+     * Updates an existing UserStatus model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -106,7 +89,7 @@ class UserSiteActivityController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->usa_id]);
+            return $this->redirect(['view', 'id' => $model->us_user_id]);
         }
 
         return $this->render('update', [
@@ -115,7 +98,7 @@ class UserSiteActivityController extends FController
     }
 
     /**
-     * Deletes an existing UserSiteActivity model.
+     * Deletes an existing UserStatus model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -129,25 +112,18 @@ class UserSiteActivityController extends FController
     }
 
     /**
-     * Finds the UserSiteActivity model based on its primary key value.
+     * Finds the UserStatus model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return UserSiteActivity the loaded model
+     * @return UserStatus the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = UserSiteActivity::findOne($id)) !== null) {
+        if (($model = UserStatus::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
-    public function actionClearLogs()
-    {
-        $countLogs = UserSiteActivity::clearHistoryLogs();
-        Yii::$app->session->setFlash('success', 'Removed ' . $countLogs . ' logs');
-        return $this->redirect(['index']);
     }
 }

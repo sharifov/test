@@ -4,6 +4,9 @@ namespace common\models;
 
 use common\components\jobs\AgentCallQueueJob;
 use common\models\query\UserCallStatusQuery;
+use sales\dispatchers\NativeEventDispatcher;
+use sales\model\user\entity\userCallStatus\events\UserCallStatusEvents;
+use sales\model\user\entity\userGroup\events\UserGroupEvents;
 use Yii;
 
 /**
@@ -42,6 +45,7 @@ class UserCallStatus extends \yii\db\ActiveRecord
     {
         return [
             [['us_type_id', 'us_user_id'], 'integer'],
+            [['us_type_id', 'us_user_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['us_created_dt'], 'safe'],
             [['us_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['us_user_id' => 'id']],
         ];
@@ -85,6 +89,10 @@ class UserCallStatus extends \yii\db\ActiveRecord
         return self::STATUS_TYPE_LIST[$this->us_type_id] ?? '-';
     }
 
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -95,6 +103,42 @@ class UserCallStatus extends \yii\db\ActiveRecord
             $job->user_id = $this->us_user_id;
             $jobId = Yii::$app->queue_job->delay(5)->priority(150)->push($job);
         }
+
+        if ($insert) {
+            NativeEventDispatcher::recordEvent(UserCallStatusEvents::class, UserCallStatusEvents::INSERT, [UserCallStatusEvents::class, 'updateUserStatus'], $this);
+            NativeEventDispatcher::trigger(UserCallStatusEvents::class, UserCallStatusEvents::INSERT);
+        } else {
+
+            if (isset($changedAttributes['us_type_id'])) {
+                NativeEventDispatcher::recordEvent(UserCallStatusEvents::class, UserCallStatusEvents::UPDATE,
+                    [UserCallStatusEvents::class, 'updateUserStatus'], $this);
+                NativeEventDispatcher::trigger(UserCallStatusEvents::class, UserCallStatusEvents::UPDATE);
+            }
+        }
+
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        NativeEventDispatcher::recordEvent(UserCallStatusEvents::class, UserCallStatusEvents::DELETE, [UserCallStatusEvents::class, 'resetCallPhoneStatus'], $this);
+        return true;
+    }
+
+
+    /**
+     *
+     */
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        NativeEventDispatcher::trigger(UserCallStatusEvents::class, UserCallStatusEvents::DELETE);
     }
 
 

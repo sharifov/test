@@ -44,6 +44,9 @@ return [
             'class' => \frontend\components\User::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-crm', 'httpOnly' => true],
+            'on afterLogin' => static function ($event) {
+                Yii::$app->user->identity->initUserStatus();
+            }
         ],
 
 

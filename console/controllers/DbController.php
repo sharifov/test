@@ -6,6 +6,7 @@ use common\models\ClientPhone;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
+use common\models\Employee;
 use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\LeadFlow;
@@ -657,5 +658,39 @@ ORDER BY lf.lead_id, id';
             ->offset($offset)
             ->orderBy(['e_id' => SORT_ASC])
             ->all();
+    }
+
+
+    /**
+     * @param int $limit
+     * @param int $offset
+     */
+    public function actionInitUserStatus(int $limit = 1000, int $offset = 0): void
+    {
+        $this->printInfo('Start', $this->action->id);
+        $timeStart = microtime(true);
+
+        $users = Employee::find()->limit($limit)->offset($offset)->all();
+        $processed = 0;
+
+        if ($users) {
+            foreach ($users as $user) {
+                $userStatus = $user->initUserStatus();
+                if (!$userStatus) {
+                    echo '- ' . $user->username . "\n";
+                    VarDumper::dump($userStatus->attributes);
+                    VarDumper::dump($userStatus->errors);
+                } else {
+                    echo '+ ' . ($processed + 1) . '. ' . $user->username . ', ps: ' . ($userStatus->us_call_phone_status ? 1 : 0) . "\n";
+                }
+                $processed ++;
+            }
+        }
+
+        $resultInfo = 'Processed: ' . $processed .
+            ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+
+        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
+        $this->printInfo($resultInfo, $this->action->id);
     }
 }
