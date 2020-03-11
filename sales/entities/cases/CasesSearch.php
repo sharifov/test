@@ -71,6 +71,8 @@ class CasesSearch extends Cases
             ['airlineConfirmationNumber', 'string', 'min' => 4],
             ['paxFirstName', 'string', 'min' => 2],
             ['paxLastName', 'string', 'min' => 2],
+
+            ['cs_need_action', 'boolean'],
         ];
     }
 
@@ -128,6 +130,7 @@ class CasesSearch extends Cases
             'cs_category' => $this->cs_category,
             'cs_status' => $this->cs_status,
             'cs_source_type_id' => $this->cs_source_type_id,
+            'cs_need_action' => $this->cs_need_action,
         ]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
@@ -239,6 +242,7 @@ class CasesSearch extends Cases
             'cs_status' => $this->cs_status,
             'cs_client_id' => $this->cs_client_id,
             'cs_source_type_id' => $this->cs_source_type_id,
+            'cs_need_action' => $this->cs_need_action,
         ]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
@@ -333,6 +337,7 @@ class CasesSearch extends Cases
             'cssBookId' => 'Booking ID',
             'salePNR' => 'Quote PNR',
             'cs_source_type_id' => 'Source type',
+            'cs_need_action' => 'Need action',
         ];
     }
 

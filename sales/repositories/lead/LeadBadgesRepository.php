@@ -104,6 +104,34 @@ class LeadBadgesRepository
      * @param Employee $user
      * @return int
      */
+    public function getBonusCount(Employee $user): int
+    {
+        return $this->getFollowUpQuery($user)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getBonusQuery(Employee $user): ActiveQuery
+    {
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_FOLLOW_UP]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
     public function getProcessingCount(Employee $user): int
     {
         return $this->getProcessingQuery($user)->count();

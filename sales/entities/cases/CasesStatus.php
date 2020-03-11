@@ -49,11 +49,13 @@ class CasesStatus
         self::STATUS_FOLLOW_UP => [
             self::STATUS_PROCESSING,
             self::STATUS_TRASH,
+            self::STATUS_PENDING,
         ],
         self::STATUS_TRASH => [
             self::STATUS_PROCESSING,
             self::STATUS_FOLLOW_UP,
             self::STATUS_SOLVED,
+            self::STATUS_PENDING,
         ],
         self::STATUS_SOLVED => [
             self::STATUS_PROCESSING,

@@ -92,6 +92,9 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?= $form->field($model, 'ticketNumber') ?>
         </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cs_need_action')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+        </div>
     </div>
 
     <div class="form-group text-center">

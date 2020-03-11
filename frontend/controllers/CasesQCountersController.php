@@ -6,7 +6,6 @@ use common\models\Employee;
 use sales\repositories\cases\CasesQRepository;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
-use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use Yii;
 
@@ -93,6 +92,11 @@ class CasesQCountersController extends FController
                         $result['trash'] = $count;
                     }
                     break;
+                case 'need-action':
+                    if ($count = $this->getNeedAction()) {
+                        $result['need-action'] = $count;
+                    }
+                    break;
             }
         }
 
@@ -175,6 +179,19 @@ class CasesQCountersController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->casesQRepository->getTrashCount($user);
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getNeedAction(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/need-action')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->casesQRepository->getNeedActionCount($user);
     }
 
 }

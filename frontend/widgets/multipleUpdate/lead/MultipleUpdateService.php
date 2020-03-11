@@ -24,7 +24,10 @@ class MultipleUpdateService
     private $qCallService;
     private $report;
 
-    public function __construct(LeadStateService $leadStateService, QCallService $qCallService)
+    public function __construct(
+        LeadStateService $leadStateService,
+        QCallService $qCallService
+    )
     {
         $this->leadStateService = $leadStateService;
         $this->qCallService = $qCallService;
@@ -137,6 +140,14 @@ class MultipleUpdateService
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
                 \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:snooze:LeadId:' . $lead->id);
             }
+        } elseif ($lead->isNew()) {
+            try {
+                $this->leadStateService->new($lead, $newOwner->id, $creatorId,$form->message);
+                $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeOwner:snooze:LeadId:' . $lead->id);
+            }
         }
     }
 
@@ -205,6 +216,14 @@ class MultipleUpdateService
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
                 \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:snooze:LeadId:' . $lead->id);
+            }
+        } elseif ($form->isNew()) {
+            try {
+                $this->leadStateService->new($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'New', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+                \Yii::warning($e->getMessage(), 'lead\MultipleUpdateService:changeStatus:new:LeadId:' . $lead->id);
             }
         } else {
             $this->addMessage('Undefined status: ' . $form->statusId . ' for multi update Lead: ' . $lead->id);

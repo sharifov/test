@@ -81,4 +81,16 @@ class CasesQController extends FController
             'dataProvider' => $dataProvider,
         ]);
     }
+
+    public function actionNeedAction()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchNeedAction(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('need-action', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
 }

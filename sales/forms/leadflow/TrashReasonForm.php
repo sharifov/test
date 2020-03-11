@@ -25,6 +25,9 @@ class TrashReasonForm extends Model
     public const REASON_TRAVEL_DATES_PASSED = 'Travel dates passed';
     public const REASON_INVALID_PHONE_NUMBER = 'Invalid phone number';
     public const REASON_CANCELED_TRIP = 'Canceled trip';
+    public const REASON_TRANSFER_TO_CUSTOMER_CARE = 'Transfer to Customer Care';
+    public const REASON_TRANSFER_TO_EXCHANGE = 'Transfer to Exchange';
+    public const REASON_TRANSFER_TO_SCHEDULE_CHARGE = 'Transfer to Schedule Change';
     public const REASON_TEST = 'Test';
     public const REASON_OTHER = 'Other';
 
@@ -34,6 +37,9 @@ class TrashReasonForm extends Model
         self::REASON_TRAVEL_DATES_PASSED => self::REASON_TRAVEL_DATES_PASSED,
         self::REASON_INVALID_PHONE_NUMBER => self::REASON_INVALID_PHONE_NUMBER,
         self::REASON_CANCELED_TRIP => self::REASON_CANCELED_TRIP,
+        self::REASON_TRANSFER_TO_CUSTOMER_CARE => self::REASON_TRANSFER_TO_CUSTOMER_CARE,
+        self::REASON_TRANSFER_TO_EXCHANGE => self::REASON_TRANSFER_TO_EXCHANGE,
+        self::REASON_TRANSFER_TO_SCHEDULE_CHARGE => self::REASON_TRANSFER_TO_SCHEDULE_CHARGE,
         self::REASON_TEST => self::REASON_TEST,
         self::REASON_OTHER => self::REASON_OTHER,
     ];

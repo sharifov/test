@@ -65,9 +65,9 @@ class UserGroupEvents extends Component
         //\Yii::warning(VarDumper::dumpAsString($params->data), 'UserGroupEvents:webHookDelete');
     }
 
-	public static function updateListeners(): array
+	public static function updateListeners(string $eventName): array
 	{
-		return self::UPDATE_LISTENERS;
+		return self::UPDATE_LISTENERS[$eventName];
 	}
 
 }

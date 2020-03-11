@@ -195,6 +195,7 @@ class LeadSearch extends Lead
     public function search($params)
     {
         $query = Lead::find()->with('project', 'source', 'employee', 'client');
+        $query->with(['client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // add conditions that should always apply here
@@ -768,6 +769,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(EmployeeProjectAccess::getProjects());
         $query = Lead::find();
+        $query->with(['project', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $dataProvider = new ActiveDataProvider([
@@ -1060,6 +1062,7 @@ class LeadSearch extends Lead
 //        $query = Lead::find()->with('project', 'source');
 
         $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source', 'employee')->joinWith('leadFlowSold' );
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $this->load($params);
         $leadTable = Lead::tableName();
 
@@ -1385,6 +1388,7 @@ class LeadSearch extends Lead
     {
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = $this->leadBadgesRepository->getFollowUpQuery($user)->with('project');
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
@@ -1472,6 +1476,149 @@ class LeadSearch extends Lead
                 'NOT IN', Lead::tableName() . '.id', Lead::unprocessedByAgentInFollowUp()
             ]);
         }
+
+        if($this->email_status > 0) {
+            if($this->email_status == 2) {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
+            } else {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
+            }
+        }
+
+        if($this->quote_status > 0) {
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            if($this->quote_status == 2) {
+                //echo $subQuery->createCommand()->getRawSql(); exit;
+                $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') > 0'));
+            } else {
+                $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') = 0'));
+            }
+        }
+
+//        if($this->supervision_id > 0) {
+//            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+//            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+//            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+//        }
+
+        if ($this->remainingDays || $this->remainingDays === 0) {
+            $query->andHaving(['remainingDays' => $this->remainingDays]);
+        }
+
+        $query->with([
+            'client',
+            'client.clientEmails',
+            'client.clientPhones',
+            'employee',
+            'leadFlightSegments' => static function(ActiveQuery $query) {
+                return $query->orderBy(['id' => SORT_ASC]);
+            },
+//            'leadFlightSegments.airportByOrigin'
+        ]);
+
+//          $sqlRaw = $query->createCommand()->getRawSql();
+//         VarDumper::dump($sqlRaw, 10, true); exit;
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchBonus($params, Employee $user): ActiveDataProvider
+    {
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
+        $query = $this->leadBadgesRepository->getBonusQuery($user)->with('project');
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        $leadTable = Lead::tableName();
+
+        $departureQuery =  (new Query())
+            ->select(['lfs.departure'])
+            ->from(['lfs' => LeadFlightSegment::tableName()])
+            ->where('lfs.lead_id  = ' . $leadTable . '.id')
+            ->orderBy(['lfs.departure' => SORT_ASC])
+            ->limit(1)
+            ->createCommand()->getSql();
+        $nowQuery = (new Query())
+            ->select(new Expression("if (a.dst is not null, if (cast(a.dst as signed) >= 0, concat('+', if (length(a.dst) < 2, concat(0, a.dst), a.dst),':00'), concat(a.dst, ':00')), '+00:00')"))
+            ->from(['a' => Airport::tableName()])
+            ->andWhere('a.iata = (' .
+                (new Query())
+                    ->select(['lfs.origin'])
+                    ->from(['lfs' => LeadFlightSegment::tableName()])
+                    ->andWhere('lfs.lead_id = ' . $leadTable . '.id')
+                    ->orderBy(['lfs.departure' => SORT_ASC])
+                    ->limit(1)
+                    ->createCommand()->getSql()
+                . ')'
+            )
+            ->createCommand()->getSql();
+
+        $query->addSelect([
+            'remainingDays' =>
+                new Expression("datediff((" . $departureQuery . "), (date(convert_tz(NOW(), '+00:00', (" . $nowQuery . ")))))")
+        ]);
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> [
+                'defaultOrder' => ['l_last_action_dt' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'created',
+                    'l_last_action_dt',
+                    'remainingDays'
+                ]
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        if ($this->created) {
+            //$query->andFilterWhere(['=','DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+
+        if ($this->l_last_action_dt) {
+            //$query->andFilterWhere(['=','DATE(l_last_action_dt)', date('Y-m-d', strtotime($this->l_last_action_dt))]);
+            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
+                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable.'.id' => $this->id,
+            $leadTable.'.l_answered' => $this->l_answered,
+            $leadTable.'.project_id' => $this->project_id,
+        ]);
+
+//        $query
+//        ->andWhere(['IN','leads.status', [self::STATUS_FOLLOW_UP]])
+//        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+//        ;
+
+//        $showAll = Yii::$app->request->cookies->getValue(Lead::getCookiesKey(), true);
+//        if (!$showAll) {
+//            $query->andWhere([
+//                'NOT IN', Lead::tableName() . '.id', Lead::unprocessedByAgentInFollowUp()
+//            ]);
+//        }
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
@@ -1658,6 +1805,48 @@ class LeadSearch extends Lead
             $query->limit($this->limit);
             //$dataProvider->setTotalCount($this->limit);
         }
+
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+
+        return $dataProvider;
+    }
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchNew($params, Employee $user): ActiveDataProvider
+    {
+        $leadTable = Lead::tableName();
+
+        $query = Lead::find()->andWhere([$leadTable . '.status' => Lead::STATUS_NEW]);
+
+        $this->load($params);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => ['pageSize' => 20],
+        ]);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable . '.id' => $this->id,
+            $leadTable . '.project_id' => $this->project_id,
+            $leadTable . '.source_id' => $this->source_id,
+            $leadTable . '.client_id' => $this->client_id,
+            $leadTable . '.cabin' => $this->cabin,
+            $leadTable . '.request_ip' => $this->request_ip,
+            $leadTable . '.l_init_price' => $this->l_init_price,
+			$leadTable . '.l_is_test' => $this->l_is_test,
+			$leadTable . '.l_call_status_id' => $this->l_call_status_id,
+        ]);
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
 
@@ -1913,7 +2102,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'project']);
 
         return $dataProvider;
     }

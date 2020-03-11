@@ -5,6 +5,7 @@ namespace modules\qaTask\controllers;
 use modules\qaTask\src\entities\qaTask\search\object\QaTaskObjectSearch;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\guard\QaTaskGuard;
+use sales\access\QueryAccessService;
 use Yii;
 use common\models\Lead;
 use frontend\controllers\FController;
@@ -20,8 +21,21 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
+/**
+ * Class QaTaskController
+ *
+ * @property QueryAccessService $queryAccessService
+ */
 class QaTaskController extends FController
 {
+    private $queryAccessService;
+
+    public function __construct($id, $module, QueryAccessService $queryAccessService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->queryAccessService = $queryAccessService;
+    }
+
     public function behaviors(): array
     {
         $behaviors = [
@@ -81,6 +95,7 @@ class QaTaskController extends FController
             'projectList' => [],
             'userList' => (new ListsAccess(Auth::id()))->getEmployees(),
             'categoryList' =>  QaTaskCategoryQuery::getEnabledListByType($typeId),
+            'queryAccessService' => $this->queryAccessService,
         ]));
 
         $dataProvider = $searchModel->search($typeId, $id, Yii::$app->request->queryParams);

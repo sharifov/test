@@ -30,6 +30,9 @@ class MultipleUpdateForm extends Model
             4 => 'Invalid phone number',
             5 => 'Canceled trip',
             6 => 'Test',
+            7 => 'Transfer to Customer Care',
+            8 => 'Transfer to Exchange',
+            9 => 'Transfer to Schedule Change',
             0 => 'Other'
         ],
         Lead::STATUS_REJECT => [
@@ -279,5 +282,10 @@ class MultipleUpdateForm extends Model
     public function isSnooze(): bool
     {
         return $this->statusId === Lead::STATUS_SNOOZE;
+    }
+
+    public function isNew(): bool
+    {
+        return $this->statusId === Lead::STATUS_NEW;
     }
 }

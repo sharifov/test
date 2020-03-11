@@ -161,7 +161,7 @@ class UserGroup extends ActiveRecord
 
             if (isset($changedAttributes['ug_name']) || isset($changedAttributes['ug_key']) || isset($changedAttributes['ug_disable'])) {
                 NativeEventDispatcher::recordEvent(UserGroupEvents::class, UserGroupEvents::UPDATE,
-					UserGroupEvents::updateListeners(), $this->exportData());
+					[UserGroupEvents::class, 'webHookUpdate'], $this->exportData());
                 NativeEventDispatcher::trigger(UserGroupEvents::class, UserGroupEvents::UPDATE);
             }
         }

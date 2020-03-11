@@ -12,14 +12,14 @@ use yii\helpers\Url;
 
 ?>
 
-<?php if (QaTaskDecideService::can($model, Auth::id())): ?>
+<?php if (QaTaskDecideService::can(Auth::user(), $model)): ?>
     <div class="btn-group" style="margin-bottom: 5px; margin-left: 7px;">
         <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
             Decide
         </button>
         <div class="dropdown-menu">
-            <?php if (QaTaskDecideNoActionService::can($model, Auth::id())): ?>
+            <?php if (QaTaskDecideNoActionService::can(Auth::user(), $model)): ?>
                 <?= Html::a(
                     'No Action',
                     '#',
@@ -32,7 +32,7 @@ use yii\helpers\Url;
                     ]
                 ) ?>
             <?php endif; ?>
-            <?php if (QaTaskDecideLeadSendToRedialQueue::can($model, Auth::id())): ?>
+            <?php if (QaTaskDecideLeadSendToRedialQueue::can(Auth::user(), $model)): ?>
                 <?= Html::a(
                     'Send Lead to Redial Queue',
                     ['/qa-task/qa-task-action/decide-lead-send-to-redial-queue', 'gid' => $model->t_gid],
@@ -42,7 +42,7 @@ use yii\helpers\Url;
                     ]
                 ) ?>
             <?php endif; ?>
-            <?php if (QaTaskDecideLeadReAssignService::can($model, Auth::id())): ?>
+            <?php if (QaTaskDecideLeadReAssignService::can(Auth::user(), $model)): ?>
                 <?= Html::a(
                     'Re-assign Lead',
                     '#',

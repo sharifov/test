@@ -2,132 +2,107 @@
 
 namespace sales\model\user\entity;
 
-use common\models\Department;
 use common\models\Employee;
-use common\models\Project;
-use common\models\UserGroup;
 
 /**
  * Class Access
  *
- * @property array $groups
- * @property array $groupsList
- * @property array $projects
- * @property array $projectsList
- * @property array $departments
- * @property array $departmentsList
+ * @property Employee $user
+ * @property AccessCache $cache
+ * @property array|null $projects
+ * @property array|null $departments
+ * @property array|null $groups
  */
 class Access
 {
+    private $user;
+    private $cache;
+
     private $groups;
-    private $groupsList;
-
     private $projects;
-    private $projectsList;
-
     private $departments;
-    private $departmentsList;
 
-    /**
-     * @param Employee $employee
-     */
-     public function __construct(Employee $employee)
+    public function __construct(Employee $user, AccessCache $cache)
     {
-        $this->groups = $employee->ugsGroups;
-        $this->projects = $employee->projects;
-        $this->departments = $employee->departments;
+        $this->user = $user;
+        $this->cache = $cache;
     }
 
-    /**
-     * @return array
-     */
-    public function getGroupsList(): array
+    public function getUserId(): int
     {
-        if ($this->groupsList !== null) {
-            return $this->groupsList;
-        }
-
-        $this->groupsList = [];
-
-        /** @var UserGroup $item */
-        foreach ($this->groups as $item) {
-            $this->groupsList[$item->ug_id] = $item->ug_name;
-        }
-
-        return $this->groupsList;
+        return $this->user->id;
     }
 
-    /**
-     * @param int $groupId
-     * @return bool
-     */
-    public function inGroup(int $groupId): bool
+    public function getUserName(): int
     {
-        if (!$this->getGroupsList()) {
-            return false;
-        }
-        return array_key_exists($groupId, $this->getGroupsList());
+        return $this->user->username;
     }
 
-    /**
-     * @return array
-     */
-    public function getProjectsList(): array
+    public function getAllProjects(): array
     {
-        if ($this->projectsList !== null) {
-            return $this->projectsList;
-        }
-
-        $this->projectsList = [];
-
-        /** @var Project $item */
-        foreach ($this->projects as $item) {
-            $this->projectsList[$item->id] = $item->name;
-        }
-
-        return $this->projectsList;
+        return array_column($this->getProjects(), 'name', 'id');
     }
 
-    /**
-     * @param int $projectId
-     * @return bool
-     */
-    public function inProject(int $projectId): bool
+    public function getActiveProjects(): array
     {
-        if (!$this->getProjectsList()) {
-            return false;
-        }
-        return array_key_exists($projectId, $this->getProjectsList());
+        return array_column(array_filter($this->getProjects(), static function ($v) { return !$v['closed']; }, ARRAY_FILTER_USE_BOTH), 'name', 'id');
     }
 
-    /**
-     * @return array
-     */
-    public function getDepartmentsList(): array
+    private function getProjects(): array
     {
-        if ($this->departmentsList !== null) {
-            return $this->departmentsList;
+        if ($this->projects !== null) {
+            return $this->projects;
         }
 
-        $this->departmentsList = [];
-
-        /** @var Department $item */
-        foreach ($this->departments as $item) {
-            $this->departmentsList[$item->dep_id] = $item->dep_name;
+        if ($projects = $this->cache->getProjects()) {
+            $this->projects = $projects;
+            return $this->projects;
         }
 
-        return $this->departmentsList;
+        $this->projects = $this->user->getProjectsToArray();
+
+        return $this->projects;
     }
 
-    /**
-     * @param int $departmentId
-     * @return bool
-     */
-    public function inDepartment(int $departmentId): bool
+    public function getDepartments(): array
     {
-        if (!$this->getDepartmentsList()) {
-            return false;
+        if ($this->departments !== null) {
+            return $this->departments;
         }
-        return array_key_exists($departmentId, $this->getDepartmentsList());
+
+        if ($departments = $this->cache->getDepartments()) {
+            $this->departments = $departments;
+            return $this->departments;
+        }
+
+        $this->departments = $this->user->getDepartmentsToArray();
+
+        return $this->departments;
+    }
+
+    public function getAllGroups(): array
+    {
+        return array_column($this->getGroups(), 'ug_name', 'ug_id');
+    }
+
+    public function getActiveGroups(): array
+    {
+        return array_column(array_filter($this->getGroups(), static function ($v) { return !$v['ug_disable']; }, ARRAY_FILTER_USE_BOTH), 'ug_name', 'ug_id');
+    }
+
+    private function getGroups(): array
+    {
+        if ($this->groups !== null) {
+            return $this->groups;
+        }
+
+        if ($groups = $this->cache->getGroups()) {
+            $this->groups = $groups;
+            return $this->groups;
+        }
+
+        $this->groups = $this->user->getGroupsToArray();
+
+        return $this->groups;
     }
 }

@@ -63,6 +63,9 @@ use yii\widgets\ActiveForm;
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_source_type_id')->dropDownList(CasesSourceType::getList(), ['prompt' => '']) ?>
                 </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_need_action')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+                </div>
             </div>
         </div>
     </div>

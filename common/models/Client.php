@@ -6,6 +6,8 @@ use common\models\query\ClientQuery;
 use sales\entities\EventTrait;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use thamtech\uuid\helpers\UuidHelper;
+use thamtech\uuid\validators\UuidValidator;
 use yii\behaviors\TimestampBehavior;
 use yii\helpers\ArrayHelper;
 use yii\db\ActiveRecord;
@@ -20,6 +22,7 @@ use yii\db\ActiveQuery;
  * @property string $last_name
  * @property string $created
  * @property string $updated
+ * @property string $uuid
  *
  * @property string $full_name
  *
@@ -56,6 +59,7 @@ class Client extends ActiveRecord
         $client->first_name = $firstName;
         $client->middle_name = $middleName;
         $client->last_name = $lastName;
+        $client->uuid = UuidHelper::uuid();
         return $client;
     }
 
@@ -80,6 +84,9 @@ class Client extends ActiveRecord
             [['first_name'], 'required'],
             [['created', 'updated'], 'safe'],
             [['first_name', 'middle_name', 'last_name'], 'string', 'max' => 100],
+
+            ['uuid', 'unique'],
+            ['uuid', UuidValidator::class],
         ];
     }
 
@@ -148,7 +155,20 @@ class Client extends ActiveRecord
         return $this->hasMany(Lead::class, ['client_id' => 'id']);
     }
 
-	/**
+    public function beforeSave($insert): bool
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if (!$this->uuid) {
+            $this->uuid = UuidHelper::uuid();
+        }
+
+        return true;
+    }
+
+    /**
 	 * @return array
 	 */
 	public function behaviors(): array

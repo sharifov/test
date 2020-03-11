@@ -47,6 +47,7 @@ use Yii;
  * @property string $cs_last_action_dt
  * @property int|null $cs_source_type_id
  * @property string|null $cs_deadline_dt
+ * @property bool $cs_need_action
  *
  * @property CasesCategory $category
  * @property Department $department
@@ -341,7 +342,7 @@ class Cases extends ActiveRecord implements Objectable
         $this->cs_user_id = $userId;
     }
 
-    private function freedOwner(): void
+    public function freedOwner(): void
     {
         if ($this->isFreedOwner()) {
             throw new \DomainException('Case is already freed owner');
@@ -353,7 +354,7 @@ class Cases extends ActiveRecord implements Objectable
     /**
      * @return bool
      */
-    private function isFreedOwner(): bool
+    public function isFreedOwner(): bool
     {
         return $this->cs_user_id === null;
     }
@@ -412,6 +413,29 @@ class Cases extends ActiveRecord implements Objectable
     public function setDeadline(string $deadline)
     {
         $this->cs_deadline_dt = $deadline;
+    }
+
+    public function onNeedAction(): void
+    {
+        if ($this->isNeedAction()) {
+            throw new \DomainException('Case is already enabled need action.');
+        }
+
+        $this->cs_need_action = true;
+    }
+
+    public function offNeedAction(): void
+    {
+        if (!$this->isNeedAction()) {
+            throw new \DomainException('Case is already mark checked.');
+        }
+
+        $this->cs_need_action = false;
+    }
+
+    public function isNeedAction(): bool
+    {
+        return $this->cs_need_action ? true : false;
     }
 
     /**
@@ -525,6 +549,7 @@ class Cases extends ActiveRecord implements Objectable
             'cs_last_action_dt' => 'Last Action',
             'cs_source_type_id' => 'Source type',
             'cs_deadline_dt' => 'Deadline',
+            'cs_need_action' => 'Need Action',
         ];
     }
 

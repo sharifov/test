@@ -2,46 +2,25 @@
 
 namespace modules\qaTask\src\useCases\qaTask\returnTask\toEscalate;
 
+use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
+use modules\qaTask\src\useCases\qaTask\QaTaskActionsService;
 use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnEvent;
-use sales\access\EmployeeProjectAccess;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\user\UserRepository;
 use yii\web\ForbiddenHttpException;
 
 /**
  * Class QaTaskReturnToEscalateService
- *
- * @property QaTaskRepository $taskRepository
- * @property UserRepository $userRepository
- * @property EventDispatcher $eventDispatcher
  */
-class QaTaskReturnToEscalateService
+class QaTaskReturnToEscalateService extends QaTaskActionsService
 {
-    private $taskRepository;
-    private $userRepository;
-    private $eventDispatcher;
-
-    public function __construct(
-        QaTaskRepository $taskRepository,
-        UserRepository $userRepository,
-        EventDispatcher $eventDispatcher
-    )
-    {
-        $this->taskRepository = $taskRepository;
-        $this->userRepository = $userRepository;
-        $this->eventDispatcher = $eventDispatcher;
-    }
-
     public function return(QaTaskReturnToEscalateForm $form): void
     {
         $task = $this->taskRepository->find($form->getTaskId());
         $user = $this->userRepository->find($form->getUserId());
 
-        self::businessGuard($task, $user->id);
+        $this->businessGuard($user, $task);
 
         $startStatusId = $task->t_status_id;
         $oldAssignedUserId = $task->t_assigned_user_id;
@@ -81,9 +60,9 @@ class QaTaskReturnToEscalateService
         ]);
     }
 
-    private static function businessGuard(QaTask $task, int $userId): void
+    private function businessGuard(Employee $user, QaTask $task): void
     {
-        EmployeeProjectAccess::guard($task->t_project_id, $userId);
+        $this->projectAccessService->guard($user->getAccess(), $task->t_project_id);
 
         if ($task->isPending()) {
             throw new \DomainException('Task is pending.');
@@ -94,26 +73,23 @@ class QaTaskReturnToEscalateService
         }
     }
 
-    /**
-     * @param QaTask $task
-     * @throws ForbiddenHttpException
-     */
-    public static function permissionGuard(QaTask $task): void
+    public function permissionGuard($userId, QaTask $task): void
     {
-        if (!\Yii::$app->user->can('qa-task/qa-task-action/return', ['task' => $task])) {
+        if (!$this->accessChecker->checkAccess($userId, 'qa-task/qa-task-action/return', ['task' => $task])) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        if (!\Yii::$app->user->can('qa-task/qa-task-action/return_To_Escalate')) {
+        if (!$this->accessChecker->checkAccess($userId, 'qa-task/qa-task-action/return_To_Escalate')) {
             throw new ForbiddenHttpException('Access denied.');
         }
     }
 
-    public static function can(QaTask $task, int $userId): bool
+    public static function can(Employee $user, QaTask $task): bool
     {
+        $service = \Yii::createObject(static::class);
         try {
-            self::permissionGuard($task);
-            self::businessGuard($task, $userId);
+            $service->permissionGuard($user->id, $task);
+            $service->businessGuard($user, $task);
         } catch (\Throwable $e) {
             return false;
         }
