@@ -86,7 +86,7 @@ class CasesQRepository
      */
     public function getNeedActionQuery(Employee $user): ActiveQuery
     {
-        $query = CasesQSearch::find()->andWhere(['cs_need_action' => true]);
+        $query = CasesQSearch::find()->andWhere(['cs_need_action' => true])->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -101,6 +101,7 @@ class CasesQRepository
             ],
             ['cs_status' => CasesStatus::STATUS_FOLLOW_UP],
             ['cs_status' => CasesStatus::STATUS_TRASH],
+            ['cs_status' => CasesStatus::STATUS_SOLVED],
         ];
 
         $query->andWhere($this->createSubQuery($user->id, $condition));

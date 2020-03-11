@@ -5,12 +5,11 @@ namespace frontend\controllers;
 use sales\auth\Auth;
 use sales\entities\cases\CasesQSearch;
 use Yii;
-use yii\web\Controller;
 
 /**
  * Class CasesQController
  */
-class CasesQController extends Controller
+class CasesQController extends FController
 {
 
     public function actionPending()
