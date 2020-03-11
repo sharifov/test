@@ -1429,7 +1429,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isIn(): bool
     {
-        return $this->c_call_type_id === self::CALL_TYPE_IN;
+        return (int) $this->c_call_type_id === self::CALL_TYPE_IN;
     }
 
     /**
@@ -1437,7 +1437,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isOut(): bool
     {
-        return $this->c_call_type_id === self::CALL_TYPE_OUT;
+        return (int) $this->c_call_type_id === self::CALL_TYPE_OUT;
     }
 
 
@@ -1557,7 +1557,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isStatusCompleted(): bool
     {
-        return $this->c_status_id === self::STATUS_COMPLETED;
+        return (int) $this->c_status_id === self::STATUS_COMPLETED;
     }
 
     /**

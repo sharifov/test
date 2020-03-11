@@ -43,7 +43,7 @@ class CallEvents extends Component
                 $userStatus->us_gl_call_count = 0;
             }
 
-            if ($call->isStatusCompleted()) {
+            if ($call->c_parent_id && $call->isIn() && $call->isStatusCompleted()) {
                 $userStatus->us_gl_call_count = (int)$userStatus->us_gl_call_count + 1;
             }
 
