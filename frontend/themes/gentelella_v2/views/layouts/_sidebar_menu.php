@@ -227,7 +227,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                     'icon' => 'list',
                     'visible' => Yii::$app->user->can('user-product-type/list')
                 ],
-                ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'list'],
+                ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
             ]

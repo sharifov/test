@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\user\entity\userStatus;
+namespace sales\model\user\entity\userStatus\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -46,6 +46,10 @@ class UserStatusSearch extends UserStatus
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['us_updated_dt' => SORT_DESC, 'us_user_id' => SORT_ASC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

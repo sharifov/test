@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use Yii;
 use sales\model\user\entity\userStatus\UserStatus;
-use sales\model\user\entity\userStatus\UserStatusSearch;
+use sales\model\user\entity\userStatus\search\UserStatusSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
