@@ -317,7 +317,7 @@ $ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) 
             }
         }
 
-        if (!$user[$user_id]) {
+        if (!isset($user[$user_id]) || !$user[$user_id]) {
             try {
                 $sql = 'DELETE FROM user_online WHERE uo_user_id = :user_id';
                 $stmt = $db->prepare($sql);
