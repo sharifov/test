@@ -235,7 +235,7 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public function attributeLabels(): array
+    public function attributeLabels()
     {
         return [
             'c_id' => 'ID',
