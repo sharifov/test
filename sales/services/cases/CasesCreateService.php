@@ -150,21 +150,14 @@ class CasesCreateService
         return $case;
     }
 
-    /**
-     * @param PhoneCreateForm[] $clientPhones
-     * @param int $callId
-     * @param int $projectId
-     * @param int|null $depId
-     * @return Cases
-     * @throws \Exception
-     */
-    public function getOrCreateByCall(array $clientPhones, int $callId, int $projectId, ?int $depId): Cases
+    public function getOrCreateByCall(array $clientPhones, int $callId, int $projectId, int $depId): Cases
     {
 
         $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId) {
 
             $client = $this->clientManageService->getOrCreateByPhones($clientPhones);
-            if (!$case = $this->casesRepository->getByClientProjectDepartment($client->id, $projectId, $depId)) {
+
+            if (!$case = Cases::find()->findLastActiveCaseByClient($client->id, $projectId)->byDepartment($depId)->one()) {
                 //\Yii::info('Not found case:  ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
                 $case = Cases::createByCall(
                     $client->id,

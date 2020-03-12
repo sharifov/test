@@ -74,10 +74,11 @@ class UserConnectionSearch extends UserConnection
             return $dataProvider;
         }
 
-        if (isset($params['UserConnectionSearch']['uc_created_dt'])) {
+        if (!empty($this->uc_created_dt)) {
             $query->andFilterWhere(['>=','uc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->uc_created_dt))])
                 ->andFilterWhere(['<=', 'uc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->uc_created_dt) + 3600 * 24)]);
         }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'uc_id' => $this->uc_id,
