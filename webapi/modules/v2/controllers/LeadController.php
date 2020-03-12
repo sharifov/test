@@ -2,6 +2,8 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use sales\model\lead\LeadCodeException;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
 use sales\model\lead\useCases\lead\api\create\LeadCreateValue;
@@ -275,6 +277,29 @@ class LeadController extends BaseController
                         'uid' => $lead->uid,
                         'gid' => $lead->gid,
                         'client_id' => $lead->client_id,
+                        'client' => [
+                            'uuid' => $lead->client->uuid,
+                            'client_id' => $lead->client_id,
+                            'first_name' => $lead->client->first_name,
+                            'middle_name' => $lead->client->middle_name,
+                            'last_name' => $lead->client->last_name,
+                            'phones' => $lead->client->getClientPhonesByType(
+                                [
+                                    null,
+                                    ClientPhone::PHONE_VALID,
+                                    ClientPhone::PHONE_NOT_SET,
+                                    ClientPhone::PHONE_FAVORITE,
+                                ]
+                            ),
+                            'emails' => $lead->client->getClientEmailsByType(
+                                [
+                                    null,
+                                    ClientEmail::EMAIL_NOT_SET,
+                                    ClientEmail::EMAIL_FAVORITE,
+                                    ClientEmail::EMAIL_VALID,
+                                ]
+                            ),
+                        ],
                     ])
                 )
             )

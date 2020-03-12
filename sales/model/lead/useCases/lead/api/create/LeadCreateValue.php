@@ -18,4 +18,5 @@ class LeadCreateValue extends MessageValue
     public $uid;
     public $gid;
     public $client_id;
+    public $client;
 }
