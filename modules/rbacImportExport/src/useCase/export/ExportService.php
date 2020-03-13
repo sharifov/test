@@ -117,7 +117,7 @@ class ExportService
 
 		$binFile = $this->createBINFile($binFileName, RbacDataHelper::encode($dto->data));
 
-		$zipPath = ($this->getModule())->params['tmpDir'] . '/' . $dto->fileName;
+		$zipPath = \Yii::getAlias(($this->getModule())->tmpDir) . '/' . $dto->fileName;
 
 		$zipArchive = new \ZipArchive();
 		if($zipArchive->open($zipPath, \ZipArchive::CREATE) !== true) {
@@ -135,7 +135,7 @@ class ExportService
 
 	private function createBINFile(string $fileName, string $data): string
 	{
-		$filePath = ($this->getModule())->params['tmpDir'] . '/' . $fileName;
+		$filePath = \Yii::getAlias(($this->getModule())->tmpDir) . '/' . $fileName;
 
 		$file = fopen($filePath, 'wb');
 		file_put_contents($filePath, $data);

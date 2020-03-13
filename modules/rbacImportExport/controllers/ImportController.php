@@ -45,12 +45,12 @@ class ImportController extends Controller
 
 				$cacheKey = 'rbac-import-export_' . $this->importService->dataByteLength;
 				if ($differences) {
-					\Yii::$app->cache->set($cacheKey, $differences, $this->getModule()->params['cacheDuration']);
+					\Yii::$app->cache->set($cacheKey, $differences, $this->getModule()->cacheDuration);
 				}
 				$renderParams['cacheKey'] = $cacheKey;
 				$renderParams['fileSize'] = $this->importService->fileSize;
 				$renderParams['fileName'] = $this->importService->generatedZipFileName;
-				$renderParams['cacheDuration'] = $this->getModule()->params['cacheDuration'];
+				$renderParams['cacheDuration'] = $this->getModule()->cacheDuration;
 			} catch (\RuntimeException $e) {
 				$form->addError('runtimeError', $e->getMessage());
 			} catch (\Throwable | Exception $e) {

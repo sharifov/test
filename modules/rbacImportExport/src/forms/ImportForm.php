@@ -17,7 +17,7 @@ class ImportForm extends Model
 	public function rules(): array
 	{
 		return [
-			[['zipFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'zip', 'maxSize' => $this->getModule()->params['maxFileSizeUpload']],
+			[['zipFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'zip', 'maxSize' => $this->getModule()->maxFileSizeUpload],
 		];
 	}
 }

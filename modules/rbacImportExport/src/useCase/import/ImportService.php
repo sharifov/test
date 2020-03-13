@@ -168,7 +168,7 @@ class ImportService
 
 	private function saveUploadedFile(ImportForm $importForm): self
 	{
-		$tmpDir = ($this->getModule())->params['tmpDir'];
+		$tmpDir = Yii::getAlias(($this->getModule())->tmpDir);
 		$this->generatedZipFileName = $this->generateZipFileName()  . '.' . $importForm->zipFile->extension;
 		$this->generatedZipFilePath = $tmpDir . '/' . $this->generatedZipFileName;
 		$importForm->zipFile->saveAs($this->generatedZipFilePath);
@@ -196,7 +196,7 @@ class ImportService
 				throw new \RuntimeException('Unzip false');
 			}
 
-			$tmpDir = ($this->getModule())->params['tmpDir'];
+			$tmpDir = Yii::getAlias(($this->getModule())->tmpDir);
 			for($i=0; $i < $zip->numFiles; $i++) {
 
 				$extractedFileName = $zip->getNameIndex($i);

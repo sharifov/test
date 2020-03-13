@@ -15,6 +15,21 @@ class RbacImportExportModule extends Module
      */
     public $controllerNamespace = 'modules\rbacImportExport\controllers';
 
+	/**
+	 * @var string
+	 */
+    public $tmpDir = '@runtime/';
+
+	/**
+	 * @var int
+	 */
+    public $cacheDuration = 600;
+
+	/**
+	 * @var float|int
+	 */
+    public $maxFileSizeUpload = 1024 * 1024 * 2;
+
     /**
      * {@inheritdoc}
      */
@@ -23,14 +38,6 @@ class RbacImportExportModule extends Module
         parent::init();
 
 		$this->setViewPath('@modules/rbacImportExport/views');
-
-		Yii::configure($this, [
-			'params' => [
-				'tmpDir' => __DIR__ . '/src/tmp',
-				'cacheDuration' => 600,
-				'maxFileSizeUpload' => 1024 * 1024 * 2
-			]
-		]);
 	}
 
 	/**
