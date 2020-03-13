@@ -1686,11 +1686,11 @@ class Call extends \yii\db\ActiveRecord
     {
         $timeLimit = (int)(Yii::$app->params['settings']['call_incoming_time_limit'] ?? 0);
 
-        $callMaxTime = strtotime($this->c_created_dt) + ($timeLimit * 60);
+        $callMaxTime = strtotime($this->c_updated_dt) + ($timeLimit * 60);
 
-        Yii::info('CallId: ' . $this->c_id . ', (cd: '.$this->c_created_dt.', ud: '.$this->c_updated_dt.') time limit: ' . $timeLimit . ', status: ' . $this->getStatusName() . ', MaxTime (sec): ' . ($callMaxTime - time()) ,'info\checkCancelCall');
+        Yii::info('CallId: ' . $this->c_id . ', (cd: '.$this->c_created_dt.', ud: '.$this->c_updated_dt.'), time limit: ' . $timeLimit . ' min, status: ' . $this->getStatusName() . ', Last Time (sec): ' . ($callMaxTime - time()) ,'info\checkCancelCall');
 
-        if ($timeLimit && $this->isStatusQueue()) {
+        if ($timeLimit && ($this->isStatusIvr() || $this->isStatusQueue())) {
             if ($callMaxTime < time()) {
                 $result = $this->cancelCall();
                 Yii::info('CallId: ' . $this->c_id . ', '. VarDumper::dumpAsString($result) ,'info\checkCancelCall:cancelCall');
