@@ -7,6 +7,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use common\models\UserOnline;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use Yii;
@@ -148,10 +149,10 @@ class EmployeeSearch extends Employee
 
         if ($this->online > 0) {
             if ($this->online == 1) {
-                $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
+                $subQuery = UserOnline::find()->select(['uo_user_id']);
                 $query->andWhere(['IN', 'employees.id', $subQuery]);
             } elseif ($this->online == 2) {
-                $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
+                $subQuery = UserOnline::find()->select(['uo_user_id']);
                 $query->andWhere(['NOT IN', 'employees.id', $subQuery]);
             }
         }
