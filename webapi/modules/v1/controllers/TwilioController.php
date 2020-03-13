@@ -459,6 +459,8 @@ class TwilioController extends ApiBaseNoAuthController
                         ]);
                 }
 
+                $responseTwml->reject(['reason' => 'busy']);
+
 //                $url_music = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
 //                $responseTwml->play($url_music, ['loop' => 0]);
 

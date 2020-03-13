@@ -2071,12 +2071,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->innerJoin('user_profile AS up', 'uo.uo_user_id = up.up_user_id');
         $query->innerJoin('user_project_params AS upp', 'uo.uo_user_id = upp.upp_user_id');
 
-
         $query->andWhere(['us.us_call_phone_status' => true, 'us.us_is_on_call' => false, 'us.us_has_call_access' => false]);
         $query->andWhere(['up.up_call_type_id' => UserProfile::CALL_TYPE_WEB]);
         $query->andWhere(['upp.upp_allow_general_line' => true, 'upp.upp_project_id' => $project_id]);
-
-
 
         if($exceptUserIds) {
             $query->andWhere(['NOT IN', 'uo.uo_user_id', $exceptUserIds]);
@@ -2087,18 +2084,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $query->andWhere(['ud.ud_dep_id' => $department_id]);
         }
 
-
         if ($call->cugUgs) {
             $groupIds = ArrayHelper::map($call->cugUgs, 'ug_id', 'ug_id');
             if ($groupIds) {
-                $query->innerJoin('user_group_assign AS ud', 'uo.uo_user_id = ugs.ugs_user_id');
+                $query->innerJoin('user_group_assign AS ugs', 'uo.uo_user_id = ugs.ugs_user_id');
                 $query->andWhere(['ugs.ugs_group_id' => $groupIds]);
             }
         }
 
         //$query->groupBy(['uo.uo_user_id']);
         $query->orderBy(['us.us_gl_call_count' => SORT_ASC]);
-
 
         if($limit > 0) {
             $query->limit($limit);
@@ -2109,7 +2104,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //VarDumper::dump($sqlRaw, 10, true); exit;
 
         $users = $query->asArray()->all();
-
         return $users;
     }
 

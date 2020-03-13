@@ -172,6 +172,10 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                 if ($call->isStatusQueue() || $call->isStatusIvr()) {
 
+                    if ($call->checkCancelCall()) {
+                        return true;
+                    }
+
                     // Yii::info('CallQueueJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
 
                     $isCalled = false;
