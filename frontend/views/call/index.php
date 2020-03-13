@@ -75,21 +75,10 @@ if($user->isAdmin()) {
                     },
 
                     'cancel' => static function (Call $model, $key, $index) use ($user) {
-                        return $user->isAdmin(); // && $model->isIn() && ($model->isStatusQueue() || $model->isStatusRinging() || $model->isStatusInProgress());
+                        return $user->isAdmin() && $model->isIn() && ($model->isStatusIvr() || $model->isStatusQueue() || $model->isStatusRinging() || $model->isStatusInProgress());
                     },
                 ],
                 'buttons' => [
-//                    'view' => static function ($url, CasesQSearch $model) {
-//                        return Html::a('<i class="glyphicon glyphicon-search"></i> View Case', [
-//                            'cases/view',
-//                            'gid' => $model->cs_gid
-//                        ], [
-//                            'class' => 'btn btn-info btn-xs',
-//                            'target' => '_blank',
-//                            'data-pjax' => 0,
-//                            'title' => 'View',
-//                        ]);
-//                    },
                     'cancel' => static function ($url, Call $model) {
                         return Html::a('<i class="fa fa-close text-danger"></i>', ['call/cancel', 'id' => $model->c_id], [
                             //'class' => 'btn btn-primary btn-xs take-processing-btn',
