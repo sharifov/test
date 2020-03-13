@@ -1537,6 +1537,14 @@ class Call extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return int
+     */
+    public function setStatusCanceled(): int
+    {
+        return $this->c_status_id = self::STATUS_CANCELED;
+    }
+
+    /**
      * @return bool
      */
     public function isStatusBusy(): bool
@@ -1641,5 +1649,48 @@ class Call extends \yii\db\ActiveRecord
     public function isTransfer(): bool
     {
         return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function cancelCall(): bool
+    {
+        $communication = \Yii::$app->communication;
+        $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/cancel-call?id=' . $this->c_id;
+        $data = [];
+        $data['c_id'] = $this->c_id;
+
+        if ($this->c_call_sid) {
+            try {
+                $result = $communication->redirectCall($this->c_call_sid, $data, $callbackUrl);
+                if (!empty($result['error'])) {
+                    Yii::error($result['error'], 'Call:cancelCall:redirectCall');
+                }
+                return true;
+            } catch (\Throwable $throwable) {
+                Yii::error($throwable->getMessage(), 'Call:cancelCall:Throwable');
+            }
+        } else {
+            Yii::error(' Not found Call Sid, CallId: ' . $this->c_id , 'Call:cancelCall:Throwable');
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function checkCancelCall(): bool
+    {
+        $timeLimit = (int)(Yii::$app->params['settings']['call_incoming_time_limit'] ?? 0);
+        if ($timeLimit && $this->isStatusQueue()) {
+            if (strtotime($this->c_updated_dt) + ($timeLimit * 60) < time() ) {
+                $result = $this->cancelCall();
+                return true;
+            }
+        }
+        return false;
     }
 }

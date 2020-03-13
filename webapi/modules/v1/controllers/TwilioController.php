@@ -7,6 +7,7 @@ use common\models\CallUserGroup;
 use common\models\ClientPhone;
 use common\models\DepartmentPhoneProject;
 use common\models\DepartmentPhoneProjectUserGroup;
+use sales\helpers\app\AppHelper;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\base\Exception;
@@ -350,7 +351,7 @@ class TwilioController extends ApiBaseNoAuthController
 
         } catch (\Throwable $throwable) {
 
-            Yii::error('Message: ' . $throwable->getMessage() . ', file: ' . $throwable->getFile().' (' . $throwable->getLine().')', 'API:Twilio:RedirectCall:Throwable');
+            Yii::error(AppHelper::throwableFormatter($throwable), 'API:Twilio:RedirectCall:Throwable');
 
             $responseTwml = new VoiceResponse();
             $responseTwml->say('Sorry, communication error', [
@@ -409,6 +410,79 @@ class TwilioController extends ApiBaseNoAuthController
 
         return $responseData;
 
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function actionCancelCall()
+    {
+
+        //$this->checkPost();
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+//        $out = [
+////            'dateTime'      => date('Y-m-d H:i:s'),
+////            'ip'        => Yii::$app->request->getUserIP(),
+//            'get'       => Yii::$app->request->get(),
+//            'post'      => Yii::$app->request->post(),
+//        ];
+
+        // Yii::info(VarDumper::dumpAsString($out), 'info\API:Twilio:RedirectCal');
+
+        $c_id = (int) Yii::$app->request->post('c_id');
+
+        try {
+
+            if (!$c_id) {
+                throw new Exception('Params "c_id" is empty', 1);
+            }
+
+            $call = Call::findOne($c_id);
+
+            // Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:CancelCall:callData');
+
+            $responseTwml = new VoiceResponse();
+
+            if ($call) {
+
+                $call->setStatusCanceled();
+
+                $message = Yii::$app->params['settings']['call_incoming_time_limit_message'] ?? '';
+
+                if ($message) {
+                    $responseTwml->say($message,
+                        [
+                            'language' => 'en-US',
+                            'voice' => 'alice'
+                        ]);
+                }
+
+//                $url_music = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+//                $responseTwml->play($url_music, ['loop' => 0]);
+
+                if (!$call->save()) {
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:CancelCall:Call:update');
+                }
+            }
+
+        } catch (\Throwable $throwable) {
+
+            Yii::error(AppHelper::throwableFormatter($throwable), 'API:Twilio:CancelCall:Throwable');
+
+            $responseTwml = new VoiceResponse();
+            $responseTwml->say('Sorry, sale communication error', [
+                'language' => 'en-US',
+                'voice' => 'alice'
+            ]);
+        }
+        $responseData['responseTwml'] = (string) $responseTwml;
+
+        $apiLog->endApiLog($responseData);
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        return $responseData;
     }
 
 

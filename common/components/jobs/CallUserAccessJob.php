@@ -71,6 +71,10 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 
                     // Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_status_id: ' . $call->c_status_id . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
 
+                    if ($call->checkCancelCall()) {
+                        return true;
+                    }
+
 
                     $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
                     $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_user_limit'] ?? 1);
