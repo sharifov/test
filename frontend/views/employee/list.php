@@ -182,9 +182,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             ],
 
             [
-                //'label' => 'Online',
                 'attribute' => 'online',
-                //'filter' => false,
                 'filter' => [1 => 'Online', 2 => 'Offline'],
                 'value' => static function (\common\models\Employee $model) {
                     return $model->isOnline() ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>';

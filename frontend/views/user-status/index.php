@@ -63,6 +63,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'us_gl_call_count',
                 'us_call_phone_status:boolean',
                 'us_is_on_call:boolean',
+                [
+                    'attribute' => 'online',
+                    'filter' => [1 => 'Online', 2 => 'Offline'],
+                    'value' => static function (UserStatus $model) {
+                        return $model->usUser->isOnline() ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>';
+                    },
+                    'format' => 'raw'
+                ],
                 'us_has_call_access:boolean',
                 [
                     'class' => DateTimeColumn::class,

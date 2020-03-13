@@ -65,6 +65,7 @@ use yii\web\NotFoundHttpException;
  * @property UserProjectParams[] $userProjectParams
  * @property Project[] $uppProjects
  * @property UserProfile $userProfile
+ * @property UserOnline $userOnline
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
  * @property int $callExpertCountByShiftTime
@@ -398,6 +399,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    /**
+     * Gets query for [[UserOnline]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserOnline()
+    {
+        return $this->hasOne(UserOnline::class, ['uo_user_id' => 'id']);
     }
 
     /**
@@ -1873,8 +1884,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isOnline() : bool
     {
-        $online = UserConnection::find()->where(['uc_user_id' => $this->id])->exists();
-        return $online;
+        return UserOnline::find()->where(['uo_user_id' => $this->id])->exists();
     }
 
     /**

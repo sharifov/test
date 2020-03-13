@@ -2,6 +2,7 @@
 
 namespace sales\model\user\entity\userStatus\search;
 
+use common\models\UserOnline;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use sales\model\user\entity\userStatus\UserStatus;
@@ -11,6 +12,8 @@ use sales\model\user\entity\userStatus\UserStatus;
  */
 class UserStatusSearch extends UserStatus
 {
+    public $online;
+
     /**
      * {@inheritdoc}
      */
@@ -18,7 +21,7 @@ class UserStatusSearch extends UserStatus
     {
         return [
             [['us_user_id', 'us_gl_call_count', 'us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'integer'],
-            [['us_updated_dt'], 'safe'],
+            [['us_updated_dt', 'online'], 'safe'],
         ];
     }
 
@@ -58,6 +61,16 @@ class UserStatusSearch extends UserStatus
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->online > 0) {
+            if ($this->online == 1) {
+                $subQuery = UserOnline::find()->select(['uo_user_id']);
+                $query->andWhere(['IN', 'us_user_id', $subQuery]);
+            } elseif ($this->online == 2) {
+                $subQuery = UserOnline::find()->select(['uo_user_id']);
+                $query->andWhere(['NOT IN', 'us_user_id', $subQuery]);
+            }
         }
 
         // grid filtering conditions
