@@ -2,12 +2,13 @@
 namespace modules\rbacImportExport\src\useCase\export;
 
 use modules\rbacImportExport\src\entity\AuthImportExport;
+use modules\rbacImportExport\src\helpers\RbacDataHelper;
 
 /**
- * Class RbacExportDataDTO
+ * Class RbacExportImportDataDTO
  * @package modules\rbacImportExport\src\useCase\export
  *
- * @property array $exportData
+ * @property array $data
  * @property int $cntRoles
  * @property int $cntPermissions
  * @property int $cntRules
@@ -16,9 +17,9 @@ use modules\rbacImportExport\src\entity\AuthImportExport;
  * @property string $fileName
  * @property int $fileSize
  */
-class RbacExportDataDTO
+class RbacExportImportDataDTO
 {
-	public $exportData;
+	public $data;
 
 	public $cntRoles = 0;
 
@@ -43,7 +44,7 @@ class RbacExportDataDTO
 
 	public function fillByModel(AuthImportExport $model): void
 	{
-		$this->exportData = @json_decode($model->aie_data_json, true) ?? [];
+		$this->data = RbacDataHelper::decode($model->aie_data);
 		$this->fileName = $model->aie_file_name;
 	}
 }

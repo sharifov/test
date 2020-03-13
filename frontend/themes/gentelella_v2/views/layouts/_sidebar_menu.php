@@ -414,7 +414,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Route', 'url' => ['/rbac/route']],
                 ['label' => 'Permission', 'url' => ['/rbac/permission']],
                 ['label' => 'Role', 'url' => ['/rbac/role']],
-                ['label' => 'Import / Export', 'url' => ['/rbac-import-export/import-export/index']],
+                ['label' => 'Import / Export', 'url' => ['/rbac-import-export/log']],
             ],
         ];
 

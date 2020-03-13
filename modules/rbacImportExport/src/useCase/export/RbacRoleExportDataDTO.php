@@ -20,14 +20,12 @@ class RbacRoleExportDataDTO
 	public $userIdsByRole;
 	public $permissionsByRole;
 	public $childByRole;
-//	public $rulesByRole;
 
 	public function __construct(array $userIdsByRole, array $permissionsByRole, array $childByRole, Role $roleInfo)
 	{
 		$this->userIdsByRole = $userIdsByRole;
 		$this->permissionsByRole = $permissionsByRole;
 		$this->childByRole = $childByRole;
-//		$this->rulesByRole = $rulesByRole;
 		$this->roleInfo = $roleInfo;
 	}
 }

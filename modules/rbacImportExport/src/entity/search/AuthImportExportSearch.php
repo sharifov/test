@@ -17,8 +17,8 @@ class AuthImportExportSearch extends AuthImportExport
     public function rules()
     {
         return [
-            [['aie_id', 'aie_type', 'aie_cnt_roles', 'aie_cnt_permissions', 'aie_cnt_rules', 'aie_cnt_childs', 'aie_file_size', 'aie_user_id'], 'integer'],
-            [['aie_file_name', 'aie_created_dt', 'aie_data_json'], 'safe'],
+            [['aie_id', 'aie_type', 'aie_cnt_roles', 'aie_cnt_permissions', 'aie_cnt_rules', 'aie_cnt_child', 'aie_file_size', 'aie_user_id'], 'integer'],
+            [['aie_file_name', 'aie_created_dt', 'aie_data'], 'safe'],
         ];
     }
 
@@ -67,14 +67,14 @@ class AuthImportExportSearch extends AuthImportExport
             'aie_cnt_roles' => $this->aie_cnt_roles,
             'aie_cnt_permissions' => $this->aie_cnt_permissions,
             'aie_cnt_rules' => $this->aie_cnt_rules,
-            'aie_cnt_childs' => $this->aie_cnt_childs,
+            'aie_cnt_child' => $this->aie_cnt_child,
             'aie_file_size' => $this->aie_file_size,
             'aie_created_dt' => $this->aie_created_dt,
             'aie_user_id' => $this->aie_user_id,
         ]);
 
         $query->andFilterWhere(['like', 'aie_file_name', $this->aie_file_name])
-            ->andFilterWhere(['like', 'aie_data_json', $this->aie_data_json]);
+            ->andFilterWhere(['like', 'aie_data', $this->aie_data]);
 
         return $dataProvider;
     }

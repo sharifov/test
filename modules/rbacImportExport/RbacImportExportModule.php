@@ -26,7 +26,9 @@ class RbacImportExportModule extends Module
 
 		Yii::configure($this, [
 			'params' => [
-				'tmpDir' => __DIR__ . '/src/tmp'
+				'tmpDir' => __DIR__ . '/src/tmp',
+				'cacheDuration' => 600,
+				'maxFileSizeUpload' => 1024 * 1024 * 2
 			]
 		]);
 	}

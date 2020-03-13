@@ -8,8 +8,15 @@ use modules\rbacImportExport\src\entity\AuthImportExport;
 use modules\rbacImportExport\src\forms\ExportForm;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
+use yii\web\YiiAsset;
 
+$this->title = 'RBAC Export';
+$this->params['breadcrumbs'][] = ['label' => 'RBAC Import Export', 'url' => ['/rbac-import-export/log/index']];
+$this->params['breadcrumbs'][] = $this->title;
+YiiAsset::register($this);
 ?>
+<h1><?= Html::encode($this->title) ?></h1>
+
 <div class="row">
 	<div class="col-md-6">
 

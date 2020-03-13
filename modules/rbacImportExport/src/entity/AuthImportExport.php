@@ -4,10 +4,10 @@ namespace modules\rbacImportExport\src\entity;
 
 use common\models\Employee;
 use common\models\query\EmployeeQuery;
-use modules\rbacImportExport\src\useCase\export\RbacExportDataDTO;
+use modules\rbacImportExport\src\helpers\RbacDataHelper;
+use modules\rbacImportExport\src\useCase\export\RbacExportImportDataDTO;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "auth_import_export".
@@ -17,12 +17,12 @@ use yii\db\ActiveRecord;
  * @property int|null $aie_cnt_roles
  * @property int|null $aie_cnt_permissions
  * @property int|null $aie_cnt_rules
- * @property int|null $aie_cnt_childs
+ * @property int|null $aie_cnt_child
  * @property string|null $aie_file_name
  * @property int|null $aie_file_size
  * @property string|null $aie_created_dt
  * @property int|null $aie_user_id
- * @property string|null $aie_data_json
+ * @property string|null $aie_data
  *
  * @property Employee $aieUser
  */
@@ -86,8 +86,8 @@ class AuthImportExport extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['aie_type', 'aie_cnt_roles', 'aie_cnt_permissions', 'aie_cnt_rules', 'aie_cnt_childs', 'aie_file_size', 'aie_user_id'], 'integer'],
-            [['aie_created_dt', 'aie_data_json'], 'safe'],
+            [['aie_type', 'aie_cnt_roles', 'aie_cnt_permissions', 'aie_cnt_rules', 'aie_cnt_child', 'aie_file_size', 'aie_user_id'], 'integer'],
+            [['aie_created_dt', 'aie_data'], 'safe'],
             [['aie_file_name'], 'string', 'max' => 255],
             [['aie_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['aie_user_id' => 'id']],
         ];
@@ -104,12 +104,12 @@ class AuthImportExport extends \yii\db\ActiveRecord
             'aie_cnt_roles' => 'Cnt Roles',
             'aie_cnt_permissions' => 'Cnt Permissions',
             'aie_cnt_rules' => 'Cnt Rules',
-            'aie_cnt_childs' => 'Cnt Childs',
+            'aie_cnt_child' => 'Cnt Child',
             'aie_file_name' => 'File Name',
             'aie_file_size' => 'File Size',
             'aie_created_dt' => 'Created Dt',
             'aie_user_id' => 'User',
-            'aie_data_json' => 'Data Json',
+            'aie_data' => 'Data',
         ];
     }
 
@@ -147,7 +147,7 @@ class AuthImportExport extends \yii\db\ActiveRecord
 		return self::SECTION_LIST;
 	}
 
-	public static function create(RbacExportDataDTO $dto): self
+	public static function create(RbacExportImportDataDTO $dto): self
 	{
 		$newRow = new self();
 
@@ -155,10 +155,10 @@ class AuthImportExport extends \yii\db\ActiveRecord
 		$newRow->aie_cnt_roles = $dto->cntRoles;
 		$newRow->aie_cnt_permissions = $dto->cntPermissions;
 		$newRow->aie_cnt_rules = $dto->cntRules;
-		$newRow->aie_cnt_childs = $dto->cntChild;
+		$newRow->aie_cnt_child = $dto->cntChild;
 		$newRow->aie_file_name = $dto->fileName;
 		$newRow->aie_file_size = $dto->fileSize;
-		$newRow->aie_data_json = json_encode($dto->exportData);
+		$newRow->aie_data = RbacDataHelper::encode($dto->data);
 
 		return $newRow;
 	}
