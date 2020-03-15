@@ -134,7 +134,7 @@ class SmsDistributionList extends ActiveRecord
         if (parent::beforeSave($insert)) {
 
             if (!$this->sdl_client_id) {
-                $clientPhone = ClientPhone::find()->where(['phone' => $this->sdl_phone_to])->one();
+                $clientPhone = ClientPhone::find()->where(['phone' => $this->sdl_phone_to])->orderBy(['id' => SORT_DESC])->one();
                 if ($clientPhone) {
                     $this->sdl_client_id = $clientPhone->client_id;
                 }
