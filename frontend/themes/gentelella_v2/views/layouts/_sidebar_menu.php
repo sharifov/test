@@ -148,6 +148,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'items' => [
                 ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
+                ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'comments warning'],
                 ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
                 ['label' => 'Conference Room', 'url' => ['/conference-room/index'], 'icon' => 'comment'],

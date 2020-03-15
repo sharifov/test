@@ -2,6 +2,7 @@
 namespace webapi\modules\v1\controllers;
 
 use Yii;
+use yii\helpers\VarDumper;
 
 class AppController extends ApiBaseController
 {
@@ -54,7 +55,7 @@ class AppController extends ApiBaseController
         $headers = [];
         foreach ($_SERVER as $name => $value)
         {
-            if (substr($name, 0, 5) == 'HTTP_')
+            if (strpos($name, 'HTTP_') === 0)
             {
                 $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
             }
@@ -71,6 +72,9 @@ class AppController extends ApiBaseController
             'files'     => $_FILES,
             'headers'   => $headers
         ];
+
+        Yii::info(VarDumper::dumpAsString($out), 'info\API:AppController:Test');
+
         return $out;
     }
 
