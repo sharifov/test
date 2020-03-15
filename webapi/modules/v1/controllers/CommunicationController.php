@@ -1623,7 +1623,7 @@ class CommunicationController extends ApiBaseController
                 $response['sms'] = $sms->s_id;
             } else {
 
-                $smsModel = SmsDistributionList::findOne(['sdl_com_id' => $sq_id]);
+                $smsModel = SmsDistributionList::find()->where(['sdl_com_id' => $sq_id])->one();
 
                 if ($smsModel) {
 
