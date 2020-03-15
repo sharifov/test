@@ -49,7 +49,7 @@ class SmsDistributionListSearch extends SmsDistributionList
             'query' => $query,
             'sort'=> ['defaultOrder' => ['sdl_id' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 50,
             ],
         ]);
 

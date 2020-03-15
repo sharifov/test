@@ -48,15 +48,19 @@ class SmsDistributionList extends ActiveRecord
 
     public const STATUS_NEW     = 1;
     public const STATUS_PENDING = 2;
-    public const STATUS_SEND    = 3;
-    public const STATUS_ERROR   = 4;
+    public const STATUS_PROCESS = 3;
+    public const STATUS_CANCEL  = 4;
     public const STATUS_DONE    = 5;
-    public const STATUS_CANCEL  = 6;
+    public const STATUS_ERROR   = 6;
+    public const STATUS_SENT    = 7;
+
+
 
     public const STATUS_LIST = [
         self::STATUS_NEW        => 'New',
         self::STATUS_PENDING    => 'Pending',
-        self::STATUS_SEND       => 'Send',
+        self::STATUS_PROCESS    => 'Processing',
+        self::STATUS_SENT       => 'Send',
         self::STATUS_ERROR      => 'Error',
         self::STATUS_DONE       => 'Done',
         self::STATUS_CANCEL     => 'Cancel',
@@ -65,7 +69,8 @@ class SmsDistributionList extends ActiveRecord
     public const STATUS_LIST_LABEL = [
         self::STATUS_NEW        => '<span class="badge badge-info">' .self::STATUS_LIST[self::STATUS_NEW]. '</span>',
         self::STATUS_PENDING    => '<span class="badge badge-warning">' .self::STATUS_LIST[self::STATUS_PENDING]. '</span>',
-        self::STATUS_SEND       => '<span class="badge badge-default">' .self::STATUS_LIST[self::STATUS_SEND]. '</span>',
+        self::STATUS_PROCESS    => '<span class="badge badge-white">' .self::STATUS_LIST[self::STATUS_PROCESS]. '</span>',
+        self::STATUS_SENT       => '<span class="badge badge-green">' .self::STATUS_LIST[self::STATUS_SENT]. '</span>',
         self::STATUS_ERROR      => '<span class="badge badge-danger">' .self::STATUS_LIST[self::STATUS_ERROR]. '</span>',
         self::STATUS_DONE       => '<span class="badge badge-green">' .self::STATUS_LIST[self::STATUS_DONE]. '</span>',
         self::STATUS_CANCEL     => '<span class="badge badge-danger">' .self::STATUS_LIST[self::STATUS_CANCEL]. '</span>',

@@ -59,6 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
         <div class="col-md-6">
+            <code>Comma separated values - ","</code>
             <?= $form->field($model, 'sdl_phone_to_list')->textarea(['rows' => 16]) ?>
         </div>
 

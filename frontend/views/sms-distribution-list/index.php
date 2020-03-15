@@ -1,9 +1,11 @@
 <?php
 
+use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\yii\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\sms\entity\smsDistributionList\search\SmsDistributionListSearch */
@@ -12,6 +14,7 @@ use yii\widgets\Pjax;
 $this->title = 'Sms Distribution List';
 $this->params['breadcrumbs'][] = $this->title;
 $user = Yii::$app->user->identity;
+$gridId = 'sms-grid-id';
 ?>
 <div class="sms-distribution-list-index">
 
@@ -20,21 +23,54 @@ $user = Yii::$app->user->identity;
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Sms Distribution', ['create'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('<i class="fa fa-plus"></i> Add Multiple Sms', ['create-multiple'], ['class' => 'btn btn-warning']) ?>
+        <?= Html::a('<i class="fa fa-trash"></i> Delete All', ['delete-all'], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => 'Are you sure you want to delete all items?',
+                //'method' => 'post',
+            ],
+        ]) ?>
     </p>
 
     <div class="col-md-12">
         Site settings "<b>sms_distribution_count</b>":  <b><?=(Yii::$app->params['settings']['sms_distribution_count'] ?? 'none')?></b>
-        <div class="text-warning"> SMS are sent only in the status of Pending. With a frequency of once every 4 minutes. </div>
+        <div class="text-info"> SMS are sent only in the status of Pending. With a frequency of once every 2 minutes. </div>
     </div>
 
-    <?php Pjax::begin(); ?>
+
+    <?php Pjax::begin(['id' => 'pjax-sms-grid-list']); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
+    <?php //=Html::beginForm(['/sms-distribution-list/update-multiple'],'post', ['data-pjax' => true])?>
+    <h5>Multiple Update - selected items</h5>
+        <div class="col-md-1">
+            <?=Html::dropDownList('SmsMultipleForm[status_id]','', SmsDistributionList::getStatusList(), ['id' => 'status_id', 'class'=>'form-control', 'prompt' => '-'])?>
+        </div>
+        <div class="col-md-2">
+            <?=Html::button('Update selected items', ['class' => 'btn btn-primary btn-submit-multiple-update']);?>
+        </div>
+
     <?= GridView::widget([
+        'id' => 'sms-list-grid',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
+
+            [
+                'class' => 'yii\grid\CheckboxColumn',
+                /*'name' => 'SmsMultipleForm[sms_list]',
+                'checkboxOptions' => static function(SmsDistributionList $model) {
+                    return ['value' => $model->sdl_id];
+                },*/
+                //'pageSummary' => true,
+                //'rowSelectedClass' => ,
+                /*'checkboxOptions' => static function (SmsDistributionList $model) {
+                    $can = Auth::can('leadSearchMultipleUpdate', ['lead' => $model]);
+                    return ['style' => 'display:' . ($can ? 'visible' : 'none')];
+                },
+                'visible' => Auth::can('leadSearchMultipleSelect')*/
+            ],
 
             'sdl_id',
 //            'sdl_project_id',
@@ -100,10 +136,10 @@ $user = Yii::$app->user->identity;
                 'label' => 'Created User',
                 'attribute' => 'sdlCreatedUser.username',
             ],
-            [
-                'label' => 'Updated User',
-                'attribute' => 'sdlUpdatedUser.username',
-            ],
+//            [
+//                'label' => 'Updated User',
+//                'attribute' => 'sdlUpdatedUser.username',
+//            ],
             'sdl_com_id',
 
             ['class' => 'yii\grid\ActionColumn',
@@ -141,6 +177,67 @@ $user = Yii::$app->user->identity;
         ],
     ]); ?>
 
+
+    <?php //= Html::endForm();?>
+
     <?php Pjax::end(); ?>
 
 </div>
+
+<?php
+$urlAjax = Url::to(['sms-distribution-list/update-multiple']);
+$js = <<<JS
+
+    $(document).ready(function () {
+        $(document).on('click', '.btn-submit-multiple-update', function() {
+            //alert(123);
+            let ids = $('#sms-list-grid').yiiGridView('getSelectedRows');
+            if (ids.length < 1) {
+                new PNotify({title: "Multiple update", type: "error", text: 'Not selected rows', hide: true});
+                return;
+            }
+            
+            let status_id = $('#status_id').val();
+            
+            if (!status_id) {
+                new PNotify({title: "Select Status", type: "error", text: 'Not select status', hide: true});
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to update selected items?')) {
+                return;
+            }
+            
+            $('#preloader').removeClass('hidden');
+            $.ajax({
+                type: 'post',
+                url: '$urlAjax',
+                data: {"sms_list": ids, "status_id" : status_id},
+                success: function (data) {
+                    $('#preloader').addClass('hidden');
+                    new PNotify({title: "Multiple update Success", type: "success", text: 'Multiple update Success', hide: true});
+                    $.pjax.reload({container: '#pjax-sms-grid-list', async: false});
+                },
+                error: function (error) {
+                    $('#preloader').addClass('hidden');
+                    console.error('Error: ' + error);
+                }
+            });
+
+        });
+       
+      
+        
+    }); 
+
+    // $(document).on('pjax:start', function() {
+    //     $("#modalUpdate .close").click();
+    // });
+
+    /*$(document).on('pjax:end', function() {
+         $('[data-toggle="tooltip"]').tooltip();
+    });*/
+
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);
