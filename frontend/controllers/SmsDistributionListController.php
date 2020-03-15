@@ -9,6 +9,7 @@ use sales\model\sms\entity\smsDistributionList\forms\SmsDistributionListAddMulti
 use Yii;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\model\sms\entity\smsDistributionList\search\SmsDistributionListSearch;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
@@ -192,6 +193,44 @@ class SmsDistributionListController extends FController
         ]);
     }
 
+
+    public function actionUpdateMultiple()
+    {
+        $smsList = Yii::$app->request->post('sms_list');
+        $statusId = (int) Yii::$app->request->post('status_id');
+
+        //VarDumper::dump($dataForm); exit;
+        if ($smsList && $statusId) {
+
+            $successItems = [];
+            $warningItems = [];
+
+            foreach ($smsList as $id) {
+                $smsModel = SmsDistributionList::findOne((int) $id);
+                if ($smsModel) {
+                    $smsModel->sdl_status_id = $statusId;
+
+                    if($smsModel->save()) {
+                        $successItems[] = Html::encode($smsModel->sdl_phone_to);
+                    } else {
+                        $warningItems[] = Html::encode($smsModel->sdl_phone_to) . ' - ' . VarDumper::dumpAsString($smsModel->errors);
+                        //Yii::error(VarDumper::dumpAsString($smsModel->errors), 'SmsDistributionListController:actionUpdateMultiple:SmsDistributionList:save');
+                    }
+                }
+
+                if($successItems) {
+                    Yii::$app->session->setFlash('success', 'Success multiple update: ' . implode(', ', $successItems));
+                }
+
+                if($warningItems) {
+                    Yii::$app->session->setFlash('warning', 'Warning multiple update: ' . implode(', ', $warningItems));
+                }
+            }
+        }
+
+        return json_encode(['status_id' => $statusId]);
+    }
+
     /**
      * Deletes an existing SmsDistributionList model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -204,6 +243,21 @@ class SmsDistributionListController extends FController
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
+
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @return \yii\web\Response
+     * @throws Exception
+     */
+    public function actionDeleteAll()
+    {
+        if (Yii::$app->db->createCommand()->truncateTable(SmsDistributionList::tableName())->execute()) {
+            Yii::$app->session->setFlash('success', 'Success truncateTable');
+        } else {
+            Yii::$app->session->setFlash('danger', 'Error truncateTable');
+        }
 
         return $this->redirect(['index']);
     }
