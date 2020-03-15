@@ -1625,7 +1625,7 @@ class CommunicationController extends ApiBaseController
 
                 $smsModel = SmsDistributionList::findOne(['sdl_com_id' => $sq_id]);
 
-                if ($sms) {
+                if ($smsModel) {
 
                     if($sq_status_id > 0) {
                         $smsModel->sdl_status_id = $sq_status_id;
