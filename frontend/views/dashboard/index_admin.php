@@ -162,11 +162,9 @@ $user = Yii::$app->user->identity;
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-users"></i></div>
                     <div class="count">
-                        (<?=\common\models\UserOnline::find()->count()?>)
-                        <?=\common\models\UserConnection::find()->select('uc_user_id')->groupBy(['uc_user_id'])->count()?> /
-                        <?=\common\models\UserConnection::find()->count()?>
+                        <?=\common\models\UserOnline::find()->count()?> / <?=\common\models\UserConnection::find()->count()?>
                     </div>
-                    <h3><?=Html::a('Online Employees', ['user-connection/index'])?></h3>
+                    <h3><?=Html::a('Online Employees', ['user-online/index'])?></h3>
                     <p>Current state Online Employees / Connections</p>
                 </div>
             </div>

@@ -339,6 +339,13 @@ class CommunicationController extends ApiBaseController
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
+
+                        $exist = CallUserGroup::find()->where([ 'cug_ug_id' => $userGroup->ug_id, 'cug_c_id' => $callModel->c_id])->exists();
+
+                        if ($exist) {
+                            continue;
+                        }
+
                         $cug = new CallUserGroup();
                         $cug->cug_ug_id = $userGroup->ug_id;
                         $cug->cug_c_id = $callModel->c_id;

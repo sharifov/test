@@ -85,12 +85,12 @@ class LeadController extends Controller
             echo $item . PHP_EOL;
         }
 
-        $message = '0 leads returned to call bugged';
+        //$message = '0 leads returned to call bugged';
         if (count($report) > 0) {
             $message = count($report) .' leads returned to call bugged. [' . implode(', ', array_keys($report)) . ']';
+            Yii::info($message, 'info\CronReturnLead');
         }
 
-        Yii::info($message, 'info\CronReturnLead');
     }
 
     /**
