@@ -2,6 +2,7 @@
 namespace webapi\modules\v1\controllers;
 
 use Yii;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\HttpException;
 
@@ -23,14 +24,31 @@ class SiteController extends Controller
         exit;
     }
 
-    public function actionTestLog()
+    public function actionTest()
     {
-        Yii::error('error '.print_r($_SERVER, true), 'WEBAPI test');
-        Yii::warning('warning' . print_r($_SERVER, true), 'WEBAPI test');
-        Yii::info('info' . print_r($_SERVER, true), 'WEBAPI test');
-        Yii::debug('trace' . print_r($_SERVER, true), 'WEBAPI test');
+        $headers = [];
+        foreach ($_SERVER as $name => $value)
+        {
+            if (strpos($name, 'HTTP_') === 0)
+            {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
 
-        throw new HttpException(422, 'Test API HttpException 422');
+        $out = [
+            'message'   => 'Server Name: '.Yii::$app->request->serverName,
+            'code'      => 0,
+            'date'      => date('Y-m-d'),
+            'time'      => date('H:i:s'),
+            'ip'        => Yii::$app->request->getUserIP(),
+            'get'       => Yii::$app->request->get(),
+            'post'      => Yii::$app->request->post(),
+            'files'     => $_FILES,
+            'headers'   => $headers
+        ];
+
+        Yii::info(VarDumper::dumpAsString($out), 'info\API:AppController:Test');
+        VarDumper::dump($out);
     }
 
 }
