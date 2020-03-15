@@ -2,7 +2,6 @@
 
 namespace sales\model\sms\entity\smsDistributionList;
 
-use common\components\CommunicationService;
 use common\models\Client;
 use common\models\ClientPhone;
 use common\models\Employee;
@@ -118,11 +117,11 @@ class SmsDistributionList extends ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'sdl_created_user_id',
-                'updatedByAttribute' => 'sdl_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'sdl_created_user_id',
+//                'updatedByAttribute' => 'sdl_updated_user_id',
+//            ],
         ];
     }
 

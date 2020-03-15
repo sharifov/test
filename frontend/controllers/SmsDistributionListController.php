@@ -2,9 +2,6 @@
 
 namespace frontend\controllers;
 
-use borales\extensions\phoneInput\PhoneInputValidator;
-use common\models\Client;
-use common\models\ClientPhone;
 use sales\model\sms\entity\smsDistributionList\forms\SmsDistributionListAddMultipleForm;
 use Yii;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
@@ -13,7 +10,6 @@ use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -75,6 +71,7 @@ class SmsDistributionListController extends FController
     public function actionCreate()
     {
         $model = new SmsDistributionList();
+        $model->sdl_created_user_id = Yii::$app->user->id;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->sdl_id]);
@@ -123,6 +120,7 @@ class SmsDistributionListController extends FController
                     $smsModel->sdl_start_dt = $model->sdl_start_dt;
                     $smsModel->sdl_text = $model->sdl_text;
                     $smsModel->sdl_project_id = $model->sdl_project_id;
+                    $smsModel->sdl_created_user_id = Yii::$app->user->id;
 
                     if($smsModel->save()) {
                         $successItems[] = Html::encode($smsModel->sdl_phone_to);
@@ -209,6 +207,7 @@ class SmsDistributionListController extends FController
                 $smsModel = SmsDistributionList::findOne((int) $id);
                 if ($smsModel) {
                     $smsModel->sdl_status_id = $statusId;
+                    $smsModel->sdl_updated_user_id = Yii::$app->user->id;
 
                     if($smsModel->save()) {
                         $successItems[] = Html::encode($smsModel->sdl_phone_to);
