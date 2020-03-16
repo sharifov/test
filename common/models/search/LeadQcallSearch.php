@@ -2,7 +2,7 @@
 
 namespace common\models\search;
 
-use common\models\UserConnection;
+use common\models\UserOnline;
 use common\models\UserProfile;
 use sales\helpers\query\QueryHelper;
 use sales\services\lead\qcall\DayTimeHours;
@@ -307,7 +307,7 @@ class LeadQcallSearch extends LeadQcall
 
             $countUsers = (int)UserProfile::find()->select('count(*)')->andWhere([
                 'up_user_id' =>
-                    UserConnection::find()->select(['uc_user_id'])->indexBy('uc_user_id')->distinct()
+                    UserOnline::find()->select(['uo_user_id'])->indexBy('uo_user_id')
             ])->andWhere('up_skill >= ' . $skillSettings)->count();
             $query->addSelect(['redial_business_flight_leads_skill_online_user' =>
                 new Expression('if (' . $countUsers . ' < 1, 1, 0) ')

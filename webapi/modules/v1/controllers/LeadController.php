@@ -238,7 +238,21 @@ class LeadController extends ApiBaseController
      *           "phones": [
      *               "+373-69-98-698",
      *               "+373-69-98-698"
-     *           ]
+     *           ],
+     *          "client": {
+     *              "uuid": "35009a79-1a05-49d7-b876-2b884d0f825b"
+     *              "client_id": 331968,
+     *              "first_name": "Johann",
+     *              "middle_name": "Sebastian",
+     *              "last_name": "Bach",
+     *              "phones": [
+     *                 "+13152572166"
+     *              ],
+     *              "emails": [
+     *                 "example@test.com",
+     *                 "bah@gmail.com"
+     *              ]
+     *           }
      *       },
      *       "request": {
      *           "client_id": null,
@@ -676,7 +690,29 @@ class LeadController extends ApiBaseController
             $response['flights'] = $modelLead->flights;
             $response['emails'] = $modelLead->emails;
             $response['phones'] = $modelLead->phones;
-
+            $response['client'] = [
+                'uuid' => $lead->client->uuid,
+                'client_id' => $lead->client_id,
+                'first_name' => $lead->client->first_name,
+                'middle_name' => $lead->client->middle_name,
+                'last_name' => $lead->client->last_name,
+                'phones' => $lead->client->getClientPhonesByType(
+                    [
+                        null,
+                        ClientPhone::PHONE_VALID,
+                        ClientPhone::PHONE_NOT_SET,
+                        ClientPhone::PHONE_FAVORITE,
+                    ]
+                ),
+                'emails' => $lead->client->getClientEmailsByType(
+                    [
+                        null,
+                        ClientEmail::EMAIL_NOT_SET,
+                        ClientEmail::EMAIL_FAVORITE,
+                        ClientEmail::EMAIL_VALID,
+                    ]
+                ),
+            ];
         } catch (\Throwable $e) {
 
 //            $transaction->rollBack();
@@ -710,7 +746,6 @@ class LeadController extends ApiBaseController
 
         $responseData['data']['response'] = $response;
         // $responseData['data']['request']                = $modelLead;
-
 
         $responseData = $apiLog->endApiLog($responseData);
 

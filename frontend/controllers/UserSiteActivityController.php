@@ -16,9 +16,9 @@ use yii\filters\VerbFilter;
 class UserSiteActivityController extends FController
 {
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         $behaviors = [
             'verbs' => [

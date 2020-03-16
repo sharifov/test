@@ -49,6 +49,7 @@ class CallController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                    //'cancel' => ['POST'],
                 ],
             ],
         ];
@@ -831,6 +832,24 @@ class CallController extends FController
         }
 
         return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    /**
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionCancel()
+    {
+        $id = (int) Yii::$app->request->get('id');
+        $model = $this->findModel($id);
+
+        if ($result = $model->cancelCall()) {
+            Yii::$app->session->setFlash('success', '<strong>Cancel Call</strong> Success');
+        } else {
+            Yii::$app->session->setFlash('error', '<strong>Cancel Call</strong> Error');
+        }
+
+        return $this->redirect(['index']);
     }
 
     /**

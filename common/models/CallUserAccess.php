@@ -2,7 +2,10 @@
 
 namespace common\models;
 
+use common\components\jobs\AgentCallQueueJob;
 use common\models\query\CallUserAccessQuery;
+use sales\dispatchers\NativeEventDispatcher;
+use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -166,11 +169,45 @@ class CallUserAccess extends \yii\db\ActiveRecord
             //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
             Notifications::sendSocket('getNewNotification', ['user_id' => $this->cua_user_id]);
 
+            NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::INSERT, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
+            NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::INSERT);
         }
 
         if($insert || isset($changedAttributes['cua_status_id'])) {
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
             Notifications::sendSocket('updateIncomingCall', ['user_id' => $this->cua_user_id], $this->attributes);
         }
+
+        if (!$insert && isset($changedAttributes['cua_status_id'])) {
+            NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
+            NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE);
+        }
+        
     }
+
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::DELETE, [CallUserAccessEvents::class, 'resetHasCallAccess'], $this);
+        return true;
+    }
+
+
+    /**
+     *
+     */
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::DELETE);
+    }
+    
+    
 }

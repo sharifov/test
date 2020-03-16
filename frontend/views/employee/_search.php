@@ -40,7 +40,7 @@ use yii\widgets\ActiveForm;
                     'data-pjax' => 1
                 ],
             ]); ?>
-
+            <div class="row">
             <div class="col-md-1">
                 <?= $form->field($model, 'id') ?>
             </div>
@@ -65,24 +65,24 @@ use yii\widgets\ActiveForm;
                 <?php echo $form->field($model, 'user_group_id')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '---']) ?>
             </div>
 
-    <?php // echo $form->field($model, 'status') ?>
+            <?php // echo $form->field($model, 'status') ?>
 
-    <?php // echo $form->field($model, 'last_activity') ?>
+            <?php // echo $form->field($model, 'last_activity') ?>
 
-    <?php // echo $form->field($model, 'acl_rules_activated') ?>
+            <?php // echo $form->field($model, 'acl_rules_activated') ?>
 
-    <?php // echo $form->field($model, 'created_at') ?>
+            <?php // echo $form->field($model, 'created_at') ?>
 
-    <?php // echo $form->field($model, 'updated_at') ?>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="form-group text-center">
-                <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary']) ?>
-                <?= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-default']) ?>
+            <?php // echo $form->field($model, 'updated_at') ?>
             </div>
-        </div>
-    </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group text-center">
+                        <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary']) ?>
+                        <?= Html::resetButton('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['class' => 'btn btn-default']) ?>
+                    </div>
+                </div>
+            </div>
 
             <?php ActiveForm::end(); ?>
         </div>

@@ -3,6 +3,7 @@
 use common\models\Call;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
+use sales\yii\grid\call\CallDurationColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -60,7 +61,7 @@ if($user->isAdmin()) {
                 'options' => ['style' => 'width: 80px']
             ],
             ['class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {delete}',
+                'template' => '{view} {update} {delete} {cancel}',
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
@@ -72,6 +73,24 @@ if($user->isAdmin()) {
                     'delete' => static function ($model, $key, $index) use ($user) {
                         return $user->isAdmin();
                     },
+
+                    'cancel' => static function (Call $model, $key, $index) use ($user) {
+                        return $user->isAdmin() && $model->isIn() && ($model->isStatusIvr() || $model->isStatusQueue() || $model->isStatusRinging() || $model->isStatusInProgress());
+                    },
+                ],
+                'buttons' => [
+                    'cancel' => static function ($url, Call $model) {
+                        return Html::a('<i class="fa fa-close text-danger"></i>', ['call/cancel', 'id' => $model->c_id], [
+                            //'class' => 'btn btn-primary btn-xs take-processing-btn',
+                            'title' => 'Cancel Call',
+                            'data-pjax' => 0,
+                            'data' => [
+                                'confirm' => 'Are you sure you want Cancel this Call?',
+                                'id' => $model->c_id
+                                //'method' => 'post',
+                            ],
+                        ]);
+                    }
                 ],
             ],
             [
@@ -137,17 +156,7 @@ if($user->isAdmin()) {
                 'format' => 'raw'
             ],*/
 
-            [
-                'attribute' => 'c_recording_duration',
-                'label' => 'Recording',
-                'value' => static function (\common\models\Call $model) {
-                    return  $model->c_recording_url ? Html::button(gmdate('i:s', $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]) : '-';
-                },
-                'format' => 'raw',
-                'contentOptions' => ['class' => 'text-right'],
-                'options' => ['style' => 'width: 80px']
-
-            ],
+            ['class' => CallDurationColumn::class],
 
             //'c_recording_duration',
 

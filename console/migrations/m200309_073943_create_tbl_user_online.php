@@ -45,7 +45,7 @@ class m200309_073943_create_tbl_user_online extends Migration
             'CASCADE'
         );
 
-        \Yii::$app->db->getSchema()->refreshTableSchema('{{%visitor_log}}');
+        \Yii::$app->db->getSchema()->refreshTableSchema('{{%user_online}}');
 
         if (\Yii::$app->cache) {
             \Yii::$app->cache->flush();

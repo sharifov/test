@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Client;
+use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\CreditCard;
 use common\models\Currency;
@@ -85,6 +86,8 @@ use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
+use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
+use sales\model\lead\useCases\lead\api\create\LeadCreateValue;
 use sales\model\lead\useCases\lead\api\create\SegmentForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportService;
@@ -115,6 +118,8 @@ use sales\services\TransactionManager;
 use sales\temp\LeadFlowUpdate;
 use Twilio\TwiML\VoiceResponse;
 use webapi\models\ApiLead;
+use webapi\src\response\messages\DataMessage;
+use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\base\Event;
 use yii\caching\DbDependency;
@@ -189,30 +194,13 @@ class TestController extends FController
 
     public function actionTest()
     {
-
-        $request['LeadImportForm']['projectId'] = 6;
-        $request['LeadImportForm']['marketingInfoId'] = 'JIVOCH';
-        $request['LeadImportForm']['rating'] = 2;
-        $request['LeadImportForm']['notes'] = '1231';
-        $request['ClientForm']['firstName'] = 'First Name test';
-        $request['ClientForm']['email'] = 'test@test.t3e2331st2t11';
-
-
-        $form1 = new LeadImportForm();
-        $form1->load($request);
-
-        $forms = [
-            1 => $form1,
-            2 => clone $form1,
-            5 => clone $form1,
-            3 => clone $form1,
-        ];
-
-        $service = Yii::createObject(LeadImportService::class);
-        $log = $service->import($forms, 295);
-        VarDumper::dump($log);
+        $lead = Lead::findOne(371172);
+        $repo = Yii::createObject(LeadRepository::class);
+        $lead->followUp();
+        $lead->processing(295);
+        $lead->followUp(294);
+        $repo->save($lead);
         die;
-
         return $this->render('blank');
     }
 
@@ -1134,6 +1122,49 @@ class TestController extends FController
         echo VarDumper::dump($leads, 10, true);
         echo '</pre>';
 
+    }
+
+    public function actionZ()
+    {
+        $lead = Lead::findOne(370872);
+
+        $response = new SuccessResponse(
+            new DataMessage(
+                new LeadCreateMessage(
+                    new LeadCreateValue([
+                        'id' => $lead->id,
+                        'uid' => $lead->uid,
+                        'gid' => $lead->gid,
+                        'client_id' => $lead->client_id,
+                        'client' => [
+                            'uuid' => $lead->client->uuid,
+                            'client_id' => $lead->client_id,
+                            'first_name' => $lead->client->first_name,
+                            'middle_name' => $lead->client->middle_name,
+                            'last_name' => $lead->client->last_name,
+                            'phones' => $lead->client->getClientPhonesByType(
+                                [
+                                    null,
+                                    ClientPhone::PHONE_VALID,
+                                    ClientPhone::PHONE_NOT_SET,
+                                    ClientPhone::PHONE_FAVORITE,
+                                ]
+                            ),
+                            'emails' => $lead->client->getClientEmailsByType(
+                                [
+                                    null,
+                                    ClientEmail::EMAIL_NOT_SET,
+                                    ClientEmail::EMAIL_FAVORITE,
+                                    ClientEmail::EMAIL_VALID,
+                                ]
+                            ),
+                        ],
+                    ])
+                )
+            )
+        );
+
+        \yii\helpers\VarDumper::dump($response, 10, true); exit();  /* FOR DEBUG:: must by remove */
     }
 
 }

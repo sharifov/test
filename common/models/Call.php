@@ -4,10 +4,12 @@ namespace common\models;
 
 use common\models\query\CallQuery;
 use sales\access\EmployeeDepartmentAccess;
+use sales\dispatchers\NativeEventDispatcher;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
 use sales\events\call\CallCreatedEvent;
+use sales\model\call\entity\call\events\CallEvents;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -43,7 +45,7 @@ use Locale;
  * @property int $c_recording_duration
  * @property int $c_sequence_number
  * @property int $c_lead_id
- * @property int $c_created_user_id$c_created_user_id
+ * @property int $c_created_user_id
  * @property string $c_created_dt
  * @property int $c_com_call_id
  * @property string $c_updated_dt
@@ -185,23 +187,32 @@ class Call extends \yii\db\ActiveRecord
 
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'call';
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
         return [
             [['c_call_sid'], 'required'],
             [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id', 'c_status_id', 'c_parent_id', 'c_sequence_number'], 'integer'],
+
+            [['c_status_id','c_parent_id', 'c_dep_id', 'c_case_id', 'c_client_id', 'c_lead_id', 'c_call_type_id', 'c_call_duration', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_sequence_number', 'c_recording_duration', 'c_call_duration'],
+                'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
+            [['c_is_new', 'c_is_deleted'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
+            [['c_is_deleted'], 'default', 'value' => false],
+            [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id'], 'default', 'value' => null],
+
             [['c_is_new', 'c_is_deleted'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
             [['c_call_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],
@@ -222,7 +233,7 @@ class Call extends \yii\db\ActiveRecord
 
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function attributeLabels()
     {
@@ -232,7 +243,7 @@ class Call extends \yii\db\ActiveRecord
             'c_call_type_id' => 'Call Type ID',
             'c_from' => 'From',
             'c_to' => 'To',
-            'c_call_status' => 'Call Status',
+            'c_call_status' => 'Twilio Status',
             'c_forwarded_from' => 'Forwarded From',
             'c_caller_name' => 'Caller Name',
             'c_parent_call_sid' => 'Parent Call SID',
@@ -260,6 +271,9 @@ class Call extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         return [
@@ -955,6 +969,14 @@ class Call extends \yii\db\ActiveRecord
             $this->cCase->updateLastAction();
         }
 
+
+
+        if ($isChangedStatus) {
+            NativeEventDispatcher::recordEvent(CallEvents::class, CallEvents::CHANGE_STATUS, [CallEvents::class, 'updateUserStatus'], ['call' => $this, 'changedAttributes' => $changedAttributes]);
+            NativeEventDispatcher::trigger(CallEvents::class, CallEvents::CHANGE_STATUS);
+        }
+
+
         if ($this->c_created_user_id && ($insert || $isChangedStatus))  {
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 
@@ -1407,7 +1429,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isIn(): bool
     {
-        return $this->c_call_type_id === self::CALL_TYPE_IN;
+        return (int) $this->c_call_type_id === self::CALL_TYPE_IN;
     }
 
     /**
@@ -1415,7 +1437,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isOut(): bool
     {
-        return $this->c_call_type_id === self::CALL_TYPE_OUT;
+        return (int) $this->c_call_type_id === self::CALL_TYPE_OUT;
     }
 
 
@@ -1515,6 +1537,14 @@ class Call extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return int
+     */
+    public function setStatusCanceled(): int
+    {
+        return $this->c_status_id = self::STATUS_CANCELED;
+    }
+
+    /**
      * @return bool
      */
     public function isStatusBusy(): bool
@@ -1535,7 +1565,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isStatusCompleted(): bool
     {
-        return $this->c_status_id === self::STATUS_COMPLETED;
+        return (int) $this->c_status_id === self::STATUS_COMPLETED;
     }
 
     /**
@@ -1619,5 +1649,54 @@ class Call extends \yii\db\ActiveRecord
     public function isTransfer(): bool
     {
         return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function cancelCall(): bool
+    {
+        $communication = \Yii::$app->communication;
+        $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/cancel-call?id=' . $this->c_id;
+        $data = [];
+        $data['c_id'] = $this->c_id;
+
+        if ($this->c_call_sid) {
+            try {
+                $result = $communication->redirectCall($this->c_call_sid, $data, $callbackUrl);
+                if (!empty($result['error'])) {
+                    Yii::error($result['error'], 'Call:cancelCall:redirectCall');
+                }
+                return true;
+            } catch (\Throwable $throwable) {
+                Yii::error($throwable->getMessage(), 'Call:cancelCall:Throwable');
+            }
+        } else {
+            Yii::error(' Not found Call Sid, CallId: ' . $this->c_id , 'Call:cancelCall:Throwable');
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function checkCancelCall(): bool
+    {
+        $timeLimit = (int)(Yii::$app->params['settings']['call_incoming_time_limit'] ?? 0);
+
+        $callMaxTime = strtotime($this->c_updated_dt) + ($timeLimit * 60);
+
+        //Yii::info('CallId: ' . $this->c_id . ', (cd: '.$this->c_created_dt.', ud: '.$this->c_updated_dt.'), time limit: ' . $timeLimit . ' min, status: ' . $this->getStatusName() . ', Last Time (sec): ' . ($callMaxTime - time()) ,'info\checkCancelCall');
+
+        if ($timeLimit && ($this->isStatusIvr() || $this->isStatusQueue())) {
+            if ($callMaxTime < time()) {
+                $result = $this->cancelCall();
+                Yii::info('CallId: ' . $this->c_id . ', '. VarDumper::dumpAsString($result) ,'info\checkCancelCall:cancelCall');
+                return true;
+            }
+        }
+        return false;
     }
 }
