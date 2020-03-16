@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ae78d17e99dfd3f30dfbea703ad5e213",
+    "content-hash": "d9ab56aa6457bf3436b5f4b83a375815",
     "packages": [
         {
             "name": "2amigos/qrcode-library",
@@ -656,7 +656,7 @@
             "version": "3.3.11",
             "source": {
                 "type": "git",
-                "url": "https://github.com/RobinHerbots/Inputmask.git",
+                "url": "git@github.com:RobinHerbots/Inputmask.git",
                 "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
             },
             "dist": {
@@ -677,12 +677,12 @@
             "version": "v16.0.11",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jackocnr/intl-tel-input.git",
+                "url": "git@github.com:Bluefieldscom/intl-tel-input.git",
                 "reference": "c84a31fbb40800a96d8a710c0056d81054503d0c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackocnr/intl-tel-input/zipball/c84a31fbb40800a96d8a710c0056d81054503d0c",
+                "url": "https://api.github.com/repos/Bluefieldscom/intl-tel-input/zipball/c84a31fbb40800a96d8a710c0056d81054503d0c",
                 "reference": "c84a31fbb40800a96d8a710c0056d81054503d0c"
             },
             "type": "bower-asset"
@@ -692,7 +692,7 @@
             "version": "3.4.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jquery/jquery-dist.git",
+                "url": "git@github.com:jquery/jquery-dist.git",
                 "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d"
             },
             "dist": {

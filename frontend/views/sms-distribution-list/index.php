@@ -134,6 +134,19 @@ $gridId = 'sms-grid-id';
                 'label' => 'Created User',
                 'attribute' => 'sdlCreatedUser.username',
             ],
+
+            [
+                'class' => \sales\yii\grid\UserColumn::class,
+                'attribute' => 'sdl_updated_user_id',
+                'relation' => 'sdlUpdatedUser'
+            ],
+
+            [
+                'class' => \sales\yii\grid\UserSelect2Column::class,
+                'attribute' => 'sdl_updated_user_id',
+                'relation' => 'sdlUpdatedUser'
+            ],
+
 //            [
 //                'label' => 'Updated User',
 //                'attribute' => 'sdlUpdatedUser.username',
