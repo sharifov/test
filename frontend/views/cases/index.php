@@ -147,6 +147,9 @@ $gridId = 'cases-grid-id';
                 'filter' => false
             ],
             [
+                'attribute' => 'cs_order_uid',
+            ],
+            [
                 'attribute' => 'cs_created_dt',
                 'value' => static function (Cases $model) {
                     return $model->cs_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';

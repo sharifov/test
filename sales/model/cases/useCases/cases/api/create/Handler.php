@@ -54,6 +54,7 @@ class Handler
                 $client->id,
                 $command->project_id,
                 $category->cc_dep_id,
+                $command->order_uid,
                 $command->subject,
                 $command->description
             );

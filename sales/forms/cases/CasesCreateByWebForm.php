@@ -12,6 +12,8 @@ use sales\entities\cases\CasesCategory;
 use sales\entities\cases\CasesSourceType;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
+use function GuzzleHttp\Psr7\str;
+
 //use yii\helpers\Html;
 
 /**
@@ -25,6 +27,7 @@ use yii\helpers\ArrayHelper;
  * @property string $clientEmail
  * @property int $depId
  * @property int $sourceTypeId
+ * @property string|null $orderUid
  *
  * @property Employee $user
  */
@@ -39,6 +42,7 @@ class CasesCreateByWebForm extends Model
     public $clientEmail;
     public $depId;
     public $sourceTypeId;
+    public $orderUid;
 
     private $user;
     private $cache_projects;
@@ -96,6 +100,10 @@ class CasesCreateByWebForm extends Model
             ['sourceTypeId', 'integer'],
             ['sourceTypeId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['sourceTypeId', 'in', 'range' => array_keys($this->getSourceTypeList())],
+
+            ['orderUid', 'default', 'value' => null],
+            ['orderUid', 'string', 'min'  => '7', 'max' => 7],
+            ['orderUid', 'match', 'pattern' => '/^[a-zA-Z0-9]+$/'],
         ];
     }
 
@@ -196,6 +204,7 @@ class CasesCreateByWebForm extends Model
             'clientPhone' => 'Phone',
             'clientEmail' => 'Email',
             'sourceTypeId' => 'Source type',
+            'orderUid' => 'Booking ID',
         ];
     }
 

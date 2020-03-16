@@ -48,6 +48,7 @@ use Yii;
  * @property int|null $cs_source_type_id
  * @property string|null $cs_deadline_dt
  * @property bool $cs_need_action
+ * @property string|null $cs_order_uid
  *
  * @property CasesCategory $category
  * @property Department $department
@@ -169,6 +170,7 @@ class Cases extends ActiveRecord implements Objectable
      * @param string|null $description
      * @param int|null $creatorId
      * @param int|null $sourceTypeId
+     * @param string|null $orderUid
      * @return Cases
      */
     public static function createByWeb(
@@ -179,7 +181,8 @@ class Cases extends ActiveRecord implements Objectable
         ?string $subject,
         ?string $description,
         ?int $creatorId,
-        ?int $sourceTypeId
+        ?int $sourceTypeId,
+        ?string $orderUid
     ): self
     {
         $case = self::create();
@@ -190,6 +193,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_subject = $subject;
         $case->cs_description = $description;
         $case->cs_source_type_id = $sourceTypeId;
+        $case->cs_order_uid = $orderUid;
         $case->pending($creatorId, 'Created by web');
         return $case;
     }
@@ -198,6 +202,7 @@ class Cases extends ActiveRecord implements Objectable
         int $clientId,
         int $projectId,
         int $departmentId,
+        ?string $orderUid,
         ?string $subject,
         ?string $description
     ): self
@@ -206,6 +211,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = $departmentId;
+        $case->cs_order_uid = $orderUid;
         $case->cs_subject = $subject;
         $case->cs_description = $description;
         $case->cs_source_type_id = CasesSourceType::API;
@@ -405,28 +411,25 @@ class Cases extends ActiveRecord implements Objectable
         $this->cs_status = $status;
     }
 
+    public function updateInfo(
+        string $category,
+        ?string $subject,
+        ?string $description,
+        ?string $orderUid
+    ): void
+    {
+        $this->updateCategory($category);
+        $this->cs_subject = $subject;
+        $this->cs_description = $description;
+        $this->cs_order_uid = $orderUid;
+    }
+
     /**
      * @param string $category
      */
     public function updateCategory(string $category): void
     {
         $this->cs_category = $category;
-    }
-
-    /**
-     * @param string|null $subject
-     */
-    public function updateSubject(?string $subject): void
-    {
-        $this->cs_subject = $subject;
-    }
-
-    /**
-     * @param string|null $description
-     */
-    public function updateDescription(?string $description): void
-    {
-        $this->cs_description = $description;
     }
 
     public function setDeadline(string $deadline)
@@ -569,6 +572,7 @@ class Cases extends ActiveRecord implements Objectable
             'cs_source_type_id' => 'Source type',
             'cs_deadline_dt' => 'Deadline',
             'cs_need_action' => 'Need Action',
+            'cs_order_uid' => 'Booking ID ',
         ];
     }
 
