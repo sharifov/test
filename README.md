@@ -325,6 +325,7 @@ CRONs
 10   1-3  *  *  *     php /var/www/sale/yii service/update-currency
 */1  *  *  *  *     php /var/www/sale/yii db/compress-email 
 45 * * * *         php /var/www/sale/yii qa-task/lead-processing-quality
+*/4 * * * *     php /var/www/sale/yii service/send-sms
 ```
 Note: php /var/www/sale/yii db/compress-email - Временный скрипт. Удалить запись после дополнительного тикета по :
 ALTER TABLE "email" DROP "e_email_body_text";  
