@@ -194,6 +194,25 @@ class Cases extends ActiveRecord implements Objectable
         return $case;
     }
 
+    public static function createByApi(
+        int $clientId,
+        int $projectId,
+        int $departmentId,
+        ?string $subject,
+        ?string $description
+    ): self
+    {
+        $case = self::create();
+        $case->cs_client_id = $clientId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = $departmentId;
+        $case->cs_subject = $subject;
+        $case->cs_description = $description;
+        $case->cs_source_type_id = CasesSourceType::API;
+        $case->pending(null, 'Created by api');
+        return $case;
+    }
+
     /**
      * @return string
      */
