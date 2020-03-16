@@ -44,6 +44,83 @@
     "groupTitle": "App"
   },
   {
+    "type": "get",
+    "url": "/v2/case-category/list",
+    "title": "Get Case Category",
+    "version": "0.2.0",
+    "name": "CaseCategoryList",
+    "group": "CaseCategory",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "If-Modified-Since",
+            "description": "<p>Format <code> day-name, day month year hour:minute:second GMT</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Header-Example (If-Modified-Since):",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\",\n    \"If-Modified-Since\": \"Mon, 23 Dec 2019 08:17:54 GMT\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"case-category\": [\n             {\n                 \"cc_key\": \"add_infant\",\n                 \"cc_name\": \"Add infant\",\n                 \"cc_dep_id\": 3,\n                 \"cc_system\": 0,\n                 \"cc_updated_dt\": null\n             },\n             {\n                 \"cc_key\": \"add_insurance\",\n                 \"cc_name\": \"Insurance Add/Remove\",\n                 \"cc_dep_id\": 3,\n                 \"cc_system\": 0,\n                 \"cc_updated_dt\": \"2019-09-26 15:14:01\"\n             }\n         ]\n     },\n     \"technical\": {\n         \"action\": \"v2/case-category/list\",\n         \"response_id\": 11926631,\n         \"request_dt\": \"2020-03-16 11:26:34\",\n         \"response_dt\": \"2020-03-16 11:26:34\",\n         \"execution_time\": 0.076,\n         \"memory_usage\": 506728\n     },\n     \"request\": []\n }",
+          "type": "json"
+        },
+        {
+          "title": "Not Modified-Response (304):",
+          "content": "\nHTTP/1.1 304 Not Modified\nCache-Control: public, max-age=3600\nLast-Modified: Mon, 23 Dec 2019 08:17:53 GMT",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (405):",
+          "content": "\nHTTP/1.1 405 Method Not Allowed\n  {\n      \"name\": \"Method Not Allowed\",\n      \"message\": \"Method Not Allowed. This URL can only handle the following request methods: GET.\",\n      \"code\": 0,\n      \"status\": 405,\n      \"type\": \"yii\\\\web\\\\MethodNotAllowedHttpException\"\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseCategoryController.php",
+    "groupTitle": "CaseCategory"
+  },
+  {
     "type": "post",
     "url": "/v1/communication/email",
     "title": "Communication Email",

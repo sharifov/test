@@ -42,7 +42,7 @@ class CaseCategoryController extends BaseController
     }
 
     /**
-     * @api {get} /v2/case-category/list Get User Groups
+     * @api {get} /v2/case-category/list Get Case Category
      * @apiVersion 0.2.0
      * @apiName CaseCategoryList
      * @apiGroup CaseCategory
