@@ -42,7 +42,7 @@ class CaseCategoryController extends BaseController
     }
 
     /**
-     * @api {get} /v2/case-category/list Get Case Category
+     * @api {get} /v2/case-category/list Get CaseCategory
      * @apiVersion 0.2.0
      * @apiName CaseCategoryList
      * @apiGroup CaseCategory
@@ -76,14 +76,12 @@ class CaseCategoryController extends BaseController
      *                  "cc_key": "add_infant",
      *                  "cc_name": "Add infant",
      *                  "cc_dep_id": 3,
-     *                  "cc_system": 0,
      *                  "cc_updated_dt": null
      *              },
      *              {
      *                  "cc_key": "add_insurance",
      *                  "cc_name": "Insurance Add/Remove",
      *                  "cc_dep_id": 3,
-     *                  "cc_system": 0,
      *                  "cc_updated_dt": "2019-09-26 15:14:01"
      *              }
      *          ]
@@ -122,7 +120,7 @@ class CaseCategoryController extends BaseController
     public function actionList(): SuccessResponse
     {
         $casesCategory = CasesCategory::find()
-            ->select(['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_updated_dt'])
+            ->select(['cc_key', 'cc_name', 'cc_dep_id', 'cc_updated_dt'])
             ->orderBy(['cc_key' => SORT_ASC])
             ->all();
 
