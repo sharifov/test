@@ -721,13 +721,10 @@ class CommunicationController extends ApiBaseController
      */
     private function voiceDefault(array $post = []): array
     {
-
-        $response = [];
-        $trace = [];
-
-        //Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceDefault');
-
-        //$agentId = null;
+        $response = [
+            'trace' => [],
+            'error' => '',
+        ];
 
         if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
 
@@ -735,7 +732,6 @@ class CommunicationController extends ApiBaseController
             $call = $this->findOrCreateCallByData($callData);
 
             if($call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusCanceled() || $call->isStatusFailed()) {
-
                 if ($call->c_lead_id) {
                     if (($lead = $call->cLead) && !$lead->isCallCancel()) {
                         try {
@@ -744,31 +740,22 @@ class CommunicationController extends ApiBaseController
                             $leadRepository->save($lead);
                         } catch (\Throwable $e) {
                             Yii::error('LeadId: ' . $lead->id . ' Message: ' . $e->getMessage() ,'API:Communication:voiceDefault:Lead:save');
+                            $response['error'] = 'Error in method voiceDefault. LeadId: ' . $lead->id . ' Message: ' . $e->getMessage();
                         }
                     }
                 }
 
             }
-
-
-//            if ($call->c_source_type_id === Call::SOURCE_CONFERENCE_CALL && isset($callData['CallStatus'])) {
-//                $call->c_call_status = $callData['CallStatus'];
-//                $call->setStatusByTwilioStatus($call->c_call_status);
-//            }
-
-            /*else {
+            /*if ($call->c_source_type_id === Call::SOURCE_CONFERENCE_CALL && isset($callData['CallStatus'])) {
+                $call->c_call_status = $callData['CallStatus'];
+                $call->setStatusByTwilioStatus($call->c_call_status);
+            } else {
                 $call->c_call_status = $call_status;
                 $call->setStatusByTwilioStatus($call_status);
             }*/
-            //if(!$childCall) {
-
-
-            //}
-
             /*if (!$call->c_price && isset($post['call']['c_tw_price']) && $post['call']['c_tw_price']) {
                 $call->c_price = abs((float) $post['call']['c_tw_price']);
             }*/
-
             /*if(isset($post['call']['c_call_duration']) && $post['call']['c_call_duration']) {
                 $call->c_call_duration = (int) $post['call']['c_call_duration'];
             } else {
@@ -777,14 +764,15 @@ class CommunicationController extends ApiBaseController
 
             if (!$call->save()) {
                 Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
+                $response['error'] = 'Error in method voiceDefault. ' . $call->getErrorSummary(false)[0];
             }
 
         } else {
             Yii::error('Not found POST[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceDefault:callData:notFound');
-            $response['error'] = 'Not found POST[callData][CallSid]';
+            $response['error'] = 'Error in method voiceDefault. Not found POST[callData][CallSid]';
         }
 
-        $response['trace'] = $trace;
+        $response['status'] = $response['error'] !== '' ? 'Fail' : 'Success';
 
         return $response;
     }
