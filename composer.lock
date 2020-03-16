@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ae94b1996b5191486619007d87fc6ab",
+    "content-hash": "d9ab56aa6457bf3436b5f4b83a375815",
     "packages": [
         {
             "name": "2amigos/qrcode-library",
@@ -3456,56 +3456,6 @@
                 "zxing"
             ],
             "time": "2018-04-26T11:41:33+00:00"
-        },
-        {
-            "name": "kivork/yii2-rbac-export-import",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "git@github.com:kivork/yii2-rbac-export-import.git",
-                "reference": "5fbe3a8783c8d0eb6591a9407759bdaee4fe8f4d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kivork/yii2-rbac-export-import/zipball/5fbe3a8783c8d0eb6591a9407759bdaee4fe8f4d",
-                "reference": "5fbe3a8783c8d0eb6591a9407759bdaee4fe8f4d",
-                "shasum": ""
-            },
-            "require": {
-                "kartik-v/yii2-widget-select2": "@dev",
-                "php": ">=7.3.0",
-                "yiisoft/yii2": "~2.0.13",
-                "yiisoft/yii2-jui": "~2.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "kivork\\rbacExportImport\\": ""
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Alex Grub",
-                    "email": "alex.grub@techork.com"
-                }
-            ],
-            "description": "RBAC export/import management module for Yii2",
-            "keywords": [
-                "rbac management",
-                "rbac module",
-                "yii2",
-                "yii2 rbac",
-                "yii2 rbac export import module",
-                "yii2-rbac-export-import"
-            ],
-            "support": {
-                "source": "https://github.com/kivork/yii2-rbac-export-import/tree/master",
-                "issues": "https://github.com/kivork/yii2-rbac-export-import/issues"
-            },
-            "time": "2020-03-16T16:14:49+00:00"
         },
         {
             "name": "lajax/yii2-translate-manager",
@@ -8819,8 +8769,7 @@
         "kartik-v/yii2-widget-activeform": 20,
         "kartik-v/yii2-widget-datepicker": 20,
         "xtetis/yii2-bootstrap4-glyphicons": 20,
-        "kartik-v/yii2-bootstrap4-dropdown": 20,
-        "kivork/yii2-rbac-export-import": 20
+        "kartik-v/yii2-bootstrap4-dropdown": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
