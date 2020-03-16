@@ -47,7 +47,7 @@ $gridId = 'sms-grid-id';
             <?=Html::dropDownList('SmsMultipleForm[status_id]','', SmsDistributionList::getStatusList(), ['id' => 'status_id', 'class'=>'form-control', 'prompt' => '-'])?>
         </div>
         <div class="col-md-2">
-            <?=Html::button('Update selected items', ['class' => 'btn btn-primary btn-submit-multiple-update']);?>
+            <?=Html::button('<i class="fa fa-save"></i> Update selected items', ['class' => 'btn btn-warning btn-submit-multiple-update']);?>
         </div>
 
     <?= GridView::widget([
@@ -96,19 +96,17 @@ $gridId = 'sms-grid-id';
             ],
             'sdl_phone_from',
             'sdl_phone_to',
-            //'sdl_client_id',
+            'sdl_client_id:client',
             [
-                'attribute' => 'sdl_client_id',
+                'label' => 'Client Name',
                 'value' => static function (SmsDistributionList $model) {
-                    return $model->sdlClient ? Html::a($model->sdlClient->full_name . ' ('.$model->sdl_client_id.')', ['/client/view', 'id' => $model->sdl_client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+                    return $model->sdl_client_id && $model->sdlClient ? $model->sdlClient->full_name : '-';
                 },
-                'format' => 'raw',
-
             ],
             [
                 'attribute' => 'sdl_text',
                 'value' => static function (SmsDistributionList $model) {
-                    return '<span class="fa fa-info" title="' . Html::encode($model->sdl_text) . '"> Message </span>';
+                    return '<pre><small>' . nl2br(Html::encode($model->sdl_text)) . '</small></pre>';
                 },
                 'format' => 'raw',
 

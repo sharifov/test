@@ -1,12 +1,13 @@
 <?php
 
+use sales\yii\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\sms\entity\smsDistributionList\SmsDistributionList */
 
-$this->title = $model->sdl_id;
+$this->title = 'SMS Distribution ID: ' . $model->sdl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Sms Distribution Lists', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -16,8 +17,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->sdl_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->sdl_id], [
+        <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->sdl_id], ['class' => 'btn btn-warning']) ?>
+        <?= Html::a('<i class="fa fa-trash"></i> Delete', ['delete', 'id' => $model->sdl_id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -26,6 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
+    <div class="col-md-6">
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -34,21 +36,32 @@ $this->params['breadcrumbs'][] = $this->title;
             'sdl_project_id',
             'sdl_phone_from',
             'sdl_phone_to',
-            'sdl_client_id',
+            'sdl_client_id:client',
             'sdl_text:ntext',
-            'sdl_start_dt',
-            'sdl_end_dt',
-            'sdl_status_id',
-            'sdl_priority',
-            'sdl_error_message:ntext',
-            'sdl_message_sid',
-            'sdl_num_segments',
-            'sdl_price',
-            'sdl_created_user_id',
-            'sdl_updated_user_id',
-            'sdl_created_dt',
-            'sdl_updated_dt',
+            'sdl_start_dt:byUserDateTime',
+            'sdl_end_dt:byUserDateTime',
         ],
     ]) ?>
+    </div>
+    <div class="col-md-6">
+        <?= DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'sdl_status_id',
+                'sdl_priority',
+                'sdl_error_message:ntext',
+                'sdl_message_sid',
+                'sdl_num_segments',
+                'sdl_price',
+
+                'sdl_created_user_id:userName',
+                'sdl_created_dt:byUserDateTime',
+
+                'sdl_updated_user_id:userName',
+                'sdl_updated_dt:byUserDateTime',
+
+            ],
+        ]) ?>
+    </div>
 
 </div>
