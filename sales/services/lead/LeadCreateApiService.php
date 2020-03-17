@@ -180,6 +180,7 @@ class LeadCreateApiService
     private function addVisitorLogs(ApiLead $modelLead, Lead $lead): void
     {
         $lastLogId = null;
+        $lastVisitDt = null;
         foreach ($modelLead->visitor_log as $visitorLog) {
             $log = new VisitorLog([
                 'vl_project_id' => $lead->project_id,
@@ -193,7 +194,15 @@ class LeadCreateApiService
                         . ' log: ' . VarDumper::dumpAsString($visitorLog)
                         . ' Errors: ' . VarDumper::dumpAsString($log->getErrors()), 'API:LeadCreateApiService:createByApi:visitor:log:save');
                 } else {
-                    $lastLogId = $log->vl_id;
+                    if ($lastVisitDt) {
+                        if (strtotime($log->vl_visit_dt) >= strtotime($lastVisitDt)) {
+                            $lastLogId = $log->vl_id;
+                            $lastVisitDt = $log->vl_visit_dt;
+                        }
+                    } else {
+                        $lastLogId = $log->vl_id;
+                        $lastVisitDt = $log->vl_visit_dt;
+                    }
                 }
             } else {
                 Yii::error('Cant load visitor_log. LeadId: ' . $lead->id . ' log: ' . VarDumper::dumpAsString($visitorLog), 'API:LeadCreateApiService:createByApi:visitor:log:load');
