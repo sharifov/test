@@ -2,7 +2,9 @@
 
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use sales\yii\grid\CombinedDataColumn;
 use sales\yii\grid\DateTimeColumn;
+use sales\yii\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
@@ -122,35 +124,67 @@ $gridId = 'sms-grid-id';
             //'sdl_message_sid',
             //'sdl_created_user_id',
             //'sdl_updated_user_id',
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'sdl_created_dt',
-            ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'sdl_updated_dt',
-            ],
-            [
-                'label' => 'Created User',
-                'attribute' => 'sdlCreatedUser.username',
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'sdl_created_dt',
+//            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'sdl_updated_dt',
+//            ],
+
 
             [
-                'class' => \sales\yii\grid\UserColumn::class,
-                'attribute' => 'sdl_updated_user_id',
-                'relation' => 'sdlUpdatedUser'
+                'class' => CombinedDataColumn::class,
+                'labelTemplate' => '{0}  /  {1}',
+                'valueTemplate' => '{0}  <br>  {1}',
+//                'labels' => [
+//                    'Created At',
+//                    '[ Updated At ]',
+//                ],
+                'attributes' => [
+                    'sdl_created_dt:byUserDateTime',
+                    'sdl_updated_dt:byUserDateTime',
+                ],
+//                'values' => [
+//                    null,
+//                    function ($model, $_key, $_index, $_column) {
+//                        return '[ ' . Yii::$app->formatter->asDatetime($model->updated_at) . ' ]';
+//                    },
+//                ],
+//                'sortLinksOptions' => [
+//                    ['class' => 'text-nowrap'],
+//                    null,
+//                ],
             ],
 
-            [
-                'class' => \sales\yii\grid\UserSelect2Column::class,
-                'attribute' => 'sdl_updated_user_id',
-                'relation' => 'sdlUpdatedUser'
-            ],
+
 
 //            [
-//                'label' => 'Updated User',
-//                'attribute' => 'sdlUpdatedUser.username',
+//                'label' => 'Created User',
+//                'attribute' => 'sdlCreatedUser.username',
 //            ],
+
+//            [
+//                'class' => \sales\yii\grid\UserColumn::class,
+//                'attribute' => 'sdl_updated_user_id',
+//                'relation' => 'sdlUpdatedUser'
+//            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'sdl_created_user_id',
+                'relation' => 'sdlCreatedUser',
+                'placeholder' => 'Select User'
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'sdl_updated_user_id',
+                'relation' => 'sdlUpdatedUser',
+                'placeholder' => 'Select User'
+            ],
+
             'sdl_com_id',
 
             ['class' => 'yii\grid\ActionColumn',
