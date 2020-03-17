@@ -718,7 +718,7 @@ class EmployeeController extends Controller
 
         $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
 
-        if (!is_null($q)) {
+        if ($q !== null) {
             $query = Employee::find();
             $data = $query->select(['id', 'text' => 'username'])
                 ->where(['like', 'username', $q])

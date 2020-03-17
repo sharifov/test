@@ -4,18 +4,24 @@ namespace sales\yii\grid;
 
 use common\models\Employee;
 use Yii;
-use sales\access\ListsAccess;
+use yii\base\Model;
 use yii\grid\DataColumn;
 use kartik\select2\Select2;
+use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\JsExpression;
 use yii\web\View;
 
 /**
  * Class UserSelect2Column
  *
- * @property $userId
- * @property $url
- * @property $relation
+ * @property int $userId
+ * @property string $url
+ * @property string $relation
+ * @property int $minimumInputLength
+ * @property int $delay
+ * @property string $placeholder
+ * @property array $data
  *
  * Ex.
     [
@@ -32,6 +38,10 @@ class UserSelect2Column extends DataColumn
     public $url;
     public $relation;
     public $minimumInputLength = 1;
+    public $delay = 300;
+    public $placeholder = '';
+    public $data = [];
+
 
     public function init(): void
     {
@@ -42,17 +52,30 @@ class UserSelect2Column extends DataColumn
         }
 
         if (empty($this->url)) {
-            $this->url = \yii\helpers\Url::to(['employee/list-ajax']);
+            $this->url = Url::to(['employee/list-ajax']);
+        }
+        $model = $this->grid->filterModel;
+
+        //VarDumper::dump($attr, 10 , true); exit;
+
+        if ($this->filter !== false && $model instanceof Model && $this->attribute !== null && $model->isAttributeActive($this->attribute)) {
+            $userId = (int) $model->getAttribute($this->attribute);
+            if ($userId) {
+                $user = Employee::find()->select(['id', 'username'])->where(['id' => $userId])->cache(3600)->one();
+                if ($user) {
+                    $this->data[$user->id] = $user->username . ' ('.$user->id.')';
+                }
+            }
         }
 
-//        if ($this->filter === null) {
-//            if (!$this->userId) {
-//                $this->userId = Yii::$app->user->id ?? null;
-//            }
-//            $this->filter = (new ListsAccess($this->userId))->getEmployees();
-//        }
     }
 
+    /**
+     * @param mixed $model
+     * @param mixed $key
+     * @param int $index
+     * @return string|null
+     */
     public function getDataCellValue($model, $key, $index)
     {
         if ($model->{$this->attribute} && ($user = $model->{$this->relation})) {
@@ -63,6 +86,10 @@ class UserSelect2Column extends DataColumn
         return null;
     }
 
+    /**
+     * @return array|false|string|null
+     * @throws \Exception
+     */
     protected function renderFilterCellContent()
     {
 
@@ -70,12 +97,12 @@ class UserSelect2Column extends DataColumn
             return $this->filter;
         }
 
-
         $model = $this->grid->filterModel;
-        $widgetOptions1 = [
+
+        $widgetOptions = [
             'model' => $model,
             'attribute' => $this->attribute,
-            //'data' => [$model->{$this->attribute} => 162],
+            'data' => $this->data, //[$model->{$this->attribute} => 'asdasd'],
             'theme' => Select2::THEME_KRAJEE,
             'pluginOptions' => [
                 'allowClear' => true,
@@ -83,7 +110,8 @@ class UserSelect2Column extends DataColumn
                 'ajax' => [
                     'url' => $this->url,
                     'dataType' => 'json',
-                    'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                    'data' => new JsExpression('function(params) { return {q:params.term}; }'),
+                    'delay' => $this->delay
                 ],
                 'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                 'templateResult' => new JsExpression('formatText'),
@@ -91,8 +119,11 @@ class UserSelect2Column extends DataColumn
                 //'templateSelection' => new JsExpression('function (city) { return city.text; }'),
                 'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
             ],
-            'options' => ['placeholder' => ''],
+            'options' => ['placeholder' => $this->placeholder, 'class' => 'form-control'],
         ];
+
+
+
 
 $js = <<<JS
 function formatText( data ) {
@@ -107,6 +138,6 @@ function formatText( data ) {
 JS;
         Yii::$app->view->registerJs($js, View::POS_HEAD, 'employee/list-ajax');
 
-        return Select2::widget($widgetOptions1);
+        return Select2::widget($widgetOptions);
     }
 }
