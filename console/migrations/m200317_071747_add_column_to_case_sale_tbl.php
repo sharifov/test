@@ -16,11 +16,11 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
     {
         $this->addColumn($this->table, 'css_charged', $this->decimal(8,2));
         $this->addColumn($this->table, 'css_profit', $this->decimal(8,2));
-        $this->addColumn($this->table, 'css_out_departure_airport', $this->string(10));
-        $this->addColumn($this->table, 'css_out_arrival_airport', $this->string(10));
+        $this->addColumn($this->table, 'css_out_departure_airport', $this->string(3));
+        $this->addColumn($this->table, 'css_out_arrival_airport', $this->string(3));
         $this->addColumn($this->table, 'css_out_date', $this->dateTime());
-        $this->addColumn($this->table, 'css_in_departure_airport', $this->string(10));
-        $this->addColumn($this->table, 'css_in_arrival_airport', $this->string(10));
+        $this->addColumn($this->table, 'css_in_departure_airport', $this->string(3));
+        $this->addColumn($this->table, 'css_in_arrival_airport', $this->string(3));
         $this->addColumn($this->table, 'css_in_date', $this->dateTime());
         $this->addColumn($this->table, 'css_charge_type', $this->string(100));
 

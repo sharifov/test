@@ -1124,5 +1124,23 @@ class TestController extends FController
 
     }
 
+    public function actionZ()
+    {
+        $a = [
+            'saleId' => 263202,
+            /*'itinerary' => [
+                0 => [
+                    'segments' => [
+                        0 => [
+                            'segmentId' => 1398032,
+                            'airline' => 'BA'
+                        ]
+                    ]
+                ]
+            ]*/
+        ];
+
+        \yii\helpers\VarDumper::dump((isset($a['itinerary'][0]['segments'])), 10, true); exit();  /* FOR DEBUG:: must by remove */
+    }
 
 }
