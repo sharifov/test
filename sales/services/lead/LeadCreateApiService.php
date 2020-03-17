@@ -211,7 +211,7 @@ class LeadCreateApiService
 
         if ($lastLogId) {
             try {
-                $lead->l_visitor_log_id = $lastLogId;
+                $lead->setVisitorLog($lastLogId);
                 $this->leadRepository->save($lead);
             } catch (\Throwable $e) {
                 Yii::error('Cant update lead. ' . $e, 'API:LeadCreateApiService:createByApi:lead:update:visitor_log');
