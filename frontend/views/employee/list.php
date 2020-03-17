@@ -107,6 +107,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
             ],
 
+
+
+
             [
                 'class' => ActionColumn::class,
                 'template' => '{update} {projects} {groups} {switch}',
@@ -185,7 +188,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'attribute' => 'online',
                 'filter' => [1 => 'Online', 2 => 'Offline'],
                 'value' => static function (\common\models\Employee $model) {
-                    return $model->isOnline() ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>';
+                    return $model->userOnline ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>';
                 },
                 'format' => 'raw'
             ],
@@ -434,53 +437,53 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'visible' => $isAdmin
             ],*/
 
-            [
-                'label' => 'Bonuses',
-                'value' => static function (\common\models\Employee $model) {
-                    if($params = $model->userParams) {
-                        $str = '<table class="table table-bordered" style="font-size:10px">';
-                        $str .= '<tr><td>Bonus Active</td><td>'. ($params->up_bonus_active ? 'Yes':'No') . '</td></tr>';
-                        $str .= '<tr><td>Commission</td><td>'. ($params->up_commission_percent ? $params->up_commission_percent . '%':'-') . '</td></tr>';
-                        $str .= '<tr><td>Base Amount</td><td>' . ($params->up_base_amount ? number_format($params->up_base_amount, 2) : '-').'</td></tr>';
-                        $str .= '</table>';
-                    } else {
-                        $str = '-';
-                    }
-                    return $str;
-                },
-                'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left'],
-                'options' => [
-                    'style' => 'width:240px;'
-                ],
-                'visible' => $isAdmin
-            ],
+//            [
+//                'label' => 'Bonuses',
+//                'value' => static function (\common\models\Employee $model) {
+//                    if($params = $model->userParams) {
+//                        $str = '<table class="table table-bordered" style="font-size:10px">';
+//                        $str .= '<tr><td>Bonus Active</td><td>'. ($params->up_bonus_active ? 'Yes':'No') . '</td></tr>';
+//                        $str .= '<tr><td>Commission</td><td>'. ($params->up_commission_percent ? $params->up_commission_percent . '%':'-') . '</td></tr>';
+//                        $str .= '<tr><td>Base Amount</td><td>' . ($params->up_base_amount ? number_format($params->up_base_amount, 2) : '-').'</td></tr>';
+//                        $str .= '</table>';
+//                    } else {
+//                        $str = '-';
+//                    }
+//                    return $str;
+//                },
+//                'format' => 'raw',
+//                'contentOptions' => ['class' => 'text-left'],
+//                'options' => [
+//                    'style' => 'width:240px;'
+//                ],
+//                'visible' => $isAdmin
+//            ],
 
-            [
-                'label' => 'Other params',
-                //'attribute' => 'created_at',
-                'value' => static function(\common\models\Employee $model) {
-                    if($params = $model->userParams) {
-                        $str = '<table class="table table-bordered" style="font-size:10px">';
-                        $str .= '<tr><td>'.$params->getAttributeLabel('up_inbox_show_limit_leads').'</td><td>'.$params->up_inbox_show_limit_leads.'</td></tr>';
-                        $str .= '<tr><td>'.$params->getAttributeLabel('up_default_take_limit_leads').'</td><td>'.$params->up_default_take_limit_leads.'</td></tr>';
-                        $str .= '<tr><td>'.$params->getAttributeLabel('up_min_percent_for_take_leads').'</td><td>'.$params->up_min_percent_for_take_leads.'%</td></tr>';
-                        $str .= '<tr><td>'.$params->getAttributeLabel('up_frequency_minutes').'</td><td>'.$params->up_frequency_minutes.'</td></tr>';
-                        $str .= '<tr><td>'.$params->getAttributeLabel('up_call_expert_limit').'</td><td>'.$params->up_call_expert_limit.'</td></tr>';
-
-                        $str .= '</table>';
-                    } else {
-                        $str = '-';
-                    }
-                    return $str;
-                },
-                'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left'],
-                'options' => [
-                    'style' => 'width:240px;'
-                ],
-                'visible' => $isAdmin
-            ],
+//            [
+//                'label' => 'Other params',
+//                //'attribute' => 'created_at',
+//                'value' => static function(\common\models\Employee $model) {
+//                    if($params = $model->userParams) {
+//                        $str = '<table class="table table-bordered" style="font-size:10px">';
+//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_inbox_show_limit_leads').'</td><td>'.$params->up_inbox_show_limit_leads.'</td></tr>';
+//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_default_take_limit_leads').'</td><td>'.$params->up_default_take_limit_leads.'</td></tr>';
+//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_min_percent_for_take_leads').'</td><td>'.$params->up_min_percent_for_take_leads.'%</td></tr>';
+//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_frequency_minutes').'</td><td>'.$params->up_frequency_minutes.'</td></tr>';
+//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_call_expert_limit').'</td><td>'.$params->up_call_expert_limit.'</td></tr>';
+//
+//                        $str .= '</table>';
+//                    } else {
+//                        $str = '-';
+//                    }
+//                    return $str;
+//                },
+//                'format' => 'raw',
+//                'contentOptions' => ['class' => 'text-left'],
+//                'options' => [
+//                    'style' => 'width:240px;'
+//                ],
+//                'visible' => $isAdmin
+//            ],
 
             /*[
                 'attribute' => 'created_at',
