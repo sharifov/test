@@ -70,6 +70,8 @@ class CasesQSearch extends Cases
             ['trash_date', 'string'],
 
             ['cs_need_action', 'boolean'],
+
+            ['cs_order_uid', 'string'],
         ];
     }
 
@@ -109,6 +111,8 @@ class CasesQSearch extends Cases
             'cs_dep_id' => $this->cs_dep_id,
         ]);
 
+
+
         if ($this->cs_lead_id) {
             $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
         }
@@ -118,6 +122,7 @@ class CasesQSearch extends Cases
         }
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         return $dataProvider;
     }
@@ -176,6 +181,7 @@ class CasesQSearch extends Cases
         }
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         return $dataProvider;
     }
@@ -231,6 +237,7 @@ class CasesQSearch extends Cases
         }
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         return $dataProvider;
     }
@@ -268,6 +275,7 @@ class CasesQSearch extends Cases
                     'cs_user_id',
                     'time_left',
                     'cs_need_action',
+                    'cs_order_uid',
                 ],
             ],
             'pagination' => [
@@ -303,6 +311,7 @@ class CasesQSearch extends Cases
         }
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         return $dataProvider;
     }
@@ -374,6 +383,7 @@ class CasesQSearch extends Cases
 //        }
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         $dataProvider->sort->attributes['solved_date'] = [
         	'asc' => ['solved_date' => SORT_ASC],
@@ -448,6 +458,7 @@ class CasesQSearch extends Cases
 		}
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
 		$dataProvider->sort->attributes['trash_date'] = [
 			'asc' => ['trash_date' => SORT_ASC],
@@ -490,7 +501,8 @@ class CasesQSearch extends Cases
                     'time_left',
                     'cs_need_action',
                     'cs_status',
-                    'cs_last_action_dt'
+                    'cs_last_action_dt',
+                    'cs_order_uid',
                 ],
             ],
             'pagination' => [
@@ -527,6 +539,7 @@ class CasesQSearch extends Cases
         }
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         return $dataProvider;
     }
@@ -550,6 +563,7 @@ class CasesQSearch extends Cases
             'cs_deadline_dt' => 'Deadline',
             'lastSolvedDate' => 'Solved',
             'cs_need_action' => 'Need Action',
+            'cs_order_uid' => 'Booking ID',
         ];
     }
 }

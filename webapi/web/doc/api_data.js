@@ -122,6 +122,132 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v2/cases/create",
+    "title": "Create Case",
+    "version": "0.2.0",
+    "name": "CreateCase",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "contact_email",
+            "description": "<p>Client Email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "contact_phone",
+            "description": "<p>Client Phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "category",
+            "description": "<p>Case category</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "5..7",
+            "optional": false,
+            "field": "order_uid",
+            "description": "<p>Order uid (symbols and numbers only)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "subject",
+            "description": "<p>Subject</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": true,
+            "field": "order_info",
+            "description": "<p>Order Info (key =&gt; value, key: string, value: string)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_email\": \"test@test.com\",\n      \"contact_phone\": \"+37369636690\",\n      \"category\": \"add_insurance\",\n      \"order_uid\": \"12WS09W\",\n      \"subject\": \"Subject text\",\n      \"description\": \"Description text\",\n      \"order_info\": {\n          \"Departure Date\":\"2020-03-07\",\n          \"Departure Airport\":\"LON\"\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n          \"case_gid\": \"708ddf3e44ec477f8807d8b5f748bb6c\",\n          \"client_uuid\": \"5d0cd25a-7f22-4b18-9547-e19a3e7d0c9a\"\n      },\n      \"technical\": {\n          \"action\": \"v2/cases/create\",\n          \"response_id\": 11934216,\n          \"request_dt\": \"2020-03-17 08:31:30\",\n          \"response_dt\": \"2020-03-17 08:31:30\",\n          \"execution_time\": 0.156,\n          \"memory_usage\": 979248\n      },\n      \"request\": {\n          \"contact_email\": \"test@test.com\",\n          \"contact_phone\": \"+37369636690\",\n          \"category\": \"add_insurance\",\n          \"order_uid\": \"12WS09W\",\n          \"subject\": \"Subject text\",\n          \"description\": \"Description text\",\n          \"order_info\": {\n              \"Departure Date\": \"2020-03-07\",\n              \"Departure Airport\": \"LON\"\n          }\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n  {\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_email\": [\n              \"Contact Email cannot be blank.\"\n          ],\n          \"contact_phone\": [\n              \"The format of Contact Phone is invalid.\"\n          ],\n          \"order_uid\": [\n              \"Order Uid should contain at most 7 characters.\"\n          ]\n      },\n      \"code\": \"21301\",\n      \"technical\": {\n         ...\n      },\n      \"request\": {\n         ...\n      }\n  }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Saving error\",\n      \"errors\": [\n          \"Saving error\"\n      ],\n      \"code\": 21101,\n      \"technical\": {\n          ...\n      },\n      \"request\": {\n          ...\n      }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found Case data on POST request\"\n      ],\n      \"code\": 21300,\n      \"technical\": {\n          ...\n      },\n      \"request\": {\n          ...\n      }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CasesController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "post",
     "url": "/v1/communication/email",
     "title": "Communication Email",
     "version": "0.1.0",

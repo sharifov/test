@@ -73,6 +73,8 @@ class CasesSearch extends Cases
             ['paxLastName', 'string', 'min' => 2],
 
             ['cs_need_action', 'boolean'],
+
+            ['cs_order_uid', 'string'],
         ];
     }
 
@@ -134,6 +136,7 @@ class CasesSearch extends Cases
         ]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         if ($user->isExSuper() || $user->isSupSuper()) {
             if ($this->cs_user_id) {
@@ -178,7 +181,10 @@ class CasesSearch extends Cases
         }
 
         if ($this->cssBookId) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
+            $query->andWhere(['OR',
+                ['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])],
+                ['cs_order_uid' => $this->cssBookId],
+            ]);
         }
 
         if ($this->salePNR) {
@@ -246,6 +252,7 @@ class CasesSearch extends Cases
         ]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         if ($this->cs_user_id) {
             $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
@@ -291,7 +298,10 @@ class CasesSearch extends Cases
         }
 
         if ($this->cssBookId) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
+            $query->andWhere(['OR',
+                ['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])],
+                ['cs_order_uid' => $this->cssBookId],
+            ]);
         }
 
         if ($this->salePNR) {

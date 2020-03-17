@@ -51,6 +51,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'sourceTypeId')->dropDownList($model->getSourceTypeList(), ['prompt' => 'Choose a source type']) ?>
 
+                <?= $form->field($model, 'orderUid')->textInput(['maxlength' => 7]) ?>
+
                 <?= $form->field($model, 'clientPhone')->widget(PhoneInput::class, [
                     'name' => 'phone',
                     'jsOptions' => [

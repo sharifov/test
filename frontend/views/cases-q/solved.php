@@ -75,6 +75,7 @@ $lists = new ListsAccess($user->id);
                     return $model->lead ? $model->lead->uid : '';
                 },
             ],
+            'cs_order_uid',
             [
                 'attribute' => 'cs_dep_id',
                 'value' => static function (CasesQSearch $model) {
