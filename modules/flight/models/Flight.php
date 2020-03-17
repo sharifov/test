@@ -82,6 +82,25 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         return $flight;
     }
 
+    public static function createByApi(
+        int $productId,
+        ?int $tripTypeId,
+        ?string $cabinClass,
+        int $adults,
+        int $children,
+        int $infants
+    ): self
+    {
+        $flight = new static();
+        $flight->fl_product_id = $productId;
+        $flight->fl_trip_type_id = $tripTypeId;
+        $flight->fl_cabin_class = $cabinClass;
+        $flight->fl_adults = $adults;
+        $flight->fl_children = $children;
+        $flight->fl_infants = $infants;
+        return $flight;
+    }
+
     /**
      * @return string
      */
