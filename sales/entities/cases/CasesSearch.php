@@ -24,12 +24,15 @@ use yii\helpers\VarDumper;
  * @property $airlineConfirmationNumber
  * @property $paxFirstName
  * @property $paxLastName
+ * @property $cssChargedFrom
+ * @property $cssChargedTo
+ * @property $cssProfitFrom
+ * @property $cssProfitTo
  *
  * @property array $cacheSaleData
  */
 class CasesSearch extends Cases
 {
-
     public $cssSaleId;
     public $cssBookId;
     public $salePNR;
@@ -39,6 +42,22 @@ class CasesSearch extends Cases
     public $airlineConfirmationNumber;
     public $paxFirstName;
     public $paxLastName;
+
+    public $cssChargedFrom;
+    public $cssChargedTo;
+    public $cssProfitFrom;
+    public $cssProfitTo;
+
+    /*
+    Selling price (диапазон) - фильтрует сss_charged
+    Profit (диапазон) - фильтрует  css_profit
+    Departure Airports (multichoice) - css_out_departure_airport или css_in_departure_airport попадают в список
+    Arrival Airports (multichoice) - css_out_arrival_airport или css_in_arrival_airport попадают в список
+    Departure Countries (multichoice) - страны связанные с кодами css_out_departure_airport или css_in_departure_airport попадают в список
+    Arrival Countries (multichoice) - страны связанные с кодами css_out_arrival_airport или css_in_arrival_airport попадают в список
+    Flight Date (диапазон) - css_out_date или css_in_date попадают в диапазон
+    Charge Type - фильтрует css_charge_type - уточнить Charge Type у команды BO
+    */
 
     private $cacheSaleData = [];
 
@@ -61,7 +80,6 @@ class CasesSearch extends Cases
             ['cs_project_id', 'integer'],
             ['cs_source_type_id', 'integer'],
             ['cs_last_action_dt', 'safe'],
-
             ['cssSaleId', 'integer'],
             ['cssBookId', 'string'],
             ['salePNR', 'string'],
@@ -71,8 +89,37 @@ class CasesSearch extends Cases
             ['airlineConfirmationNumber', 'string', 'min' => 4],
             ['paxFirstName', 'string', 'min' => 2],
             ['paxLastName', 'string', 'min' => 2],
-
             ['cs_need_action', 'boolean'],
+
+            [['cssChargedFrom', 'cssChargedTo', 'cssProfitFrom', 'cssProfitTo'], 'number'],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'cs_id' => 'ID',
+            'cs_gid' => 'GID',
+            'cs_project_id' => 'Project',
+            'cs_subject' => 'Subject',
+            'cs_category' => 'Category',
+            'cs_status' => 'Status',
+            'cs_user_id' => 'User',
+            'cs_lead_id' => 'Lead ID',
+            'cs_dep_id' => 'Department',
+            'cs_created_dt' => 'Created',
+            'cssSaleId' => 'Sale ID',
+            'cssBookId' => 'Booking ID',
+            'salePNR' => 'Quote PNR',
+            'cs_source_type_id' => 'Source type',
+            'cs_need_action' => 'Need action',
+            'cssChargedFrom' => 'Charged from',
+            'cssChargedTo' => 'Charged to',
+            'cssProfitFrom' => 'Profit from',
+            'cssProfitTo' => 'Profit to',
         ];
     }
 
@@ -140,11 +187,9 @@ class CasesSearch extends Cases
                 $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
             }
         }
-
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
-
         if ($this->ticketNumber) {
             if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -152,7 +197,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->paxFirstName) {
             if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -160,7 +204,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->paxLastName) {
             if ($saleId = $this->getSaleIdByPaxLastName($this->paxLastName)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -168,7 +211,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->airlineConfirmationNumber) {
             if ($saleId = $this->getSaleIdByAcn($this->airlineConfirmationNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -176,27 +218,33 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->cssBookId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
         }
-
         if ($this->salePNR) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_pnr' => $this->salePNR])]);
         }
-
         if ($this->clientPhone) {
             $query->andWhere(['cs_client_id' => ClientPhone::find()->select('client_id')->andWhere(['phone' => $this->clientPhone])]);
         }
-
         if ($this->clientEmail) {
             $query->andWhere(['cs_client_id' => ClientEmail::find()->select('client_id')->andWhere(['email' => $this->clientEmail])]);
         }
-
         if ($this->cs_created_dt) {
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
         }
-
+        if ($this->cssChargedFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_charged', $this->cssChargedFrom])]);
+        }
+        if ($this->cssChargedTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_charged', $this->cssChargedTo])]);
+        }
+        if ($this->cssProfitFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_profit', $this->cssProfitFrom])]);
+        }
+        if ($this->cssProfitTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
+        }
 
         return $dataProvider;
     }
@@ -289,56 +337,38 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->cssBookId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
         }
-
         if ($this->salePNR) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_pnr' => $this->salePNR])]);
         }
-
         if ($this->clientPhone) {
             $query->andWhere(['cs_client_id' => ClientPhone::find()->select('client_id')->andWhere(['phone' => $this->clientPhone])]);
         }
-
         if ($this->clientEmail) {
             $query->andWhere(['cs_client_id' => ClientEmail::find()->select('client_id')->andWhere(['email' => $this->clientEmail])]);
         }
-
         if ($this->cs_created_dt) {
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
         }
-
         if ($this->cs_last_action_dt) {
             $query->andFilterWhere(['DATE(cs_last_action_dt)' => date('Y-m-d', strtotime($this->cs_last_action_dt))]);
         }
+        if ($this->cssChargedFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_charged', $this->cssChargedFrom])]);
+        }
+        if ($this->cssChargedTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_charged', $this->cssChargedTo])]);
+        }
+        if ($this->cssProfitFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_profit', $this->cssProfitFrom])]);
+        }
+        if ($this->cssProfitTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
+        }
 
         return $dataProvider;
-    }
-
-    /**
-     * @return array
-     */
-    public function attributeLabels(): array
-    {
-        return [
-            'cs_id' => 'ID',
-            'cs_gid' => 'GID',
-            'cs_project_id' => 'Project',
-            'cs_subject' => 'Subject',
-            'cs_category' => 'Category',
-            'cs_status' => 'Status',
-            'cs_user_id' => 'User',
-            'cs_lead_id' => 'Lead ID',
-            'cs_dep_id' => 'Department',
-            'cs_created_dt' => 'Created',
-            'cssSaleId' => 'Sale ID',
-            'cssBookId' => 'Booking ID',
-            'salePNR' => 'Quote PNR',
-            'cs_source_type_id' => 'Source type',
-            'cs_need_action' => 'Need action',
-        ];
     }
 
     /**

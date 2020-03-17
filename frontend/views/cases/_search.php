@@ -96,6 +96,15 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'cs_need_action')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssChargedFrom') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssChargedTo') ?>
+        </div>
+
+    </div>
 
     <div class="form-group text-center">
         <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>

@@ -60,7 +60,7 @@ $gridId = 'cases-grid-id';
             if ($user->isAdmin()) {
                 $searchTpl = '_search';
             } else {
-                $searchTpl = '_search_agents';
+                $searchTpl = '_search_agents'; /* TODO::  */
             }
             ?>
             <?= $this->render($searchTpl, ['model' => $searchModel]); ?>
