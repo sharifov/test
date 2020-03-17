@@ -737,6 +737,15 @@ class CasesController extends FController
                 $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
                 $cs->css_sale_data_updated = $cs->css_sale_data;
 
+                if (array_key_exists('price', $saleData) && array_key_exists('amountCharged', $saleData['price'])) {
+                    $amountCharged = preg_replace('/[^0-9.]/', '', $saleData['price']['amountCharged']);
+                    $cs->css_charged = $amountCharged ?: null;
+                }
+                if (array_key_exists('price', $saleData) && array_key_exists('profit', $saleData['price'])) {
+                    $profit = preg_replace('/[^0-9.]/', '', $saleData['price']['profit']);
+                    $cs->css_profit = $profit ?: null;
+                }
+
                 if(!$cs->save()) {
                     Yii::error(VarDumper::dumpAsString($cs->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
                 } else {

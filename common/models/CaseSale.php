@@ -25,6 +25,9 @@ use yii\db\ActiveRecord;
  * @property string $css_updated_dt
  * @property int $css_need_sync_bo
  * @property array $css_sale_data_updated
+ * @property float|null $css_charged
+ * @property float|null $css_profit
+ * @property string|null css_out_departure_airport
  *
  * @property Employee $cssCreatedUser
  * @property Cases $cssCs
