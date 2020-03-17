@@ -25,7 +25,7 @@
 		"yiisoft/yii2-httpclient" : "^2.0.11",
 		"2amigos/yii2-date-picker-widget" : "~1.0",
 		"andrewblake1/yii2-credit-card" : "dev-master",
-		"kartik-v/yii2-widget-select2" : "@dev",
+		"kartik-v/yii2-widget-select2" : "dev-master",
 		"authorizenet/authorizenet" : "~1.9.9",
 		"2amigos/yii2-ckeditor-widget" : "^2.1",
 		"apimatic/jsonmapper" : "~1.3",
