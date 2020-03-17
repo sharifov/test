@@ -488,6 +488,8 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
     ];
 
+    unset($gridColumnsExport['reason']);
+
     Yii::$app->state = Yii::$app::STATE_END;
 
     $pdfHeader = [
@@ -542,8 +544,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             'label' => 'Export Fields'
         ],
     ]);
-
-    unset($gridColumnsExport['reason']);
 
     ?>
 

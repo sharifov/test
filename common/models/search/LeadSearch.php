@@ -448,7 +448,7 @@ class LeadSearch extends Lead
     public function searchExport($params): ActiveDataProvider
     {
         $query = Lead::find()->with('project', 'source', 'employee', 'client');
-        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $query->select(['id', 'uid', 'l_type_create', 'status', 'client_id', 'called_expert', 'project_id', 'source_id', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'employee_id', 'created', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // add conditions that should always apply here
 
