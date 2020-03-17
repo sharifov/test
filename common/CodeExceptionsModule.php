@@ -15,4 +15,5 @@ class CodeExceptionsModule
     public const OFFER = 18;
     public const INVOICE = 19;
     public const QA_TASK = 20;
+    public const CASES = 21;
 }

@@ -181,7 +181,10 @@ class CasesSearch extends Cases
         }
 
         if ($this->cssBookId) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
+            $query->andWhere(['OR',
+                ['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])],
+                ['cs_order_uid' => $this->cssBookId],
+            ]);
         }
 
         if ($this->salePNR) {
@@ -295,7 +298,10 @@ class CasesSearch extends Cases
         }
 
         if ($this->cssBookId) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
+            $query->andWhere(['OR',
+                ['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])],
+                ['cs_order_uid' => $this->cssBookId],
+            ]);
         }
 
         if ($this->salePNR) {

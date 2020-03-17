@@ -56,7 +56,8 @@ class Handler
                 $category->cc_dep_id,
                 $command->order_uid,
                 $command->subject,
-                $command->description
+                $this->processDescription($command->order_info, $command->description),
+                $command->category
             );
 
             $this->casesRepository->save($case);
@@ -66,5 +67,15 @@ class Handler
         });
 
         return $result;
+    }
+
+    private function processDescription(array $orderInfo, ?string $description): ?string
+    {
+        $result = '';
+        foreach ($orderInfo as $key => $value) {
+            $result .= $key . ': ' . $value . PHP_EOL;
+        }
+        $result .= $description;
+        return $result ?: null;
     }
 }

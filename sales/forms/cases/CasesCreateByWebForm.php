@@ -102,7 +102,7 @@ class CasesCreateByWebForm extends Model
             ['sourceTypeId', 'in', 'range' => array_keys($this->getSourceTypeList())],
 
             ['orderUid', 'default', 'value' => null],
-            ['orderUid', 'string', 'min'  => '7', 'max' => 7],
+            ['orderUid', 'string', 'min'  => '5', 'max' => 7],
             ['orderUid', 'match', 'pattern' => '/^[a-zA-Z0-9]+$/'],
         ];
     }

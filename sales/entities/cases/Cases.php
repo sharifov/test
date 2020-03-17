@@ -204,7 +204,8 @@ class Cases extends ActiveRecord implements Objectable
         int $departmentId,
         ?string $orderUid,
         ?string $subject,
-        ?string $description
+        ?string $description,
+        string $category
     ): self
     {
         $case = self::create();
@@ -214,6 +215,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_order_uid = $orderUid;
         $case->cs_subject = $subject;
         $case->cs_description = $description;
+        $case->cs_category = $category;
         $case->cs_source_type_id = CasesSourceType::API;
         $case->pending(null, 'Created by api');
         return $case;
