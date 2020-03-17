@@ -11,8 +11,8 @@ use yii\base\Model;
 /**
  * Class CreateForm
  *
- * @property string $email
- * @property string $phone
+ * @property string $contact_email
+ * @property string $contact_phone
  * @property string $category
  * @property string $order_uid
  * @property array $order_info
@@ -22,8 +22,8 @@ use yii\base\Model;
  */
 class CreateForm extends Model
 {
-    public $email;
-    public $phone;
+    public $contact_email;
+    public $contact_phone;
     public $category;
     public $order_uid;
     public $order_info;
@@ -45,22 +45,22 @@ class CreateForm extends Model
     public function rules(): array
     {
         return [
-            ['email', 'required'],
-            ['email', 'email'],
+            ['contact_email', 'required'],
+            ['contact_email', 'email'],
 
-            ['phone', 'required'],
-            ['phone', 'string', 'max' => 100],
-            ['phone', PhoneInputValidator::class],
-            ['phone', 'filter', 'filter' => static function ($value) {
+            ['contact_phone', 'required'],
+            ['contact_phone', 'string', 'max' => 100],
+            ['contact_phone', PhoneInputValidator::class],
+            ['contact_phone', 'filter', 'filter' => static function ($value) {
                 return str_replace(['-', ' '], '', trim($value));
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
-            ['phone', InternalPhoneValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['contact_phone', InternalPhoneValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['category', 'required'],
             ['category', 'exist', 'targetClass' => CasesCategory::class, 'targetAttribute' => ['category' => 'cc_key']],
 
             ['order_uid', 'required'],
-            ['order_uid', 'string', 'min' => '5', 'max' => 7],
+            ['order_uid', 'string', 'min' => 5, 'max' => 7],
             ['order_uid', 'match', 'pattern' => '/^[a-zA-Z0-9]+$/'],
 
             ['subject', 'default', 'value' => null],
@@ -85,8 +85,8 @@ class CreateForm extends Model
     public function getDto(): Command
     {
         return new Command(
-            $this->email,
-            $this->phone,
+            $this->contact_email,
+            $this->contact_phone,
             $this->category,
             $this->order_uid,
             $this->order_info,

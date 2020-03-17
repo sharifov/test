@@ -46,8 +46,8 @@ class Handler
         $result = $this->transactionManager->wrap(function () use ($command, $category) {
 
             $client = $this->clientManageService->getOrCreate(
-                [new PhoneCreateForm(['phone' => $command->phone])],
-                [new EmailCreateForm(['email' => $command->email])]
+                [new PhoneCreateForm(['phone' => $command->contact_phone])],
+                [new EmailCreateForm(['email' => $command->contact_email])]
             );
 
             $case = Cases::createByApi(

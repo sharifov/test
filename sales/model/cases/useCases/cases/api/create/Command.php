@@ -5,8 +5,8 @@ namespace sales\model\cases\useCases\cases\api\create;
 /**
  * Class Command
  *
- * @property string $email
- * @property string $phone
+ * @property string $contact_email
+ * @property string $contact_phone
  * @property string $category
  * @property string $order_uid
  * @property array $order_info
@@ -16,8 +16,8 @@ namespace sales\model\cases\useCases\cases\api\create;
  */
 class Command
 {
-    public $email;
-    public $phone;
+    public $contact_email;
+    public $contact_phone;
     public $category;
     public $order_uid;
     public $order_info;
@@ -26,8 +26,8 @@ class Command
     public $description;
 
     public function __construct(
-        string $email,
-        string $phone,
+        string $contact_email,
+        string $contact_phone,
         string $category,
         string $order_uid,
         array $order_info,
@@ -36,8 +36,8 @@ class Command
         ?string $description
     )
     {
-        $this->email = $email;
-        $this->phone = $phone;
+        $this->contact_email = $contact_email;
+        $this->contact_phone = $contact_phone;
         $this->category = $category;
         $this->order_uid = $order_uid;
         $this->order_info = $order_info;
