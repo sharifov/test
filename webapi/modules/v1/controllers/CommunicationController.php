@@ -20,6 +20,7 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\repositories\lead\LeadRepository;
 use sales\services\call\CallDeclinedException;
@@ -1520,6 +1521,7 @@ class CommunicationController extends ApiBaseController
     private function updateSmsStatus()
     {
 
+        $response = [];
         /*
          * [
                 'sq_id' => '257'
@@ -1619,54 +1621,56 @@ class CommunicationController extends ApiBaseController
                         Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:updateSmsStatus:Sms:save');
                     }
                 }
-
-                $response['sms'] = $sms->s_id;
+                $response['SmsId'] = $sms->s_id;
             } else {
 
                 $smsModel = SmsDistributionList::find()->where(['sdl_com_id' => $sq_id])->one();
 
                 if ($smsModel) {
 
-                    if($sq_status_id > 0) {
+                    if ($sq_status_id > 0) {
                         $smsModel->sdl_status_id = $sq_status_id;
 //                        if($sq_status_id === SmsDistributionList::STATUS_DONE) {
 //                            $sms->s_status_done_dt = date('Y-m-d H:i:s');
 //                        }
 
-                        if($smsParams) {
-                            if(!empty($smsParams['sq_tw_price'])) {
-                                $smsModel->sdl_price = abs((float) $smsParams['sq_tw_price']);
+                        if ($smsParams) {
+                            if (!empty($smsParams['sq_tw_price'])) {
+                                $smsModel->sdl_price = abs((float)$smsParams['sq_tw_price']);
                             }
 
-                            if(!empty($smsParams['sq_tw_num_segments'])) {
-                                $smsModel->sdl_num_segments = (int) $smsParams['sq_tw_num_segments'];
+                            if (!empty($smsParams['sq_tw_num_segments'])) {
+                                $smsModel->sdl_num_segments = (int)$smsParams['sq_tw_num_segments'];
                             }
 
-                            if(!empty($smsParams['sq_tw_status'])) {
-                                $smsModel->sdl_error_message = 'status: ' .  $smsParams['sq_tw_status'];
+                            if (!empty($smsParams['sq_tw_status'])) {
+                                $smsModel->sdl_error_message = 'status: ' . $smsParams['sq_tw_status'];
                             }
 
-                            if(!$smsModel->sdl_message_sid && !empty($smsParams['sq_tw_message_id'])) {
+                            if (!$smsModel->sdl_message_sid && !empty($smsParams['sq_tw_message_id'])) {
                                 $smsModel->sdl_message_sid = $smsParams['sq_tw_message_id'];
                             }
 
                         }
 
-                        if(!$smsModel->save()) {
-                            Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:updateSmsStatus:SmsDistributionList:save');
+                        if (!$smsModel->save()) {
+                            Yii::error(VarDumper::dumpAsString($sms->errors),
+                                'API:Communication:updateSmsStatus:SmsDistributionList:save');
                         }
                     }
 
+                    $response['SmsDistributionId'] = $smsModel->sdl_id;
+
                 } else {
-                    $response['error'] = 'Not found SMS ID (' . $sq_id . ')';
+                    $response['error'] = 'Not found SMS or SmsDistributionList ID (' . $sq_id . ')';
                     $response['error_code'] = 13;
                 }
             }
 
 
-        } catch (\Throwable $e) {
-            Yii::error($e->getTraceAsString(), 'API:Communication:updateSmsStatus:try');
-            $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+        } catch (\Throwable $throwable) {
+            Yii::error($throwable->getTraceAsString(), 'API:Communication:updateSmsStatus:try');
+            $message = $this->debug ? $throwable->getTraceAsString() : AppHelper::throwableFormatter($throwable);
             $response['error'] = $message;
             $response['error_code'] = 15;
         }
@@ -1767,16 +1771,49 @@ class CommunicationController extends ApiBaseController
                 $response['sms'] = $sms->attributes;
 
             } else {
-                $response['error'] = 'Not found SMS message_sid ('.$smsData['sid'].') and not found CommId ('.$comId.')';
-                $response['error_code'] = 13;
+
+                $smsModel = SmsDistributionList::find()->where(['sdl_com_id' => $comId])->one();
+
+                if ($smsModel) {
+                    if(isset($smsData['price'])) {
+                        $smsModel->sdl_price = abs((float) $smsData['price']);
+                    }
+
+                    if(!empty($smsData['num_segments'])) {
+                        $smsModel->sdl_num_segments = (int) $smsData['num_segments'];
+                    }
+
+                    if(!empty($smsData['sid']) && !$smsModel->sdl_message_sid) {
+                        $smsModel->sdl_message_sid = $smsData['sid'];
+                    }
+
+                    if(isset($smsData['status'])) {
+
+                        $smsModel->sdl_error_message = 'status: ' . $smsData['status'];
+
+                        if($smsData['status'] === 'delivered') {
+                            $smsModel->sdl_status_id = SmsDistributionList::STATUS_DONE;
+                        }
+                    }
+
+                    if(!$smsModel->save()) {
+                        Yii::error(VarDumper::dumpAsString($smsModel->errors), 'API:Communication:smsFinish:SmsDistributionList:save');
+                    }
+
+                    $response['smsDistribution'] = $smsModel->attributes;
+
+                } else {
+                    $response['error'] = 'Not found SMS or Sms Distribution message_sid (' . $smsData['sid'] . ') and not found CommId (' . $comId . ')';
+                    $response['error_code'] = 13;
+                }
             }
 
 
-        } catch (\Throwable $e) {
-            Yii::error($e->getTraceAsString(), 'API:Communication:smsFinish:try');
-            $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+        } catch (\Throwable $throwable) {
+            Yii::error($throwable->getTraceAsString(), 'API:Communication:smsFinish:Throwable');
+            $message = $this->debug ? $throwable->getTraceAsString() : AppHelper::throwableFormatter($throwable);
             $response['error'] = $message;
-            $response['error_code'] = $e->getCode();
+            $response['error_code'] = $throwable->getCode();
         }
 
         return $response;

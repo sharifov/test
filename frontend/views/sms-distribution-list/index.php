@@ -2,7 +2,9 @@
 
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use sales\yii\grid\CombinedDataColumn;
 use sales\yii\grid\DateTimeColumn;
+use sales\yii\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
@@ -47,7 +49,7 @@ $gridId = 'sms-grid-id';
             <?=Html::dropDownList('SmsMultipleForm[status_id]','', SmsDistributionList::getStatusList(), ['id' => 'status_id', 'class'=>'form-control', 'prompt' => '-'])?>
         </div>
         <div class="col-md-2">
-            <?=Html::button('Update selected items', ['class' => 'btn btn-primary btn-submit-multiple-update']);?>
+            <?=Html::button('<i class="fa fa-save"></i> Update selected items', ['class' => 'btn btn-warning btn-submit-multiple-update']);?>
         </div>
 
     <?= GridView::widget([
@@ -96,19 +98,17 @@ $gridId = 'sms-grid-id';
             ],
             'sdl_phone_from',
             'sdl_phone_to',
-            //'sdl_client_id',
+            'sdl_client_id:client',
             [
-                'attribute' => 'sdl_client_id',
+                'label' => 'Client Name',
                 'value' => static function (SmsDistributionList $model) {
-                    return $model->sdlClient ? Html::a($model->sdlClient->full_name . ' ('.$model->sdl_client_id.')', ['/client/view', 'id' => $model->sdl_client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+                    return $model->sdl_client_id && $model->sdlClient ? $model->sdlClient->full_name : '-';
                 },
-                'format' => 'raw',
-
             ],
             [
                 'attribute' => 'sdl_text',
                 'value' => static function (SmsDistributionList $model) {
-                    return '<span class="fa fa-info" title="' . Html::encode($model->sdl_text) . '"> Message </span>';
+                    return '<pre><small>' . nl2br(Html::encode($model->sdl_text)) . '</small></pre>';
                 },
                 'format' => 'raw',
 
@@ -124,22 +124,67 @@ $gridId = 'sms-grid-id';
             //'sdl_message_sid',
             //'sdl_created_user_id',
             //'sdl_updated_user_id',
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'sdl_created_dt',
-            ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'sdl_updated_dt',
-            ],
-            [
-                'label' => 'Created User',
-                'attribute' => 'sdlCreatedUser.username',
-            ],
 //            [
-//                'label' => 'Updated User',
-//                'attribute' => 'sdlUpdatedUser.username',
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'sdl_created_dt',
 //            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'sdl_updated_dt',
+//            ],
+
+
+            [
+                'class' => CombinedDataColumn::class,
+                'labelTemplate' => '{0}  /  {1}',
+                'valueTemplate' => '{0}  <br>  {1}',
+//                'labels' => [
+//                    'Created At',
+//                    '[ Updated At ]',
+//                ],
+                'attributes' => [
+                    'sdl_created_dt:byUserDateTime',
+                    'sdl_updated_dt:byUserDateTime',
+                ],
+//                'values' => [
+//                    null,
+//                    function ($model, $_key, $_index, $_column) {
+//                        return '[ ' . Yii::$app->formatter->asDatetime($model->updated_at) . ' ]';
+//                    },
+//                ],
+//                'sortLinksOptions' => [
+//                    ['class' => 'text-nowrap'],
+//                    null,
+//                ],
+            ],
+
+
+
+//            [
+//                'label' => 'Created User',
+//                'attribute' => 'sdlCreatedUser.username',
+//            ],
+
+//            [
+//                'class' => \sales\yii\grid\UserColumn::class,
+//                'attribute' => 'sdl_updated_user_id',
+//                'relation' => 'sdlUpdatedUser'
+//            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'sdl_created_user_id',
+                'relation' => 'sdlCreatedUser',
+                'placeholder' => 'Select User'
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'sdl_updated_user_id',
+                'relation' => 'sdlUpdatedUser',
+                'placeholder' => 'Select User'
+            ],
+
             'sdl_com_id',
 
             ['class' => 'yii\grid\ActionColumn',

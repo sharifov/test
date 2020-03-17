@@ -1,7 +1,7 @@
 <?php
 
-use modules\rbacImportExport\src\rbac\DbManager;
-use modules\rbacImportExport\RbacImportExportModule;
+use kivork\rbacExportImport\src\rbac\DbManager;
+use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
 use modules\flight\FlightModule;
 use modules\hotel\HotelModule;

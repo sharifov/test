@@ -72,6 +72,10 @@ use yii\widgets\DetailView;
                             'format' => 'raw'
                         ],
                         'cs_source_type_id:casesSourceType',
+                        [
+                            'attribute' => 'cs_order_uid',
+                            'label' => 'Booking ID',
+                        ],
                         //'cs_subject',
                         //'cs_description:ntext',
                     ],

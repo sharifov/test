@@ -32,4 +32,12 @@ class HttpBasicAuth extends \yii\filters\auth\HttpBasicAuth
 
         return $user;
     }
+
+    public function authenticate($user, $request, $response)
+    {
+        if (($identity = parent::authenticate($user, $request, $response)) && $identity instanceof ApiUser) {
+            $this->owner->auth = $identity;
+        }
+        return $identity;
+    }
 }

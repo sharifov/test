@@ -12,7 +12,7 @@ use yii\rest\Controller;
 /**
  * Class RequestBehavior
  *
- * @property Filterable $filter
+ * @property Filterable|null $filter
  */
 class RequestBehavior extends BaseBehavior
 {

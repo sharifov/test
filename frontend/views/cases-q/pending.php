@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->lead ? $model->lead->uid : '';
                 },
             ],
+            'cs_order_uid',
             [
                 'attribute' => 'cs_dep_id',
                 'value' => static function (Cases $model) {

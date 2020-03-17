@@ -384,7 +384,7 @@ class Formatter extends \yii\i18n\Formatter
         } elseif ($value instanceof Employee) {
             $name = $value->username;
         } elseif (is_int($value)) {
-            if ($entity = Employee::findOne($value)) {
+            if ($entity = Employee::find()->select(['username'])->where(['id' => $value])->cache(3600)->one()) {
                 $name = $entity->username;
             } else {
                 return 'not found';
@@ -395,6 +395,7 @@ class Formatter extends \yii\i18n\Formatter
 
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
     }
+
 
 	/**
 	 * @param $numberOfMonth
@@ -496,5 +497,17 @@ class Formatter extends \yii\i18n\Formatter
             return Html::tag('span', 'Yes', ['class' => 'badge badge-success']);
         }
         return Html::tag('span', 'No', ['class' => 'badge badge-danger']);
+    }
+
+    /**
+     * @param $value
+     * @return string
+     */
+    public function asClient($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::a($value, ['/client/view', 'id' => $value], ['data-pjax' => 0, 'target' => '_blank']);
     }
 }

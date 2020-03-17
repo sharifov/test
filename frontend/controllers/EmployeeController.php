@@ -26,6 +26,7 @@ use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -33,7 +34,7 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class EmployeeController extends FController
+class EmployeeController extends Controller
 {
 
     public function actionSellerContactInfo($employeeId)
@@ -705,5 +706,54 @@ class EmployeeController extends FController
         }
         $this->redirect(['site/index']);
     }
+
+    /**
+     * @param string|null $q
+     * @param int|null $id
+     * @return array
+     */
+    public function actionListAjax(?string $q = null, ?int $id = null)
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
+
+        if ($q !== null) {
+            $query = Employee::find();
+            $data = $query->select(['id', 'text' => 'username'])
+                ->where(['like', 'username', $q])
+                ->orWhere(['id' => (int) $q])
+                ->limit(20)
+                //->indexBy('id')
+                ->asArray()
+                ->all();
+
+            if ($data) {
+                foreach ($data as $n => $item) {
+                    $text = $item['text'] . ' ('.$item['id'].')';
+                    $data[$n]['text'] = self::formatText($text, $q);
+                    $data[$n]['selection'] = $item['text'];
+                }
+            }
+
+            $out['results'] = $data; //array_values($data);
+        }
+        elseif ($id > 0) {
+            $user = Employee::findOne($id);
+            $out['results'] = ['id' => $id, 'text' => $user ? $user->username : '', 'selection' => $user ? $user->username : ''];
+        }
+        return $out;
+    }
+
+    /**
+     * @param string $str
+     * @param string $term
+     * @return string
+     */
+    public static function formatText(string $str, string $term): string
+    {
+        return preg_replace('~'.$term.'~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
+    }
+
 
 }
