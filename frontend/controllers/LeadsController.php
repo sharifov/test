@@ -168,6 +168,53 @@ class LeadsController extends FController
         ]);
     }
 
+    public function actionExportCsv()
+    {
+        set_time_limit(0);
+        $searchModel = new LeadSearch();
+        $dataProvideQuery = $searchModel->searchExportCsv();
+
+        $data = [];
+        $batchOrder = 0;
+        //$dataProvideQuery->batch()->reset();
+        foreach ($dataProvideQuery->batch(50000) as $batchIndex => $batch){
+            var_dump($batch); die();
+            if ($batchIndex == $batchOrder && $batchOrder <= 0){
+
+                foreach ($batch as $row){
+                    array_push($data, $row);
+                }
+                $batchOrder++;
+            }
+
+            /*if ($batchIndex == 1){
+
+                foreach ($batch as $row){
+                    array_push($data, $row);
+                }
+            }*/
+
+            //$dataProvideQuery->batch()->reset();
+            //$dataProvideQuery->batch()->rewind();
+        }
+
+        $exporter = new CsvGrid([
+            'dataProvider' => new ArrayDataProvider([
+                'allModels' => $data
+            ]),
+            /*'columns' => [
+                [
+                    'attribute' => 'name',
+                ],
+            ],*/
+            //'maxEntriesPerFile' => 50000
+        ]);
+        //$exporter->export()->saveAs(Yii::getAlias('@runtime') . '/file.csv');
+        $exporter->export()->send('file.csv');
+
+        //var_dump($data); die();
+    }
+
     /**
      * Lists all Lead models.
      * @return mixed

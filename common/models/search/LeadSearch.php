@@ -765,6 +765,14 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+    public function searchExportCsv()
+    {
+        $query = Lead::find()->asArray();
+        $query->select(['id', 'uid']);
+
+        return $query;
+    }
+
     public function searchAgent($params)
     {
         $projectIds = array_keys(EmployeeProjectAccess::getProjects());
