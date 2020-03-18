@@ -867,7 +867,7 @@ class CasesController extends FController
         if ($categories = $this->caseCategoryRepository->getAllByDep($id)) {
             $str .= '<option>Choose a category</option>';
             foreach ($categories as $category) {
-                $str .= '<option value="' . Html::encode($category->cc_key) . '">' . Html::encode($category->cc_name) . '</option>';
+                $str .= '<option value="' . Html::encode($category->cc_id) . '">' . Html::encode($category->cc_name) . '</option>';
             }
         } else {
             $str = '<option>-</option>';
@@ -976,7 +976,7 @@ class CasesController extends FController
         if ($statusForm->load(Yii::$app->request->post()) && $statusForm->validate()) {
             try {
 
-                if ($user->isSimpleAgent() && empty($case->cs_category)) {
+                if ($user->isSimpleAgent() && empty($case->cs_category_id)) {
                     throw new \DomainException('Status of a case without a category cannot be changed!');
                 }
 
@@ -1250,7 +1250,7 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
-            ArrayHelper::map($this->caseCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_key', 'cc_name')
+            ArrayHelper::map($this->caseCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_id', 'cc_name')
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {

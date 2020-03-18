@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
 			],
             'cs_subject',
 			[
-				'attribute' => 'cs_category',
+				'attribute' => 'cs_category_id',
 				'value' => static function (CasesQSearch $model) {
 					return $model->category ? $model->category->cc_name : '';
 				},

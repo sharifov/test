@@ -9,9 +9,9 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
- * Class CasesCategoryController
+ * Class CaseCategoryController
  */
-class CasesCategoryController extends FController
+class CaseCategoryController extends FController
 {
 
     /**
@@ -48,7 +48,7 @@ class CasesCategoryController extends FController
         $model = new CaseCategory();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cc_key]);
+            return $this->redirect(['view', 'id' => $model->cc_id]);
         }
 
         return $this->render('create', [
@@ -66,7 +66,7 @@ class CasesCategoryController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cc_key]);
+            return $this->redirect(['view', 'id' => $model->cc_id]);
         }
 
         return $this->render('update', [

@@ -56,7 +56,7 @@ class CasesController extends BaseController
      *
      * @apiParam {string}           contact_email                    Client Email
      * @apiParam {string}           contact_phone                    Client Phone
-     * @apiParam {string}           category                         Case category
+     * @apiParam {int}              category_id                      Case category id
      * @apiParam {string{5..7}}     order_uid                        Order uid (symbols and numbers only)
      * @apiParam {string}           [subject]                        Subject
      * @apiParam {string}           [description                     Description
@@ -66,7 +66,7 @@ class CasesController extends BaseController
      * {
      *       "contact_email": "test@test.com",
      *       "contact_phone": "+37369636690",
-     *       "category": "add_insurance",
+     *       "category_id": 12,
      *       "order_uid": "12WS09W",
      *       "subject": "Subject text",
      *       "description": "Description text",
@@ -97,7 +97,7 @@ class CasesController extends BaseController
      *       "request": {
      *           "contact_email": "test@test.com",
      *           "contact_phone": "+37369636690",
-     *           "category": "add_insurance",
+     *           "category_id": 12,
      *           "order_uid": "12WS09W",
      *           "subject": "Subject text",
      *           "description": "Description text",

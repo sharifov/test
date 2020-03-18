@@ -21,7 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property int $projectId
  * @property string $subject
  * @property string $description
- * @property string $category
+ * @property int $categoryId
  * @property string $clientPhone
  * @property string $clientEmail
  * @property int $depId
@@ -36,7 +36,7 @@ class CasesCreateByWebForm extends Model
     public $projectId;
     public $subject;
     public $description;
-    public $category;
+    public $categoryId;
     public $clientPhone;
     public $clientEmail;
     public $depId;
@@ -74,9 +74,10 @@ class CasesCreateByWebForm extends Model
             ['depId', 'required'],
             ['depId', 'in', 'range' => array_keys($this->getDepartments())],
 
-            ['category', 'required'],
-            ['category', 'string', 'max' => 50],
-            ['category', 'in', 'range' => function() {
+            ['categoryId', 'required'],
+            ['categoryId', 'integer'],
+            ['categoryId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['categoryId', 'in', 'range' => function() {
                 return $this->getAvailableCategories($this->depId);
             }],
 
@@ -163,8 +164,8 @@ class CasesCreateByWebForm extends Model
     private function getAvailableCategories($depId): array
     {
         $depId = (int)$depId;
-        $categories = CaseCategory::find()->select(['cc_key'])->andWhere(['cc_dep_id' => $depId])->asArray()->all();
-        return array_column($categories, 'cc_key');
+        $categories = CaseCategory::find()->select(['cc_id'])->andWhere(['cc_dep_id' => $depId])->asArray()->all();
+        return array_column($categories, 'cc_id');
     }
 
 //	/**
@@ -199,7 +200,7 @@ class CasesCreateByWebForm extends Model
             'subject' => 'Subject',
             'description' => 'Description',
             'depId' => 'Department',
-            'category' => 'Category',
+            'categoryId' => 'Category',
             'clientPhone' => 'Phone',
             'clientEmail' => 'Email',
             'sourceTypeId' => 'Source type',

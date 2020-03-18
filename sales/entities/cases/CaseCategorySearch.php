@@ -16,7 +16,7 @@ class CaseCategorySearch extends CaseCategory
     public function rules(): array
     {
         return [
-            [['cc_key', 'cc_name'], 'string'],
+            [['cc_id', 'cc_name'], 'string'],
             [['cc_dep_id', 'cc_system'], 'integer'],
         ];
     }
@@ -45,12 +45,12 @@ class CaseCategorySearch extends CaseCategory
 
         // grid filtering conditions
         $query->andFilterWhere([
+            'cc_id' => $this->cc_id,
             'cc_dep_id' => $this->cc_dep_id,
             'cc_system' => $this->cc_system,
         ]);
 
-        $query->andFilterWhere(['like', 'cc_key', $this->cc_key])
-            ->andFilterWhere(['like', 'cc_name', $this->cc_name]);
+        $query->andFilterWhere(['like', 'cc_name', $this->cc_name]);
 
         return $dataProvider;
     }

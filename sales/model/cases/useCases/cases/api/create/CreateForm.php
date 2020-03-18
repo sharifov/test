@@ -13,7 +13,7 @@ use yii\base\Model;
  *
  * @property string $contact_email
  * @property string $contact_phone
- * @property string $category
+ * @property int $category_id
  * @property string $order_uid
  * @property array $order_info
  * @property int $project_id
@@ -24,7 +24,7 @@ class CreateForm extends Model
 {
     public $contact_email;
     public $contact_phone;
-    public $category;
+    public $category_id;
     public $order_uid;
     public $order_info;
     public $project_id;
@@ -56,8 +56,9 @@ class CreateForm extends Model
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
             ['contact_phone', InternalPhoneValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
 
-            ['category', 'required'],
-            ['category', 'exist', 'targetClass' => CaseCategory::class, 'targetAttribute' => ['category' => 'cc_key']],
+            ['category_id', 'required'],
+            ['category_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['category_id', 'exist', 'targetClass' => CaseCategory::class, 'targetAttribute' => ['category_id' => 'cc_id']],
 
             ['order_uid', 'required'],
             ['order_uid', 'string', 'min' => 5, 'max' => 7],
@@ -87,7 +88,7 @@ class CreateForm extends Model
         return new Command(
             $this->contact_email,
             $this->contact_phone,
-            $this->category,
+            $this->category_id,
             $this->order_uid,
             $this->order_info,
             $this->project_id,

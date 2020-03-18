@@ -178,22 +178,22 @@ class CasesManageService
 
     /**
      * @param int $caseId
-     * @param string $categoryKey
+     * @param int $categoryId
      */
-    public function updateCategoryByCaseId(int $caseId, string $categoryKey): void
+    public function updateCategoryByCaseId(int $caseId, int $categoryId): void
     {
         $case = $this->casesRepository->find($caseId);
-        $this->updateCategory($case, $categoryKey);
+        $this->updateCategory($case, $categoryId);
     }
 
     /**
      * @param Cases $case
-     * @param string $categoryKey
+     * @param int $categoryId
      */
-    public function updateCategory(Cases $case, string $categoryKey): void
+    public function updateCategory(Cases $case, int $categoryId): void
     {
-        $category = $this->caseCategoryRepository->findByKey($categoryKey);
-        $case->updateCategory($category->cc_key);
+        $category = $this->caseCategoryRepository->find($categoryId);
+        $case->updateCategory($category->cc_id);
         $this->casesRepository->save($case);
     }
 

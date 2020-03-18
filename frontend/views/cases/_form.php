@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cs_description')->textarea(['rows' => 6]) ?>
 
-        <?= $form->field($model, 'cs_category')->dropDownList(\yii\helpers\ArrayHelper::map(\sales\entities\cases\CaseCategory::find()->asArray()->all(), 'cc_key', 'cc_name'), ['prompt' => '-']) ?>
+        <?= $form->field($model, 'cs_category_id')->dropDownList(\yii\helpers\ArrayHelper::map(\sales\entities\cases\CaseCategory::find()->asArray()->all(), 'cc_id', 'cc_name'), ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'cs_client_id')->textInput() ?>
 

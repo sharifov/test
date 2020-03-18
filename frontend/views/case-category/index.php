@@ -9,7 +9,7 @@ use sales\entities\cases\CaseCategory;
 /* @var $searchModel sales\entities\cases\CaseCategorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Cases Categories';
+$this->title = 'Case Categories';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="case-category-index">
@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Cases Category', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Case Category', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -26,9 +26,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => yii\grid\SerialColumn::class],
-
-            'cc_key',
+            [
+                'attribute' => 'cc_id',
+                'options' => ['style' => 'width:160px'],
+            ],
             'cc_name',
             [
                 'attribute' => 'cc_dep_id',

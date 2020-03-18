@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'cc_key') ?>
+    <?= $form->field($model, 'cc_id') ?>
 
     <?= $form->field($model, 'cc_name') ?>
 

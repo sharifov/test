@@ -232,7 +232,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
-                ['label' => 'Cases categories', 'url' => ['/case-category/index'], 'icon' => 'users'],
+                ['label' => 'Case categories', 'url' => ['/case-category/index'], 'icon' => 'users'],
             ]
         ];
 

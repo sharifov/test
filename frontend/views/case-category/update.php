@@ -5,9 +5,9 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model sales\entities\cases\CaseCategory */
 
-$this->title = 'Update Cases Category: ' . $model->cc_key;
-$this->params['breadcrumbs'][] = ['label' => 'Cases Categories', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->cc_key, 'url' => ['view', 'id' => $model->cc_key]];
+$this->title = 'Update Case Category: ' . $model->cc_id;
+$this->params['breadcrumbs'][] = ['label' => 'Case Categories', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->cc_id, 'url' => ['view', 'id' => $model->cc_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="case-category-update">

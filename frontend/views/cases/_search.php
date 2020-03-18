@@ -37,7 +37,7 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'cs_dep_id')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'cs_category')->dropDownList(CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments())), ['prompt' => '-']) ?>
+                    <?= $form->field($model, 'cs_category_id')->dropDownList(CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments())), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>

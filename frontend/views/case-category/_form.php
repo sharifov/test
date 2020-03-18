@@ -13,8 +13,6 @@ use common\models\Department;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'cc_key')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'cc_name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'cc_dep_id')->dropDownList(Department::getList(), ['prompt' => 'Select department']) ?>

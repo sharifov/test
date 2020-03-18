@@ -40,7 +40,7 @@ class Handler
 
     public function handle(Command $command): Result
     {
-        $category = $this->categoryRepository->findByKey($command->category);
+        $category = $this->categoryRepository->find($command->category_id);
 
         /** @var Result $result */
         $result = $this->transactionManager->wrap(function () use ($command, $category) {
@@ -57,7 +57,7 @@ class Handler
                 $command->order_uid,
                 $command->subject,
                 $this->processDescription($command->order_info, $command->description),
-                $command->category
+                $command->category_id
             );
 
             $this->casesRepository->save($case);

@@ -18,12 +18,12 @@ class CaseCategoryRepository
     }
 
     /**
-     * @param string $key
+     * @param int $id
      * @return CaseCategory
      */
-    public function findByKey(string $key): CaseCategory
+    public function find(int $id): CaseCategory
     {
-        if ($category = CaseCategory::find()->andWhere(['cc_key' => $key])->limit(1)->one()) {
+        if ($category = CaseCategory::findOne($id)) {
             return $category;
         }
         throw new NotFoundException('Case category is not found');
@@ -31,14 +31,14 @@ class CaseCategoryRepository
 
     /**
      * @param CaseCategory $category
-     * @return string
+     * @return int
      */
-    public function save(CaseCategory $category): string
+    public function save(CaseCategory $category): int
     {
         if (!$category->save(false)) {
             throw new \RuntimeException('Saving error');
         }
-        return $category->cc_key;
+        return $category->cc_id;
     }
 
     /**
