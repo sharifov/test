@@ -5,6 +5,7 @@ namespace webapi\modules\v2\controllers;
 use sales\model\cases\CaseCodeException;
 use sales\model\cases\useCases\cases\api\create\CreateForm;
 use sales\model\cases\useCases\cases\api\create\Handler;
+use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
@@ -171,6 +172,15 @@ class CasesController extends BaseController
      */
     public function actionCreate(): Response
     {
+        if (!$this->auth->au_project_id) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Not found Project with current user: ' . $this->auth->au_api_username),
+                new ErrorsMessage('Not found Project with current user: ' . $this->auth->au_api_username),
+                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+            );
+        }
+
         $form = new CreateForm($this->auth->au_project_id);
 
         if (!$form->load(Yii::$app->request->post())) {
