@@ -293,6 +293,34 @@ class CasesSaleService
 		return $caseSale;
 	}
 
+    /**
+     * @param Cases $case
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function create(Cases $case, array $saleData): CaseSale
+	{
+		$caseSale = new CaseSale();
+        $caseSale->css_cs_id = $case->cs_id;
+        $caseSale->css_sale_id = $saleData['saleId'];
+        $caseSale->css_sale_data = json_encode($saleData);
+        $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
+        $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
+        $caseSale->css_sale_book_id = $saleData['bookingId'] ?? null;
+        $caseSale->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
+        $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
+
+        $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
+
+        if(!$caseSale->save()) {
+            \Yii::error(VarDumper::dumpAsString($caseSale->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesSaleService:create');
+        }
+
+        $case->updateLastAction();
+
+		return $caseSale;
+	}
+
 	/**
      * @param CaseSale $caseSale
      * @param array $saleData

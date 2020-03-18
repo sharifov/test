@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v2\controllers;
 
+use sales\entities\cases\Cases;
 use sales\model\cases\CaseCodeException;
 use sales\model\cases\useCases\cases\api\create\CreateForm;
 use sales\model\cases\useCases\cases\api\create\Handler;
@@ -215,7 +216,9 @@ class CasesController extends BaseController
             );
         }
 
-        $findByOrderUid = $this->casesSaleService->requestToBackOffice(['order_uid' => $form->order_uid]);
+        if ($saleData = $this->getSale($form)) {
+            $this->casesSaleService->create(Cases::findOne($result->csId), $saleData);
+        }
 
         return new SuccessResponse(
             new DataMessage(
