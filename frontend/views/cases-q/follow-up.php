@@ -4,7 +4,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
 use sales\access\ListsAccess;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
 use sales\yii\grid\cases\NeedActionColumn;
 use sales\yii\grid\DeadlineColumn;
@@ -66,7 +66,7 @@ $lists = new ListsAccess($user->id);
                 'value' => static function (CasesQSearch $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-                'filter' => CasesCategory::getList()
+                'filter' => CaseCategory::getList()
             ],
             [
                 'attribute' => 'cs_lead_id',

@@ -5,7 +5,7 @@ use common\models\Employee;
 use common\models\Project;
 use sales\access\ListsAccess;
 use dosamigos\datepicker\DatePicker;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
@@ -58,7 +58,7 @@ $lists = new ListsAccess($user->id);
                 'value' => static function (CasesQSearch $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-                'filter' => CasesCategory::getList()
+                'filter' => CaseCategory::getList()
             ],
             [
                 'attribute' => 'cs_user_id',

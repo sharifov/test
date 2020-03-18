@@ -7,12 +7,11 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
 //use sales\entities\cases\Cases;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 //use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesSourceType;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
-use function GuzzleHttp\Psr7\str;
 
 //use yii\helpers\Html;
 
@@ -164,7 +163,7 @@ class CasesCreateByWebForm extends Model
     private function getAvailableCategories($depId): array
     {
         $depId = (int)$depId;
-        $categories = CasesCategory::find()->select(['cc_key'])->andWhere(['cc_dep_id' => $depId])->asArray()->all();
+        $categories = CaseCategory::find()->select(['cc_key'])->andWhere(['cc_dep_id' => $depId])->asArray()->all();
         return array_column($categories, 'cc_key');
     }
 

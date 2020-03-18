@@ -5,11 +5,11 @@ use yii\widgets\ActiveForm;
 use common\models\Department;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CasesCategory */
+/* @var $model sales\entities\cases\CaseCategory */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="cases-category-form">
+<div class="case-category-form">
 
     <?php $form = ActiveForm::begin(); ?>
 

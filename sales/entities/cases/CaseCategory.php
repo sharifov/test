@@ -11,7 +11,7 @@ use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
- * Class CasesCategory
+ * Class CaseCategory
  *
  * @property string $cc_key
  * @property string $cc_name
@@ -25,7 +25,7 @@ use yii\helpers\ArrayHelper;
  * @property Department $dep
  * @property Employee $updatedUser
  */
-class CasesCategory extends ActiveRecord
+class CaseCategory extends ActiveRecord
 {
 
     /**
@@ -140,7 +140,7 @@ class CasesCategory extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return '{{%cases_category}}';
+        return '{{%case_category}}';
     }
 
 }

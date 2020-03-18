@@ -3,16 +3,16 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\Department;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesCategorySearch */
+/* @var $searchModel sales\entities\cases\CaseCategorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Cases Categories';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="cases-category-index">
+<div class="case-category-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cc_dep_id',
                 'format' => 'raw',
                 'filter' => Department::getList(),
-                'value' => static function (CasesCategory $model) {
+                'value' => static function (CaseCategory $model) {
                     return $model->dep ? $model->dep->dep_name : 'undefined';
                 }
             ],

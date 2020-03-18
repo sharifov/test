@@ -50,7 +50,7 @@ use Yii;
  * @property bool $cs_need_action
  * @property string|null $cs_order_uid
  *
- * @property CasesCategory $category
+ * @property CaseCategory $category
  * @property Department $department
  * @property Lead $lead
  * @property Call $call
@@ -523,7 +523,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function getCategory(): ActiveQuery
     {
-        return $this->hasOne(CasesCategory::class, ['cc_key' => 'cs_category']);
+        return $this->hasOne(CaseCategory::class, ['cc_key' => 'cs_category']);
     }
 
     /**

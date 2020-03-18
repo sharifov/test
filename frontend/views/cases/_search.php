@@ -2,7 +2,7 @@
 
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use yii\helpers\Html;
@@ -37,7 +37,7 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'cs_dep_id')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'cs_category')->dropDownList(CasesCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments())), ['prompt' => '-']) ?>
+                    <?= $form->field($model, 'cs_category')->dropDownList(CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments())), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>

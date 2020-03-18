@@ -2,38 +2,38 @@
 
 namespace sales\repositories\cases;
 
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\repositories\NotFoundException;
 
-class CasesCategoryRepository
+class CaseCategoryRepository
 {
 
     /**
      * @param int $depId
-     * @return CasesCategory[]
+     * @return CaseCategory[]
      */
     public function getAllByDep(int $depId): array
     {
-        return CasesCategory::find()->andWhere(['cc_dep_id' => $depId])->orderBy(['cc_created_dt' => SORT_ASC])->all();
+        return CaseCategory::find()->andWhere(['cc_dep_id' => $depId])->orderBy(['cc_created_dt' => SORT_ASC])->all();
     }
 
     /**
      * @param string $key
-     * @return CasesCategory
+     * @return CaseCategory
      */
-    public function findByKey(string $key): CasesCategory
+    public function findByKey(string $key): CaseCategory
     {
-        if ($category = CasesCategory::find()->andWhere(['cc_key' => $key])->limit(1)->one()) {
+        if ($category = CaseCategory::find()->andWhere(['cc_key' => $key])->limit(1)->one()) {
             return $category;
         }
         throw new NotFoundException('Case category is not found');
     }
 
     /**
-     * @param CasesCategory $category
+     * @param CaseCategory $category
      * @return string
      */
-    public function save(CasesCategory $category): string
+    public function save(CaseCategory $category): string
     {
         if (!$category->save(false)) {
             throw new \RuntimeException('Saving error');
@@ -42,11 +42,11 @@ class CasesCategoryRepository
     }
 
     /**
-     * @param CasesCategory $category
+     * @param CaseCategory $category
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function remove(CasesCategory $category): void
+    public function remove(CaseCategory $category): void
     {
         if (!$category->delete()) {
             throw new \RuntimeException('Removing error');

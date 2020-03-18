@@ -3,7 +3,7 @@
 namespace sales\model\cases\useCases\cases\api\create;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\services\client\InternalPhoneValidator;
 use sales\yii\validators\IsArrayValidator;
 use yii\base\Model;
@@ -57,7 +57,7 @@ class CreateForm extends Model
             ['contact_phone', InternalPhoneValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['category', 'required'],
-            ['category', 'exist', 'targetClass' => CasesCategory::class, 'targetAttribute' => ['category' => 'cc_key']],
+            ['category', 'exist', 'targetClass' => CaseCategory::class, 'targetAttribute' => ['category' => 'cc_key']],
 
             ['order_uid', 'required'],
             ['order_uid', 'string', 'min' => 5, 'max' => 7],

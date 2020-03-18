@@ -38,7 +38,7 @@ use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\guards\cases\CaseTakeGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
-use sales\repositories\cases\CasesCategoryRepository;
+use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
 use sales\repositories\client\ClientEmailRepository;
@@ -71,7 +71,7 @@ use yii\widgets\ActiveForm;
  *
  * @property CasesCreateService $casesCreateService
  * @property CasesManageService $casesManageService
- * @property CasesCategoryRepository $casesCategoryRepository
+ * @property CaseCategoryRepository $caseCategoryRepository
  * @property CasesRepository $casesRepository
  * @property CasesCommunicationService $casesCommunicationService
  * @property UserRepository $userRepository,
@@ -87,7 +87,7 @@ class CasesController extends FController
     private $casesCreateService;
     private $casesManageService;
     private $casesCommunicationService;
-    private $casesCategoryRepository;
+    private $caseCategoryRepository;
     private $casesRepository;
     private $userRepository;
     private $casesSaleRepository;
@@ -97,26 +97,26 @@ class CasesController extends FController
     private $updateHandler;
 
     public function __construct(
-		$id,
-		$module,
-		CasesCreateService $casesCreateService,
-		CasesManageService $casesManageService,
-		CasesCategoryRepository $casesCategoryRepository,
-		CasesRepository $casesRepository,
-		CasesCommunicationService $casesCommunicationService,
-		UserRepository $userRepository,
-		CasesSaleRepository $casesSaleRepository,
-		CasesSaleService $casesSaleService,
+        $id,
+        $module,
+        CasesCreateService $casesCreateService,
+        CasesManageService $casesManageService,
+        CaseCategoryRepository $caseCategoryRepository,
+        CasesRepository $casesRepository,
+        CasesCommunicationService $casesCommunicationService,
+        UserRepository $userRepository,
+        CasesSaleRepository $casesSaleRepository,
+        CasesSaleService $casesSaleService,
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
-		CaseTakeGuard $caseTakeGuard,
-		Handler $updateHandler,
-		$config = []
+        CaseTakeGuard $caseTakeGuard,
+        Handler $updateHandler,
+        $config = []
     )
     {
         parent::__construct($id, $module, $config);
         $this->casesCreateService = $casesCreateService;
         $this->casesManageService = $casesManageService;
-        $this->casesCategoryRepository = $casesCategoryRepository;
+        $this->caseCategoryRepository = $caseCategoryRepository;
         $this->casesRepository = $casesRepository;
         $this->casesCommunicationService = $casesCommunicationService;
         $this->userRepository = $userRepository;
@@ -864,7 +864,7 @@ class CasesController extends FController
     {
         $id = (int)$id;
         $str = '';
-        if ($categories = $this->casesCategoryRepository->getAllByDep($id)) {
+        if ($categories = $this->caseCategoryRepository->getAllByDep($id)) {
             $str .= '<option>Choose a category</option>';
             foreach ($categories as $category) {
                 $str .= '<option value="' . Html::encode($category->cc_key) . '">' . Html::encode($category->cc_name) . '</option>';
@@ -1250,7 +1250,7 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
-            ArrayHelper::map($this->casesCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_key', 'cc_name')
+            ArrayHelper::map($this->caseCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_key', 'cc_name')
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {

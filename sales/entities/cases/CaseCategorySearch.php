@@ -5,9 +5,9 @@ namespace sales\entities\cases;
 use yii\data\ActiveDataProvider;
 
 /**
- * Class CasesCategorySearch
+ * Class CaseCategorySearch
  */
-class CasesCategorySearch extends CasesCategory
+class CaseCategorySearch extends CaseCategory
 {
 
     /**
@@ -27,7 +27,7 @@ class CasesCategorySearch extends CasesCategory
      */
     public function search($params): ActiveDataProvider
     {
-        $query = CasesCategory::find();
+        $query = CaseCategory::find();
 
         // add conditions that should always apply here
 

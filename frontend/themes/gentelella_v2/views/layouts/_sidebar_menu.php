@@ -209,6 +209,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
                 ['label' => 'Lead Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
+                ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
             ]
         ];
 
@@ -268,8 +269,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
-                ['label' => 'Cases status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
-                ['label' => 'Cases categories', 'url' => ['/cases-category/index'], 'icon' => 'list'],
+                ['label' => 'Cases categories', 'url' => ['/case-category/index'], 'icon' => 'list'],
             ]
         ];
 

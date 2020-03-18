@@ -2,17 +2,17 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CasesCategory */
+/* @var $model sales\entities\cases\CaseCategory */
 
 $this->title = $model->cc_key;
 $this->params['breadcrumbs'][] = ['label' => 'Cases Categories', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
-<div class="cases-category-view">
+<div class="case-category-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cc_dep_id',
                 'format' => 'raw',
-                'value' => static function (CasesCategory $model) {
+                'value' => static function (CaseCategory $model) {
                     return $model->dep ? $model->dep->dep_name : '';
                 }
             ],

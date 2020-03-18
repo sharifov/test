@@ -130,6 +130,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklist')],
                 ['label' => 'LF Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
+                ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
             ]
         ];
 
@@ -231,8 +232,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
-                ['label' => 'Cases status history', 'url' => ['/case-status-log'], 'icon' => 'bars'],
-                ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
+                ['label' => 'Cases categories', 'url' => ['/case-category/index'], 'icon' => 'users'],
             ]
         ];
 

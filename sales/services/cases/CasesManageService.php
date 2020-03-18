@@ -7,7 +7,7 @@ use common\models\Lead;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\Cases;
-use sales\repositories\cases\CasesCategoryRepository;
+use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
@@ -18,7 +18,7 @@ use sales\services\ServiceFinder;
  * @property CasesRepository $casesRepository
  * @property UserRepository $userRepository
  * @property LeadRepository $leadRepository
- * @property CasesCategoryRepository $casesCategoryRepository
+ * @property CaseCategoryRepository $caseCategoryRepository
  * @property ServiceFinder $finder
  */
 class CasesManageService
@@ -27,7 +27,7 @@ class CasesManageService
     private $casesRepository;
     private $userRepository;
     private $leadRepository;
-    private $casesCategoryRepository;
+    private $caseCategoryRepository;
     private $finder;
 
     /**
@@ -35,21 +35,21 @@ class CasesManageService
      * @param CasesRepository $casesRepository
      * @param UserRepository $userRepository
      * @param LeadRepository $leadRepository
-     * @param CasesCategoryRepository $casesCategoryRepository
+     * @param CaseCategoryRepository $caseCategoryRepository
      * @param ServiceFinder $finder
      */
     public function __construct(
         CasesRepository $casesRepository,
         UserRepository $userRepository,
         LeadRepository $leadRepository,
-        CasesCategoryRepository $casesCategoryRepository,
+        CaseCategoryRepository $caseCategoryRepository,
         ServiceFinder $finder
     )
     {
         $this->casesRepository = $casesRepository;
         $this->userRepository = $userRepository;
         $this->leadRepository = $leadRepository;
-        $this->casesCategoryRepository = $casesCategoryRepository;
+        $this->caseCategoryRepository = $caseCategoryRepository;
         $this->finder = $finder;
     }
 
@@ -192,7 +192,7 @@ class CasesManageService
      */
     public function updateCategory(Cases $case, string $categoryKey): void
     {
-        $category = $this->casesCategoryRepository->findByKey($categoryKey);
+        $category = $this->caseCategoryRepository->findByKey($categoryKey);
         $case->updateCategory($category->cc_key);
         $this->casesRepository->save($case);
     }

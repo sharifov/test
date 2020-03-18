@@ -4,7 +4,7 @@ use common\models\Employee;
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\yii\grid\cases\CasesSourceTypeColumn;
 use sales\yii\grid\cases\CasesStatusColumn;
 use yii\helpers\Html;
@@ -117,7 +117,7 @@ $gridId = 'cases-grid-id';
                 'value' => static function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-                'filter' => CasesCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
+                'filter' => CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
             ],
             [
                     'class' => CasesStatusColumn::class,
