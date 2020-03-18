@@ -17,6 +17,7 @@ use sales\model\user\entity\userStatus\UserStatus;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -66,6 +67,7 @@ use yii\web\NotFoundHttpException;
  * @property Project[] $uppProjects
  * @property UserProfile $userProfile
  * @property UserOnline $userOnline
+ * @property UserStatus $userStatus
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
  * @property int $callExpertCountByShiftTime
@@ -74,7 +76,7 @@ use yii\web\NotFoundHttpException;
  * @property array $cache
  * @property Access|null $access
  *
- * @property \yii\db\ActiveQuery $productType
+ * @property ActiveQuery $productType
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -404,15 +406,26 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * Gets query for [[UserOnline]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getUserOnline()
+    public function getUserOnline(): ActiveQuery
     {
         return $this->hasOne(UserOnline::class, ['uo_user_id' => 'id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * Gets query for [[UserStatus]].
+     *
+     * @return ActiveQuery
+     */
+    public function getUserStatus(): ActiveQuery
+    {
+        return $this->hasOne(UserStatus::class, ['us_user_id' => 'id']);
+    }
+
+
+    /**
+     * @return ActiveQuery
      */
     public function getDepartments()
     {
@@ -420,7 +433,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getDepartmentPhoneProjects()
     {
@@ -428,7 +441,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUserDepartments()
     {
@@ -436,7 +449,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUdDeps()
     {
@@ -639,7 +652,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }*/
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUserProfile()
     {
@@ -657,7 +670,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getEmployeeAcl()
     {
@@ -665,7 +678,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getProjectEmployeeAccesses()
     {
@@ -674,7 +687,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUserProjectParams()
     {
@@ -682,7 +695,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUppProjects()
     {
@@ -691,7 +704,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getProjects()
     {
@@ -699,14 +712,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      * @throws \yii\base\InvalidConfigException
      */
-    public function getProductType(): \yii\db\ActiveQuery
+    public function getProductType(): ActiveQuery
     {
         return $this->hasMany(ProductType::class, ['pt_id' => 'upt_product_type_id'])
             ->viaTable(UserProductType::tableName(), ['upt_user_id' => 'id'], static function ($query) {
-            /* @var \yii\db\ActiveQuery $query */
+            /* @var ActiveQuery $query */
             $query->andWhere(['upt_product_enabled' => true]);
         });
     }
@@ -758,7 +771,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUserParams()
     {
@@ -843,7 +856,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLeads()
     {
@@ -1156,7 +1169,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUserGroupAssigns()
     {
@@ -1164,7 +1177,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getUgsGroups()
     {
@@ -1884,7 +1897,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isOnline() : bool
     {
-        return UserOnline::find()->where(['uo_user_id' => $this->id])->exists();
+        return $this->userOnline ? true : false;
+        //return UserOnline::find()->where(['uo_user_id' => $this->id])->exists();
     }
 
     /**
@@ -1892,14 +1906,21 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isCallStatusReady() : bool
     {
-        $isReady = true;
+        $status = $this->userStatus;
+
+        if ($status && $status->us_call_phone_status) {
+            return true;
+        }
+
+        /*$isReady = true;
         $ucs = UserCallStatus::find()->where(['us_user_id' => $this->id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
         if($ucs) {
             if((int) $ucs->us_type_id === UserCallStatus::STATUS_TYPE_OCCUPIED) {
                 $isReady = false;
             }
-        }
-        return $isReady;
+        }*/
+
+        return false;
     }
 
     /**
@@ -1907,11 +1928,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isCallFree() : bool
     {
-        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->exists(); //Call::CALL_STATUS_QUEUE, andWhere(['<>', 'c_parent_id', null])
+        $status = $this->userStatus;
+
+        if ($status && $status->us_is_on_call) {
+            return false;
+        }
+
+        /*$callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->exists(); //Call::CALL_STATUS_QUEUE, andWhere(['<>', 'c_parent_id', null])
 
         if ($callExist) {
             return false;
-        }
+        }*/
 
         return true;
     }
