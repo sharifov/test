@@ -28,6 +28,10 @@ use yii\helpers\VarDumper;
  * @property $cssChargedTo
  * @property $cssProfitFrom
  * @property $cssProfitTo
+ * @property $cssOutDate
+ * @property $cssInDate
+ * @property $cssChargeType
+ * @property $departureAirport
  *
  * @property array $cacheSaleData
  */
@@ -47,17 +51,20 @@ class CasesSearch extends Cases
     public $cssChargedTo;
     public $cssProfitFrom;
     public $cssProfitTo;
+    public $cssOutDate;
+    public $cssInDate;
+    public $cssChargeType;
+    public $departureAirport;
 
+    /* TODO::  */
     /*
-    Selling price (диапазон) - фильтрует сss_charged
-    Profit (диапазон) - фильтрует  css_profit
     Departure Airports (multichoice) - css_out_departure_airport или css_in_departure_airport попадают в список
     Arrival Airports (multichoice) - css_out_arrival_airport или css_in_arrival_airport попадают в список
     Departure Countries (multichoice) - страны связанные с кодами css_out_departure_airport или css_in_departure_airport попадают в список
     Arrival Countries (multichoice) - страны связанные с кодами css_out_arrival_airport или css_in_arrival_airport попадают в список
-    Flight Date (диапазон) - css_out_date или css_in_date попадают в диапазон
-    Charge Type - фильтрует css_charge_type - уточнить Charge Type у команды BO
     */
+    /* TODO::  */
+
 
     private $cacheSaleData = [];
 
@@ -92,6 +99,9 @@ class CasesSearch extends Cases
             ['cs_need_action', 'boolean'],
 
             [['cssChargedFrom', 'cssChargedTo', 'cssProfitFrom', 'cssProfitTo'], 'number'],
+            [['cssOutDate', 'cssInDate'], 'date'],
+            [['cssChargeType'], 'string', 'max' => 100],
+            [['departureAirport'], 'safe'],
         ];
     }
 
@@ -120,6 +130,10 @@ class CasesSearch extends Cases
             'cssChargedTo' => 'Charged to',
             'cssProfitFrom' => 'Profit from',
             'cssProfitTo' => 'Profit to',
+            'cssOutDate' => 'Out Date',
+            'cssInDate' => 'In Date',
+            'cssChargeType' => 'Charge Type',
+            'departureAirport' => 'Departure Airport',
         ];
     }
 
@@ -232,18 +246,6 @@ class CasesSearch extends Cases
         }
         if ($this->cs_created_dt) {
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
-        }
-        if ($this->cssChargedFrom) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_charged', $this->cssChargedFrom])]);
-        }
-        if ($this->cssChargedTo) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_charged', $this->cssChargedTo])]);
-        }
-        if ($this->cssProfitFrom) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_profit', $this->cssProfitFrom])]);
-        }
-        if ($this->cssProfitTo) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
         }
 
         return $dataProvider;
@@ -367,6 +369,17 @@ class CasesSearch extends Cases
         if ($this->cssProfitTo) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
         }
+        if ($this->cssOutDate) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'DATE(css_out_date)', date('Y-m-d', strtotime($this->cssOutDate))])]);
+        }
+        if ($this->cssInDate) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'DATE(css_in_date)', date('Y-m-d', strtotime($this->cssInDate))])]);
+        }
+
+        $query->andFilterWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
+
+        // departureAirport
+
 
         return $dataProvider;
     }

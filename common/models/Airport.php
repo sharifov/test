@@ -88,4 +88,15 @@ class Airport extends ActiveRecord
         return $this->city;
     }
 
+    /**
+     * @return array|ActiveRecord[]
+     */
+    public static function getIataList(): array
+    {
+        return ArrayHelper::map(
+            self::find()->select(['iata'])->distinct()->orderBy(['iata' => SORT_ASC])->all(),
+            'iata', 'iata'
+        );
+    }
+
 }

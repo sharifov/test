@@ -1,5 +1,6 @@
 <?php
 
+use common\models\CaseSale;
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
@@ -60,7 +61,7 @@ $gridId = 'cases-grid-id';
             if ($user->isAdmin()) {
                 $searchTpl = '_search';
             } else {
-                $searchTpl = '_search_agents'; /* TODO::  */
+                $searchTpl = '_search_agents';
             }
             ?>
             <?= $this->render($searchTpl, ['model' => $searchModel]); ?>
@@ -160,7 +161,52 @@ $gridId = 'cases-grid-id';
                 },
                 'format' => 'raw'
             ],
-
+            [
+                'label' => 'Selling price',
+                'value' => static function (Cases $model) {
+                    $out = '';
+                    if ($model->caseSale) {
+                        foreach ($model->caseSale as $caseSale) {
+                            /** @var CaseSale $caseSale */
+                            $out .= $caseSale->css_charged . '<br />';
+                        }
+                    }
+                    return $out;
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => 'Profit',
+                'value' => static function (Cases $model) {
+                    $out = '';
+                    if ($model->caseSale) {
+                        foreach ($model->caseSale as $caseSale) {
+                            /** @var CaseSale $caseSale */
+                            $out .= $caseSale->css_profit . '<br />';
+                        }
+                    }
+                    return $out;
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => 'Flight Date',
+                'value' => static function (Cases $model) {
+                    $out = '';
+                    if ($model->caseSale) {
+                        foreach ($model->caseSale as $caseSale) {
+                            /** @var CaseSale $caseSale */
+                            $out .= $caseSale->css_out_date ? 'Out : <i class="fa fa-calendar"></i> ' .
+                                Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_out_date)) . '<br />' : '';
+                            $out .= $caseSale->css_in_date ? 'In : <i class="fa fa-calendar"></i> ' .
+                                Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_in_date)) . '<br />' : '';
+                        }
+                    }
+                    return $out;
+                },
+                'format' => 'raw'
+            ],
+            //  css_out_date, иначе css_in_date
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
