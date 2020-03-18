@@ -3,10 +3,9 @@
 namespace modules\product\src\useCases\product\create;
 
 use common\models\Lead;
-use modules\product\src\entities\productType\ProductType;
+use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\guards\ProductAvailableGuard;
 use sales\access\EmployeeProductAccess;
-use sales\access\ListsAccess;
 use yii\base\Model;
 
 /**
@@ -63,5 +62,10 @@ class ProductCreateForm extends Model
             'pr_name' => 'Name',
             'pr_description' => 'Description',
         ];
+    }
+
+    public function getDto(): CreateDto
+    {
+        return new CreateDto($this->pr_lead_id, $this->pr_type_id, $this->pr_name, $this->pr_description);
     }
 }

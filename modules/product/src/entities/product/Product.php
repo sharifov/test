@@ -4,6 +4,7 @@ namespace modules\product\src\entities\product;
 
 use common\models\Employee;
 use common\models\Lead;
+use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\product\serializer\ProductSerializer;
@@ -56,13 +57,13 @@ class Product extends \yii\db\ActiveRecord implements Serializable
 
     private $childProduct;
 
-    public static function create(ProductCreateForm $form): self
+    public static function create(CreateDto $dto): self
     {
         $product = new static();
-        $product->pr_lead_id = $form->pr_lead_id;
-        $product->pr_type_id = $form->pr_type_id;
-        $product->pr_name = $form->pr_name;
-        $product->pr_description = $form->pr_description;
+        $product->pr_lead_id = $dto->pr_lead_id;
+        $product->pr_type_id = $dto->pr_type_id;
+        $product->pr_name = $dto->pr_name;
+        $product->pr_description = $dto->pr_description;
         $product->recordEvent(new ProductCreateEvent($product));
         return $product;
     }

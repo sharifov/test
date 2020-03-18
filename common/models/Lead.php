@@ -1568,6 +1568,11 @@ class Lead extends ActiveRecord implements Objectable
         $this->recordEvent(new LeadDuplicateDetectedEvent($this));
     }
 
+    public function setVisitorLog(int $logId): void
+    {
+        $this->l_visitor_log_id = $logId;
+    }
+
     /**
      * @return bool
      */
