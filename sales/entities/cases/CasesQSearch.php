@@ -331,7 +331,7 @@ class CasesQSearch extends Cases
 		$query->addSelect('b.csl_start_dt as `solved_date`');
 
 		$query->join('JOIN', '('.(new Query())->select(['csl_start_dt', 'csl_case_id'])
-			->from('cases_status_log')
+			->from(CaseStatusLog::tableName())
 			->where(['csl_to_status' => CasesStatus::STATUS_SOLVED])
 			->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql().') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
 
@@ -410,7 +410,7 @@ class CasesQSearch extends Cases
 		$query->addSelect('b.csl_start_dt as `trash_date`');
 
 		$query->join('JOIN', '('.(new Query())->select(['csl_start_dt', 'csl_case_id'])
-				->from('cases_status_log')
+				->from(CaseStatusLog::tableName())
 				->where(['csl_to_status' => CasesStatus::STATUS_TRASH])
 				->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql().') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
 

@@ -27,7 +27,7 @@ use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
-use sales\entities\cases\CasesStatusLogSearch;
+use sales\entities\cases\CaseStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesChangeStatusForm;
@@ -1026,10 +1026,10 @@ class CasesController extends FController
 
         $caseGId = Yii::$app->request->get('gid');
         $case = $this->casesRepository->findByGid($caseGId);
-        $searchModel = new CasesStatusLogSearch();
+        $searchModel = new CaseStatusLogSearch();
 
         $params = Yii::$app->request->queryParams;
-        $params['CasesStatusLogSearch']['csl_case_id'] = $case->cs_id;
+        $params['CaseStatusLogSearch']['csl_case_id'] = $case->cs_id;
 
         $dataProvider = $searchModel->searchByCase($params);
 

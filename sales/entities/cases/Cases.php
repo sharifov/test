@@ -55,10 +55,10 @@ use Yii;
  * @property Lead $lead
  * @property Call $call
  * @property Employee $owner
- * @property CasesStatusLog $lastLogRecord
+ * @property CaseStatusLog $lastLogRecord
  * @property Client $client
  * @property Project $project
- * @property CasesStatusLog[] $casesStatusLogs
+ * @property CaseStatusLog[] $caseStatusLogs
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  */
 class Cases extends ActiveRecord implements Objectable
@@ -497,9 +497,9 @@ class Cases extends ActiveRecord implements Objectable
     /**
      * @return ActiveQuery
      */
-    public function getCasesStatusLogs(): ActiveQuery
+    public function getCaseStatusLogs(): ActiveQuery
     {
-        return $this->hasMany(CasesStatusLog::class, ['csl_case_id' => 'cs_id']);
+        return $this->hasMany(CaseStatusLog::class, ['csl_case_id' => 'cs_id']);
     }
 
 	/**
@@ -531,7 +531,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function getLastLogRecord(): ActiveQuery
     {
-        return $this->hasOne(CasesStatusLog::class, ['csl_case_id' => 'cs_id'])->orderBy(['csl_id' => SORT_DESC]);
+        return $this->hasOne(CaseStatusLog::class, ['csl_case_id' => 'cs_id'])->orderBy(['csl_id' => SORT_DESC]);
     }
 
     /**

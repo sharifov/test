@@ -3,20 +3,19 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\entities\cases\CasesStatusLogSearch;
+use sales\entities\cases\CaseStatusLogSearch;
 
 /**
- * Class CasesStatusLogController
+ * Class CaseStatusLogController
  */
-class CasesStatusLogController extends FController
+class CaseStatusLogController extends FController
 {
-
     /**
      * @return string
      */
     public function actionIndex(): string
     {
-        $searchModel = new CasesStatusLogSearch();
+        $searchModel = new CaseStatusLogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -24,5 +23,4 @@ class CasesStatusLogController extends FController
             'dataProvider' => $dataProvider,
         ]);
     }
-
 }

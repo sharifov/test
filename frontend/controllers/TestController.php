@@ -97,7 +97,7 @@ use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
-use sales\repositories\cases\CasesStatusLogRepository;
+use sales\repositories\cases\CaseStatusLogRepository;
 use sales\repositories\lead\LeadBadgesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;

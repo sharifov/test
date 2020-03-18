@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CasesStatusLog */
+/* @var $model sales\entities\cases\CaseStatusLog */
 
 $this->title = $model->csl_id;
-$this->params['breadcrumbs'][] = ['label' => 'Cases Status Logs', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Case Status Logs', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="cases-status-log-view">
+<div class="case-status-log-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

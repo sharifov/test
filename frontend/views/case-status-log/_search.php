@@ -8,14 +8,14 @@ use dosamigos\datepicker\DatePicker;
 use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CasesStatusLogSearch */
+/* @var $model sales\entities\cases\CaseStatusLogSearch */
 /* @var $form yii\widgets\ActiveForm */
 
 $userList = Employee::getList();
 
 ?>
 
-<div class="cases-status-log-search">
+<div class="case-status-log-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
