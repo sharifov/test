@@ -2,6 +2,7 @@
 
 namespace sales\entities\cases;
 
+use common\models\Airport;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -32,6 +33,9 @@ use yii\helpers\VarDumper;
  * @property $cssInDate
  * @property $cssChargeType
  * @property $departureAirport
+ * @property $arrivalAirport
+ * @property $departureCountries
+ * @property $arrivalCountries
  *
  * @property array $cacheSaleData
  */
@@ -55,16 +59,9 @@ class CasesSearch extends Cases
     public $cssInDate;
     public $cssChargeType;
     public $departureAirport;
-
-    /* TODO::  */
-    /*
-    Departure Airports (multichoice) - css_out_departure_airport или css_in_departure_airport попадают в список
-    Arrival Airports (multichoice) - css_out_arrival_airport или css_in_arrival_airport попадают в список
-    Departure Countries (multichoice) - страны связанные с кодами css_out_departure_airport или css_in_departure_airport попадают в список
-    Arrival Countries (multichoice) - страны связанные с кодами css_out_arrival_airport или css_in_arrival_airport попадают в список
-    */
-    /* TODO::  */
-
+    public $arrivalAirport;
+    public $departureCountries;
+    public $arrivalCountries;
 
     private $cacheSaleData = [];
 
@@ -101,7 +98,7 @@ class CasesSearch extends Cases
             [['cssChargedFrom', 'cssChargedTo', 'cssProfitFrom', 'cssProfitTo'], 'number'],
             [['cssOutDate', 'cssInDate'], 'date'],
             [['cssChargeType'], 'string', 'max' => 100],
-            [['departureAirport'], 'safe'],
+            [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries'], 'safe'],
         ];
     }
 
@@ -134,6 +131,9 @@ class CasesSearch extends Cases
             'cssInDate' => 'In Date',
             'cssChargeType' => 'Charge Type',
             'departureAirport' => 'Departure Airport',
+            'arrivalAirport' => 'Arrival Airport',
+            'departureCountries' => 'Depart. Countries',
+            'arrivalCountries' => 'Arrival Countries',
         ];
     }
 
@@ -375,11 +375,39 @@ class CasesSearch extends Cases
         if ($this->cssInDate) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'DATE(css_in_date)', date('Y-m-d', strtotime($this->cssInDate))])]);
         }
-
-        $query->andFilterWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
-
-        // departureAirport
-
+        if ($this->cssChargeType) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
+        }
+        if ($this->departureAirport) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(['IN', 'css_out_departure_airport', $this->departureAirport])
+                ->orWhere(['IN', 'css_in_departure_airport', $this->departureAirport])
+            ]);
+        }
+        if ($this->arrivalAirport) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(['IN', 'css_out_arrival_airport', $this->arrivalAirport])
+                ->orWhere(['IN', 'css_in_arrival_airport', $this->arrivalAirport])
+            ]);
+        }
+        if ($this->departureCountries) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('case_sale.css_cs_id')
+                ->innerJoin(Airport::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->where(['IN', 'airports.country', $this->departureCountries])
+            ]);
+        }
+        if ($this->arrivalCountries) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('case_sale.css_cs_id')
+                ->innerJoin(Airport::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->where(['IN', 'airports.country', $this->arrivalCountries])
+            ]);
+        }
 
         return $dataProvider;
     }

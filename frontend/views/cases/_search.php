@@ -2,6 +2,7 @@
 
 use common\models\Airport;
 use common\models\CaseSale;
+use kartik\select2\Select2;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesCategory;
@@ -113,6 +114,46 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'cssProfitTo') ?>
         </div>
         <div class="col-md-1">
+            <?php
+                echo $form->field($model, 'departureAirport')->widget(Select2::class, [
+                    'data' => Airport::getIataList(),
+                    'size' => Select2::SMALL,
+                    'options' => ['multiple' => true],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
+            ?>
+        </div>
+        <div class="col-md-1">
+            <?php
+                echo $form->field($model, 'arrivalAirport')->widget(Select2::class, [
+                    'data' => Airport::getIataList(),
+                    'size' => Select2::SMALL,
+                    'options' => ['multiple' => true],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
+            ?>
+        </div>
+        <div class="col-md-1">
+            <?php
+                echo $form->field($model, 'departureCountries')->widget(Select2::class, [
+                    'data' => Airport::getCountryList(),
+                    'size' => Select2::SMALL,
+                    'options' => ['multiple' => true],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
+            ?>
+        </div>
+        <div class="col-md-1">
+            <?php
+                echo $form->field($model, 'arrivalCountries')->widget(Select2::class, [
+                    'data' => Airport::getCountryList(),
+                    'size' => Select2::SMALL,
+                    'options' => ['multiple' => true],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
+            ?>
+        </div>
+        <div class="col-md-1">
             <?= $form->field($model, 'cssOutDate')->widget(
                 \dosamigos\datepicker\DatePicker::class, [
                 'inline' => false,
@@ -139,17 +180,7 @@ use yii\widgets\ActiveForm;
                     'css_charge_type','css_charge_type'
                 )
             ?>
-            <?= $form->field($model, 'cssChargeType')->dropDownList($types, ['prompt' => 'Charge Type']) ?>
-        </div>
-        <div class="col-md-1">
-            <?php
-                echo $form->field($model, 'departureAirport')->widget(\kartik\select2\Select2::class, [
-                    'data' => Airport::getIataList(),
-                    'size' => \kartik\select2\Select2::SMALL,
-                    'options' => ['multiple' => true],
-                    'pluginOptions' => ['allowClear' => true],
-                ]);
-            ?>
+            <?= $form->field($model, 'cssChargeType')->dropDownList($types, ['prompt' => '---']) ?>
         </div>
 
     </div>

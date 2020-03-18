@@ -24,6 +24,9 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
         $this->addColumn($this->table, 'css_in_date', $this->dateTime());
         $this->addColumn($this->table, 'css_charge_type', $this->string(100));
 
+        $this->createIndex('IND-case_sale_css_charged', $this->table, ['css_charged']);
+        $this->createIndex('IND-case_sale_css_profit', $this->table, ['css_profit']);
+
         $this->refresh();
     }
 
@@ -32,6 +35,9 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
      */
     public function safeDown()
     {
+        $this->dropIndex('IND-case_sale_css_charged', $this->table);
+        $this->dropIndex('IND-case_sale_css_profit', $this->table);
+
         $this->dropColumn($this->table, 'css_charged');
         $this->dropColumn($this->table, 'css_profit');
         $this->dropColumn($this->table, 'css_out_departure_airport');
