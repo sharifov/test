@@ -1,5 +1,6 @@
 <?php
 
+use console\migrations\RbacMigrationService;
 use yii\db\Migration;
 
 /**
@@ -7,6 +8,15 @@ use yii\db\Migration;
  */
 class m200317_071747_add_column_to_case_sale_tbl extends Migration
 {
+    private $routes = [
+        '/sale/delete-ajax',
+    ];
+
+    private $roles = [
+        \common\models\Employee::ROLE_ADMIN,
+        \common\models\Employee::ROLE_SUPER_ADMIN,
+    ];
+
     private $table = '{{%case_sale}}';
 
     /**
@@ -26,6 +36,8 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
 
         $this->createIndex('IND-case_sale_css_charged', $this->table, ['css_charged']);
         $this->createIndex('IND-case_sale_css_profit', $this->table, ['css_profit']);
+
+        (new RbacMigrationService())->up($this->routes, $this->roles);
 
         $this->refresh();
     }
@@ -47,6 +59,8 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
         $this->dropColumn($this->table, 'css_in_arrival_airport');
         $this->dropColumn($this->table, 'css_in_date');
         $this->dropColumn($this->table, 'css_charge_type');
+
+        (new RbacMigrationService())->down($this->routes, $this->roles);
 
         $this->refresh();
     }
