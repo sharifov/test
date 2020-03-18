@@ -277,6 +277,7 @@ class CasesSaleService
 	{
 		if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
 			$caseSale = $this->casesSaleRepository->refreshOriginalSaleData($caseSale, $case, $saleData);
+			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
 			if(!$caseSale->save()) {
 				\Yii::error(VarDumper::dumpAsString($caseSale->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
@@ -290,4 +291,47 @@ class CasesSaleService
 
 		return $caseSale;
 	}
+
+	/**
+     * @param CaseSale $caseSale
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function prepareAdditionalData(CaseSale $caseSale, array $saleData): CaseSale
+    {
+        if (isset($saleData['price']['amountCharged'])) {
+            $amountCharged = preg_replace('/[^0-9.]/', '', $saleData['price']['amountCharged']);
+            $caseSale->css_charged = $amountCharged ?: null;
+        }
+        if (isset($saleData['price']['profit'])) {
+            $caseSale->css_profit = $saleData['price']['profit'];
+        }
+        if (isset($saleData['itinerary'][0]['segments'][0]['departureAirport'])) {
+            $caseSale->css_out_departure_airport = $saleData['itinerary'][0]['segments'][0]['departureAirport'];
+        }
+        if (isset($saleData['itinerary'][0]['segments'])) {
+            $idxLastInFirstSegments = count($saleData['itinerary'][0]['segments']) - 1;
+            if (isset($saleData['itinerary'][0]['segments'][$idxLastInFirstSegments]['arrivalAirport'])) {
+                $caseSale->css_out_arrival_airport = $saleData['itinerary'][0]['segments'][$idxLastInFirstSegments]['arrivalAirport'];
+            }
+        }
+        if (isset($saleData['itinerary'][0]['segments'][0]['departureTime'])) {
+            $caseSale->css_out_date = $saleData['itinerary'][0]['segments'][0]['departureTime'];
+        }
+        $countItinerary = count($saleData['itinerary']);
+        if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'])) {
+            $caseSale->css_in_departure_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'];
+        }
+        $idxLastInLastSegments = count($saleData['itinerary'][$countItinerary - 1]['segments']) - 1;
+        if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
+            $caseSale->css_out_arrival_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'];
+        }
+        if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'])) {
+            $caseSale->css_in_date = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'];
+        }
+        if (isset($saleData['chargeType'])) {
+            $caseSale->css_charge_type = $saleData['chargeType'];
+        }
+        return $caseSale;
+    }
 }

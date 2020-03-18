@@ -680,14 +680,14 @@ $('.refresh-from-bo').on('click', function (e) {
                    new PNotify({
                         title: "Error",
                         type: "error",
-                        text: data.message,
+                        text: data.error,
                         hide: true
                     }); 
                 } else {
                     new PNotify({
                         title: "Success",
                         type: "success",
-                        text: data.message,
+                        text: 'Successfully deleted',
                         hide: true
                     }); 
                     $.pjax.reload({container: '#pjax-sale-list', push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
