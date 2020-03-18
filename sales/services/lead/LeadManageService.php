@@ -2,10 +2,14 @@
 
 namespace sales\services\lead;
 
+use common\models\Client;
+use thamtech\uuid\helpers\UuidHelper;
+use Yii;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
 use common\models\Sources;
+use common\models\VisitorLog;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\forms\lead\PhoneCreateForm;
@@ -129,23 +133,22 @@ class LeadManageService
         return $lead;
     }
 
-	/**
-	 * @param string $phoneNumber
-	 * @param int $projectId
-	 * @param int $sourceId
-	 * @param string $gmt
-	 * @param bool $isTest
-	 * @return Lead
-	 * @throws \Throwable
-	 */
+    /**
+     * @param string $phoneNumber
+     * @param int $projectId
+     * @param int $sourceId
+     * @param string $gmt
+     * @param bool $isTest
+     * @return Lead
+     * @throws \Throwable
+     */
     public function createByIncomingCall(string $phoneNumber = '', int $projectId = 0, int $sourceId = 0, $gmt = ''): Lead
     {
-        $lead = $this->transaction->wrap(function() use ($phoneNumber, $projectId, $sourceId, $gmt) {
+        $lead = $this->transaction->wrap(function () use ($phoneNumber, $projectId, $sourceId, $gmt) {
 
             $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $phoneNumber, 'comments' => 'incoming'])]);
 
             $sourceId = $this->getSourceId($sourceId, $projectId);
-
 
             $lead = Lead::createByIncomingCall($phoneNumber, $client->id, $projectId, $sourceId, $gmt);
 
@@ -153,11 +156,70 @@ class LeadManageService
 
             $this->leadRepository->save($lead);
 
+            if ($logId = $this->createVisitorLog($client, $lead)) {
+                $lead->setVisitorLog($logId);
+                $this->leadRepository->save($lead);
+            }
+
             return $lead;
 
         });
 
         return $lead;
+    }
+
+    private function createVisitorLog(Client $client, Lead $lead): ?int
+    {
+        $sourceCid = null;
+        if ($source = Sources::find()->select(['cid'])->andWhere(['id' => $lead->source_id])->asArray()->limit(1)->one()) {
+            $sourceCid = $source['cid'];
+        }
+
+        if ($lastVisitorLog = VisitorLog::find()->andWhere(['vl_client_id' => $client->id, 'vl_project_id' => $lead->project_id])->orderBy(['vl_visit_dt' => SORT_DESC])->limit(1)->one()) {
+
+            if ($sourceCid && $lastVisitorLog->vl_source_cid === $sourceCid) {
+                return $lastVisitorLog->vl_id;
+            }
+
+            $log = new VisitorLog([
+                'vl_source_cid' => $sourceCid,
+                'vl_ga_client_id' => $lastVisitorLog->vl_ga_client_id,
+                'vl_ga_user_id' => $client->uuid,
+                'vl_visit_dt' => date('Y-m-d H:i:s'),
+                'vl_lead_id' => $lead->id,
+                'vl_project_id' => $lead->project_id
+            ]);
+
+            if (!$log->save()) {
+                Yii::error(
+                    'Cant save visitor_log. Point:1 LeadId: ' . $lead->id . ' Errors: ' . VarDumper::dumpAsString($log->getErrors()),
+                    'LeadManageService:createVisitorLog:visitor:log:save'
+                );
+                return null;
+            }
+
+            return $log->vl_id;
+
+        }
+
+        $log = new VisitorLog([
+            'vl_source_cid' => $sourceCid,
+            'vl_ga_client_id' => UuidHelper::uuid(),
+            'vl_ga_user_id' => $client->uuid,
+            'vl_visit_dt' => date('Y-m-d H:i:s'),
+            'vl_lead_id' => $lead->id,
+            'vl_project_id' => $lead->project_id
+        ]);
+
+        if (!$log->save()) {
+            Yii::error(
+                'Cant save visitor_log. Point:2  LeadId: ' . $lead->id . ' Errors: ' . VarDumper::dumpAsString($log->getErrors()),
+                'LeadManageService:createVisitorLog:visitor:log:save'
+            );
+            return null;
+        }
+
+        return $log->vl_id;
     }
 
     /**
@@ -191,7 +253,7 @@ class LeadManageService
 
         $lead = $this->transaction->wrap(function () use ($form, $employeeId, $creatorId, $reason) {
 
-           return $this->createManually($form, $employeeId, $creatorId, $reason);
+            return $this->createManually($form, $employeeId, $creatorId, $reason);
 
         });
 
