@@ -1684,6 +1684,8 @@ class Lead extends ActiveRecord implements Objectable
             'l_dep_id' => 'Department ID',
             'l_delayed_charge' => 'Delayed charge',
             'hybrid_uid' => 'Booking ID',
+
+            'l_visitor_log_id' => 'Visitor log ID',
         ];
     }
 
