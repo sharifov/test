@@ -2,6 +2,7 @@
 
 namespace sales\services\cases;
 
+use common\components\BackOffice;
 use common\models\CaseSale;
 use Exception;
 use http\Exception\RuntimeException;
@@ -334,4 +335,27 @@ class CasesSaleService
         }
         return $caseSale;
     }
+
+    /**
+     * @param array $params
+     * @return array|mixed
+     */
+    public function requestToBackOffice(array $params)
+    {
+        try {
+            $response = BackOffice::sendRequest2('cs/detail', $params);
+            if ($response->isOk) {
+                $result = $response->data;
+                if ($result && is_array($result)) {
+                    return $result;
+                }
+            } else {
+                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+            }
+        } catch (\Throwable $exception) {
+            \Yii::error(VarDumper::dumpAsString($exception), 'CasesSaleService:requestBackOffice');
+        }
+        return [];
+    }
+
 }

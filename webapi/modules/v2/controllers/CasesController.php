@@ -5,6 +5,7 @@ namespace webapi\modules\v2\controllers;
 use sales\model\cases\CaseCodeException;
 use sales\model\cases\useCases\cases\api\create\CreateForm;
 use sales\model\cases\useCases\cases\api\create\Handler;
+use sales\services\cases\CasesSaleService;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
@@ -23,21 +24,25 @@ use webapi\src\response\Response;
  * Class CasesController
  *
  * @property Handler $createHandler
+ * @property CasesSaleService $casesSaleService
  */
 class CasesController extends BaseController
 {
     private $createHandler;
+    private $casesSaleService;
 
     public function __construct(
         $id,
         $module,
         ApiLogger $logger,
         Handler $createHandler,
+        CasesSaleService $casesSaleService,
         $config = []
     )
     {
         parent::__construct($id, $module, $logger, $config);
         $this->createHandler = $createHandler;
+        $this->casesSaleService = $casesSaleService;
     }
 
     /**
@@ -210,6 +215,8 @@ class CasesController extends BaseController
             );
         }
 
+        $findByOrderUid = $this->casesSaleService->requestToBackOffice(['order_uid' => $form->order_uid]);
+
         return new SuccessResponse(
             new DataMessage(
                 new Message('case_gid', $result->caseGid),
@@ -217,4 +224,23 @@ class CasesController extends BaseController
             )
         );
     }
+
+    /**
+     * @param CreateForm $form
+     * @return array|mixed
+     */
+    private function getSale(CreateForm $form)
+    {
+        if ($findByOrderUid = $this->casesSaleService->requestToBackOffice(['order_uid' => $form->order_uid])) {
+            return $findByOrderUid;
+        }
+        if ($findByEmail = $this->casesSaleService->requestToBackOffice(['email' => $form->contact_email])) {
+            return $findByEmail;
+        }
+        if ($findByPhone = $this->casesSaleService->requestToBackOffice(['phone' => $form->contact_phone])) {
+            return $findByPhone;
+        }
+        return [];
+    }
+
 }
