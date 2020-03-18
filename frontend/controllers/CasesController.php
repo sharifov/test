@@ -34,9 +34,10 @@ use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
-use sales\forms\cases\CasesUpdateForm;
+use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\guards\cases\CaseTakeGuard;
+use sales\model\cases\useCases\cases\updateInfo\Handler;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -78,6 +79,7 @@ use yii\widgets\ActiveForm;
  * @property CasesSaleService $casesSaleService
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
  * @property CaseTakeGuard $caseTakeGuard
+ * @property Handler $updateHandler
  */
 class CasesController extends FController
 {
@@ -92,23 +94,8 @@ class CasesController extends FController
     private $casesSaleService;
     private $clientUpdateFromEntityService;
     private $caseTakeGuard;
+    private $updateHandler;
 
-	/**
-	 * CasesController constructor.
-	 * @param $id
-	 * @param $module
-	 * @param CasesCreateService $casesCreateService
-	 * @param CasesManageService $casesManageService
-	 * @param CasesCategoryRepository $casesCategoryRepository
-	 * @param CasesRepository $casesRepository
-	 * @param CasesCommunicationService $casesCommunicationService
-	 * @param UserRepository $userRepository ,
-	 * @param CasesSaleRepository $casesSaleRepository
-	 * @param CasesSaleService $casesSaleService
-	 * @param ClientUpdateFromEntityService $clientUpdateFromEntityService
-	 * @param CaseTakeGuard $caseTakeGuard
-	 * @param array $config
-	 */
     public function __construct(
 		$id,
 		$module,
@@ -122,6 +109,7 @@ class CasesController extends FController
 		CasesSaleService $casesSaleService,
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
 		CaseTakeGuard $caseTakeGuard,
+		Handler $updateHandler,
 		$config = []
     )
     {
@@ -136,6 +124,7 @@ class CasesController extends FController
         $this->casesSaleService = $casesSaleService;
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
         $this->caseTakeGuard = $caseTakeGuard;
+        $this->updateHandler = $updateHandler;
     }
 
     public function behaviors(): array
@@ -1258,42 +1247,25 @@ class CasesController extends FController
      */
     public function actionAjaxUpdate()
     {
-        $gid = (string)Yii::$app->request->get('gid');
-        $case = $this->findModelByGid($gid);
-        $form = new CasesUpdateForm($case);
+        $case = $this->findModelByGid((string)Yii::$app->request->get('gid'));
 
-        try {
-            if ($form->load(Yii::$app->request->post())) {
-                if($form->validate()) {
-                    try {
-                        $case->updateCategory($form->category);
-                        $case->updateSubject($form->subject);
-                        $case->updateDescription($form->description);
+        $form = new UpdateInfoForm(
+            $case,
+            ArrayHelper::map($this->casesCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_key', 'cc_name')
+        );
 
-                        $this->casesRepository->save($case);
-                        //$this->casesManageService->updateCategory($case, $form->category);
-                        Yii::$app->session->setFlash('success', 'Case information has been updated successfully.');
-                    } catch (\Throwable $exception) {
-                        Yii::$app->session->setFlash('error', VarDumper::dumpAsString($exception));
-                    }
-                    return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
-                }
-            } else {
-                $form->category = $case->cs_category;
-                $form->subject = $case->cs_subject;
-                $form->description = $case->cs_description;
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->updateHandler->handle($form->getDto());
+                Yii::$app->session->setFlash('success', 'Case information has been updated successfully.');
+            } catch (\Throwable $exception) {
+                Yii::$app->session->setFlash('error', VarDumper::dumpAsString($exception));
             }
-
-        } catch (\Throwable $exception) {
-            $form->addError('category', $exception->getMessage());
+            return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
         }
-
-        $categories = $this->casesCategoryRepository->getAllByDep($case->cs_dep_id);
-        $categoryList = ArrayHelper::map($categories, 'cc_key', 'cc_name');
 
         return $this->renderAjax('partial/_case_update', [
             'model' => $form,
-            'categoryList' => $categoryList
         ]);
     }
 

@@ -48,7 +48,7 @@ class ProductCreateService
 
         $productId = $this->transactionManager->wrap(function () use ($form) {
 
-            $product = Product::create($form);
+            $product = Product::create($form->getDto());
 
             $this->productRepository->save($product);
 

@@ -5,6 +5,7 @@ namespace sales\repositories\cases;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
+use sales\model\cases\CaseCodeException;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
@@ -117,7 +118,7 @@ class CasesRepository extends Repository
         if ($case = Cases::findOne($id)) {
             return $case;
         }
-        throw new NotFoundException('Case is not found');
+        throw new NotFoundException('Case is not found', CaseCodeException::CASE_NOT_FOUND);
     }
 
     /**
@@ -130,7 +131,7 @@ class CasesRepository extends Repository
         $case->cs_updated_dt = $now;
         $case->cs_last_action_dt = $now;
         if (!$case->save(false)) {
-            throw new \RuntimeException('Saving error');
+            throw new \RuntimeException('Saving error', CaseCodeException::CASE_SAVE);
         }
         $this->eventDispatcher->dispatchAll($case->releaseEvents());
         return $case->cs_id;
@@ -144,7 +145,7 @@ class CasesRepository extends Repository
     public function remove(Cases $case): void
     {
         if (!$case->delete()) {
-            throw new \RuntimeException('Removing error');
+            throw new \RuntimeException('Removing error', CaseCodeException::CASE_REMOVE);
         }
         $this->eventDispatcher->dispatchAll($case->releaseEvents());
     }

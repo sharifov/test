@@ -11,6 +11,8 @@ use common\models\LeadFlightSegment;
 use common\models\Notifications;
 use common\models\Sources;
 use common\models\VisitorLog;
+use modules\flight\models\FlightSegment;
+use modules\product\src\useCases\product\api\create\flight\Handler;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
@@ -33,6 +35,7 @@ class LeadController extends ApiBaseController
     private $leadRepository;
     private $transactionManager;
     private $leadCreateApiService;
+    private $createProductFlightHandler;
 
     public function __construct($id,
                                 $module,
@@ -40,6 +43,7 @@ class LeadController extends ApiBaseController
                                 LeadRepository $leadRepository,
                                 TransactionManager $transactionManager,
                                 LeadCreateApiService $leadCreateApiService,
+                                Handler $createProductFlightHandler,
                                 $config = [])
     {
         parent::__construct($id, $module, $config);
@@ -47,6 +51,7 @@ class LeadController extends ApiBaseController
         $this->leadRepository = $leadRepository;
         $this->transactionManager = $transactionManager;
         $this->leadCreateApiService = $leadCreateApiService;
+        $this->createProductFlightHandler = $createProductFlightHandler;
     }
 
     /**
@@ -419,6 +424,31 @@ class LeadController extends ApiBaseController
         $response = [];
 
         $lead = $this->leadCreateApiService->createByApi($modelLead, $this->apiProject);
+
+        if ((bool)(Yii::$app->params['settings']['api_create_lead_flight_product'] ?? false)) {
+            $segments = [];
+            /** @var LeadFlightSegment $flightSegment */
+            foreach ($lead->getLeadFlightSegments()->orderBy(['departure' => SORT_ASC])->all() as $flightSegment) {
+                $segments[] = new \modules\flight\src\dto\flightSegment\SegmentDTO(
+                    null,
+                    $flightSegment->origin,
+                    $flightSegment->destination,
+                    null,
+                    null,
+                    $flightSegment->origin_label,
+                    $flightSegment->destination_label,
+                    $flightSegment->departure
+                );
+            }
+            $this->createProductFlightHandler->handle(
+                $lead->id,
+                $lead->cabin,
+                (int)$lead->adults,
+                (int)$lead->children,
+                (int)$lead->infants,
+                ...$segments
+            );
+        }
 
 //        $transaction = Yii::$app->db->beginTransaction();
 //
