@@ -54,8 +54,8 @@ class CasesController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string}           contact_email                    Client Email
-     * @apiParam {string}           contact_phone                    Client Phone
+     * @apiParam {string{160}}           contact_email                    Client Email
+     * @apiParam {string{20}}           contact_phone                    Client Phone
      * @apiParam {int}              category_id                      Case category id
      * @apiParam {string{5..7}}     order_uid                        Order uid (symbols and numbers only)
      * @apiParam {string{255}}           [subject]                        Subject

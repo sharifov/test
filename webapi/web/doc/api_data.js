@@ -158,6 +158,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "160",
             "optional": false,
             "field": "contact_email",
             "description": "<p>Client Email</p>"
@@ -165,6 +166,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "20",
             "optional": false,
             "field": "contact_phone",
             "description": "<p>Client Phone</p>"
