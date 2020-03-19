@@ -68,7 +68,7 @@ class CreateForm extends Model
             ['subject', 'string', 'max' => 255],
 
             ['description', 'default', 'value' => null],
-            ['description', 'string'],
+            ['description', 'string', 'max' => 65000],
 
             ['order_info', 'default', 'value' => []],
             ['order_info', IsArrayValidator::class],

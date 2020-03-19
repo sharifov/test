@@ -130,7 +130,12 @@ $gridId = 'cases-grid-id';
                 'class' => \sales\yii\grid\cases\NeedActionColumn::class,
                 'attribute' => 'cs_need_action',
             ],
-            'cs_subject',
+            [
+                'attribute' => 'cs_subject',
+                'contentOptions' => [
+                    'style' => 'word-break: break-all; white-space:normal'
+                ]
+            ],
             [
                 'attribute' => 'cs_user_id',
                 'value' => static function (Cases $model) {
