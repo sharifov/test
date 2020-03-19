@@ -74,12 +74,14 @@ class CaseCategoryController extends BaseController
      *          "case-category": [
      *              {
      *                  "cc_id": 1,
+     *                  "cc_key": "add_infant",
      *                  "cc_name": "Add infant",
      *                  "cc_dep_id": 3,
      *                  "cc_updated_dt": null
      *              },
      *              {
      *                  "cc_id": 2,
+     *                  "cc_key": "add_insurance",
      *                  "cc_name": "Insurance Add/Remove",
      *                  "cc_dep_id": 3,
      *                  "cc_updated_dt": "2019-09-26 15:14:01"
@@ -120,7 +122,7 @@ class CaseCategoryController extends BaseController
     public function actionList(): SuccessResponse
     {
         $caseCategory = CaseCategory::find()
-            ->select(['cc_id', 'cc_name', 'cc_dep_id', 'cc_updated_dt'])
+            ->select(['cc_id', 'cc_key', 'cc_name', 'cc_dep_id', 'cc_updated_dt'])
             ->orderBy(['cc_id' => SORT_ASC])
             ->all();
 
