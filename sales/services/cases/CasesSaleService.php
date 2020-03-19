@@ -347,16 +347,18 @@ class CasesSaleService
         if (isset($saleData['itinerary'][0]['segments'][0]['departureTime'])) {
             $caseSale->css_out_date = $saleData['itinerary'][0]['segments'][0]['departureTime'];
         }
-        $countItinerary = count($saleData['itinerary']);
-        if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'])) {
-            $caseSale->css_in_departure_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'];
-        }
-        $idxLastInLastSegments = count($saleData['itinerary'][$countItinerary - 1]['segments']) - 1;
-        if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
-            $caseSale->css_out_arrival_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'];
-        }
-        if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'])) {
-            $caseSale->css_in_date = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'];
+        if (isset($saleData['itinerary'])) {
+            $countItinerary = count($saleData['itinerary']);
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'])) {
+                $caseSale->css_in_departure_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'];
+            }
+            $idxLastInLastSegments = count($saleData['itinerary'][$countItinerary - 1]['segments']) - 1;
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
+                $caseSale->css_out_arrival_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'];
+            }
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'])) {
+                $caseSale->css_in_date = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'];
+            }
         }
         if (isset($saleData['chargeType'])) {
             $caseSale->css_charge_type = $saleData['chargeType'];
