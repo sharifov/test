@@ -35,6 +35,7 @@ class OrderUserProfit extends \yii\db\ActiveRecord
 	public const MIN_PERCENT = 0;
 
 	public const SCENARIO_CRUD = 'crud';
+	public const SCENARIO_INSERT = 'insert';
 
 	public function scenarios()
 	{
@@ -81,13 +82,13 @@ class OrderUserProfit extends \yii\db\ActiveRecord
             [['oup_amount', 'oup_percent'], 'number'],
 			['oup_percent', 'integer', 'max' => self::MAX_PERCENT , 'min' => self::MIN_PERCENT],
 			[['oup_created_dt', 'oup_updated_dt'], 'safe'],
-            [['oup_order_id', 'oup_user_id'], 'unique', 'targetAttribute' => ['oup_order_id', 'oup_user_id']],
+            [['oup_order_id', 'oup_user_id'], 'unique', 'targetAttribute' => ['oup_order_id', 'oup_user_id'], 'on' => [self::SCENARIO_INSERT, self::SCENARIO_CRUD]],
             [['oup_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['oup_created_user_id' => 'id']],
             [['oup_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['oup_user_id' => 'id']],
             [['oup_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['oup_order_id' => 'or_id']],
             [['oup_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['oup_updated_user_id' => 'id']],
             [['oup_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['oup_user_id' => 'id']],
-			[['oup_percent'], 'checkPercentForAllUsersByOrder', 'on' => 'crud']
+			[['oup_percent'], 'checkPercentForAllUsersByOrder', 'on' => self::SCENARIO_CRUD]
         ];
     }
 

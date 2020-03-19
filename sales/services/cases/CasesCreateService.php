@@ -106,7 +106,7 @@ class CasesCreateService
 
             $case = Cases::createByWeb(
                 $form->projectId,
-                $form->category,
+                $form->categoryId,
                 $client->id,
                 $form->depId,
                 $form->subject,

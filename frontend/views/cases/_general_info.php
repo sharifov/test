@@ -85,7 +85,7 @@ use yii\widgets\DetailView;
                 <?= DetailView::widget([
                     'model' => $model,
                     'attributes' => [
-                        //'cs_category',
+                        //'cs_category_id',
                         //'cs_lead_id',
                         //'cs_call_id',
                         //'cs_dep_id',

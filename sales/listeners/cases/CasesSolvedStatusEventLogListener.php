@@ -4,32 +4,27 @@ namespace sales\listeners\cases;
 
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\events\CasesSolvedStatusEvent;
-use sales\services\cases\CasesStatusLogService;
+use sales\services\cases\CaseStatusLogService;
 use Yii;
 
 /**
  * Class CasesSolvedStatusEventLogListener
+ *
+ * @property CaseStatusLogService $caseStatusLogService
  */
 class CasesSolvedStatusEventLogListener
 {
-    private $casesStatusLogService;
+    private $caseStatusLogService;
 
-    /**
-     * CasesSolvedStatusEventLogListener constructor.
-     * @param CasesStatusLogService $casesStatusLogService
-     */
-    public function __construct(CasesStatusLogService $casesStatusLogService)
+    public function __construct(CaseStatusLogService $caseStatusLogService)
     {
-        $this->casesStatusLogService = $casesStatusLogService;
+        $this->caseStatusLogService = $caseStatusLogService;
     }
 
-    /**
-     * @param CasesSolvedStatusEvent $event
-     */
     public function handle(CasesSolvedStatusEvent $event): void
     {
         try {
-            $this->casesStatusLogService->log(
+            $this->caseStatusLogService->log(
                 $event->case->cs_id,
                 CasesStatus::STATUS_SOLVED,
                 $event->oldStatus,

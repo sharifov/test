@@ -7,7 +7,7 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
- * Class CasesStatusLog
+ * Class CaseStatusLog
  *
  * @property int $csl_id
  * @property int $csl_case_id
@@ -24,7 +24,7 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property Employee $owner
  */
-class CasesStatusLog extends ActiveRecord
+class CaseStatusLog extends ActiveRecord
 {
 
     /**
@@ -34,7 +34,7 @@ class CasesStatusLog extends ActiveRecord
      * @param int|null $creatorId
      * @param int|null $ownerId
      * @param string|null $description
-     * @return CasesStatusLog
+     * @return CaseStatusLog
      */
     public static function create(
         int $caseId,
@@ -140,6 +140,6 @@ class CasesStatusLog extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return '{{%cases_status_log}}';
+        return '{{%case_status_log}}';
     }
 }

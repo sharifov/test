@@ -5,9 +5,9 @@ namespace sales\entities\cases;
 use yii\data\ActiveDataProvider;
 
 /**
- * Class CasesCategorySearch
+ * Class CaseCategorySearch
  */
-class CasesCategorySearch extends CasesCategory
+class CaseCategorySearch extends CaseCategory
 {
 
     /**
@@ -16,7 +16,7 @@ class CasesCategorySearch extends CasesCategory
     public function rules(): array
     {
         return [
-            [['cc_key', 'cc_name'], 'string'],
+            [['cc_id', 'cc_name'], 'string'],
             [['cc_dep_id', 'cc_system'], 'integer'],
         ];
     }
@@ -27,7 +27,7 @@ class CasesCategorySearch extends CasesCategory
      */
     public function search($params): ActiveDataProvider
     {
-        $query = CasesCategory::find();
+        $query = CaseCategory::find();
 
         // add conditions that should always apply here
 
@@ -45,12 +45,12 @@ class CasesCategorySearch extends CasesCategory
 
         // grid filtering conditions
         $query->andFilterWhere([
+            'cc_id' => $this->cc_id,
             'cc_dep_id' => $this->cc_dep_id,
             'cc_system' => $this->cc_system,
         ]);
 
-        $query->andFilterWhere(['like', 'cc_key', $this->cc_key])
-            ->andFilterWhere(['like', 'cc_name', $this->cc_name]);
+        $query->andFilterWhere(['like', 'cc_name', $this->cc_name]);
 
         return $dataProvider;
     }
