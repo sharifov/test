@@ -234,22 +234,6 @@ if (!empty($caseSaleModel)) {
         </div>
 
     </div>
-    <?php if (!empty($data['fareRules'])): ?>
-        <div class="row">
-            <div class="col-md-12">
-                <h2>Rules</h2>
-                <table class="table table-bordered table-hover table-striped">
-                    <tr>
-                        <td>
-                            <pre>
-                                <?php print_r($data['fareRules']); ?>
-                            </pre>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    <?php endif; ?>
     <div class="row">
         <div class="col-md-12">
             <h2>Passengers</h2>
@@ -569,6 +553,120 @@ if (!empty($caseSaleModel)) {
             <?php endif;?>
         </div>
     </div>
+
+    <?php if (!empty($data['fareRules'])): ?>
+
+        <?php
+            try {
+         ?>
+
+            <h4>Fare Rules</h4>
+            <?php foreach ($data['fareRules'] as $rule): ?>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <?php foreach ($rule as $key => $value): ?>
+
+                                    <?php if ($key !== 'rules'): ?>
+                                        <br> <b><?= $key ?></b>: <?= Html::encode($value) ?>
+                                    <?php else: ?>
+                                        <?php foreach ($value as $item): ?>
+                                            <b>Rules:</b>
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <?php if (isset($item['details'])): ?>
+                                                        <b>Details</b>
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <?php foreach ($item['details'] as $detailKey => $detailValue): ?>
+                                                                    <b><?= $detailKey ?></b>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <table class="table table-bordered table-hover table-striped">
+                                                                                <thead>
+                                                                                <tr>
+                                                                                    <th>for</th>
+                                                                                    <th>title</th>
+                                                                                    <th>value</th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                <?php foreach ($detailValue as $elem): ?>
+                                                                                    <tr>
+                                                                                        <td><?= $elem['for'] ?></td>
+                                                                                        <td><?= $elem['title'] ?></td>
+                                                                                        <td><?= $elem['value'] ?></td>
+                                                                                    </tr>
+                                                                                <?php endforeach; ?>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    <br>
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <div class="row">
+
+                                                                <div class="col-md-6">
+                                                                    <table class="table table-bordered table-hover table-striped">
+
+                                                                        <?php if (isset($item['category'])): ?>
+                                                                            <tr>
+                                                                                <td>category</b></td>
+                                                                                <td> <?= Html::encode($item['category']) ?> </td>
+                                                                            </tr>
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (isset($item['fullText'])): ?>
+                                                                            <tr>
+                                                                                <td>fullText</b></td>
+                                                                                <td> <?= Html::encode($item['fullText']) ?> </td>
+                                                                            </tr>
+
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (isset($item['categoryTitle'])): ?>
+                                                                            <tr>
+                                                                                <td>categoryTitle</b></td>
+                                                                                <td> <?= Html::encode($item['categoryTitle']) ?> </td>
+                                                                            </tr>
+
+                                                                        <?php endif; ?>
+
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+            <?php endforeach; ?>
+
+        <?php
+
+            } catch (Throwable $e) {
+                Yii::error($e->getMessage() . VarDumper::dumpAsString($data['fareRules']), 'Parsing:fareRules');
+            }
+
+        ?>
+    <?php endif; ?>
+
     <?php
 	$url = \yii\helpers\Url::to(['/cases/ajax-sync-with-back-office/']);
 	$urlRefresh = \yii\helpers\Url::to(['/cases/ajax-refresh-sale-info']);
