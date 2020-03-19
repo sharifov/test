@@ -626,7 +626,7 @@ if (!empty($caseSaleModel)) {
                                                                         <?php if (isset($item['fullText'])): ?>
                                                                             <tr>
                                                                                 <td>fullText</b></td>
-                                                                                <td> <?= Html::encode($item['fullText']) ?> </td>
+                                                                                <td> <?= Yii::$app->formatter->format($item['fullText'], 'ntext') ?> </td>
                                                                             </tr>
 
                                                                         <?php endif; ?>
