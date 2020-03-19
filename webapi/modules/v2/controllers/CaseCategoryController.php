@@ -81,7 +81,7 @@ class CaseCategoryController extends BaseController
      *              },
      *              {
      *                  "cc_id": 2,
-     *                  "cc_key": "add_insurance",
+     *                  "cc_key": null,
      *                  "cc_name": "Insurance Add/Remove",
      *                  "cc_dep_id": 3,
      *                  "cc_updated_dt": "2019-09-26 15:14:01"
