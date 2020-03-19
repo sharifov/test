@@ -6,6 +6,7 @@ use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 
 /* @var $this yii\web\View */
 /* @var $data array */
@@ -44,6 +45,10 @@ if (!empty($caseSaleModel)) {
                 <tr>
                     <th>Sale Id</th>
                     <td><?=Html::encode($data['saleId'])?></td>
+                </tr>
+                <tr>
+                    <th>Flight Status</th>
+                    <td><?=Html::encode($data['flightStatus'] ?? '')?></td>
                 </tr>
                 <tr>
                     <th>Confirmation Number (Booking Id)</th>
@@ -142,11 +147,13 @@ if (!empty($caseSaleModel)) {
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Phone number</th>
+                            <th>Email</th>
                         </tr>
                         <tr>
                             <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
                             <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
                             <td><?=Html::encode($data['customerInfo']['phoneNumber'] ?? '')?></td>
+                            <td><?=Html::encode($data['email'] ?? '')?></td>
                         </tr>
                     </table>
 				<?php endif;?>
@@ -227,6 +234,22 @@ if (!empty($caseSaleModel)) {
         </div>
 
     </div>
+    <?php if (!empty($data['fareRules'])): ?>
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Rules</h2>
+                <table class="table table-bordered table-hover table-striped">
+                    <tr>
+                        <td>
+                            <pre>
+                                <?php print_r($data['fareRules']); ?>
+                            </pre>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    <?php endif; ?>
     <div class="row">
         <div class="col-md-12">
             <h2>Passengers</h2>
