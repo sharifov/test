@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-//                'filter' => CaseCategory::getList()
+                'filter' => CaseCategory::getList()
             ],
             [
                 'attribute' => 'cs_lead_id',
