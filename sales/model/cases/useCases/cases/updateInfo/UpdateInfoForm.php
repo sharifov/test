@@ -9,7 +9,7 @@ use yii\base\Model;
  * Class CasesUpdateForm
  *
  * @property Cases $case
- * @property string $category
+ * @property int $categoryId
  * @property string $subject
  * @property string $description
  * @property string|null $orderUid
@@ -17,7 +17,7 @@ use yii\base\Model;
  */
 class UpdateInfoForm extends Model
 {
-    public $category;
+    public $categoryId;
     public $subject;
     public $description;
     public $orderUid;
@@ -32,7 +32,7 @@ class UpdateInfoForm extends Model
     {
         parent::__construct($config);
         $this->case = $case;
-        $this->category = $case->cs_category;
+        $this->categoryId = $case->cs_category_id;
         $this->orderUid = $case->cs_order_uid;
         $this->subject = $case->cs_subject;
         $this->description = $case->cs_description;
@@ -42,9 +42,9 @@ class UpdateInfoForm extends Model
     public function rules(): array
     {
         return [
-            ['category', 'required'],
-            ['category', 'string', 'max' => 100],
-            ['category', 'in', 'range' => array_keys($this->getCategoryList())],
+            ['categoryId', 'required'],
+            ['categoryId', 'integer'],
+            ['categoryId', 'in', 'range' => array_keys($this->getCategoryList())],
 
             ['subject', 'string', 'max' => 200],
 
@@ -59,7 +59,7 @@ class UpdateInfoForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'category' => 'Category',
+            'categoryId' => 'Category',
             'subject' => 'Subject',
             'description' => 'Description',
             'orderUid' => 'Booking ID',
@@ -80,7 +80,7 @@ class UpdateInfoForm extends Model
     {
         return new Command(
             $this->case->cs_id,
-            $this->category,
+            $this->categoryId,
             $this->subject,
             $this->description,
             $this->orderUid

@@ -4,32 +4,27 @@ namespace sales\listeners\cases;
 
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\events\CasesTrashStatusEvent;
-use sales\services\cases\CasesStatusLogService;
+use sales\services\cases\CaseStatusLogService;
 use Yii;
 
 /**
  * Class CasesTrashStatusEventLogListener
+ *
+ * @property CaseStatusLogService $caseStatusLogService
  */
 class CasesTrashStatusEventLogListener
 {
-    private $casesStatusLogService;
+    private $caseStatusLogService;
 
-    /**
-     * CasesTrashStatusEventLogListener constructor.
-     * @param CasesStatusLogService $casesStatusLogService
-     */
-    public function __construct(CasesStatusLogService $casesStatusLogService)
+    public function __construct(CaseStatusLogService $caseStatusLogService)
     {
-        $this->casesStatusLogService = $casesStatusLogService;
+        $this->caseStatusLogService = $caseStatusLogService;
     }
 
-    /**
-     * @param CasesTrashStatusEvent $event
-     */
     public function handle(CasesTrashStatusEvent $event): void
     {
         try {
-            $this->casesStatusLogService->log(
+            $this->caseStatusLogService->log(
                 $event->case->cs_id,
                 CasesStatus::STATUS_TRASH,
                 $event->oldStatus,

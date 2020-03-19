@@ -6,13 +6,13 @@ use common\models\Employee;
 use yii\data\ActiveDataProvider;
 
 /**
- * Class CasesStatusLogSearch
+ * Class CaseStatusLogSearch
  *
  * @property array $statuses
  * @property string $created_date_from
  * @property string $created_date_to
  */
-class CasesStatusLogSearch extends CasesStatusLog
+class CaseStatusLogSearch extends CaseStatusLog
 {
 
     public $statuses = [];
@@ -61,7 +61,7 @@ class CasesStatusLogSearch extends CasesStatusLog
      */
     public function search($params): ActiveDataProvider
     {
-        $query = CasesStatusLog::find();
+        $query = CaseStatusLog::find();
 
         // add conditions that should always apply here
 
@@ -123,7 +123,7 @@ class CasesStatusLogSearch extends CasesStatusLog
      */
     public function searchByCase($params): ActiveDataProvider
     {
-        $query = CasesStatusLog::find();
+        $query = CaseStatusLog::find();
 
         // add conditions that should always apply here
 

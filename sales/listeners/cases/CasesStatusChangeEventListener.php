@@ -3,22 +3,21 @@
 namespace sales\listeners\cases;
 
 use sales\entities\cases\events\CasesStatusChangeEvent;
-use sales\services\cases\CasesStatusLogService;
+use sales\services\cases\CaseStatusLogService;
 use Yii;
 
 /**
  * Class CasesStatusChangeEventListener
  *
- * @property CasesStatusLogService $casesStatusLogService
+ * @property CaseStatusLogService $caseStatusLogService
  */
 class CasesStatusChangeEventListener
 {
+    private $caseStatusLogService;
 
-    private $casesStatusLogService;
-
-    public function __construct(CasesStatusLogService $casesStatusLogService)
+    public function __construct(CaseStatusLogService $caseStatusLogService)
     {
-        $this->casesStatusLogService = $casesStatusLogService;
+        $this->caseStatusLogService = $caseStatusLogService;
     }
 
     /**
@@ -28,7 +27,7 @@ class CasesStatusChangeEventListener
     {
         $createdUserId = Yii::$app->user->id ?? null;
         try {
-            $this->casesStatusLogService->log(
+            $this->caseStatusLogService->log(
                 $event->case->cs_id,
                 $event->toStatus,
                 $event->fromStatus,
@@ -40,5 +39,4 @@ class CasesStatusChangeEventListener
             Yii::error($e, 'Listeners:CasesStatusChangeEventListener');
         }
     }
-
 }

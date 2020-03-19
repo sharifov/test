@@ -5,7 +5,7 @@ namespace sales\model\cases\useCases\cases\api\create;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
-use sales\repositories\cases\CasesCategoryRepository;
+use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
@@ -13,7 +13,7 @@ use sales\services\TransactionManager;
 /**
  * Class Handler
  *
- * @property CasesCategoryRepository $categoryRepository
+ * @property CaseCategoryRepository $categoryRepository
  * @property ClientManageService $clientManageService
  * @property CasesRepository $casesRepository
  * @property TransactionManager $transactionManager
@@ -26,7 +26,7 @@ class Handler
     private $transactionManager;
 
     public function __construct(
-        CasesCategoryRepository $categoryRepository,
+        CaseCategoryRepository $categoryRepository,
         ClientManageService $clientManageService,
         CasesRepository $casesRepository,
         TransactionManager $transactionManager
@@ -40,7 +40,7 @@ class Handler
 
     public function handle(Command $command): Result
     {
-        $category = $this->categoryRepository->findByKey($command->category);
+        $category = $this->categoryRepository->find($command->category_id);
 
         /** @var Result $result */
         $result = $this->transactionManager->wrap(function () use ($command, $category) {
@@ -57,7 +57,7 @@ class Handler
                 $command->order_uid,
                 $command->subject,
                 $this->processDescription($command->order_info, $command->description),
-                $command->category
+                $command->category_id
             );
 
             $this->casesRepository->save($case);

@@ -2,7 +2,7 @@
 
 namespace webapi\modules\v2\controllers;
 
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\Message;
 use webapi\src\response\SuccessResponse;
@@ -24,7 +24,7 @@ class CaseCategoryController extends BaseController
 				'class' => HttpCache::class,
                 'only' => ['list'],
                 'lastModified' => static function () {
-                    return strtotime(CasesCategory::find()->max('cc_updated_dt'));
+                    return strtotime(CaseCategory::find()->max('cc_updated_dt'));
                 },
 			],
 		];
@@ -73,13 +73,13 @@ class CaseCategoryController extends BaseController
      *      "data": {
      *          "case-category": [
      *              {
-     *                  "cc_key": "add_infant",
+     *                  "cc_id": 1,
      *                  "cc_name": "Add infant",
      *                  "cc_dep_id": 3,
      *                  "cc_updated_dt": null
      *              },
      *              {
-     *                  "cc_key": "add_insurance",
+     *                  "cc_id": 2,
      *                  "cc_name": "Insurance Add/Remove",
      *                  "cc_dep_id": 3,
      *                  "cc_updated_dt": "2019-09-26 15:14:01"
@@ -119,14 +119,14 @@ class CaseCategoryController extends BaseController
 
     public function actionList(): SuccessResponse
     {
-        $casesCategory = CasesCategory::find()
-            ->select(['cc_key', 'cc_name', 'cc_dep_id', 'cc_updated_dt'])
-            ->orderBy(['cc_key' => SORT_ASC])
+        $caseCategory = CaseCategory::find()
+            ->select(['cc_id', 'cc_name', 'cc_dep_id', 'cc_updated_dt'])
+            ->orderBy(['cc_id' => SORT_ASC])
             ->all();
 
         return new SuccessResponse(
             new DataMessage(
-                new Message('case-category', $casesCategory)
+                new Message('case-category', $caseCategory)
             )
         );
     }

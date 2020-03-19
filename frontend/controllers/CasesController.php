@@ -27,7 +27,7 @@ use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
-use sales\entities\cases\CasesStatusLogSearch;
+use sales\entities\cases\CaseStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesChangeStatusForm;
@@ -38,7 +38,7 @@ use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\guards\cases\CaseTakeGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
-use sales\repositories\cases\CasesCategoryRepository;
+use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
 use sales\repositories\client\ClientEmailRepository;
@@ -71,7 +71,7 @@ use yii\widgets\ActiveForm;
  *
  * @property CasesCreateService $casesCreateService
  * @property CasesManageService $casesManageService
- * @property CasesCategoryRepository $casesCategoryRepository
+ * @property CaseCategoryRepository $caseCategoryRepository
  * @property CasesRepository $casesRepository
  * @property CasesCommunicationService $casesCommunicationService
  * @property UserRepository $userRepository,
@@ -87,7 +87,7 @@ class CasesController extends FController
     private $casesCreateService;
     private $casesManageService;
     private $casesCommunicationService;
-    private $casesCategoryRepository;
+    private $caseCategoryRepository;
     private $casesRepository;
     private $userRepository;
     private $casesSaleRepository;
@@ -97,26 +97,26 @@ class CasesController extends FController
     private $updateHandler;
 
     public function __construct(
-		$id,
-		$module,
-		CasesCreateService $casesCreateService,
-		CasesManageService $casesManageService,
-		CasesCategoryRepository $casesCategoryRepository,
-		CasesRepository $casesRepository,
-		CasesCommunicationService $casesCommunicationService,
-		UserRepository $userRepository,
-		CasesSaleRepository $casesSaleRepository,
-		CasesSaleService $casesSaleService,
+        $id,
+        $module,
+        CasesCreateService $casesCreateService,
+        CasesManageService $casesManageService,
+        CaseCategoryRepository $caseCategoryRepository,
+        CasesRepository $casesRepository,
+        CasesCommunicationService $casesCommunicationService,
+        UserRepository $userRepository,
+        CasesSaleRepository $casesSaleRepository,
+        CasesSaleService $casesSaleService,
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
-		CaseTakeGuard $caseTakeGuard,
-		Handler $updateHandler,
-		$config = []
+        CaseTakeGuard $caseTakeGuard,
+        Handler $updateHandler,
+        $config = []
     )
     {
         parent::__construct($id, $module, $config);
         $this->casesCreateService = $casesCreateService;
         $this->casesManageService = $casesManageService;
-        $this->casesCategoryRepository = $casesCategoryRepository;
+        $this->caseCategoryRepository = $caseCategoryRepository;
         $this->casesRepository = $casesRepository;
         $this->casesCommunicationService = $casesCommunicationService;
         $this->userRepository = $userRepository;
@@ -864,10 +864,10 @@ class CasesController extends FController
     {
         $id = (int)$id;
         $str = '';
-        if ($categories = $this->casesCategoryRepository->getAllByDep($id)) {
+        if ($categories = $this->caseCategoryRepository->getAllByDep($id)) {
             $str .= '<option>Choose a category</option>';
             foreach ($categories as $category) {
-                $str .= '<option value="' . Html::encode($category->cc_key) . '">' . Html::encode($category->cc_name) . '</option>';
+                $str .= '<option value="' . Html::encode($category->cc_id) . '">' . Html::encode($category->cc_name) . '</option>';
             }
         } else {
             $str = '<option>-</option>';
@@ -976,7 +976,7 @@ class CasesController extends FController
         if ($statusForm->load(Yii::$app->request->post()) && $statusForm->validate()) {
             try {
 
-                if ($user->isSimpleAgent() && empty($case->cs_category)) {
+                if ($user->isSimpleAgent() && empty($case->cs_category_id)) {
                     throw new \DomainException('Status of a case without a category cannot be changed!');
                 }
 
@@ -1026,10 +1026,10 @@ class CasesController extends FController
 
         $caseGId = Yii::$app->request->get('gid');
         $case = $this->casesRepository->findByGid($caseGId);
-        $searchModel = new CasesStatusLogSearch();
+        $searchModel = new CaseStatusLogSearch();
 
         $params = Yii::$app->request->queryParams;
-        $params['CasesStatusLogSearch']['csl_case_id'] = $case->cs_id;
+        $params['CaseStatusLogSearch']['csl_case_id'] = $case->cs_id;
 
         $dataProvider = $searchModel->searchByCase($params);
 
@@ -1250,7 +1250,7 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
-            ArrayHelper::map($this->casesCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_key', 'cc_name')
+            ArrayHelper::map($this->caseCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_id', 'cc_name')
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {

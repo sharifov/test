@@ -2,7 +2,7 @@
 
 use common\models\Department;
 use common\models\Project;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
@@ -42,11 +42,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'cs_subject',
             [
-                'attribute' => 'cs_category',
+                'attribute' => 'cs_category_id',
                 'value' => static function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-//                'filter' => CasesCategory::getList()
+                'filter' => CaseCategory::getList()
             ],
             [
                 'attribute' => 'cs_lead_id',
