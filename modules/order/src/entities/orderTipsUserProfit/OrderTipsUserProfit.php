@@ -109,6 +109,7 @@ class OrderTipsUserProfit extends \yii\db\ActiveRecord
             [['otup_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['otup_updated_user_id' => 'id']],
             [['otup_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['otup_user_id' => 'id']],
 			[['otup_percent'], 'checkPercentForAllUsersByOrder', 'on' => self::SCENARIO_CRUD],
+			[['otup_order_id'], 'checkIfExistOrderTips', 'on' => self::SCENARIO_CRUD]
 
 		];
 //		return [
@@ -210,6 +211,13 @@ class OrderTipsUserProfit extends \yii\db\ActiveRecord
 			if ($totalSum > self::MAX_PERCENT) {
 				$this->addError('otup_percent', 'Total sum of percent on this order cant be more then 100%');
 			}
+		}
+	}
+
+	public function checkIfExistOrderTips($attribute): void
+	{
+		if (!$this->otupOrder->orderTips) {
+			$this->addError($attribute, 'Order Tips is not assigned to this order: ' . $this->$attribute);
 		}
 	}
 
