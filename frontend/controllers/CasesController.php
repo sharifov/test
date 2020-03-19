@@ -1403,7 +1403,10 @@ class CasesController extends FController
 			if ($throwable->getCode() < 0 && $throwable->getCode() > -4) {
 				$out['message'] = $throwable->getMessage();
 			}
-			Yii::error('Code: ' . $throwable->getCode() . '; ' . $throwable->getMessage() . '; File: ' . $throwable->getFile() . ': ' . $throwable->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
+			Yii::error(
+			    \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
+			);
 		}
 
 		return $out;
@@ -1458,7 +1461,10 @@ class CasesController extends FController
 			if ($throwable->getCode() <= 0 && $throwable->getCode() > -4) {
 				$out['message'] = $throwable->getMessage();
 			}
-			Yii::error('Code: ' . $throwable->getCode() . '; ' . $throwable->getMessage() . '; File: ' . $throwable->getFile() . ': ' . $throwable->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
+			Yii::error(
+			    \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
+			);
 		}
 
 		return $this->asJson($out);
