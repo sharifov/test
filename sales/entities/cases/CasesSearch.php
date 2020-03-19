@@ -114,7 +114,7 @@ class CasesSearch extends Cases
             'cs_gid' => 'GID',
             'cs_project_id' => 'Project',
             'cs_subject' => 'Subject',
-            'cs_category' => 'Category',
+            'cs_category_id' => 'Category',
             'cs_status' => 'Status',
             'cs_user_id' => 'User',
             'cs_lead_id' => 'Lead ID',
@@ -420,30 +420,6 @@ class CasesSearch extends Cases
         }
 
         return $dataProvider;
-    }
-
-    /**
-     * @return array
-     */
-    public function attributeLabels(): array
-    {
-        return [
-            'cs_id' => 'ID',
-            'cs_gid' => 'GID',
-            'cs_project_id' => 'Project',
-            'cs_subject' => 'Subject',
-            'cs_category_id' => 'Category',
-            'cs_status' => 'Status',
-            'cs_user_id' => 'User',
-            'cs_lead_id' => 'Lead ID',
-            'cs_dep_id' => 'Department',
-            'cs_created_dt' => 'Created',
-            'cssSaleId' => 'Sale ID',
-            'cssBookId' => 'Booking ID',
-            'salePNR' => 'Quote PNR',
-            'cs_source_type_id' => 'Source type',
-            'cs_need_action' => 'Need action',
-        ];
     }
 
     /**
