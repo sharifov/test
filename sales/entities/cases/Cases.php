@@ -557,7 +557,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function getCaseSale(): ActiveQuery
     {
-        return $this->hasMany(CaseSale::class, ['css_cs_id' => 'cs_id']);
+        return $this->hasMany(CaseSale::class, ['css_cs_id' => 'cs_id'])->orderBy(['css_sale_id' => SORT_DESC]);
     }
 
     /**

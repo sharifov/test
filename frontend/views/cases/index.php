@@ -171,7 +171,8 @@ $gridId = 'cases-grid-id';
                     if ($model->caseSale) {
                         foreach ($model->caseSale as $caseSale) {
                             /** @var CaseSale $caseSale */
-                            $out .= $caseSale->css_charged . '<br />';
+                            $out .= Html::a($caseSale->css_charged, ['sale/view', 'h' => base64_encode($caseSale->css_sale_book_id . '|' . $caseSale->css_sale_id)]) . '<br />';
+                            //$out .= $caseSale->css_charged . '<br />';
                         }
                     }
                     return $out;
@@ -185,7 +186,8 @@ $gridId = 'cases-grid-id';
                     if ($model->caseSale) {
                         foreach ($model->caseSale as $caseSale) {
                             /** @var CaseSale $caseSale */
-                            $out .= $caseSale->css_profit . '<br />';
+                            $out .= Html::a($caseSale->css_profit, ['sale/view', 'h' => base64_encode($caseSale->css_sale_book_id . '|' . $caseSale->css_sale_id)]) . '<br />';
+                            //$out .= $caseSale->css_profit . '<br />';
                         }
                     }
                     return $out;
@@ -203,6 +205,7 @@ $gridId = 'cases-grid-id';
                                 Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_out_date)) . '<br />' : '';
                             $out .= $caseSale->css_in_date ? 'In : <i class="fa fa-calendar"></i> ' .
                                 Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_in_date)) . '<br />' : '';
+
                         }
                     }
                     return $out;

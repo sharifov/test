@@ -306,11 +306,9 @@ class CasesSaleService
         $caseSale->css_sale_data = json_encode($saleData);
         $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
         $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-        $caseSale->css_sale_book_id = $saleData['bookingId'] ?? null;
-        $caseSale->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
+        $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+        $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
         $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
-
-        $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
         if(!$caseSale->save()) {
             \Yii::error(VarDumper::dumpAsString($caseSale->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesSaleService:create');
@@ -370,20 +368,44 @@ class CasesSaleService
      * @param array $params
      * @return array|mixed
      */
-    public function requestToBackOffice(array $params)
+    public function searchRequestToBackOffice(array $params)
     {
         try {
+            $response = BackOffice::sendRequest2('cs/search', $params);
+            if ($response->isOk) {
+                $result = $response->data;
+                if (isset($result['items']) && is_array($result['items'])) {
+                    return array_shift($result['items']);
+                }
+            } else {
+                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+            }
+        } catch (\Throwable $exception) {
+            \Yii::error(VarDumper::dumpAsString($exception), 'CasesSaleService:searchRequestToBackOffice');
+        }
+        return [];
+    }
+
+    /**
+     * @param int $sale_id
+     * @return array|mixed
+     */
+    public function detailRequestToBackOffice(int $sale_id)
+    {
+        try {
+            $params['sale_id'] = $sale_id;
             $response = BackOffice::sendRequest2('cs/detail', $params);
+
             if ($response->isOk) {
                 $result = $response->data;
                 if ($result && is_array($result)) {
                     return $result;
                 }
             } else {
-                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
             }
         } catch (\Throwable $exception) {
-            \Yii::error(VarDumper::dumpAsString($exception), 'CasesSaleService:requestBackOffice');
+            \Yii::error(VarDumper::dumpAsString($exception), 'CasesSaleService:detailRequestToBackOffice');
         }
         return [];
     }

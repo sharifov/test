@@ -20,6 +20,7 @@ use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use webapi\src\response\Response;
+use yii\helpers\VarDumper;
 
 /**
  * Class CasesController
@@ -216,9 +217,7 @@ class CasesController extends BaseController
             );
         }
 
-        if ($saleData = $this->getSale($form)) {
-            $this->casesSaleService->create(Cases::findOne($result->csId), $saleData);
-        }
+        $this->createSale($form, $result);
 
         return new SuccessResponse(
             new DataMessage(
@@ -230,20 +229,38 @@ class CasesController extends BaseController
 
     /**
      * @param CreateForm $form
+     * @param $result
+     */
+    private function createSale(CreateForm $form, $result):void
+    {
+        try {
+            if ($saleData = $this->getSale($form)) {
+                $case = Cases::findOne($result->csId);
+                if ($caseSale = $this->casesSaleService->create($case, $saleData) ) {
+                    $refreshSaleData = $this->casesSaleService->detailRequestToBackOffice($saleData['saleId']);
+                    $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $refreshSaleData);
+                }
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
+        }
+    }
+
+    /**
+     * @param CreateForm $form
      * @return array|mixed
      */
     private function getSale(CreateForm $form)
     {
-        if ($findByOrderUid = $this->casesSaleService->requestToBackOffice(['order_uid' => $form->order_uid])) {
+        if ($findByOrderUid = $this->casesSaleService->searchRequestToBackOffice(['order_uid' => $form->order_uid])) {
             return $findByOrderUid;
         }
-        if ($findByEmail = $this->casesSaleService->requestToBackOffice(['email' => $form->contact_email])) {
+        if ($findByEmail = $this->casesSaleService->searchRequestToBackOffice(['email' => $form->contact_email])) {
             return $findByEmail;
         }
-        if ($findByPhone = $this->casesSaleService->requestToBackOffice(['phone' => $form->contact_phone])) {
+        if ($findByPhone = $this->casesSaleService->searchRequestToBackOffice(['phone' => $form->contact_phone])) {
             return $findByPhone;
         }
         return [];
     }
-
 }

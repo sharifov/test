@@ -36,6 +36,7 @@ use yii\helpers\VarDumper;
  * @property $arrivalAirport
  * @property $departureCountries
  * @property $arrivalCountries
+ * @property $css_profit
  *
  * @property array $cacheSaleData
  */
@@ -100,7 +101,7 @@ class CasesSearch extends Cases
             [['cssChargedFrom', 'cssChargedTo', 'cssProfitFrom', 'cssProfitTo'], 'number'],
             [['cssOutDate', 'cssInDate'], 'date'],
             [['cssChargeType'], 'string', 'max' => 100],
-            [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries'], 'safe'],
+            [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries',], 'safe'],
         ];
     }
 
@@ -252,6 +253,57 @@ class CasesSearch extends Cases
         }
         if ($this->cs_created_dt) {
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
+        }
+        if ($this->cssChargedFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_charged', $this->cssChargedFrom])]);
+        }
+        if ($this->cssChargedTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_charged', $this->cssChargedTo])]);
+        }
+        if ($this->cssProfitFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_profit', $this->cssProfitFrom])]);
+        }
+        if ($this->cssProfitTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
+        }
+        if ($this->cssOutDate) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'DATE(css_out_date)', date('Y-m-d', strtotime($this->cssOutDate))])]);
+        }
+        if ($this->cssInDate) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'DATE(css_in_date)', date('Y-m-d', strtotime($this->cssInDate))])]);
+        }
+        if ($this->cssChargeType) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
+        }
+        if ($this->departureAirport) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(['IN', 'css_out_departure_airport', $this->departureAirport])
+                ->orWhere(['IN', 'css_in_departure_airport', $this->departureAirport])
+            ]);
+        }
+        if ($this->arrivalAirport) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(['IN', 'css_out_arrival_airport', $this->arrivalAirport])
+                ->orWhere(['IN', 'css_in_arrival_airport', $this->arrivalAirport])
+            ]);
+        }
+        if ($this->departureCountries) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('case_sale.css_cs_id')
+                ->innerJoin(Airport::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->where(['IN', 'airports.country', $this->departureCountries])
+            ]);
+        }
+        if ($this->arrivalCountries) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('case_sale.css_cs_id')
+                ->innerJoin(Airport::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->where(['IN', 'airports.country', $this->arrivalCountries])
+            ]);
         }
 
         return $dataProvider;

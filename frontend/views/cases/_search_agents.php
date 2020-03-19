@@ -1,10 +1,14 @@
 <?php
 
+use common\models\Airport;
+use common\models\CaseSale;
+use kartik\select2\Select2;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -67,6 +71,89 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'cs_need_action')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssChargedFrom') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssChargedTo') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssProfitFrom') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssProfitTo') ?>
+        </div>
+        <div class="col-md-1">
+            <?php
+                echo $form->field($model, 'departureAirport')->widget(Select2::class, [
+                    'data' => Airport::getIataList(),
+                    'size' => Select2::SMALL,
+                    'options' => ['multiple' => true],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
+            ?>
+        </div>
+        <div class="col-md-1">
+            <?php
+                echo $form->field($model, 'arrivalAirport')->widget(Select2::class, [
+                    'data' => Airport::getIataList(),
+                    'size' => Select2::SMALL,
+                    'options' => ['multiple' => true],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
+            ?>
+        </div>
+        <div class="col-md-1">
+            <?php
+                echo $form->field($model, 'departureCountries')->widget(Select2::class, [
+                    'data' => Airport::getCountryList(),
+                    'size' => Select2::SMALL,
+                    'options' => ['multiple' => true],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
+            ?>
+        </div>
+        <div class="col-md-1">
+            <?php
+                echo $form->field($model, 'arrivalCountries')->widget(Select2::class, [
+                    'data' => Airport::getCountryList(),
+                    'size' => Select2::SMALL,
+                    'options' => ['multiple' => true],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
+            ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssOutDate')->widget(
+                \dosamigos\datepicker\DatePicker::class, [
+                'inline' => false,
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'dd-M-yyyy',
+                ]
+            ])  ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssInDate')->widget(
+                \dosamigos\datepicker\DatePicker::class, [
+                'inline' => false,
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'dd-M-yyyy',
+                ]
+            ]) ?>
+        </div>
+        <div class="col-md-1">
+            <?php
+                $types = ArrayHelper::map(
+                    CaseSale::find()->select('css_charge_type')->distinct()->where(['NOT', ['css_charge_type' => null]])->all(),
+                    'css_charge_type','css_charge_type'
+                )
+            ?>
+            <?= $form->field($model, 'cssChargeType')->dropDownList($types, ['prompt' => '---']) ?>
         </div>
     </div>
 

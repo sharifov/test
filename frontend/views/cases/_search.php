@@ -182,7 +182,6 @@ use yii\widgets\ActiveForm;
             ?>
             <?= $form->field($model, 'cssChargeType')->dropDownList($types, ['prompt' => '---']) ?>
         </div>
-
     </div>
 
     <div class="form-group text-center">

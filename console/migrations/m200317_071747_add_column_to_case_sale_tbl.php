@@ -36,6 +36,8 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
 
         $this->createIndex('IND-case_sale_css_charged', $this->table, ['css_charged']);
         $this->createIndex('IND-case_sale_css_profit', $this->table, ['css_profit']);
+        $this->dropForeignKey('FK-case_sale_css_created_user_id', '{{%case_sale}}');
+        $this->dropForeignKey('FK-case_sale_css_updated_user_id', '{{%case_sale}}');
 
         (new RbacMigrationService())->up($this->routes, $this->roles);
 
@@ -59,6 +61,9 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
         $this->dropColumn($this->table, 'css_in_arrival_airport');
         $this->dropColumn($this->table, 'css_in_date');
         $this->dropColumn($this->table, 'css_charge_type');
+
+        $this->addForeignKey('FK-case_sale_css_created_user_id', '{{%case_sale}}', ['css_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-case_sale_css_updated_user_id', '{{%case_sale}}', ['css_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
         (new RbacMigrationService())->down($this->routes, $this->roles);
 
