@@ -58,8 +58,8 @@ class CasesController extends BaseController
      * @apiParam {string}           contact_phone                    Client Phone
      * @apiParam {int}              category_id                      Case category id
      * @apiParam {string{5..7}}     order_uid                        Order uid (symbols and numbers only)
-     * @apiParam {string}           [subject]                        Subject
-     * @apiParam {string}           [description                     Description
+     * @apiParam {string{255}}           [subject]                        Subject
+     * @apiParam {string{65000}}           [description                     Description
      * @apiParam {array[]}          [order_info]                      Order Info (key => value, key: string, value: string)
      *
      * @apiParamExample {json} Request-Example:

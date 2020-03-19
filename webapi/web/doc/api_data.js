@@ -187,6 +187,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "255",
             "optional": true,
             "field": "subject",
             "description": "<p>Subject</p>"
@@ -194,6 +195,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "65000",
             "optional": true,
             "field": "description",
             "description": "<p>Description</p>"
