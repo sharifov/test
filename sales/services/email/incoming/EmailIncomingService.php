@@ -3,6 +3,7 @@
 namespace sales\services\email\incoming;
 
 use common\models\Sources;
+use sales\services\cases\CasesSaleService;
 use sales\services\lead\LeadManageService;
 use sales\services\TransactionManager;
 use Yii;
@@ -22,6 +23,7 @@ use yii\helpers\VarDumper;
  * @property InternalContactService $internalContactService
  * @property LeadManageService $leadManageService
  * @property TransactionManager $transactionManager
+ * @property CasesSaleService $casesSaleService
  */
 class EmailIncomingService
 {
@@ -30,13 +32,15 @@ class EmailIncomingService
     private $internalContactService;
     private $leadManageService;
     private $transactionManager;
+    private $casesSaleService;
 
     public function __construct(
         CasesCreateService $casesCreateService,
         ClientManageService $clientManageService,
         InternalContactService $internalContactService,
         LeadManageService $leadManageService,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        CasesSaleService $casesSaleService
     )
     {
         $this->casesCreateService = $casesCreateService;
@@ -44,6 +48,7 @@ class EmailIncomingService
         $this->internalContactService = $internalContactService;
         $this->leadManageService = $leadManageService;
         $this->transactionManager = $transactionManager;
+        $this->casesSaleService = $casesSaleService;
     }
 
     /**
@@ -149,6 +154,11 @@ class EmailIncomingService
         }
         if ((bool)Yii::$app->params['settings']['create_new_exchange_case_email']) {
             $case = $this->casesCreateService->createExchangeByIncomingEmail($clientId, $projectId);
+
+            $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+            if (count($saleData)) {
+                $this->casesSaleService->createSale($case->cs_id, $saleData);
+            }
             return $case->cs_id;
         }
         if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $projectId)->one()) {
@@ -172,6 +182,11 @@ class EmailIncomingService
         }
         if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
             $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
+
+            $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+            if (count($saleData)) {
+                $this->casesSaleService->createSale($case->cs_id, $saleData);
+            }
             return $case->cs_id;
         }
         if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
@@ -201,6 +216,12 @@ class EmailIncomingService
         } else {
             if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
                 $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
+
+                $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+                if (count($saleData)) {
+                    $this->casesSaleService->createSale($case->cs_id, $saleData);
+                }
+
                 return new Process(null, $case->cs_id);
             } else {
                 if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
