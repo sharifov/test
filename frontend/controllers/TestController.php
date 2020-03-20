@@ -194,7 +194,7 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $lead = Lead::findOne(371172);
+        $lead = Lead::findOne(371222);
         $repo = Yii::createObject(LeadRepository::class);
         $lead->followUp();
         $lead->processing(295);

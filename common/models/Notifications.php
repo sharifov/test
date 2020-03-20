@@ -6,6 +6,7 @@ use common\components\jobs\TelegramSendMessageJob;
 use common\models\query\NotificationsQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -214,6 +215,7 @@ class Notifications extends ActiveRecord
 
         $model->n_new = true;
         if($model->save()){
+            \frontend\widgets\Notifications::cacheInvalidate($user_id);
             return true;
         }
 
