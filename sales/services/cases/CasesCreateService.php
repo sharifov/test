@@ -16,6 +16,7 @@ use sales\services\TransactionManager;
  * @property CasesRepository $casesRepository
  * @property ClientManageService $clientManageService
  * @property TransactionManager $transaction
+ * @property CasesSaleService $casesSaleService
  */
 class CasesCreateService
 {
@@ -23,22 +24,26 @@ class CasesCreateService
     private $casesRepository;
     private $clientManageService;
     private $transaction;
+    private $casesSaleService;
 
     /**
      * CasesCreateService constructor.
      * @param CasesRepository $casesRepository
      * @param ClientManageService $clientManageService
      * @param TransactionManager $transaction
+     * @param CasesSaleService $casesSaleService
      */
     public function __construct(
         CasesRepository $casesRepository,
         ClientManageService $clientManageService,
-        TransactionManager $transaction
+        TransactionManager $transaction,
+        CasesSaleService $casesSaleService
     )
     {
         $this->casesRepository = $casesRepository;
         $this->clientManageService = $clientManageService;
         $this->transaction = $transaction;
+        $this->casesSaleService = $casesSaleService;
     }
 
     /**
@@ -144,8 +149,13 @@ class CasesCreateService
                 $depId
             );
             $this->casesRepository->save($case);
-            return $case;
 
+            $saleData = $this->casesSaleService->getSaleFromBo(null, null, $clientPhones['phone']);
+            if (count($saleData)) {
+                $this->casesSaleService->createSale($case->cs_id, $saleData);
+            }
+
+            return $case;
         });
 
         return $case;
@@ -167,6 +177,12 @@ class CasesCreateService
                     $depId
                 );
                 $this->casesRepository->save($case);
+
+                $saleData = $this->casesSaleService->getSaleFromBo(null, null, $clientPhones['phone']);
+                if (count($saleData)) {
+                    $this->casesSaleService->createSale($case->cs_id, $saleData);
+                }
+
             } else {
                 //\Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
             }
