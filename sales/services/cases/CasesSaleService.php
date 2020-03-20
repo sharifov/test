@@ -407,7 +407,8 @@ class CasesSaleService
             if ($response->isOk) {
                 $result = $response->data;
                 if (isset($result['items']) && is_array($result['items'])) {
-                    return array_shift($result['items']); 
+                    $lastSaleId = max(array_keys($result['items']));
+                    return $result['items'][$lastSaleId];
                 }
             } else {
                 throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
