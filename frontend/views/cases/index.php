@@ -165,54 +165,27 @@ $gridId = 'cases-grid-id';
                 'format' => 'raw'
             ],
             [
-                'label' => 'Selling price',
+                'label' => 'Sale info',
                 'value' => static function (Cases $model) {
                     $out = '';
                     if ($model->caseSale) {
                         foreach ($model->caseSale as $caseSale) {
                             /** @var CaseSale $caseSale */
-                            $out .= Html::a($caseSale->css_charged, ['sale/view', 'h' => base64_encode($caseSale->css_sale_book_id . '|' . $caseSale->css_sale_id)]) . '<br />';
-                            //$out .= $caseSale->css_charged . '<br />';
-                        }
-                    }
-                    return $out;
-                },
-                'format' => 'raw'
-            ],
-            [
-                'label' => 'Profit',
-                'value' => static function (Cases $model) {
-                    $out = '';
-                    if ($model->caseSale) {
-                        foreach ($model->caseSale as $caseSale) {
-                            /** @var CaseSale $caseSale */
-                            $out .= Html::a($caseSale->css_profit, ['sale/view', 'h' => base64_encode($caseSale->css_sale_book_id . '|' . $caseSale->css_sale_id)]) . '<br />';
-                            //$out .= $caseSale->css_profit . '<br />';
-                        }
-                    }
-                    return $out;
-                },
-                'format' => 'raw'
-            ],
-            [
-                'label' => 'Flight Date',
-                'value' => static function (Cases $model) {
-                    $out = '';
-                    if ($model->caseSale) {
-                        foreach ($model->caseSale as $caseSale) {
-                            /** @var CaseSale $caseSale */
+                            $out .= Html::a('[' . $caseSale->css_sale_id . ']',
+                                ['sale/view', 'h' => base64_encode($caseSale->css_sale_book_id . '|' . $caseSale->css_sale_id)]) . '<br />';
+                            $out .= $caseSale->css_charged ? 'Selling price: ' . $caseSale->css_charged . '<br />' : '';
+                            $out .= $caseSale->css_profit ? 'Profit: ' . $caseSale->css_profit . '<br />' : '';
                             $out .= $caseSale->css_out_date ? 'Out : <i class="fa fa-calendar"></i> ' .
                                 Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_out_date)) . '<br />' : '';
                             $out .= $caseSale->css_in_date ? 'In : <i class="fa fa-calendar"></i> ' .
                                 Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_in_date)) . '<br />' : '';
-
+                            $out .= '<hr />';
                         }
                     }
                     return $out;
                 },
                 'format' => 'raw'
             ],
-            //  css_out_date, иначе css_in_date
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',

@@ -234,12 +234,11 @@ class CasesController extends BaseController
     private function createSale(CreateForm $form, $result):void
     {
         try {
-            if ($saleData = $this->getSale($form)) {
-                $case = Cases::findOne($result->csId);
-                if ($caseSale = $this->casesSaleService->create($case, $saleData) ) {
-                    $refreshSaleData = $this->casesSaleService->detailRequestToBackOffice($saleData['saleId']);
-                    $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $refreshSaleData);
-                }
+            if ($saleData = $this->getSaleFromBo($form)) {
+                $cases = Cases::findOne($result->csId);
+                $caseSale = $this->casesSaleService->create($cases, $saleData);
+                $refreshSaleData = $this->casesSaleService->detailRequestToBackOffice($saleData['saleId']);
+                $this->casesSaleService->saveAdditionalData($caseSale, $cases, $refreshSaleData);
             }
         } catch (\Throwable $throwable) {
             Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
@@ -250,7 +249,7 @@ class CasesController extends BaseController
      * @param CreateForm $form
      * @return array|mixed
      */
-    private function getSale(CreateForm $form)
+    private function getSaleFromBo(CreateForm $form)
     {
         if ($findByOrderUid = $this->casesSaleService->searchRequestToBackOffice(['order_uid' => $form->order_uid])) {
             return $findByOrderUid;

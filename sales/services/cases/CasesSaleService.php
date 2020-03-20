@@ -281,7 +281,7 @@ class CasesSaleService
 			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
 			if(!$caseSale->save()) {
-				\Yii::error(VarDumper::dumpAsString($caseSale->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
+				\Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesController:actionAddSale:CaseSale:save');
 				throw new \RuntimeException('An error occurred while trying to refresh original sale info;');
 			}
 
@@ -310,11 +310,35 @@ class CasesSaleService
         $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
         $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
 
-        if(!$caseSale->save()) {
-            \Yii::error(VarDumper::dumpAsString($caseSale->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesSaleService:create');
+        if(!$caseSale->save(false)) {
+            \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:create');
+            return null;
         }
 
         $case->updateLastAction();
+
+		return $caseSale;
+	}
+
+    /**
+     * @param CaseSale $caseSale
+     * @param Cases $case
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): CaseSale
+	{
+		if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
+			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
+
+			if(!$caseSale->save()) {
+				\Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:saveAdditionalData');
+				throw new \RuntimeException('Error. Additional data not saved');
+			}
+			$case->updateLastAction();
+		} else {
+			throw new \DomainException('Sale info form BO is not equal with current sale');
+		}
 
 		return $caseSale;
 	}
@@ -326,8 +350,13 @@ class CasesSaleService
      */
     public function prepareAdditionalData(CaseSale $caseSale, array $saleData): CaseSale
     {
-        if (isset($saleData['price']['amountCharged'])) {
-            $amountCharged = preg_replace('/[^0-9.]/', '', $saleData['price']['amountCharged']);
+        if (isset($saleData['price']['priceQuotes'])) {
+            $amountCharged = 0;
+            foreach ($saleData['price']['priceQuotes'] as $priceQuote) {
+                if (isset($priceQuote['selling'])) {
+                    $amountCharged += $priceQuote['selling'];
+                }
+            }
             $caseSale->css_charged = $amountCharged ?: null;
         }
         if (isset($saleData['price']['profit'])) {
@@ -375,7 +404,7 @@ class CasesSaleService
             if ($response->isOk) {
                 $result = $response->data;
                 if (isset($result['items']) && is_array($result['items'])) {
-                    return array_shift($result['items']);
+                    return array_pop($result['items']); 
                 }
             } else {
                 throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
@@ -393,8 +422,7 @@ class CasesSaleService
     public function detailRequestToBackOffice(int $sale_id)
     {
         try {
-            $params['sale_id'] = $sale_id;
-            $response = BackOffice::sendRequest2('cs/detail', $params);
+            $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id]);
 
             if ($response->isOk) {
                 $result = $response->data;

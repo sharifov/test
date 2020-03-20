@@ -112,12 +112,10 @@ class CaseSale extends \yii\db\ActiveRecord
     {
         return [
             [['css_cs_id', 'css_sale_id', 'css_sale_data'], 'required'],
-            [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_created_user_id', 'css_updated_user_id'], 'integer'],
-            [['css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt'], 'safe'],
+            [['css_cs_id', 'css_sale_id', 'css_sale_pax'], 'integer'],
+            [['css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt', 'css_created_user_id', 'css_updated_user_id'], 'safe'],
             [['css_sale_book_id', 'css_sale_pnr'], 'string', 'max' => 8],
             [['css_cs_id', 'css_sale_id'], 'unique', 'targetAttribute' => ['css_cs_id', 'css_sale_id']],
-            [['css_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['css_created_user_id' => 'id']],
-            [['css_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['css_updated_user_id' => 'id']],
             [['css_cs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['css_cs_id' => 'cs_id']],
             [['css_profit', 'css_charged'], 'number'],
             [['css_out_departure_airport', 'css_out_arrival_airport', 'css_in_departure_airport', 'css_in_arrival_airport'], 'string', 'max' => 3],
