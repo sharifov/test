@@ -170,49 +170,34 @@ class LeadsController extends FController
 
     public function actionExportCsv()
     {
-        set_time_limit(0);
+        //set_time_limit(60);
+        ini_set('memory_limit', '512M');
         $searchModel = new LeadSearch();
         $dataProvideQuery = $searchModel->searchExportCsv();
 
         $data = [];
         $batchOrder = 0;
         //$dataProvideQuery->batch()->reset();
-        foreach ($dataProvideQuery->batch(50000) as $batchIndex => $batch){
-            var_dump($batch); die();
-            if ($batchIndex == $batchOrder && $batchOrder <= 0){
+        //$dataProvideQuery->batch()->rewind();
 
-                foreach ($batch as $row){
-                    array_push($data, $row);
-                }
-                $batchOrder++;
+        $fpath = fopen(Yii::getAlias('@runtime'. '/file.csv'), 'w');
+
+        foreach ($dataProvideQuery->each(1) as $batchIndex => $batch){
+            if ($batchIndex == 0){
+                fputcsv($fpath, array_keys($batch));
             }
 
-            /*if ($batchIndex == 1){
+            if (!empty($batch['l_type_create'])){
+                $batch['l_type_create'] = Lead::TYPE_CREATE_LIST[$batch['l_type_create']];
+            }
+            if (!empty($batch['status'])){
+                $batch['status'] = Lead::STATUS_LIST[$batch['status']];
+            }
 
-                foreach ($batch as $row){
-                    array_push($data, $row);
-                }
-            }*/
+            fputcsv($fpath, $batch);
 
-            //$dataProvideQuery->batch()->reset();
-            //$dataProvideQuery->batch()->rewind();
         }
-
-        $exporter = new CsvGrid([
-            'dataProvider' => new ArrayDataProvider([
-                'allModels' => $data
-            ]),
-            /*'columns' => [
-                [
-                    'attribute' => 'name',
-                ],
-            ],*/
-            //'maxEntriesPerFile' => 50000
-        ]);
-        //$exporter->export()->saveAs(Yii::getAlias('@runtime') . '/file.csv');
-        $exporter->export()->send('file.csv');
-
-        //var_dump($data); die();
+        fclose($fpath);
     }
 
     /**
