@@ -150,11 +150,6 @@ class CasesCreateService
             );
             $this->casesRepository->save($case);
 
-            $saleData = $this->casesSaleService->getSaleFromBo(null, null, $clientPhones['phone']);
-            if (count($saleData)) {
-                $this->casesSaleService->createSale($case->cs_id, $saleData);
-            }
-
             return $case;
         });
 
@@ -177,11 +172,6 @@ class CasesCreateService
                     $depId
                 );
                 $this->casesRepository->save($case);
-
-                $saleData = $this->casesSaleService->getSaleFromBo(null, null, $clientPhones['phone']);
-                if (count($saleData)) {
-                    $this->casesSaleService->createSale($case->cs_id, $saleData);
-                }
 
             } else {
                 //\Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
