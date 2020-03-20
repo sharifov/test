@@ -443,19 +443,19 @@ class CasesSaleService
 
     /**
      * @param string|null $order_uid
-     * @param string|null $contact_email
-     * @param string|null $contact_phone
+     * @param string|null $email
+     * @param string|null $phone
      * @return array
      */
-    public function getSaleFromBo(?string $order_uid = null, ?string $contact_email = null, ?string $contact_phone = null): array
+    public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null): array
     {
         if ($order_uid && $result = $this->searchRequestToBackOffice(['order_uid' => $order_uid])) {
             return $result;
         }
-        if ($contact_email && $result = $this->searchRequestToBackOffice(['email' => $contact_email])) {
+        if ($email && $result = $this->searchRequestToBackOffice(['email' => $email])) {
             return $result;
         }
-        if ($contact_phone && $result = $this->searchRequestToBackOffice(['phone' => $contact_phone])) {
+        if ($phone && $result = $this->searchRequestToBackOffice(['phone' => $phone])) {
             return $result;
         }
         return [];
