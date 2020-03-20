@@ -78,6 +78,7 @@ class OrderUserProfitService
 				$this->orderUserProfitRepository->deleteByOrderId($order->or_id);
 
 				foreach ($orderUserProfits as $row) {
+					$row->scenario = OrderUserProfit::SCENARIO_INSERT;
 					$row->insert();
 					$row->oup_amount = $order->or_profit_amount;
 					$this->orderUserProfitRepository->save($row);

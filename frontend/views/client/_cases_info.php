@@ -48,7 +48,7 @@ $user = Yii::$app->user->identity;
                 ],
                 'cs_subject',
                 [
-                    'attribute' => 'cs_category',
+                    'attribute' => 'cs_category_id',
                     'value' => static function (Cases $model) {
                         return $model->category ? $model->category->cc_name : '';
                     },

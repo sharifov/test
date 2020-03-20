@@ -17,6 +17,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesCreateService;
+use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadManageService;
 use yii\base\BaseObject;
@@ -37,6 +38,7 @@ use yii\queue\Queue;
  * @property ClientManageService $clientManageService
  * @property float|int $ttr
  * @property CasesRepository $casesRepository
+ * @property CasesSaleService $casesSaleService
  */
 
 class CallQueueJob extends BaseObject implements JobInterface
@@ -48,6 +50,7 @@ class CallQueueJob extends BaseObject implements JobInterface
     private $casesCreateService;
     private $casesRepository;
     private $clientManageService;
+    private $casesSaleService;
 
     /*public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
     {
@@ -69,6 +72,7 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->casesCreateService = Yii::createObject(CasesCreateService::class);
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
+            $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
             // Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
 
@@ -156,6 +160,13 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                         if (!$originalAgentId && $case && $case->cs_user_id) {
                             $originalAgentId = $case->cs_user_id;
+                        }
+
+                        if ($case) {
+                            $saleData = $this->casesSaleService->getSaleFromBo(null, null, $call->c_from);
+                            if (count($saleData)) {
+                                $this->casesSaleService->createSale($case->cs_id, $saleData);
+                            }
                         }
 
                     } catch (\Throwable $exception) {

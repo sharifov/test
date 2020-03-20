@@ -71,7 +71,7 @@ use sales\cache\app\AppCache;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
@@ -97,7 +97,7 @@ use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
-use sales\repositories\cases\CasesStatusLogRepository;
+use sales\repositories\cases\CaseStatusLogRepository;
 use sales\repositories\lead\LeadBadgesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
@@ -1126,45 +1126,21 @@ class TestController extends FController
 
     public function actionZ()
     {
-        $lead = Lead::findOne(370872);
+        $a = [
+            'saleId' => 263202,
+            /*'itinerary' => [
+                0 => [
+                    'segments' => [
+                        0 => [
+                            'segmentId' => 1398032,
+                            'airline' => 'BA'
+                        ]
+                    ]
+                ]
+            ]*/
+        ];
 
-        $response = new SuccessResponse(
-            new DataMessage(
-                new LeadCreateMessage(
-                    new LeadCreateValue([
-                        'id' => $lead->id,
-                        'uid' => $lead->uid,
-                        'gid' => $lead->gid,
-                        'client_id' => $lead->client_id,
-                        'client' => [
-                            'uuid' => $lead->client->uuid,
-                            'client_id' => $lead->client_id,
-                            'first_name' => $lead->client->first_name,
-                            'middle_name' => $lead->client->middle_name,
-                            'last_name' => $lead->client->last_name,
-                            'phones' => $lead->client->getClientPhonesByType(
-                                [
-                                    null,
-                                    ClientPhone::PHONE_VALID,
-                                    ClientPhone::PHONE_NOT_SET,
-                                    ClientPhone::PHONE_FAVORITE,
-                                ]
-                            ),
-                            'emails' => $lead->client->getClientEmailsByType(
-                                [
-                                    null,
-                                    ClientEmail::EMAIL_NOT_SET,
-                                    ClientEmail::EMAIL_FAVORITE,
-                                    ClientEmail::EMAIL_VALID,
-                                ]
-                            ),
-                        ],
-                    ])
-                )
-            )
-        );
-
-        \yii\helpers\VarDumper::dump($response, 10, true); exit();  /* FOR DEBUG:: must by remove */
+        \yii\helpers\VarDumper::dump((isset($a['itinerary'][0]['segments'])), 10, true); exit();  /* FOR DEBUG:: must by remove */
     }
 
 }

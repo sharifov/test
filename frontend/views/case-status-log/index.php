@@ -4,11 +4,11 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\CasesStatus;
-use sales\entities\cases\CasesStatusLog;
+use sales\entities\cases\CaseStatusLog;
 use common\models\Employee;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesStatusLogSearch */
+/* @var $searchModel sales\entities\cases\CaseStatusLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Case Status History';
@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $userList = Employee::getList();
 
 ?>
-<div class="cases-status-log-index">
+<div class="case-status-log-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -34,7 +34,7 @@ $userList = Employee::getList();
             ],
             [
                 'attribute' => 'csl_from_status',
-                'value' => static function (CasesStatusLog $model) {
+                'value' => static function (CaseStatusLog $model) {
                     return CasesStatus::getLabel($model->csl_from_status); //'<span class="label label-info">' . CasesStatus::getName($model->csl_from_status) . '</span></h5>';
                 },
                 'format' => 'raw',
@@ -43,7 +43,7 @@ $userList = Employee::getList();
             ],
             [
                 'attribute' => 'csl_to_status',
-                'value' => static function (CasesStatusLog $model) {
+                'value' => static function (CaseStatusLog $model) {
                     return CasesStatus::getLabel($model->csl_to_status); //'<span class="label label-info">' . CasesStatus::getName($model->csl_to_status) . '</span></h5>';
                 },
                 'format' => 'raw',
@@ -57,7 +57,7 @@ $userList = Employee::getList();
             [
                 'label' => 'Status start date',
                 'attribute' => 'csl_start_dt',
-                'value' => static function (CasesStatusLog $model) {
+                'value' => static function (CaseStatusLog $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->csl_start_dt));
                 },
                 'format' => 'raw',
@@ -78,7 +78,7 @@ $userList = Employee::getList();
             [
                 'label' => 'Status end date',
                 'attribute' => 'csl_end_dt',
-                'value' => static function (CasesStatusLog $model) {
+                'value' => static function (CaseStatusLog $model) {
                     return $model->csl_end_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->csl_end_dt)) : '';
                 },
                 'format' => 'raw',
@@ -99,14 +99,14 @@ $userList = Employee::getList();
             'csl_time_duration',
             [
                 'attribute' => 'csl_owner_id',
-                'value' => static function (CasesStatusLog $model) {
+                'value' => static function (CaseStatusLog $model) {
                     return $model->owner ? $model->owner->username : '';
                 },
                 'filter' => $userList
             ],
             [
                 'attribute' => 'csl_created_user_id',
-                'value' => static function (CasesStatusLog $model) {
+                'value' => static function (CaseStatusLog $model) {
                     return $model->createdUser ? $model->createdUser->username : '';
                 },
                 'filter' => $userList

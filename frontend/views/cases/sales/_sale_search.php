@@ -31,6 +31,7 @@ use yii\widgets\Pjax;
         </ul>
         <div class="clearfix"></div>
     </div>
+
     <div class="x_content" style="display: block;">
         <div class="sale-search">
 

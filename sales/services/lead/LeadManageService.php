@@ -187,7 +187,8 @@ class LeadManageService
                 'vl_ga_user_id' => $client->uuid,
                 'vl_visit_dt' => date('Y-m-d H:i:s'),
                 'vl_lead_id' => $lead->id,
-                'vl_project_id' => $lead->project_id
+                'vl_project_id' => $lead->project_id,
+                'vl_client_id' => $client->id,
             ]);
 
             if (!$log->save()) {
@@ -208,7 +209,8 @@ class LeadManageService
             'vl_ga_user_id' => $client->uuid,
             'vl_visit_dt' => date('Y-m-d H:i:s'),
             'vl_lead_id' => $lead->id,
-            'vl_project_id' => $lead->project_id
+            'vl_project_id' => $lead->project_id,
+            'vl_client_id' => $client->id,
         ]);
 
         if (!$log->save()) {

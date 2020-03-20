@@ -16,6 +16,7 @@ use sales\services\TransactionManager;
  * @property CasesRepository $casesRepository
  * @property ClientManageService $clientManageService
  * @property TransactionManager $transaction
+ * @property CasesSaleService $casesSaleService
  */
 class CasesCreateService
 {
@@ -23,22 +24,26 @@ class CasesCreateService
     private $casesRepository;
     private $clientManageService;
     private $transaction;
+    private $casesSaleService;
 
     /**
      * CasesCreateService constructor.
      * @param CasesRepository $casesRepository
      * @param ClientManageService $clientManageService
      * @param TransactionManager $transaction
+     * @param CasesSaleService $casesSaleService
      */
     public function __construct(
         CasesRepository $casesRepository,
         ClientManageService $clientManageService,
-        TransactionManager $transaction
+        TransactionManager $transaction,
+        CasesSaleService $casesSaleService
     )
     {
         $this->casesRepository = $casesRepository;
         $this->clientManageService = $clientManageService;
         $this->transaction = $transaction;
+        $this->casesSaleService = $casesSaleService;
     }
 
     /**
@@ -106,7 +111,7 @@ class CasesCreateService
 
             $case = Cases::createByWeb(
                 $form->projectId,
-                $form->category,
+                $form->categoryId,
                 $client->id,
                 $form->depId,
                 $form->subject,
@@ -144,8 +149,8 @@ class CasesCreateService
                 $depId
             );
             $this->casesRepository->save($case);
-            return $case;
 
+            return $case;
         });
 
         return $case;
@@ -167,6 +172,7 @@ class CasesCreateService
                     $depId
                 );
                 $this->casesRepository->save($case);
+
             } else {
                 //\Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
             }

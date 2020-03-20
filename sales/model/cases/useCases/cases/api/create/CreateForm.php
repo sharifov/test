@@ -3,7 +3,7 @@
 namespace sales\model\cases\useCases\cases\api\create;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\services\client\InternalPhoneValidator;
 use sales\yii\validators\IsArrayValidator;
 use yii\base\Model;
@@ -13,7 +13,7 @@ use yii\base\Model;
  *
  * @property string $contact_email
  * @property string $contact_phone
- * @property string $category
+ * @property int $category_id
  * @property string $order_uid
  * @property array $order_info
  * @property int $project_id
@@ -24,7 +24,7 @@ class CreateForm extends Model
 {
     public $contact_email;
     public $contact_phone;
-    public $category;
+    public $category_id;
     public $order_uid;
     public $order_info;
     public $project_id;
@@ -47,17 +47,19 @@ class CreateForm extends Model
         return [
             ['contact_email', 'required'],
             ['contact_email', 'email'],
+            ['contact_phone', 'string', 'max' => 160],
 
             ['contact_phone', 'required'],
-            ['contact_phone', 'string', 'max' => 100],
+            ['contact_phone', 'string', 'max' => 20],
             ['contact_phone', PhoneInputValidator::class],
             ['contact_phone', 'filter', 'filter' => static function ($value) {
                 return str_replace(['-', ' '], '', trim($value));
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
             ['contact_phone', InternalPhoneValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
 
-            ['category', 'required'],
-            ['category', 'exist', 'targetClass' => CasesCategory::class, 'targetAttribute' => ['category' => 'cc_key']],
+            ['category_id', 'required'],
+            ['category_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['category_id', 'exist', 'targetClass' => CaseCategory::class, 'targetAttribute' => ['category_id' => 'cc_id']],
 
             ['order_uid', 'required'],
             ['order_uid', 'string', 'min' => 5, 'max' => 7],
@@ -67,7 +69,7 @@ class CreateForm extends Model
             ['subject', 'string', 'max' => 255],
 
             ['description', 'default', 'value' => null],
-            ['description', 'string'],
+            ['description', 'string', 'max' => 65000],
 
             ['order_info', 'default', 'value' => []],
             ['order_info', IsArrayValidator::class],
@@ -87,7 +89,7 @@ class CreateForm extends Model
         return new Command(
             $this->contact_email,
             $this->contact_phone,
-            $this->category,
+            $this->category_id,
             $this->order_uid,
             $this->order_info,
             $this->project_id,

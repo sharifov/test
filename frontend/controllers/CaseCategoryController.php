@@ -3,15 +3,15 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\entities\cases\CasesCategory;
-use sales\entities\cases\CasesCategorySearch;
+use sales\entities\cases\CaseCategory;
+use sales\entities\cases\CaseCategorySearch;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
- * Class CasesCategoryController
+ * Class CaseCategoryController
  */
-class CasesCategoryController extends FController
+class CaseCategoryController extends FController
 {
 
     /**
@@ -19,7 +19,7 @@ class CasesCategoryController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new CasesCategorySearch();
+        $searchModel = new CaseCategorySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -45,10 +45,10 @@ class CasesCategoryController extends FController
      */
     public function actionCreate()
     {
-        $model = new CasesCategory();
+        $model = new CaseCategory();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cc_key]);
+            return $this->redirect(['view', 'id' => $model->cc_id]);
         }
 
         return $this->render('create', [
@@ -66,7 +66,7 @@ class CasesCategoryController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cc_key]);
+            return $this->redirect(['view', 'id' => $model->cc_id]);
         }
 
         return $this->render('update', [
@@ -90,12 +90,12 @@ class CasesCategoryController extends FController
 
     /**
      * @param $id
-     * @return CasesCategory
+     * @return CaseCategory
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): CasesCategory
+    protected function findModel($id): CaseCategory
     {
-        if (($model = CasesCategory::findOne($id)) !== null) {
+        if (($model = CaseCategory::findOne($id)) !== null) {
             return $model;
         }
 

@@ -41,13 +41,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'onchange' => '
                         $.get( "' . Url::to(['/cases/get-categories']) . '", { id: $(this).val() } )
                             .done(function( data ) {
-                                $( "#' . Html::getInputId($model, 'category') . '" ).html( data );
+                                $( "#' . Html::getInputId($model, 'categoryId') . '" ).html( data );
                             }
                         );
                     '
                 ]) ?>
 
-                <?= $form->field($model, 'category')->dropDownList([], ['prompt' => 'Choose a category']) ?>
+                <?= $form->field($model, 'categoryId')->dropDownList([], ['prompt' => 'Choose a category']) ?>
 
                 <?= $form->field($model, 'sourceTypeId')->dropDownList($model->getSourceTypeList(), ['prompt' => 'Choose a source type']) ?>
 
