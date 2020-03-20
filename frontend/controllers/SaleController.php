@@ -92,7 +92,7 @@ class SaleController extends FController
 
         try {
             $data['sale_id'] = $id;
-            $response = BackOffice::sendRequest2('cs/detail', $data);
+            $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', 90);
 
             if ($response->isOk) {
                 $result = $response->data;
