@@ -235,10 +235,11 @@ class CasesController extends BaseController
     {
         try {
             if ($saleData = $this->getSaleFromBo($form)) {
-                $cases = Cases::findOne($result->csId);
-                $caseSale = $this->casesSaleService->create($cases, $saleData);
-                $refreshSaleData = $this->casesSaleService->detailRequestToBackOffice($saleData['saleId']);
-                $this->casesSaleService->saveAdditionalData($caseSale, $cases, $refreshSaleData);
+                if ($cases = Cases::findOne($result->csId)) {
+                    $caseSale = $this->casesSaleService->create($cases, $saleData);
+                    $refreshSaleData = $this->casesSaleService->detailRequestToBackOffice($saleData['saleId']);
+                    $this->casesSaleService->saveAdditionalData($caseSale, $cases, $refreshSaleData);
+                }
             }
         } catch (\Throwable $throwable) {
             Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
