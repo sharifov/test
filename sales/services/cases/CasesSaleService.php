@@ -329,6 +329,7 @@ class CasesSaleService
     public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): CaseSale
 	{
 		if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
+		    $caseSale->css_sale_data_updated = json_encode($saleData);
 			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
 			if(!$caseSale->save()) {
