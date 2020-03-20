@@ -144,7 +144,7 @@ class CallSearch extends Call
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
-            $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalid($this, static::class . 'search' . $user->id, $query, 60));
+            $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalidModel($this, static::class . 'search' . $user->id, $query, 60));
             return $dataProvider;
         }
 
@@ -217,7 +217,7 @@ class CallSearch extends Call
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
 
-        $dataProvider->setTotalCount(QueryHelper::getQueryCountValid($this, static::class . 'search' . $user->id, $query, 60));
+        $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'search' . $user->id, $query, 60));
 
         return $dataProvider;
     }

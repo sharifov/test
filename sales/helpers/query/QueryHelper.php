@@ -72,7 +72,7 @@ class QueryHelper
         return (new \DateTimeImmutable($value, new \DateTimeZone($userTimeZone)))->setTimezone(new \DateTimeZone('UTC'));
     }
 
-    public static function getQueryCountValid(Model $model, string $prefix, Query $query, int $duration = 600)
+    public static function getQueryCountValidModel(Model $model, string $prefix, Query $query, int $duration = 600)
     {
         $hash = self::getFieldsHash($model, $prefix);
         return Yii::$app->cache->getOrSet($hash, static function () use ($query) {
@@ -82,11 +82,11 @@ class QueryHelper
         }, $duration);
     }
 
-    public static function getQueryCountInvalid(Model $model, string $prefix, Query $query, int $duration = 600)
+    public static function getQueryCountInvalidModel(Model $model, string $prefix, Query $query, int $duration = 600)
     {
         $clone = clone $model;
         self::resetProperties($clone);
-        return self::getQueryCountValid($clone, $prefix, $query, $duration);
+        return self::getQueryCountValidModel($clone, $prefix, $query, $duration);
     }
 
     private static function resetProperties(Model $model): void
