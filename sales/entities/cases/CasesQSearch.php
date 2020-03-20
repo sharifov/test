@@ -53,7 +53,7 @@ class CasesQSearch extends Cases
 
             ['cs_subject', 'string'],
 
-            ['cs_category', 'string'],
+            ['cs_category_id', 'integer'],
 
             ['cs_status', 'integer'],
 
@@ -107,7 +107,7 @@ class CasesQSearch extends Cases
 			'cs_id' => $this->cs_id,
 			'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
-            'cs_category' => $this->cs_category,
+            'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
         ]);
 
@@ -167,7 +167,7 @@ class CasesQSearch extends Cases
 			'cs_id' => $this->cs_id,
 			'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
-            'cs_category' => $this->cs_category,
+            'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
             'cs_need_action' => $this->cs_need_action,
         ]);
@@ -218,7 +218,7 @@ class CasesQSearch extends Cases
         	'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
-            'cs_category' => $this->cs_category,
+            'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
 			'cs_user_id' => $this->cs_user_id,
             'cs_need_action' => $this->cs_need_action,
@@ -268,7 +268,7 @@ class CasesQSearch extends Cases
                     'cs_gid',
                     'cs_project_id',
                     'cs_subject',
-                    'cs_category',
+                    'cs_category_id',
                     'cs_lead_id',
                     'cs_dep_id',
                     'cs_created_dt',
@@ -296,7 +296,7 @@ class CasesQSearch extends Cases
 			'cs_id' => $this->cs_id,
 			'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
-            'cs_category' => $this->cs_category,
+            'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
 			'cs_user_id' => $this->cs_user_id,
 			'cs_need_action' => $this->cs_need_action,
@@ -331,7 +331,7 @@ class CasesQSearch extends Cases
 		$query->addSelect('b.csl_start_dt as `solved_date`');
 
 		$query->join('JOIN', '('.(new Query())->select(['csl_start_dt', 'csl_case_id'])
-			->from('cases_status_log')
+			->from(CaseStatusLog::tableName())
 			->where(['csl_to_status' => CasesStatus::STATUS_SOLVED])
 			->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql().') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
 
@@ -356,7 +356,7 @@ class CasesQSearch extends Cases
         	'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
-            'cs_category' => $this->cs_category,
+            'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
 			'cs_user_id' => $this->cs_user_id,
 //			'cs_updated_dt' => $this->cs_updated_dt,
@@ -410,7 +410,7 @@ class CasesQSearch extends Cases
 		$query->addSelect('b.csl_start_dt as `trash_date`');
 
 		$query->join('JOIN', '('.(new Query())->select(['csl_start_dt', 'csl_case_id'])
-				->from('cases_status_log')
+				->from(CaseStatusLog::tableName())
 				->where(['csl_to_status' => CasesStatus::STATUS_TRASH])
 				->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql().') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
 
@@ -435,7 +435,7 @@ class CasesQSearch extends Cases
 			'cs_id' => $this->cs_id,
 			'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
-            'cs_category' => $this->cs_category,
+            'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
 			'cs_user_id' => $this->cs_user_id,
 			'cs_need_action' => $this->cs_need_action,
@@ -493,7 +493,7 @@ class CasesQSearch extends Cases
                     'cs_gid',
                     'cs_project_id',
                     'cs_subject',
-                    'cs_category',
+                    'cs_category_id',
                     'cs_lead_id',
                     'cs_dep_id',
                     'cs_created_dt',
@@ -523,7 +523,7 @@ class CasesQSearch extends Cases
             'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
-            'cs_category' => $this->cs_category,
+            'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
             'cs_user_id' => $this->cs_user_id,
             'cs_need_action' => $this->cs_need_action,
@@ -553,7 +553,7 @@ class CasesQSearch extends Cases
             'cs_gid' => 'GID',
             'cs_project_id' => 'Project',
             'cs_subject' => 'Subject',
-            'cs_category' => 'Category',
+            'cs_category_id' => 'Category',
             'cs_status' => 'Status',
             'cs_user_id' => 'User',
             'cs_lead_id' => 'Lead',

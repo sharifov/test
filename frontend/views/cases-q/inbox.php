@@ -2,7 +2,7 @@
 
 use common\models\Department;
 use common\models\Project;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
 use sales\yii\grid\cases\NeedActionColumn;
 use yii\helpers\Html;
@@ -44,13 +44,18 @@ $this->params['breadcrumbs'][] = $this->title;
 				},
 				'filter' => Project::getList()
 			],
-            'cs_subject',
+            [
+                'attribute' => 'cs_subject',
+                'contentOptions' => [
+                    'style' => 'word-break: break-all; white-space:normal'
+                ]
+            ],
 			[
-				'attribute' => 'cs_category',
+				'attribute' => 'cs_category_id',
 				'value' => static function (CasesQSearch $model) {
 					return $model->category ? $model->category->cc_name : '';
 				},
-				'filter' => CasesCategory::getList()
+				'filter' => CaseCategory::getList()
 			],
             [
                 'attribute' => 'cs_lead_id',

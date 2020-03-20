@@ -287,7 +287,8 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                             },
                             'format' => 'raw',
                         ],
-                        'additional_information'
+                        'additional_information',
+                        'l_visitor_log_id',
 
 
                     ],

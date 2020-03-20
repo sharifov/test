@@ -3,6 +3,7 @@
 namespace sales\entities\cases;
 
 use common\models\Call;
+use common\models\CaseSale;
 use common\models\Client;
 use common\models\Department;
 use common\models\DepartmentEmailProject;
@@ -33,7 +34,7 @@ use Yii;
  * @property int $cs_id
  * @property string $cs_subject
  * @property string $cs_description
- * @property string $cs_category
+ * @property string $cs_category_id
  * @property int $cs_status
  * @property int|null $cs_user_id
  * @property int $cs_lead_id
@@ -50,16 +51,17 @@ use Yii;
  * @property bool $cs_need_action
  * @property string|null $cs_order_uid
  *
- * @property CasesCategory $category
+ * @property CaseCategory $category
  * @property Department $department
  * @property Lead $lead
  * @property Call $call
  * @property Employee $owner
- * @property CasesStatusLog $lastLogRecord
+ * @property CaseStatusLog $lastLogRecord
  * @property Client $client
  * @property Project $project
- * @property CasesStatusLog[] $casesStatusLogs
+ * @property CaseStatusLog[] $caseStatusLogs
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
+ * @property CaseSale[] $caseSale
  */
 class Cases extends ActiveRecord implements Objectable
 {
@@ -163,7 +165,7 @@ class Cases extends ActiveRecord implements Objectable
 
     /**
      * @param int|null $projectId
-     * @param string $category
+     * @param int $categoryId
      * @param string $clientId
      * @param int $depId
      * @param string|null $subject
@@ -175,7 +177,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public static function createByWeb(
         ?int $projectId,
-        string $category,
+        int $categoryId,
         string $clientId,
         int $depId,
         ?string $subject,
@@ -187,7 +189,7 @@ class Cases extends ActiveRecord implements Objectable
     {
         $case = self::create();
         $case->cs_project_id = $projectId;
-        $case->cs_category = $category;
+        $case->cs_category_id = $categoryId;
         $case->cs_client_id = $clientId;
         $case->cs_dep_id = $depId;
         $case->cs_subject = $subject;
@@ -205,7 +207,7 @@ class Cases extends ActiveRecord implements Objectable
         ?string $orderUid,
         ?string $subject,
         ?string $description,
-        string $category
+        int $categoryId
     ): self
     {
         $case = self::create();
@@ -215,7 +217,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_order_uid = $orderUid;
         $case->cs_subject = $subject;
         $case->cs_description = $description;
-        $case->cs_category = $category;
+        $case->cs_category_id = $categoryId;
         $case->cs_source_type_id = CasesSourceType::API;
         $case->pending(null, 'Created by api');
         return $case;
@@ -414,24 +416,24 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     public function updateInfo(
-        string $category,
+        int $categoryId,
         ?string $subject,
         ?string $description,
         ?string $orderUid
     ): void
     {
-        $this->updateCategory($category);
+        $this->updateCategory($categoryId);
         $this->cs_subject = $subject;
         $this->cs_description = $description;
         $this->cs_order_uid = $orderUid;
     }
 
     /**
-     * @param string $category
+     * @param int $categoryId
      */
-    public function updateCategory(string $category): void
+    public function updateCategory(int $categoryId): void
     {
-        $this->cs_category = $category;
+        $this->cs_category_id = $categoryId;
     }
 
     public function setDeadline(string $deadline)
@@ -497,9 +499,9 @@ class Cases extends ActiveRecord implements Objectable
     /**
      * @return ActiveQuery
      */
-    public function getCasesStatusLogs(): ActiveQuery
+    public function getCaseStatusLogs(): ActiveQuery
     {
-        return $this->hasMany(CasesStatusLog::class, ['csl_case_id' => 'cs_id']);
+        return $this->hasMany(CaseStatusLog::class, ['csl_case_id' => 'cs_id']);
     }
 
 	/**
@@ -523,7 +525,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function getCategory(): ActiveQuery
     {
-        return $this->hasOne(CasesCategory::class, ['cc_key' => 'cs_category']);
+        return $this->hasOne(CaseCategory::class, ['cc_id' => 'cs_category_id']);
     }
 
     /**
@@ -531,7 +533,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function getLastLogRecord(): ActiveQuery
     {
-        return $this->hasOne(CasesStatusLog::class, ['csl_case_id' => 'cs_id'])->orderBy(['csl_id' => SORT_DESC]);
+        return $this->hasOne(CaseStatusLog::class, ['csl_case_id' => 'cs_id'])->orderBy(['csl_id' => SORT_DESC]);
     }
 
     /**
@@ -551,6 +553,14 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     /**
+     * @return ActiveQuery
+     */
+    public function getCaseSale(): ActiveQuery
+    {
+        return $this->hasMany(CaseSale::class, ['css_cs_id' => 'cs_id'])->orderBy(['css_sale_id' => SORT_DESC]);
+    }
+
+    /**
      * @return array
      */
     public function attributeLabels(): array
@@ -560,7 +570,7 @@ class Cases extends ActiveRecord implements Objectable
             'cs_gid' => 'GID',
             'cs_subject' => 'Subject',
             'cs_description' => 'Description',
-            'cs_category' => 'Category',
+            'cs_category_id' => 'Category',
             'cs_status' => 'Status',
             'cs_user_id' => 'User',
             'cs_lead_id' => 'Lead',

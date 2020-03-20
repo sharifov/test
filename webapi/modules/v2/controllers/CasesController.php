@@ -2,9 +2,11 @@
 
 namespace webapi\modules\v2\controllers;
 
+use sales\entities\cases\Cases;
 use sales\model\cases\CaseCodeException;
 use sales\model\cases\useCases\cases\api\create\CreateForm;
 use sales\model\cases\useCases\cases\api\create\Handler;
+use sales\services\cases\CasesSaleService;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
@@ -18,26 +20,31 @@ use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use webapi\src\response\Response;
+use yii\helpers\VarDumper;
 
 /**
  * Class CasesController
  *
  * @property Handler $createHandler
+ * @property CasesSaleService $casesSaleService
  */
 class CasesController extends BaseController
 {
     private $createHandler;
+    private $casesSaleService;
 
     public function __construct(
         $id,
         $module,
         ApiLogger $logger,
         Handler $createHandler,
+        CasesSaleService $casesSaleService,
         $config = []
     )
     {
         parent::__construct($id, $module, $logger, $config);
         $this->createHandler = $createHandler;
+        $this->casesSaleService = $casesSaleService;
     }
 
     /**
@@ -54,19 +61,19 @@ class CasesController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string}           contact_email                    Client Email
-     * @apiParam {string}           contact_phone                    Client Phone
-     * @apiParam {string}           category                         Case category
+     * @apiParam {string{160}}           contact_email                    Client Email
+     * @apiParam {string{20}}           contact_phone                    Client Phone
+     * @apiParam {int}              category_id                      Case category id
      * @apiParam {string{5..7}}     order_uid                        Order uid (symbols and numbers only)
-     * @apiParam {string}           [subject]                        Subject
-     * @apiParam {string}           [description                     Description
+     * @apiParam {string{255}}           [subject]                        Subject
+     * @apiParam {string{65000}}           [description                     Description
      * @apiParam {array[]}          [order_info]                      Order Info (key => value, key: string, value: string)
      *
      * @apiParamExample {json} Request-Example:
      * {
      *       "contact_email": "test@test.com",
      *       "contact_phone": "+37369636690",
-     *       "category": "add_insurance",
+     *       "category_id": 12,
      *       "order_uid": "12WS09W",
      *       "subject": "Subject text",
      *       "description": "Description text",
@@ -97,7 +104,7 @@ class CasesController extends BaseController
      *       "request": {
      *           "contact_email": "test@test.com",
      *           "contact_phone": "+37369636690",
-     *           "category": "add_insurance",
+     *           "category_id": 12,
      *           "order_uid": "12WS09W",
      *           "subject": "Subject text",
      *           "description": "Description text",
@@ -208,6 +215,11 @@ class CasesController extends BaseController
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
+        }
+
+        $saleData = $this->casesSaleService->getSaleFromBo($form->order_uid, $form->contact_email, $form->contact_phone);
+        if (count($saleData)) {
+            $this->casesSaleService->createSale($result->csId, $saleData);
         }
 
         return new SuccessResponse(

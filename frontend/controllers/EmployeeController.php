@@ -5,10 +5,8 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
-use common\models\Lead;
 use common\models\ProjectEmployeeAccess;
 use common\models\search\EmployeeSearch;
-use common\models\search\UserProductTypeSearch;
 use common\models\search\UserProjectParamsSearch;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
@@ -17,25 +15,37 @@ use common\models\UserProductType;
 use common\models\UserProfile;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
-use sales\model\user\entity\UserCache;
 use Yii;
 use yii\bootstrap4\Html;
-use yii\caching\Cache;
 use yii\data\ActiveDataProvider;
-use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
- * Site controller
+ * EmployeeController controller
  */
-class EmployeeController extends Controller
+class EmployeeController extends FController
 {
+    /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function actionSellerContactInfo($employeeId)
     {
@@ -712,7 +722,7 @@ class EmployeeController extends Controller
      * @param int|null $id
      * @return array
      */
-    public function actionListAjax(?string $q = null, ?int $id = null)
+    public function actionListAjax(?string $q = null, ?int $id = null): array
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 

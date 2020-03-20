@@ -2,23 +2,23 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CasesCategory */
+/* @var $model sales\entities\cases\CaseCategory */
 
-$this->title = $model->cc_key;
-$this->params['breadcrumbs'][] = ['label' => 'Cases Categories', 'url' => ['index']];
+$this->title = $model->cc_id;
+$this->params['breadcrumbs'][] = ['label' => 'Case Categories', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
-<div class="cases-category-view">
+<div class="case-category-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'id' => $model->cc_key], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->cc_key], [
+        <?= Html::a('Update', ['update', 'id' => $model->cc_id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Delete', ['delete', 'id' => $model->cc_id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -30,12 +30,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
+            'cc_id',
             'cc_key',
             'cc_name',
             [
                 'attribute' => 'cc_dep_id',
                 'format' => 'raw',
-                'value' => static function (CasesCategory $model) {
+                'value' => static function (CaseCategory $model) {
                     return $model->dep ? $model->dep->dep_name : '';
                 }
             ],

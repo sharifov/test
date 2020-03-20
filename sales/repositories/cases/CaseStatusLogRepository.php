@@ -2,31 +2,31 @@
 
 namespace sales\repositories\cases;
 
-use sales\entities\cases\CasesStatusLog;
+use sales\entities\cases\CaseStatusLog;
 
 /**
- * Class CasesStatusLogRepository
+ * Class CaseStatusLogRepository
  */
-class CasesStatusLogRepository
+class CaseStatusLogRepository
 {
 
     /**
      * @param int $caseId
-     * @return CasesStatusLog|null
+     * @return CaseStatusLog|null
      */
-    public function getPrevious(int $caseId): ?CasesStatusLog
+    public function getPrevious(int $caseId): ?CaseStatusLog
     {
-        if ($log = CasesStatusLog::find()->andWhere(['csl_case_id' => $caseId])->orderBy(['csl_id' => SORT_DESC])->limit(1)->one()) {
+        if ($log = CaseStatusLog::find()->andWhere(['csl_case_id' => $caseId])->orderBy(['csl_id' => SORT_DESC])->limit(1)->one()) {
             return $log;
         }
         return null;
     }
 
     /**
-     * @param CasesStatusLog $log
+     * @param CaseStatusLog $log
      * @return int
      */
-    public function save(CasesStatusLog $log): int
+    public function save(CaseStatusLog $log): int
     {
         if (!$log->save(false)) {
             throw new \RuntimeException('Saving error');
@@ -35,11 +35,11 @@ class CasesStatusLogRepository
     }
 
     /**
-     * @param CasesStatusLog $log
+     * @param CaseStatusLog $log
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function remove(CasesStatusLog $log): void
+    public function remove(CaseStatusLog $log): void
     {
         if (!$log->delete()) {
             throw new \RuntimeException('Removing error');

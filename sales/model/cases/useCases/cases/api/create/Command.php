@@ -7,7 +7,7 @@ namespace sales\model\cases\useCases\cases\api\create;
  *
  * @property string $contact_email
  * @property string $contact_phone
- * @property string $category
+ * @property int $category_id
  * @property string $order_uid
  * @property array $order_info
  * @property int $project_id
@@ -18,7 +18,7 @@ class Command
 {
     public $contact_email;
     public $contact_phone;
-    public $category;
+    public $category_id;
     public $order_uid;
     public $order_info;
     public $project_id;
@@ -28,7 +28,7 @@ class Command
     public function __construct(
         string $contact_email,
         string $contact_phone,
-        string $category,
+        int $category_id,
         string $order_uid,
         array $order_info,
         int $project_id,
@@ -38,7 +38,7 @@ class Command
     {
         $this->contact_email = $contact_email;
         $this->contact_phone = $contact_phone;
-        $this->category = $category;
+        $this->category_id = $category_id;
         $this->order_uid = $order_uid;
         $this->order_info = $order_info;
         $this->project_id = $project_id;

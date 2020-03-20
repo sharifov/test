@@ -6,6 +6,7 @@ use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 
 /* @var $this yii\web\View */
 /* @var $data array */
@@ -44,6 +45,10 @@ if (!empty($caseSaleModel)) {
                 <tr>
                     <th>Sale Id</th>
                     <td><?=Html::encode($data['saleId'])?></td>
+                </tr>
+                <tr>
+                    <th>Flight Status</th>
+                    <td><?=Html::encode($data['flightStatus'] ?? '')?></td>
                 </tr>
                 <tr>
                     <th>Confirmation Number (Booking Id)</th>
@@ -142,11 +147,13 @@ if (!empty($caseSaleModel)) {
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Phone number</th>
+                            <th>Email</th>
                         </tr>
                         <tr>
                             <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
                             <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
                             <td><?=Html::encode($data['customerInfo']['phoneNumber'] ?? '')?></td>
+                            <td><?=Html::encode($data['email'] ?? '')?></td>
                         </tr>
                     </table>
 				<?php endif;?>
@@ -489,21 +496,12 @@ if (!empty($caseSaleModel)) {
                             <th>Airline</th>
                             <th>Airline Name</th>
                             <th>Main Airline</th>
-                            <th>Arrival Airport</th>
-                            <th>Arrival Time</th>
-                            <th>Departure Airport</th>
-                            <th>Departure Time</th>
+                            <th>Departure / Arrival</th>
                             <th>Booking Class</th>
                             <th>Flight Number</th>
                             <th>Status Code</th>
                             <th>Operating Airline</th>
                             <th>Cabin</th>
-                            <th>DepartureCity</th>
-                            <th>Arrival City</th>
-                            <th>Departure Country</th>
-                            <th>Arrival Country</th>
-                            <th>Departure AirportName</th>
-                            <th>Arrival AirportName</th>
                             <th>Flight Duration</th>
                             <th>Layover Duration</th>
                             <th>Airline RecordLocator</th>
@@ -515,21 +513,40 @@ if (!empty($caseSaleModel)) {
                                 <td><?=Html::encode($segment['airline'])?></td>
                                 <td><?=Html::encode($segment['airlineName'])?></td>
                                 <td><?=Html::encode($segment['mainAirline'])?></td>
-                                <td><?=Html::encode($segment['arrivalAirport'])?></td>
-                                <td><?=Html::encode($segment['arrivalTime'])?></td>
-                                <td><?=Html::encode($segment['departureAirport'])?></td>
-                                <td><?=Html::encode($segment['departureTime'])?></td>
+
+                                <td>
+                                    <table class="table table-responsive table-striped table-bordered">
+                                        <tr>
+                                            <th></th>
+                                            <th>Country</th>
+                                            <th>City</th>
+                                            <th>IATA</th>
+                                            <th>AirportName</th>
+                                            <th>Date Time</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Departure</th>
+                                            <td><?=Html::encode($segment['departureCountry'])?></td>
+                                            <td><?=Html::encode($segment['departureCity'])?></td>
+                                            <td><span class="label label-default"><?=Html::encode($segment['departureAirport'])?></span></td>
+                                            <td><?=Html::encode($segment['departureAirportName'])?></td>
+                                            <td><?=Html::encode($segment['departureTime'])?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Arrival</th>
+                                            <td><?=Html::encode($segment['arrivalCountry'])?></td>
+                                            <td><?=Html::encode($segment['arrivalCity'])?></td>
+                                            <td><span class="label label-default"><?=Html::encode($segment['arrivalAirport'])?></span></td>
+                                            <td><?=Html::encode($segment['arrivalAirportName'])?></td>
+                                            <td><?=Html::encode($segment['arrivalTime'])?></td>
+                                        </tr>
+                                    </table>
+                                </td>
                                 <td><?=Html::encode($segment['bookingClass'])?></td>
                                 <td><?=Html::encode($segment['flightNumber'])?></td>
                                 <td><?=Html::encode($segment['statusCode'])?></td>
                                 <td><?=Html::encode($segment['operatingAirline'])?></td>
-                                <td><?=Html::encode($segment['cabin'])?></td>
-                                <td><?=Html::encode($segment['departureCity'])?></td>
-                                <td><?=Html::encode($segment['arrivalCity'])?></td>
-                                <td><?=Html::encode($segment['departureCountry'])?></td>
-                                <td><?=Html::encode($segment['arrivalCountry'])?></td>
-                                <td><?=Html::encode($segment['departureAirportName'])?></td>
-                                <td><?=Html::encode($segment['arrivalAirportName'])?></td>
+                                <td><span class="label label-default"><?=Html::encode($segment['cabin'])?></span></td>
                                 <td><?=Html::encode($segment['flightDuration'])?></td>
                                 <td><?=Html::encode($segment['layoverDuration'])?></td>
                                 <td><?=Html::encode($segment['airlineRecordLocator'])?></td>
@@ -546,6 +563,120 @@ if (!empty($caseSaleModel)) {
             <?php endif;?>
         </div>
     </div>
+
+    <?php if (!empty($data['fareRules'])): ?>
+
+        <?php
+            try {
+         ?>
+
+            <h4>Fare Rules</h4>
+            <?php foreach ($data['fareRules'] as $rule): ?>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <?php foreach ($rule as $key => $value): ?>
+
+                                    <?php if ($key !== 'rules'): ?>
+                                        <br> <b><?= $key ?></b>: <?= Html::encode($value) ?>
+                                    <?php else: ?>
+                                        <?php foreach ($value as $item): ?>
+                                            <b>Rules:</b>
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <?php if (isset($item['details'])): ?>
+                                                        <b>Details</b>
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <?php foreach ($item['details'] as $detailKey => $detailValue): ?>
+                                                                    <b><?= $detailKey ?></b>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <table class="table table-bordered table-hover table-striped">
+                                                                                <thead>
+                                                                                <tr>
+                                                                                    <th>for</th>
+                                                                                    <th>title</th>
+                                                                                    <th>value</th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                <?php foreach ($detailValue as $elem): ?>
+                                                                                    <tr>
+                                                                                        <td><?= $elem['for'] ?></td>
+                                                                                        <td><?= $elem['title'] ?></td>
+                                                                                        <td><?= $elem['value'] ?></td>
+                                                                                    </tr>
+                                                                                <?php endforeach; ?>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    <br>
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <div class="row">
+
+                                                                <div class="col-md-6">
+                                                                    <table class="table table-bordered table-hover table-striped">
+
+                                                                        <?php if (isset($item['category'])): ?>
+                                                                            <tr>
+                                                                                <td>category</b></td>
+                                                                                <td> <?= Html::encode($item['category']) ?> </td>
+                                                                            </tr>
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (isset($item['fullText'])): ?>
+                                                                            <tr>
+                                                                                <td>fullText</b></td>
+                                                                                <td> <?= Yii::$app->formatter->format($item['fullText'], 'ntext') ?> </td>
+                                                                            </tr>
+
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (isset($item['categoryTitle'])): ?>
+                                                                            <tr>
+                                                                                <td>categoryTitle</b></td>
+                                                                                <td> <?= Html::encode($item['categoryTitle']) ?> </td>
+                                                                            </tr>
+
+                                                                        <?php endif; ?>
+
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+            <?php endforeach; ?>
+
+        <?php
+
+            } catch (Throwable $e) {
+                Yii::error($e->getMessage() . VarDumper::dumpAsString($data['fareRules']), 'Parsing:fareRules');
+            }
+
+        ?>
+    <?php endif; ?>
+
     <?php
 	$url = \yii\helpers\Url::to(['/cases/ajax-sync-with-back-office/']);
 	$urlRefresh = \yii\helpers\Url::to(['/cases/ajax-refresh-sale-info']);
@@ -653,7 +784,60 @@ $('.refresh-from-bo').on('click', function (e) {
             $(obj).closest('.panel').find('.error-dump').html();
         }
     });
-})
+});
+
+    
+    $('.remove-sale').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if(!confirm('Are you sure you want to delete this sale?')) {
+            return false;
+        }  
+        
+        let obj = $(this),            
+            caseSaleId = obj.attr('data-case-sale-id');
+        
+        $.ajax({
+            url: '/sale/delete-ajax?id=' + caseSaleId,
+            type: 'post',
+            dataType: "json",    
+            beforeSend: function () {
+                obj.attr('disabled', true).find('i').toggleClass('fa-spin');
+                $(obj).closest('.panel').find('.error-dump').html();
+            },
+            success: function (data) {
+                if (data.error) {
+                   new PNotify({
+                        title: "Error",
+                        type: "error",
+                        text: data.error,
+                        hide: true
+                    }); 
+                } else {
+                    new PNotify({
+                        title: "Success",
+                        type: "success",
+                        text: 'Successfully deleted',
+                        hide: true
+                    }); 
+                    $.pjax.reload({container: '#pjax-sale-list', push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
+                }
+            },
+            error: function (text) {
+                new PNotify({
+                    title: "Error",
+                    type: "error",
+                    text: "Internal Server Error. Try again letter.",
+                    hide: true
+                });
+            },
+            complete: function () {
+                obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
+                $(obj).closest('.panel').find('.error-dump').html();
+            }
+        });
+    });
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
 JS;

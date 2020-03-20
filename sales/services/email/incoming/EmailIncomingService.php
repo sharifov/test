@@ -3,6 +3,7 @@
 namespace sales\services\email\incoming;
 
 use common\models\Sources;
+use sales\services\cases\CasesSaleService;
 use sales\services\lead\LeadManageService;
 use sales\services\TransactionManager;
 use Yii;
@@ -22,6 +23,7 @@ use yii\helpers\VarDumper;
  * @property InternalContactService $internalContactService
  * @property LeadManageService $leadManageService
  * @property TransactionManager $transactionManager
+ * @property CasesSaleService $casesSaleService
  */
 class EmailIncomingService
 {
@@ -30,13 +32,15 @@ class EmailIncomingService
     private $internalContactService;
     private $leadManageService;
     private $transactionManager;
+    private $casesSaleService;
 
     public function __construct(
         CasesCreateService $casesCreateService,
         ClientManageService $clientManageService,
         InternalContactService $internalContactService,
         LeadManageService $leadManageService,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        CasesSaleService $casesSaleService
     )
     {
         $this->casesCreateService = $casesCreateService;
@@ -44,6 +48,7 @@ class EmailIncomingService
         $this->internalContactService = $internalContactService;
         $this->leadManageService = $leadManageService;
         $this->transactionManager = $transactionManager;
+        $this->casesSaleService = $casesSaleService;
     }
 
     /**
@@ -86,11 +91,23 @@ class EmailIncomingService
                 }
                 if ($department->isExchange()) {
                     $caseId = $this->getOrCreateCaseByExchange($client->id, $contact->projectId, $internalEmail, $emailId);
+
+                    $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+                    if (count($saleData)) {
+                        $this->casesSaleService->createSale($caseId, $saleData);
+                    }
+
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
                     return new Process(null, $caseId);
                 }
                 if ($department->isSupport()) {
                     $caseId = $this->getOrCreateCaseBySupport($client->id, $contact->projectId, $internalEmail, $emailId);
+
+                    $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+                    if (count($saleData)) {
+                        $this->casesSaleService->createSale($caseId, $saleData);
+                    }
+
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
                     return new Process(null, $caseId);
                 }
@@ -99,8 +116,13 @@ class EmailIncomingService
             $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
             Yii::error('Incoming email. Created Email Id: ' . $emailId . ' | Not found Department for email: ' . $internalEmail, 'EmailIncomingService');
             $process = $this->getOrCreateByDefault($client->id, $contact->projectId, $internalEmail, $emailId);
-            return $process;
 
+            $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+            if (count($saleData)) {
+                $this->casesSaleService->createSale($process->caseId, $saleData);
+            }
+
+            return $process;
         });
 
         return $process;

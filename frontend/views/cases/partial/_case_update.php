@@ -23,7 +23,7 @@ use yii\widgets\Pjax;
         echo $form->errorSummary($model);
     ?>
 
-    <?= $form->field($model, 'category')->dropDownList($model->getCategoryList(), ['prompt' => '-']) ?>
+    <?= $form->field($model, 'categoryId')->dropDownList($model->getCategoryList(), ['prompt' => '-']) ?>
 
     <?= $form->field($model, 'orderUid')->textInput(['maxlength' => 7]) ?>
 

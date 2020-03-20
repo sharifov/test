@@ -11,9 +11,10 @@ use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
- * Class CasesCategory
+ * Class CaseCategory
  *
- * @property string $cc_key
+ * @property int $cc_id
+ * @property int $cc_key
  * @property string $cc_name
  * @property int $cc_dep_id
  * @property int $cc_system
@@ -25,7 +26,7 @@ use yii\helpers\ArrayHelper;
  * @property Department $dep
  * @property Employee $updatedUser
  */
-class CasesCategory extends ActiveRecord
+class CaseCategory extends ActiveRecord
 {
 
     /**
@@ -56,7 +57,7 @@ class CasesCategory extends ActiveRecord
     public function rules(): array
     {
         return [
-            ['cc_key', 'required'],
+            ['cc_key', 'default', 'value' => null],
             ['cc_key', 'string', 'max' => 50],
             ['cc_key', 'match', 'pattern' => '/^[a-zA-Z0-9_-]+$/', 'message' =>  'Key can only contain alphanumeric characters, underscores and dashes.'],
             ['cc_key', 'unique'],
@@ -67,7 +68,7 @@ class CasesCategory extends ActiveRecord
 
             ['cc_dep_id', 'required'],
             ['cc_dep_id', 'integer'],
-            ['cc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::className(), 'targetAttribute' => ['cc_dep_id' => 'dep_id']],
+            ['cc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['cc_dep_id' => 'dep_id']],
 
             ['cc_system', 'boolean'],
         ];
@@ -79,6 +80,7 @@ class CasesCategory extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
+            'cc_id' => 'ID',
             'cc_key' => 'Key',
             'cc_name' => 'Name',
             'dep.dep_name' => 'Department',
@@ -95,7 +97,7 @@ class CasesCategory extends ActiveRecord
      */
     public function getCases(): ActiveQuery
     {
-        return $this->hasMany(Cases::className(), ['cs_category' => 'cc_key']);
+        return $this->hasMany(Cases::class, ['cs_category_id' => 'cc_id']);
     }
 
     /**
@@ -103,7 +105,7 @@ class CasesCategory extends ActiveRecord
      */
     public function getDep(): ActiveQuery
     {
-        return $this->hasOne(Department::className(), ['dep_id' => 'cc_dep_id']);
+        return $this->hasOne(Department::class, ['dep_id' => 'cc_dep_id']);
     }
 
     /**
@@ -111,7 +113,7 @@ class CasesCategory extends ActiveRecord
      */
     public function getUpdatedUser(): ActiveQuery
     {
-        return $this->hasOne(Employee::className(), ['id' => 'cc_updated_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'cc_updated_user_id']);
     }
 
     /**
@@ -126,9 +128,9 @@ class CasesCategory extends ActiveRecord
             $conditions = ['cc_dep_id' => $departments];
         }
 
-        $data = self::find()->select(['cc_name', 'cc_dep_id', 'cc_key'])
+        $data = self::find()->select(['cc_name', 'cc_dep_id', 'cc_id'])
             ->andWhere($conditions)
-            ->indexBy('cc_key')
+            ->indexBy('cc_id')
             ->orderBy(['cc_created_dt' => SORT_ASC])
             ->asArray()
             ->column();
@@ -140,7 +142,7 @@ class CasesCategory extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return '{{%cases_category}}';
+        return '{{%case_category}}';
     }
 
 }
