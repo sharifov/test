@@ -40,6 +40,7 @@ use modules\flight\src\entities\flightQuote\Scopes;
  * @property string|null $fq_origin_search_data
  * @property string|null $fq_last_ticket_date
  * @property string|null $fq_request_hash
+ * @property string|null $fq_uid
  *
  * @property Employee $fqCreatedUser
  * @property Flight $fqFlight

@@ -7,12 +7,14 @@ use yii\db\Migration;
  */
 class m200320_083513_add_column_fq_uid_to_flight_quote_tbl extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
     public function safeUp()
     {
+        $this->addColumn('{{%quotes}}', 'fq_uid', $this->string(50));
 
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%quotes}}');
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
     /**
@@ -20,23 +22,11 @@ class m200320_083513_add_column_fq_uid_to_flight_quote_tbl extends Migration
      */
     public function safeDown()
     {
-        echo "m200320_083513_add_column_fq_uid_to_flight_quote_tbl cannot be reverted.\n";
+        $this->dropColumn('{{%quotes}}', 'fq_uid');
 
-        return false;
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%quotes}}');
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
-
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m200320_083513_add_column_fq_uid_to_flight_quote_tbl cannot be reverted.\n";
-
-        return false;
-    }
-    */
 }
