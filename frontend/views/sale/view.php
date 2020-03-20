@@ -496,21 +496,12 @@ if (!empty($caseSaleModel)) {
                             <th>Airline</th>
                             <th>Airline Name</th>
                             <th>Main Airline</th>
-                            <th>Arrival Airport</th>
-                            <th>Arrival Time</th>
-                            <th>Departure Airport</th>
-                            <th>Departure Time</th>
+                            <th>Departure / Arrival</th>
                             <th>Booking Class</th>
                             <th>Flight Number</th>
                             <th>Status Code</th>
                             <th>Operating Airline</th>
                             <th>Cabin</th>
-                            <th>DepartureCity</th>
-                            <th>Arrival City</th>
-                            <th>Departure Country</th>
-                            <th>Arrival Country</th>
-                            <th>Departure AirportName</th>
-                            <th>Arrival AirportName</th>
                             <th>Flight Duration</th>
                             <th>Layover Duration</th>
                             <th>Airline RecordLocator</th>
@@ -522,21 +513,40 @@ if (!empty($caseSaleModel)) {
                                 <td><?=Html::encode($segment['airline'])?></td>
                                 <td><?=Html::encode($segment['airlineName'])?></td>
                                 <td><?=Html::encode($segment['mainAirline'])?></td>
-                                <td><?=Html::encode($segment['arrivalAirport'])?></td>
-                                <td><?=Html::encode($segment['arrivalTime'])?></td>
-                                <td><?=Html::encode($segment['departureAirport'])?></td>
-                                <td><?=Html::encode($segment['departureTime'])?></td>
+
+                                <td>
+                                    <table class="table table-responsive table-striped table-bordered">
+                                        <tr>
+                                            <th></th>
+                                            <th>Country</th>
+                                            <th>City</th>
+                                            <th>IATA</th>
+                                            <th>AirportName</th>
+                                            <th>Date Time</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Departure</th>
+                                            <td><?=Html::encode($segment['departureCountry'])?></td>
+                                            <td><?=Html::encode($segment['departureCity'])?></td>
+                                            <td><span class="label label-default"><?=Html::encode($segment['departureAirport'])?></span></td>
+                                            <td><?=Html::encode($segment['departureAirportName'])?></td>
+                                            <td><?=Html::encode($segment['departureTime'])?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Arrival</th>
+                                            <td><?=Html::encode($segment['arrivalCountry'])?></td>
+                                            <td><?=Html::encode($segment['arrivalCity'])?></td>
+                                            <td><span class="label label-default"><?=Html::encode($segment['arrivalAirport'])?></span></td>
+                                            <td><?=Html::encode($segment['arrivalAirportName'])?></td>
+                                            <td><?=Html::encode($segment['arrivalTime'])?></td>
+                                        </tr>
+                                    </table>
+                                </td>
                                 <td><?=Html::encode($segment['bookingClass'])?></td>
                                 <td><?=Html::encode($segment['flightNumber'])?></td>
                                 <td><?=Html::encode($segment['statusCode'])?></td>
                                 <td><?=Html::encode($segment['operatingAirline'])?></td>
-                                <td><?=Html::encode($segment['cabin'])?></td>
-                                <td><?=Html::encode($segment['departureCity'])?></td>
-                                <td><?=Html::encode($segment['arrivalCity'])?></td>
-                                <td><?=Html::encode($segment['departureCountry'])?></td>
-                                <td><?=Html::encode($segment['arrivalCountry'])?></td>
-                                <td><?=Html::encode($segment['departureAirportName'])?></td>
-                                <td><?=Html::encode($segment['arrivalAirportName'])?></td>
+                                <td><span class="label label-default"><?=Html::encode($segment['cabin'])?></span></td>
                                 <td><?=Html::encode($segment['flightDuration'])?></td>
                                 <td><?=Html::encode($segment['layoverDuration'])?></td>
                                 <td><?=Html::encode($segment['airlineRecordLocator'])?></td>
