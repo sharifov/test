@@ -8,7 +8,7 @@ class NativeEventDispatcher
 {
 	private static $queue = [];
 
-	public static function recordEvent(string $eventClass, string $eventName, array $handlerCallable, $params = null): self
+	public static function recordEvent(string $eventClass, string $eventName, $handlerCallable, $params = null): self
 	{
 		if (is_callable($handlerCallable)) {
 			self::registerEvent($eventClass, $eventName, $handlerCallable, $params);
@@ -30,7 +30,8 @@ class NativeEventDispatcher
 		if (isset(self::$queue[$eventClass])) {
 			foreach (self::$queue[$eventClass] as $classEventName) {
 				if ($eventName === $classEventName) {
-					Event::trigger($eventClass, $classEventName);
+					$class = new $eventClass();
+					Event::trigger($class, $classEventName);
 					unset(self::$queue[$eventClass][$classEventName]);
 
 					if (empty(self::$queue[$eventClass])) {
@@ -88,7 +89,7 @@ class NativeEventDispatcher
 		return new static;
 	}
 
-	private static function registerEvent(string $className, string $eventName, array $handlerCallable, $params = null): void
+	private static function registerEvent(string $className, string $eventName, $handlerCallable, $params = null): void
 	{
 		if (!(isset(self::$queue[$className]) && in_array($eventName, self::$queue[$className], true))) {
 			self::$queue[$className][] = $eventName;

@@ -1,5 +1,7 @@
 <?php
 
+use modules\rbacImportExport\src\rbac\DbManager;
+use modules\rbacImportExport\RbacImportExportModule;
 use common\models\Employee;
 use modules\flight\FlightModule;
 use modules\hotel\HotelModule;
@@ -280,7 +282,23 @@ return [
         'qa-task' => [
             'class' => QaTaskModule::class,
         ],
-
+		'rbac-import-export' => [
+			'class' => RbacImportExportModule::class,
+			'as access' => [
+				'class' => yii2mod\rbac\filters\AccessControl::class,
+				'rules' => [
+					[
+						'allow' => true,
+						'roles' => [Employee::ROLE_SUPER_ADMIN],
+					]
+				]
+			],
+			'components' => [
+				'authManager' => [
+					'class' => DbManager::class
+				]
+			]
+		],
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,
