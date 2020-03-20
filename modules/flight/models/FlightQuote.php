@@ -4,6 +4,7 @@ namespace modules\flight\models;
 
 use common\models\Airline;
 use common\models\Employee;
+use modules\flight\models\behaviors\FlightQuoteFqUid;
 use modules\flight\src\entities\flightQuote\events\FlightQuoteCloneCreatedEvent;
 use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -13,6 +14,7 @@ use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\flight\src\entities\flightQuote\Scopes;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "flight_quote".
@@ -205,6 +207,16 @@ class FlightQuote extends ActiveRecord implements Quotable
             'fq_request_hash' => 'Request Hash',
             'fq_uid' => 'Uid',
         ];
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'fq_uid' => [
+                'class' => FlightQuoteFqUid::class,
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

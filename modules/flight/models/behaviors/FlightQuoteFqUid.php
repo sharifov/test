@@ -1,28 +1,22 @@
 <?php
 
 namespace modules\flight\models\behaviors;
+
+use modules\flight\models\FlightQuote;
 use yii\base\Behavior;
 use yii\db\ActiveRecord;
 
 /**
- * Class ProductQuoteProfitAmount
- * @package modules\product\src\entities\productQuote\behaviors
- * @property RecalculateProfitAmountService $recalculateProfitAmountService
+ * Class FlightQuoteFqUid
+ * Note: Attached to FlightQuote
  */
-class ProductQuoteProfitAmount extends Behavior
+class FlightQuoteFqUid extends Behavior
 {
-    private $recalculateProfitAmountService;
 
-    /**
-     * ProductQuoteProfitAmount constructor.
-     * @param RecalculateProfitAmountService $recalculateProfitAmountService
-     * @param array $config
+    /* TODO::
+    При создании flight_quote в beforeSave генерируем уникальный string (uniqueid), если он не пустой.
+    При Update, проверяем, если поле пустое, то генерим fq_uid и сохраняем, если не передается. (текущая логика уже есть в примерах моделей)
      */
-    public function __construct(RecalculateProfitAmountService $recalculateProfitAmountService, $config = [])
-    {
-        $this->recalculateProfitAmountService = $recalculateProfitAmountService;
-        parent::__construct($config);
-    }
 
     /**
      * @return array
@@ -30,31 +24,27 @@ class ProductQuoteProfitAmount extends Behavior
     public function events(): array
     {
         return [
-            //ActiveRecord::EVENT_BEFORE_INSERT => 'beforeInsert',
-            //ActiveRecord::EVENT_BEFORE_UPDATE => 'beforeUpdate',
-            ActiveRecord::EVENT_AFTER_UPDATE => 'customAfterSave',
-            ActiveRecord::EVENT_AFTER_INSERT => 'customAfterSave',
+            ActiveRecord::EVENT_BEFORE_INSERT => 'beforeInsert',
+            ActiveRecord::EVENT_BEFORE_UPDATE => 'beforeUpdate',
+            //ActiveRecord::EVENT_AFTER_UPDATE => 'customAfterSave',
+            //ActiveRecord::EVENT_AFTER_INSERT => 'customAfterSave',
         ];
     }
 
     /**
      * @param $event
-     * @throws \yii\base\InvalidConfigException
      */
     public function customAfterSave($event): void
     {
-        if (array_key_exists('pq_profit_amount', $event->changedAttributes) ||
-            array_key_exists('pq_status_id', $event->changedAttributes)
-        ) {
-            /** @var ProductQuote $this->owner */
-            $this->recalculateProfitAmountService->setOffers($this->owner->opOffers)->recalculateOffers();
-            $this->recalculateProfitAmountService->setOrders($this->owner->orpOrders)->recalculateOrders();
+        if (array_key_exists('pq_profit_amount', $event->changedAttributes) ) {
+
         }
     }
 
     public function beforeInsert(): void
     {
-        $this->owner->pq_profit_amount = 0.00; // if need
+        $this->owner->fq_uid = 0.00; // if need
+        $this->uid = empty($this->owner->fq_uid) ? uniqid('fq_uid', true) : $this->owner->fq_uid;
     }
 
     public function beforeUpdate(): void
