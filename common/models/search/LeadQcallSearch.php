@@ -181,15 +181,15 @@ class LeadQcallSearch extends LeadQcall
         $query->andWhere([Lead::tableName() . '.project_id' => array_keys(EmployeeProjectAccess::getProjects($user))]);
 
         $query->addSelect([
-            'is_not_empty_passengers' => new Expression('if ((' . Lead::tableName() . '.adults > 0 OR ' . Lead::tableName() . '.children > 0 OR ' . Lead::tableName() . '.infants > 0), 1, 2)')
-        ]);
-
-        $query->addSelect([
             'is_ready' => new Expression('if (lqc_dt_from <= \'' . $nowDt . '\', 1, 0)')
         ]);
 
         $query->addSelect([
             'is_reserved' => new Expression('if (lqc_reservation_time > \'' . $nowDt . '\' AND (lqc_reservation_user_id != ' . $user->id . ' OR lqc_reservation_user_id IS NULL) , 1, 0)')
+        ]);
+
+        $query->addSelect([
+            'is_not_empty_passengers' => new Expression('if ((' . Lead::tableName() . '.adults > 0 OR ' . Lead::tableName() . '.children > 0 OR ' . Lead::tableName() . '.infants > 0), 1, 2)')
         ]);
 
         $defaultOrder = [
