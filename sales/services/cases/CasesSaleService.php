@@ -407,7 +407,7 @@ class CasesSaleService
             if ($response->isOk) {
                 $result = $response->data;
                 if (isset($result['items']) && is_array($result['items'])) {
-                    return array_pop($result['items']); 
+                    return array_shift($result['items']); 
                 }
             } else {
                 throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
