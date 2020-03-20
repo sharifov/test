@@ -31,6 +31,7 @@ use yii\helpers\VarDumper;
  * @property $cssProfitTo
  * @property $cssOutDate
  * @property $cssInDate
+ * @property $cssInOutDate
  * @property $cssChargeType
  * @property $departureAirport
  * @property $arrivalAirport
@@ -58,6 +59,7 @@ class CasesSearch extends Cases
     public $cssProfitTo;
     public $cssOutDate;
     public $cssInDate;
+    public $cssInOutDate;
     public $cssChargeType;
     public $departureAirport;
     public $arrivalAirport;
@@ -101,7 +103,7 @@ class CasesSearch extends Cases
             [['cssChargedFrom', 'cssChargedTo', 'cssProfitFrom', 'cssProfitTo'], 'number'],
             [['cssOutDate', 'cssInDate'], 'date'],
             [['cssChargeType'], 'string', 'max' => 100],
-            [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries',], 'safe'],
+            [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate'], 'safe'],
         ];
     }
 
@@ -431,12 +433,18 @@ class CasesSearch extends Cases
         if ($this->cssProfitTo) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
         }
-        if ($this->cssOutDate) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'DATE(css_out_date)', date('Y-m-d', strtotime($this->cssOutDate))])]);
-        }
-        if ($this->cssInDate) {
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'DATE(css_in_date)', date('Y-m-d', strtotime($this->cssInDate))])]);
-        }
+		if ($this->cssInOutDate) {
+			$departRange = explode(' - ', $this->cssInOutDate);
+			if ($departRange[0] && $departRange[1]) {
+				$fromDate = date('Y-m-d', strtotime($departRange[0]));
+				$toDate = date('Y-m-d', strtotime($departRange[1]));
+				$query->andWhere(['cs_id' => CaseSale::find()
+													->select('css_cs_id')
+													->where(['between', 'DATE(css_out_date)', $fromDate, $toDate])
+													->orWhere(['between', 'DATE(css_in_date)', $fromDate, $toDate])
+				]);
+			}
+		}
         if ($this->cssChargeType) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
         }

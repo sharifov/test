@@ -153,25 +153,24 @@ use yii\widgets\ActiveForm;
                 ]);
             ?>
         </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cssOutDate')->widget(
-                \dosamigos\datepicker\DatePicker::class, [
-                'inline' => false,
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'dd-M-yyyy',
-                ]
-            ])  ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cssInDate')->widget(
-                \dosamigos\datepicker\DatePicker::class, [
-                'inline' => false,
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'dd-M-yyyy',
-                ]
-            ]) ?>
+        <div class="col-md-2">
+            <?= $form->field($model, 'cssInOutDate', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                        'presetDropdown' => false,
+                        'hideInput' => true,
+                        'convertFormat' => true,
+                        'pluginOptions' => [
+                            'timePicker' => true,
+                            'timePickerIncrement' => 1,
+                            'timePicker24Hour' => true,
+                            'locale' => [
+                                'format' => 'd-M-Y',
+                                'separator' => ' - '
+                            ]
+                        ]
+                    ])->label('Flight Date From / To') ?>
+
         </div>
         <div class="col-md-1">
             <?php
