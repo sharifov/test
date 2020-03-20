@@ -8,6 +8,7 @@ use Exception;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesSaleRepository;
+use Yii;
 use yii\helpers\VarDumper;
 
 class CasesSaleService
@@ -402,6 +403,7 @@ class CasesSaleService
     {
         try {
             $response = BackOffice::sendRequest2('cs/search', $params);
+
             if ($response->isOk) {
                 $result = $response->data;
                 if (isset($result['items']) && is_array($result['items'])) {
@@ -439,4 +441,40 @@ class CasesSaleService
         return [];
     }
 
+    /**
+     * @param string|null $order_uid
+     * @param string|null $contact_email
+     * @param string|null $contact_phone
+     * @return array
+     */
+    public function getSaleFromBo(?string $order_uid = null, ?string $contact_email = null, ?string $contact_phone = null): array
+    {
+        if ($order_uid && $result = $this->searchRequestToBackOffice(['order_uid' => $order_uid])) {
+            return $result;
+        }
+        if ($contact_email && $result = $this->searchRequestToBackOffice(['email' => $contact_email])) {
+            return $result;
+        }
+        if ($contact_phone && $result = $this->searchRequestToBackOffice(['phone' => $contact_phone])) {
+            return $result;
+        }
+        return [];
+    }
+
+    /**
+     * @param int $csId
+     * @param array $saleData
+     */
+    public function createSale(int $csId, array $saleData):void
+    {
+        try {
+            if ($cases = Cases::findOne($csId)) {
+                $caseSale = $this->create($cases, $saleData);
+                $refreshSaleData = $this->detailRequestToBackOffice($saleData['saleId']);
+                $this->saveAdditionalData($caseSale, $cases, $refreshSaleData);
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
+        }
+    }
 }

@@ -217,7 +217,10 @@ class CasesController extends BaseController
             );
         }
 
-        $this->createSale($form, $result);
+        $saleData = $this->casesSaleService->getSaleFromBo($form->order_uid, $form->contact_email, $form->contact_phone);
+        if (count($saleData)) {
+            $this->casesSaleService->createSale($result->csId, $saleData);
+        }
 
         return new SuccessResponse(
             new DataMessage(
@@ -225,42 +228,5 @@ class CasesController extends BaseController
                 new Message('client_uuid', $result->clientUuid),
             )
         );
-    }
-
-    /**
-     * @param CreateForm $form
-     * @param $result
-     */
-    private function createSale(CreateForm $form, $result):void
-    {
-        try {
-            if ($saleData = $this->getSaleFromBo($form)) {
-                if ($cases = Cases::findOne($result->csId)) {
-                    $caseSale = $this->casesSaleService->create($cases, $saleData);
-                    $refreshSaleData = $this->casesSaleService->detailRequestToBackOffice($saleData['saleId']);
-                    $this->casesSaleService->saveAdditionalData($caseSale, $cases, $refreshSaleData);
-                }
-            }
-        } catch (\Throwable $throwable) {
-            Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
-        }
-    }
-
-    /**
-     * @param CreateForm $form
-     * @return array|mixed
-     */
-    private function getSaleFromBo(CreateForm $form)
-    {
-        if ($findByOrderUid = $this->casesSaleService->searchRequestToBackOffice(['order_uid' => $form->order_uid])) {
-            return $findByOrderUid;
-        }
-        if ($findByEmail = $this->casesSaleService->searchRequestToBackOffice(['email' => $form->contact_email])) {
-            return $findByEmail;
-        }
-        if ($findByPhone = $this->casesSaleService->searchRequestToBackOffice(['phone' => $form->contact_phone])) {
-            return $findByPhone;
-        }
-        return [];
     }
 }
