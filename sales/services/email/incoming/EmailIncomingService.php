@@ -91,11 +91,23 @@ class EmailIncomingService
                 }
                 if ($department->isExchange()) {
                     $caseId = $this->getOrCreateCaseByExchange($client->id, $contact->projectId, $internalEmail, $emailId);
+
+                    $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+                    if (count($saleData)) {
+                        $this->casesSaleService->createSale($caseId, $saleData);
+                    }
+
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
                     return new Process(null, $caseId);
                 }
                 if ($department->isSupport()) {
                     $caseId = $this->getOrCreateCaseBySupport($client->id, $contact->projectId, $internalEmail, $emailId);
+
+                    $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+                    if (count($saleData)) {
+                        $this->casesSaleService->createSale($caseId, $saleData);
+                    }
+
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
                     return new Process(null, $caseId);
                 }
@@ -104,8 +116,13 @@ class EmailIncomingService
             $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
             Yii::error('Incoming email. Created Email Id: ' . $emailId . ' | Not found Department for email: ' . $internalEmail, 'EmailIncomingService');
             $process = $this->getOrCreateByDefault($client->id, $contact->projectId, $internalEmail, $emailId);
-            return $process;
 
+            $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
+            if (count($saleData)) {
+                $this->casesSaleService->createSale($process->caseId, $saleData);
+            }
+
+            return $process;
         });
 
         return $process;
@@ -154,11 +171,6 @@ class EmailIncomingService
         }
         if ((bool)Yii::$app->params['settings']['create_new_exchange_case_email']) {
             $case = $this->casesCreateService->createExchangeByIncomingEmail($clientId, $projectId);
-
-            $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
-            if (count($saleData)) {
-                $this->casesSaleService->createSale($case->cs_id, $saleData);
-            }
             return $case->cs_id;
         }
         if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $projectId)->one()) {
@@ -182,11 +194,6 @@ class EmailIncomingService
         }
         if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
             $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
-
-            $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
-            if (count($saleData)) {
-                $this->casesSaleService->createSale($case->cs_id, $saleData);
-            }
             return $case->cs_id;
         }
         if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
@@ -216,12 +223,6 @@ class EmailIncomingService
         } else {
             if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
                 $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
-
-                $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
-                if (count($saleData)) {
-                    $this->casesSaleService->createSale($case->cs_id, $saleData);
-                }
-
                 return new Process(null, $case->cs_id);
             } else {
                 if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
