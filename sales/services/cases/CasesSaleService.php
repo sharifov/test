@@ -2,6 +2,7 @@
 
 namespace sales\services\cases;
 
+use common\components\BackOffice;
 use common\models\CaseSale;
 use Exception;
 use http\Exception\RuntimeException;
@@ -277,9 +278,10 @@ class CasesSaleService
 	{
 		if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
 			$caseSale = $this->casesSaleRepository->refreshOriginalSaleData($caseSale, $case, $saleData);
+			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
 			if(!$caseSale->save()) {
-				\Yii::error(VarDumper::dumpAsString($caseSale->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
+				\Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesController:actionAddSale:CaseSale:save');
 				throw new \RuntimeException('An error occurred while trying to refresh original sale info;');
 			}
 
@@ -290,4 +292,150 @@ class CasesSaleService
 
 		return $caseSale;
 	}
+
+    /**
+     * @param Cases $case
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function create(Cases $case, array $saleData): CaseSale
+	{
+		$caseSale = new CaseSale();
+        $caseSale->css_cs_id = $case->cs_id;
+        $caseSale->css_sale_id = $saleData['saleId'];
+        $caseSale->css_sale_data = json_encode($saleData);
+        $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
+        $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
+        $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+        $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
+        $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
+
+        if(!$caseSale->save(false)) {
+            \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:create');
+            return null;
+        }
+
+        $case->updateLastAction();
+
+		return $caseSale;
+	}
+
+    /**
+     * @param CaseSale $caseSale
+     * @param Cases $case
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): CaseSale
+	{
+		if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
+			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
+
+			if(!$caseSale->save()) {
+				\Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:saveAdditionalData');
+				throw new \RuntimeException('Error. Additional data not saved');
+			}
+			$case->updateLastAction();
+		} else {
+			throw new \DomainException('Sale info form BO is not equal with current sale');
+		}
+
+		return $caseSale;
+	}
+
+	/**
+     * @param CaseSale $caseSale
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function prepareAdditionalData(CaseSale $caseSale, array $saleData): CaseSale
+    {
+        if (isset($saleData['price']['priceQuotes'])) {
+            $amountCharged = 0;
+            foreach ($saleData['price']['priceQuotes'] as $priceQuote) {
+                if (isset($priceQuote['selling'])) {
+                    $amountCharged += $priceQuote['selling'];
+                }
+            }
+            $caseSale->css_charged = $amountCharged ?: null;
+        }
+        if (isset($saleData['price']['profit'])) {
+            $caseSale->css_profit = $saleData['price']['profit'];
+        }
+        if (isset($saleData['itinerary'][0]['segments'][0]['departureAirport'])) {
+            $caseSale->css_out_departure_airport = $saleData['itinerary'][0]['segments'][0]['departureAirport'];
+        }
+        if (isset($saleData['itinerary'][0]['segments'])) {
+            $idxLastInFirstSegments = count($saleData['itinerary'][0]['segments']) - 1;
+            if (isset($saleData['itinerary'][0]['segments'][$idxLastInFirstSegments]['arrivalAirport'])) {
+                $caseSale->css_out_arrival_airport = $saleData['itinerary'][0]['segments'][$idxLastInFirstSegments]['arrivalAirport'];
+            }
+        }
+        if (isset($saleData['itinerary'][0]['segments'][0]['departureTime'])) {
+            $caseSale->css_out_date = $saleData['itinerary'][0]['segments'][0]['departureTime'];
+        }
+        if (isset($saleData['itinerary'])) {
+            $countItinerary = count($saleData['itinerary']);
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'])) {
+                $caseSale->css_in_departure_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'];
+            }
+            $idxLastInLastSegments = count($saleData['itinerary'][$countItinerary - 1]['segments']) - 1;
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
+                $caseSale->css_out_arrival_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'];
+            }
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'])) {
+                $caseSale->css_in_date = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'];
+            }
+        }
+        if (isset($saleData['chargeType'])) {
+            $caseSale->css_charge_type = $saleData['chargeType'];
+        }
+        return $caseSale;
+    }
+
+    /**
+     * @param array $params
+     * @return array|mixed
+     */
+    public function searchRequestToBackOffice(array $params)
+    {
+        try {
+            $response = BackOffice::sendRequest2('cs/search', $params);
+            if ($response->isOk) {
+                $result = $response->data;
+                if (isset($result['items']) && is_array($result['items'])) {
+                    return array_pop($result['items']); 
+                }
+            } else {
+                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+            }
+        } catch (\Throwable $exception) {
+            \Yii::error(VarDumper::dumpAsString($exception), 'CasesSaleService:searchRequestToBackOffice');
+        }
+        return [];
+    }
+
+    /**
+     * @param int $sale_id
+     * @return array|mixed
+     */
+    public function detailRequestToBackOffice(int $sale_id)
+    {
+        try {
+            $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id]);
+
+            if ($response->isOk) {
+                $result = $response->data;
+                if ($result && is_array($result)) {
+                    return $result;
+                }
+            } else {
+                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+            }
+        } catch (\Throwable $exception) {
+            \Yii::error(VarDumper::dumpAsString($exception), 'CasesSaleService:detailRequestToBackOffice');
+        }
+        return [];
+    }
+
 }

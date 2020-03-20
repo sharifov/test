@@ -2,9 +2,11 @@
 
 namespace webapi\modules\v2\controllers;
 
+use sales\entities\cases\Cases;
 use sales\model\cases\CaseCodeException;
 use sales\model\cases\useCases\cases\api\create\CreateForm;
 use sales\model\cases\useCases\cases\api\create\Handler;
+use sales\services\cases\CasesSaleService;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
@@ -18,26 +20,31 @@ use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use webapi\src\response\Response;
+use yii\helpers\VarDumper;
 
 /**
  * Class CasesController
  *
  * @property Handler $createHandler
+ * @property CasesSaleService $casesSaleService
  */
 class CasesController extends BaseController
 {
     private $createHandler;
+    private $casesSaleService;
 
     public function __construct(
         $id,
         $module,
         ApiLogger $logger,
         Handler $createHandler,
+        CasesSaleService $casesSaleService,
         $config = []
     )
     {
         parent::__construct($id, $module, $logger, $config);
         $this->createHandler = $createHandler;
+        $this->casesSaleService = $casesSaleService;
     }
 
     /**
@@ -210,11 +217,49 @@ class CasesController extends BaseController
             );
         }
 
+        $this->createSale($form, $result);
+
         return new SuccessResponse(
             new DataMessage(
                 new Message('case_gid', $result->caseGid),
                 new Message('client_uuid', $result->clientUuid),
             )
         );
+    }
+
+    /**
+     * @param CreateForm $form
+     * @param $result
+     */
+    private function createSale(CreateForm $form, $result):void
+    {
+        try {
+            if ($saleData = $this->getSaleFromBo($form)) {
+                $cases = Cases::findOne($result->csId);
+                $caseSale = $this->casesSaleService->create($cases, $saleData);
+                $refreshSaleData = $this->casesSaleService->detailRequestToBackOffice($saleData['saleId']);
+                $this->casesSaleService->saveAdditionalData($caseSale, $cases, $refreshSaleData);
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
+        }
+    }
+
+    /**
+     * @param CreateForm $form
+     * @return array|mixed
+     */
+    private function getSaleFromBo(CreateForm $form)
+    {
+        if ($findByOrderUid = $this->casesSaleService->searchRequestToBackOffice(['order_uid' => $form->order_uid])) {
+            return $findByOrderUid;
+        }
+        if ($findByEmail = $this->casesSaleService->searchRequestToBackOffice(['email' => $form->contact_email])) {
+            return $findByEmail;
+        }
+        if ($findByPhone = $this->casesSaleService->searchRequestToBackOffice(['phone' => $form->contact_phone])) {
+            return $findByPhone;
+        }
+        return [];
     }
 }

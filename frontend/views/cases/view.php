@@ -131,6 +131,7 @@ $user = Yii::$app->user->identity;
             <?php endif;?>
         </div>
     </div>
+
     <div class="row">
         <div class="col-md-12">
 

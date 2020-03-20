@@ -3,6 +3,7 @@
 namespace sales\entities\cases;
 
 use common\models\Call;
+use common\models\CaseSale;
 use common\models\Client;
 use common\models\Department;
 use common\models\DepartmentEmailProject;
@@ -60,6 +61,7 @@ use Yii;
  * @property Project $project
  * @property CaseStatusLog[] $caseStatusLogs
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
+ * @property CaseSale[] $caseSale
  */
 class Cases extends ActiveRecord implements Objectable
 {
@@ -548,6 +550,14 @@ class Cases extends ActiveRecord implements Objectable
     public function getProject(): ActiveQuery
     {
         return $this->hasOne(Project::class, ['id' => 'cs_project_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCaseSale(): ActiveQuery
+    {
+        return $this->hasMany(CaseSale::class, ['css_cs_id' => 'cs_id'])->orderBy(['css_sale_id' => SORT_DESC]);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace sales\entities\cases;
 
+use common\models\Airport;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -24,12 +25,23 @@ use yii\helpers\VarDumper;
  * @property $airlineConfirmationNumber
  * @property $paxFirstName
  * @property $paxLastName
+ * @property $cssChargedFrom
+ * @property $cssChargedTo
+ * @property $cssProfitFrom
+ * @property $cssProfitTo
+ * @property $cssOutDate
+ * @property $cssInDate
+ * @property $cssChargeType
+ * @property $departureAirport
+ * @property $arrivalAirport
+ * @property $departureCountries
+ * @property $arrivalCountries
+ * @property $css_profit
  *
  * @property array $cacheSaleData
  */
 class CasesSearch extends Cases
 {
-
     public $cssSaleId;
     public $cssBookId;
     public $salePNR;
@@ -39,6 +51,18 @@ class CasesSearch extends Cases
     public $airlineConfirmationNumber;
     public $paxFirstName;
     public $paxLastName;
+
+    public $cssChargedFrom;
+    public $cssChargedTo;
+    public $cssProfitFrom;
+    public $cssProfitTo;
+    public $cssOutDate;
+    public $cssInDate;
+    public $cssChargeType;
+    public $departureAirport;
+    public $arrivalAirport;
+    public $departureCountries;
+    public $arrivalCountries;
 
     private $cacheSaleData = [];
 
@@ -61,7 +85,6 @@ class CasesSearch extends Cases
             ['cs_project_id', 'integer'],
             ['cs_source_type_id', 'integer'],
             ['cs_last_action_dt', 'safe'],
-
             ['cssSaleId', 'integer'],
             ['cssBookId', 'string'],
             ['salePNR', 'string'],
@@ -71,10 +94,49 @@ class CasesSearch extends Cases
             ['airlineConfirmationNumber', 'string', 'min' => 4],
             ['paxFirstName', 'string', 'min' => 2],
             ['paxLastName', 'string', 'min' => 2],
-
             ['cs_need_action', 'boolean'],
 
             ['cs_order_uid', 'string'],
+
+            [['cssChargedFrom', 'cssChargedTo', 'cssProfitFrom', 'cssProfitTo'], 'number'],
+            [['cssOutDate', 'cssInDate'], 'date'],
+            [['cssChargeType'], 'string', 'max' => 100],
+            [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries',], 'safe'],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'cs_id' => 'ID',
+            'cs_gid' => 'GID',
+            'cs_project_id' => 'Project',
+            'cs_subject' => 'Subject',
+            'cs_category_id' => 'Category',
+            'cs_status' => 'Status',
+            'cs_user_id' => 'User',
+            'cs_lead_id' => 'Lead ID',
+            'cs_dep_id' => 'Department',
+            'cs_created_dt' => 'Created',
+            'cssSaleId' => 'Sale ID',
+            'cssBookId' => 'Booking ID',
+            'salePNR' => 'Quote PNR',
+            'cs_source_type_id' => 'Source type',
+            'cs_need_action' => 'Need action',
+            'cssChargedFrom' => 'Charged from',
+            'cssChargedTo' => 'Charged to',
+            'cssProfitFrom' => 'Profit from',
+            'cssProfitTo' => 'Profit to',
+            'cssOutDate' => 'Out Date',
+            'cssInDate' => 'In Date',
+            'cssChargeType' => 'Charge Type',
+            'departureAirport' => 'Departure Airport',
+            'arrivalAirport' => 'Arrival Airport',
+            'departureCountries' => 'Depart. Countries',
+            'arrivalCountries' => 'Arrival Countries',
         ];
     }
 
@@ -143,11 +205,9 @@ class CasesSearch extends Cases
                 $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
             }
         }
-
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
-
         if ($this->ticketNumber) {
             if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -155,7 +215,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->paxFirstName) {
             if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -163,7 +222,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->paxLastName) {
             if ($saleId = $this->getSaleIdByPaxLastName($this->paxLastName)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -171,7 +229,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->airlineConfirmationNumber) {
             if ($saleId = $this->getSaleIdByAcn($this->airlineConfirmationNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -179,30 +236,75 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->cssBookId) {
             $query->andWhere(['OR',
                 ['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])],
                 ['cs_order_uid' => $this->cssBookId],
             ]);
         }
-
         if ($this->salePNR) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_pnr' => $this->salePNR])]);
         }
-
         if ($this->clientPhone) {
             $query->andWhere(['cs_client_id' => ClientPhone::find()->select('client_id')->andWhere(['phone' => $this->clientPhone])]);
         }
-
         if ($this->clientEmail) {
             $query->andWhere(['cs_client_id' => ClientEmail::find()->select('client_id')->andWhere(['email' => $this->clientEmail])]);
         }
-
         if ($this->cs_created_dt) {
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
         }
-
+        if ($this->cssChargedFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_charged', $this->cssChargedFrom])]);
+        }
+        if ($this->cssChargedTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_charged', $this->cssChargedTo])]);
+        }
+        if ($this->cssProfitFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_profit', $this->cssProfitFrom])]);
+        }
+        if ($this->cssProfitTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
+        }
+        if ($this->cssOutDate) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'DATE(css_out_date)', date('Y-m-d', strtotime($this->cssOutDate))])]);
+        }
+        if ($this->cssInDate) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'DATE(css_in_date)', date('Y-m-d', strtotime($this->cssInDate))])]);
+        }
+        if ($this->cssChargeType) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
+        }
+        if ($this->departureAirport) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(['IN', 'css_out_departure_airport', $this->departureAirport])
+                ->orWhere(['IN', 'css_in_departure_airport', $this->departureAirport])
+            ]);
+        }
+        if ($this->arrivalAirport) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(['IN', 'css_out_arrival_airport', $this->arrivalAirport])
+                ->orWhere(['IN', 'css_in_arrival_airport', $this->arrivalAirport])
+            ]);
+        }
+        if ($this->departureCountries) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('case_sale.css_cs_id')
+                ->innerJoin(Airport::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->where(['IN', 'airports.country', $this->departureCountries])
+            ]);
+        }
+        if ($this->arrivalCountries) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('case_sale.css_cs_id')
+                ->innerJoin(Airport::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->where(['IN', 'airports.country', $this->arrivalCountries])
+            ]);
+        }
 
         return $dataProvider;
     }
@@ -296,59 +398,80 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->cssBookId) {
             $query->andWhere(['OR',
                 ['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])],
                 ['cs_order_uid' => $this->cssBookId],
             ]);
         }
-
         if ($this->salePNR) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_pnr' => $this->salePNR])]);
         }
-
         if ($this->clientPhone) {
             $query->andWhere(['cs_client_id' => ClientPhone::find()->select('client_id')->andWhere(['phone' => $this->clientPhone])]);
         }
-
         if ($this->clientEmail) {
             $query->andWhere(['cs_client_id' => ClientEmail::find()->select('client_id')->andWhere(['email' => $this->clientEmail])]);
         }
-
         if ($this->cs_created_dt) {
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
         }
-
         if ($this->cs_last_action_dt) {
             $query->andFilterWhere(['DATE(cs_last_action_dt)' => date('Y-m-d', strtotime($this->cs_last_action_dt))]);
         }
+        if ($this->cssChargedFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_charged', $this->cssChargedFrom])]);
+        }
+        if ($this->cssChargedTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_charged', $this->cssChargedTo])]);
+        }
+        if ($this->cssProfitFrom) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'css_profit', $this->cssProfitFrom])]);
+        }
+        if ($this->cssProfitTo) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
+        }
+        if ($this->cssOutDate) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['>=', 'DATE(css_out_date)', date('Y-m-d', strtotime($this->cssOutDate))])]);
+        }
+        if ($this->cssInDate) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'DATE(css_in_date)', date('Y-m-d', strtotime($this->cssInDate))])]);
+        }
+        if ($this->cssChargeType) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
+        }
+        if ($this->departureAirport) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(['IN', 'css_out_departure_airport', $this->departureAirport])
+                ->orWhere(['IN', 'css_in_departure_airport', $this->departureAirport])
+            ]);
+        }
+        if ($this->arrivalAirport) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(['IN', 'css_out_arrival_airport', $this->arrivalAirport])
+                ->orWhere(['IN', 'css_in_arrival_airport', $this->arrivalAirport])
+            ]);
+        }
+        if ($this->departureCountries) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('case_sale.css_cs_id')
+                ->innerJoin(Airport::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->where(['IN', 'airports.country', $this->departureCountries])
+            ]);
+        }
+        if ($this->arrivalCountries) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('case_sale.css_cs_id')
+                ->innerJoin(Airport::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->where(['IN', 'airports.country', $this->arrivalCountries])
+            ]);
+        }
 
         return $dataProvider;
-    }
-
-    /**
-     * @return array
-     */
-    public function attributeLabels(): array
-    {
-        return [
-            'cs_id' => 'ID',
-            'cs_gid' => 'GID',
-            'cs_project_id' => 'Project',
-            'cs_subject' => 'Subject',
-            'cs_category_id' => 'Category',
-            'cs_status' => 'Status',
-            'cs_user_id' => 'User',
-            'cs_lead_id' => 'Lead ID',
-            'cs_dep_id' => 'Department',
-            'cs_created_dt' => 'Created',
-            'cssSaleId' => 'Sale ID',
-            'cssBookId' => 'Booking ID',
-            'salePNR' => 'Quote PNR',
-            'cs_source_type_id' => 'Source type',
-            'cs_need_action' => 'Need action',
-        ];
     }
 
     /**

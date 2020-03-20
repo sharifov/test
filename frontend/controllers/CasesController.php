@@ -726,6 +726,8 @@ class CasesController extends FController
                 $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
                 $cs->css_sale_data_updated = $cs->css_sale_data;
 
+                $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
+
                 if(!$cs->save()) {
                     Yii::error(VarDumper::dumpAsString($cs->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
                 } else {
@@ -741,7 +743,6 @@ class CasesController extends FController
 
         return $out;
     }
-
 
     /**
      * @return array
@@ -1402,7 +1403,10 @@ class CasesController extends FController
 			if ($throwable->getCode() < 0 && $throwable->getCode() > -4) {
 				$out['message'] = $throwable->getMessage();
 			}
-			Yii::error('Code: ' . $throwable->getCode() . '; ' . $throwable->getMessage() . '; File: ' . $throwable->getFile() . ': ' . $throwable->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
+			Yii::error(
+			    \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
+			);
 		}
 
 		return $out;
@@ -1457,7 +1461,10 @@ class CasesController extends FController
 			if ($throwable->getCode() <= 0 && $throwable->getCode() > -4) {
 				$out['message'] = $throwable->getMessage();
 			}
-			Yii::error('Code: ' . $throwable->getCode() . '; ' . $throwable->getMessage() . '; File: ' . $throwable->getFile() . ': ' . $throwable->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
+			Yii::error(
+			    \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
+			);
 		}
 
 		return $this->asJson($out);

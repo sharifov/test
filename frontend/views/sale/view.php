@@ -774,7 +774,60 @@ $('.refresh-from-bo').on('click', function (e) {
             $(obj).closest('.panel').find('.error-dump').html();
         }
     });
-})
+});
+
+    
+    $('.remove-sale').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if(!confirm('Are you sure you want to delete this sale?')) {
+            return false;
+        }  
+        
+        let obj = $(this),            
+            caseSaleId = obj.attr('data-case-sale-id');
+        
+        $.ajax({
+            url: '/sale/delete-ajax?id=' + caseSaleId,
+            type: 'post',
+            dataType: "json",    
+            beforeSend: function () {
+                obj.attr('disabled', true).find('i').toggleClass('fa-spin');
+                $(obj).closest('.panel').find('.error-dump').html();
+            },
+            success: function (data) {
+                if (data.error) {
+                   new PNotify({
+                        title: "Error",
+                        type: "error",
+                        text: data.error,
+                        hide: true
+                    }); 
+                } else {
+                    new PNotify({
+                        title: "Success",
+                        type: "success",
+                        text: 'Successfully deleted',
+                        hide: true
+                    }); 
+                    $.pjax.reload({container: '#pjax-sale-list', push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
+                }
+            },
+            error: function (text) {
+                new PNotify({
+                    title: "Error",
+                    type: "error",
+                    text: "Internal Server Error. Try again letter.",
+                    hide: true
+                });
+            },
+            complete: function () {
+                obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
+                $(obj).closest('.panel').find('.error-dump').html();
+            }
+        });
+    });
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
 JS;

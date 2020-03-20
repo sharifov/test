@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
+use common\models\CaseSale;
 use common\models\search\SaleSearch;
 use Yii;
 use yii\base\Exception;
@@ -12,6 +13,7 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * LeadsController implements the CRUD actions for Lead model.
@@ -78,6 +80,26 @@ class SaleController extends FController
         }
 
         return $this->render('view', ['data' => $model]);
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function actionDeleteAjax(int $id): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['error' => '', 'status' => 0];
+
+        if (Yii::$app->request->isAjax && $sale = CaseSale::findOne(['css_sale_id' => $id])) {
+            try {
+                $sale->delete();
+                $result['status'] = 1;
+            } catch (\Throwable $throwable) {
+                $result['error'] = $throwable->getMessage();
+            }
+        }
+        return $result;
     }
 
 

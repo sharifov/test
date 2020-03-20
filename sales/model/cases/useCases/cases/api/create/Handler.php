@@ -62,7 +62,7 @@ class Handler
 
             $this->casesRepository->save($case);
 
-            return new Result($case->cs_gid, $client->uuid);
+            return new Result($case->cs_gid, $client->uuid, $case->cs_id);
 
         });
 

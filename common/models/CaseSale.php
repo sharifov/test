@@ -25,6 +25,15 @@ use yii\db\ActiveRecord;
  * @property string $css_updated_dt
  * @property int $css_need_sync_bo
  * @property array $css_sale_data_updated
+ * @property float|null $css_charged
+ * @property float|null $css_profit
+ * @property string|null $css_out_departure_airport
+ * @property string|null $css_out_arrival_airport
+ * @property string|null $css_in_departure_airport
+ * @property string|null $css_in_arrival_airport
+ * @property string|null $css_charge_type
+ * @property string|null $css_out_date
+ * @property string|null $css_in_date
  *
  * @property Employee $cssCreatedUser
  * @property Cases $cssCs
@@ -103,13 +112,16 @@ class CaseSale extends \yii\db\ActiveRecord
     {
         return [
             [['css_cs_id', 'css_sale_id', 'css_sale_data'], 'required'],
-            [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_created_user_id', 'css_updated_user_id'], 'integer'],
-            [['css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt'], 'safe'],
+            [['css_cs_id', 'css_sale_id', 'css_sale_pax'], 'integer'],
+            [['css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt', 'css_created_user_id', 'css_updated_user_id'], 'safe'],
             [['css_sale_book_id', 'css_sale_pnr'], 'string', 'max' => 8],
             [['css_cs_id', 'css_sale_id'], 'unique', 'targetAttribute' => ['css_cs_id', 'css_sale_id']],
-            [['css_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['css_created_user_id' => 'id']],
-            [['css_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['css_updated_user_id' => 'id']],
             [['css_cs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['css_cs_id' => 'cs_id']],
+            [['css_profit', 'css_charged'], 'number'],
+            [['css_out_departure_airport', 'css_out_arrival_airport', 'css_in_departure_airport', 'css_in_arrival_airport'], 'string', 'max' => 3],
+            [['css_out_date', 'css_in_date'], 'string'],
+            [['css_out_date', 'css_in_date'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['css_charge_type'], 'string', 'max' => 100],
         ];
     }
 
@@ -130,6 +142,15 @@ class CaseSale extends \yii\db\ActiveRecord
             'css_created_dt' => 'Created Dt',
             'css_updated_user_id' => 'Updated User ID',
             'css_updated_dt' => 'Updated Dt',
+            'css_charged' => 'Charged',
+            'css_profit' => 'Profit',
+            'css_out_departure_airport' => 'Out departure airport',
+            'css_out_arrival_airport' => 'Out arrival airport',
+            'css_in_departure_airport' => 'In departure airport',
+            'css_in_arrival_airport' => 'In arrival airport',
+            'css_charge_type' => 'Charge type',
+            'css_out_date' => 'Out date',
+            'css_in_date' => 'In date',
         ];
     }
 
