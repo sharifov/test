@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'cc_id',
+            'cc_key',
             'cc_name',
             [
                 'attribute' => 'cc_dep_id',

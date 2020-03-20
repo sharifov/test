@@ -51,7 +51,12 @@ $lists = new ListsAccess($user->id);
 				},
 				'filter' => Project::getList()
 			],
-            'cs_subject',
+            [
+                'attribute' => 'cs_subject',
+                'contentOptions' => [
+                    'style' => 'word-break: break-all; white-space:normal'
+                ]
+            ],
             [
                 'attribute' => 'cs_category_id',
                 'value' => static function (CasesQSearch $model) {

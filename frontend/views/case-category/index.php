@@ -30,6 +30,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cc_id',
                 'options' => ['style' => 'width:160px'],
             ],
+            [
+                'attribute' => 'cc_key',
+                'options' => ['style' => 'width:160px'],
+            ],
             'cc_name',
             [
                 'attribute' => 'cc_dep_id',

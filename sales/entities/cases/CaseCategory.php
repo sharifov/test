@@ -13,7 +13,8 @@ use yii\helpers\ArrayHelper;
 /**
  * Class CaseCategory
  *
- * @property string $cc_id
+ * @property int $cc_id
+ * @property int $cc_key
  * @property string $cc_name
  * @property int $cc_dep_id
  * @property int $cc_system
@@ -56,6 +57,11 @@ class CaseCategory extends ActiveRecord
     public function rules(): array
     {
         return [
+            ['cc_key', 'default', 'value' => null],
+            ['cc_key', 'string', 'max' => 50],
+            ['cc_key', 'match', 'pattern' => '/^[a-zA-Z0-9_-]+$/', 'message' =>  'Key can only contain alphanumeric characters, underscores and dashes.'],
+            ['cc_key', 'unique'],
+
             ['cc_name', 'required'],
             ['cc_name', 'string', 'max' => 255],
             ['cc_name', 'unique'],
@@ -75,6 +81,7 @@ class CaseCategory extends ActiveRecord
     {
         return [
             'cc_id' => 'ID',
+            'cc_key' => 'Key',
             'cc_name' => 'Name',
             'dep.dep_name' => 'Department',
             'cc_dep_id' => 'Department',

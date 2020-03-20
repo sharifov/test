@@ -47,9 +47,10 @@ class CreateForm extends Model
         return [
             ['contact_email', 'required'],
             ['contact_email', 'email'],
+            ['contact_phone', 'string', 'max' => 160],
 
             ['contact_phone', 'required'],
-            ['contact_phone', 'string', 'max' => 100],
+            ['contact_phone', 'string', 'max' => 20],
             ['contact_phone', PhoneInputValidator::class],
             ['contact_phone', 'filter', 'filter' => static function ($value) {
                 return str_replace(['-', ' '], '', trim($value));
@@ -68,7 +69,7 @@ class CreateForm extends Model
             ['subject', 'string', 'max' => 255],
 
             ['description', 'default', 'value' => null],
-            ['description', 'string'],
+            ['description', 'string', 'max' => 65000],
 
             ['order_info', 'default', 'value' => []],
             ['order_info', IsArrayValidator::class],

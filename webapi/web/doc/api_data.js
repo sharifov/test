@@ -98,7 +98,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"case-category\": [\n             {\n                 \"cc_id\": 1,\n                 \"cc_name\": \"Add infant\",\n                 \"cc_dep_id\": 3,\n                 \"cc_updated_dt\": null\n             },\n             {\n                 \"cc_id\": 2,\n                 \"cc_name\": \"Insurance Add/Remove\",\n                 \"cc_dep_id\": 3,\n                 \"cc_updated_dt\": \"2019-09-26 15:14:01\"\n             }\n         ]\n     },\n     \"technical\": {\n         \"action\": \"v2/case-category/list\",\n         \"response_id\": 11926631,\n         \"request_dt\": \"2020-03-16 11:26:34\",\n         \"response_dt\": \"2020-03-16 11:26:34\",\n         \"execution_time\": 0.076,\n         \"memory_usage\": 506728\n     },\n     \"request\": []\n }",
+          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"case-category\": [\n             {\n                 \"cc_id\": 1,\n                 \"cc_key\": \"add_infant\",\n                 \"cc_name\": \"Add infant\",\n                 \"cc_dep_id\": 3,\n                 \"cc_updated_dt\": null\n             },\n             {\n                 \"cc_id\": 2,\n                 \"cc_key\": null,\n                 \"cc_name\": \"Insurance Add/Remove\",\n                 \"cc_dep_id\": 3,\n                 \"cc_updated_dt\": \"2019-09-26 15:14:01\"\n             }\n         ]\n     },\n     \"technical\": {\n         \"action\": \"v2/case-category/list\",\n         \"response_id\": 11926631,\n         \"request_dt\": \"2020-03-16 11:26:34\",\n         \"response_dt\": \"2020-03-16 11:26:34\",\n         \"execution_time\": 0.076,\n         \"memory_usage\": 506728\n     },\n     \"request\": []\n }",
           "type": "json"
         },
         {
@@ -158,6 +158,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "160",
             "optional": false,
             "field": "contact_email",
             "description": "<p>Client Email</p>"
@@ -165,6 +166,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "20",
             "optional": false,
             "field": "contact_phone",
             "description": "<p>Client Phone</p>"
@@ -187,6 +189,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "255",
             "optional": true,
             "field": "subject",
             "description": "<p>Subject</p>"
@@ -194,6 +197,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "65000",
             "optional": true,
             "field": "description",
             "description": "<p>Description</p>"
