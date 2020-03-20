@@ -157,7 +157,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_flight_id'], 'required'],
             [['fq_flight_id', 'fq_source_id', 'fq_product_quote_id', 'fq_type_id', 'fq_trip_type_id', 'fq_fare_type_id', 'fq_created_user_id', 'fq_created_expert_id'], 'integer'],
             [['fq_service_fee_percent'], 'number'],
-            [['fq_reservation_dump', 'fq_pricing_info', 'fq_gds_offer_id'], 'string'],
+            [['fq_reservation_dump', 'fq_pricing_info', 'fq_gds_offer_id', 'fq_uid'], 'string'],
             [['fq_origin_search_data', 'fq_last_ticket_date'], 'safe'],
             [['fq_hash_key', 'fq_request_hash'], 'string', 'max' => 32],
             [['fq_record_locator'], 'string', 'max' => 8],
@@ -203,6 +203,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             'fq_origin_search_data' => 'Origin Search Data',
             'fq_last_ticket_date' => 'Last Ticket Date',
             'fq_request_hash' => 'Request Hash',
+            'fq_uid' => 'Uid',
         ];
     }
 
