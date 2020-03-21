@@ -9,8 +9,10 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
+use common\models\Project;
 use common\models\QuotePrice;
 use common\models\Sms;
+use common\models\Sources;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
@@ -768,11 +770,8 @@ class LeadSearch extends Lead
 
     public function searchExportCsv()
     {
-        /*$query = Lead::find()->asArray();
-        $query->select(['id', 'uid', 'l_type_create', 'status', 'client_id', 'called_expert', 'project_id', 'source_id', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'employee_id', 'created', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);*/
-
         $query = Lead::find()->asArray();
-        $query->select(['id', 'uid', 'l_type_create', 'status', 'client_id', 'called_expert', 'project_id', 'source_id', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'employee_id', 'created', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $query->select(['id', 'uid', 'l_type_create', 'status', 'client_id', 'called_expert', 'project_id', 'source_id', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'employee_id', 'createdDate' => new Expression("DATE(created)"), 'createdTime' => new Expression("TIME(created)"), 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -1057,6 +1056,20 @@ class LeadSearch extends Lead
         ]);
 
         $query->addSelect([
+            'projectInfo' => (new Query())
+            ->select([Project::tableName() . '.name'])
+            ->from(Project::tableName())
+            ->where(Project::tableName() . '.id =' . Lead::tableName() . '.project_id')
+        ]);
+
+        $query->addSelect([
+            'marketInfo' => (new Query())
+                ->select([Sources::tableName() . '.name'])
+                ->from(Sources::tableName())
+                ->where(Sources::tableName() . '.id =' . Lead::tableName() . '.source_id')
+        ]);
+
+        $query->addSelect([
             'segments' => (new Query())
                 ->select(['GROUP_CONCAT(CONCAT('. LeadFlightSegment::tableName() . '.origin' .',' . '\'->\',' . LeadFlightSegment::tableName() . '.destination))'])
                 ->from(LeadFlightSegment::tableName())
@@ -1150,6 +1163,13 @@ class LeadSearch extends Lead
                 ->andWhere([Quote::tableName() . '.status' => Quote::STATUS_APPLIED])
                 ->andWhere(Quote::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
                 ->limit(1)
+        ]);
+
+        $query->addSelect([
+            'agentName' => (new Query())
+            ->select([Employee::tableName() . '.username'])
+            ->from(Employee::tableName())
+            ->where(Employee::tableName() . '.id = ' . Lead::tableName() . '.employee_id')
         ]);
 
         return $query;

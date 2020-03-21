@@ -171,18 +171,13 @@ class LeadsController extends FController
     public function actionExportCsv()
     {
         //set_time_limit(60);
-        ini_set('memory_limit', '512M');
+        //ini_set('memory_limit', '512M');
         $searchModel = new LeadSearch();
         $dataProvideQuery = $searchModel->searchExportCsv();
 
-        $data = [];
-        $batchOrder = 0;
-        //$dataProvideQuery->batch()->reset();
-        //$dataProvideQuery->batch()->rewind();
-
         $fpath = fopen(Yii::getAlias('@runtime'. '/file.csv'), 'w');
 
-        foreach ($dataProvideQuery->each(1) as $batchIndex => $batch){
+        foreach ($dataProvideQuery-> /*offset(0)->limit(30)->*/ each(1) as $batchIndex => $batch){
             if ($batchIndex == 0){
                 fputcsv($fpath, array_keys($batch));
             }
@@ -195,7 +190,6 @@ class LeadsController extends FController
             }
 
             fputcsv($fpath, $batch);
-
         }
         fclose($fpath);
     }
