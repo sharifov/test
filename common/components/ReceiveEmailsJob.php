@@ -3,11 +3,13 @@
 namespace common\components;
 
 
+use common\components\jobs\CreateSaleFromBOJob;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
+use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesManageService;
@@ -208,10 +210,14 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //                        }
                         if ($email->e_case_id) {
                             (Yii::createObject(CasesManageService::class))->needAction($email->e_case_id);
-                            
-                            $saleData = $this->casesSaleService->getSaleFromBo(null, $email->e_email_from, null);
-                            if (count($saleData)) {
-                                $this->casesSaleService->createSale($email->e_case_id, $saleData);
+
+                            try {
+                                $job = new CreateSaleFromBOJob();
+                                $job->case_id = $email->e_case_id;
+                                $job->email = $email->e_email_from;
+                                Yii::$app->queue_job->priority(100)->push($job);
+                            } catch (\Throwable $throwable) {
+                                Yii::error(AppHelper::throwableFormatter($throwable), 'ReceiveEmailsJob:addToJobFailed');
                             }
                         }
 
