@@ -18,17 +18,11 @@ class LeadFollowUpNotificationsListener
 
     private $userRepository;
 
-    /**
-     * @param UserRepository $userRepository
-     */
     public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * @param LeadFollowUpEvent $event
-     */
     public function handle(LeadFollowUpEvent $event): void
     {
         if (!$event->newOwnerId || ($event->newOwnerId === $event->creatorId)) {
@@ -54,8 +48,8 @@ class LeadFollowUpNotificationsListener
                 'url' => $host . '/lead/view/' . $event->lead->gid,
             ]);
 
-        if (Notifications::create($newOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
-            Notifications::sendSocket('getNewNotification', ['user_id' => $newOwner->id], [], true);
+        if ($ntf = Notifications::create($newOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+            Notifications::sendSocket('getNewNotification', ['user_id' => $newOwner->id]);
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $newOwner->id . ', lead: ' . $event->lead->id,
@@ -63,5 +57,4 @@ class LeadFollowUpNotificationsListener
             );
         }
     }
-
 }

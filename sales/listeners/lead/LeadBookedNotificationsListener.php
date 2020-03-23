@@ -66,7 +66,7 @@ class LeadBookedNotificationsListener
                 'url' => $host . '/lead/view/' . $lead->gid,
             ]);
 
-        if (Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+        if ($ntf = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($owner->id, null, 'getNewNotification', [], true);
             Notifications::sendSocket('getNewNotification', ['user_id' => $owner->id]);
         } else {

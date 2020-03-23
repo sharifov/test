@@ -111,10 +111,12 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
 
         if (!$isUM) {
-            $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
+           // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
+            $cntNotifications = null;
             $menuItems[] = [
                 'label' => 'My Notifications' .
-                    '<span id="div-cnt-notification">' . ($cntNotifications ? '<span class="label-success label pull-right">' . $cntNotifications . '</span>' : '') . '</span>',
+//                    '<span id="div-cnt-notification">' . ($cntNotifications ? '<span class="label-success label pull-right">' . $cntNotifications . '</span>' : '') . '</span>',
+                    '<span id="div-cnt-notification"><span class="label-success label pull-right notification-counter"></span></span>',
                 'url' => ['/notifications/list'],
                 'icon' => 'comment',
             ];

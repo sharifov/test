@@ -2672,9 +2672,11 @@ Reason: {reason}
 
                     //Notifications::create()
 
-                    $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
-                    // Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                    Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                    if ($ntf = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+                        $isSend = true;
+                        // Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                        Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                    }
 
 
                     if (!$isSend) {
