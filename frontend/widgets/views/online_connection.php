@@ -128,9 +128,10 @@ $js = <<<JS
                     
                     if(obj.command === 'getNewNotification') {
                         //alert(obj.command);
-                        updatePjaxNotify();
+                         updatePjaxNotify();
+                        //notificationInit(obj.notification);
                     }
-                    
+                                        
                     if(obj.command === 'updateCommunication') {
                         // updatePjaxNotify();
                         updateCommunication();

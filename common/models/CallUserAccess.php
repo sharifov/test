@@ -165,9 +165,10 @@ class CallUserAccess extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true);
-            //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
-            Notifications::sendSocket('getNewNotification', ['user_id' => $this->cua_user_id]);
+            if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true)) {
+                //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
+                Notifications::sendSocket('getNewNotification', ['user_id' => $this->cua_user_id]);
+            }
 
             NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::INSERT, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::INSERT);

@@ -401,6 +401,9 @@ class CasesSaleService
      */
     public function searchRequestToBackOffice(array $params)
     {
+        if (!Yii::$app->params['settings']['enable_request_to_bo_sale']) {
+            return [];
+        }
         try {
             $response = BackOffice::sendRequest2('cs/search', $params);
 
