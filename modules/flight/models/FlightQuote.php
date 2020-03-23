@@ -159,7 +159,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_flight_id'], 'required'],
             [['fq_flight_id', 'fq_source_id', 'fq_product_quote_id', 'fq_type_id', 'fq_trip_type_id', 'fq_fare_type_id', 'fq_created_user_id', 'fq_created_expert_id'], 'integer'],
             [['fq_service_fee_percent'], 'number'],
-            [['fq_reservation_dump', 'fq_pricing_info', 'fq_gds_offer_id', 'fq_uid'], 'string'],
+            [['fq_reservation_dump', 'fq_pricing_info', 'fq_gds_offer_id'], 'string'],
             [['fq_origin_search_data', 'fq_last_ticket_date'], 'safe'],
             [['fq_hash_key', 'fq_request_hash'], 'string', 'max' => 32],
             [['fq_record_locator'], 'string', 'max' => 8],
@@ -167,9 +167,8 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_gds_pcc'], 'string', 'max' => 10],
             [['fq_cabin_class'], 'string', 'max' => 1],
             [['fq_created_expert_name'], 'string', 'max' => 20],
-
+            [['fq_uid'], 'string', 'max' => 50],
             [['fq_hash_key'], 'unique', 'targetAttribute' => ['fq_flight_id', 'fq_hash_key'] , 'message' => 'Flight already have this quote;', 'skipOnEmpty' => true],
-
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
@@ -209,6 +208,9 @@ class FlightQuote extends ActiveRecord implements Quotable
         ];
     }
 
+    /**
+     * @return array
+     */
     public function behaviors(): array
     {
         $behaviors = [
