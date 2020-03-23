@@ -11,6 +11,7 @@ use common\models\Call;
 use common\models\Email;
 use common\models\Sms;
 use yii\caching\DbDependency;
+use yii\caching\TagDependency;
 use yii\db\Query;
 use yii\helpers\VarDumper;
 
@@ -45,35 +46,21 @@ class Notifications extends \yii\bootstrap\Widget
     public function run()
     {
         $user_id = \Yii::$app->user->id;
-        $cache = \Yii::$app->cache;
 
-        $sql = \common\models\Notifications::find()->select('COUNT(*)')->where(['n_user_id' => $user_id, 'n_new' => true, 'n_deleted' => false])->createCommand()->rawSql;
+//        $sql = \common\models\Notifications::find()->select('COUNT(*)')->where(['n_user_id' => $user_id, 'n_new' => true, 'n_deleted' => false])->createCommand()->rawSql;
+//        $dependency = new DbDependency();
+//        $dependency->sql = $sql;
 
-        $duration = null;
-        $dependency = new DbDependency();
-        $dependency->sql = $sql;
-
-        //$dependency = null; //...;  // optional dependency
-
-
-        $key = 'notify_' . $user_id;
+//        $key = 'notify_' . $user_id;
 
         //$cache->delete($key);
 
-        $result = $cache->get($key);
-        if ($result === false) {
-            $result['newCount'] = \common\models\Notifications::findNewCount($user_id);
-            $result['model'] = \common\models\Notifications::findNew($user_id);
-
-            $cache->set($key, $result, $duration, $dependency);
-        }
-
-
-        /*$result = $cache->getOrSet($key, function () use ($user_id) {
-            $result['newCount'] = \common\models\Notifications::findNewCount($user_id) + 10;
-            $result['model'] = \common\models\Notifications::findNew($user_id);
-            return $result;
-        }, $duration, $dependency);*/
+        $result = self::getCache()->getOrSet(self::getCacheKey($user_id), static function () use ($user_id) {
+            return [
+                'newCount' => \common\models\Notifications::findNewCount($user_id),
+                'model' => \common\models\Notifications::findNew($user_id),
+            ];
+        }, null, new TagDependency(['tags' => self::getTags($user_id)]));
 
 
 
@@ -133,10 +120,31 @@ class Notifications extends \yii\bootstrap\Widget
         }
 
         if($removeCache) {
-            $cache->delete($key);
+//            $cache->delete($key);
+           self::cacheInvalidate($user_id);
         }
 
 
         return $content;
+    }
+
+    public static function getCache(): \yii\caching\CacheInterface
+    {
+        return \Yii::$app->cache;
+    }
+
+    public static function cacheInvalidate($user_id): void
+    {
+        TagDependency::invalidate(self::getCache(), self::getTags($user_id));
+    }
+
+    private static function getCacheKey($user_id): string
+    {
+        return 'notify_' . $user_id;
+    }
+
+    private static function getTags($user_id): string
+    {
+        return self::getCacheKey($user_id);
     }
 }

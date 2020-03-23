@@ -65,7 +65,7 @@ class QaTaskCancelNotifierListener
                 'url' => Url::toRoute( ['/qa-task/qa-task/view', 'gid' => $task->t_gid], true),
             ]);
 
-        if (Notifications::create($assigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+        if ($ntf = Notifications::create($assigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($assigned->id, null, 'getNewNotification', [], true);
             Notifications::sendSocket('getNewNotification', ['user_id' => $assigned->id]);
         } else {

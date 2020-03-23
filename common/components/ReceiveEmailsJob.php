@@ -236,10 +236,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
             if ($userArray) {
                 foreach ($userArray as $user_id) {
-                    Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true);
-                    // Notifications::socket($user_id, null, 'getNewNotification', [], true);
-
-                    Notifications::sendSocket('getNewNotification', ['user_id' => $user_id]);
+                    if ($ntf = Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true)) {
+                        // Notifications::socket($user_id, null, 'getNewNotification', [], true);
+                        Notifications::sendSocket('getNewNotification', ['user_id' => $user_id]);
+                    }
                 }
             }
 
