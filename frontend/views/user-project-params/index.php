@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use sales\access\EmployeeProjectAccess;
+use sales\yii\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -80,6 +81,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             //'upp_project_id',
             'upp_email:email',
             'upp_tw_phone_number',
+            [
+                'class' => \sales\yii\grid\PhoneSelect2Column::class,
+                'attribute' => 'upp_phone_list_id',
+                'relation' => 'phoneList',
+            ],
             [
                 'attribute' => 'upp_allow_general_line',
                 'format' => 'raw',

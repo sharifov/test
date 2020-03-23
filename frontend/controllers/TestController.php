@@ -117,6 +117,7 @@ use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use sales\services\TransactionManager;
 use sales\temp\LeadFlowUpdate;
+use sales\widgets\PhoneSelect2Widget;
 use Twilio\TwiML\VoiceResponse;
 use webapi\models\ApiLead;
 use webapi\src\response\messages\DataMessage;
@@ -195,6 +196,13 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $lead = Lead::findOne(371222);
+
+        $w = new PhoneSelect2Widget(['model' => $lead, 'attribute' => 'id', 'pluginOptions' => ['ajax' => [
+            'url' => '//234234/234/',
+            'dataType' => 'js',
+        ],]]);
+        die;
 
         $lead = Lead::findOne(371222);
         $repo = Yii::createObject(LeadRepository::class);

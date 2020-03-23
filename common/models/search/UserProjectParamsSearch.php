@@ -23,6 +23,7 @@ class UserProjectParamsSearch extends UserProjectParams
         return [
             [['upp_user_id', 'upp_project_id', 'upp_updated_user_id', 'supervision_id'], 'integer'],
             [['upp_email', 'upp_phone_number', 'upp_tw_phone_number', 'upp_tw_sip_id', 'upp_created_dt', 'upp_updated_dt', 'upp_allow_general_line'], 'safe'],
+            ['upp_phone_list_id', 'integer'],
         ];
     }
 
@@ -77,6 +78,7 @@ class UserProjectParamsSearch extends UserProjectParams
             //'upp_updated_dt' => $this->upp_updated_dt ? date('Y-m-d', strtotime($this->upp_updated_dt)) : null,
             'upp_updated_user_id' => $this->upp_updated_user_id,
             'upp_allow_general_line' => $this->upp_allow_general_line,
+            'upp_phone_list_id' => $this->upp_phone_list_id,
         ]);
 
         if($this->supervision_id > 0) {

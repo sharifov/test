@@ -3,9 +3,11 @@
 namespace common\models;
 
 use common\models\query\DepartmentPhoneProjectQuery;
+use sales\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -25,6 +27,7 @@ use yii\db\ActiveRecord;
  * @property string $dpp_description
  * @property int $dpp_default
  * @property bool $dpp_show_on_site
+ * @property int|null $dpp_phone_list_id
  *
  * @property array $user_group_list
  *
@@ -34,6 +37,7 @@ use yii\db\ActiveRecord;
  * @property Employee $dppUpdatedUser
  * @property DepartmentPhoneProjectUserGroup[] $departmentPhoneProjectUserGroups
  * @property UserGroup[] $dugUgs
+ * @property PhoneList $phoneList
  */
 class DepartmentPhoneProject extends \yii\db\ActiveRecord
 {
@@ -74,6 +78,9 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             ['dpp_description', 'string', 'max' => 255],
 
             ['dpp_show_on_site', 'boolean'],
+
+            ['dpp_phone_list_id', 'integer'],
+            ['dpp_phone_list_id', 'exist', 'skipOnError' => true, 'targetClass' => PhoneList::class, 'targetAttribute' => ['dpp_phone_list_id' => 'pl_id']],
         ];
     }
 
@@ -97,6 +104,8 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             'dpp_description' => 'Description',
 			'dpp_default' => 'Default',
 			'dpp_show_on_site' => 'Show on site',
+            'dpp_phone_list_id' => 'Phone List',
+            'phoneList.pl_phone_number' => 'Phone List',
         ];
     }
 
@@ -168,6 +177,11 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     public function getDugUgs()
     {
         return $this->hasMany(UserGroup::class, ['ug_id' => 'dug_ug_id'])->viaTable('department_phone_project_user_group', ['dug_dpp_id' => 'dpp_id']);
+    }
+
+    public function getPhoneList(): ActiveQuery
+    {
+        return $this->hasOne(PhoneList::class, ['pl_id' => 'dpp_phone_list_id']);
     }
 
     /**

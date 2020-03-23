@@ -53,6 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'upp_email:email',
             'upp_tw_phone_number',
+            'phoneList.pl_phone_number',
             [
                 'attribute' => 'upp_allow_general_line',
                 'format' => 'raw',

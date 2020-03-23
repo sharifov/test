@@ -1,8 +1,12 @@
 <?php
 
 use common\models\Employee;
+use kartik\select2\Select2;
 use sales\access\EmployeeProjectAccess;
+use sales\widgets\PhoneSelect2Widget;
 use yii\helpers\Html;
+use yii\web\JsExpression;
+use yii\web\View;
 use yii\widgets\ActiveForm;
 use borales\extensions\phoneInput\PhoneInput;
 //use frontend\extensions\PhoneInput;
@@ -31,6 +35,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     <?php $form = ActiveForm::begin(); ?>
 
     <div class="col-md-2">
+
         <?= $form->field($model, 'upp_user_id')->dropDownList($userList, ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['prompt' => '-']) ?>
@@ -38,8 +43,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         <?= $form->field($model, 'upp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
-
-
 
         <?= $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
             'jsOptions' => [
@@ -50,6 +53,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'preferredCountries' => ['us'],
                 'customContainer' => 'intl-tel-input'
             ]
+        ]) ?>
+
+        <?= $form->field($model, 'upp_phone_list_id')->widget(PhoneSelect2Widget::class, [
+                'data' => $model->upp_phone_list_id ? [
+                        $model->upp_phone_list_id => $model->phoneList->pl_phone_number
+                ] : [],
         ]) ?>
 
         <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
