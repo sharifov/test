@@ -2,13 +2,13 @@
 
 namespace frontend\controllers;
 
+use frontend\widgets\notification\NotificationCache;
+use frontend\widgets\notification\NotificationWidget;
+use sales\auth\Auth;
 use Yii;
 use common\models\Notifications;
 use common\models\search\NotificationsSearch;
-use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -105,7 +105,9 @@ class NotificationsController extends FController
         if(!$model->n_read_dt) {
             $model->n_read_dt = date('Y-m-d H:i:s');
             $model->n_new = false;
-            $model->save();
+            if ($model->save()) {
+                Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
+            }
         }
 
         return $this->render('view2', [
@@ -144,6 +146,7 @@ class NotificationsController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
             return $this->redirect(['view', 'id' => $model->n_id]);
         } else {
             return $this->render('update', [
@@ -160,7 +163,12 @@ class NotificationsController extends FController
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+
+        if ($model->delete()) {
+            NotificationCache::invalidate($model->n_user_id);
+            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
+        }
 
         return $this->redirect(['index']);
     }
@@ -174,20 +182,26 @@ class NotificationsController extends FController
     public function actionSoftDelete($id)
     {
         $model = $this->findModel($id);
-        if($model->n_user_id != Yii::$app->user->id) throw new ForbiddenHttpException('Access denied.');
+        if ($model->n_user_id != Yii::$app->user->id) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
 
         $model->n_deleted = true;
-        $model->save();
+        if ($model->save()) {
+            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
+        }
         return $this->redirect(['list']);
     }
-
 
     /**
      * @return \yii\web\Response
      */
     public function actionAllDelete()
     {
-        Notifications::updateAll(['n_deleted' => true], ['n_deleted' => false, 'n_user_id' => Yii::$app->user->id]);
+        if (Notifications::updateAll(['n_deleted' => true], ['n_deleted' => false, 'n_user_id' => Yii::$app->user->id])) {
+            NotificationCache::invalidate(Yii::$app->user->id);
+            Notifications::sendSocket('getNewNotification', ['user_id' => Yii::$app->user->id]);
+        }
         return $this->redirect(['list']);
     }
 
@@ -196,7 +210,10 @@ class NotificationsController extends FController
      */
     public function actionAllRead()
     {
-        Notifications::updateAll(['n_new' => false, 'n_read_dt' => date('Y-m-d H:i:s')], ['n_read_dt' => null, 'n_user_id' => Yii::$app->user->id]);
+        if (Notifications::updateAll(['n_new' => false, 'n_read_dt' => date('Y-m-d H:i:s')], ['n_read_dt' => null, 'n_user_id' => Yii::$app->user->id])) {
+            NotificationCache::invalidate(Yii::$app->user->id);
+            Notifications::sendSocket('getNewNotification', ['user_id' => Yii::$app->user->id]);
+        }
         return $this->redirect(['list']);
     }
 
@@ -216,16 +233,14 @@ class NotificationsController extends FController
         }
     }
 
-
     /**
      * @return string|\yii\web\Response
      */
     public function actionPjaxNotify()
     {
         if(Yii::$app->request->isAjax) {
-            $box = \frontend\widgets\Notifications::getInstance();
-            $result = $box->run();
-            return $result;
+//            $box = \frontend\widgets\Notifications::getInstance();
+            return (new NotificationWidget(['userId' => Auth::id()]))->run();
         } elseif(Yii::$app->request->referrer) {
             return $this->redirect(Yii::$app->request->referrer);
         }

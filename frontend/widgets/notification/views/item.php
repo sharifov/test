@@ -16,7 +16,7 @@ $time = strtotime($createdDt);
 
 <li data-id="<?= $id ?>">
     <a href="<?= Url::to(['/notifications/view2', 'id' => $id]) ?>" data-pjax="0">
-        <span class="glyphicon glyphicon-info-sign"> <?php //remove-sign, ok-sign, question-sign ?></span>
+        <span class="glyphicon glyphicon-info-sign"> </span>
         <span>
             <span><?= Html::encode($title) ?></span>
             <span class="time" data-time="<?= $time ?>"><?= Yii::$app->formatter->asRelativeTime($time) ?></span>

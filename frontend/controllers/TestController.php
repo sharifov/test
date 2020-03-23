@@ -37,6 +37,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
+use frontend\widgets\notification\NotificationWidget;
 use modules\hotel\HotelModule;
 use modules\lead\src\entities\lead\LeadQuery;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -194,14 +195,35 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $lead = Lead::findOne(371172);
+
+        $lead = Lead::findOne(371222);
         $repo = Yii::createObject(LeadRepository::class);
-        $lead->followUp();
         $lead->processing(295);
         $lead->followUp(294);
+        $lead->followUp(295);
         $repo->save($lead);
         die;
         return $this->render('blank');
+    }
+
+    public function actionTestNew()
+    {
+        $n = new Notifications([
+            'n_user_id' => 295,
+            'n_title' => '1',
+            'n_message' => '2',
+            'n_popup' => 1,
+            'n_new' => 1,
+            'n_type_id' => 3,
+        ]);
+        if (!$n->save()) {
+            VarDumper::dump($n->getErrors());
+        }
+        Notifications::sendSocket('getNewNotification', ['user_id' => 295] );
+        die;
+
+        $userId = 295;
+        Notifications::sendSocket('getNewNotification', ['user_id' => $userId]);
     }
 
     private function getPathForTable($actions, $controller, &$batchTmpTableItem, &$batchTmpTableItemChild, $role)

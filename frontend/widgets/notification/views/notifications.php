@@ -1,95 +1,110 @@
 <?php
 
 use common\models\Notifications;
-use yii\helpers\Html;
+use yii\bootstrap4\Html;
+use yii\helpers\Url;
 use yii\web\View;
+use yii\widgets\Pjax;
 
 /* @var Notifications[] $notifications */
-/* @var integer $newCount */
+/* @var integer $count */
 /** @var View $this */
 
+if (!$count) {
+    $count = null;
+}
+
 ?>
-    <li class="dropdown open" role="presentation">
+<?php Pjax::begin(['id' => 'notify-pjax', 'timeout' => false, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => [
+    'tag' => 'li',
+    'class' => 'dropdown open',
+    'role' => 'presentation',
+]])?>
 
-        <a href="javascript:;" class="dropdown-toggle info-number" title="Notifications" data-toggle="dropdown" aria-expanded="false">
-            <i class="fa fa-comment-o"></i>
-            <?php if ($newCount): ?>
-                <span class="badge bg-green"><?= $newCount ?></span>
-            <?php endif; ?>
-        </a>
+    <?php $pNotifiers = null; ?>
 
-        <ul id="notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
-            <?php foreach ($notifications as $n => $notification): ?>
-                <?= $this->render('item', [
-                    'id' => $notification->n_id,
-                    'title' => $notification->n_title,
-                    'createdDt' => $notification->n_created_dt,
-                    'message' => $notification->n_message,
-                ]) ?>
-            <?php endforeach; ?>
-            <li>
-                <div class="text-center">
-                    <?= Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['/notifications/list'], ['data-pjax' => 0]) ?>
-                </div>
-            </li>
-        </ul>
-    </li>
+    <a href="javascript:;" class="dropdown-toggle info-number" title="Notifications" data-toggle="dropdown"
+       aria-expanded="false">
+        <i class="fa fa-comment-o"></i><span class="badge bg-green notification-counter"><?= $count ?></span>
+    </a>
+
+    <ul id="notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
+        <?php foreach ($notifications as $notification): ?>
+            <?= $this->render('item', [
+                'id' => $notification->n_id,
+                'title' => $notification->n_title,
+                'createdDt' => $notification->n_created_dt,
+                'message' => $notification->n_message
+            ]) ?>
+            <?php
+                if ($notification->isMustPopupShow()) {
+                    $title = Html::encode($notification->n_title);
+                    $type = $notification->getNotifyType();
+                    $message = str_replace(["\r\n", "\n", '"'], ['', '', '\"'], $notification->n_message);
+                    $desktopMessage = str_replace('"', '\"', strip_tags($notification->n_message));
+                    $pNotifiers .= "notificationPNotify('" . $type . "', '" . $title . "', '" . $message . "', '" . $desktopMessage . "');" . PHP_EOL;
+                }
+            ?>
+        <?php endforeach; ?>
+
+        <?php $this->registerJs($pNotifiers, View::POS_END); ?>
+        <?php $this->registerJs('notificationCount(\'' . $count . '\');', View::POS_END); ?>
+
+        <li>
+            <div class="text-center">
+                <?= Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['/notifications/list']) ?>
+            </div>
+        </li>
+    </ul>
+
+<?php yii\widgets\Pjax::end() ?>
+
 <?php
 
+$notifyUrl = Url::to(['/notifications/pjax-notify']);
+
 $js = <<<JS
-function notificationInit(data) {
-    console.log('notificationInit.start');
-    console.log(data);
-    try {
-        var command = data['command'];
-        var message = data['message'];
-    } catch (error) {
-        console.error('Invalid data on notificationInit');
-        console.error(data);
-        return;
-    }
 
-    if (command === 'add') {
-        notificationAdd(message);
-    }
-    notificationUpdateTime();
-   // notificationUpdateList()//todo
+const notifyUrl = '$notifyUrl';
+function updatePjaxNotify() {
+    $.pjax.reload({url: notifyUrl, container : '#notify-pjax', push: false, replace: false, timeout: 10000, scrollTo: false, async: false});
 }
 
-function notificationAdd(message) {
-    $("#notification-menu").prepend('<li>we</li>');
-}
-function notificationUpdateTime() {
-    $( "#notification-menu li .time").each(function() {
-        $(this).text(timeDifference(new Date(), new Date($(this).data('time') * 1000)));
+$("#notify-pjax").on("pjax:beforeSend", function() {
+    $('#notify-pjax .info-number i').removeClass('fa-comment-o').addClass('fa-spin fa-spinner');
+});
+
+$("#notify-pjax").on("pjax:complete", function() {
+    $('#notify-pjax .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comment-o');
+});
+
+$("#notify-pjax").on('pjax:timeout', function(event) {
+    $('#notify-pjax .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comment-o');
+    event.preventDefault()
+});
+ 
+function notificationPNotify(type, title, message, desktopMessage) {
+    new PNotify({
+        type: type,
+        title: title,
+        text: message,
+        icon: true,
+        desktop: {
+            desktop: true,
+            fallback: true,
+            text: desktopMessage
+        },
+        delay: 10000,
+        mouse_reset: false,
+        hide: true
     });
+    soundNotification();
 }
 
-function timeDifference(current, previous) {
-
-    let msPerMinute = 60 * 1000;
-    let msPerHour = msPerMinute * 60;
-    let msPerDay = msPerHour * 24;
-    let msPerMonth = msPerDay * 30;
-    let msPerYear = msPerDay * 365;
-
-    let elapsed = current - previous;
-
-    if (elapsed < msPerMinute) {
-         return Math.round(elapsed/1000) + ' seconds ago';   
-    } else if (elapsed < msPerHour) {
-         return Math.round(elapsed/msPerMinute) + ' minutes ago';   
-    } else if (elapsed < msPerDay ) {
-         return Math.round(elapsed/msPerHour ) + ' hours ago';   
-    } else if (elapsed < msPerMonth) {
-        return 'approximately ' + Math.round(elapsed/msPerDay) + ' days ago';   
-    } else if (elapsed < msPerYear) {
-        return 'approximately ' + Math.round(elapsed/msPerMonth) + ' months ago';   
-    } else {
-        return 'approximately ' + Math.round(elapsed/msPerYear ) + ' years ago';   
-    }
+function notificationCount(count) {
+    $(".notification-counter").text(count);   
 }
 
 JS;
 
-$this->registerJs($js, View::POS_READY);
+$this->registerJs($js, View::POS_END);

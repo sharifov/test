@@ -4,6 +4,8 @@
 /* @var $content string */
 
 use common\models\Employee;
+use frontend\widgets\notification\NotificationWidget;
+use sales\auth\Auth;
 use yii\helpers\Html;
 
 $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
@@ -126,7 +128,8 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
                         <?php /*php if($isAdmin):*/ ?>
                             <?= frontend\widgets\OnlineConnection::widget() ?>
-                            <?= frontend\widgets\Notifications::widget() ?>
+                            <?php //= frontend\widgets\Notifications::widget() ?>
+                            <?= NotificationWidget::widget(['userId' => Auth::id()]) ?>
 
 
                         <li class="nav-item">

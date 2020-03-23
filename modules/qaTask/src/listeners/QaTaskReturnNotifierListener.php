@@ -71,7 +71,7 @@ class QaTaskReturnNotifierListener
                 'url' => Url::toRoute( ['/qa-task/qa-task/view', 'gid' => $task->t_gid], true),
             ]);
 
-        if (Notifications::create($oldAssigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+        if ($ntf = Notifications::create($oldAssigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($oldAssigned->id, null, 'getNewNotification', [], true);
             Notifications::sendSocket('getNewNotification', ['user_id' => $oldAssigned->id]);
         } else {
