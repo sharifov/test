@@ -405,7 +405,7 @@ class CasesSaleService
             return [];
         }
         try {
-            $response = BackOffice::sendRequest2('cs/search', $params);
+            $response = BackOffice::sendRequest2('cs/search', $params, 'POST', 90);
 
             if ($response->isOk) {
                 $result = $response->data;
@@ -429,7 +429,7 @@ class CasesSaleService
     public function detailRequestToBackOffice(int $sale_id)
     {
         try {
-            $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id]);
+            $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id], 'POST', 90);
 
             if ($response->isOk) {
                 $result = $response->data;
