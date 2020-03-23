@@ -92,21 +92,11 @@ class EmailIncomingService
                 if ($department->isExchange()) {
                     $caseId = $this->getOrCreateCaseByExchange($client->id, $contact->projectId, $internalEmail, $emailId);
 
-                    $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
-                    if (count($saleData)) {
-                        $this->casesSaleService->createSale($caseId, $saleData);
-                    }
-
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
                     return new Process(null, $caseId);
                 }
                 if ($department->isSupport()) {
                     $caseId = $this->getOrCreateCaseBySupport($client->id, $contact->projectId, $internalEmail, $emailId);
-
-                    $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
-                    if (count($saleData)) {
-                        $this->casesSaleService->createSale($caseId, $saleData);
-                    }
 
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
                     return new Process(null, $caseId);
@@ -116,11 +106,6 @@ class EmailIncomingService
             $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
             Yii::error('Incoming email. Created Email Id: ' . $emailId . ' | Not found Department for email: ' . $internalEmail, 'EmailIncomingService');
             $process = $this->getOrCreateByDefault($client->id, $contact->projectId, $internalEmail, $emailId);
-
-            $saleData = $this->casesSaleService->getSaleFromBo(null, $internalEmail, null);
-            if (count($saleData)) {
-                $this->casesSaleService->createSale($process->caseId, $saleData);
-            }
 
             return $process;
         });

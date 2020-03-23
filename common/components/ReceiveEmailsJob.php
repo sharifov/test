@@ -11,6 +11,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesManageService;
+use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
@@ -32,6 +33,7 @@ use yii\web\UnprocessableEntityHttpException;
  * @package common\components
  *
  * @property EmailService
+ * @property CasesSaleService $casesSaleService
  */
 class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 {
@@ -39,6 +41,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 	 * @var EmailService
 	 */
 	private $emailService;
+	private $casesSaleService;
 
 	public $last_email_id = 0;
 
@@ -62,6 +65,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
         try {
         	$this->emailService = Yii::createObject(EmailService::class);
+        	$this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
             if ((int)$this->last_email_id < 1) {
                 \Yii::error('Not found last_email_id (' . $this->last_email_id . ')', 'ReceiveEmailsJob:execute');
@@ -204,6 +208,11 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //                        }
                         if ($email->e_case_id) {
                             (Yii::createObject(CasesManageService::class))->needAction($email->e_case_id);
+                            
+                            $saleData = $this->casesSaleService->getSaleFromBo(null, $email->e_email_from, null);
+                            if (count($saleData)) {
+                                $this->casesSaleService->createSale($email->e_case_id, $saleData);
+                            }
                         }
 
                         $countTotal++;
