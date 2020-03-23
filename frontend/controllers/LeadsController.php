@@ -170,27 +170,36 @@ class LeadsController extends FController
 
     public function actionExportCsv()
     {
-        //set_time_limit(60);
+        //set_time_limit(30);
         //ini_set('memory_limit', '512M');
         $searchModel = new LeadSearch();
-        $dataProvideQuery = $searchModel->searchExportCsv();
+        $totalLeads = Lead::find()->count();
+        $limit = 10000;
+        $queryIterations = ceil($totalLeads / $limit);
 
         $fpath = fopen(Yii::getAlias('@runtime'. '/file.csv'), 'w');
 
-        foreach ($dataProvideQuery-> /*offset(0)->limit(30)->*/ each(1) as $batchIndex => $batch){
-            if ($batchIndex == 0){
-                fputcsv($fpath, array_keys($batch));
+        for ($i = 0; $i < $queryIterations; $i++){
+            $offset = $i * $limit;
+            $dataProvideQuery = $searchModel->searchExportCsv($offset, $limit);
+
+            foreach ($dataProvideQuery as $rowIndex => $row){
+                if ($i == 0 && $rowIndex == 0){
+                    fputcsv($fpath, array_keys($row));
+                }
+
+                if (!empty($row['l_type_create'])){
+                    $row['l_type_create'] = Lead::TYPE_CREATE_LIST[$row['l_type_create']];
+                }
+                if (!empty($row['status'])){
+                    $row['status'] = Lead::STATUS_LIST[$row['status']];
+                }
+
+                fputcsv($fpath, $row);
             }
 
-            if (!empty($batch['l_type_create'])){
-                $batch['l_type_create'] = Lead::TYPE_CREATE_LIST[$batch['l_type_create']];
-            }
-            if (!empty($batch['status'])){
-                $batch['status'] = Lead::STATUS_LIST[$batch['status']];
-            }
+    }
 
-            fputcsv($fpath, $batch);
-        }
         fclose($fpath);
     }
 

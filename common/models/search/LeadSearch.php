@@ -768,9 +768,9 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
-    public function searchExportCsv()
+    public function searchExportCsv($offset, $limit)
     {
-        $query = Lead::find()->asArray();
+        $query = Lead::find()->offset($offset)->limit($limit)->asArray();
         $query->select(['id', 'uid', 'l_type_create', 'status', 'client_id', 'called_expert', 'project_id', 'source_id', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'employee_id', 'createdDate' => new Expression("DATE(created)"), 'createdTime' => new Expression("TIME(created)"), 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // grid filtering conditions
@@ -1172,7 +1172,10 @@ class LeadSearch extends Lead
             ->where(Employee::tableName() . '.id = ' . Lead::tableName() . '.employee_id')
         ]);
 
-        return $query;
+        $command = $query->createCommand();
+        $data = $command->queryAll();
+
+        return $data;
     }
 
     public function searchAgent($params)
