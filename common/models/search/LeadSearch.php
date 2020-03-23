@@ -453,6 +453,10 @@ class LeadSearch extends Lead
         $query = Lead::find()->with('project', 'source', 'employee', 'client');
         $query->select(['id', 'uid', 'l_type_create', 'status', 'client_id', 'called_expert', 'project_id', 'source_id', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'employee_id', 'created', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
+        if (isset($params['LeadSearch']) && !array_filter($params['LeadSearch']) || empty($params)){
+            $query->where('0=1');
+        }
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -768,10 +772,12 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
-    public function searchExportCsv($offset, $limit)
+    public function searchExportCsv($params, $offset, $limit)
     {
-        $query = Lead::find()->offset($offset)->limit($limit)->asArray();
+        $query = Lead::find()->offset($offset)->limit($limit)->orderBy(['id' => SORT_DESC])->asArray();
         $query->select(['id', 'uid', 'l_type_create', 'status', 'client_id', 'called_expert', 'project_id', 'source_id', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'employee_id', 'createdDate' => new Expression("DATE(created)"), 'createdTime' => new Expression("TIME(created)"), 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        $this->load($params);
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -1173,9 +1179,8 @@ class LeadSearch extends Lead
         ]);
 
         $command = $query->createCommand();
-        $data = $command->queryAll();
 
-        return $data;
+        return $command->queryAll();
     }
 
     public function searchAgent($params)

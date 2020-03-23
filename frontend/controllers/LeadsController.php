@@ -173,7 +173,12 @@ class LeadsController extends FController
         //set_time_limit(30);
         //ini_set('memory_limit', '512M');
         $searchModel = new LeadSearch();
-        $totalLeads = Lead::find()->count();
+        $params = Yii::$app->request->queryParams;
+
+        $dataProvider = $searchModel->searchExport($params);
+        $totalLeads = $dataProvider->query->count();
+        //$totalLeads = Lead::find()->count();
+
         $limit = 10000;
         $queryIterations = ceil($totalLeads / $limit);
 
@@ -181,7 +186,7 @@ class LeadsController extends FController
 
         for ($i = 0; $i < $queryIterations; $i++){
             $offset = $i * $limit;
-            $dataProvideQuery = $searchModel->searchExportCsv($offset, $limit);
+            $dataProvideQuery = $searchModel->searchExportCsv($params, $offset, $limit);
 
             foreach ($dataProvideQuery as $rowIndex => $row){
                 if ($i == 0 && $rowIndex == 0){
@@ -200,7 +205,29 @@ class LeadsController extends FController
 
     }
 
-        fclose($fpath);
+        if(fclose($fpath)){
+            //return $this->redirect(['leads/download-csv']);
+            return 'success';
+        }
+    }
+
+    public function actionDownloadCsv()
+    {
+        $path = Yii::getAlias('@runtime');
+        $file = $path . '/file.csv';
+
+        if (file_exists($file)) {
+            Yii::$app->response->sendFile($file);
+        }
+    }
+
+    public function actionFileSize()
+    {
+        $path = Yii::getAlias('@runtime');
+        $file = $path . '/file.csv';
+        if (file_exists($file)) {
+            return filesize($file);
+        }
     }
 
     /**
