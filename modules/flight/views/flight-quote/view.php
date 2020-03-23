@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fq_source_id',
             'fq_product_quote_id',
             'fq_hash_key',
+            'fq_uid',
             'fq_service_fee_percent',
             'fq_record_locator',
             'fq_gds',

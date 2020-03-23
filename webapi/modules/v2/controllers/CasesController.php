@@ -2,7 +2,9 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\components\jobs\CreateSaleFromBOJob;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\model\cases\CaseCodeException;
 use sales\model\cases\useCases\cases\api\create\CreateForm;
 use sales\model\cases\useCases\cases\api\create\Handler;
@@ -217,9 +219,15 @@ class CasesController extends BaseController
             );
         }
 
-        $saleData = $this->casesSaleService->getSaleFromBo($form->order_uid, $form->contact_email, $form->contact_phone);
-        if (count($saleData)) {
-            $this->casesSaleService->createSale($result->csId, $saleData);
+        try {
+            $job = new CreateSaleFromBOJob();
+            $job->case_id = $result->csId;
+            $job->order_uid = $form->order_uid;
+            $job->email = $form->contact_email;
+            $job->phone = $form->contact_phone;
+            Yii::$app->queue_job->priority(100)->push($job);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), 'CasesController:' . __FUNCTION__ . ':addToJobFailed');
         }
 
         return new SuccessResponse(
