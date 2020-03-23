@@ -295,33 +295,6 @@ class CasesSaleService
 	}
 
     /**
-     * @param Cases $case
-     * @param array $saleData
-     * @return CaseSale
-     */
-    public function create(Cases $case, array $saleData): CaseSale
-	{
-		$caseSale = new CaseSale();
-        $caseSale->css_cs_id = $case->cs_id;
-        $caseSale->css_sale_id = $saleData['saleId'];
-        $caseSale->css_sale_data = json_encode($saleData);
-        $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
-        $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-        $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
-        $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
-        $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
-
-        if(!$caseSale->save(false)) {
-            \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:create');
-            return null;
-        }
-
-        $case->updateLastAction();
-
-		return $caseSale;
-	}
-
-    /**
      * @param CaseSale $caseSale
      * @param Cases $case
      * @param array $saleData
@@ -468,17 +441,48 @@ class CasesSaleService
     /**
      * @param int $csId
      * @param array $saleData
+     * @return CaseSale|null
      */
-    public function createSale(int $csId, array $saleData):void
+    public function createSale(int $csId, array $saleData)
     {
         try {
-            if ($cases = Cases::findOne($csId)) {
-                $caseSale = $this->create($cases, $saleData);
+            if (($case = Cases::findOne($csId)) && isset($saleData['saleId'])) {
+
+                $caseSale = $this->getOrCreateCaseSale($csId, $saleData['saleId']);
+                $caseSale->css_cs_id = $case->cs_id;
+                $caseSale->css_sale_id = $saleData['saleId'];
+                $caseSale->css_sale_data = json_encode($saleData);
+                $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
+                $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
+                $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+                $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
+                $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
+
+                if(!$caseSale->save(false)) {
+                    \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:create');
+                    return null;
+                }
                 $refreshSaleData = $this->detailRequestToBackOffice($saleData['saleId']);
-                $this->saveAdditionalData($caseSale, $cases, $refreshSaleData);
+                $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
+            } else {
+                throw new \RuntimeException('Error. Params csId and saleId is required');
             }
         } catch (\Throwable $throwable) {
             Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
         }
+        return $caseSale;
+    }
+
+    /**
+     * @param int $csId
+     * @param int $saleId
+     * @return CaseSale
+     */
+    private function getOrCreateCaseSale(int $csId, int $saleId): CaseSale
+    {
+        if ($caseSale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
+            return $caseSale;
+        }
+        return new CaseSale();
     }
 }
