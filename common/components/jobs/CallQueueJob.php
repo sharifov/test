@@ -14,6 +14,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesCreateService;
@@ -163,9 +164,13 @@ class CallQueueJob extends BaseObject implements JobInterface
                         }
 
                         if ($case) {
-                            $saleData = $this->casesSaleService->getSaleFromBo(null, null, $call->c_from);
-                            if (count($saleData)) {
-                                $this->casesSaleService->createSale($case->cs_id, $saleData);
+                            try {
+                                $job = new CreateSaleFromBOJob();
+                                $job->case_id = $case->cs_id;
+                                $job->phone = $call->c_from;
+                                Yii::$app->queue_job->priority(100)->push($job);
+                            } catch (\Throwable $throwable) {
+                                Yii::error(AppHelper::throwableFormatter($throwable), 'CallQueueJob:addToJobFailed');
                             }
                         }
 

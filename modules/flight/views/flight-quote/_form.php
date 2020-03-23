@@ -20,6 +20,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'fq_hash_key')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'fq_uid')->textInput(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'fq_service_fee_percent')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'fq_record_locator')->textInput(['maxlength' => true]) ?>
