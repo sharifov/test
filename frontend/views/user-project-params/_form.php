@@ -3,6 +3,7 @@
 use common\models\Employee;
 use kartik\select2\Select2;
 use sales\access\EmployeeProjectAccess;
+use sales\widgets\EmailSelect2Widget;
 use sales\widgets\PhoneSelect2Widget;
 use yii\helpers\Html;
 use yii\web\JsExpression;
@@ -43,6 +44,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         <?= $form->field($model, 'upp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'upp_email_list_id')->widget(EmailSelect2Widget::class, [
+            'data' => $model->upp_email_list_id ? [
+                $model->upp_email_list_id => $model->emailList->el_email
+            ] : [],
+        ]) ?>
 
         <?= $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
             'jsOptions' => [

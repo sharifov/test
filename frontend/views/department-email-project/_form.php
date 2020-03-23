@@ -1,5 +1,6 @@
 <?php
 
+use sales\widgets\EmailSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -13,6 +14,12 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin(); ?>
 
     <?= $form->field($model, 'dep_email')->textInput(['maxlength' => true, 'type' => 'email']) ?>
+
+    <?= $form->field($model, 'dep_email_list_id')->widget(EmailSelect2Widget::class, [
+            'data' => $model->dep_email_list_id ? [
+                    $model->dep_email_list_id => $model->emailList->el_email,
+            ] : [],
+    ]) ?>
 
 	<?= $form->field($model, 'dep_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
 

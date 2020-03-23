@@ -3,7 +3,7 @@
 namespace sales\model\phoneList\entity;
 
 use common\models\Employee;
-use sales\yii\validators\PhoneValidator;
+use common\components\validators\PhoneValidator;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;

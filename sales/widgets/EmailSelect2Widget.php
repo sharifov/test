@@ -9,21 +9,14 @@ use yii\web\JsExpression;
 use yii\web\View;
 
 /**
- * Class PhoneSelect2Widget
+ * Class EmailSelect2Widget
  *
  * @property int $minimumInputLength
  * @property int $delay
  * @property string $placeholder
  * @property string $url
- *
- * Ex.
-        <?= $form->field($model, 'dpp_phone_list_id')->widget(PhoneSelect2Widget::class, [
-            'data' => $model->dpp_phone_list_id ? [
-                $model->dpp_phone_list_id => $model->phoneList->pl_phone_number
-            ] : [],
-        ]) ?>
  */
-class PhoneSelect2Widget extends Select2
+class EmailSelect2Widget extends Select2
 {
     public $minimumInputLength = 1;
     public $delay = 300;
@@ -34,7 +27,7 @@ class PhoneSelect2Widget extends Select2
     {
         parent::init();
 
-        $this->url = $this->url ?: Url::to(['/phone-list/list-ajax']);
+        $this->url = $this->url ?: Url::to(['/email-list/list-ajax']);
         $this->theme = $this->theme ?: self::THEME_KRAJEE;
         $this->pluginOptions = ArrayHelper::merge([
             'allowClear' => true,
@@ -46,7 +39,7 @@ class PhoneSelect2Widget extends Select2
                 'delay' => $this->delay
             ],
             'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-            'templateResult' => new JsExpression('formatPhoneListText'),
+            'templateResult' => new JsExpression('formatEmailListText'),
             'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
         ], $this->pluginOptions);
         $this->options = ArrayHelper::merge(['placeholder' => $this->placeholder, 'class' => 'form-control'], $this->options);
@@ -56,7 +49,7 @@ class PhoneSelect2Widget extends Select2
     {
         parent::registerAssets();
         $js = <<<JS
-function formatPhoneListText( data ) {
+function formatEmailListText( data ) {
     if (data.loading) {
         return data.text;
     }
@@ -67,6 +60,6 @@ function formatPhoneListText( data ) {
     return str;
 }
 JS;
-        $this->getView()->registerJs($js, View::POS_HEAD, '/phone-list/list-ajax');
+        $this->getView()->registerJs($js, View::POS_HEAD, '/email-list/list-ajax');
     }
 }

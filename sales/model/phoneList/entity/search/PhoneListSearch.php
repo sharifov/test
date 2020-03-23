@@ -18,7 +18,7 @@ class PhoneListSearch extends PhoneList
 
             ['pl_title', 'string'],
 
-            ['pl_phone_number', 'safe'],
+            ['pl_phone_number', 'string'],
 
             [['pl_created_dt', 'pl_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];

@@ -80,6 +80,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             //'upp_user_id',
             //'upp_project_id',
             'upp_email:email',
+            [
+                'class' => \sales\yii\grid\EmailSelect2Column::class,
+                'attribute' => 'upp_email_list_id',
+                'relation' => 'emailList',
+            ],
             'upp_tw_phone_number',
             [
                 'class' => \sales\yii\grid\PhoneSelect2Column::class,

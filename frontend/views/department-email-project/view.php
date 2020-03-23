@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'dep_id',
             'dep_email',
+            'emailList.el_email',
 			[
 				'attribute' => 'dep_project_id',
 				'value' => static function (\common\models\DepartmentEmailProject $model) {

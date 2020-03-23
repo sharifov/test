@@ -45,7 +45,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
      */
     public function search($params, $user)
     {
-        $query = DepartmentPhoneProject::find();
+        $query = DepartmentPhoneProject::find()->with(['phoneList']);
 
         // add conditions that should always apply here
 
