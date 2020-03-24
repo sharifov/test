@@ -2037,7 +2037,12 @@ class CommunicationController extends ApiBaseController
     private function getResponseData(array $response, ApiLog $apiLog): array
     {
         if (isset($response['error']) && $response['error']) {
-            $responseData = [];
+            $responseData = [
+                'status'    => 422,
+                'name'      => 'Error',
+                'code'      => $response['error_code'] ?? 0,
+                'message'   => is_string($response['error']) ? $response['error'] : @json_encode($response['error'])
+            ];
         } else {
             $responseData = [
                 'status'    => 200,
@@ -2050,15 +2055,6 @@ class CommunicationController extends ApiBaseController
         $responseData['data']['response'] = $response;
         $responseData = $apiLog->endApiLog($responseData);
 
-        if (isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = $response['error_code'];
-            } else {
-                $error_code = 0;
-            }
-            throw new UnprocessableEntityHttpException($json, $error_code);
-        }
         return $responseData;
     }
 
