@@ -488,6 +488,8 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
     ];
 
+    unset($gridColumnsExport['reason']);
+
     Yii::$app->state = Yii::$app::STATE_END;
 
     $pdfHeader = [
@@ -543,8 +545,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
     ]);
 
-    unset($gridColumnsExport['reason']);
-
     ?>
 
     <?php echo GridView::widget([
@@ -589,11 +589,12 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         'toolbar' =>  [
             ['content'=>
             //Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
-                Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/index'], ['data-pjax'=>0, 'class' => 'btn btn-default', 'title'=>'Reset Grid'])
+                Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/export'], ['data-pjax'=>0, 'class' => 'btn btn-outline-secondary', 'title'=>'Reset Grid']) . ' ' .
+                '{export}' . ' ' .
+                Html::button('<i class="glyphicon glyphicon-download"></i> Full Export', ['type'=>'button', 'title'=>'Full Export in CSV', 'id' => 'fullExportLeads', 'class'=>'btn btn-outline-secondary'])
             ],
-            '{export}',
-            $fullExportMenu,
-            '{toggleData}'
+            //$fullExportMenu,
+            //'{toggleData}'
         ],
         'pjax' => true,
         'pjaxSettings' => ['options' => ['id' => 'kv-pjax-container'], 'style' => 'overflow: auto;'],
@@ -614,3 +615,52 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+$downloadButton = Html::a('<i class="glyphicon glyphicon-cloud-download"></i> Download', ['leads/download-csv'], ['data-pjax'=>0, 'class' => 'btn btn-default', 'title'=>'Download']);
+yii\bootstrap4\Modal::begin([
+    'id' => 'modalClient',
+    'size' => \yii\bootstrap4\Modal::SIZE_DEFAULT,
+    'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
+]);
+echo "<div id='modalClientContent'></div>";
+yii\bootstrap4\Modal::end();
+
+$jsCode = <<<JS
+    $(document).on('click', '#fullExportLeads', function(){
+        var button = '$downloadButton';
+        //e.preventDefault();
+        $('#modalClient').modal('show').find('#modalClientContent').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Processing ...</div>');
+        $('#modalClient-label').html($(this).attr('title'));
+       
+        var params = {};
+	    var parser = document.createElement('a');
+	    parser.href = window.location.href;
+	    var query = parser.search.substring(1);       
+        
+        $.ajax({
+            url: 'export-csv?' + query,
+            type: 'GET',            
+             success: function(data) {
+                 //$('#modalClient').find('#modalClientContent').html(data);
+                  $('#modalClient').find('#modalClientContent').html('<div class="container"> <div class="row"> <div class="col text-center">' + button + '</div></div></div>');
+             },
+             error: function(error) {                   
+                //console.log('Error code: ' + error.status);
+                if(error.status == 504){
+                    $.ajax({
+                        url: 'file-size',   
+                        success: function(data) {
+                             $('#modalClient').find('#modalClientContent').html('<div class="container"> <div class="row"> <div class="col text-center">' + button + '</div></div></div>');
+                        },                
+                    })
+                } else {
+                     $('#modalClient').find('#modalClientContent').html('Error code: ' + error.status);
+                }
+             }
+         });        
+       return false;
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);
