@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\ApiLog;
 use common\models\Employee;
+use common\models\search\CallSearch;
 use kartik\export\ExportMenu;
 use sales\entities\call\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
@@ -338,6 +339,21 @@ class StatsController extends FController
         } else {
             return $this->render('agent-ratings', $params);
         }
+    }
+
+    public function actionCallsStats()
+    {
+        $searchModel = new CallSearch();
+        $params = Yii::$app->request->queryParams;
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->searchCallsStats($params, $user);
+
+        return $this->render('calls', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     public function actionLeadsStats()

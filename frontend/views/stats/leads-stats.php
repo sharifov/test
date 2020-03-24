@@ -1,7 +1,6 @@
 <?php
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use sales\access\ListsAccess;
 use kartik\export\ExportMenu;
 use sales\auth\Auth;
 
@@ -13,7 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
  * @var $searchModel common\models\search\LeadSearch;
  * @var $dataProvider yii\data\ArrayDataProvider
  */
-$list = new ListsAccess(Yii::$app->user->id);
+
 ?>
 <div class="calls-report-index">
     <h1><i class=""></i> <?= Html::encode($this->title) ?></h1>
