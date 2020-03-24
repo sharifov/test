@@ -285,6 +285,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                     $menuNewData,
                 ['label' => 'Projects', 'url' => ['/project/index'], 'icon' => 'product-hunt'],
                 ['label' => 'Project Sources', 'url' => ['/sources/index'], 'icon' => 'product-hunt'],
+                ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'list'],
+                ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'list'],
                 ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
                 ['label' => 'Department Emails', 'url' => ['/department-email-project/index'], 'icon' => 'envelope'],
                 ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],

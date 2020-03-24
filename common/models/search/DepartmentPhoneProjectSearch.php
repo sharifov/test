@@ -22,7 +22,8 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
             [['dpp_phone_number', 'dpp_params', 'dpp_updated_dt'], 'safe'],
             [['dpp_redial', 'dpp_default'], 'boolean'],
 
-            ['dpp_show_on_site', 'boolean']
+            ['dpp_show_on_site', 'boolean'],
+            ['dpp_phone_list_id', 'integer'],
         ];
     }
 
@@ -44,7 +45,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
      */
     public function search($params, $user)
     {
-        $query = DepartmentPhoneProject::find();
+        $query = DepartmentPhoneProject::find()->with(['phoneList']);
 
         // add conditions that should always apply here
 
@@ -76,6 +77,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
             'dpp_redial' => $this->dpp_redial,
             'dpp_default' => $this->dpp_default,
             'dpp_show_on_site' => $this->dpp_show_on_site,
+            'dpp_phone_list_id' => $this->dpp_phone_list_id,
         ]);
 
         $query->andFilterWhere(['like', 'dpp_phone_number', $this->dpp_phone_number])

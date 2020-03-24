@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ae94b1996b5191486619007d87fc6ab",
+    "content-hash": "713b6b3aa7fc18ac9868e85e7ea3c9aa",
     "packages": [
         {
             "name": "2amigos/qrcode-library",
@@ -636,7 +636,7 @@
             "version": "v4.7.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/FortAwesome/Font-Awesome.git",
+                "url": "git@github.com:FortAwesome/Font-Awesome.git",
                 "reference": "a8386aae19e200ddb0f6845b5feeee5eb7013687"
             },
             "dist": {
@@ -692,7 +692,7 @@
             "version": "3.4.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:jquery/jquery-dist.git",
+                "url": "https://github.com/jquery/jquery-dist.git",
                 "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d"
             },
             "dist": {
@@ -3463,12 +3463,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:kivork/yii2-rbac-export-import.git",
-                "reference": "1c962b20ff8bcdea10d20d96b84bce8c1c931caa"
+                "reference": "3433bf12be69d0fd58650ce2278bb113f398ca1b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kivork/yii2-rbac-export-import/zipball/1c962b20ff8bcdea10d20d96b84bce8c1c931caa",
-                "reference": "1c962b20ff8bcdea10d20d96b84bce8c1c931caa",
+                "url": "https://api.github.com/repos/kivork/yii2-rbac-export-import/zipball/3433bf12be69d0fd58650ce2278bb113f398ca1b",
+                "reference": "3433bf12be69d0fd58650ce2278bb113f398ca1b",
                 "shasum": ""
             },
             "require": {
@@ -3505,7 +3505,7 @@
                 "source": "https://github.com/kivork/yii2-rbac-export-import/tree/master",
                 "issues": "https://github.com/kivork/yii2-rbac-export-import/issues"
             },
-            "time": "2020-03-18T14:16:55+00:00"
+            "time": "2020-03-24T11:26:02+00:00"
         },
         {
             "name": "lajax/yii2-translate-manager",

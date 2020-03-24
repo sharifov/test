@@ -44,6 +44,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'dpp_phone_number',
             [
+                'class' => \sales\yii\grid\PhoneSelect2Column::class,
+                'attribute' => 'dpp_phone_list_id',
+                'relation' => 'phoneList',
+            ],
+            [
                 'class' => \sales\yii\grid\BooleanColumn::class,
                 'attribute' => 'dpp_redial',
             ],
