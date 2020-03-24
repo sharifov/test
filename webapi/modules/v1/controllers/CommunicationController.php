@@ -2032,7 +2032,6 @@ class CommunicationController extends ApiBaseController
      * @param array $response
      * @param ApiLog $apiLog
      * @return array
-     * @throws UnprocessableEntityHttpException
      */
     private function getResponseData(array $response, ApiLog $apiLog): array
     {
