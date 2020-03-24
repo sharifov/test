@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\yii\validators;
+namespace common\components\validators;
 
 class NumberValidator extends \yii\validators\NumberValidator
 {

@@ -1,5 +1,6 @@
 <?php
 
+use sales\yii\grid\EmailSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -38,6 +39,11 @@ $this->params['breadcrumbs'][] = $this->title;
 				'format' => 'raw',
 			],
             'dep_email',
+            [
+                'class' => \sales\yii\grid\EmailSelect2Column::class,
+                'attribute' => 'dep_email_list_id',
+                'relation' => 'emailList',
+            ],
 			[
 				'attribute' => 'dep_dep_id',
 				'value' => static function (\common\models\DepartmentEmailProject $model) {

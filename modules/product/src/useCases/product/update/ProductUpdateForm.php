@@ -3,7 +3,7 @@
 namespace modules\product\src\useCases\product\update;
 
 use modules\product\src\entities\product\Product;
-use sales\yii\validators\NumberValidator;
+use common\components\validators\NumberValidator;
 use yii\base\Model;
 
 /**

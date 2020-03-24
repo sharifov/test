@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'dpp_dep_id:departmentName',
             'dpp_project_id:projectName',
             'dpp_phone_number',
+            'phoneList.pl_phone_number',
             'dpp_redial:booleanByLabel',
             //'dpp_source_id',
             [

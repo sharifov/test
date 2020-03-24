@@ -4,7 +4,7 @@ namespace modules\offer\src\useCases\offer\api\view;
 
 use sales\forms\api\VisitorForm;
 use sales\forms\CompositeForm;
-use sales\yii\validators\IsNotArrayValidator;
+use common\components\validators\IsNotArrayValidator;
 
 /**
  * Class OfferViewForm
