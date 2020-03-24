@@ -448,8 +448,6 @@ class CasesSaleService
         try {
             if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
                 $caseSale = $this->getOrCreateCaseSale($csId, $saleData['saleId']);
-                $caseSale->css_cs_id = $case->cs_id;
-                $caseSale->css_sale_id = $saleData['saleId'];
 
                 if ($refreshSaleData = $this->detailRequestToBackOffice($saleData['saleId'])) {
                     $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
@@ -459,9 +457,14 @@ class CasesSaleService
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
-                    if(!$caseSale->save(false)) {
-                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:create');
-                        throw new \RuntimeException('Error. CaseSale not saved.');
+                    if (!CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleData['saleId']])) {
+                        if (!$caseSale->save(false)) {
+                            \Yii::error(
+                                VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                                'CasesSaleService:create'
+                            );
+                            throw new \RuntimeException('Error. CaseSale not saved.');
+                        }
                     }
                 }
                 $transaction->commit();
@@ -485,9 +488,11 @@ class CasesSaleService
      */
     private function getOrCreateCaseSale(int $csId, int $saleId): CaseSale
     {
-        if ($caseSale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
-            return $caseSale;
+        if (!$caseSale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
+             $caseSale = new CaseSale();
+             $caseSale->css_cs_id = $csId;
+             $caseSale->css_sale_id = $saleId;
         }
-        return new CaseSale();
+        return $caseSale;
     }
 }
