@@ -378,7 +378,7 @@ class CasesSaleService
             return [];
         }
         try {
-            $response = BackOffice::sendRequest2('cs/search', $params, 'POST', 90);
+            $response = BackOffice::sendRequest2('cs/search', $params, 'POST', 120);
 
             if ($response->isOk) {
                 $result = $response->data;
@@ -398,24 +398,21 @@ class CasesSaleService
     /**
      * @param int $sale_id
      * @return array|mixed
+     * @throws \yii\base\InvalidConfigException
      */
     public function detailRequestToBackOffice(int $sale_id)
     {
-        try {
-            $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id], 'POST', 90);
+        $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id], 'POST', 120);
 
-            if ($response->isOk) {
-                $result = $response->data;
-                if ($result && is_array($result)) {
-                    return $result;
-                }
-            } else {
-                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+        if ($response->isOk) {
+            $result = $response->data;
+            if ($result && is_array($result)) {
+                return $result;
             }
-        } catch (\Throwable $exception) {
-            \Yii::error(VarDumper::dumpAsString($exception), 'CasesSaleService:detailRequestToBackOffice');
+        } else {
+            throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
         }
-        return [];
+        throw new \RuntimeException('BO request failed:detailRequestToBackOffice');
     }
 
     /**
@@ -445,6 +442,7 @@ class CasesSaleService
      */
     public function createSale(int $csId, array $saleData)
     {
+        $transaction = Yii::$app->db->beginTransaction();
         try {
             if (($case = Cases::findOne($csId)) && isset($saleData['saleId'])) {
 
@@ -460,16 +458,20 @@ class CasesSaleService
 
                 if(!$caseSale->save(false)) {
                     \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:create');
-                    return null;
+                    throw new \RuntimeException('Error. CaseSale not saved.');
                 }
                 $refreshSaleData = $this->detailRequestToBackOffice($saleData['saleId']);
                 $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
+                $transaction->commit();
+
             } else {
                 throw new \RuntimeException('Error. Params csId and saleId is required');
             }
         } catch (\Throwable $throwable) {
+            $transaction->rollBack();
             Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
         }
+
         return $caseSale;
     }
 
