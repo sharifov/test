@@ -303,9 +303,10 @@ class CasesSaleService
      */
     public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): ?CaseSale
     {
-        if ((isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) && isset($saleData['bookingId'])) {
+        if ((isset($saleData['saleId']) && (int)$saleData['saleId'] === (int)$caseSale->css_sale_id) && isset($saleData['bookingId'])) {
+            $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
+            $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
 
-            $caseSale->css_sale_data_updated = json_encode($saleData);
             $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
             if(!$caseSale->save()) {
@@ -406,13 +407,14 @@ class CasesSaleService
 
         if ($response->isOk) {
             $result = $response->data;
-            if ($result && is_array($result)) {
+            if (is_array($result) && count($result) && array_key_exists('bookingId', $result)) {
                 return $result;
             }
+
+            throw new \RuntimeException('BO broken response:detailRequestToBackOffice: ' . VarDumper::dumpAsString($response));
         } else {
             throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
         }
-        throw new \RuntimeException('BO request failed:detailRequestToBackOffice');
     }
 
     /**
@@ -448,19 +450,20 @@ class CasesSaleService
                 $caseSale = $this->getOrCreateCaseSale($csId, $saleData['saleId']);
                 $caseSale->css_cs_id = $case->cs_id;
                 $caseSale->css_sale_id = $saleData['saleId'];
-                $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
-                $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
-                $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-                $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
-                $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
-                $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
 
-                if(!$caseSale->save(false)) {
-                    \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:create');
-                    throw new \RuntimeException('Error. CaseSale not saved.');
+                if ($refreshSaleData = $this->detailRequestToBackOffice($saleData['saleId'])) {
+                    $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
+                    $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
+                    $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+                    $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
+
+                    $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
+
+                    if(!$caseSale->save(false)) {
+                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:create');
+                        throw new \RuntimeException('Error. CaseSale not saved.');
+                    }
                 }
-                $refreshSaleData = $this->detailRequestToBackOffice($saleData['saleId']);
-                $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
                 $transaction->commit();
 
                 return $caseSale;
