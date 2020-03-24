@@ -301,7 +301,7 @@ class CasesSaleService
      * @param array $saleData
      * @return CaseSale
      */
-    public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): CaseSale
+    public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): ?CaseSale
     {
         if ((isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) && isset($saleData['bookingId'])) {
 
@@ -315,7 +315,7 @@ class CasesSaleService
             $case->updateLastAction();
             return $caseSale;
         }
-        return null;
+        throw new \RuntimeException('Error. Additional data not saved. Broken saleData params');
     }
 
 	/**
