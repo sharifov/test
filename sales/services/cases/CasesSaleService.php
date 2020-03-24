@@ -386,12 +386,14 @@ class CasesSaleService
                 if (isset($result['items']) && is_array($result['items']) && count($result['items'])) {
                     $lastSaleId = max(array_keys($result['items']));
                     return $result['items'][$lastSaleId];
+                } else {
+                    \Yii::info(VarDumper::dumpAsString(['params' => $params, 'response' => $response], 20, true),'info\CasesSaleService:emptyResponse');
                 }
             } else {
-                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 20);
             }
         } catch (\Throwable $exception) {
-            \Yii::error(VarDumper::dumpAsString($exception), 'CasesSaleService:searchRequestToBackOffice');
+            \Yii::error(VarDumper::dumpAsString($exception, 20, true),'CasesSaleService:searchRequestToBackOffice:Fail');
         }
         return [];
     }
