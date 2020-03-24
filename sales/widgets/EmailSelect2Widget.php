@@ -15,6 +15,13 @@ use yii\web\View;
  * @property int $delay
  * @property string $placeholder
  * @property string $url
+ *
+ * Ex.
+        <?= $form->field($model, 'upp_email_list_id')->widget(EmailSelect2Widget::class, [
+            'data' => $model->upp_email_list_id ? [
+                $model->upp_email_list_id => $model->emailList->el_email
+            ] : [],
+        ]) ?>
  */
 class EmailSelect2Widget extends Select2
 {
