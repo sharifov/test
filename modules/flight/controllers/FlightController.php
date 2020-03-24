@@ -172,6 +172,8 @@ class FlightController extends FController
 			['segments' => 'FlightSegmentEditForm']
 		);
 		$form = new ItineraryEditForm($flight, count($data['post']['FlightSegmentEditForm']));
+		echo '<pre>';
+		print_r($data['post']);die;
 
 		if ($form->load($data['post']) && $form->validate()) {
 			try {

@@ -143,6 +143,16 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
 								'class' => 'dropdown-item text-success btn-search-flight-quotes'
                             ]) ?>
 
+							<?= Html::a('<i class="fa fa-plus"></i> Add Quote', null, [
+								'data-url' => \yii\helpers\Url::to([
+									'/flight/flight-quote/ajax-add-quote-content'
+								]),
+								'data-flight-id' => $product->flight->fl_id,
+								'data-lead-id' => $product->pr_lead_id,
+								'data-pjax-reload-id' => $pjaxId,
+								'class' => 'dropdown-item text-success btn-add-flight-quote'
+							]) ?>
+
                             <div class="dropdown-divider"></div>
                             <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [
                                 'class' => 'dropdown-item text-warning btn-update-product',
@@ -269,6 +279,33 @@ $js = <<<JS
                 alert(response);
             } else {
                 $('#preloader').addClass('d-none');
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });
+    
+     $('body').off('click', '.btn-add-flight-quote').on('click', '.btn-add-flight-quote', function (e) {
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');          
+        let url = $(this).data('url');
+        let flightId = $(this).data('flight-id');
+        let leadId = $(this).data('lead-id');
+        let pjaxReloadId = $(this).data('pjax-reload-id');
+        let modal = $('#modal-md');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Add Quote');
+        modal.find('.modal-body').load(url, {flightId: flightId, leadId: leadId, pjaxReloadId: pjaxReloadId}, function( response, status, xhr ) {
+            $('#preloader').addClass('d-none');
+            if (status == 'error') {
+                new PNotify({
+                    'title': 'Error',
+                    'type': 'error',
+                    'text': xhr.statusText
+                })
+            } else {
                 modal.modal({
                   backdrop: 'static',
                   show: true

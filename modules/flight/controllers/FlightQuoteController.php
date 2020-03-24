@@ -2,17 +2,21 @@
 
 namespace modules\flight\controllers;
 
+use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
-use modules\flight\src\entities\flightQuotePaxPrice\FlightQuotePaxPriceQuery;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
+use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\auth\Auth;
+use sales\forms\CompositeFormHelper;
+use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use Yii;
 use modules\flight\models\FlightQuote;
@@ -33,6 +37,7 @@ use yii\filters\VerbFilter;
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteRepository $productQuoteRepository
  * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
+ * @property LeadRepository $leadRepository
  */
 class FlightQuoteController extends FController
 {
@@ -56,6 +61,10 @@ class FlightQuoteController extends FController
 	 * @var FlightQuotePaxPriceRepository
 	 */
 	private $flightQuotePaxPriceRepository;
+	/**
+	 * @var LeadRepository
+	 */
+	private $leadRepository;
 
 	/**
 	 * FlightQuoteController constructor.
@@ -66,6 +75,7 @@ class FlightQuoteController extends FController
 	 * @param FlightQuoteManageService $flightQuoteManageService
 	 * @param ProductQuoteRepository $productQuoteRepository
 	 * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
+	 * @param LeadRepository $leadRepository
 	 * @param array $config
 	 */
 	public function __construct(
@@ -76,6 +86,7 @@ class FlightQuoteController extends FController
 		FlightQuoteManageService $flightQuoteManageService,
 		ProductQuoteRepository $productQuoteRepository,
 		FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository,
+		LeadRepository $leadRepository,
 		$config = []
 	)
 	{
@@ -85,6 +96,7 @@ class FlightQuoteController extends FController
 		$this->flightQuoteManageService = $flightQuoteManageService;
 		$this->productQuoteRepository = $productQuoteRepository;
 		$this->flightQuotePaxPriceRepository = $flightQuotePaxPriceRepository;
+		$this->leadRepository = $leadRepository;
 	}
 
 	/**
@@ -377,6 +389,57 @@ class FlightQuoteController extends FController
 
 		return $this->renderAjax('partial/_quote_status_log', [
 			'flightQuote' => $flightQuote,
+		]);
+	}
+
+	public function actionAjaxAddQuoteContent(): string
+	{
+//		$leadId = Yii::$app->request->post('leadId', 0);
+		$flightId = Yii::$app->request->post('flightId', 0);
+		$pjaxReloadId = Yii::$app->request->post('pjaxReloadId', 0);
+
+		$message = null;
+
+		try {
+//			$lead = $this->leadRepository->find($leadId);
+			$flight = $this->flightRepository->find($flightId);
+
+			$data = CompositeFormHelper::prepareDataForMultiInput(
+				Yii::$app->request->post(),
+				'FlightQuoteCreateForm',
+				['prices' => 'FlightQuotePaxPriceForm']
+			);
+
+			$form = new FlightQuoteCreateForm();
+			$form->prices = FlightQuotePaxPriceHelper::getQuotePaxPriceFormCollection($flight);
+
+			echo '<pre>';print_r(($data['post']));die;
+
+			if ($form->load($data['post']) && $form->validate()) {
+				$preparedData = $this->flightQuoteManageService->prepareFlightQuoteData($form);
+
+				$this->flightQuoteManageService->create($flight, $preparedData, $form->quoteCreator);
+
+				return '<script>$("#modal-md").modal("hide");pjaxReload({container: "#'.$pjaxReloadId.'"})</script>';
+			}
+		} catch (\RuntimeException $e) {
+			if (isset($form)) {
+				$form->addError('general', $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+			}else {
+				$message = $e->getMessage();
+			}
+		} catch (NotFoundException $e) {
+			$message = $e->getMessage();
+		} catch (\Throwable $e) {
+			$message = 'Internal Server Error';
+			Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'FlightModule::FlightQuoteController::actionAjaxAddQuoteContent::Throwable');
+		}
+
+		return $this->renderAjax('partial/_add_quote_manual', [
+			'message' => $message,
+			'createQuoteForm' => $form ?? new FlightQuoteCreateForm(),
+			'flight' => $flight ?? new Flight(),
+			'pjaxReloadId' => $pjaxReloadId
 		]);
 	}
 
