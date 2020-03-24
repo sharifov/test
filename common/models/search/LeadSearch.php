@@ -3415,4 +3415,164 @@ class LeadSearch extends Lead
 
         return $dataProvider = new ArrayDataProvider($paramsData);
     }
+
+    /**
+     * @param $params
+     * @param $user Employee
+     * @return ArrayDataProvider
+     * @throws \Exception
+     */
+    public function leadFlowStats($params, $user):ArrayDataProvider
+    {
+        $this->load($params);
+        $timezone = $user->timezone;
+
+        if($this->reportTimezone == null){
+            $this->defaultUserTz = $timezone;
+        } else {
+            $timezone = $this->reportTimezone;
+            $this->defaultUserTz = $this->reportTimezone;
+        }
+        if ($this->timeTo == ""){
+            $differenceTimeToFrom  = "24:00";
+        } else {
+            if((strtotime($this->timeTo) - strtotime($this->timeFrom)) <= 0){
+                $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
+            } else {
+                $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
+            }
+        }
+        if ($this->createTimeRange != null) {
+            $dates = explode(' - ', $this->createTimeRange);
+            $hourSub = date('G', strtotime($dates[0]));
+            $timeSub = date('G', strtotime($this->timeFrom));
+
+            $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+        } else {
+            $timeSub = date('G', strtotime(date('00:00')));
+            $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00').' -2 days'), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+        }
+
+        if($this->lfOwnerId != null) {
+            $queryByOwner = " AND lf.lf_owner_id = '{$this->lfOwnerId}'";
+        } else {
+            $queryByOwner = '';
+        }
+
+        if ($this->departmentId != null) {
+            $userIdsByDepartment = UserDepartment::find()->select(['ud_user_id'])->where(['=', 'ud_dep_id', $this->departmentId])->asArray()->all();
+            $employeesFromDep = "'" . implode("', '", array_map(function ($entry) {
+                    return $entry['ud_user_id'];
+                }, $userIdsByDepartment)) . "'";
+            $queryByDepartment = " AND lf.lf_owner_id in " . "(" . $employeesFromDep .")";
+        } else {
+            $queryByDepartment = '';
+        }
+
+        if($this->userGroupId != null) {
+            $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->userGroupId])->asArray()->all();
+            $employees = "'" . implode("', '", array_map(function ($entry) {
+                    return $entry['ugs_user_id'];
+                }, $userIdsByGroup)) . "'";
+            $queryByGroup = " AND lf.lf_owner_id in " . "(" . $employees .")";
+        } else {
+            $queryByGroup = '';
+        }
+
+        if ($this->projectId != null) {
+            $queryByProject = " AND ls.project_id = {$this->projectId}";
+        } else {
+            $queryByProject = '';
+        }
+
+        if ($this->createdType != null) {
+            $queryByCreatedType = " AND ls.l_type_create = {$this->createdType}";
+        } else {
+            $queryByCreatedType = '';
+        }
+
+        $query = new Query();
+
+        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt, 
+                
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '.Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS newTotal,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Take" '. $queryByProject . $queryByCreatedType .') AS inboxLeadsTaken,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Call AutoCreated Lead" '. $queryByProject . $queryByCreatedType .') AS callLeadsTaken,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_PENDING .' AND lfw.status = '. Lead::STATUS_PROCESSING .' AND lf_description = "Lead redial" '. $queryByProject . $queryByCreatedType .') AS redialLeadsTaken,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = '. Lead::STATUS_PROCESSING .' AND ls.clone_id IS NULL '. $queryByProject . $queryByCreatedType .') AS leadsCreated,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = '. Lead::STATUS_PROCESSING .'  AND lfw.lf_description <> "Manual create" AND ls.clone_id IS NOT NULL '. $queryByProject . $queryByCreatedType .') AS leadsCloned,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND `lf_from_status_id` = '. Lead::STATUS_FOLLOW_UP .' AND lfw.status =  '. Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS followUpTotal,              
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_PROCESSING .' AND lfw.status =  '. Lead::STATUS_FOLLOW_UP . $queryByProject . $queryByCreatedType .') AS toFollowUp,                
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '. Lead::STATUS_FOLLOW_UP .' AND lfw.status = '. Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType .') AS followUpLeadsTaken,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = '.Lead::STATUS_PROCESSING.' AND lfw.status = '. Lead::STATUS_TRASH . $queryByProject . $queryByCreatedType .') AS trashLeads,    
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS soldLeads,    
+            (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS profit,    
+            (SELECT SUM(CASE WHEN ls.tips IS NOT NULL THEN ls.tips ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS tips
+                
+            FROM lead_flow AS lf WHERE lf.created ' .$between_condition. ' AND lf.lf_owner_id IS NOT NULL '. $queryByOwner . $queryByGroup . $queryByDepartment. '        
+        ']);
+
+        $query->groupBy([/*'created_date',*/ 'lf.lf_owner_id']);
+
+        $command = $query->createCommand();
+        $data = $command->queryAll();
+
+        foreach ($data as $key => $model){
+            if (
+                $model['newTotal'] == 0 &&
+                $model['inboxLeadsTaken'] == 0 &&
+                $model['callLeadsTaken'] == 0 &&
+                $model['redialLeadsTaken'] == 0 &&
+                $model['leadsCreated'] == 0 &&
+                $model['leadsCloned'] == 0 &&
+                $model['followUpTotal'] == 0 &&
+                $model['toFollowUp'] == 0 &&
+                $model['followUpLeadsTaken'] == 0 &&
+                $model['trashLeads'] == 0 &&
+                $model['soldLeads'] == 0 &&
+                $model['profit'] == 0 &&
+                $model['tips'] == 0
+            ){
+                unset($data[$key]);
+            }
+        }
+
+        $paramsData = [
+            'allModels' => $data,
+            'sort' => [
+                'defaultOrder' => [
+                    'user_id' => SORT_ASC,
+                    'created_date' => SORT_ASC
+                ],
+                'attributes' => [
+                    'user_id',
+                    'created_date',
+                    'newTotal',
+                    'inboxLeadsTaken',
+                    'callLeadsTaken',
+                    'redialLeadsTaken',
+                    'leadsCreated',
+                    'leadsCloned',
+                    'followUpTotal',
+                    'toFollowUp',
+                    'followUpLeadsTaken',
+                    'trashLeads',
+                    'soldLeads',
+                    'profit',
+                    'tips'
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ];
+
+        return $dataProvider = new ArrayDataProvider($paramsData);
+    }
 }

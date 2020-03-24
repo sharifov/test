@@ -339,4 +339,19 @@ class StatsController extends FController
             return $this->render('agent-ratings', $params);
         }
     }
+
+    public function actionLeadsStats()
+    {
+        $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->leadFlowStats($params, $user);
+
+        return $this->render('leads-stats', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
+        ]);
+    }
 }
