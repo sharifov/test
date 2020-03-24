@@ -7,6 +7,7 @@ use common\models\CaseSale;
 use Exception;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesSaleRepository;
 use Yii;
 use yii\helpers\VarDumper;
@@ -440,16 +441,15 @@ class CasesSaleService
      * @param array $saleData
      * @return CaseSale|null
      */
-    public function createSale(int $csId, array $saleData)
+    public function createSale(int $csId, array $saleData): ?CaseSale
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            if (($case = Cases::findOne($csId)) && isset($saleData['saleId'])) {
-
+            if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
                 $caseSale = $this->getOrCreateCaseSale($csId, $saleData['saleId']);
                 $caseSale->css_cs_id = $case->cs_id;
                 $caseSale->css_sale_id = $saleData['saleId'];
-                $caseSale->css_sale_data = json_encode($saleData);
+                $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
                 $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
                 $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
                 $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
@@ -464,15 +464,16 @@ class CasesSaleService
                 $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
                 $transaction->commit();
 
-            } else {
-                throw new \RuntimeException('Error. Params csId and saleId is required');
+                return $caseSale;
             }
+
+            throw new \RuntimeException('Error. Params csId and saleId is required');
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::error(VarDumper::dumpAsString($throwable), 'CasesController:create:getAndCreateSale' );
+            Yii::error(AppHelper::throwableFormatter($throwable), 'CasesSaleService:createSale:Throwable' );
         }
 
-        return $caseSale;
+        return null;
     }
 
     /**
