@@ -19,6 +19,9 @@ use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
 use Da\TwoFA\Manager;
 
+use Da\TwoFA\Service\TOTPSecretKeyUriGeneratorService;
+use Da\TwoFA\Service\QrCodeDataUriGeneratorService;
+
 /**
  * Site controller
  */
@@ -70,7 +73,13 @@ class SiteController extends FController
     public function actionMfa()
     {
         $secret = (new Manager())->generateSecretKey();
-        \yii\helpers\VarDumper::dump($secret, 10, true); exit();  /* FOR DEBUG:: must by remove */
+
+        $totpUri = (new TOTPSecretKeyUriGeneratorService('your-company', 'andrew.snake@techork.com', $secret))->run();
+        $uri = (new QrCodeDataUriGeneratorService($totpUri))->run();
+
+        return $this->render('mfa', [
+            'uri' => $uri,
+        ]);
     }
 
 
