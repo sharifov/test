@@ -17,6 +17,7 @@ use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
+use Da\TwoFA\Manager;
 
 /**
  * Site controller
@@ -33,7 +34,7 @@ class SiteController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error'],
+                        'actions' => ['login', 'error', 'mfa'],
                         'allow' => true,
                     ],
                     [
@@ -64,6 +65,12 @@ class SiteController extends FController
                 'layout' => '@frontend/themes/gentelella_v2/views/layouts/error'
             ],
         ];
+    }
+
+    public function actionMfa()
+    {
+        $secret = (new Manager())->generateSecretKey();
+        \yii\helpers\VarDumper::dump($secret, 10, true); exit();  /* FOR DEBUG:: must by remove */
     }
 
 

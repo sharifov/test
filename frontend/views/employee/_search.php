@@ -65,6 +65,10 @@ use yii\widgets\ActiveForm;
                 <?php echo $form->field($model, 'user_group_id')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '---']) ?>
             </div>
 
+            <div class="col-md-1">
+                <?php echo $form->field($model, 'twoFaEnable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '---']) ?>
+            </div>
+
             <?php // echo $form->field($model, 'status') ?>
 
             <?php // echo $form->field($model, 'last_activity') ?>
