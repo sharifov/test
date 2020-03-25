@@ -893,7 +893,7 @@ class CasesController extends FController
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
-            Yii::error($e, 'Cases:CasesController:Take');
+            //Yii::error($e, 'Cases:CasesController:Take');
         }
         return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
     }

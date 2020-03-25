@@ -4,15 +4,14 @@ namespace frontend\controllers;
 
 use sales\auth\Auth;
 use Yii;
-use sales\model\phoneList\entity\PhoneList;
-use sales\model\phoneList\entity\search\PhoneListSearch;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\search\CallLogSearch;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
-class PhoneListController extends FController
+class CallLogController extends FController
 {
     public function behaviors()
     {
@@ -32,7 +31,7 @@ class PhoneListController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new PhoneListSearch();
+        $searchModel = new CallLogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
@@ -58,10 +57,10 @@ class PhoneListController extends FController
      */
     public function actionCreate()
     {
-        $model = new PhoneList(['pl_enabled' => 1]);
+        $model = new CallLog();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->pl_id]);
+            return $this->redirect(['view', 'id' => $model->cl_id]);
         }
 
         return $this->render('create', [
@@ -79,7 +78,7 @@ class PhoneListController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->pl_id]);
+            return $this->redirect(['view', 'id' => $model->cl_id]);
         }
 
         return $this->render('update', [
@@ -102,48 +101,13 @@ class PhoneListController extends FController
     }
 
     /**
-     * @param string|null $q
-     * @param int|null $id
-     * @return Response
+     * @param $id
+     * @return CallLog
+     * @throws NotFoundHttpException
      */
-    public function actionListAjax(?string $q = null, ?int $id = null): Response
+    protected function findModel($id): CallLog
     {
-        $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
-
-        if ($q !== null) {
-            $data = PhoneList::find()->select(['id' => 'pl_id', 'text' => 'pl_phone_number'])
-                ->where(['like', 'pl_phone_number', $q])
-                ->orWhere(['pl_id' => (int)$q])
-                ->limit(20)
-                //->indexBy('id')
-                ->asArray()
-                ->all();
-
-            if ($data) {
-                foreach ($data as $n => $item) {
-                    $text = $item['text'] . ' (' . $item['id'] . ')';
-                    $data[$n]['text'] = $this->formatText($text, $q);
-                    $data[$n]['selection'] = $item['text'];
-                }
-            }
-
-            $out['results'] = $data; //array_values($data);
-        } elseif ($id > 0) {
-            $phone = PhoneList::findOne($id);
-            $out['results'] = ['id' => $id, 'text' => $phone ? $phone->pl_phone_number : '', 'selection' => $phone ? $phone->pl_phone_number : ''];
-        }
-        return $this->asJson($out);
-    }
-
-    private function formatText(string $str, string $term): string
-    {
-        $term = str_replace('+', '\+', $term);
-        return preg_replace('~' . $term . '~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
-    }
-
-    protected function findModel($id): PhoneList
-    {
-        if (($model = PhoneList::findOne($id)) !== null) {
+        if (($model = CallLog::findOne($id)) !== null) {
             return $model;
         }
 
