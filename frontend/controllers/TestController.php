@@ -85,6 +85,7 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
+use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
@@ -196,12 +197,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $lead = Lead::findOne(371222);
-
-        $w = new PhoneSelect2Widget(['model' => $lead, 'attribute' => 'id', 'pluginOptions' => ['ajax' => [
-            'url' => '//234234/234/',
-            'dataType' => 'js',
-        ],]]);
         die;
 
         $lead = Lead::findOne(371222);
