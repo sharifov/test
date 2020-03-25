@@ -91,12 +91,17 @@ class SaleController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
         $result = ['error' => '', 'status' => 0];
 
-        if (Yii::$app->request->isAjax && $sale = CaseSale::findOne(['css_sale_id' => $id])) {
-            try {
-                $sale->delete();
-                $result['status'] = 1;
-            } catch (\Throwable $throwable) {
-                $result['error'] = $throwable->getMessage();
+        if (Yii::$app->request->isAjax) {
+            $saleId = Yii::$app->request->post('sale_id');
+            $csId = Yii::$app->request->post('case_id');
+
+            if ($sale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
+                try {
+                    $sale->delete();
+                    $result['status'] = 1;
+                } catch (\Throwable $throwable) {
+                    $result['error'] = $throwable->getMessage();
+                }
             }
         }
         return $result;
