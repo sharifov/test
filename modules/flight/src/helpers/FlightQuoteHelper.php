@@ -10,11 +10,15 @@ use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 
 class FlightQuoteHelper
 {
@@ -537,9 +541,8 @@ class FlightQuoteHelper
 					$segment['layoverDuration'] = ($segment['departureDateTime']->getTimestamp() - $previewSegment['arrivalDateTime']->getTimestamp()) / 60;
 				}
 				$data[] = $segment;
-				$flightQuoteSegment = (new ItineraryDumpDTO([]))->feelByParsedreservationDump($segment);
+				$itinerary[] = (new ItineraryDumpDTO([]))->feelByParsedreservationDump($segment);
 
-				$itinerary[] = $flightQuoteSegment;
 			}
 			if ($validation) {
 				//echo sprintf('Check %d - %d - %d', $segmentCount, count($data), $operatedCnt);
@@ -552,5 +555,231 @@ class FlightQuoteHelper
 		}
 
 		return $data;
+	}
+
+	public static function parsePriceDump(string $priceDump): array
+	{
+		$explodeDump = explode("\n", $priceDump);
+		$priceRows = [];
+		$bagRows = [];
+		$validatingCarrierRow = '';
+		foreach ($explodeDump as $key => $row) {
+			$row = trim($row);
+			if (stripos($row, "«") !== false) {
+				continue;
+			}
+
+			if ((stripos($row, "JCB") !== false ||
+					stripos($row, "ADT") !== false ||
+					stripos($row, "PFA") !== false ||
+					stripos($row, "JNN") !== false ||
+					stripos($row, "CNN") !== false ||
+					stripos($row, "CBC") !== false ||
+					stripos($row, "JNF") !== false ||
+					stripos($row, "INF") !== false ||
+					stripos($row, "CBI") !== false) &&
+				stripos($row, "XT") !== false
+			) {
+				$priceRows[] = $row;
+			}
+
+			if (stripos($row, "VALIDATING CARRIER") !== false && empty($validatingCarrierRow)) {
+				$row = str_replace("VALIDATING CARRIER - ", "", $row);
+				$validating = explode(' ', $row);
+				$validatingCarrierRow = $validating[0];
+			}
+
+			if (stripos($row, "BAG ALLOWANCE") !== false) {
+				$bagRows[] = self::getBagString($explodeDump, $key);
+			}
+		}
+
+		$prices = [];
+		foreach ($priceRows as $row) {
+			if (stripos($row, "JCB") !== false ||
+				stripos($row, "ADT") !== false ||
+				stripos($row, "PFA") !== false
+			) {
+				if (empty($prices[FlightPax::PAX_ADULT])) {
+					$prices[FlightPax::PAX_ADULT] = self::getPrice($row);
+				}
+			} elseif (stripos($row, "JNN") !== false ||
+				stripos($row, "CNN") !== false ||
+				stripos($row, "CBC") !== false
+			) {
+				if (empty($prices[FlightPax::PAX_CHILD])) {
+					$prices[FlightPax::PAX_CHILD] = self::getPrice($row);
+				}
+			} elseif (stripos($row, "JNF") !== false ||
+				stripos($row, "INF") !== false ||
+				stripos($row, "CBI") !== false
+			) {
+				if (empty($prices[FlightPax::PAX_INFANT])) {
+					$prices[FlightPax::PAX_INFANT] = self::getPrice($row);
+				}
+			}
+		}
+
+		return [
+			'validating_carrier' => $validatingCarrierRow,
+			'prices' => $prices,
+			'baggage' => $bagRows
+		];
+	}
+
+	private static function getBagString($array, $index): array
+	{
+		$bags = [];
+		foreach ($array as $key => $val) {
+			$val = trim($val);
+			if ($key < $index) {
+				continue;
+			}
+			if (stripos($val, "BAG ALLOWANCE") !== false && $key > $index){
+				break;
+			}
+			$bags[] = $val;
+			if (stripos($val, "**") !== false) {
+				if (!isset($array[($key + 1)]) || stripos($array[($key + 1)], "2NDCHECKED") === false) {
+					break;
+				}
+			}
+		}
+
+		$bagsString = explode('2NDCHECKED', trim(implode(' ', $bags)));
+		$bags = [
+			'segment' => '',
+			'free_baggage' => [],
+			'paid_baggage' => []
+		];
+
+		foreach ($bagsString as $key => $val) {
+			$val = str_replace('*', '', $val);
+			$detail = explode('-', $val);
+
+			if (stripos($val, "BAG ALLOWANCE") !== false) {
+				$bags['segment'] = $detail[1];
+				if (stripos($val, "NIL/") !== false ||
+					stripos($val, "*/") !== false
+				) {
+					if (stripos($val, "1STCHECKED") !== false) {
+						$bagsString = explode('1STCHECKED', $val);
+						$detailBag = explode('/', $bagsString[1]);
+						if (stripos($detailBag[0], "USD") !== false) {
+							$bagItem = [
+								'ordinal' => '1st',
+								'piece' => 1,
+								'weight' => 'N/A',
+								'height' => 'N/A',
+								'price' => explode('-', $detailBag[0])[2],
+							];
+							$detailVolume = explode('UP TO', $bagsString[1]);
+							if (isset($detailVolume[1])) {
+								$bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
+							}
+							if (isset($detailVolume[2])) {
+								$bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+							}
+							$bags['paid_baggage'][] = $bagItem;
+						}
+					}
+				} else {
+
+					$detailBag = explode('/', $detail[2]);
+					$bags['free_baggage'] = [
+						'piece' => (int)str_replace('P', '', $detailBag[0]),
+						'weight' => 'N/A',
+						'height' => 'N/A',
+						'price' => 'USD0'
+					];
+					$detailVolume = explode('UP TO', $detail[2]);
+					if (isset($detailVolume[1])) {
+						$bags['free_baggage']['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
+					}
+					if (isset($detailVolume[2])) {
+						$bags['free_baggage']['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+					}
+				}
+			} else {
+				$detailBag = explode('/', $detail[2]);
+				if (stripos($detailBag[0], "USD") !== false) {
+					$bagItem = [
+						'ordinal' => '2nd',
+						'piece' => 1,
+						'weight' => 'N/A',
+						'height' => 'N/A',
+						'price' => $detailBag[0],
+					];
+
+					$detailVolume = explode('UP TO', $detail[2]);
+					if (isset($detailVolume[1])) {
+						$bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
+					}
+					if (isset($detailVolume[2])) {
+						$bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+					}
+					$bags['paid_baggage'][] = $bagItem;
+				}
+
+			}
+		}
+		return $bags;
+	}
+
+	private static function getPrice($string): array
+	{
+		$arr = [
+			'fare' => 0,
+			'taxes' => 0,
+		];
+		$rows = explode(' ', $string);
+		foreach ($rows as $row) {
+			if (stripos($row, "XT") !== false) {
+				$arr['taxes'] = (float)str_replace('XT', '', $row);
+			}
+		}
+		$lastRow = end($rows);
+		if (stripos($lastRow, "USD") !== false) {
+			$lastRow = str_replace('USD', '', $lastRow);
+			$arr['fare'] = (float)substr($lastRow, 0, -2) - $arr['taxes'];
+		}
+		return $arr;
+	}
+
+	public static function quoteCalculatePaxPrices(FlightQuoteCreateForm $model): void
+	{
+		$oldPrices = unserialize($model->oldPrices);
+		foreach ($oldPrices as $oldPrice) {
+			foreach ($model->prices as $newPrice) {
+				if ((int)$oldPrice['paxCodeId'] === (int)$newPrice->paxCodeId) {
+					if ((float)$oldPrice['selling'] !== (float)$newPrice->selling) {
+						$newPrice->markup += ($newPrice->selling - $oldPrice['selling']);
+					} elseif ((float)$oldPrice['net'] !== (float)$newPrice->net) {
+						$newPrice->fare += ($newPrice->net - $oldPrice['net']);
+						$newPrice->markup = $newPrice->selling - $newPrice->net;
+						if ($newPrice->fare < 0) {
+							$newPrice->taxes += $newPrice->fare;
+							$newPrice->fare = 0;
+						}
+						$newPrice->selling = $newPrice->net + $newPrice->markup;
+					} else {
+						if ($newPrice->fare >= $newPrice->net) {
+							$newPrice->net = $newPrice->fare + $newPrice->taxes;
+						} else {
+							$newPrice->taxes = $newPrice->net - $newPrice->fare;
+						}
+						$newPrice->selling = $newPrice->net + $newPrice->markup;
+					}
+					$newPrice->selling = ($newPrice->selling < 0)
+						? 0 : $newPrice->selling;
+
+					$serviceFee = ProductQuoteHelper::roundPrice($newPrice->selling * $model->serviceFee / 100);
+					$newPrice->selling = ProductQuoteHelper::roundPrice( ($newPrice->selling + $serviceFee) * $newPrice->cnt);
+					$newPrice->clientSelling = ProductQuoteHelper::roundPrice($newPrice->selling * $model->currencyRate);
+				}
+			}
+		}
+
+		$model->oldPrices = serialize(ArrayHelper::toArray($model->prices));
 	}
 }

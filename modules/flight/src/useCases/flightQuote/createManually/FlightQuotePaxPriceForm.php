@@ -45,6 +45,11 @@ class FlightQuotePaxPriceForm extends Model
 	public $cnt;
 
 	/**
+	 * @var float
+	 */
+	public $clientSelling;
+
+	/**
 	 * @var int
 	 */
 	public $paxCodeId;
@@ -56,6 +61,7 @@ class FlightQuotePaxPriceForm extends Model
 		$this->fare = 0.00;
 		$this->taxes = 0.00;
 		$this->markup = 0.00;
+		$this->clientSelling = 0.00;
 		$this->paxCode = $paxCode;
 		$this->paxCodeId = $paxCodeId;
 		$this->cnt = $cnt;
@@ -66,8 +72,9 @@ class FlightQuotePaxPriceForm extends Model
 	{
 		return [
 			[['paxCode'], 'string'],
-			[['selling', 'net', 'fare', 'taxes', 'markup'], 'filter', 'filter' => 'floatval'],
-			[['selling', 'net', 'fare', 'taxes', 'markup'], 'number', 'max' => self::MAX_DECIMAL_VAL, 'min' => self::MIN_DECIMAL_VAL],
+			[['selling', 'net', 'fare', 'taxes', 'markup', 'clientSelling'], 'filter', 'filter' => 'floatval'],
+			[['selling', 'net', 'fare', 'markup', 'clientSelling'], 'number', 'max' => self::MAX_DECIMAL_VAL, 'min' => self::MIN_DECIMAL_VAL],
+			[['taxes'], 'number', 'max' => self::MAX_DECIMAL_VAL, 'min' => 0.01],
 			[['paxCodeId'], 'integer'],
 			[['paxCodeId'], 'in', 'range' => FlightPax::getPaxListId()],
 			[['paxCode'], 'in', 'range' => FlightPax::getPaxList()],

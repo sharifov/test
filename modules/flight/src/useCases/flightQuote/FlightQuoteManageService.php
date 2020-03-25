@@ -189,10 +189,10 @@ class FlightQuoteManageService
 		});
 	}
 
-	public function prepareFlightQuoteData(FlightQuoteCreateForm $form)
+	public function prepareFlightQuoteData(FlightQuoteCreateForm $form): array
 	{
 		$quote = [
-			'key' => null,
+			'key' => FlightQuoteHelper::generateHashQuoteKey(uniqid('quote_', true)),
 			'gds' => $form->gds,
 			'pcc' => $form->pcc,
 			'validatingCarrier' => $form->validatingCarrier,
@@ -201,7 +201,8 @@ class FlightQuoteManageService
 			'cabin' => $form->cabin,
 			'currency' => 'USD',
 			'recordLocator' => $form->recordLocator,
-			'passengers' => []
+			'passengers' => [],
+			'pricingInfo' => $form->parsedPricingInfo
 		];
 		/** @var $price FlightQuotePaxPriceForm */
 		foreach ($form->prices as $price) {
@@ -220,9 +221,6 @@ class FlightQuoteManageService
 			'segments' => $itinerary,
 			'duration' => @array_sum(ArrayHelper::getColumn($itinerary, 'duration'))
 		];
-
-		echo '<pre>';
-		print_r($form->prices);die;
 
 		return $quote;
 	}

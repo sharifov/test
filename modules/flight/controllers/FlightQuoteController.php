@@ -397,6 +397,7 @@ class FlightQuoteController extends FController
 //		$leadId = Yii::$app->request->post('leadId', 0);
 		$flightId = Yii::$app->request->post('flightId', 0);
 		$pjaxReloadId = Yii::$app->request->post('pjaxReloadId', 0);
+		$action = Yii::$app->request->post('action', 0);
 
 		$message = null;
 
@@ -410,18 +411,24 @@ class FlightQuoteController extends FController
 				['prices' => 'FlightQuotePaxPriceForm']
 			);
 
-			$form = new FlightQuoteCreateForm();
-			$form->prices = FlightQuotePaxPriceHelper::getQuotePaxPriceFormCollection($flight);
+			$form = new FlightQuoteCreateForm($flight, Auth::id());
 
-			echo '<pre>';print_r(($data['post']));die;
+			if ($form->load($data['post'])) {
+				if (empty($action) && $form->validate()) {
+					$preparedData = $this->flightQuoteManageService->prepareFlightQuoteData($form);
+					$this->flightQuoteManageService->create($flight, $preparedData, $form->quoteCreator);
+					return '<script>createNotify("Quote created", "Quote successfully created", "success"); $("#modal-lg").modal("hide");pjaxReload({container: "#'.$pjaxReloadId.'"})</script>';
+				}
 
-			if ($form->load($data['post']) && $form->validate()) {
-				$preparedData = $this->flightQuoteManageService->prepareFlightQuoteData($form);
-
-				$this->flightQuoteManageService->create($flight, $preparedData, $form->quoteCreator);
-
-				return '<script>$("#modal-md").modal("hide");pjaxReload({container: "#'.$pjaxReloadId.'"})</script>';
+				if ($action === FlightQuoteCreateForm::ACTION_APPLY_PRICING_INFO) {
+					$dump = FlightQuoteHelper::parsePriceDump($form->pricingInfo);
+					$form->updateDataByPricingDump($dump);
+					FlightQuoteHelper::quoteCalculatePaxPrices($form);
+				} elseif ($action === FlightQuoteCreateForm::ACTION_CALCULATE_PRICES) {
+					FlightQuoteHelper::quoteCalculatePaxPrices($form);
+				}
 			}
+
 		} catch (\RuntimeException $e) {
 			if (isset($form)) {
 				$form->addError('general', $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
