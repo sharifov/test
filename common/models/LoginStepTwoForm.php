@@ -35,16 +35,26 @@ class LoginStepTwoForm extends Model
         ];
     }
 
+
     /**
-     * @return bool|int
+     * @param $attribute
+     * @param $params
      * @throws \Da\TwoFA\Exception\InvalidCharactersException
      * @throws \Da\TwoFA\Exception\InvalidSecretKeyException
      */
-    private function validateKey()
+    public function validateKey($attribute, $params): void
     {
-        return (new Manager())
+        if (!$this->hasErrors()) {
+            $valid = (new Manager())
                 ->setCycles($this->twoFactorAuthCycles)
                 ->verify($this->secret_key, $this->twoFactorAuthKey);
+
+            \yii\helpers\VarDumper::dump(['validateKey' => $valid], 10, true); exit();  /* FOR DEBUG:: must by remove */
+
+            if (!$valid) {
+                $this->addError($attribute, 'Incorrect secret key.');
+            }
+        }
     }
 
     /**

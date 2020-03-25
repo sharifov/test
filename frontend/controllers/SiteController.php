@@ -120,23 +120,18 @@ class SiteController extends FController
 
         $model = new LoginForm();
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
+            if ($twoFactorAuth && $user->userProfile->is2faEnable()) {
+                $session = Yii::$app->session;
+                $session->set('two_factor_email', $user->email);
+                $session->set('two_factor_key', (new Manager())->generateSecretKey());
+                $session->set('two_factor_remember_me', $model->rememberMe);
+                return $this->redirect(['site/step-two']);
 
-            if ($twoFactorAuth) {
-                if ($user = $model->checkedUser()) {
+            }
 
-                    /* TODO:: add logic if not 2FA in profil */
-
-                    $session = Yii::$app->session;
-                    $session->set('two_factor_email', $user->email);
-                    $session->set('two_factor_key', (new Manager())->generateSecretKey());
-                    $session->set('two_factor_remember_me', $model->rememberMe);
-                    return $this->redirect(['site/step-two']);
-                }
-            } else {
-                if ($model->login()) {
-                    return $this->goBack();
-                }
+            if ($model->login()) {
+                return $this->goBack();
             }
         }
 
@@ -147,6 +142,9 @@ class SiteController extends FController
     }
 
 
+    /**
+     * @return string|Response
+     */
     public function actionStepTwo()
     {
         if (!Yii::$app->user->isGuest) {
@@ -167,7 +165,10 @@ class SiteController extends FController
             ->setTwoFactorAuthKey($twoFactorAuthKey)
             ->setRememberMe($session->get('two_factor_remember_me'));
 
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        if ($model->load(Yii::$app->request->post())) {
+
+            \yii\helpers\VarDumper::dump($model->getErrors(), 10, true); exit();  /* FOR DEBUG:: must by remove */
+
             return $this->goHome();
         }
 
