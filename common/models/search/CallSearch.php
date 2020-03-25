@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\Employee;
 use Faker\Provider\DateTime;
 use kartik\daterange\DateRangeBehavior;
+use sales\helpers\query\QueryHelper;
 use sales\repositories\call\CallSearchRepository;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -14,6 +15,7 @@ use common\models\UserGroupAssign;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\db\Query;
+use yii\helpers\VarDumper;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
@@ -86,11 +88,11 @@ class CallSearch extends Call
         return [
             [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration',
                 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id', 'callDepId', 'userGroupId'], 'integer'],
-            [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
-                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
+            [['c_call_sid', 'c_from', 'c_to', 'c_call_status', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_recording_url', 'c_recording_sid', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createTimeStart', 'createTimeEnd'], 'safe'],
             [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
-            [['reportTimezone', 'timeFrom', 'timeTo'], 'string']
+            [['reportTimezone', 'timeFrom', 'timeTo'], 'string'],
         ];
     }
 
@@ -142,6 +144,7 @@ class CallSearch extends Call
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
+            $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalidModel($this, static::class . 'search' . $user->id, $query, 60));
             return $dataProvider;
         }
 
@@ -213,6 +216,8 @@ class CallSearch extends Call
             ->andFilterWhere(['like', 'c_recording_url', $this->c_recording_url])
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
+
+        $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'search' . $user->id, $query, 60));
 
         return $dataProvider;
     }

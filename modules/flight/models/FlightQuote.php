@@ -4,6 +4,7 @@ namespace modules\flight\models;
 
 use common\models\Airline;
 use common\models\Employee;
+use modules\flight\models\behaviors\FlightQuoteFqUid;
 use modules\flight\src\entities\flightQuote\events\FlightQuoteCloneCreatedEvent;
 use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -13,6 +14,7 @@ use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use modules\flight\src\entities\flightQuote\Scopes;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "flight_quote".
@@ -40,6 +42,7 @@ use modules\flight\src\entities\flightQuote\Scopes;
  * @property string|null $fq_origin_search_data
  * @property string|null $fq_last_ticket_date
  * @property string|null $fq_request_hash
+ * @property string|null $fq_uid
  *
  * @property Employee $fqCreatedUser
  * @property Flight $fqFlight
@@ -164,9 +167,8 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_gds_pcc'], 'string', 'max' => 10],
             [['fq_cabin_class'], 'string', 'max' => 1],
             [['fq_created_expert_name'], 'string', 'max' => 20],
-
+            [['fq_uid'], 'string', 'max' => 50],
             [['fq_hash_key'], 'unique', 'targetAttribute' => ['fq_flight_id', 'fq_hash_key'] , 'message' => 'Flight already have this quote;', 'skipOnEmpty' => true],
-
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
@@ -202,7 +204,21 @@ class FlightQuote extends ActiveRecord implements Quotable
             'fq_origin_search_data' => 'Origin Search Data',
             'fq_last_ticket_date' => 'Last Ticket Date',
             'fq_request_hash' => 'Request Hash',
+            'fq_uid' => 'Uid',
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'fq_uid' => [
+                'class' => FlightQuoteFqUid::class,
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

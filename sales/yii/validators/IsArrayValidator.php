@@ -6,7 +6,7 @@ use yii\validators\Validator;
 
 class IsArrayValidator extends Validator
 {
-    public function validateAttribute($model, $attribute)
+    public function validateAttribute($model, $attribute): void
     {
         $value = $model->$attribute;
         if (!is_array($value)) {

@@ -3,14 +3,17 @@
 namespace common\components;
 
 
+use common\components\jobs\CreateSaleFromBOJob;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
+use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesManageService;
+use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
@@ -32,6 +35,7 @@ use yii\web\UnprocessableEntityHttpException;
  * @package common\components
  *
  * @property EmailService
+ * @property CasesSaleService $casesSaleService
  */
 class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 {
@@ -39,6 +43,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 	 * @var EmailService
 	 */
 	private $emailService;
+	private $casesSaleService;
 
 	public $last_email_id = 0;
 
@@ -62,6 +67,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
         try {
         	$this->emailService = Yii::createObject(EmailService::class);
+        	$this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
             if ((int)$this->last_email_id < 1) {
                 \Yii::error('Not found last_email_id (' . $this->last_email_id . ')', 'ReceiveEmailsJob:execute');
@@ -204,6 +210,15 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //                        }
                         if ($email->e_case_id) {
                             (Yii::createObject(CasesManageService::class))->needAction($email->e_case_id);
+
+                            try {
+                                $job = new CreateSaleFromBOJob();
+                                $job->case_id = $email->e_case_id;
+                                $job->email = $email->e_email_from;
+                                Yii::$app->queue_job->priority(100)->push($job);
+                            } catch (\Throwable $throwable) {
+                                Yii::error(AppHelper::throwableFormatter($throwable), 'ReceiveEmailsJob:addToJobFailed');
+                            }
                         }
 
                         $countTotal++;
@@ -227,10 +242,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
             if ($userArray) {
                 foreach ($userArray as $user_id) {
-                    Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true);
-                    // Notifications::socket($user_id, null, 'getNewNotification', [], true);
-
-                    Notifications::sendSocket('getNewNotification', ['user_id' => $user_id]);
+                    if ($ntf = Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true)) {
+                        // Notifications::socket($user_id, null, 'getNewNotification', [], true);
+                        Notifications::sendSocket('getNewNotification', ['user_id' => $user_id]);
+                    }
                 }
             }
 

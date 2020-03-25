@@ -3,6 +3,7 @@
 namespace common\models;
 
 
+use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -86,6 +87,34 @@ class Airport extends ActiveRecord
     public function getCityName(): string
     {
         return $this->city;
+    }
+
+    /**
+     * @param int $duration
+     * @return array
+     */
+    public static function getIataList(int $duration = 5 * 60): array
+    {
+        return Yii::$app->cacheFile->getOrSet(__FUNCTION__, static function () {
+            return ArrayHelper::map(
+                self::find()->select(['iata'])->distinct()->orderBy(['iata' => SORT_ASC])->all(),
+                'iata', 'iata'
+            );
+        }, $duration);
+    }
+
+    /**
+     * @param int $duration
+     * @return array
+     */
+    public static function getCountryList(int $duration = 5 * 60): array
+    {
+        return Yii::$app->cacheFile->getOrSet(__FUNCTION__, static function () {
+            return ArrayHelper::map(
+                self::find()->select(['country'])->distinct()->orderBy(['country' => SORT_ASC])->all(),
+                'country', 'country'
+            );
+        }, $duration);
     }
 
 }

@@ -1,11 +1,12 @@
 <?php
 
+use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model sales\forms\cases\CasesUpdateForm */
+/* @var $model UpdateInfoForm */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $categoryList [] */
 ?>
@@ -13,7 +14,7 @@ use yii\widgets\Pjax;
 <div class="cases-change-status">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['cases/ajax-update', 'gid' => $model->caseGid],
+        'action' => ['/cases/ajax-update', 'gid' => $model->getCaseGid()],
         'method' => 'post',
         'options' => ['data-pjax' => true]
     ]); ?>
@@ -22,7 +23,9 @@ use yii\widgets\Pjax;
         echo $form->errorSummary($model);
     ?>
 
-    <?= $form->field($model, 'category')->dropDownList($categoryList, ['prompt' => '-']) ?>
+    <?= $form->field($model, 'categoryId')->dropDownList($model->getCategoryList(), ['prompt' => '-']) ?>
+
+    <?= $form->field($model, 'orderUid')->textInput(['maxlength' => 7]) ?>
 
     <?= $form->field($model, 'subject')->textInput(['maxlength' => true]) ?>
 

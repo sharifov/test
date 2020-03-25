@@ -1568,6 +1568,11 @@ class Lead extends ActiveRecord implements Objectable
         $this->recordEvent(new LeadDuplicateDetectedEvent($this));
     }
 
+    public function setVisitorLog(int $logId): void
+    {
+        $this->l_visitor_log_id = $logId;
+    }
+
     /**
      * @return bool
      */
@@ -1679,6 +1684,8 @@ class Lead extends ActiveRecord implements Objectable
             'l_dep_id' => 'Department ID',
             'l_delayed_charge' => 'Delayed charge',
             'hybrid_uid' => 'Booking ID',
+
+            'l_visitor_log_id' => 'Visitor log ID',
         ];
     }
 
@@ -2665,9 +2672,11 @@ Reason: {reason}
 
                     //Notifications::create()
 
-                    $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
-                    // Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                    Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                    if ($ntf = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+                        $isSend = true;
+                        // Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                        Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                    }
 
 
                     if (!$isSend) {

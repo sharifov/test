@@ -84,10 +84,12 @@ class CallService
             ($upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $internalPhoneNumber])->limit(1)->one())
             && ($user = $upp->uppUser)
         ) {
-            Notifications::create($user->id, 'Declined Call',
+            if ($ntf = Notifications::create($user->id, 'Declined Call',
                 'Declined Call Id: ' . $call->c_id . ' Reason: Blacklisted',
-                Notifications::TYPE_WARNING, true);
-            Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                Notifications::TYPE_WARNING, true)
+            ) {
+                Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+            }
         }
 
         throw new CallDeclinedException('Declined Call Id: ' . $call->c_id . '. Reason: Blacklisted');

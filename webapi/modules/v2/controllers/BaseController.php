@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\models\ApiUser;
 use webapi\src\behaviors\HttpBasicAuth;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\logger\behaviors\TechnicalInfoBehavior;
@@ -16,10 +17,13 @@ use yii\web\Response;
 /**
  * Class BaseController
  *
+ * @property ApiUser $auth
  * @property ApiLogger $logger
  */
 class BaseController extends Controller
 {
+    public $auth;
+
     private $logger;
 
     public function __construct($id, $module, ApiLogger $logger, $config = [])

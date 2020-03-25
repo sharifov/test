@@ -18,13 +18,14 @@ use yii\widgets\Pjax;
 
     <div class="row">
         <div class="col-md-3">
+            <?= $form->errorSummary($model) ?>
+
             <?= $form->field($model, 'otup_order_id')->input('number', ['step' => 1]) ?>
 
             <?= $form->field($model, 'otup_user_id')->dropDownList(Employee::getList(), ['prompt' => '---']) ?>
 
             <?= $form->field($model, 'otup_percent')->input('number', ['step' => 1, 'maxlength' => true, 'max' => OrderTipsUserProfit::MAX_PERCENT, 'min' => OrderTipsUserProfit::MIN_PERCENT]) ?>
 
-            <?= $form->field($model, 'otup_amount')->input('number', ['maxlength' => true, 'step' => 0.01]) ?>
         </div>
     </div>
 

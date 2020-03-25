@@ -37,6 +37,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
+use frontend\widgets\notification\NotificationWidget;
 use modules\hotel\HotelModule;
 use modules\lead\src\entities\lead\LeadQuery;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -71,7 +72,7 @@ use sales\cache\app\AppCache;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
@@ -97,7 +98,7 @@ use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
-use sales\repositories\cases\CasesStatusLogRepository;
+use sales\repositories\cases\CaseStatusLogRepository;
 use sales\repositories\lead\LeadBadgesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
@@ -194,14 +195,35 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $lead = Lead::findOne(371172);
+
+        $lead = Lead::findOne(371222);
         $repo = Yii::createObject(LeadRepository::class);
-        $lead->followUp();
         $lead->processing(295);
         $lead->followUp(294);
+        $lead->followUp(295);
         $repo->save($lead);
         die;
         return $this->render('blank');
+    }
+
+    public function actionTestNew()
+    {
+        $n = new Notifications([
+            'n_user_id' => 295,
+            'n_title' => '1',
+            'n_message' => '2',
+            'n_popup' => 1,
+            'n_new' => 1,
+            'n_type_id' => 3,
+        ]);
+        if (!$n->save()) {
+            VarDumper::dump($n->getErrors());
+        }
+        Notifications::sendSocket('getNewNotification', ['user_id' => 295] );
+        die;
+
+        $userId = 295;
+        Notifications::sendSocket('getNewNotification', ['user_id' => $userId]);
     }
 
     private function getPathForTable($actions, $controller, &$batchTmpTableItem, &$batchTmpTableItemChild, $role)
@@ -1126,45 +1148,21 @@ class TestController extends FController
 
     public function actionZ()
     {
-        $lead = Lead::findOne(370872);
+        $a = [
+            'saleId' => 263202,
+            /*'itinerary' => [
+                0 => [
+                    'segments' => [
+                        0 => [
+                            'segmentId' => 1398032,
+                            'airline' => 'BA'
+                        ]
+                    ]
+                ]
+            ]*/
+        ];
 
-        $response = new SuccessResponse(
-            new DataMessage(
-                new LeadCreateMessage(
-                    new LeadCreateValue([
-                        'id' => $lead->id,
-                        'uid' => $lead->uid,
-                        'gid' => $lead->gid,
-                        'client_id' => $lead->client_id,
-                        'client' => [
-                            'uuid' => $lead->client->uuid,
-                            'client_id' => $lead->client_id,
-                            'first_name' => $lead->client->first_name,
-                            'middle_name' => $lead->client->middle_name,
-                            'last_name' => $lead->client->last_name,
-                            'phones' => $lead->client->getClientPhonesByType(
-                                [
-                                    null,
-                                    ClientPhone::PHONE_VALID,
-                                    ClientPhone::PHONE_NOT_SET,
-                                    ClientPhone::PHONE_FAVORITE,
-                                ]
-                            ),
-                            'emails' => $lead->client->getClientEmailsByType(
-                                [
-                                    null,
-                                    ClientEmail::EMAIL_NOT_SET,
-                                    ClientEmail::EMAIL_FAVORITE,
-                                    ClientEmail::EMAIL_VALID,
-                                ]
-                            ),
-                        ],
-                    ])
-                )
-            )
-        );
-
-        \yii\helpers\VarDumper::dump($response, 10, true); exit();  /* FOR DEBUG:: must by remove */
+        \yii\helpers\VarDumper::dump((isset($a['itinerary'][0]['segments'])), 10, true); exit();  /* FOR DEBUG:: must by remove */
     }
 
 }

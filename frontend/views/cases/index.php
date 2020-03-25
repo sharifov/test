@@ -1,10 +1,11 @@
 <?php
 
+use common\models\CaseSale;
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
-use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CaseCategory;
 use sales\yii\grid\cases\CasesSourceTypeColumn;
 use sales\yii\grid\cases\CasesStatusColumn;
 use yii\helpers\Html;
@@ -113,11 +114,11 @@ $gridId = 'cases-grid-id';
                 'filter' => EmployeeDepartmentAccess::getDepartments()
             ],
             [
-                'attribute' => 'cs_category',
+                'attribute' => 'cs_category_id',
                 'value' => static function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-                'filter' => CasesCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
+                'filter' => CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
             ],
             [
                     'class' => CasesStatusColumn::class,
@@ -130,7 +131,12 @@ $gridId = 'cases-grid-id';
                 'class' => \sales\yii\grid\cases\NeedActionColumn::class,
                 'attribute' => 'cs_need_action',
             ],
-            'cs_subject',
+            [
+                'attribute' => 'cs_subject',
+                'contentOptions' => [
+                    'style' => 'word-break: break-all; white-space:normal'
+                ]
+            ],
             [
                 'attribute' => 'cs_user_id',
                 'value' => static function (Cases $model) {
@@ -147,6 +153,9 @@ $gridId = 'cases-grid-id';
                 'filter' => false
             ],
             [
+                'attribute' => 'cs_order_uid',
+            ],
+            [
                 'attribute' => 'cs_created_dt',
                 'value' => static function (Cases $model) {
                     return $model->cs_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
@@ -160,7 +169,28 @@ $gridId = 'cases-grid-id';
                 },
                 'format' => 'raw'
             ],
-
+            [
+                'label' => 'Sale info',
+                'value' => static function (Cases $model) {
+                    $out = '';
+                    if ($model->caseSale) {
+                        foreach ($model->caseSale as $caseSale) {
+                            /** @var CaseSale $caseSale */
+                            $out .= Html::a('[' . $caseSale->css_sale_id . ']',
+                                ['sale/view', 'h' => base64_encode($caseSale->css_sale_book_id . '|' . $caseSale->css_sale_id)]) . '<br />';
+                            $out .= $caseSale->css_charged ? 'Selling price: ' . $caseSale->css_charged . '<br />' : '';
+                            $out .= $caseSale->css_profit ? 'Profit: ' . $caseSale->css_profit . '<br />' : '';
+                            $out .= $caseSale->css_out_date ? 'Out : <i class="fa fa-calendar"></i> ' .
+                                Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_out_date)) . '<br />' : '';
+                            $out .= $caseSale->css_in_date ? 'In : <i class="fa fa-calendar"></i> ' .
+                                Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_in_date)) . '<br />' : '';
+                            $out .= '<hr />';
+                        }
+                    }
+                    return $out;
+                },
+                'format' => 'raw'
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
