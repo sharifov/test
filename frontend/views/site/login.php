@@ -7,6 +7,7 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\LoginForm;
+use yii\helpers\Url;
 
 ?>
 
@@ -61,6 +62,43 @@ use common\models\LoginForm;
         </div>
 
     </div>
+
+    <?php
+        $loginAjaxUrl = Url::to(['site/login-step-one']);
+
+    $js =<<<JS
+    $('.cancel-call-btn').click(function (e) {
+       if (confirm('The call will be canceled. Proceed?')) {
+            $.ajax({
+                type: 'post',
+                url: '{$loginAjaxUrl}',
+                data: {id: {$callId}}
+            })
+            .done(function(data) {
+                $('#call-box-modal').modal('toggle');
+                obj = new Object();
+                obj.id = {$callId};
+                obj.status = {$cancelStatus};
+                refreshCallBox(obj);
+                if (data.success) {
+                    new PNotify({title: "Call status", type: "success", text: 'Success', hide: true});
+                } else {
+                   let text = 'Error. Try again later';
+                   if (data.message) {
+                       text = data.message;
+                   }
+                   new PNotify({title: "Call status", type: "error", text: text, hide: true});
+                }
+            })
+            .fail(function() {
+                new PNotify({title: "Call status", type: "error", text: 'Try again later.', hide: true});
+            })
+       }
+    });
+    JS;
+    $this->registerJs($js);
+
+?>
 
 
 <?php /*
