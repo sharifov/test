@@ -38,9 +38,18 @@ class CreateSaleFromBOJob extends BaseObject implements JobInterface
                 $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
                 $saleData = $this->casesSaleService->getSaleFromBo($this->order_uid, $this->email, $this->phone);
-                if (count($saleData)) {
-                    $this->casesSaleService->createSale($this->case_id, $saleData);
+                if (count($saleData) && isset($saleData['saleId'])) {
+
+                    $keyCasesSale = $this->case_id . '-' . $saleData['saleId'];
+                    $existCasesSale = Yii::$app->cache->get($keyCasesSale);
+
+                    if ($existCasesSale === false) {
+                        Yii::$app->cache->set($keyCasesSale, $keyCasesSale, 60);
+                        $this->casesSaleService->createSale($this->case_id, $saleData);
+                    }
                 }
+            } else {
+                throw new \RuntimeException('Error. Params csId and (order_uid||email||phone) is required');
             }
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CreateSaleFromBOJob:execute:catch');

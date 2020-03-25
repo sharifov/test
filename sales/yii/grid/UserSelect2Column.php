@@ -3,14 +3,10 @@
 namespace sales\yii\grid;
 
 use common\models\Employee;
-use Yii;
+use sales\widgets\UserSelect2Widget;
 use yii\base\Model;
 use yii\grid\DataColumn;
-use kartik\select2\Select2;
 use yii\helpers\Url;
-use yii\helpers\VarDumper;
-use yii\web\JsExpression;
-use yii\web\View;
 
 /**
  * Class UserSelect2Column
@@ -25,7 +21,7 @@ use yii\web\View;
  *
  * Ex.
     [
-        'class' => \sales\yii\grid\UserColumn::class,
+        'class' => \sales\yii\grid\UserSelect2Column::class,
         'attribute' => 'ugs_updated_user_id',
         'relation' => 'updatedUser',
  *      'url' => 'employee/list-ajax',
@@ -92,52 +88,24 @@ class UserSelect2Column extends DataColumn
      */
     protected function renderFilterCellContent()
     {
-
         if (is_string($this->filter)) {
             return $this->filter;
         }
 
-        $model = $this->grid->filterModel;
-
         $widgetOptions = [
-            'model' => $model,
+            'model' => $this->grid->filterModel,
             'attribute' => $this->attribute,
-            'data' => $this->data, //[$model->{$this->attribute} => 'asdasd'],
-            'theme' => Select2::THEME_KRAJEE,
+            'data' => $this->data,
             'pluginOptions' => [
-                'allowClear' => true,
                 'minimumInputLength' => $this->minimumInputLength,
                 'ajax' => [
                     'url' => $this->url,
-                    'dataType' => 'json',
-                    'data' => new JsExpression('function(params) { return {q:params.term}; }'),
                     'delay' => $this->delay
                 ],
-                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                'templateResult' => new JsExpression('formatText'),
-                //'templateResult' => new JsExpression('function(city) { return city.text; }'),
-                //'templateSelection' => new JsExpression('function (city) { return city.text; }'),
-                'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
             ],
-            'options' => ['placeholder' => $this->placeholder, 'class' => 'form-control'],
+            'options' => ['placeholder' => $this->placeholder],
         ];
 
-
-
-
-$js = <<<JS
-function formatText( data ) {
-    if (data.loading) return data.text;
-
-    let str = "<div class='select2-result-repository clearfix'>" +
-        "<div class='select2-result-repository__meta'>" +
-            "<div class='select2-result-repository__title'>" + data.text + "</div>";
-    str +=	"</div></div>";
-    return str;
-}
-JS;
-        Yii::$app->view->registerJs($js, View::POS_HEAD, 'employee/list-ajax');
-
-        return Select2::widget($widgetOptions);
+        return UserSelect2Widget::widget($widgetOptions);
     }
 }

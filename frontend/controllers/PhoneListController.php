@@ -7,6 +7,7 @@ use Yii;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\phoneList\entity\search\PhoneListSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -136,6 +137,7 @@ class PhoneListController extends FController
 
     private function formatText(string $str, string $term): string
     {
+        $term = str_replace('+', '\+', $term);
         return preg_replace('~' . $term . '~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
     }
 

@@ -146,6 +146,18 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'th-list',
             'items' => [
                 ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                [
+                    'label' => 'Call logs',
+                    'url' => 'javascript:',
+                    'icon' => 'phone',
+                    'items' => [
+                        ['label' => 'Log', 'url' => ['/call-log/index'], 'icon' => 'list'],
+                        ['label' => 'Cases', 'url' => ['/call-log-case/index'], 'icon' => 'list'],
+                        ['label' => 'Leads', 'url' => ['/call-log-lead/index'], 'icon' => 'list'],
+                        ['label' => 'Queue', 'url' => ['/call-log-queue/index'], 'icon' => 'list'],
+                        ['label' => 'Record', 'url' => ['/call-log-record/index'], 'icon' => 'list'],
+                    ],
+                ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'comments warning'],
                 ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],

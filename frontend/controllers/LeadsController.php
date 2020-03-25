@@ -174,6 +174,9 @@ class LeadsController extends FController
         //ini_set('memory_limit', '512M');
         $searchModel = new LeadSearch();
         $params = Yii::$app->request->queryParams;
+        if(Yii::$app->user->identity->canRole('supervision')) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
 
         $dataProvider = $searchModel->searchExport($params);
         $totalLeads = $dataProvider->query->count();

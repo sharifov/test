@@ -53,7 +53,7 @@ class FlightQuoteCreateDTO
 		$this->productQuoteId = $productQuote->pq_id;
 		$this->hashKey = FlightQuoteHelper::generateHashQuoteKey($quote['key']);
 		$this->serviceFeePercent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id) ?? (FlightQuote::SERVICE_FEE * 100);
-		$this->recordLocator = null;
+		$this->recordLocator = $quote['recordLocator'] ?? null;
 		$this->gds = $quote['gds'];
 		$this->gdsPcc = $quote['pcc'];
 		$this->gdsOfferId = $quote['gdsOfferId'] ?? null;
@@ -65,10 +65,10 @@ class FlightQuoteCreateDTO
 		$this->createdUserId = $userId;
 		$this->createdExpertId = null;
 		$this->createdExpertName = null;
-		$this->reservationDump = FlightQuoteHelper::getItineraryDump($quote);
-		$this->pricingInfo = json_encode($quote['prices']);
+		$this->reservationDump = FlightQuoteHelper::getItineraryDump($quote) ?? '';
+		$this->pricingInfo = !empty($quote['pricingInfo']) ? json_encode($quote['pricingInfo']) : null;
 		$this->originSearchData = json_encode($quote);
-		$this->lastTicketDate = $quote['prices']['lastTicketDate'];
+		$this->lastTicketDate = $quote['prices']['lastTicketDate'] ?? null;
 		$this->requestHash = $flight->fl_request_hash_key;
 	}
 }

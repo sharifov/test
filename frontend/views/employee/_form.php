@@ -434,8 +434,18 @@ JS;
                     //'upp_user_id',
                     //'upp_project_id',
                     'upp_email:email',
+                    [
+                        'class' => \sales\yii\grid\EmailSelect2Column::class,
+                        'attribute' => 'upp_email_list_id',
+                        'relation' => 'emailList',
+                    ],
                     //'upp_phone_number',
                     'upp_tw_phone_number',
+                    [
+                        'class' => \sales\yii\grid\PhoneSelect2Column::class,
+                        'attribute' => 'upp_phone_list_id',
+                        'relation' => 'phoneList',
+                    ],
                     [
                         'attribute' => 'upp_allow_general_line',
                         'format' => 'raw',
@@ -610,8 +620,8 @@ JS;
 $js = <<<JS
 
     $('#modal-df').on('hidden.bs.modal', function () {
-        $.pjax.reload({container:'#pjax-grid-upp'});
-        $.pjax.reload({container: "#pjax-grid-product-type"});
+        $.pjax.reload({container:'#pjax-grid-upp', 'async': false});
+        $.pjax.reload({container: "#pjax-grid-product-type", 'async': false});
         
         /*new PNotify({
             title: 'Params successfully updated',

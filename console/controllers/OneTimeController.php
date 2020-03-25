@@ -36,26 +36,58 @@ class OneTimeController extends Controller
         printf(PHP_EOL);
         $time_start = microtime(true);
 
-        foreach (UserProjectParams::find()->all() as $upp) {
+        foreach (UserProjectParams::find()->with('uppProject', 'uppDep', 'uppUser')->all() as $upp) {
+            $title = [];
+            if ($upp->uppProject) {
+                $title[] = $upp->uppProject->name;
+            }
+            if ($upp->uppDep) {
+                $title[] = $upp->uppDep->dep_name;
+            }
+            if ($upp->uppUser) {
+                $title[] = $upp->uppUser->username;
+            }
             if ($upp->upp_tw_phone_number) {
                 if (!$phoneList = PhoneList::find()->andWhere(['pl_phone_number' => $upp->upp_tw_phone_number])->one()) {
                     $phoneList = new Phonelist([
                         'pl_phone_number' => $upp->upp_tw_phone_number,
                         'pl_enabled' => true,
+                        'pl_title' => implode('-', $title),
                     ]);
                     if ($phoneList->save()) {
                         $upp->upp_phone_list_id = $phoneList->pl_id;
-                        $upp->save();
+                        if (!$upp->save()) {
+                            $report[] = VarDumper::dumpAsString([
+                                'section' => 'UserProjectParams:1',
+                                'error' => $upp->getErrors(),
+                                'model' => $upp->toArray()
+                            ]);
+                        }
                     } else {
                         $report[] = VarDumper::dumpAsString([
-                            'section' => 'UserProjectParams',
+                            'section' => 'UserProjectParams:2',
                             'error' => $phoneList->getErrors(),
                             'model' => $phoneList->toArray()
                         ]);
                     }
                 } else {
                     $upp->upp_phone_list_id = $phoneList->pl_id;
-                    $upp->save();
+                    if (!$upp->save()) {
+                        $report[] = VarDumper::dumpAsString([
+                            'section' => 'UserProjectParams:3',
+                            'error' => $upp->getErrors(),
+                            'model' => $upp->toArray()
+                        ]);
+                    } else {
+                        $phoneList->pl_title = implode('-', $title);
+                        if (!$phoneList->save()) {
+                            $report[] = VarDumper::dumpAsString([
+                                'section' => 'UserProjectParams:4',
+                                'error' => $phoneList->getErrors(),
+                                'model' => $phoneList->toArray()
+                            ]);
+                        }
+                    }
                 }
             }
             if ($upp->upp_email) {
@@ -63,66 +95,146 @@ class OneTimeController extends Controller
                     $emailList = new EmailList([
                         'el_email' => $upp->upp_email,
                         'el_enabled' => true,
+                        'el_title' => implode('-', $title),
                     ]);
                     if ($emailList->save()) {
                         $upp->upp_email_list_id = $emailList->el_id;
-                        $upp->save();
+                        if (!$upp->save()) {
+                            $report[] = VarDumper::dumpAsString([
+                                'section' => 'UserProjectParams:5',
+                                'error' => $upp->getErrors(),
+                                'model' => $upp->toArray()
+                            ]);
+                        }
                     } else {
                         $report[] = VarDumper::dumpAsString([
-                            'section' => 'UserProjectParams',
+                            'section' => 'UserProjectParams:6',
                             'error' => $emailList->getErrors(),
                             'model' => $emailList->toArray()
                         ]);
                     }
                 } else {
                     $upp->upp_email_list_id = $emailList->el_id;
-                    $upp->save();
+                    if (!$upp->save()) {
+                        $report[] = VarDumper::dumpAsString([
+                            'section' => 'UserProjectParams:7',
+                            'error' => $upp->getErrors(),
+                            'model' => $upp->toArray()
+                        ]);
+                    } else {
+                        $emailList->el_title = implode('-', $title);
+                        if (!$emailList->save()) {
+                            $report[] = VarDumper::dumpAsString([
+                                'section' => 'UserProjectParams:8',
+                                'error' => $emailList->getErrors(),
+                                'model' => $emailList->toArray()
+                            ]);
+                        }
+                    }
                 }
             }
         }
-        foreach (DepartmentPhoneProject::find()->all() as $dpp) {
+        foreach (DepartmentPhoneProject::find()->with(['dppProject', 'dppDep'])->all() as $dpp) {
             if ($dpp->dpp_phone_number) {
+                $title = [];
+                if ($dpp->dppProject) {
+                    $title[] = $dpp->dppProject->name;
+                }
+                if ($dpp->dppDep) {
+                    $title[] = $dpp->dppDep->dep_name;
+                }
                 if (!$phoneList = PhoneList::find()->andWhere(['pl_phone_number' => $dpp->dpp_phone_number])->one()) {
                     $phoneList = new Phonelist([
                         'pl_phone_number' => $dpp->dpp_phone_number,
                         'pl_enabled' => true,
+                        'pl_title' => implode('-', $title),
                     ]);
                     if ($phoneList->save()) {
                         $dpp->dpp_phone_list_id = $phoneList->pl_id;
-                        $dpp->save();
+                        if (!$dpp->save()) {
+                            $report[] = VarDumper::dumpAsString([
+                                'section' => 'DepartmentPhoneProject:1',
+                                'error' => $dpp->getErrors(),
+                                'model' => $dpp->toArray()
+                            ]);
+                        }
                     } else {
                         $report[] = VarDumper::dumpAsString([
-                            'section' => 'DepartmentPhoneProject',
+                            'section' => 'DepartmentPhoneProject:2',
                             'error' => $phoneList->getErrors(),
                             'model' => $phoneList->toArray()
                         ]);
                     }
                 } else {
                     $dpp->dpp_phone_list_id = $phoneList->pl_id;
-                    $dpp->save();
+                    if (!$dpp->save()) {
+                        $report[] = VarDumper::dumpAsString([
+                            'section' => 'DepartmentPhoneProject:3',
+                            'error' => $dpp->getErrors(),
+                            'model' => $dpp->toArray()
+                        ]);
+                    } else {
+                        $phoneList->pl_title = implode('-', $title);
+                        if (!$phoneList->save()) {
+                            $report[] = VarDumper::dumpAsString([
+                                'section' => 'DepartmentPhoneProject:4',
+                                'error' => $phoneList->getErrors(),
+                                'model' => $phoneList->toArray()
+                            ]);
+                        }
+                    }
                 }
             }
         }
         foreach (DepartmentEmailProject::find()->all() as $dep) {
             if ($dep->dep_email) {
+                $title = [];
+                if ($dep->depProject) {
+                    $title[] = $dep->depProject->name;
+                }
+                if ($dep->depDep) {
+                    $title[] = $dep->depDep->dep_name;
+                }
                 if (!$emailList = EmailList::find()->andWhere(['el_email' => $dep->dep_email])->one()) {
                     $emailList = new EmailList([
                         'el_email' => $dep->dep_email,
                         'el_enabled' => true,
+                        'el_title' => implode('-', $title),
                     ]);
                     if ($emailList->save()) {
                         $dep->dep_email_list_id = $emailList->el_id;
-                        $dep->save();
+                        if (!$dep->save()) {
+                            $report[] = VarDumper::dumpAsString([
+                                'section' => 'DepartmentEmailProject:1',
+                                'error' => $dep->getErrors(),
+                                'model' => $dep->toArray()
+                            ]);
+                        }
                     } else {
                         $report[] = VarDumper::dumpAsString([
-                            'section' => 'DepartmentEmailProject',
+                            'section' => 'DepartmentEmailProject:2',
                             'error' => $emailList->getErrors(),
                             'model' => $emailList->toArray()
                         ]);
                     }
                 } else {
                     $dep->dep_email_list_id = $emailList->el_id;
-                    $dep->save();
+                    if (!$dep->save()) {
+                        $report[] = VarDumper::dumpAsString([
+                            'section' => 'DepartmentEmailProject:3',
+                            'error' => $dep->getErrors(),
+                            'model' => $dep->toArray()
+                        ]);
+                    } else {
+                        $emailList->el_title = implode('-', $title);
+                        if (!$emailList->save()) {
+                            $report[] = VarDumper::dumpAsString([
+                                'section' => 'DepartmentEmailProject:4',
+                                'error' => $emailList->getErrors(),
+                                'model' => $emailList->toArray()
+                            ]);
+                        }
+                    }
                 }
             }
         }

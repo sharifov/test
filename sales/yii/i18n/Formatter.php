@@ -37,13 +37,52 @@ use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
+use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSourceType;
+use sales\model\callLog\entity\callLog\CallLogCategory;
+use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asCallLog($logId): string
+    {
+        if ($logId === null) {
+            return $this->nullDisplay;
+        }
+        return \yii\helpers\Html::a('log: ' . $logId, ['/call-log/view', 'id' => $logId]);
+    }
+
+    public function asCallLogStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return CallLogStatus::asFormat($value);
+    }
+
+    public function asCallLogCategory($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return CallLogCategory::asFormat($value);
+    }
+
+    public function asCallLogType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return CallLogType::asFormat($value);
+    }
+
     public function asQaTaskRating($value): string
     {
         if ($value === null) {
@@ -279,6 +318,15 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return \modules\lead\src\helpers\formatters\lead\Formatter::asLead($lead);
+    }
+
+    public function asCase(?Cases $case): string
+    {
+        if ($case === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\cases\helpers\formatters\cases\Formatter::asCase($case);
     }
 
     public function asProductType($value): string
