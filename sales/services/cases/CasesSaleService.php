@@ -429,7 +429,7 @@ class CasesSaleService
      */
     public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null): array
     {
-        if ($order_uid && $result = $this->searchRequestToBackOffice(['order_uid' => $order_uid])) {
+        if ($order_uid && $result = $this->searchRequestToBackOffice(['confirmation_number' => $order_uid])) {
             return $result;
         }
         if ($email && $result = $this->searchRequestToBackOffice(['email' => $email])) {
