@@ -417,7 +417,7 @@ class FlightQuoteController extends FController
 				if (empty($action) && $form->validate()) {
 					$preparedData = $this->flightQuoteManageService->prepareFlightQuoteData($form);
 					$this->flightQuoteManageService->create($flight, $preparedData, $form->quoteCreator);
-					return '<script>createNotify("Quote created", "Quote successfully created", "success"); $("#modal-lg").modal("hide");pjaxReload({container: "#'.$pjaxReloadId.'"})</script>';
+					return '<script>createNotify("Quote created", "Quote successfully created", "success"); $("#modal-md").modal("hide");pjaxReload({container: "#'.$pjaxReloadId.'"})</script>';
 				}
 
 				if ($action === FlightQuoteCreateForm::ACTION_APPLY_PRICING_INFO) {

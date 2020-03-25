@@ -294,7 +294,7 @@ $js = <<<JS
         let flightId = $(this).data('flight-id');
         let leadId = $(this).data('lead-id');
         let pjaxReloadId = $(this).data('pjax-reload-id');
-        let modal = $('#modal-lg');
+        let modal = $('#modal-md');
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Add Quote');
         modal.find('.modal-body').load(url, {flightId: flightId, leadId: leadId, pjaxReloadId: pjaxReloadId}, function( response, status, xhr ) {

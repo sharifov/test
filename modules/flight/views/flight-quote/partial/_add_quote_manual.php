@@ -55,19 +55,13 @@ $pjaxId = 'pjax-container-prices';
             <?= $form->field($createQuoteForm, 'oldPrices')->hiddenInput()->label(false) ?>
             <table class="table table-striped table-neutral">
                 <thead>
-                <tr>
+                <tr class="text-center">
                     <th>Pax Type</th>
                     <th>X</th>
                     <th>Fare</th>
-                    <th></th>
                     <th>Taxes</th>
-                    <th></th>
-                    <th>Net Price</th>
-                    <th></th>
                     <th>Mark-up</th>
-                    <th></th>
                     <th>SFP, %</th>
-                    <th></th>
                     <th>Selling Price, $</th>
                     <th>Client Price, <?= $createQuoteForm->currencyCode ?></th>
 <!--                    <th></th>-->
@@ -94,26 +88,15 @@ $pjaxId = 'pjax-container-prices';
                                 'step' => 0.01
 							])->label(false) ?>
                         </td>
-                        <td>+</td>
                         <td class="td-input">
 							<?= $form->field($createQuoteForm, 'prices[' . $index . '][taxes]')->input('number', [
 								'class' => 'form-control alt-quote-price',
-								'readonly' => true,
+//								'readonly' => true,
 								'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
 								'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
 								'step' => 0.01
 							])->label(false) ?>
                         </td>
-                        <td>=</td>
-                        <td class="td-input">
-							<?= $form->field($createQuoteForm, 'prices[' . $index . '][net]')->input('number', [
-								'class' => 'form-control alt-quote-price',
-								'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
-								'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
-								'step' => 0.01
-							])->label(false) ?>
-                        </td>
-                        <th>+</th>
                         <td class="td-input">
 							<?= $form->field($createQuoteForm, 'prices[' . $index . '][markup]')->input('number', [
 								'class' => 'form-control alt-quote-price mark-up',
@@ -122,10 +105,8 @@ $pjaxId = 'pjax-container-prices';
 								'step' => 0.01
 							])->label(false) ?>
                         </td>
-                        <th>+</th>
                         <td><?= $createQuoteForm->serviceFee ?></td>
-                        <th>=</th>
-                        <td class="td-input">
+                        <td class="text-right">
 							<?= $form->field($createQuoteForm, 'prices[' . $index . '][selling]')->input('number', [
 								'class' => 'form-control alt-quote-price',
 								'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
@@ -160,16 +141,18 @@ $pjaxId = 'pjax-container-prices';
                 <div class="col-md-12">
                     <div class="row">
                         <div class="col-md-6">
-							<?= $form->field($createQuoteForm, 'recordLocator', ['labelOptions' => ['class' => 'control-label', 'max' => 8]])->textInput() ?>
-
 							<?= $form->field($createQuoteForm, 'pcc', ['labelOptions' => ['class' => 'control-label', 'max' => 10]])->textInput() ?>
+
+							<?= $form->field($createQuoteForm, 'gds', ['labelOptions' => ['class' => 'control-label']])->dropDownList(FlightQuote::getGdsList(), ['prompt' => '---']) ?>
 
 							<?= $form->field($createQuoteForm, 'cabin', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getCabinClassList(), ['prompt' => '---']) ?>
 
-							<?= $form->field($createQuoteForm, 'quoteCreator', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Employee::getListByProject($flight->flProduct->prLead->project_id, false), ['prompt' => '---']) ?>
+							<?= $form->field($createQuoteForm, 'quoteCreator', ['labelOptions' => ['class' => 'control-label']])->widget(sales\widgets\UserSelect2Widget::class, [
+							        'data' => [$createQuoteForm->quoteCreator => Employee::findOne($createQuoteForm->quoteCreator)->username ]
+                            ]) ?>
                         </div>
                         <div class="col-md-6">
-							<?= $form->field($createQuoteForm, 'gds', ['labelOptions' => ['class' => 'control-label']])->dropDownList(FlightQuote::getGdsList(), ['prompt' => '---']) ?>
+							<?= $form->field($createQuoteForm, 'recordLocator', ['labelOptions' => ['class' => 'control-label', 'max' => 8]])->textInput() ?>
 
 							<?= $form->field($createQuoteForm, 'tripType', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getTripTypeList(), ['prompt' => '---']) ?>
 
@@ -193,11 +176,11 @@ $pjaxId = 'pjax-container-prices';
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
-							<?= $form->field($createQuoteForm, 'reservationDump', ['labelOptions' => ['class' => 'control-label']])->textarea() ?>
+                        <div class="col-md-12">
+							<?= $form->field($createQuoteForm, 'reservationDump', ['labelOptions' => ['class' => 'control-label']])->textarea(['rows' => 7]) ?>
                         </div>
-                        <div class="col-md-6">
-							<?= $form->field($createQuoteForm, 'pricingInfo', ['labelOptions' => ['class' => 'control-label']])->textarea(['class' => 'apply-pricing-field form-control']) ?>
+                        <div class="col-md-12">
+							<?= $form->field($createQuoteForm, 'pricingInfo', ['labelOptions' => ['class' => 'control-label']])->textarea(['class' => 'apply-pricing-field form-control', 'rows' => 7]) ?>
                         </div>
                     </div>
                     <div class="row">
@@ -217,9 +200,14 @@ $pjaxId = 'pjax-container-prices';
 			$js = <<<JS
             var form = $('#add-quote-form');
             var pricingDumpField = $('.apply-pricing-field', form);
-            form.on('change', '.alt-quote-price', function (event) {
-                $('#add-quote-action').val('$actionCalculate');
-                $('#add-quote-form').submit();
+            var timeout;
+            form.on('keyup', '.alt-quote-price', function (event) {
+                clearTimeout(timeout);
+                
+                timeout = setTimeout(function () {
+                    $('#add-quote-action').val('$actionCalculate');
+                    $('#add-quote-form').submit();
+                }, 500);
             });
             $('body').off('click', '#btn-apply-pricing').on('click', '#btn-apply-pricing', function (e) {
                 $('#add-quote-action').val('$actionApply');
