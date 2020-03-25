@@ -387,13 +387,15 @@ class CasesSaleService
                     $lastSaleId = max(array_keys($result['items']));
                     return $result['items'][$lastSaleId];
                 } else {
-                    \Yii::info(VarDumper::dumpAsString(['params' => $params, 'response' => $response], 20, true),'info\CasesSaleService:emptyResponse');
+                    \Yii::info(VarDumper::dumpAsString(['params' => $params, 'response' => $response], 20),
+                        'info\CasesSaleService:searchRequestToBackOffice:empty');
                 }
             } else {
-                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 20);
+                $responseStr = VarDumper::dumpAsString($response->content);
+                throw new \RuntimeException('BO request Error: ' . $responseStr, 20);
             }
         } catch (\Throwable $exception) {
-            \Yii::error(VarDumper::dumpAsString($exception, 20, true),'CasesSaleService:searchRequestToBackOffice:Fail');
+            \Yii::error(VarDumper::dumpAsString($exception, 20),'CasesSaleService:searchRequestToBackOffice:Fail');
         }
         return [];
     }
@@ -446,12 +448,25 @@ class CasesSaleService
      */
     public function createSale(int $csId, array $saleData): ?CaseSale
     {
+        if ($this->isExistCaseSale($csId, $saleData['saleId'])) {
+            return null;
+        }
+
         $transaction = Yii::$app->db->beginTransaction();
         try {
             if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
-                $caseSale = $this->getOrCreateCaseSale($csId, $saleData['saleId']);
+                $saleId = (int)$saleData['saleId'];
 
-                if ($refreshSaleData = $this->detailRequestToBackOffice($saleData['saleId'])) {
+                $caseSale = new CaseSale();
+                $caseSale->css_cs_id = $csId;
+                $caseSale->css_sale_id = $saleId;
+                $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
+
+                if (!$caseSale->save()) {
+                    throw new \RuntimeException('Error. CaseSale not saved.');
+                }
+
+                if ($refreshSaleData = $this->detailRequestToBackOffice($saleId)) {
                     $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
                     $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
                     $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
@@ -459,15 +474,12 @@ class CasesSaleService
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
-                    if (!CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleData['saleId']])) {
-                        if (!$caseSale->save(false)) {
-                            \Yii::error(
-                                VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
-                                'CasesSaleService:create'
-                            );
-                            throw new \RuntimeException('Error. CaseSale not saved.');
-                        }
+                    if (!$caseSale->save(false)) {
+                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),'CasesSaleService:createSale:Update');
+                        throw new \RuntimeException('Error. CaseSale not updated from detailRequestToBackOffice.');
                     }
+                } else {
+                    throw new \RuntimeException('Error. Broken response from detailRequestToBackOffice. CaseSale not updated.');
                 }
                 $transaction->commit();
 
@@ -486,15 +498,10 @@ class CasesSaleService
     /**
      * @param int $csId
      * @param int $saleId
-     * @return CaseSale
+     * @return bool
      */
-    private function getOrCreateCaseSale(int $csId, int $saleId): CaseSale
+    public function isExistCaseSale(int $csId, int $saleId): bool
     {
-        if (!$caseSale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
-             $caseSale = new CaseSale();
-             $caseSale->css_cs_id = $csId;
-             $caseSale->css_sale_id = $saleId;
-        }
-        return $caseSale;
+        return CaseSale::find()->where(['css_cs_id' => $csId, 'css_sale_id' => $saleId])->exists();
     }
 }
