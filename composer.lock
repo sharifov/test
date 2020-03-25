@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "713b6b3aa7fc18ac9868e85e7ea3c9aa",
+    "content-hash": "241c9b3ac3293735999e696c179663b7",
     "packages": [
         {
             "name": "2amigos/qrcode-library",
@@ -636,7 +636,7 @@
             "version": "v4.7.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:FortAwesome/Font-Awesome.git",
+                "url": "https://github.com/FortAwesome/Font-Awesome.git",
                 "reference": "a8386aae19e200ddb0f6845b5feeee5eb7013687"
             },
             "dist": {
@@ -3462,7 +3462,7 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "git@github.com:kivork/yii2-rbac-export-import.git",
+                "url": "https://stash.travelinsides.com/scm/lib/yii2-rbac-export-import.git",
                 "reference": "3433bf12be69d0fd58650ce2278bb113f398ca1b"
             },
             "dist": {
