@@ -2,11 +2,14 @@
 
 namespace sales\services\cases;
 
+use common\components\BackOffice;
 use common\models\CaseSale;
 use Exception;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesSaleRepository;
+use Yii;
 use yii\helpers\VarDumper;
 
 class CasesSaleService
@@ -277,9 +280,10 @@ class CasesSaleService
 	{
 		if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
 			$caseSale = $this->casesSaleRepository->refreshOriginalSaleData($caseSale, $case, $saleData);
+			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
 			if(!$caseSale->save()) {
-				\Yii::error(VarDumper::dumpAsString($caseSale->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
+				\Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesController:actionAddSale:CaseSale:save');
 				throw new \RuntimeException('An error occurred while trying to refresh original sale info;');
 			}
 
@@ -290,4 +294,207 @@ class CasesSaleService
 
 		return $caseSale;
 	}
+
+    /**
+     * @param CaseSale $caseSale
+     * @param Cases $case
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): ?CaseSale
+    {
+        if ((isset($saleData['saleId']) && (int)$saleData['saleId'] === (int)$caseSale->css_sale_id) && isset($saleData['bookingId'])) {
+            $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
+            $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
+
+            $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
+
+            if(!$caseSale->save()) {
+                \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:saveAdditionalData');
+                throw new \RuntimeException('Error. Additional data not saved');
+            }
+            $case->updateLastAction();
+            return $caseSale;
+        }
+        throw new \RuntimeException('Error. Additional data not saved. Broken saleData params');
+    }
+
+	/**
+     * @param CaseSale $caseSale
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function prepareAdditionalData(CaseSale $caseSale, array $saleData): CaseSale
+    {
+        if (isset($saleData['price']['priceQuotes'])) {
+            $amountCharged = 0;
+            foreach ($saleData['price']['priceQuotes'] as $priceQuote) {
+                if (isset($priceQuote['selling'])) {
+                    $amountCharged += $priceQuote['selling'];
+                }
+            }
+            $caseSale->css_charged = $amountCharged ?: null;
+        }
+        if (isset($saleData['price']['profit'])) {
+            $caseSale->css_profit = $saleData['price']['profit'];
+        }
+        if (isset($saleData['itinerary'][0]['segments'][0]['departureAirport'])) {
+            $caseSale->css_out_departure_airport = $saleData['itinerary'][0]['segments'][0]['departureAirport'];
+        }
+        if (isset($saleData['itinerary'][0]['segments'])) {
+            $idxLastInFirstSegments = count($saleData['itinerary'][0]['segments']) - 1;
+            if (isset($saleData['itinerary'][0]['segments'][$idxLastInFirstSegments]['arrivalAirport'])) {
+                $caseSale->css_out_arrival_airport = $saleData['itinerary'][0]['segments'][$idxLastInFirstSegments]['arrivalAirport'];
+            }
+        }
+        if (isset($saleData['itinerary'][0]['segments'][0]['departureTime'])) {
+            $caseSale->css_out_date = $saleData['itinerary'][0]['segments'][0]['departureTime'];
+        }
+        if (isset($saleData['itinerary'])) {
+            $countItinerary = count($saleData['itinerary']);
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'])) {
+                $caseSale->css_in_departure_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'];
+            }
+            $idxLastInLastSegments = count($saleData['itinerary'][$countItinerary - 1]['segments']) - 1;
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
+                $caseSale->css_out_arrival_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'];
+            }
+            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'])) {
+                $caseSale->css_in_date = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'];
+            }
+        }
+        if (isset($saleData['chargeType'])) {
+            $caseSale->css_charge_type = $saleData['chargeType'];
+        }
+        return $caseSale;
+    }
+
+    /**
+     * @param array $params
+     * @return array|mixed
+     */
+    public function searchRequestToBackOffice(array $params)
+    {
+        if (!Yii::$app->params['settings']['enable_request_to_bo_sale']) {
+            return [];
+        }
+        try {
+            $response = BackOffice::sendRequest2('cs/search', $params, 'POST', 120);
+
+            if ($response->isOk) {
+                $result = $response->data;
+                if (isset($result['items']) && is_array($result['items']) && count($result['items'])) {
+                    $lastSaleId = max(array_keys($result['items']));
+                    return $result['items'][$lastSaleId];
+                } else {
+                    \Yii::info(VarDumper::dumpAsString(['params' => $params, 'response' => $response], 20, true),'info\CasesSaleService:emptyResponse');
+                }
+            } else {
+                throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 20);
+            }
+        } catch (\Throwable $exception) {
+            \Yii::error(VarDumper::dumpAsString($exception, 20, true),'CasesSaleService:searchRequestToBackOffice:Fail');
+        }
+        return [];
+    }
+
+    /**
+     * @param int $sale_id
+     * @return array|mixed
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function detailRequestToBackOffice(int $sale_id)
+    {
+        $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id], 'POST', 120);
+
+        if ($response->isOk) {
+            $result = $response->data;
+            if (is_array($result) && count($result) && array_key_exists('bookingId', $result)) {
+                return $result;
+            }
+
+            throw new \RuntimeException('BO broken response:detailRequestToBackOffice: ' . VarDumper::dumpAsString($response));
+        } else {
+            throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+        }
+    }
+
+    /**
+     * @param string|null $order_uid
+     * @param string|null $email
+     * @param string|null $phone
+     * @return array
+     */
+    public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null): array
+    {
+        if ($order_uid && $result = $this->searchRequestToBackOffice(['order_uid' => $order_uid])) {
+            return $result;
+        }
+        if ($email && $result = $this->searchRequestToBackOffice(['email' => $email])) {
+            return $result;
+        }
+        if ($phone && $result = $this->searchRequestToBackOffice(['phone' => $phone])) {
+            return $result;
+        }
+        return [];
+    }
+
+    /**
+     * @param int $csId
+     * @param array $saleData
+     * @return CaseSale|null
+     */
+    public function createSale(int $csId, array $saleData): ?CaseSale
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
+                $caseSale = $this->getOrCreateCaseSale($csId, $saleData['saleId']);
+
+                if ($refreshSaleData = $this->detailRequestToBackOffice($saleData['saleId'])) {
+                    $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
+                    $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
+                    $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+                    $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
+
+                    $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
+
+                    if (!CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleData['saleId']])) {
+                        if (!$caseSale->save(false)) {
+                            \Yii::error(
+                                VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                                'CasesSaleService:create'
+                            );
+                            throw new \RuntimeException('Error. CaseSale not saved.');
+                        }
+                    }
+                }
+                $transaction->commit();
+
+                return $caseSale;
+            }
+
+            throw new \RuntimeException('Error. Params csId and saleId is required');
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable), 'CasesSaleService:createSale:Throwable' );
+        }
+
+        return null;
+    }
+
+    /**
+     * @param int $csId
+     * @param int $saleId
+     * @return CaseSale
+     */
+    private function getOrCreateCaseSale(int $csId, int $saleId): CaseSale
+    {
+        if (!$caseSale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
+             $caseSale = new CaseSale();
+             $caseSale->css_cs_id = $csId;
+             $caseSale->css_sale_id = $saleId;
+        }
+        return $caseSale;
+    }
 }

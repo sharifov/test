@@ -24,7 +24,6 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'oup_percent')->input('number') ?>
 
-<!--            --><?//= $form->field($model, 'oup_amount')->input('number', ['maxlength' => true, 'step' => 0.01]) ?>
         </div>
     </div>
 

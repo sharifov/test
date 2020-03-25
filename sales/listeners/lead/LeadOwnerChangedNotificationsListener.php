@@ -62,7 +62,7 @@ class LeadOwnerChangedNotificationsListener
                 'url' => $host . '/lead/view/' . $lead->gid,
             ]);
 
-        if (Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+        if ($ntf = Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($oldOwner->id, null, 'getNewNotification', [], true);
             Notifications::sendSocket('getNewNotification', ['user_id' => $oldOwner->id]);
         } else {

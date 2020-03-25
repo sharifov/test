@@ -4,8 +4,10 @@ namespace common\models;
 
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\query\NotificationsQuery;
+use frontend\widgets\notification\NotificationCache;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -183,6 +185,10 @@ class Notifications extends ActiveRecord
         return $str;
     }
 
+    public function isMustPopupShow(): bool
+    {
+        return $this->n_popup && !$this->n_popup_show;
+    }
 
     /**
      * @param int $user_id
@@ -191,16 +197,15 @@ class Notifications extends ActiveRecord
      * @param int $type
      * @param bool $popup
      * @param bool $unique
-     * @return bool
+     * @return self|null
      */
-    public static function create($user_id = 0, $title = '', $message = '', $type = 1, $popup = true, $unique = false) : bool
+    public static function create($user_id = 0, $title = '', $message = '', $type = 1, $popup = true, $unique = false): ?self
     {
-
-        $md5Hash = md5($message.$user_id);
-        if($unique) {
+        $md5Hash = md5($message . $user_id);
+        if ($unique) {
             $exists = self::find()->where(['n_unique_id' => $md5Hash])->exists();
-            if($exists) {
-                return false;
+            if ($exists) {
+                return null;
             }
         }
 
@@ -211,18 +216,19 @@ class Notifications extends ActiveRecord
         $model->n_type_id = $type;
         $model->n_popup = $popup;
         $model->n_unique_id = $md5Hash;
-
         $model->n_new = true;
-        if($model->save()){
-            return true;
+
+        if ($model->save()) {
+            return $model;
         }
 
-        return false;
+        return null;
     }
 
 
     public function afterSave($insert, $changedAttributes)
     {
+        NotificationCache::invalidate($this->n_user_id);
 
         parent::afterSave($insert, $changedAttributes);
 

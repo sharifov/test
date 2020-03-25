@@ -28,14 +28,11 @@ $isSuperAdmin = $user->isSuperAdmin();
 
 
 
-        if ($user->canCall()) {
-            $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
-        }
+//        if ($user->canCall()) {
+//            $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
+//        }
 
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/dashboard/index'], 'icon' => 'area-chart'];
-
-
-
 
         $menuLItems = [];
 
@@ -114,10 +111,12 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
 
         if (!$isUM) {
-            $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
+           // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
+            $cntNotifications = null;
             $menuItems[] = [
                 'label' => 'My Notifications' .
-                    '<span id="div-cnt-notification">' . ($cntNotifications ? '<span class="label-success label pull-right">' . $cntNotifications . '</span>' : '') . '</span>',
+//                    '<span id="div-cnt-notification">' . ($cntNotifications ? '<span class="label-success label pull-right">' . $cntNotifications . '</span>' : '') . '</span>',
+                    '<span id="div-cnt-notification"><span class="label-success label pull-right notification-counter"></span></span>',
                 'url' => ['/notifications/list'],
                 'icon' => 'comment',
             ];
@@ -157,30 +156,12 @@ $isSuperAdmin = $user->isSuperAdmin();
             ]
         ];
 
-        $menuItems[] = [
-            'label' => 'Stats & Reports',
-            'url' => 'javascript:',
-            'icon' => 'bar-chart',
-            'items' => [
-                ['label' => 'Agents report', 'url' => ['/agent-report/index'], 'icon' => 'users'],
-                ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
-                ['label' => 'Calls report', 'url' => ['/report/calls-report'], 'icon' => 'table'],
-				['label' => 'Leads report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
-				['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
-                ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
-                ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
-                ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
 
-                ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
-                ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
-                ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
-            ]
-        ];
 
-        $menuItems[] = [
+        $menuQCall = [
             'label' => 'QCall',
             'url' => 'javascript:',
-            'icon' => 'list',
+            'icon' => 'phone',
             'items' => [
                 ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list'], 'icon' => 'list'],
                 ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index'], 'icon' => 'list'],
@@ -195,6 +176,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
+                $menuQCall,
                 ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                 ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index'], 'icon' => 'bell'],
                 ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
@@ -208,7 +190,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'LF Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
-                ['label' => 'Lead Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
+
             ]
         ];
 
@@ -232,6 +214,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -246,52 +229,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             ]
         ];
 
-        $menuItems[] = [
-            'label' => 'Data Settings',
-            'url' => 'javascript:',
-            'icon' => 'list',
-            'items' => [
-                ['label' => 'Projects', 'url' => ['/project/index'], 'icon' => 'product-hunt'],
-                ['label' => 'Project Sources', 'url' => ['/sources/index'], 'icon' => 'product-hunt'],
-                ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
-                ['label' => 'Department Emails', 'url' => ['/department-email-project/index'], 'icon' => 'envelope'],
-                ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
-                ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
-                ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
-                ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
-                ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
-                ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
-                ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
-                ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
-                ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
-                ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
-                ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
-                ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
-                ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
-                ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'],
-                ['label' => 'Cases categories', 'url' => ['/cases-category/index'], 'icon' => 'list'],
-            ]
-        ];
-
-        if (class_exists('\modules\flight\FlightModule')) {
-            $menuItems[] = [
-                'label' => 'Flight module',
-                'url' => 'javascript:',
-                'icon' => 'plane',
-                'items' => \modules\flight\FlightModule::getListMenu()
-            ];
-        }
-
-        if (class_exists('\modules\hotel\HotelModule')) {
-            $menuItems[] = [
-                'label' => 'Hotel module',
-                'url' => 'javascript:',
-                'icon' => 'hotel',
-                'items' => \modules\hotel\HotelModule::getListMenu()
-            ];
-        }
-
-        $menuItems[] = [
+        $menuNewData = [
             'label' => 'New Data',
             'url' => 'javascript:',
             'icon' => 'list',
@@ -306,11 +244,11 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
-					['label' => 'Orders', 'url' => ['/order/order-crud/index']],
-					['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
-					['label' => 'Orders User Profit', 'url' => ['/order/order-user-profit-crud/index']],
-					['label' => 'Orders Tips', 'url' => ['/order/order-tips-crud/index']],
-					['label' => 'Orders Tips User Profit', 'url' => ['/order/order-tips-user-profit-crud/index']],
+                    ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
+                    ['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
+                    ['label' => 'Orders User Profit', 'url' => ['/order/order-user-profit-crud/index']],
+                    ['label' => 'Orders Tips', 'url' => ['/order/order-tips-crud/index']],
+                    ['label' => 'Orders Tips User Profit', 'url' => ['/order/order-tips-user-profit-crud/index']],
                 ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],
@@ -332,17 +270,75 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ], 'hasChild' => true],
 
                 ['label' => 'KPI', 'url' => 'javascript:', 'items' => [
-					['label' => 'KPI User Performance', 'url' => '/kpi-user-performance-crud/index'],
-					['label' => 'KPI Product Commission', 'url' => '/kpi-product-commission-crud/index'],
-					['label' => 'KPI User Product Commission', 'url' => '/kpi-user-product-commission-crud/index'],
+                    ['label' => 'KPI User Performance', 'url' => '/kpi-user-performance-crud/index'],
+                    ['label' => 'KPI Product Commission', 'url' => '/kpi-product-commission-crud/index'],
+                    ['label' => 'KPI User Product Commission', 'url' => '/kpi-user-product-commission-crud/index'],
                 ], 'hasChild' => true],
             ]
         ];
 
         $menuItems[] = [
-            'label' => 'Qa Task',
+            'label' => 'Data Settings',
             'url' => 'javascript:',
             'icon' => 'list',
+            'items' => [
+                    $menuNewData,
+                ['label' => 'Projects', 'url' => ['/project/index'], 'icon' => 'product-hunt'],
+                ['label' => 'Project Sources', 'url' => ['/sources/index'], 'icon' => 'product-hunt'],
+                ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
+                ['label' => 'Department Emails', 'url' => ['/department-email-project/index'], 'icon' => 'envelope'],
+                ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
+                ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
+                ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
+                ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
+                ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
+                ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
+                ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
+                ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
+                ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
+                ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
+                ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
+                ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
+                ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
+                ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
+                ['label' => 'Case categories', 'url' => ['/case-category/index'], 'icon' => 'list'],
+            ]
+        ];
+
+
+        $menuModuleItems = [];
+
+        if (class_exists('\modules\flight\FlightModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Flight module',
+                'url' => 'javascript:',
+                'icon' => 'plane',
+                'items' => \modules\flight\FlightModule::getListMenu()
+            ];
+        }
+
+        if (class_exists('\modules\hotel\HotelModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Hotel module',
+                'url' => 'javascript:',
+                'icon' => 'hotel',
+                'items' => \modules\hotel\HotelModule::getListMenu()
+            ];
+        }
+
+        if ($menuModuleItems) {
+            $menuItems[] = [
+                'label' => 'Modules',
+                'url' => 'javascript:',
+                'icon' => 'windows',
+                'items' => $menuModuleItems
+            ];
+        }
+
+        $menuItems[] = [
+            'label' => 'QA Tasks',
+            'url' => 'javascript:',
+            'icon' => 'check-square-o',
             'items' => [
                 ['label' => 'Search', 'url' => ['/qa-task/qa-task-queue/search']],
                 ['label' => 'Pending <span id="qa-task-q-pending" data-type="pending" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PENDING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/pending']],
@@ -358,7 +354,29 @@ $isSuperAdmin = $user->isSuperAdmin();
             ]
         ];
 
+
         $menuItems[] = [
+            'label' => 'Stats & Reports',
+            'url' => 'javascript:',
+            'icon' => 'bar-chart',
+            'items' => [
+                ['label' => 'Agents report', 'url' => ['/agent-report/index'], 'icon' => 'users'],
+                ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
+                ['label' => 'Calls report', 'url' => ['/report/calls-report'], 'icon' => 'table'],
+                ['label' => 'Leads report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
+                ['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
+                ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
+                ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
+                ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
+
+                ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
+                ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
+                ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
+            ]
+        ];
+
+
+        $menuLanguages = [
             'label' => Yii::t('menu', 'Languages'),
             'url' => 'javascript:',
             'icon' => 'language',
@@ -387,22 +405,26 @@ $isSuperAdmin = $user->isSuperAdmin();
             'url' => 'javascript:',
             'icon' => 'cog',
             'items' => [
+                ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bug text-warning'],
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
-                ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bars'],
                 ['label' => 'Action Logs', 'url' => ['/log/action'], 'icon' => 'bars'],
-                ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
-                ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
-                ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'cogs'],
+
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
 				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
+                ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 [
                     'label' => Yii::t('language', 'Tools'), 'url' => 'javascript:', 'icon' => 'cog',
                     'items' => [
                         ['label' => Yii::t('language', 'Check Flight Dump'), 'url' => ['/tools/check-flight-dump']],
                     ]
                 ],
+
+                $menuLanguages,
+
+                ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'list'],
+                ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
             ]
         ];
 

@@ -527,8 +527,8 @@ class QuoteController extends ApiBaseController
                             $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\n lead: " . $host . '/lead/view/' . $lead->gid;
 
                             if ($lead->employee_id) {
-                                $isSend = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true);
-                                if ($isSend) {
+
+                                if ($ntf = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true)) {
                                     // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
                                     Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id]);
                                 }
