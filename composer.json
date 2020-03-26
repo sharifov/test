@@ -93,7 +93,7 @@
 		},
       {
         "type": "vcs",
-        "url": "https://github.com/kivork/yii2-rbac-export-import.git"
+        "url": "https://stash.travelinsides.com/scm/lib/yii2-rbac-export-import.git"
       }
 	]
 }

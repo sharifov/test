@@ -3531,14 +3531,8 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "git@github.com:kivork/yii2-rbac-export-import.git",
-                "reference": "1c962b20ff8bcdea10d20d96b84bce8c1c931caa"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kivork/yii2-rbac-export-import/zipball/1c962b20ff8bcdea10d20d96b84bce8c1c931caa",
-                "reference": "1c962b20ff8bcdea10d20d96b84bce8c1c931caa",
-                "shasum": ""
+                "url": "https://stash.travelinsides.com/scm/lib/yii2-rbac-export-import.git",
+                "reference": "796c5525ce609ac80cb6d0074bcf917a917d0f15"
             },
             "require": {
                 "kartik-v/yii2-widget-select2": "@dev",
@@ -3570,11 +3564,7 @@
                 "yii2 rbac export import module",
                 "yii2-rbac-export-import"
             ],
-            "support": {
-                "source": "https://github.com/kivork/yii2-rbac-export-import/tree/master",
-                "issues": "https://github.com/kivork/yii2-rbac-export-import/issues"
-            },
-            "time": "2020-03-18T14:16:55+00:00"
+            "time": "2020-03-25T16:04:34+00:00"
         },
         {
             "name": "lajax/yii2-translate-manager",

@@ -8,7 +8,7 @@ use yii\widgets\DetailView;
 /* @var $model EmailList */
 
 $this->title = $model->el_id;
-$this->params['breadcrumbs'][] = ['label' => 'Phone Lists', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Email Lists', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>

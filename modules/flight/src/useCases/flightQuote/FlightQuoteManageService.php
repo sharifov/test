@@ -4,10 +4,13 @@
 namespace modules\flight\src\useCases\flightQuote;
 
 
+use common\models\Lead;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuoteStatusLog;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
@@ -37,6 +40,7 @@ use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use sales\helpers\product\ProductQuoteHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightQuoteManageService
@@ -183,6 +187,47 @@ class FlightQuoteManageService
 
 			$this->calcProductQuotePrice($productQuote, $flightQuote);
 		});
+	}
+
+	public function prepareFlightQuoteData(FlightQuoteCreateForm $form): array
+	{
+		$quote = [
+			'key' => FlightQuoteHelper::generateHashQuoteKey(uniqid('quote_', true)),
+			'gds' => $form->gds,
+			'pcc' => $form->pcc,
+			'validatingCarrier' => $form->validatingCarrier,
+			'fareType' => $form->fareType,
+			'tripType' => $form->tripType,
+			'cabin' => $form->cabin,
+			'currency' => 'USD',
+			'recordLocator' => $form->recordLocator,
+			'passengers' => [],
+			'pricingInfo' => $form->parsedPricingInfo
+		];
+		/** @var $price FlightQuotePaxPriceForm */
+		foreach ($form->prices as $price) {
+			$quote['passengers'][$price->paxCode] = [
+				'codeAs' => $price->paxCode,
+				'cnt' => $price->cnt,
+				'price' => $price->selling,
+				'tax' => $price->taxes,
+				'baseFare' => $price->fare,
+				'baseTax' => $price->taxes,
+				'markup' => $price->markup,
+			];
+		}
+		$itinerary = ArrayHelper::toArray($form->itinerary);
+		$quote['trips'][] = [
+			'segments' => $itinerary,
+			'duration' => @array_sum(ArrayHelper::getColumn($itinerary, 'duration'))
+		];
+
+		return $quote;
+	}
+
+	public function createQuoteManually(Lead $lead, Flight $flight)
+	{
+		$flightQuote = new FlightQuote();
 	}
 
 	/**
