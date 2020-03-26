@@ -47,8 +47,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw',
             'filter' => \common\models\Employee::getActiveUsersListFromCommonGroups(Auth::id())
         ],
-        [   'label' =>'Report Date',
-            'attribute' => 'createdDate',
+        [   'label' =>'Period',
+            'value' => function($data) {
+                $dates = explode(' ', $data['createdDate']);
+                return '<i class="fa fa-clock-o"></i> <span title="'. implode('&#10;', $dates) .'">' . $dates[0] . '</span>';
+            },
+            'format' => 'raw',
         ],
 
         [

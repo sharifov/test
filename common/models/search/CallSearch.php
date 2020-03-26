@@ -6,6 +6,8 @@ use common\models\Department;
 use common\models\Employee;
 use Faker\Provider\DateTime;
 use kartik\daterange\DateRangeBehavior;
+use sales\access\EmployeeGroupAccess;
+use sales\auth\Auth;
 use sales\helpers\query\QueryHelper;
 use sales\repositories\call\CallSearchRepository;
 use yii\base\Model;
@@ -423,8 +425,8 @@ class CallSearch extends Call
             $queryByDuration = '';
         }
 
-        $query = new Query();
-        $query->select(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$timeSub.' HOUR), "+00:00", "'. $utcOffsetDST. '")) AS createdDate,
+        $subQuery = new Query();
+        $subQuery->select(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$timeSub.' HOUR), "+00:00", "'. $utcOffsetDST. '")) AS createdDate,
         
         SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), c_call_duration, 0)) AS outgoingCallsDuration,
         SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCalls,
@@ -442,29 +444,51 @@ class CallSearch extends Call
         SUM(IF(c_source_type_id = '. self::SOURCE_REDIAL_CALL .' AND c_status_id = '. self::STATUS_COMPLETED .'  AND c_parent_call_sid IS NOT NULL '. $queryByDuration .', 1, 0)) AS redialCompleted           
             
         ']);
-        $query->from('call');
-        $query->where('c_created_dt ' .$between_condition);
-        $query->andWhere('c_created_user_id IS NOT NULL');
-        $query->andWhere('TIME(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '. $timeSub .' HOUR), "+00:00", "'. $utcOffsetDST. '")) <= TIME("'.$differenceTimeToFrom.'")');
+        $subQuery->from('call');
+        $subQuery->where('c_created_dt ' .$between_condition);
+        $subQuery->andWhere('c_created_user_id IS NOT NULL');
+        $subQuery->andWhere('TIME(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '. $timeSub .' HOUR), "+00:00", "'. $utcOffsetDST. '")) <= TIME("'.$differenceTimeToFrom.'")');
 
         if(!empty($this->c_created_user_id)){
-            $query->andWhere('c_created_user_id='. $this->c_created_user_id);
+            $subQuery->andWhere('c_created_user_id='. $this->c_created_user_id);
+        } else {
+            $subQuery->andWhere(['c_created_user_id' => EmployeeGroupAccess::getUsersIdsInCommonGroups(Auth::id())]);
         }
 
         if (isset($params['CallSearch']['callDepId']) && $params['CallSearch']['callDepId'] != "") {
-            $query->andWhere('c_dep_id= ' . $params['CallSearch']['callDepId']);
+            $subQuery->andWhere('c_dep_id= ' . $params['CallSearch']['callDepId']);
         }
 
         if(!empty($this->c_project_id)){
-            $query->andWhere('c_project_id='. $this->c_project_id);
+            $subQuery->andWhere('c_project_id='. $this->c_project_id);
         }
 
         if(!empty($this->userGroupId)){
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where('ugs_group_id = ' . $this->userGroupId);
-            $query->andWhere(['c_created_user_id' => $userIdsByGroup]);
+            $subQuery->andWhere(['c_created_user_id' => $userIdsByGroup]);
         }
+        $subQuery->groupBy(['c_created_user_id', 'createdDate']);
 
-        $query->groupBy(['c_created_user_id', 'createdDate']);
+        $subQuerycommand = $subQuery->createCommand();
+        $subQuerySQL = $subQuerycommand->getRawSql();
+
+        $query = new Query();
+        $query->select(['c_created_user_id, group_concat(createdDate SEPARATOR " ") as createdDate, 
+                        SUM(outgoingCallsDuration) as outgoingCallsDuration, 
+                        SUM(outgoingCalls) as outgoingCalls, 
+                        SUM(outgoingCallsCompleted) as outgoingCallsCompleted, 
+                        SUM(outgoingCallsNoAnswer) as outgoingCallsNoAnswer, 
+                        SUM(outgoingCallsBusy) as outgoingCallsBusy, 
+                        SUM(incomingCallsDuration) as incomingCallsDuration, 
+                        SUM(incomingCompletedCalls) as incomingCompletedCalls, 
+                        SUM(incomingDirectLine) as incomingDirectLine, 
+                        SUM(incomingGeneralLine) as incomingGeneralLine, 
+                        SUM(redialCallsDuration) as redialCallsDuration, 
+                        SUM(totalAttempts) as totalAttempts, 
+                        SUM(redialCompleted) as redialCompleted 
+                FROM ('. $subQuerySQL .') AS tbl        
+        ']);
+        $query->groupBy(['tbl.c_created_user_id']);
 
         $command = $query->createCommand();
         $data = $command->queryAll();
