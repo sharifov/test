@@ -62,6 +62,7 @@ class LeadProfitType extends \yii\db\ActiveRecord
             [['lpt_created_dt', 'lpt_updated_dt'], 'safe'],
             [['lpt_profit_type_id'], 'unique'],
 			['lpt_profit_type_id', 'in', 'range' => array_keys(self::getProfitTypeList())],
+			[['lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix'], 'default', 'value' => 0],
 			[['lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix'], 'number', 'min' => self::MIN_PERCENT_VALUE, 'max' => self::MAX_PERCENT_VALUE]
         ];
     }
