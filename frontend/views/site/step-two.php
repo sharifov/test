@@ -24,14 +24,14 @@ $this->title = 'Login Step Two';
                 <div class="clearfix"></div><br />
 
                 <p>
-                    <?= Yii::t('user', 'Please enter the six-digit code from your Google Authenticator') ?>,
-                    <u class="btn-show-re-scan" style="cursor: pointer;">
+                    <?= Yii::t('user', 'Please enter the six-digit code from your Google Authenticator') ?>
+                    <u class="btn-show-re-scan" style="cursor: pointer; display: <?= $twoFactorKeyExist ? 'inline' : 'none' ?>;"">
                         <?= Yii::t('user', 'or re-scan QR-code') ?>
                     </u>
                 </p>
                 <div>
                     <?= $form->field($model, 'secret_key', ['template' => '{input}{error}'])
-                        ->textInput(['autofocus' => true, 'maxlength' => true, 'placeholder' => '']) ?>
+                        ->textInput(['autofocus' => true, 'maxlength' => true, 'placeholder' => '', 'autocomplete' => 'off']) ?>
                 </div>
                 <div class="form-group">
                     <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
