@@ -934,15 +934,17 @@ class CasesController extends FController
 
     /**
      * @param int $id
+     * @param int $withFareRules
      * @return mixed
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
-    protected function findSale(int $id)
+    protected function findSale(int $id, int $withFareRules = 0)
     {
 
         try {
             $data['sale_id'] = $id;
+            $data['withFareRules'] = $withFareRules;
             $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', 90);
 
             if ($response->isOk) {
@@ -1443,6 +1445,8 @@ class CasesController extends FController
 			throw new BadRequestHttpException();
 		}
 
+        $withFareRules = Yii::$app->request->post('checkFareRules', 0);
+
 		try {
 			$out = [
 				'error' => 0,
@@ -1453,7 +1457,7 @@ class CasesController extends FController
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
 			$this->checkAccessToManageCaseSaleInfo($caseSale, true);
 
-			$saleData = $this->findSale((int)$caseSale->css_sale_id);
+			$saleData = $this->findSale((int)$caseSale->css_sale_id, $withFareRules);
 
 			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
 
