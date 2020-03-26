@@ -120,7 +120,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
              [
                 'label' => '2FA enable',
                 'value' => static function (\common\models\Employee $model) {
-                    return $model->userProfile->is2faEnable() ?
+                    return ($model->userProfile && $model->userProfile->up_2fa_enable) ?
                         '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
                 },
                 'format' => 'raw'
