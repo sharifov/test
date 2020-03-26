@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\ApiLog;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\LoginStepTwoForm;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\UserParams;
@@ -13,10 +14,14 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
-use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
+use Da\TwoFA\Manager;
+
+use Da\TwoFA\Service\TOTPSecretKeyUriGeneratorService;
+use Da\TwoFA\Service\QrCodeDataUriGeneratorService;
+use yii\web\Response;
 
 /**
  * Site controller
@@ -33,7 +38,7 @@ class SiteController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error'],
+                        'actions' => ['login', 'error', 'step-two'],
                         'allow' => true,
                     ],
                     [
@@ -66,7 +71,6 @@ class SiteController extends FController
         ];
     }
 
-
     /**
      *
      */
@@ -88,25 +92,82 @@ class SiteController extends FController
      * Login action.
      *
      * @return string
+     * @throws \Da\TwoFA\Exception\InvalidSecretKeyException
      */
     public function actionLogin()
     {
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
+        $twoFactorAuthEnable = Yii::$app->params['settings']['two_factor_authentication_enable'];
+        $twoFactorAuthCounter = Yii::$app->params['settings']['two_factor_counter'] ?? 60;
 
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
 
         $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+
+        if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
+            if ($twoFactorAuthEnable && $user->userProfile->is2faEnable()) {
+                $twoFaManager = new Manager();
+                $twoFaManager->setCounter($twoFactorAuthCounter);
+                $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
+                    $twoFaManager->generateSecretKey() : $user->userProfile->up_2fa_secret;
+
+                $session = Yii::$app->session;
+                $session->set('two_factor_email', $user->email);
+                $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
+                $session->set('two_factor_key', $twoFactorAuthSecretKey);
+                $session->set('two_factor_remember_me', $model->rememberMe);
+                return $this->redirect(['site/step-two']);
+            }
+
+            if ($model->login()) {
+                return $this->goBack();
+            }
         }
 
         $model->password = '';
         return $this->render('login.php', [
             'model' => $model,
         ]);
+    }
 
+
+    /**
+     * @return string|Response
+     */
+    public function actionStepTwo()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
+        $session = Yii::$app->session;
+
+        if (!$session->has('two_factor_email') || !$session->has('two_factor_key')) {
+            return $this->redirect(['site/login']);
+        }
+
+        $userEmail = $session->get('two_factor_email');
+        $twoFactorAuthKey = $session->get('two_factor_key');
+
+        $model = (new LoginStepTwoForm())
+            ->setUserEmail($userEmail)
+            ->setTwoFactorAuthKey($twoFactorAuthKey)
+            ->setRememberMe($session->get('two_factor_remember_me'));
+
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            return $this->goHome();
+        }
+
+        $totpUri = (new TOTPSecretKeyUriGeneratorService('travelinsides.com', $userEmail, $twoFactorAuthKey))->run();
+        $qrcodeSrc = (new QrCodeDataUriGeneratorService($totpUri))->run();
+
+        return $this->render('step-two', [
+            'qrcodeSrc' => $qrcodeSrc,
+            'model' => $model,
+            'twoFactorKeyExist' => $session->get('two_factor_key_exist'),
+        ]);
     }
 
 

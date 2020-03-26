@@ -16,6 +16,9 @@ use Yii;
  * @property string $up_updated_dt
  * @property boolean $up_auto_redial
  * @property boolean $up_kpi_enable
+ * @property boolean $up_2fa_enable
+ * @property string|null $up_2fa_secret
+ * @property mixed|null $up_2fa_timestamp
  * @property int $up_skill
  *
  * @property Employee $upUser
@@ -61,10 +64,11 @@ class UserProfile extends \yii\db\ActiveRecord
             [['up_user_id'], 'required'],
             [['up_user_id', 'up_call_type_id', 'up_skill'], 'integer'],
             [['up_user_id'], 'unique'],
-            [['up_telegram_enable', 'up_auto_redial', 'up_kpi_enable'], 'boolean'],
+            [['up_telegram_enable', 'up_auto_redial', 'up_kpi_enable', 'up_2fa_enable'], 'boolean'],
             [['up_updated_dt'], 'safe'],
             [['up_sip'], 'string', 'max' => 255],
             [['up_telegram'], 'string', 'max' => 20],
+            [['up_2fa_secret'], 'string', 'max' => 50],
             [['up_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_user_id' => 'id']],
         ];
     }
@@ -94,6 +98,8 @@ class UserProfile extends \yii\db\ActiveRecord
             'up_auto_redial'    => 'Auto redial',
             'up_kpi_enable'     => 'KPI enable',
             'up_skill'          => 'Skill',
+            'up_2fa_enable'     => '2fa enable',
+            'up_2fa_secret'     => '2fa secret',
         ];
     }
 
@@ -112,5 +118,13 @@ class UserProfile extends \yii\db\ActiveRecord
     public static function find()
     {
         return new UserProfileQuery(static::class);
+    }
+
+    /**
+     * @return bool
+     */
+    public function is2faEnable() : bool
+    {
+        return $this->up_2fa_enable;
     }
 }

@@ -38,6 +38,8 @@ class EmployeeSearch extends Employee
     public $online;
     public $pageSize;
 
+    public $twoFaEnable;
+
     /**
      * {@inheritdoc}
      */
@@ -46,7 +48,7 @@ class EmployeeSearch extends Employee
         return [
             [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id'], 'integer'],
             [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
-            [['timeStart', 'timeEnd', 'roles'], 'safe'],
+            [['timeStart', 'timeEnd', 'roles', 'twoFaEnable'], 'safe'],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
@@ -135,6 +137,11 @@ class EmployeeSearch extends Employee
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['like', 'up_sip', $this->user_sip]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
+        if (strlen($this->twoFaEnable) > 0) {
+            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
 
         if ($this->user_project_id > 0) {
             $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['=', 'project_id', $this->user_project_id]);

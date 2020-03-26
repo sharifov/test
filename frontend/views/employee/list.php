@@ -36,6 +36,17 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 <div class="employee-index">
+
+    <?php $status = Yii::$app->params['settings']['two_factor_authentication_enable'] ?
+        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>' ?>
+
+    <div class="alert btn-secondary alert-dismissible fade show" role="alert">
+        Setting "Enable two factor authentication" is <span class="label label-success">true</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
     <h1><?=$this->title?></h1>
 
     <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add new User', 'create', [
@@ -106,9 +117,14 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'attribute' => 'id',
                 'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
             ],
-
-
-
+             [
+                'label' => '2FA enable',
+                'value' => static function (\common\models\Employee $model) {
+                    return $model->userProfile->is2faEnable() ?
+                        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
+                },
+                'format' => 'raw'
+            ],
 
             [
                 'class' => ActionColumn::class,
