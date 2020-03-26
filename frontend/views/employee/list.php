@@ -41,7 +41,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>' ?>
 
     <div class="alert btn-secondary alert-dismissible fade show" role="alert">
-        Setting "Enable two factor authentication" is <span class="label label-success">true</span>
+        Setting "Enable two factor authentication" is <?= $status ?>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
