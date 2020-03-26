@@ -286,6 +286,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                     ['label' => 'KPI Product Commission', 'url' => '/kpi-product-commission-crud/index'],
                     ['label' => 'KPI User Product Commission', 'url' => '/kpi-user-product-commission-crud/index'],
                 ], 'hasChild' => true],
+                ['label' => 'Lead Profit Type', 'url' => ['/lead-profit-type-crud/index']]
             ]
         ];
 
@@ -377,8 +378,10 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Agents report', 'url' => ['/agent-report/index'], 'icon' => 'users'],
                 ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
                 ['label' => 'Calls report', 'url' => ['/report/calls-report'], 'icon' => 'table'],
+                ['label' => 'Calls stats', 'url' => ['/stats/calls-stats'], 'icon' => 'table'],
                 ['label' => 'Leads report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
-                ['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
+                ['label' => 'Leads Stats', 'url' => ['/stats/leads-stats'], 'icon' => 'table'],
+                ['label' => 'Calls Stats Graph', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
