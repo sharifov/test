@@ -15,13 +15,20 @@ $this->title = 'Login Step Two';
             <?php $form = ActiveForm::begin(['id' => 'step-two-form']); ?>
                 <h1><?= $this->title ?></h1>
 
-                <p><?= Yii::t('user', 'Please scan this QR-code with your Google Authenticator') ?></p>
+                <div id="qr-box" style="display: <?= $twoFactorKeyExist ? 'none' : 'block' ?>;">
+                    <p><?= Yii::t('user', 'Please scan this QR-code with your Google Authenticator') ?></p>
 
-                <img src="<?= $qrcodeSrc ?>" alt="" />
+                    <img src="<?= $qrcodeSrc ?>" alt="" />
+                </div>
 
                 <div class="clearfix"></div><br />
 
-                <p><?= Yii::t('user', 'Please enter the six-digit code from your app') ?></p>
+                <p>
+                    <?= Yii::t('user', 'Please enter the six-digit code from your Google Authenticator') ?>,
+                    <u class="btn-show-re-scan" style="cursor: pointer;">
+                        <?= Yii::t('user', 'or re-scan QR-code') ?>
+                    </u>
+                </p>
                 <div>
                     <?= $form->field($model, 'secret_key', ['template' => '{input}{error}'])
                         ->textInput(['autofocus' => true, 'maxlength' => true, 'placeholder' => '']) ?>
@@ -43,3 +50,14 @@ $this->title = 'Login Step Two';
         </section>
     </div>
 </div>
+
+<?php
+
+$jsCode = <<<JS
+    $(document).on('click', '.btn-show-re-scan', function(){
+       $('#qr-box').toggle();
+       return false;
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);

@@ -115,6 +115,7 @@ class SiteController extends FController
 
                 $session = Yii::$app->session;
                 $session->set('two_factor_email', $user->email);
+                $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
                 $session->set('two_factor_key', $twoFactorAuthSecretKey);
                 $session->set('two_factor_remember_me', $model->rememberMe);
                 return $this->redirect(['site/step-two']);
@@ -165,6 +166,7 @@ class SiteController extends FController
         return $this->render('step-two', [
             'qrcodeSrc' => $qrcodeSrc,
             'model' => $model,
+            'twoFactorKeyExist' => $session->get('two_factor_key_exist'),
         ]);
     }
 
