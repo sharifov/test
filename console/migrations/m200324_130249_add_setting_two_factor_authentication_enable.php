@@ -13,7 +13,7 @@ class m200324_130249_add_setting_two_factor_authentication_enable extends Migrat
      */
     public function safeUp()
     {
-        $this->addColumn('{{%user_profile}}', 'up_2fa_enable', $this->boolean()->defaultValue(1));
+        $this->addColumn('{{%user_profile}}', 'up_2fa_enable', $this->boolean()->defaultValue(0));
         $this->addColumn('{{%user_profile}}', 'up_2fa_secret', $this->string(50));
         $this->addColumn('{{%user_profile}}', 'up_2fa_timestamp', $this->timestamp());
 
