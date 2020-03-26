@@ -14,8 +14,6 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
-use yii\helpers\VarDumper;
-use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
@@ -40,7 +38,7 @@ class SiteController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error', 'mfa', 'step-two'], /* TODO:: FOR DEBUG::  mfa must by remove  */
+                        'actions' => ['login', 'error', 'step-two'],
                         'allow' => true,
                     ],
                     [
@@ -73,19 +71,6 @@ class SiteController extends FController
         ];
     }
 
-    public function actionMfa() /* TODO:: FOR DEBUG:: must by remove  */
-    {
-        $secret = (new Manager())->generateSecretKey();
-
-        $totpUri = (new TOTPSecretKeyUriGeneratorService('', '501', $secret))->run();
-        $uri = (new QrCodeDataUriGeneratorService($totpUri))->run();
-
-        return $this->render('mfa', [
-            'uri' => $uri,
-        ]);
-    }
-
-
     /**
      *
      */
@@ -112,7 +97,8 @@ class SiteController extends FController
     public function actionLogin()
     {
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
-        $twoFactorAuth = Yii::$app->params['settings']['two_factor_authentication_enable'];
+        $twoFactorAuthEnable = Yii::$app->params['settings']['two_factor_authentication_enable'];
+        $twoFactorAuthCounter = Yii::$app->params['settings']['two_factor_counter'] ?? 60;
 
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
@@ -121,13 +107,17 @@ class SiteController extends FController
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
-            if ($twoFactorAuth && $user->userProfile->is2faEnable()) {
+            if ($twoFactorAuthEnable && $user->userProfile->is2faEnable()) {
+                $twoFaManager = new Manager();
+                $twoFaManager->setCounter($twoFactorAuthCounter);
+                $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
+                    $twoFaManager->generateSecretKey() : $user->userProfile->up_2fa_secret;
+
                 $session = Yii::$app->session;
                 $session->set('two_factor_email', $user->email);
-                $session->set('two_factor_key', (new Manager())->generateSecretKey());
+                $session->set('two_factor_key', $twoFactorAuthSecretKey);
                 $session->set('two_factor_remember_me', $model->rememberMe);
                 return $this->redirect(['site/step-two']);
-
             }
 
             if ($model->login()) {
@@ -165,14 +155,11 @@ class SiteController extends FController
             ->setTwoFactorAuthKey($twoFactorAuthKey)
             ->setRememberMe($session->get('two_factor_remember_me'));
 
-        if ($model->load(Yii::$app->request->post())) {
-
-            \yii\helpers\VarDumper::dump($model->getErrors(), 10, true); exit();  /* FOR DEBUG:: must by remove */
-
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
             return $this->goHome();
         }
 
-        $totpUri = (new TOTPSecretKeyUriGeneratorService('travelinsides', $userEmail, $twoFactorAuthKey))->run();
+        $totpUri = (new TOTPSecretKeyUriGeneratorService('travelinsides.com', $userEmail, $twoFactorAuthKey))->run();
         $qrcodeSrc = (new QrCodeDataUriGeneratorService($totpUri))->run();
 
         return $this->render('step-two', [

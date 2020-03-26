@@ -15,9 +15,13 @@ $this->title = 'Login Step Two';
             <?php $form = ActiveForm::begin(['id' => 'step-two-form']); ?>
                 <h1><?= $this->title ?></h1>
 
+                <p><?= Yii::t('user', 'Please scan this QR-code with your Google Authenticator') ?></p>
+
                 <img src="<?= $qrcodeSrc ?>" alt="" />
 
                 <div class="clearfix"></div><br />
+
+                <p><?= Yii::t('user', 'Please enter the six-digit code from your app') ?></p>
                 <div>
                     <?= $form->field($model, 'secret_key', ['template' => '{input}{error}'])
                         ->textInput(['autofocus' => true, 'maxlength' => true, 'placeholder' => '']) ?>

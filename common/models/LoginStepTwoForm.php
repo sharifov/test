@@ -11,8 +11,9 @@ use Da\TwoFA\Manager;
  * @property string $secret_key
  * @property string $userEmail
  * @property bool $rememberMe
- * @property string $twoFactorAuthKey *
+ * @property string $twoFactorAuthKey
  * @property int $twoFactorAuthCycles
+ * @property mixed $twoFactorTimestamp
  */
 class LoginStepTwoForm extends Model
 {
@@ -22,6 +23,7 @@ class LoginStepTwoForm extends Model
     private $rememberMe;
     private $twoFactorAuthKey;
     private $twoFactorAuthCycles = 2;
+    private $twoFactorTimestamp;
 
     /**
      * @return array
@@ -30,8 +32,9 @@ class LoginStepTwoForm extends Model
     {
         return [
             [['secret_key'], 'required'],
+            [['secret_key'], 'trim'],
             [['secret_key'], 'string', 'max' => 50],
-            ['secret_key', 'validateKey'],
+            [['secret_key'], 'validateKey'],
         ];
     }
 
@@ -45,14 +48,13 @@ class LoginStepTwoForm extends Model
     public function validateKey($attribute, $params): void
     {
         if (!$this->hasErrors()) {
+
             $valid = (new Manager())
                 ->setCycles($this->twoFactorAuthCycles)
                 ->verify($this->secret_key, $this->twoFactorAuthKey);
 
-            \yii\helpers\VarDumper::dump(['validateKey' => $valid], 10, true); exit();  /* FOR DEBUG:: must by remove */
-
             if (!$valid) {
-                $this->addError($attribute, 'Incorrect secret key.');
+                $this->addError($attribute, 'Wrong verification code. Please verify your secret code and try again.');
             }
         }
     }
@@ -64,10 +66,23 @@ class LoginStepTwoForm extends Model
      */
     public function login(): bool
     {
-        if($user = Employee::findOne(['email' => $this->userEmail])) {
+        if($this->validate() && $user = Employee::findOne(['email' => $this->userEmail])) {
+            $this->saveDataAfterLogin($user);
+
             return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
         }
         return false;
+    }
+
+    /**
+     * @param Employee $user
+     */
+    private function saveDataAfterLogin(Employee $user): void
+    {
+        $userProfile = $user->userProfile;
+        $userProfile->up_2fa_secret = $this->twoFactorAuthKey;
+        $userProfile->up_2fa_timestamp = $this->twoFactorTimestamp;
+        $userProfile->save();
     }
 
     /**
