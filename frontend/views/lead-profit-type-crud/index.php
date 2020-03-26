@@ -39,8 +39,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'lpt_commission_min:percentInteger',
             'lpt_commission_max:percentInteger',
             'lpt_commission_fix:percentInteger',
-            'lpt_created_user_id:userName',
-            'lpt_updated_user_id:userName',
+			[
+				'class' => \sales\yii\grid\UserSelect2Column::class,
+				'attribute' => 'lpt_created_user_id',
+				'relation' => 'createdUser',
+				'url' => '/employee/list-ajax',
+			],
+			[
+				'class' => \sales\yii\grid\UserSelect2Column::class,
+				'attribute' => 'lpt_updated_user_id',
+				'relation' => 'updatedUser',
+				'url' => '/employee/list-ajax',
+			],
             'lpt_created_dt:byUserDateTime',
             'lpt_updated_dt:byUserDateTime',
 

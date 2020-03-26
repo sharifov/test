@@ -5,6 +5,7 @@ namespace common\models;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -19,6 +20,9 @@ use yii\db\ActiveRecord;
  * @property int|null $lpt_updated_user_id
  * @property string|null $lpt_created_dt
  * @property string|null $lpt_updated_dt
+ *
+ * @property Employee $createdUser
+ * @property Employee $updatedUser
  */
 class LeadProfitType extends \yii\db\ActiveRecord
 {
@@ -107,5 +111,15 @@ class LeadProfitType extends \yii\db\ActiveRecord
 	public static function getProfitTypeName(int $id): ?string
 	{
 		return self::getProfitTypeList()[$id] ?? null;
+	}
+
+	public function getCreatedUser(): ActiveQuery
+	{
+		return $this->hasOne(Employee::class, ['id' => 'lpt_created_user_id']);
+	}
+
+	public function getUpdatedUser(): ActiveQuery
+	{
+		return $this->hasOne(Employee::class, ['id' => 'lpt_updated_user_id']);
 	}
 }
