@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\helpers;
 
+use common\components\SearchService;
 use common\models\Airline;
 use common\models\Airport;
 use common\models\local\FlightSegment;
@@ -533,6 +534,7 @@ class FlightQuoteHelper
 				if($airline !== null){
 					$segment['cabin'] = $airline->getCabinByClass($cabin);
 				}
+				$segment['cabin'] = SearchService::getCabinRealCode($segment['cabin']);
 				if (!empty($operationAirlineCode)) {
 					$segment['operatingAirline'] = $operationAirlineCode;
 				}
@@ -753,8 +755,8 @@ class FlightQuoteHelper
 			foreach ($model->prices as $newPrice) {
 				if ((int)$oldPrice['paxCodeId'] === (int)$newPrice->paxCodeId) {
 					if ((float)$oldPrice['selling'] !== (float)$newPrice->selling) {
-						$serviceFee = ProductQuoteHelper::roundPrice($newPrice->selling * $model->serviceFee / 100);
-						$newPrice->markup = $newPrice->selling - $serviceFee;
+						$serviceFee = ProductQuoteHelper::roundPrice((float)$newPrice->selling * $model->serviceFee / 100);
+						$newPrice->markup = (float)$newPrice->selling - $serviceFee;
 
 						if ((int)$newPrice->selling === 0) {
 							$newPrice->net = 0.00;
@@ -763,16 +765,19 @@ class FlightQuoteHelper
 							$newPrice->markup = 0.00;
 							$newPrice->clientSelling = 0.00;
 						} else {
-							$newPrice->clientSelling = ProductQuoteHelper::roundPrice($newPrice->selling * $model->currencyRate);
+							$newPrice->selling = $newPrice->markup + (float)$newPrice->fare + (float)$newPrice->taxes;
+							$serviceFee = ProductQuoteHelper::roundPrice((float)$newPrice->selling * $model->serviceFee / 100);
+							$newPrice->selling = ProductQuoteHelper::roundPrice( ((float)$newPrice->selling + $serviceFee) * (int)$newPrice->cnt);
+							$newPrice->clientSelling = ProductQuoteHelper::roundPrice((float)$newPrice->selling * $model->currencyRate);
 						}
 
 					} else {
 						$newPrice->net = (float)$newPrice->fare + (float)$newPrice->taxes;
 						$newPrice->selling = (float)$newPrice->net + (float)$newPrice->markup;
 
-						$serviceFee = ProductQuoteHelper::roundPrice($newPrice->selling * $model->serviceFee / 100);
-						$newPrice->selling = ProductQuoteHelper::roundPrice( ($newPrice->selling + $serviceFee) * $newPrice->cnt);
-						$newPrice->clientSelling = ProductQuoteHelper::roundPrice($newPrice->selling * $model->currencyRate);
+						$serviceFee = ProductQuoteHelper::roundPrice((float)$newPrice->selling * $model->serviceFee / 100);
+						$newPrice->selling = ProductQuoteHelper::roundPrice( ((float)$newPrice->selling + $serviceFee) * (int)$newPrice->cnt);
+						$newPrice->clientSelling = ProductQuoteHelper::roundPrice((float)$newPrice->selling * $model->currencyRate);
 					}
 				}
 			}

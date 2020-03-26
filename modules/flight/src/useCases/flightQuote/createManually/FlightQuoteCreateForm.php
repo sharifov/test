@@ -1,6 +1,7 @@
 <?php
 namespace modules\flight\src\useCases\flightQuote\createManually;
 
+use common\components\SearchService;
 use common\models\Airline;
 use common\models\Employee;
 use modules\flight\models\Flight;
@@ -80,6 +81,8 @@ class FlightQuoteCreateForm extends CompositeForm
 		if (!empty($this->pricingInfo)) {
 			$this->parsedPricingInfo = FlightQuoteHelper::parsePriceDump($this->pricingInfo);
 		}
+
+		$this->cabin = SearchService::getCabinRealCode($this->cabin);
 	}
 
 	public function internalForms(): array
