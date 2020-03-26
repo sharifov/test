@@ -286,6 +286,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                     ['label' => 'KPI Product Commission', 'url' => '/kpi-product-commission-crud/index'],
                     ['label' => 'KPI User Product Commission', 'url' => '/kpi-user-product-commission-crud/index'],
                 ], 'hasChild' => true],
+                ['label' => 'Lead Profit Type', 'url' => ['/lead-profit-type-crud/index']]
             ]
         ];
 
