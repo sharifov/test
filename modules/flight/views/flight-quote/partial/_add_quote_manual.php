@@ -207,7 +207,7 @@ $pjaxId = 'pjax-container-prices';
                 timeout = setTimeout(function () {
                     $('#add-quote-action').val('$actionCalculate');
                     $('#add-quote-form').submit();
-                }, 500);
+                }, 1500);
             });
             $('body').off('click', '#btn-apply-pricing').on('click', '#btn-apply-pricing', function (e) {
                 $('#add-quote-action').val('$actionApply');
