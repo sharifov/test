@@ -93,4 +93,20 @@ class CasesQController extends FController
             'isAgent' => Auth::user()->isAgent(),
         ]);
     }
+
+    /**
+     * @return string
+     * @throws Yii\base\InvalidConfigException
+     */
+    public function actionHot(): string
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchHot(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('hot', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
 }

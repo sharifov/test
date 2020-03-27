@@ -242,6 +242,29 @@ class CasesQRepository
     }
 
     /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getHotQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find();
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->freeCase();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
+
+        return $query;
+    }
+
+    /**
      * @param $userId
      * @return ActiveQuery
      */

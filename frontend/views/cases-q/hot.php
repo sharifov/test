@@ -1,9 +1,7 @@
 <?php
 
 use common\models\Department;
-use common\models\Employee;
 use common\models\Project;
-use sales\access\ListsAccess;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
 use sales\yii\grid\cases\NeedActionColumn;
@@ -17,25 +15,17 @@ use yii\widgets\Pjax;
 /* @var $searchModel sales\entities\cases\CasesQSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-/** @var Employee $user */
-$user = Yii::$app->user->identity;
-
-$this->title = 'Processing Queue';
+$this->title = 'Hot Queue';
 $this->params['breadcrumbs'][] = $this->title;
-$lists = new ListsAccess($user->id);
 ?>
-<style>
-    .dropdown-menu {
-        z-index: 1010 !important;
-    }
-</style>
+
 <h1>
-    <i class="fa fa-spinner"></i> <?= Html::encode($this->title) ?>
+    <i class="fa fa-flag"></i> <?= Html::encode($this->title) ?>
 </h1>
 
-<div class="cases-q-processing">
+<div class="cases-q-hot">
 
-    <?php Pjax::begin(['id' => 'cases-q-processing-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'cases-q-hot-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -43,7 +33,10 @@ $lists = new ListsAccess($user->id);
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'cs_id',
+            [
+                'attribute' => 'cs_id',
+                'label' => 'ID',
+            ],
 			[
 				'attribute' => 'cs_project_id',
 				'value' => static function (CasesQSearch $model) {
@@ -57,13 +50,13 @@ $lists = new ListsAccess($user->id);
                     'style' => 'word-break: break-all; white-space:normal'
                 ]
             ],
-            [
-                'attribute' => 'cs_category_id',
-                'value' => static function (CasesQSearch $model) {
-                    return $model->category ? $model->category->cc_name : '';
-                },
-                'filter' => CaseCategory::getList()
-            ],
+			[
+				'attribute' => 'cs_category_id',
+				'value' => static function (CasesQSearch $model) {
+					return $model->category ? $model->category->cc_name : '';
+				},
+				'filter' => CaseCategory::getList()
+			],
             [
                 'attribute' => 'cs_lead_id',
                 'value' => static function (CasesQSearch $model) {
@@ -138,15 +131,13 @@ $lists = new ListsAccess($user->id);
                     return $model->getClientTime();
                 },
             ],
-			[
-				'attribute' => 'cs_user_id',
-				'label' => 'Agent',
-				'value' => static function (CasesQSearch $model) {
-					return $model->owner ? $model->owner->username : '';
-				},
-				'filter' => $lists->getEmployees(),
-				'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
-			],
+            [
+                'header' => 'Agent',
+                'format' => 'raw',
+                'value' => static function (CasesQSearch $model) {
+                    return $model->owner ? '<i class="fa fa-user"></i> ' . $model->owner->username : '-';
+                },
+            ],
 			[
 				'attribute' => 'cs_last_action_dt',
 				'label' => 'Last Action',
@@ -161,9 +152,9 @@ $lists = new ListsAccess($user->id);
 			],
             [
                 'class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {take-over}',
+                'template' => '{view} {take}',
                 'visibleButtons' => [
-                    'take-over' => function (CasesQSearch $model, $key, $index) {
+                    'take' => static function (CasesQSearch $model, $key, $index) {
                         return !$model->isOwner(Yii::$app->user->id);
                     },
                 ],
@@ -179,12 +170,12 @@ $lists = new ListsAccess($user->id);
                             'title' => 'View',
                         ]);
                     },
-                    'take-over' => function ($url, Cases $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take Over', ['cases/take', 'gid' => $model->cs_gid], [
+                    'take' => static function ($url, CasesQSearch $model) {
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [
-                                'confirm' => 'Are you sure you want to take over this Case?',
+                                'confirm' => 'Are you sure you want to take this Case?',
                                 //'method' => 'post',
                             ],*/
                         ]);

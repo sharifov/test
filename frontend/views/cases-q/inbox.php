@@ -65,18 +65,18 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'cs_order_uid',
             [
-                'attribute' => 'last_in_date',
-                'value' => static function (CasesQSearch $model) {
-                    return $model->last_in_date ? '<i class="fa fa-calendar"></i> ' .
-                        Yii::$app->formatter->asDatetime(strtotime($model->last_in_date)) : '<span class="not-set">(not set)</span>';
-                },
-                'format' => 'raw',
-            ],
-            [
                 'attribute' => 'last_out_date',
                 'value' => static function (CasesQSearch $model) {
                     return $model->last_out_date ? '<i class="fa fa-calendar"></i> ' .
                         Yii::$app->formatter->asDatetime(strtotime($model->last_out_date)) : '<span class="not-set">(not set)</span>';
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'last_in_date',
+                'value' => static function (CasesQSearch $model) {
+                    return $model->last_in_date ? '<i class="fa fa-calendar"></i> ' .
+                        Yii::$app->formatter->asDatetime(strtotime($model->last_in_date)) : '<span class="not-set">(not set)</span>';
                 },
                 'format' => 'raw',
             ],
