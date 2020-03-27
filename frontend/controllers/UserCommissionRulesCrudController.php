@@ -6,6 +6,7 @@ use Yii;
 use common\models\UserCommissionRules;
 use common\models\search\UserCommissionRulesSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -17,17 +18,18 @@ class UserCommissionRulesCrudController extends FController
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
-    {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
+	public function behaviors()
+	{
+		$behaviors = [
+			'verbs' => [
+				'class' => VerbFilter::class,
+				'actions' => [
+					'delete' => ['POST'],
+				],
+			],
+		];
+		return ArrayHelper::merge(parent::behaviors(), $behaviors);
+	}
 
     /**
      * Lists all UserCommissionRules models.

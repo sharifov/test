@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use Yii;
+use common\models\query\UserCommissionRulesQuery;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -113,4 +113,12 @@ class UserCommissionRules extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'ucr_updated_user_id']);
     }
+
+	/**
+	 * @return UserCommissionRulesQuery|\yii\db\ActiveQuery
+	 */
+	public static function find()
+	{
+		return new UserCommissionRulesQuery(static::class);
+	}
 }

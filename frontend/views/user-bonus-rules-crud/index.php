@@ -6,18 +6,18 @@ use yii\widgets\Pjax;
 use sales\yii\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
-/* @var $searchModel common\models\search\UserCommissionRulesSearch */
+/* @var $searchModel common\models\search\UserBonusRulesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'User Commission Rules';
+$this->title = 'User Bonus Rules';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="user-commission-rules-index">
+<div class="user-bonus-rules-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('<i class="fa fa-plus"></i> Create User Commission Rules', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-plus"></i> Create User Bonus Rules', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php Pjax::begin(); ?>
@@ -27,31 +27,31 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'ucr_exp_month',
-            'ucr_kpi_percent:percentInteger',
-            'ucr_order_profit',
-            'ucr_value:percentInteger',
+            'ubr_exp_month',
+            'ubr_kpi_percent:percentInteger',
+            'ubr_order_profit',
+            'ubr_value',
 			[
 				'class' => \sales\yii\grid\UserSelect2Column::class,
-				'attribute' => 'ucr_created_user_id',
-				'relation' => 'ucrCreatedUser',
+				'attribute' => 'ubr_created_user_id',
+				'relation' => 'ubrCreatedUser',
 				'url' => '/employee/list-ajax',
 				'headerOptions' => ['style' => 'width:13%'],
 			],
 			[
 				'class' => \sales\yii\grid\UserSelect2Column::class,
-				'attribute' => 'ucr_updated_user_id',
-				'relation' => 'ucrUpdatedUser',
+				'attribute' => 'ubr_updated_user_id',
+				'relation' => 'ubrUpdatedUser',
 				'url' => '/employee/list-ajax',
 				'headerOptions' => ['style' => 'width:13%'],
 			],
 			[
 				'class' => DateTimeColumn::class,
-				'attribute' => 'ucr_created_dt',
+				'attribute' => 'ubr_created_dt',
 			],
 			[
 				'class' => DateTimeColumn::class,
-				'attribute' => 'ucr_updated_dt',
+				'attribute' => 'ubr_updated_dt',
 			],
 
             ['class' => 'yii\grid\ActionColumn'],

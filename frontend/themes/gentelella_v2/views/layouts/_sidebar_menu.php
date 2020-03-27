@@ -225,9 +225,10 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ],
                 ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
-                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                ['label' => 'Us er Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                 ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
                 ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
             ]
         ];
 
