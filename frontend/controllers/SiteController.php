@@ -237,10 +237,7 @@ class SiteController extends FController
 
         $qrCode = (new QrCode($url))
             ->setSize(160)
-            ->setMargin(5)
-            ->useForegroundColor(0, 0, 0);
-
-
+            ->setMargin(5);
 
         /*$qrCode = (new QrCode('https://2amigos.us'))
             ->useLogo(__DIR__ . '/data/logo.png')
