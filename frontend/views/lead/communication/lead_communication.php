@@ -297,7 +297,7 @@ $c_type_id = $comForm->c_type_id;
                             <div class="col-sm-3 form-group">
                                 <?php
                                     $typeList = [];
-                                    $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->limit(1)->one();
+                                    $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->limit(1)->one();
 
                                     /** @var \common\models\Employee $userModel */
                                     $userModel = Yii::$app->user->identity;
@@ -321,8 +321,10 @@ $c_type_id = $comForm->c_type_id;
 
                                             if ($tk == CommunicationForm::TYPE_EMAIL) {
 
-                                                if ($agentParams->upp_email) {
-                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
+//                                                if ($agentParams->upp_email) {
+                                                if ($agentParams->getEmail()) {
+//                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
+                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
                                                 }
                                             }
 

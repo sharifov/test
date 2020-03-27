@@ -22,7 +22,8 @@ class UserProjectParamsSearch extends UserProjectParams
     {
         return [
             [['upp_user_id', 'upp_project_id', 'upp_updated_user_id', 'supervision_id'], 'integer'],
-            [['upp_email', 'upp_phone_number', 'upp_tw_phone_number', 'upp_tw_sip_id', 'upp_created_dt', 'upp_updated_dt', 'upp_allow_general_line'], 'safe'],
+//            ['upp_email', 'safe'],
+            [['upp_phone_number', 'upp_tw_phone_number', 'upp_tw_sip_id', 'upp_created_dt', 'upp_updated_dt', 'upp_allow_general_line'], 'safe'],
             ['upp_phone_list_id', 'integer'],
             ['upp_email_list_id', 'integer'],
         ];
@@ -89,7 +90,8 @@ class UserProjectParamsSearch extends UserProjectParams
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        $query->andFilterWhere(['like', 'upp_email', $this->upp_email])
+        $query
+//            ->andFilterWhere(['like', 'upp_email', $this->upp_email])
             ->andFilterWhere(['like', 'upp_tw_phone_number', $this->upp_tw_phone_number]);
 
         return $dataProvider;

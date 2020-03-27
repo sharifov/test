@@ -8,6 +8,7 @@ use common\models\UserProjectParams;
 use http\Url;
 use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
+use sales\model\emailList\entity\EmailList;
 use Yii;
 use common\models\Email;
 use common\models\search\EmailSearch;
@@ -83,7 +84,8 @@ class EmailController extends FController
             }
 
             if(!$modelNewEmail->e_project_id) {
-                $upp = UserProjectParams::find()->where(['LOWER(upp_email)' => strtolower($modelNewEmail->e_email_from)])->one();
+//                $upp = UserProjectParams::find()->where(['LOWER(upp_email)' => strtolower($modelNewEmail->e_email_from)])->one();
+                $upp = UserProjectParams::find()->byEmail(strtolower($modelNewEmail->e_email_from))->one();
                 if($upp && $upp->upp_project_id) {
                     $modelNewEmail->e_project_id = $upp->upp_project_id;
                 }
@@ -123,7 +125,8 @@ class EmailController extends FController
             }
 
             if(Yii::$app->request->get('action') === 'new') {
-                $upp = UserProjectParams::find()->where(['LOWER(upp_email)' => strtolower($modelNewEmail->e_email_from)])->one();
+//                $upp = UserProjectParams::find()->where(['LOWER(upp_email)' => strtolower($modelNewEmail->e_email_from)])->one();
+                $upp = UserProjectParams::find()->byEmail(strtolower($modelNewEmail->e_email_from))->one();
                 if($upp && $upp->upp_project_id) {
                     $modelNewEmail->e_project_id = $upp->upp_project_id;
                 }
@@ -179,7 +182,8 @@ class EmailController extends FController
                         'name'  => Yii::$app->user->identity->full_name,
                         'username'  => Yii::$app->user->identity->username,
                         'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
-                        'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+//                        'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+                        'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
                     ];
 
 
@@ -269,13 +273,25 @@ class EmailController extends FController
         }
 
 
-        $mailList = [];
+//        $mailList = [];
 
-        $mails = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
-        if($mails) {
-            $mailList = ArrayHelper::map($mails, 'upp_email', 'upp_email');
-        }
+//        $mails = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
+//        $mails = UserProjectParams::find()
+//            ->select([EmailList::tableName() . '.el_email', 'upp_email_list_id'])
+//            ->where(['upp_user_id' => Yii::$app->user->id])
+//            ->joinWith('emailList', true, 'INNER JOIN')
+//            ->asArray()->all();
+//        if ($mails) {
+////            $mailList = ArrayHelper::map($mails, 'upp_email', 'upp_email');
+//            $mailList = ArrayHelper::map($mails, 'el_email', 'el_email');
+//        }
 
+        $mailList = UserProjectParams::find()
+            ->select(['el_email', 'upp_email_list_id'])
+            ->where(['upp_user_id' => Yii::$app->user->id])
+            ->joinWith('emailList', false, 'INNER JOIN')
+            ->indexBy('el_email')
+            ->column();
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
@@ -283,7 +299,7 @@ class EmailController extends FController
         if($user && $user->email) {
             $mailList[$user->email] = $user->email;
         }
-        
+
         $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
 
 
@@ -313,7 +329,8 @@ class EmailController extends FController
         $roleAccess = ($user->isAdmin() || $user->isSupervision() || $user->isExSuper() || $user->isSupSuper() || $user->isQa());
 
         if(!$roleAccess) {
-            $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => $user->id])->exists();
+//            $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => $user->id])->exists();
+            $userAccess = UserProjectParams::find()->byEmail([$model->e_email_from, $model->e_email_to])->andWhere(['upp_user_id' => $user->id])->exists();
             if(!$userAccess) {
                 if ($model->e_case_id) {
                     $userAccess = Cases::find()->where(['cs_id' => $model->e_case_id, 'cs_user_id' => $user->id])->exists();

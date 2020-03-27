@@ -378,12 +378,14 @@ class CasesController extends FController
 
 
                     $upp = null;
-					if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::findOne(['dep_id' => $comForm->dep_email_id])) {
-						$mailFrom = $departmentEmail->dep_email;
+					if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::find()->andWhere(['dep_id' => $comForm->dep_email_id])->withEmailList()->one()) {
+//						$mailFrom = $departmentEmail->dep_email;
+						$mailFrom = $departmentEmail->getEmail();
 					} else if ($model->cs_project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
                         if ($upp) {
-                            $mailFrom = $upp->upp_email;
+//                            $mailFrom = $upp->upp_email;
+                            $mailFrom = $upp->getEmail();
                         }
                     }
 

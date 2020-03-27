@@ -36,6 +36,7 @@ class EmailSelect2Column extends DataColumn
     public $delay = 300;
     public $placeholder = '';
     public $data = [];
+    public $format = 'emailList';
 
     public function init(): void
     {
@@ -53,8 +54,8 @@ class EmailSelect2Column extends DataColumn
 
         if ($this->filter !== false && $model instanceof Model && $this->attribute !== null && $model->isAttributeActive($this->attribute)) {
             if ($emailId = (int) $model->getAttribute($this->attribute)) {
-                if ($phone = EmailList::find()->select(['el_id', 'el_email'])->where(['el_id' => $emailId])->cache(3600)->one()) {
-                    $this->data[$phone->el_id] = $phone->el_email . ' (' . $phone->el_id . ')';
+                if ($email = EmailList::find()->select(['el_id', 'el_email'])->where(['el_id' => $emailId])->cache(3600)->one()) {
+                    $this->data[$email->el_id] = $email->el_email . ' (' . $email->el_id . ')';
                 }
             }
         }
@@ -62,11 +63,10 @@ class EmailSelect2Column extends DataColumn
         $this->options = ArrayHelper::merge(['style' => 'width:200px'], $this->options);
     }
 
-    public function getDataCellValue($model, $key, $index): ?string
+    public function getDataCellValue($model, $key, $index)
     {
-        if ($model->{$this->attribute} && ($phone = $model->{$this->relation})) {
-            /** @var EmailList $phone */
-            return $phone->el_email;
+        if ($model->{$this->attribute} && ($email = $model->{$this->relation})) {
+            return $email;
         }
         return null;
     }

@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'upp_project_id') ?>
 
-    <?= $form->field($model, 'upp_email') ?>
+    <?php //= $form->field($model, 'upp_email') ?>
 
     <?= $form->field($model, 'upp_tw_phone_number') ?>
 

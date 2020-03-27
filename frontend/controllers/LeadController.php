@@ -587,9 +587,11 @@ class LeadController extends FController
 
                     $upp = null;
                     if ($lead->project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+//                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
                         if ($upp) {
-                            $mailFrom = $upp->upp_email;
+//                            $mailFrom = $upp->upp_email;
+                            $mailFrom = $upp->getEmail();
                         }
                     }
 

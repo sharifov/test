@@ -10,12 +10,14 @@
  *
  */
 
+use common\models\DepartmentEmailProject;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\entities\cases\Cases;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
+use yii\helpers\VarDumper;
 
 $c_type_id = $comForm->c_type_id;
 
@@ -290,7 +292,7 @@ $c_type_id = $comForm->c_type_id;
                             <div class="col-sm-3 form-group">
                                 <?php
                                     $typeList = [];
-                                    $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->limit(1)->one();
+                                    $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->limit(1)->one();
 
                                     /** @var \common\models\Employee $userModel */
                                     $userModel = Yii::$app->user->identity;
@@ -314,8 +316,11 @@ $c_type_id = $comForm->c_type_id;
 
                                                 if ($model->isDepartmentSupport()) {
 													$typeList[$tk] = $itemName;
-												} else if ($agentParams->upp_email) {
-                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
+//												} else if ($agentParams->upp_email) {
+//                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
+//                                              }
+												} else if ($agentParams->getEmail()) {
+                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
                                                 }
                                             }
 
@@ -376,15 +381,23 @@ $c_type_id = $comForm->c_type_id;
 							<?php if ($model->isDepartmentSupport()): ?>
                                 <div class="col-md-3 form-group message-field-email" id="department-emails">
 									<?php
-									$departmentEmails = \yii\helpers\ArrayHelper::toArray($model->getDepartmentEmailsByProjectAndDepartment()->where(['dep_default' => \common\models\DepartmentPhoneProject::DEP_DEFAULT_TRUE])->all());
+                                    $departmentEmailsList = [];
+                                    /** @var DepartmentEmailProject[] $departmentEmails */
+									$departmentEmails = $model->getDepartmentEmailsByProjectAndDepartment()->where(['dep_default' => \common\models\DepartmentPhoneProject::DEP_DEFAULT_TRUE])->withEmailList()->all();
+                                    foreach ($departmentEmails as $departmentEmail) {
+                                        if ($departmentEmail->getEmail()) {
+                                            $departmentEmailsList[$departmentEmail->dep_id] = $departmentEmail->getEmail();
+                                        }
+                                    }
 									?>
                                     <?php
                                         $optionsEmail = ['class' => 'form-control'];
-                                        if (count($departmentEmails) > 1) {
+                                        if (count($departmentEmailsList) > 1) {
 											$optionsEmail['prompt'] = '---';
                                         }
                                     ?>
-									<?= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), $optionsEmail) ?>
+                                    <?php //= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), $optionsEmail) ?>
+                                    <?= $form->field($comForm,'dep_email_id')->dropDownList($departmentEmailsList, $optionsEmail) ?>
                                 </div>
 							<?php endif; ?>
 

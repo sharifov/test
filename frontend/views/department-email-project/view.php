@@ -40,13 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				'filter' => \common\models\Project::getList(true),
 				'format' => 'raw',
 			],
-			[
-				'attribute' => 'dep_dep_id',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					return $model->depDep ? $model->depDep->dep_name : '-';
-				},
-				'filter' => \common\models\Department::getList()
-			],
+            'dep_dep_id:department',
 			[
 				'attribute' => 'dep_source_id',
 				'value' => static function (\common\models\DepartmentEmailProject $model) {
@@ -54,16 +48,9 @@ $this->params['breadcrumbs'][] = $this->title;
 				},
 				'filter' => \common\models\Sources::getList(true)
 			],
-            'dep_enable:boolean',
-            'dep_default:boolean',
-			[
-				'attribute' => 'dep_updated_user_id',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					return $model->dep_updated_user_id ? '<i class="fa fa-user"></i> ' .Html::encode($model->depUpdatedUser->username) : $model->dep_updated_user_id;
-				},
-				'format' => 'raw',
-				'filter' => \common\models\Employee::getList()
-			],
+            'dep_enable:booleanByLabel',
+            'dep_default:booleanByLabel',
+            'dep_updated_user_id:userName',
 			[
 				'attribute' => 'dep_updated_dt',
 				'value' => static function (\common\models\DepartmentEmailProject $model) {
