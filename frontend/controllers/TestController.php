@@ -86,6 +86,7 @@ use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
@@ -197,7 +198,9 @@ class TestController extends FController
 
     public function actionTest()
     {
-        die;
+
+
+        return $this->render('blank');
 
         $lead = Lead::findOne(371222);
         $repo = Yii::createObject(LeadRepository::class);

@@ -446,10 +446,15 @@ class QuoteController extends ApiBaseController
 
             $response['status'] = $model->status != $model::STATUS_DECLINED ? 'Success' : 'Failed';
 
-            $userProjectParams = UserProjectParams::findOne([
-                'upp_user_id' => $model->lead->employee_id,
-                'upp_project_id' => $model->lead->project_id
-            ]);
+//            $userProjectParams = UserProjectParams::findOne([
+//                'upp_user_id' => $model->lead->employee_id,
+//                'upp_project_id' => $model->lead->project_id
+//            ]);
+
+            $userProjectParams = UserProjectParams::find()
+                ->andWhere(['upp_user_id' => $model->lead->employee_id,'upp_project_id' => $model->lead->project_id])
+                ->withEmailList()
+                ->one();
 
             $response['uid'] = $uid;
             $response['lead_id'] = $model->lead->id;
@@ -465,7 +470,8 @@ class QuoteController extends ApiBaseController
             }
 
             $response['agentName'] = ($model->lead && $model->lead->employee) ? $model->lead->employee->username : null;
-            $response['agentEmail'] = $userProjectParams ? $userProjectParams->upp_email : $model->lead->project->contactInfo->email;
+//            $response['agentEmail'] = $userProjectParams ? $userProjectParams->upp_email : $model->lead->project->contactInfo->email;
+            $response['agentEmail'] = ($userProjectParams && $userProjectParams->getEmail()) ? $userProjectParams->getEmail() : $model->lead->project->contactInfo->email;
             $response['agentDirectLine'] = $userProjectParams ? $userProjectParams->upp_tw_phone_number : sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);

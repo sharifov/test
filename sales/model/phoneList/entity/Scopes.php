@@ -9,5 +9,8 @@ use yii\db\ActiveQuery;
  */
 class Scopes extends ActiveQuery
 {
-
+    public function enabled(): self
+    {
+        return $this->andWhere(['pl_enabled' => true]);
+    }
 }

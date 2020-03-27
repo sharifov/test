@@ -40,7 +40,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
     <?= $form->field($model, 'upp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 
-    <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
+    <?php //= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
     <?= $form->field($model, 'upp_email_list_id')->widget(EmailSelect2Widget::class, [
         'data' => $model->upp_email_list_id ? [

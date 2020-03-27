@@ -110,7 +110,7 @@ class EmailListController extends FController
         $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
 
         if ($q !== null) {
-            $data = EmailList::find()->select(['id' => 'el_id', 'text' => 'el_email'])
+            $data = EmailList::find()->select(['id' => 'el_id', 'text' => 'el_email', 'enabled' => 'el_enabled'])
                 ->where(['like', 'el_email', $q])
                 ->orWhere(['el_id' => (int)$q])
                 ->limit(20)
@@ -120,7 +120,7 @@ class EmailListController extends FController
 
             if ($data) {
                 foreach ($data as $n => $item) {
-                    $text = $item['text'] . ' (' . $item['id'] . ')';
+                    $text = $item['enabled'] ? $item['text'] . ' (' . $item['id'] . ')' : ''  . $item['text'] . ' (' . $item['id'] . ')' . ' <span style="color:red"><b>DISABLED</b></span>';
                     $data[$n]['text'] = $this->formatText($text, $q);
                     $data[$n]['selection'] = $item['text'];
                 }

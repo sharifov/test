@@ -54,9 +54,9 @@ class UserProjectParams extends \yii\db\ActiveRecord
             [['upp_user_id', 'upp_project_id'], 'required'],
             [['upp_user_id', 'upp_project_id', 'upp_updated_user_id', 'upp_dep_id'], 'integer'],
             [['upp_created_dt', 'upp_updated_dt'], 'safe'],
-            [['upp_email'], 'string', 'max' => 100],
-            [['upp_email'], 'trim'],
-            [['upp_email'], 'email'],
+//            [['upp_email'], 'string', 'max' => 100],
+//            [['upp_email'], 'trim'],
+//            [['upp_email'], 'email'],
 
             ['upp_tw_phone_number', 'unique', 'targetAttribute' => ['upp_tw_phone_number']], //, 'message' => 'Twillio Phone Number must be unique'],
 
@@ -158,6 +158,20 @@ class UserProjectParams extends \yii\db\ActiveRecord
     public function getPhoneList(): ActiveQuery
     {
         return $this->hasOne(PhoneList::class, ['pl_id' => 'upp_phone_list_id']);
+    }
+
+    public function getEmail(bool $onlyEnabled = false): ?string
+    {
+        if (!$this->emailList) {
+            return null;
+        }
+        if ($onlyEnabled) {
+            if ($this->emailList->el_enabled) {
+                return $this->emailList->el_email;
+            }
+            return null;
+        }
+        return $this->emailList->el_email;
     }
 
     public function getEmailList(): ActiveQuery

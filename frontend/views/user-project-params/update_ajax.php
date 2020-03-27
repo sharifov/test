@@ -43,7 +43,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
     <?php //= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['disabled' => true]) ?>
 
-    <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
+    <?php //= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
     <?= $form->field($model, 'upp_email_list_id')->widget(EmailSelect2Widget::class, [
         'data' => $model->upp_email_list_id ? [
