@@ -1,6 +1,7 @@
 <?php
 namespace common\models\query;
 
+use common\models\UserBonusRules;
 use yii\db\ActiveQuery;
 
 /**
@@ -13,18 +14,15 @@ class UserBonusRulesQuery extends ActiveQuery
 {
 	/**
 	 * @param int $exp
-	 * @param float $kpiPercent
-	 * @param int $orderProfit
-	 * @return array|int|\yii\db\ActiveRecord
+	 * @return float
 	 */
-	public function getBonusValue(int $exp, float $kpiPercent, int $orderProfit)
+	public function getBonusValueByExpMonth(int $exp): float
 	{
+		/** @var $value UserBonusRules */
 		$value = $this
-			->andWhere(['user_bonus_rules.ubr_exp_month' => $exp])
-			->andWhere(['user_bonus_rules.ubr_kpi_percent' => $kpiPercent])
-			->andWhere(['user_bonus_rules.ubr_order_profit' => $orderProfit])
-			->orderBy(['ubr_exp_month' => SORT_DESC, 'ubr_kpi_percent' => SORT_DESC, 'ubr_order_profit' => SORT_DESC])->one();
+			->andWhere(['>=', 'user_bonus_rules.ubr_exp_month', $exp])
+			->orderBy(['ubr_exp_month' => SORT_ASC, 'ubr_kpi_percent' => SORT_DESC, 'ubr_order_profit' => SORT_DESC])->one();
 
-		return $value ?? 0;
+		return $value ? $value->ubr_value : 0.00;
 	}
 }

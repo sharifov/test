@@ -4,6 +4,8 @@
  * @var $model Employee
  * @var $modelUserParams \common\models\UserParams
  * @var $qrcodeData string
+ * @var $userCommissionRuleValue int
+ * @var $userBonusRuleValue int
  */
 
 use yii\bootstrap\Html;
@@ -132,6 +134,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $modelUserParams,
         'attributes' => [
             [
+                'label' => 'Start of work in the company',
+                'value' => static function (\common\models\UserParams $model) {
+                    return $model->upUser->userProfile->up_join_date;
+                }
+            ],
+            [
                 'attribute' => 'up_base_amount',
                 'value' => function(\common\models\UserParams $model) {
                     return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
@@ -143,6 +151,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
                 },
 
+            ],
+			[
+				'label' => 'New Commission Percent',
+				'value' => $userCommissionRuleValue . ' %'
+			],
+            [
+                'label' => 'New Bonus Value',
+                'value' => '$'.$userBonusRuleValue
             ],
             'up_bonus_active:boolean',
             'up_timezone',

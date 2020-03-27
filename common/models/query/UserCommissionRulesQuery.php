@@ -1,7 +1,8 @@
 <?php
 namespace common\models\query;
 
-use yii\db\ActiveRecord;
+use common\models\UserCommissionRules;
+use yii\db\ActiveQuery;
 
 /**
  * Class UserCommissionRulesQuery
@@ -9,22 +10,19 @@ use yii\db\ActiveRecord;
  *
  * @see \common\models\UserCommissionRules
  */
-class UserCommissionRulesQuery extends \yii\db\ActiveQuery
+class UserCommissionRulesQuery extends ActiveQuery
 {
 	/**
 	 * @param int $exp
-	 * @param float $kpiPercent
-	 * @param int $orderProfit
-	 * @return int|array|ActiveRecord
+	 * @return float
 	 */
-	public function getCommissionValue(int $exp, float $kpiPercent, int $orderProfit)
+	public function getCommissionValueByExpMonth(int $exp): float
 	{
+		/** @var $value UserCommissionRules */
 		$value = $this
-			->andWhere(['user_commission_rules.ucr_exp_month' => $exp])
-			->andWhere(['user_commission_rules.ucr_kpi_percent' => $kpiPercent])
-			->andWhere(['user_commission_rules.ucr_order_profit' => $orderProfit])
-			->orderBy(['ucr_exp_month' => SORT_DESC, 'ucr_kpi_percent' => SORT_DESC, 'ucr_order_profit' => SORT_DESC])->one();
+			->andWhere(['>=', 'user_commission_rules.ucr_exp_month', $exp])
+			->orderBy(['ucr_exp_month' => SORT_ASC, 'ucr_kpi_percent' => SORT_DESC, 'ucr_order_profit' => SORT_DESC])->one();
 
-		return $value ?? 0;
+		return $value ? $value->ucr_value : 0.00;
 	}
 }
