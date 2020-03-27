@@ -47,13 +47,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw',
             'filter' => \common\models\Employee::getActiveUsersListFromCommonGroups(Auth::id())
         ],
-        [   'label' =>'Period',
-            'value' => function($data) {
-                $dates = explode(' ', $data['createdDate']);
-                return '<i class="fa fa-clock-o"></i> <span title="'. implode('&#10;', $dates) .'">' . $dates[0] . '</span>';
-            },
-            'format' => 'raw',
-        ],
 
         [
             'label' => 'Duration',
@@ -292,7 +285,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'beforeHeader' => [
             [
                 'columns' => [
-                    ['content' => '', 'options' => ['colspan' => 2]],
+                    ['content' => '', 'options' => ['colspan' => 1]],
                     ['content' => 'Total', 'options' => ['colspan' => 2, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                     ['content' => 'Outgoing Calls', 'options' => ['colspan' => 5, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
                     ['content' => 'Incoming Calls', 'options' => ['colspan' => 4, 'class' => 'text-success text-center warning', 'style' => 'border-left: 2px solid #f0ad4e;']],
