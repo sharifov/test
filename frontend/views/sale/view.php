@@ -796,11 +796,13 @@ $('.refresh-from-bo').on('click', function (e) {
         }  
         
         let obj = $(this),            
-            caseSaleId = obj.attr('data-case-sale-id');
-        
+            caseSaleId = obj.attr('data-case-sale-id'),
+            caseId = obj.attr('data-case-id');
+                
         $.ajax({
             url: '/sale/delete-ajax?id=' + caseSaleId,
             type: 'post',
+            data: {'sale_id' : caseSaleId, 'case_id' : caseId}, 
             dataType: "json",    
             beforeSend: function () {
                 obj.attr('disabled', true).find('i').toggleClass('fa-spin');
