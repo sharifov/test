@@ -75,18 +75,6 @@ use yii\widgets\ActiveForm;
     </div>
     <div class="row">
         <div class="col-md-1">
-            <?= $form->field($model, 'cssChargedFrom') ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cssChargedTo') ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cssProfitFrom') ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cssProfitTo') ?>
-        </div>
-        <div class="col-md-1">
             <?php
                 echo $form->field($model, 'departureAirport')->widget(Select2::class, [
                     'data' => Airport::getIataList(),
