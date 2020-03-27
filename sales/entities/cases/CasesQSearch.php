@@ -727,6 +727,7 @@ class CasesQSearch extends Cases
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => [
+                'last_out_date' => SORT_ASC,
                 'sort_order' => SORT_DESC,
                 'cs_id' => SORT_ASC
                 ]
