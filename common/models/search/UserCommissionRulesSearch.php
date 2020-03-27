@@ -4,12 +4,12 @@ namespace common\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\LeadProfitType;
+use common\models\UserCommissionRules;
 
 /**
- * LeadProfitTypeSearch represents the model behind the search form of `common\models\LeadProfitType`.
+ * UserCommissionRulesSearch represents the model behind the search form of `common\models\UserCommissionRules`.
  */
-class LeadProfitTypeSearch extends LeadProfitType
+class UserCommissionRulesSearch extends UserCommissionRules
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,9 @@ class LeadProfitTypeSearch extends LeadProfitType
     public function rules()
     {
         return [
-            [['lpt_profit_type_id', 'lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix', 'lpt_created_user_id', 'lpt_updated_user_id'], 'integer'],
-            [['lpt_created_dt', 'lpt_updated_dt'], 'safe'],
+            [['ucr_exp_month', 'ucr_kpi_percent', 'ucr_order_profit', 'ucr_created_user_id', 'ucr_updated_user_id'], 'integer'],
+            [['ucr_value'], 'number'],
+            [['ucr_created_dt', 'ucr_updated_dt'], 'safe'],
         ];
     }
 
@@ -40,7 +41,7 @@ class LeadProfitTypeSearch extends LeadProfitType
      */
     public function search($params)
     {
-        $query = LeadProfitType::find();
+        $query = UserCommissionRules::find();
 
         // add conditions that should always apply here
 
@@ -58,15 +59,14 @@ class LeadProfitTypeSearch extends LeadProfitType
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'lpt_profit_type_id' => $this->lpt_profit_type_id,
-            'lpt_diff_rule' => $this->lpt_diff_rule,
-            'lpt_commission_min' => $this->lpt_commission_min,
-            'lpt_commission_max' => $this->lpt_commission_max,
-            'lpt_commission_fix' => $this->lpt_commission_fix,
-            'lpt_created_user_id' => $this->lpt_created_user_id,
-            'lpt_updated_user_id' => $this->lpt_updated_user_id,
-            'date_format(lpt_created_dt, "%Y-%m-%d")' => $this->lpt_created_dt,
-            'date_format(lpt_updated_dt, "%Y-%m-%d")' => $this->lpt_updated_dt,
+            'ucr_exp_month' => $this->ucr_exp_month,
+            'ucr_kpi_percent' => $this->ucr_kpi_percent,
+            'ucr_order_profit' => $this->ucr_order_profit,
+            'ucr_value' => $this->ucr_value,
+            'ucr_created_user_id' => $this->ucr_created_user_id,
+            'ucr_updated_user_id' => $this->ucr_updated_user_id,
+            'date_format(ucr_created_dt, "%Y-%m-%d")' => $this->ucr_created_dt,
+            'date_format(ucr_updated_dt, "%Y-%m-%d")' => $this->ucr_updated_dt,
         ]);
 
         return $dataProvider;
