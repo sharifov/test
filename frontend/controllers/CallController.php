@@ -522,10 +522,12 @@ class CallController extends FController
                     }
                 }
 
-                $upp = UserProjectParams::find()->where(['upp_project_id' => $leadModel->project_id, 'upp_user_id' => $user->id])->one();
-                if($upp && $upp->upp_tw_phone_number) {
+                $upp = UserProjectParams::find()->where(['upp_project_id' => $leadModel->project_id, 'upp_user_id' => $user->id])->withPhoneList()->one();
+//                if($upp && $upp->upp_tw_phone_number) {
+                if($upp && $upp->getPhone()) {
 
                     //$callData['phone_from'] = $upp->upp_tw_phone_number;
+                    //$callData['phone_from'] = $upp->$upp->getPhone();
 
                     $dpp = DepartmentPhoneProject::find()->where(['dpp_project_id' => $leadModel->project_id])->limit(1)->one();
                     if($dpp && $dpp->dpp_phone_number) {

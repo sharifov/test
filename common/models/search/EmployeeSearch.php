@@ -71,7 +71,7 @@ class EmployeeSearch extends Employee
      */
     public function search($params)
     {
-        $query = Employee::find()->with('ugsGroups', 'userParams', 'userProfile', 'userProjectParams');
+        $query = Employee::find()->with('ugsGroups', 'userParams', 'userProfile', 'userProjectParams.phoneList');
 
         // add conditions that should always apply here
         //VarDumper::dump($params);

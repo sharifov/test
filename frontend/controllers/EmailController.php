@@ -181,7 +181,8 @@ class EmailController extends FController
                     $content_data['agent'] = [
                         'name'  => Yii::$app->user->identity->full_name,
                         'username'  => Yii::$app->user->identity->username,
-                        'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+//                        'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+                        'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
 //                        'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
                         'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
                     ];

@@ -52,12 +52,13 @@ class InternalPhoneGuard
      */
     private function getUserProjectParams(): array
     {
-        $phones = [];
-        foreach (UserProjectParams::find()->select(['upp_tw_phone_number'])->asArray()->all() as $phone) {
-            if ($phone['upp_tw_phone_number']) {
-                $phones[] = $phone['upp_tw_phone_number'];
-            }
-        }
-        return $phones;
+//        $phones = [];
+//        foreach (UserProjectParams::find()->select(['upp_tw_phone_number'])->asArray()->all() as $phone) {
+//            if ($phone['upp_tw_phone_number']) {
+//                $phones[] = $phone['upp_tw_phone_number'];
+//            }
+//        }
+//        return $phones;
+        return UserProjectParams::find()->select(['pl_phone_number'])->innerJoinWith('phoneList', false)->column();
     }
 }

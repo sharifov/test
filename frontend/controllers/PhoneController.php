@@ -84,15 +84,18 @@ class PhoneController extends FController
 			foreach ($departmentPhones as $departmentPhone) {
 				$fromPhoneNumbers[$departmentPhone->dpp_phone_number] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->dpp_phone_number . ')';
 			}
-		} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->all()) {
+		} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->withPhoneList()->all()) {
             foreach ($userParams as $param) {
-                if(!$param->upp_tw_phone_number) {
+//                if(!$param->upp_tw_phone_number) {
+                if(!$param->getPhone()) {
                     continue;
                 }
-                $fromPhoneNumbers[$param->upp_tw_phone_number] = $param->uppProject->name . ' (' . $param->upp_tw_phone_number . ')';
+//                $fromPhoneNumbers[$param->upp_tw_phone_number] = $param->uppProject->name . ' (' . $param->upp_tw_phone_number . ')';
+                $fromPhoneNumbers[$param->getPhone()] = $param->uppProject->name . ' (' . $param->getPhone() . ')';
 
                 if($project_id  && $project_id == $param->upp_project_id) {
-                    $selectProjectPhone = $param->upp_tw_phone_number;
+//                    $selectProjectPhone = $param->upp_tw_phone_number;
+                    $selectProjectPhone = $param->getPhone();
                 }
             }
         }
@@ -193,7 +196,8 @@ class PhoneController extends FController
         $depId = null;
 
         if ($call_from && $project_id) {
-            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call_from, 'upp_project_id' => $project_id])->limit(1)->one();
+//            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call_from, 'upp_project_id' => $project_id])->limit(1)->one();
+            $upp = UserProjectParams::find()->byPhone($call_from, false)->andWhere(['upp_project_id' => $project_id])->limit(1)->one();
             if ($upp && $upp->upp_dep_id) {
                 $depId = $upp->upp_dep_id;
             }

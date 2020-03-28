@@ -276,7 +276,8 @@ $duration = 10;
                         foreach ($user->userProjectParams as $upp):?>
                             <tr>
                                 <td><?=Html::encode($upp->uppProject->name)?></td>
-                                <td><?=Html::encode($upp->upp_tw_phone_number)?></td>
+<!--                                <td>--><?php //=Html::encode($upp->upp_tw_phone_number)?><!--</td>-->
+                                <td><?=Html::encode($upp->getPhone())?></td>
                             </tr>
                         <?php endforeach; ?>
                     </table>
