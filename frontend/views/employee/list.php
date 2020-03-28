@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use yii\grid\ActionColumn;
+use sales\yii\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
@@ -117,6 +118,32 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'attribute' => 'id',
                 'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
             ],
+            [
+                'label' => 'Work Experience',
+                'attribute' => 'experienceMonth',
+                'value' => static function (Employee $model) {
+                    return $model->userProfile ? $model->userProfile->getExperienceMonth() : 0;
+                }
+            ],
+            [
+                'attribute' => 'joinDate',
+                'value' => static function (Employee $model) {
+					return $model->userProfile->up_join_date;
+                },
+				'filter' => DatePicker::widget([
+					'model' => $searchModel,
+					'attribute' => 'joinDate',
+					'clientOptions' => [
+						'autoclose' => true,
+						'format' => 'yyyy-mm-dd',
+					],
+					'options' => [
+						'autocomplete' => 'off',
+						'placeholder' =>'Choose Date',
+                        'style' => 'width: 150px'
+					],
+				]),
+			],
              [
                 'label' => '2FA enable',
                 'value' => static function (\common\models\Employee $model) {
@@ -187,7 +214,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     return $roles ? implode(', ', $roles) : '-';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles()
+                'filter' => \common\models\Employee::getAllRoles(),
+                'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
 
             'email:email',

@@ -355,6 +355,19 @@ JS;
 
             <div class="row">
                 <div class="col-md-3">
+                    <?php if ($modelProfile->up_join_date === null): $modelProfile->up_join_date = date('Y-m-d'); endif; ?>
+                    <?= $form->field($modelProfile, 'up_join_date')->widget(\dosamigos\datepicker\DatePicker::class, [
+						'clientOptions' => [
+							'autoclose' => true,
+							'format' => 'yyyy-mm-dd',
+						],
+						'options' => [
+							'autocomplete' => 'off',
+							'placeholder' =>'Choose Date',
+						],
+                    ]) ?>
+                </div>
+                <div class="col-md-3">
                     <?= $form->field($modelProfile, 'up_call_type_id')->dropDownList(\common\models\UserProfile::CALL_TYPE_LIST) ?>
                 </div>
                 <div class="col-md-3">

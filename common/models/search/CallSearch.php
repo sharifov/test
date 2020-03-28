@@ -389,13 +389,13 @@ class CallSearch extends Call
 
         if ($this->timeTo == ""){
             $differenceTimeToFrom  = "24:00";
-        } else {
+        } /*else {
             if((strtotime($this->timeTo) - strtotime($this->timeFrom)) <= 0){
                 $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
             } else {
                 $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
             }
-        }
+        }*/
 
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
@@ -467,13 +467,13 @@ class CallSearch extends Call
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where('ugs_group_id = ' . $this->userGroupId);
             $subQuery->andWhere(['c_created_user_id' => $userIdsByGroup]);
         }
-        $subQuery->groupBy(['c_created_user_id', 'createdDate']);
+        $subQuery->groupBy(['c_created_user_id']);
 
         $subQuerycommand = $subQuery->createCommand();
         $subQuerySQL = $subQuerycommand->getRawSql();
 
         $query = new Query();
-        $query->select(['c_created_user_id, group_concat(createdDate SEPARATOR " ") as createdDate, 
+        $query->select(['c_created_user_id, 
                         SUM(outgoingCallsDuration) as outgoingCallsDuration, 
                         SUM(outgoingCalls) as outgoingCalls, 
                         SUM(outgoingCallsCompleted) as outgoingCallsCompleted, 
@@ -519,7 +519,6 @@ class CallSearch extends Call
                 //'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
                     'c_created_user_id',
-                    'createdDate',
                     'outgoingCallsDuration',
                     'outgoingCalls',
                     'outgoingCallsCompleted',

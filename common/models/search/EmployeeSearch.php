@@ -27,6 +27,8 @@ class EmployeeSearch extends Employee
     public $user_project_id;
     public $user_params_project_id;
     public $user_department_id;
+    public $experienceMonth;
+    public $joinDate;
 
     public $user_call_type_id;
     public $user_sip;
@@ -46,9 +48,10 @@ class EmployeeSearch extends Employee
     public function rules()
     {
         return [
-            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id'], 'integer'],
+            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id', 'experienceMonth'], 'integer'],
             [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
-            [['timeStart', 'timeEnd', 'roles', 'twoFaEnable'], 'safe'],
+            [['timeStart', 'timeEnd', 'roles', 'twoFaEnable', 'joinDate'], 'safe'],
+			[['joinDate'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
@@ -163,6 +166,17 @@ class EmployeeSearch extends Employee
                 $query->andWhere(['NOT IN', 'employees.id', $subQuery]);
             }
         }
+
+        if ($this->experienceMonth > 0) {
+			$subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'ABS(TIMESTAMPDIFF(MONTH, curdate(), up_join_date))', $this->experienceMonth]);
+			$query->andWhere(['IN', 'employees.id', $subQuery]);
+		}
+
+        if (!empty($this->joinDate)) {
+			$subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_join_date', $this->joinDate]);
+			$query->andWhere(['IN', 'employees.id', $subQuery]);
+		}
+
 
         $query->andFilterWhere(['like', 'username', $this->username])
             ->andFilterWhere(['like', 'full_name', $this->full_name])

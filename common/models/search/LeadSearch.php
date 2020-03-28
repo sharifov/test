@@ -3437,13 +3437,13 @@ class LeadSearch extends Lead
         }
         if ($this->timeTo == ""){
             $differenceTimeToFrom  = "24:00";
-        } else {
+        } /*else {
             if((strtotime($this->timeTo) - strtotime($this->timeFrom)) <= 0){
                 $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
             } else {
                 $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
             }
-        }
+        }*/
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($dates[0]));
@@ -3522,7 +3522,7 @@ class LeadSearch extends Lead
                 (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS profit,    
                 (SELECT SUM(CASE WHEN ls.tips IS NOT NULL THEN ls.tips ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS tips
                 
-            FROM lead_flow AS lf WHERE lf.created ' .$between_condition. ' AND lf.lf_owner_id IS NOT NULL '. $queryByOwner . $queryByGroup . $queryByDepartment. ' GROUP BY created_date, lf.lf_owner_id ) AS tbl       
+            FROM lead_flow AS lf WHERE lf.created ' .$between_condition. ' AND lf.lf_owner_id IS NOT NULL '. $queryByOwner . $queryByGroup . $queryByDepartment. ' GROUP BY lf.lf_owner_id ) AS tbl       
         ']);
 
         $query->groupBy(['tbl.user_id']);
@@ -3555,11 +3555,9 @@ class LeadSearch extends Lead
             'sort' => [
                 'defaultOrder' => [
                     'user_id' => SORT_ASC,
-                    'created_date' => SORT_ASC
                 ],
                 'attributes' => [
                     'user_id',
-                    'created_date',
                     'newTotal',
                     'inboxLeadsTaken',
                     'callLeadsTaken',

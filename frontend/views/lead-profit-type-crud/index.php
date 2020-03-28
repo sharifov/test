@@ -4,6 +4,8 @@ use common\models\LeadProfitType;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use sales\yii\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadProfitTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -51,10 +53,17 @@ $this->params['breadcrumbs'][] = $this->title;
 				'relation' => 'updatedUser',
 				'url' => '/employee/list-ajax',
 			],
-            'lpt_created_dt:byUserDateTime',
-            'lpt_updated_dt:byUserDateTime',
+			[
+				'class' => DateTimeColumn::class,
+				'attribute' => 'lpt_created_dt',
+			],
+			[
+				'class' => DateTimeColumn::class,
+				'attribute' => 'lpt_updated_dt',
+			],
 
-            ['class' => 'yii\grid\ActionColumn'],
+
+			['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 

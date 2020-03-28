@@ -21,6 +21,7 @@ use common\models\Sources;
 use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\emailList\entity\EmailList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\repositories\lead\LeadRepository;
 use sales\services\call\CallDeclinedException;
@@ -1814,8 +1815,10 @@ class CommunicationController extends ApiBaseController
      */
     private function getEmailsForReceivedMessages(): array
     {
-        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
-        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+//        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
+        $mailsUpp = UserProjectParams::find()->select('el_email')->distinct()->joinWith('emailList', false, 'INNER JOIN')->column();
+//        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+        $mailsDep = DepartmentEmailProject::find()->select(['el_email'])->distinct()->joinWith('emailList', false, 'INNER JOIN')->column();
         $list = array_merge($mailsUpp, $mailsDep);
         return $list;
     }

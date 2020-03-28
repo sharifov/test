@@ -3769,7 +3769,7 @@ Reason: {reason}
 
         $upp = null;
         if ($project) {
-            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->one();
+            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
             /*if ($upp) {
                 $mailFrom = $upp->upp_email;
             }*/
@@ -3820,7 +3820,8 @@ Reason: {reason}
             'name'  => Yii::$app->user->identity->full_name,
             'username'  => Yii::$app->user->identity->username,
             'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
-            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+//            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+            'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
 
         $content_data['client'] = [
@@ -3917,7 +3918,7 @@ Reason: {reason}
 
         $upp = null;
         if ($project) {
-            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->one();
+            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
         }
 
         if($offerIds && is_array($offerIds)) {
@@ -3949,7 +3950,8 @@ Reason: {reason}
             'name'  => Yii::$app->user->identity->full_name,
             'username'  => Yii::$app->user->identity->username,
             'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
-            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+//            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+            'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
 
         $content_data['client'] = [

@@ -541,7 +541,8 @@ class Email extends \yii\db\ActiveRecord
     public function getUsersIdByEmail(): array
     {
         $users = [];
-        $params = UserProjectParams::find()->where(['upp_email' => $this->e_email_to])->all();
+//        $params = UserProjectParams::find()->where(['upp_email' => $this->e_email_to])->all();
+        $params = UserProjectParams::find()->byEmail($this->e_email_to, false)->all();
 
         if ($params) {
             foreach ($params as $param) {

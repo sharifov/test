@@ -133,10 +133,7 @@ class InternalContactService
 
         if ($dep = DepartmentEmailProject::find()->byEmail($email)->one()) {
             if ($dep->dep_dep_id && $department = $dep->depDep) {
-                if ($dep->dep_project_id === null) {
-                    $log->add('Not found project for departmentEmailProject Id: ' . $dep->dep_id);
-                }
-                if ($incomingProject && $dep->dep_project_id && $incomingProject !== $dep->dep_project_id) {
+                if ($incomingProject && $incomingProject !== $dep->dep_project_id) {
                     $log->add('Incoming Project not equal for ' . $email . ' DepartmentEmailProject Id: ' . $dep->dep_id . '. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $dep->dep_project_id);
                 }
                 return new InternalContact($department, $dep->dep_project_id, null, $log);
@@ -146,20 +143,15 @@ class InternalContactService
 
         if ($upp = UserProjectParams::find()->byEmail($email)->one()) {
             if ($upp->upp_dep_id && $department = $upp->uppDep) {
-                if ($upp->upp_project_id === null) {
-                    $log->add('Not found project for userProjectParams email: ' . $upp->upp_email);
-                }
                 if ($incomingProject && $upp->upp_project_id && $incomingProject !== $upp->upp_project_id) {
                     $log->add('Incoming Project not equal for ' . $email . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
                 }
                 return new InternalContact($department, $upp->upp_project_id, $upp->upp_user_id, $log);
             }
-            $log->add('Not found department for userProjectParams email: ' . $upp->upp_email);
+//            $log->add('Not found department for userProjectParams email: ' . $upp->upp_email);
+            $log->add('Not found department for userProjectParams email: ' . $upp->getEmail());
             if ($upp->uppUser) {
                 if ($upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0]) && $upp->uppUser->userDepartments[0]->udDep) {
-                    if ($upp->upp_project_id === null) {
-                        $log->add('Not found project for userProjectParams email: ' . $upp->upp_email);
-                    }
                     if ($incomingProject && $upp->upp_project_id && $incomingProject !== $upp->upp_project_id) {
                         $log->add('Incoming Project not equal for ' . $email . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
                     }

@@ -226,8 +226,10 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ],
                 ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
-                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                ['label' => 'Us er Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                 ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
+                ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -378,11 +380,11 @@ $isSuperAdmin = $user->isSuperAdmin();
             'items' => [
                 ['label' => 'Agents report', 'url' => ['/agent-report/index'], 'icon' => 'users'],
                 ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
-                ['label' => 'Calls report', 'url' => ['/report/calls-report'], 'icon' => 'table'],
-                ['label' => 'Calls stats', 'url' => ['/stats/calls-stats'], 'icon' => 'table'],
-                ['label' => 'Leads report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
-                ['label' => 'Leads Stats', 'url' => ['/stats/leads-stats'], 'icon' => 'table'],
-                ['label' => 'Calls Stats Graph', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
+                ['label' => 'Calls Report', 'url' => ['/report/calls-report'], 'icon' => 'table'],
+                ['label' => 'Agent Calls Report', 'url' => ['/stats/calls-stats'], 'icon' => 'table'],
+                ['label' => 'Leads Report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
+                ['label' => 'Agent Leads Report', 'url' => ['/stats/leads-stats'], 'icon' => 'table'],
+                ['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],

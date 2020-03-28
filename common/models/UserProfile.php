@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\UserProfileQuery;
+use SebastianBergmann\Comparator\DateTimeComparatorTest;
 use Yii;
 
 /**
@@ -20,6 +21,8 @@ use Yii;
  * @property string|null $up_2fa_secret
  * @property mixed|null $up_2fa_timestamp
  * @property int $up_skill
+ *
+ * @property string $up_join_date
  *
  * @property Employee $upUser
  */
@@ -65,7 +68,7 @@ class UserProfile extends \yii\db\ActiveRecord
             [['up_user_id', 'up_call_type_id', 'up_skill'], 'integer'],
             [['up_user_id'], 'unique'],
             [['up_telegram_enable', 'up_auto_redial', 'up_kpi_enable', 'up_2fa_enable'], 'boolean'],
-            [['up_updated_dt'], 'safe'],
+            [['up_updated_dt', 'up_join_date'], 'safe'],
             [['up_sip'], 'string', 'max' => 255],
             [['up_telegram'], 'string', 'max' => 20],
             [['up_2fa_secret'], 'string', 'max' => 50],
@@ -100,6 +103,7 @@ class UserProfile extends \yii\db\ActiveRecord
             'up_skill'          => 'Skill',
             'up_2fa_enable'     => '2fa enable',
             'up_2fa_secret'     => '2fa secret',
+			'up_join_date'		=> 'Join Date'
         ];
     }
 
@@ -127,4 +131,18 @@ class UserProfile extends \yii\db\ActiveRecord
     {
         return $this->up_2fa_enable;
     }
+
+	/**
+	 * @return int
+	 * @throws \Exception
+	 */
+    public function getExperienceMonth(): int
+	{
+		if ($this->up_join_date) {
+			$currentDate = new \DateTime();
+			$joinDate = new \DateTime($this->up_join_date);
+			return $joinDate->diff($currentDate)->m;
+		}
+		return 0;
+	}
 }

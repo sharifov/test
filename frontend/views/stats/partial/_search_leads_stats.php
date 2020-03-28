@@ -60,14 +60,14 @@ use sales\auth\Auth;
                 $hoursList[sprintf("%02d:00", $hour )] = sprintf("%02d", $hour );
             }
             ?>
-            <div class="row">
+            <!--<div class="row">
                 <div class="col-md-3">
-                    <?= $form->field($model, 'timeFrom')->dropDownList($hoursList)->label('Hour From') ?>
+                    <?php /*= $form->field($model, 'timeFrom')->dropDownList($hoursList)->label('Hour From') */?>
                 </div>
                 <div class="col-md-3">
-                    <?= $form->field($model, 'timeTo')->dropDownList($hoursList, ['prompt' => ""])->label('Hour To') ?>
+                    <?php /*= $form->field($model, 'timeTo')->dropDownList($hoursList, ['prompt' => ""])->label('Hour To') */?>
                 </div>
-            </div>
+            </div>-->
         </div>
     </div>
 

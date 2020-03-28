@@ -65,8 +65,8 @@ class LeadProfitTypeSearch extends LeadProfitType
             'lpt_commission_fix' => $this->lpt_commission_fix,
             'lpt_created_user_id' => $this->lpt_created_user_id,
             'lpt_updated_user_id' => $this->lpt_updated_user_id,
-            'lpt_created_dt' => $this->lpt_created_dt,
-            'lpt_updated_dt' => $this->lpt_updated_dt,
+            'date_format(lpt_created_dt, "%Y-%m-%d")' => $this->lpt_created_dt,
+            'date_format(lpt_updated_dt, "%Y-%m-%d")' => $this->lpt_updated_dt,
         ]);
 
         return $dataProvider;

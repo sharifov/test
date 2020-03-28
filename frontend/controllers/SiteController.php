@@ -8,6 +8,8 @@ use common\models\Lead;
 use common\models\LoginStepTwoForm;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
+use common\models\UserBonusRules;
+use common\models\UserCommissionRules;
 use common\models\UserParams;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -237,9 +239,11 @@ class SiteController extends FController
 
         $qrCode = (new QrCode($url))
             ->setSize(160)
-            ->setMargin(5)
-            ->useForegroundColor(0, 0, 0);
+            ->setMargin(5);
 
+		$expMonth = $modelUserParams->upUser->userProfile->getExperienceMonth();
+		$userCommissionRulesValue = UserCommissionRules::find()->getCommissionValueByExpMonth($expMonth);
+		$userBonusRulesValue = UserBonusRules::find()->getBonusValueByExpMonth($expMonth);
 
 
         /*$qrCode = (new QrCode('https://2amigos.us'))
@@ -270,7 +274,9 @@ class SiteController extends FController
         return $this->render('/employee/update_profile', [
             'model' => $model,
             'modelUserParams' => $modelUserParams,
-            'qrcodeData' => $qrCode->writeDataUri()
+            'qrcodeData' => $qrCode->writeDataUri(),
+			'userCommissionRuleValue' => $userCommissionRulesValue,
+			'userBonusRuleValue' => $userBonusRulesValue
         ]);
     }
 

@@ -154,7 +154,8 @@ $this->title = 'Home Page'; // . $user->username;
                         <?php foreach ($user->userProjectParams as $projectParam) :?>
                             <tr>
                                 <td><?=Html::encode($projectParam->uppProject->name)?></td>
-                                <td><?=Html::encode($projectParam->upp_email)?></td>
+<!--                                <td>--><?php //=Html::encode($projectParam->upp_email)?><!--</td>-->
+                                <td><?= Yii::$app->formatter->asEmailLIst($projectParam->emailList) ?></td>
                                 <td><?=Html::encode($projectParam->upp_tw_phone_number)?></td>
                                 <td><?=($projectParam->uppDep ? $projectParam->uppDep->dep_name : '-')?></td>
                                 <td><span class="label label-<?=$projectParam->upp_allow_general_line ? 'success' : 'danger'?>"><?=$projectParam->upp_allow_general_line ? 'Yes' : 'No'?></span></td>

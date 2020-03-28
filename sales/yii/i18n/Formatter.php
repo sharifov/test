@@ -42,12 +42,23 @@ use sales\entities\cases\CasesSourceType;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\emailList\entity\EmailList;
+use sales\model\emailList\helpers\formatters\EmailListFormatter;
 use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asEmailList($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        /** @var EmailList $value */
+        return EmailListFormatter::asFormat($value);
+    }
+
     public function asCallLog($logId): string
     {
         if ($logId === null) {
