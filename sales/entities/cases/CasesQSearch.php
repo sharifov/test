@@ -21,6 +21,9 @@ use yii\db\Query;
  * @property string $trash_date
  * @property string $last_in_date
  * @property string $last_out_date
+ * @property string $saleExist
+ * @property string $activeFlight
+ * @property string $lastActiveDateFlight
  *
  */
 class CasesQSearch extends Cases
@@ -33,6 +36,9 @@ class CasesQSearch extends Cases
 
     public $last_in_date;
     public $last_out_date;
+    public $saleExist;
+    public $activeFlight;
+    public $lastActiveDateFlight;
 
     /**
      * CasesSearch constructor.
@@ -66,6 +72,7 @@ class CasesQSearch extends Cases
             ['cs_need_action', 'boolean'],
             ['cs_order_uid', 'string'],
             [['last_in_date', 'last_out_date'], 'string'],
+            [['saleExist', 'activeFlight', 'lastActiveDateFlight'], 'safe'],
         ];
     }
 
@@ -155,14 +162,19 @@ class CasesQSearch extends Cases
         $query = $this->casesQRepository->getInboxQuery($user);
         $query->joinWith('project', true, 'INNER JOIN');
 
-        $yesterday = date('Y-m-d', strtotime('-1 day')) . ' 23:59:59';
-        //$query->andWhere(['<=', 'last_out_date', (new \DateTimeImmutable($yesterday))->format('Y-m-d H:i:s')]);
-
         $query->addSelect('*');
         $query->addSelect('sale.last_out_date');
         $query->addSelect('sale.last_in_date');
-        $query->addSelect('ISNULL(sale.css_cs_id) AS saleNotExist');
-        $query->addSelect('sale.activeFlightDate');
+        $query->addSelect('NOT ISNULL(sale.css_cs_id) AS saleExist');
+        $query->addSelect('sale.activeFlight');
+        $query->addSelect(new Expression('
+            CASE
+                WHEN
+                    (sale.activeFlight = 1)
+                THEN
+                    LEAST(sale.last_out_date, sale.last_in_date)
+            END AS lastActiveDateFlight'
+        ));
 
         $query->leftJoin([
             'sale' => CaseSale::find()
@@ -170,45 +182,67 @@ class CasesQSearch extends Cases
                     'css_cs_id',
                     'MAX(css_in_date) AS last_in_date',
                     'MAX(css_out_date) AS last_out_date',
-                    "
+                    new Expression('
                         CASE
-                            WHEN (DATE(MAX(css_out_date)) >= '" . $yesterday . "') OR (DATE(MAX(css_in_date)) >= '" . $yesterday . "')              
+                            WHEN (DATE(MAX(css_out_date)) <= SUBDATE(CURDATE(), 1)) OR (DATE(MAX(css_in_date)) <= SUBDATE(CURDATE(), 1))              
                             THEN 1
                             ELSE 0
-                        END AS activeFlightDate
-                    "
+                        END AS activeFlight'),
                 ])
+                ->where('css_in_date IS NOT NULL')
+                ->andWhere('css_out_date IS NOT NULL')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
-
-
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => [
+                'saleExist' => SORT_DESC,
+                'activeFlight' => SORT_DESC,
+                'lastActiveDateFlight' => SORT_ASC,
                 'sort_order' => SORT_DESC,
-                'cs_id' => SORT_ASC
-                ]
+                'cs_id' => SORT_ASC,
+                ],
             ],
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
-        $dataProvider->sort->attributes['sort_order'] = [
-            'asc' => ['sort_order' => SORT_ASC],
-            'desc' => ['sort_order' => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['last_in_date'] = [
-            'asc' => ['last_in_date' => SORT_ASC],
-            'desc' => ['last_in_date' => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['last_out_date'] = [
-            'asc' => ['last_out_date' => SORT_ASC],
-            'desc' => ['last_out_date' => SORT_DESC],
-        ];
-
-        //  $query->orderBy(['cs_id' => SORT_DESC]); /* TODO:: FOR DEBUG:: must by remove  */
+        $sorting = $dataProvider->getSort();
+        $sorting->attributes = array_merge($sorting->attributes, [
+            'sort_order' => [
+                'asc' => ['sort_order' => SORT_ASC],
+                'desc' => ['sort_order' => SORT_DESC],
+            ],
+            'last_in_date' =>  [
+                'asc' => ['last_in_date' => SORT_ASC],
+                'desc' => ['last_in_date' => SORT_DESC],
+            ],
+            'last_out_date' => [
+                'asc' => ['last_out_date' => SORT_ASC],
+                'desc' => ['last_out_date' => SORT_DESC],
+            ],
+            'saleExist' => [
+                'asc' => ['saleExist' => SORT_ASC],
+                'desc' => ['saleExist' => SORT_DESC],
+                'default' => SORT_DESC,
+                'label' => 'Sale exist',
+            ],
+            'activeFlight' => [
+                'asc' => ['activeFlight' => SORT_ASC],
+                'desc' => ['activeFlight' => SORT_DESC],
+                'default' => SORT_DESC,
+                'label' => 'Active flight',
+            ],
+            'lastActiveDateFlight' => [
+                'asc' => ['lastActiveDateFlight' => SORT_ASC],
+                'desc' => ['lastActiveDateFlight' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Last active flight date',
+            ],
+        ]);
+        $dataProvider->setSort($sorting);
 
         $this->load($params);
 
@@ -263,6 +297,8 @@ class CasesQSearch extends Cases
                     'MAX(css_in_date) AS last_in_date',
                     'MAX(css_out_date) AS last_out_date',
                 ])
+                ->where('css_in_date IS NOT NULL')
+                ->andWhere('css_out_date IS NOT NULL')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -341,6 +377,8 @@ class CasesQSearch extends Cases
                     'MAX(css_in_date) AS last_in_date',
                     'MAX(css_out_date) AS last_out_date',
                 ])
+                ->where('css_in_date IS NOT NULL')
+                ->andWhere('css_out_date IS NOT NULL')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -430,6 +468,8 @@ class CasesQSearch extends Cases
                     'MAX(css_in_date) AS last_in_date',
                     'MAX(css_out_date) AS last_out_date',
                 ])
+                ->where('css_in_date IS NOT NULL')
+                ->andWhere('css_out_date IS NOT NULL')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -534,6 +574,8 @@ class CasesQSearch extends Cases
                     'MAX(css_in_date) AS last_in_date',
                     'MAX(css_out_date) AS last_out_date',
                 ])
+                ->where('css_in_date IS NOT NULL')
+                ->andWhere('css_out_date IS NOT NULL')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -620,6 +662,8 @@ class CasesQSearch extends Cases
                     'MAX(css_in_date) AS last_in_date',
                     'MAX(css_out_date) AS last_out_date',
                 ])
+                ->where('css_in_date IS NOT NULL')
+                ->andWhere('css_out_date IS NOT NULL')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -734,6 +778,8 @@ class CasesQSearch extends Cases
                     'MAX(css_in_date) AS last_in_date',
                     'MAX(css_out_date) AS last_out_date',
                 ])
+                ->where('css_in_date IS NOT NULL')
+                ->andWhere('css_out_date IS NOT NULL')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 

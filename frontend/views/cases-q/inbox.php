@@ -32,6 +32,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => function (CasesQSearch $model) {
+            if ($model->activeFlight) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             [
                 'attribute' => 'cs_id',
@@ -65,18 +70,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'cs_order_uid',
             [
-                'attribute' => 'last_out_date',
+                'attribute' => 'lastActiveDateFlight',
                 'value' => static function (CasesQSearch $model) {
-                    return $model->last_out_date ? '<i class="fa fa-calendar"></i> ' .
-                        Yii::$app->formatter->asDatetime(strtotime($model->last_out_date)) : '<span class="not-set">(not set)</span>';
-                },
-                'format' => 'raw',
-            ],
-            [
-                'attribute' => 'last_in_date',
-                'value' => static function (CasesQSearch $model) {
-                    return $model->last_in_date ? '<i class="fa fa-calendar"></i> ' .
-                        Yii::$app->formatter->asDatetime(strtotime($model->last_in_date)) : '<span class="not-set">(not set)</span>';
+                    return $model->lastActiveDateFlight ? '<i class="fa fa-calendar"></i> ' .
+                        Yii::$app->formatter->asDatetime(strtotime($model->lastActiveDateFlight)) : '<span class="not-set">(not set)</span>';
                 },
                 'format' => 'raw',
             ],
