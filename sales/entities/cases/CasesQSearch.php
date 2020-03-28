@@ -155,18 +155,33 @@ class CasesQSearch extends Cases
         $query = $this->casesQRepository->getInboxQuery($user);
         $query->joinWith('project', true, 'INNER JOIN');
 
+        $yesterday = date('Y-m-d', strtotime('-1 day')) . ' 23:59:59';
+        //$query->andWhere(['<=', 'last_out_date', (new \DateTimeImmutable($yesterday))->format('Y-m-d H:i:s')]);
+
         $query->addSelect('*');
-        $query->addSelect('sale.last_in_date');
         $query->addSelect('sale.last_out_date');
+        $query->addSelect('sale.last_in_date');
+        $query->addSelect('ISNULL(sale.css_cs_id) AS saleNotExist');
+        $query->addSelect('sale.activeFlightDate');
+
         $query->leftJoin([
             'sale' => CaseSale::find()
                 ->select([
                     'css_cs_id',
                     'MAX(css_in_date) AS last_in_date',
                     'MAX(css_out_date) AS last_out_date',
+                    "
+                        CASE
+                            WHEN (DATE(MAX(css_out_date)) >= '" . $yesterday . "') OR (DATE(MAX(css_in_date)) >= '" . $yesterday . "')              
+                            THEN 1
+                            ELSE 0
+                        END AS activeFlightDate
+                    "
                 ])
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
+
+
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -192,6 +207,8 @@ class CasesQSearch extends Cases
             'asc' => ['last_out_date' => SORT_ASC],
             'desc' => ['last_out_date' => SORT_DESC],
         ];
+
+        //  $query->orderBy(['cs_id' => SORT_DESC]); /* TODO:: FOR DEBUG:: must by remove  */
 
         $this->load($params);
 
@@ -221,6 +238,7 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+
 
         return $dataProvider;
     }
@@ -708,6 +726,7 @@ class CasesQSearch extends Cases
         $query->addSelect('*');
         $query->addSelect('sale.last_out_date');
         $query->addSelect('sale.last_in_date');
+
         $query->innerJoin([
             'sale' => CaseSale::find()
                 ->select([

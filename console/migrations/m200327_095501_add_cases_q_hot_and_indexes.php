@@ -30,6 +30,7 @@ class m200327_095501_add_cases_q_hot_and_indexes extends Migration
 
         $this->createIndex('IND-case_sale-css_in_date', '{{%case_sale}}', ['css_in_date']);
         $this->createIndex('IND-case_sale-css_out_date', '{{%case_sale}}', ['css_out_date']);
+        $this->createIndex('IND-cases-css_cs_deadline_dt', '{{%cases}}', ['deadline_dt']);
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -52,6 +53,7 @@ class m200327_095501_add_cases_q_hot_and_indexes extends Migration
 
         $this->dropIndex('IND-case_sale-css_in_date', '{{%case_sale}}');
         $this->dropIndex('IND-case_sale-css_out_date', '{{%case_sale}}');
+        $this->dropIndex('IND-cases-css_cs_deadline_dt', '{{%cases}}');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
