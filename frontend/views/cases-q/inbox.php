@@ -72,10 +72,22 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'lastActiveDateFlight',
                 'value' => static function (CasesQSearch $model) {
-                    return $model->lastActiveDateFlight ? '<i class="fa fa-calendar"></i> ' .
-                        Yii::$app->formatter->asDatetime(strtotime($model->lastActiveDateFlight)) : '<span class="not-set">(not set)</span>';
+
+                    if ($model->lastActiveDateFlight) {
+                        $out = $model->last_out_date == $model->lastActiveDateFlight ? 'Out <i class="fab fa-hotjar"></i> '
+                            : 'Out <i class="fa fa-calendar"></i> ';
+                        $out .= Yii::$app->formatter->asDatetime(strtotime($model->last_out_date)) . '<br />';
+
+                        $out .= $model->last_in_date == $model->lastActiveDateFlight ? 'Out <i class="fab fa-hotjar"></i> '
+                            : 'In <i class="fa fa-calendar"></i> ';
+                        $out .= Yii::$app->formatter->asDatetime(strtotime($model->last_in_date));
+                        return $out;
+                    }
+
+                    return '<span class="not-set">(not set)</span>';
                 },
                 'format' => 'raw',
+                'options' => ['style' => 'width: 180px']
             ],
 			[
 				'attribute' => 'cs_dep_id',
