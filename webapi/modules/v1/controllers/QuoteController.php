@@ -276,6 +276,7 @@ class QuoteController extends ApiBaseController
             $userProjectParams = UserProjectParams::find()
                 ->andWhere(['upp_user_id' => $model->lead->employee_id,'upp_project_id' => $model->lead->project_id])
                 ->withEmailList()
+                ->withPhoneList()
                 ->one();
 
             $response['uid'] = $uid;
@@ -300,7 +301,8 @@ class QuoteController extends ApiBaseController
             $response['agentName'] = $model->lead->employee ? $model->lead->employee->username : '';
 //            $response['agentEmail'] = $userProjectParams ? $userProjectParams->upp_email : $model->lead->project->contactInfo->email;
             $response['agentEmail'] = ($userProjectParams && $userProjectParams->getEmail()) ? $userProjectParams->getEmail() : $model->lead->project->contactInfo->email;
-            $response['agentDirectLine'] = $userProjectParams ? $userProjectParams->upp_tw_phone_number : sprintf('%s', $model->lead->project->contactInfo->phone);
+//            $response['agentDirectLine'] = $userProjectParams ? $userProjectParams->upp_tw_phone_number : sprintf('%s', $model->lead->project->contactInfo->phone);
+            $response['agentDirectLine'] = ($userProjectParams && $userProjectParams->getPhone()) ? $userProjectParams->getPhone() : sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['itinerary']['tripType'] = $model->trip_type;

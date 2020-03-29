@@ -51,7 +51,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             ] : [],
         ]) ?>
 
-        <?= $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
+        <?php /* = $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
             'jsOptions' => [
                 'formatOnDisplay' => false,
                 'autoPlaceholder' => 'off',
@@ -60,7 +60,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'preferredCountries' => ['us'],
                 'customContainer' => 'intl-tel-input'
             ]
-        ]) ?>
+        ]) */ ?>
 
         <?= $form->field($model, 'upp_phone_list_id')->widget(PhoneSelect2Widget::class, [
                 'data' => $model->upp_phone_list_id ? [

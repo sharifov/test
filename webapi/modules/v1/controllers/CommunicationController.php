@@ -319,7 +319,8 @@ class CommunicationController extends ApiBaseController
                 return $this->startConference($conferenceRoom, $postCall);
             }
 
-            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
+//            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
+            $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
 
                 $project = $departmentPhone->dppProject;
@@ -373,7 +374,8 @@ class CommunicationController extends ApiBaseController
 
             } else {
 
-                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
+//                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
+                $upp = UserProjectParams::find()->byPhone($incoming_phone_number, false)->limit(1)->one();
                 if ($upp) {
 
                     if ($upp->upp_dep_id) {
@@ -608,7 +610,8 @@ class CommunicationController extends ApiBaseController
                     }
 
                     if (!$call->c_dep_id && $call->c_project_id && isset($callOriginalData['FromAgentPhone']) && $callOriginalData['FromAgentPhone']) {
-                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callOriginalData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
+//                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callOriginalData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
+                        $upp = UserProjectParams::find()->byPhone($callOriginalData['FromAgentPhone'], false)->andWhere(['upp_project_id' => $call->c_project_id])->limit(1)->one();
                         if ($upp && $upp->upp_dep_id) {
                             $call->c_dep_id = $upp->upp_dep_id;
                         }
@@ -620,7 +623,8 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if (!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
+//                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
+                    $upp = UserProjectParams::find()->byPhone($call->c_from, false)->one();
                 }
 
                 if ($upp && $upp->uppUser) {

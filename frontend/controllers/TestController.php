@@ -198,8 +198,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-
-
         return $this->render('blank');
 
         $lead = Lead::findOne(371222);
