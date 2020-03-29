@@ -41,7 +41,6 @@ use Locale;
  * @property string $c_caller_name
  * @property string $c_parent_call_sid
  * @property int $c_call_duration
- * @property string $c_recording_url
  * @property int $c_recording_duration
  * @property int $c_sequence_number
  * @property int $c_lead_id
@@ -51,8 +50,6 @@ use Locale;
  * @property string $c_updated_dt
  * @property int $c_project_id
  * @property string $c_error_message
- * @property bool $c_is_new
- * @property bool $c_is_deleted
  * @property float $c_price
  * @property int $c_source_type_id
  * @property int $c_dep_id
@@ -66,6 +63,10 @@ use Locale;
  * @property string $c_from_country
  * @property string $c_from_state
  * @property string $c_from_city
+ *
+ * @property string $c_recording_url
+ * @property bool $c_is_new
+ * @property string $recordingUrl
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
@@ -185,6 +186,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_REDIAL_CALL  => 'Redial',
     ];
 
+    //public $c_recording_url = '';
 
     /**
      * @return string
@@ -206,20 +208,19 @@ class Call extends \yii\db\ActiveRecord
             [['c_status_id','c_parent_id', 'c_dep_id', 'c_case_id', 'c_client_id', 'c_lead_id', 'c_call_type_id', 'c_call_duration', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_sequence_number', 'c_recording_duration', 'c_call_duration'],
                 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
-            [['c_is_new', 'c_is_deleted'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            [['c_is_new'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
-            [['c_is_deleted'], 'default', 'value' => false],
             [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id'], 'default', 'value' => null],
 
-            [['c_is_new', 'c_is_deleted'], 'boolean'],
+            [['c_is_new'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
             [['c_call_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],
             [['c_from', 'c_to', 'c_forwarded_from'], 'string', 'max' => 100],
             [['c_call_status'], 'string', 'max' => 15],
             [['c_caller_name'], 'string', 'max' => 50],
-            [['c_recording_url'], 'string', 'max' => 200],
+            //[['c_recording_url'], 'string', 'max' => 200],
             [['c_error_message'], 'string', 'max' => 500],
             [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
             [['c_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['c_client_id' => 'id']],
@@ -259,7 +260,6 @@ class Call extends \yii\db\ActiveRecord
             'c_project_id' => 'Project ID',
             'c_error_message' => 'Error Message',
             'c_is_new' => 'Is New',
-            'c_is_deleted' => 'Is Deleted',
             'c_price' => 'Price',
             'c_source_type_id' => 'Source Type',
             'c_dep_id' => 'Department ID',
@@ -367,7 +367,15 @@ class Call extends \yii\db\ActiveRecord
      */
     public function updateRecordingData(string $recordingUrl, string $recordingSid, int $recordingDuration): void
     {
-        $this->c_recording_url = $recordingUrl;
+        //$this->c_recording_url = $recordingUrl;
+
+        if ($recordingUrl) {
+            preg_match('~(RE[0-9a-zA-Z]{32})$~', $recordingUrl, $math);
+            if (!empty($math[1])) {
+                $this->c_recording_sid = $math[1];
+            }
+        }
+
         $this->c_recording_duration = $recordingDuration;
         $this->c_updated_dt = date('Y-m-d H:i:s');
     }
@@ -1698,5 +1706,13 @@ class Call extends \yii\db\ActiveRecord
             }
         }
         return false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecordingUrl(): string
+    {
+        return Yii::$app->communication->recording_url . $this->c_recording_sid;
     }
 }

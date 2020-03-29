@@ -88,7 +88,7 @@ class CallSearch extends Call
     public function rules()
     {
         return [
-            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration',
+            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'supervision_id', 'limit', 'c_recording_duration',
                 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id', 'callDepId', 'userGroupId'], 'integer'],
             [['c_call_sid', 'c_from', 'c_to', 'c_call_status', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_recording_url', 'c_recording_sid', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
@@ -196,7 +196,6 @@ class CallSearch extends Call
             'c_updated_dt' => $this->c_updated_dt,
             'c_project_id' => $this->c_project_id,
             'c_is_new' => $this->c_is_new,
-            'c_is_deleted' => $this->c_is_deleted,
             'c_price' => $this->c_price,
             'c_source_type_id' => $this->c_source_type_id,
             'c_call_sid' => $this->c_call_sid,
@@ -215,7 +214,6 @@ class CallSearch extends Call
             ->andFilterWhere(['like', 'c_forwarded_from', $this->c_forwarded_from])
             ->andFilterWhere(['like', 'c_caller_name', $this->c_caller_name])
             ->andFilterWhere(['like', 'c_call_duration', $this->c_call_duration])
-            ->andFilterWhere(['like', 'c_recording_url', $this->c_recording_url])
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
 
@@ -286,7 +284,6 @@ class CallSearch extends Call
             'c_updated_dt' => $this->c_updated_dt,
             'c_project_id' => $this->c_project_id,
             'c_is_new' => $this->c_is_new,
-            'c_is_deleted' => $this->c_is_deleted,
             'c_source_type_id' => $this->c_source_type_id,
             'c_call_sid' => $this->c_call_sid,
             'c_parent_call_sid' => $this->c_parent_call_sid,
@@ -303,7 +300,6 @@ class CallSearch extends Call
             ->andFilterWhere(['like', 'c_forwarded_from', $this->c_forwarded_from])
             ->andFilterWhere(['like', 'c_caller_name', $this->c_caller_name])
             ->andFilterWhere(['like', 'c_call_duration', $this->c_call_duration])
-            ->andFilterWhere(['like', 'c_recording_url', $this->c_recording_url])
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
 

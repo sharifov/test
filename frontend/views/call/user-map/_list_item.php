@@ -148,7 +148,7 @@ use \common\models\Call;
 
                 <?php if ($model->isEnded()):?>
                     <span class="badge badge-default"><?=gmdate('i:s', $sec)?></span> <?php //data-sec="<?=$sec" data-control="pause" data-format="%M:%S"?>
-                    <?php if ($model->c_recording_url):?>
+                    <?php if ($model->c_recording_sid):?>
                         <small><i class="fa fa-play-circle-o"></i></small>
                     <?php endif;?>
                     <?php //=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>

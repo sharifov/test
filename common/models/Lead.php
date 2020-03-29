@@ -4403,7 +4403,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
         $query = Call::find();
-        $query->where(['c_lead_id' => $this->id, 'c_is_deleted' => false]);
+        $query->where(['c_lead_id' => $this->id]);
 
         if($type_id !== 0) {
             $query->andWhere(['c_call_type_id' => $type_id]);

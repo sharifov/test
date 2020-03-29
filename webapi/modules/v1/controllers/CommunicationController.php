@@ -472,21 +472,33 @@ class CommunicationController extends ApiBaseController
 
             if ($call && $callData['RecordingUrl']) {
 
-                $call->c_recording_url = $callData['RecordingUrl'] ?? null;
+                //$call->c_recording_url = $callData['RecordingUrl'] ?? null;
+
+//                if (!$call->c_recording_sid && !empty($callData['RecordingUrl'])) {
+//                    preg_match('~(RE[0-9a-zA-Z]{32})$~', $callData['RecordingUrl'], $math);
+//                    if (!empty($math[1])) {
+//                        $call->c_recording_sid = $math[1];
+//                    }
+//                }
+
+                if (!$call->c_recording_sid && $callData['RecordingSid']) {
+                    $call->c_recording_sid = $callData['RecordingSid'];
+                }
+
                 $call->c_recording_duration = $callData['RecordingDuration'] ?? null;
 
                 if(!$call->save()) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceRecord:Call:save');
                 }
 
-                if ($call->c_lead_id) {
-                    //if ($call->c_created_user_id) {
-                        // Notifications::create($call->c_created_user_id, 'Call Recording Completed  from ' . $call->c_from . ' to ' . $call->c_to . ' <br>Lead ID: ' . $call->c_lead_id , Notifications::TYPE_INFO, true);
-                    //}
-                    // Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
-
-                    Notifications::sendSocket('recordingUpdate', ['lead_id' => $call->c_lead_id], ['url' => $call->c_recording_url]);
-                }
+//                if ($call->c_lead_id) {
+//                    //if ($call->c_created_user_id) {
+//                        // Notifications::create($call->c_created_user_id, 'Call Recording Completed  from ' . $call->c_from . ' to ' . $call->c_to . ' <br>Lead ID: ' . $call->c_lead_id , Notifications::TYPE_INFO, true);
+//                    //}
+//                    // Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
+//
+//                    Notifications::sendSocket('recordingUpdate', ['lead_id' => $call->c_lead_id], ['url' => $call->recordingUrl]);
+//                }
             }
         } else {
             $response['error'] = 'Not found callData[CallSid] or callData[RecordingSid] in voiceRecord';

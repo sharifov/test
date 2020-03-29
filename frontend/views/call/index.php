@@ -285,15 +285,8 @@ if($user->isAdmin()) {
                 'format' => 'raw'
             ],*/
 
-
-
-
             //'c_updated_dt',
-
             //'c_error_message',
-
-            //'c_is_deleted:boolean',
-
 
         ],
     ]); ?>

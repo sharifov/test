@@ -820,7 +820,7 @@ $duration = 10;
                 [
                     'attribute' => 'c_recording_url',
                     'value' => static function (\common\models\Call $model) {
-                        return  $model->c_recording_url ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
+                        return  $model->recordingUrl ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="'.$model->recordingUrl.'" type="audio/mpeg"> </audio>' : '-';
                     },
                     'format' => 'raw'
                 ],
