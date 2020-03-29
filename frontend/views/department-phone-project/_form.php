@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'dpp_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
 
-        <?= $form->field($model, 'dpp_phone_number')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'dpp_phone_number')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'dpp_phone_list_id')->widget(PhoneSelect2Widget::class, [
             'data' => $model->dpp_phone_list_id ? [

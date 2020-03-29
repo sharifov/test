@@ -319,7 +319,8 @@ class CommunicationController extends ApiBaseController
                 return $this->startConference($conferenceRoom, $postCall);
             }
 
-            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
+//            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
+            $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
 
                 $project = $departmentPhone->dppProject;

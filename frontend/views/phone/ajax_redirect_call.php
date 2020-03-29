@@ -83,7 +83,8 @@ use yii\helpers\Html;
                                 echo $userGroupList ? implode(' ', $userGroupList) : '-';
                             ?>
                         </td>
-                        <td><i class="fa fa-phone"></i> <?=Html::encode($department->dpp_phone_number)?></td>
+<!--                        <td><i class="fa fa-phone"></i> --><?php //=Html::encode($department->dpp_phone_number) ?><!--</td>-->
+                        <td><i class="fa fa-phone"></i> <?=Html::encode($department->getPhone())?> </td>
                         <td class="text-center">
                             <?=Html::button('<i class="fa fa-forward"></i> Redirect', [
                                 'class' => 'btn btn-xs btn-success btn-transfer',

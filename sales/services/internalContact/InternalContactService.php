@@ -76,11 +76,8 @@ class InternalContactService
             $log->add('Incoming Project is empty');
         }
 
-        if ($dpp = DepartmentPhoneProject::find()->findByPhone($phone)->one()) {
+        if ($dpp = DepartmentPhoneProject::find()->byPhone($phone)->one()) {
             if ($dpp->dpp_dep_id && $department = $dpp->dppDep) {
-                if ($dpp->dpp_project_id === null) {
-                    $log->add('Not found project for departmentPhoneProject Id: ' . $dpp->dpp_id);
-                }
                 if ($incomingProject && $dpp->dpp_project_id && $incomingProject !== $dpp->dpp_project_id) {
                     $log->add('Incoming Project not equal for ' . $phone . ' departmentPhoneProject Id: ' . $dpp->dpp_id . '. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $dpp->dpp_project_id);
                 }

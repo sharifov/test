@@ -478,9 +478,10 @@ class CasesController extends FController
                     $content_data['project_id'] = $model->cs_project_id;
                     $phoneFrom = '';
 
-                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::findOne(['dpp_id' => $comForm->dpp_phone_id])) {
+                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::find()->andWhere(['dpp_id' => $comForm->dpp_phone_id])->withPhoneList()->one()) {
 
-						$phoneFrom = $departmentPhone->dpp_phone_number;
+//						$phoneFrom = $departmentPhone->dpp_phone_number;
+						$phoneFrom = $departmentPhone->getPhone();
 
 					} elseif ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();

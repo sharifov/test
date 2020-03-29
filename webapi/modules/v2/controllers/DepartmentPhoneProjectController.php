@@ -145,13 +145,14 @@ class DepartmentPhoneProjectController extends BaseController
             ->andWhere(['dpp_project_id' => $form->project_id])
             ->andWhere(['dpp_show_on_site' => true])
             ->andFilterWhere(['dpp_dep_id' => $form->department_id])
+            ->withPhoneList()
             ->all();
 
         $data = [];
 
         foreach ($phones as $key => $phone) {
             $data[] = [
-                'phone' => $phone->dpp_phone_number,
+                'phone' => $phone->getPhone(),
                 'cid' => $phone->dppSource ? $phone->dppSource->cid : null,
                 'department_id' => $phone->dpp_dep_id,
                 'department' => $phone->dpp_dep_id ? Department::getName($phone->dpp_dep_id) : null,

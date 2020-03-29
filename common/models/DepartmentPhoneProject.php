@@ -62,13 +62,19 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['dpp_project_id', 'dpp_phone_number'], 'required'],
+            ['dpp_project_id', 'required'],
+
+//            ['dpp_phone_number', 'required'],
+//            ['dpp_phone_number', 'unique'],
+//            ['dpp_phone_number', 'string', 'max' => 18],
+//            [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number']],
+
             [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_updated_user_id', 'dpp_default'], 'integer'],
-            [['dpp_phone_number'], 'unique'],
+
             [['dpp_ivr_enable', 'dpp_enable'], 'boolean'],
             [['dpp_params', 'dpp_updated_dt', 'user_group_list'], 'safe'],
-            [['dpp_phone_number'], 'string', 'max' => 18],
-            [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number']],
+
+
             [['dpp_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['dpp_dep_id' => 'dep_id']],
             [['dpp_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['dpp_project_id' => 'id']],
             [['dpp_source_id'], 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['dpp_source_id' => 'id']],
@@ -79,8 +85,12 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
 
             ['dpp_show_on_site', 'boolean'],
 
+            ['dpp_phone_list_id', 'required'],
             ['dpp_phone_list_id', 'integer'],
+            ['dpp_phone_list_id', 'unique'],
             ['dpp_phone_list_id', 'exist', 'skipOnError' => true, 'targetClass' => PhoneList::class, 'targetAttribute' => ['dpp_phone_list_id' => 'pl_id']],
+
+            [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id']],
         ];
     }
 
@@ -177,6 +187,20 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     public function getDugUgs()
     {
         return $this->hasMany(UserGroup::class, ['ug_id' => 'dug_ug_id'])->viaTable('department_phone_project_user_group', ['dug_dpp_id' => 'dpp_id']);
+    }
+
+    public function getPhone(bool $onlyEnabled = false): ?string
+    {
+        if (!$this->phoneList) {
+            return null;
+        }
+        if ($onlyEnabled) {
+            if ($this->phoneList->pl_phone_number) {
+                return $this->phoneList->pl_phone_number;
+            }
+            return null;
+        }
+        return $this->phoneList->pl_phone_number;
     }
 
     public function getPhoneList(): ActiveQuery

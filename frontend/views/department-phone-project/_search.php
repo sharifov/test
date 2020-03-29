@@ -20,7 +20,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'dpp_id') ?>
 
-    <?= $form->field($model, 'dpp_phone_number') ?>
+    <?php //= $form->field($model, 'dpp_phone_number') ?>
 
     <?= $form->field($model, 'dpp_project_id') ?>
 

@@ -11,6 +11,7 @@
  */
 
 use common\models\DepartmentEmailProject;
+use common\models\DepartmentPhoneProject;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
@@ -414,15 +415,23 @@ $c_type_id = $comForm->c_type_id;
                             <?php if ($model->isDepartmentSupport()): ?>
                                 <div class="col-md-3 form-group message-field-sms" id="sms-phone-numbers">
                                     <?php
-                                        $departmentPhones = \yii\helpers\ArrayHelper::toArray($model->getDepartmentPhonesByProjectAndDepartment()->where(['dpp_default' => \common\models\DepartmentPhoneProject::DPP_DEFAULT_TRUE])->all());
+                                        $departmentPhonesList = [];
+                                        /** @var DepartmentPhoneProject[] $departmentPhones */
+                                        $departmentPhones = $model->getDepartmentPhonesByProjectAndDepartment()->where(['dpp_default' => \common\models\DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
+                                        foreach ($departmentPhones as $departmentPhone) {
+                                            if ($departmentPhone->getPhone()) {
+                                                $departmentPhonesList[$departmentPhone->dpp_id] = $departmentPhone->getPhone();
+                                            }
+                                        }
                                     ?>
 									<?php
 									$optionsPhone = ['class' => 'form-control'];
-									if (count($departmentPhones) > 1) {
+									if (count($departmentPhonesList) > 1) {
 										$optionsPhone['prompt'] = '---';
 									}
 									?>
-                                    <?= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), $optionsPhone) ?>
+                                    <?php //= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), $optionsPhone) ?>
+                                    <?= $form->field($comForm,'dpp_phone_id')->dropDownList($departmentPhonesList, $optionsPhone) ?>
                                 </div>
                             <?php endif; ?>
 
