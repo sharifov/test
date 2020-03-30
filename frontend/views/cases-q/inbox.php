@@ -32,6 +32,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => function (CasesQSearch $model) {
+            if ($model->nextFlight) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             [
                 'attribute' => 'cs_id',
@@ -64,6 +69,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'cs_order_uid',
+            [
+                'attribute' => 'nextFlight',
+                'value' => static function (CasesQSearch $model) {
+
+                    if ($model->nextFlight) {
+                        $out =  '<i class="fa fa-calendar"></i> ';
+                        $out .= Yii::$app->formatter->asDatetime(strtotime($model->nextFlight));
+                        return $out;
+                    }
+                    return '<span class="not-set">(not set)</span>';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width: 180px']
+            ],
 			[
 				'attribute' => 'cs_dep_id',
 				'value' => static function (CasesQSearch $model) {
