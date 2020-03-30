@@ -10,7 +10,7 @@ class CallLogLeadSearch extends CallLogLead
     public function rules(): array
     {
         return [
-            [['cll_cl_id', 'cll_lead_id'], 'integer'],
+            [['cll_cl_id', 'cll_lead_id', 'cll_lead_flow_id'], 'integer'],
         ];
     }
 
@@ -32,6 +32,7 @@ class CallLogLeadSearch extends CallLogLead
         $query->andFilterWhere([
             'cll_cl_id' => $this->cll_cl_id,
             'cll_lead_id' => $this->cll_lead_id,
+            'cll_lead_flow_id' => $this->cll_lead_flow_id,
         ]);
 
         return $dataProvider;

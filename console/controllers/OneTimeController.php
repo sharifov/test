@@ -134,7 +134,7 @@ class OneTimeController extends Controller
 
             if ($call->c_recording_duration || $call->c_recording_sid) {
                 $callLogRecord = new CallLogRecord([
-                    'clr_cl_id' => 'asdasd.as.da.sd',
+                    'clr_cl_id' => $callLog->cl_id,
                     'clr_duration' => $call->c_recording_duration,
                     'clr_record_sid' => $call->c_recording_sid,
                 ]);
