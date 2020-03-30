@@ -619,7 +619,7 @@ class CasesQSearch extends Cases
             'lastSolvedDate' => 'Solved',
             'cs_need_action' => 'Need Action',
             'cs_order_uid' => 'Booking ID',
-            'nextFlight' => 'Active Date Flight',
+            'nextFlight' => 'Next Flight Date',
         ];
     }
 }
