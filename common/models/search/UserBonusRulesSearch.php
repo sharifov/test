@@ -65,8 +65,8 @@ class UserBonusRulesSearch extends UserBonusRules
             'ubr_value' => $this->ubr_value,
             'ubr_created_user_id' => $this->ubr_created_user_id,
             'ubr_updated_user_id' => $this->ubr_updated_user_id,
-            'date(ubr_created_dt, "%Y-%m-%d")' => $this->ubr_created_dt,
-            'date(ubr_updated_dt, "%Y-%m-%d")' => $this->ubr_updated_dt,
+            'date_format(ubr_created_dt, "%Y-%m-%d")' => $this->ubr_created_dt,
+            'date_format(ubr_updated_dt, "%Y-%m-%d")' => $this->ubr_updated_dt,
         ]);
 
         return $dataProvider;
