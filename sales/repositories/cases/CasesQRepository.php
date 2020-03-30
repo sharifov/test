@@ -2,7 +2,9 @@
 
 namespace sales\repositories\cases;
 
+use common\models\CaseSale;
 use common\models\Employee;
+use common\models\query\CaseSaleQuery;
 use common\models\UserGroupAssign;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
@@ -11,6 +13,7 @@ use sales\entities\cases\Cases;
 use sales\entities\cases\CasesQSearch;
 use sales\entities\cases\CasesStatus;
 use yii\db\ActiveQuery;
+use yii\db\Expression;
 
 class CasesQRepository
 {
@@ -264,6 +267,51 @@ class CasesQRepository
         return $query;
     }
 
+
+    /**
+     * @return CaseSaleQuery
+     */
+    public function getLastFlightDatesSubQuery(): CaseSaleQuery
+    {
+        return CaseSale::find()
+            ->select([
+                'css_cs_id',
+                new Expression('
+                    MIN(if(css_in_date >= SUBDATE(CURDATE(), 1), css_in_date, NULL)) AS last_in_date'),
+                new Expression('
+                    MIN(if(css_out_date >= SUBDATE(CURDATE(), 1), css_out_date, NULL)) AS last_out_date'),
+            ])
+            ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+            ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
+            ->groupBy('css_cs_id');
+    }
+
+
+    /**
+     * @param int $joinByStatus
+     * @return CaseSaleQuery
+     */
+    public function getNexFlightDateSubQuery(int $joinByStatus = 0): CaseSaleQuery
+    {
+        $query = CaseSale::find()
+            ->select([
+                'css_cs_id',
+                new Expression('
+                    MIN(if(css_out_date >= SUBDATE(CURDATE(), 1), css_out_date, css_in_date)) as nextFlight'),
+            ]);
+
+        if ($joinByStatus) {
+            $query->innerJoin(Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . $joinByStatus);
+        }
+
+        $query->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+            ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
+            ->groupBy('css_cs_id');
+
+        return $query;
+    }
+
     /**
      * @param $userId
      * @return ActiveQuery
@@ -328,4 +376,6 @@ class CasesQRepository
             ]
         ];
     }
+
+
 }

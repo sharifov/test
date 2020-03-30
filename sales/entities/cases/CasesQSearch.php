@@ -87,14 +87,9 @@ class CasesQSearch extends Cases
         $query->addSelect('*');
         $query->addSelect('sale.last_in_date');
         $query->addSelect('sale.last_out_date');
+
         $query->leftJoin([
-            'sale' => CaseSale::find()
-                ->select([
-                    'css_cs_id',
-                    'MAX(css_in_date) AS last_in_date',
-                    'MAX(css_out_date) AS last_out_date',
-                ])
-                ->groupBy('css_cs_id')
+            'sale' => $this->casesQRepository->getLastFlightDatesSubQuery()
         ], 'cases.cs_id = sale.css_cs_id');
 
         $dataProvider = new ActiveDataProvider([
@@ -166,17 +161,7 @@ class CasesQSearch extends Cases
         $query->addSelect('DATE(sale.nextFlight) AS nextFlight');
 
         $query->leftJoin([
-            'sale' => CaseSale::find()
-                ->select([
-                    'css_cs_id',
-                    new Expression('
-                        MIN(if(css_out_date >= SUBDATE(CURDATE(), 1), css_out_date, css_in_date)) as nextFlight'),
-                ])
-                ->innerJoin(Cases::tableName() . ' AS cases',
-                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = 1')
-                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
-                ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
-                ->groupBy('css_cs_id')
+            'sale' => $this->casesQRepository->getNexFlightDateSubQuery(CasesStatus::STATUS_PENDING)
         ], 'cases.cs_id = sale.css_cs_id');
 
         $dataProvider = new ActiveDataProvider([
@@ -260,15 +245,20 @@ class CasesQSearch extends Cases
         $query->addSelect('*');
         $query->addSelect('sale.last_in_date');
         $query->addSelect('sale.last_out_date');
+
         $query->leftJoin([
             'sale' => CaseSale::find()
                 ->select([
                     'css_cs_id',
-                    'MAX(css_in_date) AS last_in_date',
-                    'MAX(css_out_date) AS last_out_date',
+                    new Expression('
+                        MIN(if(css_in_date >=SUBDATE(CURDATE(), 1),css_in_date,null)) AS last_in_date'),
+                    new Expression('
+                        MIN(if(css_out_date >=SUBDATE(CURDATE(), 1),css_out_date,null)) AS last_out_date'),
                 ])
-                ->where('css_in_date IS NOT NULL')
-                ->andWhere('css_out_date IS NOT NULL')
+                ->innerJoin(Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = 1')
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -340,15 +330,20 @@ class CasesQSearch extends Cases
 
         $query->addSelect('sale.last_in_date');
         $query->addSelect('sale.last_out_date');
+
         $query->leftJoin([
             'sale' => CaseSale::find()
                 ->select([
                     'css_cs_id',
-                    'MAX(css_in_date) AS last_in_date',
-                    'MAX(css_out_date) AS last_out_date',
+                    new Expression('
+                        MIN(if(css_in_date >=SUBDATE(CURDATE(), 1),css_in_date,null)) AS last_in_date'),
+                    new Expression('
+                        MIN(if(css_out_date >=SUBDATE(CURDATE(), 1),css_out_date,null)) AS last_out_date'),
                 ])
-                ->where('css_in_date IS NOT NULL')
-                ->andWhere('css_out_date IS NOT NULL')
+                ->innerJoin(Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = 1')
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -431,15 +426,20 @@ class CasesQSearch extends Cases
 
         $query->addSelect('sale.last_in_date');
         $query->addSelect('sale.last_out_date');
+
         $query->leftJoin([
             'sale' => CaseSale::find()
                 ->select([
                     'css_cs_id',
-                    'MAX(css_in_date) AS last_in_date',
-                    'MAX(css_out_date) AS last_out_date',
+                    new Expression('
+                        MIN(if(css_in_date >=SUBDATE(CURDATE(), 1),css_in_date,null)) AS last_in_date'),
+                    new Expression('
+                        MIN(if(css_out_date >=SUBDATE(CURDATE(), 1),css_out_date,null)) AS last_out_date'),
                 ])
-                ->where('css_in_date IS NOT NULL')
-                ->andWhere('css_out_date IS NOT NULL')
+                ->innerJoin(Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = 1')
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -537,15 +537,20 @@ class CasesQSearch extends Cases
 
 		$query->addSelect('sale.last_in_date');
         $query->addSelect('sale.last_out_date');
+
         $query->leftJoin([
             'sale' => CaseSale::find()
                 ->select([
                     'css_cs_id',
-                    'MAX(css_in_date) AS last_in_date',
-                    'MAX(css_out_date) AS last_out_date',
+                    new Expression('
+                        MIN(if(css_in_date >=SUBDATE(CURDATE(), 1),css_in_date,null)) AS last_in_date'),
+                    new Expression('
+                        MIN(if(css_out_date >=SUBDATE(CURDATE(), 1),css_out_date,null)) AS last_out_date'),
                 ])
-                ->where('css_in_date IS NOT NULL')
-                ->andWhere('css_out_date IS NOT NULL')
+                ->innerJoin(Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = 1')
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -625,15 +630,20 @@ class CasesQSearch extends Cases
         ]);
         $query->addSelect('sale.last_in_date');
         $query->addSelect('sale.last_out_date');
+
         $query->leftJoin([
             'sale' => CaseSale::find()
                 ->select([
                     'css_cs_id',
-                    'MAX(css_in_date) AS last_in_date',
-                    'MAX(css_out_date) AS last_out_date',
+                    new Expression('
+                        MIN(if(css_in_date >=SUBDATE(CURDATE(), 1),css_in_date,null)) AS last_in_date'),
+                    new Expression('
+                        MIN(if(css_out_date >=SUBDATE(CURDATE(), 1),css_out_date,null)) AS last_out_date'),
                 ])
-                ->where('css_in_date IS NOT NULL')
-                ->andWhere('css_out_date IS NOT NULL')
+                ->innerJoin(Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = 1')
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
                 ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale.css_cs_id');
 
@@ -722,6 +732,8 @@ class CasesQSearch extends Cases
             'lastSolvedDate' => 'Solved',
             'cs_need_action' => 'Need Action',
             'cs_order_uid' => 'Booking ID',
+            'last_out_date' => 'Last active out date',
+            'last_in_date' => 'Last active in date',
         ];
     }
 
