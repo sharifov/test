@@ -44,12 +44,23 @@ use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\emailList\entity\EmailList;
 use sales\model\emailList\helpers\formatters\EmailListFormatter;
+use sales\model\phoneList\entity\PhoneList;
+use sales\model\phoneList\helpers\formatters\PhoneListFormatter;
 use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asPhoneList($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        /** @var PhoneList $value */
+        return PhoneListFormatter::asFormat($value);
+    }
+
     public function asEmailList($value): string
     {
         if ($value === null) {

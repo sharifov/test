@@ -410,7 +410,7 @@ class CasesController extends FController
                         $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
 
                         $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
-                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $content_data, $data, 'en-US', 10);
 
 
                         //VarDumper::dump($content_data, 10 , true); exit;
@@ -478,14 +478,16 @@ class CasesController extends FController
                     $content_data['project_id'] = $model->cs_project_id;
                     $phoneFrom = '';
 
-                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::findOne(['dpp_id' => $comForm->dpp_phone_id])) {
+                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::find()->andWhere(['dpp_id' => $comForm->dpp_phone_id])->withPhoneList()->one()) {
 
-						$phoneFrom = $departmentPhone->dpp_phone_number;
+//						$phoneFrom = $departmentPhone->dpp_phone_number;
+						$phoneFrom = $departmentPhone->getPhone();
 
 					} elseif ($model->cs_project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
                         if ($upp) {
-                            $phoneFrom = $upp->upp_tw_phone_number;
+//                            $phoneFrom = $upp->upp_tw_phone_number;
+                            $phoneFrom = $upp->getPhone();
                         }
                     }
 

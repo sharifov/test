@@ -276,7 +276,8 @@ $duration = 10;
                         foreach ($user->userProjectParams as $upp):?>
                             <tr>
                                 <td><?=Html::encode($upp->uppProject->name)?></td>
-                                <td><?=Html::encode($upp->upp_tw_phone_number)?></td>
+<!--                                <td>--><?php //=Html::encode($upp->upp_tw_phone_number)?><!--</td>-->
+                                <td><?=Html::encode($upp->getPhone())?></td>
                             </tr>
                         <?php endforeach; ?>
                     </table>
@@ -820,7 +821,7 @@ $duration = 10;
                 [
                     'attribute' => 'c_recording_url',
                     'value' => static function (\common\models\Call $model) {
-                        return  $model->c_recording_url ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
+                        return  $model->recordingUrl ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="'.$model->recordingUrl.'" type="audio/mpeg"> </audio>' : '-';
                     },
                     'format' => 'raw'
                 ],

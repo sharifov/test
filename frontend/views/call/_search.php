@@ -83,7 +83,6 @@ use \kartik\form\ActiveForm;
 
             <?php // echo $form->field($model, 'c_is_new') ?>
 
-            <?php // echo $form->field($model, 'c_is_deleted') ?>
 
             <div class="row">
                 <div class="col-md-3">

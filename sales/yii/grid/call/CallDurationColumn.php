@@ -17,7 +17,7 @@ class CallDurationColumn extends DataColumn
     protected function renderDataCellContent($model, $key, $index): string
     {
         /** @var Call $model */
-        if (!$model->c_recording_url) {
+        if (!$model->c_recording_sid) {
             return '-';
         }
 
@@ -27,7 +27,7 @@ class CallDurationColumn extends DataColumn
             $format = 'i:s';
         }
 
-        return  Html::button(gmdate($format, $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['title' => $model->c_recording_duration . ' (sec)', 'class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]);
+        return  Html::button(gmdate($format, $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['title' => $model->c_recording_duration . ' (sec)', 'class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]);
     }
 
 }

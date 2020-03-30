@@ -3769,7 +3769,7 @@ Reason: {reason}
 
         $upp = null;
         if ($project) {
-            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
+            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->one();
             /*if ($upp) {
                 $mailFrom = $upp->upp_email;
             }*/
@@ -3819,7 +3819,8 @@ Reason: {reason}
         $content_data['agent'] = [
             'name'  => Yii::$app->user->identity->full_name,
             'username'  => Yii::$app->user->identity->username,
-            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+//            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+            'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
 //            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
             'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
@@ -3918,7 +3919,7 @@ Reason: {reason}
 
         $upp = null;
         if ($project) {
-            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
+            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->one();
         }
 
         if($offerIds && is_array($offerIds)) {
@@ -3949,7 +3950,8 @@ Reason: {reason}
         $content_data['agent'] = [
             'name'  => Yii::$app->user->identity->full_name,
             'username'  => Yii::$app->user->identity->username,
-            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+//            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+            'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
 //            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
             'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
@@ -4403,7 +4405,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
         $query = Call::find();
-        $query->where(['c_lead_id' => $this->id, 'c_is_deleted' => false]);
+        $query->where(['c_lead_id' => $this->id]);
 
         if($type_id !== 0) {
             $query->andWhere(['c_call_type_id' => $type_id]);
@@ -4469,7 +4471,17 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query->andWhere(['OR', ['employee_id' => null], ['employee_id' => $user_id]]);
 
         if($user_id) {
-            $subQuery = UserProjectParams::find()->select(['upp_project_id'])->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']]);
+
+            $subQuery = UserProjectParams::find()
+                ->select(['upp_project_id'])
+                ->innerJoinWith('phoneList', false)
+                ->where(['upp_user_id' => $user_id]);
+//                ->andWhere([
+//                    'AND',
+//                    ['IS NOT', 'upp_tw_phone_number', null],
+//                    ['<>', 'upp_tw_phone_number', '']
+//                ]);
+
             $query->andWhere(['IN', 'project_id', $subQuery]);
         }
         //$query->andWhere(['request_ip' => ['217.26.162.22']]);

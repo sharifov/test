@@ -297,7 +297,7 @@ $c_type_id = $comForm->c_type_id;
                             <div class="col-sm-3 form-group">
                                 <?php
                                     $typeList = [];
-                                    $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->limit(1)->one();
+                                    $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->limit(1)->one();
 
                                     /** @var \common\models\Employee $userModel */
                                     $userModel = Yii::$app->user->identity;
@@ -328,10 +328,12 @@ $c_type_id = $comForm->c_type_id;
                                                 }
                                             }
 
-                                            if ($agentParams->upp_tw_phone_number) {
+//                                            if ($agentParams->upp_tw_phone_number) {
+                                            if ($agentParams->getPhone()) {
 
                                                 if ($tk == CommunicationForm::TYPE_SMS) {
-                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
+//                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
+                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
                                                 }
 
 

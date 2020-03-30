@@ -56,7 +56,7 @@ class CasesCommunicationService
         $upp = null;
 
         if ($project) {
-            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => $user->id])->withEmailList()->one();
+            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => $user->id])->withEmailList()->withPhoneList()->one();
             if ($project && $project->contact_info) {
                 $projectContactInfo = @json_decode($project->contact_info, true);
             }
@@ -78,7 +78,8 @@ class CasesCommunicationService
         $content_data['agent'] = [
             'name'      => $user->full_name,
             'username'  => $user->username,
-            'phone'     => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+//            'phone'     => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+            'phone'     => $upp && $upp->getPhone() ? $upp->getPhone() : '',
 //            'email'     => $upp && $upp->upp_email ? $upp->upp_email : '',
             'email'     => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];

@@ -560,14 +560,17 @@ class Sms extends \yii\db\ActiveRecord
     public function getUsersIdByPhone(): array
     {
         $users = [];
-        $params = UserProjectParams::find()->where(['upp_tw_phone_number' => $this->s_phone_to])->all();
-
-        if($params) {
-            foreach ($params as $param) {
-                $users[$param->upp_user_id] = $param->upp_user_id;
-            }
+//        $params = UserProjectParams::find()->where(['upp_tw_phone_number' => $this->s_phone_to])->all();
+//
+//        if($params) {
+//            foreach ($params as $param) {
+//                $users[$param->upp_user_id] = $param->upp_user_id;
+//            }
+//        }
+        $params = UserProjectParams::find()->select(['upp_user_id'])->byPhone($this->s_phone_to, false)->asArray()->all();
+        foreach ($params as $param) {
+            $users[(int)$param['upp_user_id']] = (int)$param['upp_user_id'];
         }
-
         return $users;
     }
 

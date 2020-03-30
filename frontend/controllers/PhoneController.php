@@ -80,19 +80,23 @@ class PhoneController extends FController
 
         $fromPhoneNumbers = [];
         if ($case && $case->isDepartmentSupport()) {
-			$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $project_id, 'dpp_dep_id' => $case->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->all();
+			$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $project_id, 'dpp_dep_id' => $case->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
 			foreach ($departmentPhones as $departmentPhone) {
-				$fromPhoneNumbers[$departmentPhone->dpp_phone_number] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->dpp_phone_number . ')';
+//				$fromPhoneNumbers[$departmentPhone->dpp_phone_number] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->dpp_phone_number . ')';
+				$fromPhoneNumbers[$departmentPhone->getPhone()] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->getPhone() . ')';
 			}
-		} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->all()) {
+		} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->withPhoneList()->all()) {
             foreach ($userParams as $param) {
-                if(!$param->upp_tw_phone_number) {
+//                if(!$param->upp_tw_phone_number) {
+                if(!$param->getPhone()) {
                     continue;
                 }
-                $fromPhoneNumbers[$param->upp_tw_phone_number] = $param->uppProject->name . ' (' . $param->upp_tw_phone_number . ')';
+//                $fromPhoneNumbers[$param->upp_tw_phone_number] = $param->uppProject->name . ' (' . $param->upp_tw_phone_number . ')';
+                $fromPhoneNumbers[$param->getPhone()] = $param->uppProject->name . ' (' . $param->getPhone() . ')';
 
                 if($project_id  && $project_id == $param->upp_project_id) {
-                    $selectProjectPhone = $param->upp_tw_phone_number;
+//                    $selectProjectPhone = $param->upp_tw_phone_number;
+                    $selectProjectPhone = $param->getPhone();
                 }
             }
         }
@@ -193,7 +197,8 @@ class PhoneController extends FController
         $depId = null;
 
         if ($call_from && $project_id) {
-            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call_from, 'upp_project_id' => $project_id])->limit(1)->one();
+//            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call_from, 'upp_project_id' => $project_id])->limit(1)->one();
+            $upp = UserProjectParams::find()->byPhone($call_from, false)->andWhere(['upp_project_id' => $project_id])->limit(1)->one();
             if ($upp && $upp->upp_dep_id) {
                 $depId = $upp->upp_dep_id;
             }
@@ -490,7 +495,7 @@ class PhoneController extends FController
         }
 
 
-        $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])->andWhere(['>', 'dpp_dep_id', 0])->orderBy(['dpp_dep_id' => SORT_ASC])->all();
+        $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
         $phones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
 
         return $this->renderAjax('ajax_redirect_call', [

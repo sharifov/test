@@ -12,15 +12,37 @@ use yii\db\ActiveQuery;
  */
 class UserProjectParamsQuery extends ActiveQuery
 {
-    public function byPhone(string $phone): self
+    /**
+     * @param string|array $phone
+     * @param bool $eagerLoading
+     * @param bool $onyEnabled
+     * @return $this
+     */
+    public function byPhone($phone, bool $eagerLoading = true, bool $onyEnabled = false): self
     {
-        return $this->where(['upp_tw_phone_number' => $phone])->orderBy(['upp_created_dt' => SORT_DESC]);
+        if ($onyEnabled) {
+            $this->innerJoinWith(['phoneList' => static function(\sales\model\phoneList\entity\Scopes $query) use ($phone) {
+                $query
+                    ->andOnCondition(['pl_enabled' => true])
+                    ->andOnCondition(['pl_phone_number' => $phone]);
+            }], $eagerLoading);
+        } else {
+            $this->innerJoinWith(['phoneList' => static function(\sales\model\phoneList\entity\Scopes $query) use ($phone) {
+                $query->andOnCondition(['pl_phone_number' => $phone]);
+            }], $eagerLoading);
+        }
+        return $this->orderBy(['upp_created_dt' => SORT_DESC]);
     }
+
+//    public function byPhone(string $phone): self
+//    {
+//        return $this->where(['upp_tw_phone_number' => $phone])->orderBy(['upp_created_dt' => SORT_DESC]);
+//    }
 
     /**
      * @param string|array $email
-     * @param bool $onyEnabled
      * @param bool $eagerLoading
+     * @param bool $onyEnabled
      * @return $this
      */
     public function byEmail($email, bool $eagerLoading = true, bool $onyEnabled = false): self
@@ -62,5 +84,10 @@ class UserProjectParamsQuery extends ActiveQuery
             }]);
         }
         return $this->with(['emailList']);
+    }
+
+    public function byUserId(int $userId): self
+    {
+        return $this->andWhere(['upp_user_id' => $userId]);
     }
 }

@@ -51,7 +51,7 @@ use borales\extensions\phoneInput\PhoneInput;
     <?php //= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
 
 
-    <?= $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
+    <?php /* = $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
         'jsOptions' => [
             'autoPlaceholder' => 'off',
             'customPlaceholder' => '',
@@ -59,7 +59,7 @@ use borales\extensions\phoneInput\PhoneInput;
             'preferredCountries' => ['us'],
             'customContainer' => 'intl-tel-input'
         ]
-    ]) ?>
+    ]) */ ?>
 
     <?= $form->field($model, 'upp_phone_list_id')->widget(PhoneSelect2Widget::class, [
         'data' => $model->upp_phone_list_id ? [

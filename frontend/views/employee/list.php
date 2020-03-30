@@ -128,7 +128,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'attribute' => 'joinDate',
                 'value' => static function (Employee $model) {
-					return $model->userProfile->up_join_date;
+					return $model->userProfile ? $model->userProfile->up_join_date : null;
                 },
 				'filter' => DatePicker::widget([
 					'model' => $searchModel,
@@ -384,7 +384,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             $str .= '<tr>';
 //                                $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
                             $str .= '<td>'.Html::encode($projectParam->uppProject->name).'</td>';
-                            $str .= '<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+//                            $str .= '<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+                            $str .= '<td>'.Html::encode($projectParam->getPhone()).'</td>';
                             $str .= '<td title="' . ($projectParam->uppDep ? $projectParam->uppDep->dep_name : '-') . '">' . Html::encode($projectParam->upp_dep_id) . '</td>';
 
                             if ($projectParam->upp_allow_general_line) {

@@ -139,6 +139,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->upUser->userProfile->up_join_date;
                 }
             ],
+			[
+				'label' => 'Experience',
+				'value' => static function (\common\models\UserParams $model) {
+					return $model->upUser->userProfile->getExperienceMonth() . ' Months';
+				}
+			],
             [
                 'attribute' => 'up_base_amount',
                 'value' => function(\common\models\UserParams $model) {

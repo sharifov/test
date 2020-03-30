@@ -138,10 +138,11 @@ class UserProfile extends \yii\db\ActiveRecord
 	 */
     public function getExperienceMonth(): int
 	{
-		if ($this->up_join_date) {
+		if ($this->up_join_date && preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $this->up_join_date)) {
 			$currentDate = new \DateTime();
 			$joinDate = new \DateTime($this->up_join_date);
-			return $joinDate->diff($currentDate)->m;
+			$interval = $joinDate->diff($currentDate);
+			return $interval->m + ($interval->y * 12);
 		}
 		return 0;
 	}

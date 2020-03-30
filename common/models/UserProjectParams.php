@@ -58,19 +58,24 @@ class UserProjectParams extends \yii\db\ActiveRecord
 //            [['upp_email'], 'trim'],
 //            [['upp_email'], 'email'],
 
-            ['upp_tw_phone_number', 'unique', 'targetAttribute' => ['upp_tw_phone_number']], //, 'message' => 'Twillio Phone Number must be unique'],
 
-            [['upp_phone_number', 'upp_tw_phone_number'], 'string', 'max' => 30],
+
+            ['upp_phone_number', 'string', 'max' => 30],
             [['upp_user_id', 'upp_project_id'], 'unique', 'targetAttribute' => ['upp_user_id', 'upp_project_id']],
             [['upp_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['upp_project_id' => 'id']],
             [['upp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upp_updated_user_id' => 'id']],
             [['upp_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upp_user_id' => 'id']],
             [['upp_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['upp_dep_id' => 'dep_id']],
-            [['upp_phone_number', 'upp_tw_phone_number'], PhoneInputValidator::class],
+            ['upp_phone_number', PhoneInputValidator::class],
+
+//            ['upp_tw_phone_number', PhoneInputValidator::class],
+//            ['upp_tw_phone_number', 'unique', 'targetAttribute' => ['upp_tw_phone_number']], //, 'message' => 'Twillio Phone Number must be unique'],
+//            ['upp_tw_phone_number', 'string', 'max' => 30],
 
             ['upp_allow_general_line', 'boolean'],
 
             ['upp_phone_list_id', 'integer'],
+            ['upp_phone_list_id', 'unique'],
             ['upp_phone_list_id', 'exist', 'skipOnError' => true, 'targetClass' => PhoneList::class, 'targetAttribute' => ['upp_phone_list_id' => 'pl_id']],
 
             ['upp_email_list_id', 'integer'],
@@ -153,6 +158,20 @@ class UserProjectParams extends \yii\db\ActiveRecord
     public function getUppUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'upp_user_id']);
+    }
+
+    public function getPhone(bool $onlyEnabled = false): ?string
+    {
+        if (!$this->phoneList) {
+            return null;
+        }
+        if ($onlyEnabled) {
+            if ($this->phoneList->pl_phone_number) {
+                return $this->phoneList->pl_phone_number;
+            }
+            return null;
+        }
+        return $this->phoneList->pl_phone_number;
     }
 
     public function getPhoneList(): ActiveQuery

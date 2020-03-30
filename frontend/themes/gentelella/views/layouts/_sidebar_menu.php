@@ -51,12 +51,17 @@ $isSuperAdmin = $user->isSuperAdmin();
 
         $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
 
+//        $smsExist = \common\models\UserProjectParams::find()
+//            ->where(['upp_user_id' => $user->id])
+//            ->andWhere([
+//                'AND', ['IS NOT', 'upp_tw_phone_number', null],
+//                ['<>', 'upp_tw_phone_number', '']
+//            ])
+//            ->exists();
+
         $smsExist = \common\models\UserProjectParams::find()
-            ->where(['upp_user_id' => $user->id])
-            ->andWhere([
-                'AND', ['IS NOT', 'upp_tw_phone_number', null],
-                ['<>', 'upp_tw_phone_number', '']
-            ])
+            ->andWhere(['upp_user_id' => Yii::$app->user->id])
+            ->innerJoinWith('phoneList', false)
             ->exists();
 
         if ($smsExist) {
