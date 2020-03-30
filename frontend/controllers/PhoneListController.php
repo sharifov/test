@@ -7,6 +7,7 @@ use Yii;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\phoneList\entity\search\PhoneListSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -111,23 +112,23 @@ class PhoneListController extends FController
         $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
 
         if ($q !== null) {
-            $data = PhoneList::find()->select(['id' => 'pl_id', 'text' => 'pl_phone_number', 'title' => 'pl_title']);
+            $query = PhoneList::find()->select(['id' => 'pl_id', 'text' => 'pl_phone_number', 'title' => 'pl_title']);
 
             //if (is_numeric($q)) {}
-            $data->where(['like', 'pl_phone_number', $q])
+            $query->where(['like', 'pl_phone_number', $q])
                 ->orWhere(['pl_id' => (int)$q]);
-            $data->orWhere(['pl_title' => $q]);
+            $query->orWhere(['like', 'pl_title', $q]);
 
-            $data->limit(20)
+            $query->limit(20)
                 //->indexBy('id')
-                ->asArray()
-                ->all();
+                ->asArray();
+            $data = $query->all();
 
             if ($data) {
                 foreach ($data as $n => $item) {
                     $text = $item['text'] . ' (' . $item['id'] . ')';
-                    if ($item['pl_title']) {
-                        $text .= $item['pl_title'];
+                    if ($item['title']) {
+                        $text .= ' - ' . Html::encode($item['title']);
                     }
                     $data[$n]['text'] = $this->formatText($text, $q);
                     $data[$n]['selection'] = $item['text'];
