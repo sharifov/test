@@ -1445,7 +1445,7 @@ class CasesController extends FController
 			throw new BadRequestHttpException();
 		}
 
-        $withFareRules = Yii::$app->request->post('checkFareRules', 0);
+        $withFareRules = Yii::$app->request->post('check_fare_rules', 0);
 
 		try {
 			$out = [
