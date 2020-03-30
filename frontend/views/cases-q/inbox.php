@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'rowOptions' => function (CasesQSearch $model) {
-            if ($model->activeFlight) {
+            if ($model->nextFlight) {
                 return ['class' => 'danger'];
             }
         },
@@ -70,20 +70,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'cs_order_uid',
             [
-                'attribute' => 'lastActiveDateFlight',
+                'attribute' => 'nextFlight',
                 'value' => static function (CasesQSearch $model) {
 
-                    if ($model->lastActiveDateFlight) {
-                        $out = $model->last_out_date == $model->lastActiveDateFlight ? 'Out <i class="fab fa-hotjar"></i> '
-                            : 'Out <i class="fa fa-calendar"></i> ';
-                        $out .= Yii::$app->formatter->asDatetime(strtotime($model->last_out_date)) . '<br />';
-
-                        $out .= $model->last_in_date == $model->lastActiveDateFlight ? 'Out <i class="fab fa-hotjar"></i> '
-                            : 'In <i class="fa fa-calendar"></i> ';
-                        $out .= Yii::$app->formatter->asDatetime(strtotime($model->last_in_date));
+                    if ($model->nextFlight) {
+                        $out =  '<i class="fa fa-calendar"></i> ';
+                        $out .= Yii::$app->formatter->asDatetime(strtotime($model->nextFlight));
                         return $out;
                     }
-
                     return '<span class="not-set">(not set)</span>';
                 },
                 'format' => 'raw',
