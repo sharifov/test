@@ -111,10 +111,14 @@ class PhoneListController extends FController
         $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
 
         if ($q !== null) {
-            $data = PhoneList::find()->select(['id' => 'pl_id', 'text' => 'pl_phone_number'])
-                ->where(['like', 'pl_phone_number', $q])
-                ->orWhere(['pl_id' => (int)$q])
-                ->limit(20)
+            $data = PhoneList::find()->select(['id' => 'pl_id', 'text' => 'pl_phone_number', 'title' => 'pl_title']);
+
+            //if (is_numeric($q)) {}
+            $data->where(['like', 'pl_phone_number', $q])
+                ->orWhere(['pl_id' => (int)$q]);
+            $data->orWhere(['pl_title' => $q]);
+
+            $data->limit(20)
                 //->indexBy('id')
                 ->asArray()
                 ->all();
@@ -122,6 +126,9 @@ class PhoneListController extends FController
             if ($data) {
                 foreach ($data as $n => $item) {
                     $text = $item['text'] . ' (' . $item['id'] . ')';
+                    if ($item['pl_title']) {
+                        $text .= $item['pl_title'];
+                    }
                     $data[$n]['text'] = $this->formatText($text, $q);
                     $data[$n]['selection'] = $item['text'];
                 }
