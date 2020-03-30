@@ -34,8 +34,8 @@ $user = Yii::$app->user->identity;
                 </td>
                 <td>
                     <?php if ($callItem->recordingUrl):?>
-                        <?=Html::button(gmdate('i:s', $callItem->recordingUrl) . ' <i class="fa fa-play-circle-o"></i>',
-                            ['class' => 'btn btn-' . ($callItem->recordingUrl < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ])*/ ]) ?>
+                        <?=Html::button(gmdate('i:s', $callItem->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
+                            ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ])*/ ]) ?>
                     <?php endif;?>
                 </td>
                 <td class="text-center">
