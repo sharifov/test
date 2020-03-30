@@ -3,7 +3,7 @@
 use common\models\Call;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
-use sales\yii\grid\call\CallDurationColumn;
+use common\components\grid\call\CallDurationColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

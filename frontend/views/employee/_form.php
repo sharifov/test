@@ -451,14 +451,14 @@ JS;
                     //'upp_project_id',
                     'upp_email:email',
                     [
-                        'class' => \sales\yii\grid\EmailSelect2Column::class,
+                        'class' => \common\components\grid\EmailSelect2Column::class,
                         'attribute' => 'upp_email_list_id',
                         'relation' => 'emailList',
                     ],
                     //'upp_phone_number',
                     'upp_tw_phone_number',
                     [
-                        'class' => \sales\yii\grid\PhoneSelect2Column::class,
+                        'class' => \common\components\grid\PhoneSelect2Column::class,
                         'attribute' => 'upp_phone_list_id',
                         'relation' => 'phoneList',
                     ],

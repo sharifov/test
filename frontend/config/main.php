@@ -10,7 +10,7 @@ use modules\offer\OfferModule;
 use modules\order\OrderModule;
 use modules\product\ProductModule;
 use modules\qaTask\QaTaskModule;
-use sales\yii\i18n\Formatter;
+use common\components\i18n\Formatter;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;

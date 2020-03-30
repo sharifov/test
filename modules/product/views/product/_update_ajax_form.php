@@ -1,8 +1,8 @@
 <?php
 
 use modules\product\src\useCases\product\update\ProductUpdateForm;
-use sales\yii\bootstrap4\activeForm\ActiveForm;
-use sales\yii\bootstrap4\activeForm\ClientBeforeSubmit;
+use common\components\bootstrap4\activeForm\ActiveForm;
+use common\components\bootstrap4\activeForm\ClientBeforeSubmit;
 use yii\helpers\Html;
 
 /* @var yii\web\View $this */

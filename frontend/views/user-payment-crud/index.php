@@ -1,14 +1,14 @@
 <?php
 
 use sales\model\user\entity\payment\UserPayment;
-use sales\yii\grid\UserColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\userPayment\UserPaymentCategoryIdColumn;
+use common\components\grid\UserColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\userPayment\UserPaymentCategoryIdColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
-use sales\yii\grid\userPayment\UserPaymentStatusIdColumn;
+use common\components\grid\userPayment\UserPaymentStatusIdColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\user\entity\payment\search\UserPaymentSearch */

@@ -4,7 +4,7 @@ use common\models\Department;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
-use sales\yii\grid\cases\NeedActionColumn;
+use common\components\grid\cases\NeedActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
