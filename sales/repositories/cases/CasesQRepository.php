@@ -277,7 +277,7 @@ class CasesQRepository
             ->select([
                 'css_cs_id',
                 new Expression('
-                    MIN(if(css_out_date >= SUBDATE(CURDATE(), 1), css_out_date, css_in_date)) as nextFlight'),
+                    MIN(css_out_date) AS last_out_date'),
             ]);
 
         if ($joinByStatus) {

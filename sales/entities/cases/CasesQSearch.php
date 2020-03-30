@@ -138,12 +138,40 @@ class CasesQSearch extends Cases
         $query->joinWith('project', true, 'INNER JOIN');
 
         $query->addSelect('*');
-        $query->addSelect('NOT ISNULL(sale.css_cs_id) AS saleExist');
-        $query->addSelect('DATE(sale.nextFlight) AS nextFlight');
+        $query->addSelect(new Expression('
+            CASE 
+                WHEN (NOT ISNULL(sale_out.css_cs_id) OR NOT ISNULL(sale_in.css_cs_id))
+                THEN 1
+                ELSE 0
+            END AS saleExist'));
+        $query->addSelect(new Expression('
+            DATE(if(last_out_date IS NULL, last_in_date, LEAST(last_in_date, last_out_date))) AS nextFlight'));
 
         $query->leftJoin([
-            'sale' => $this->casesQRepository->getNexFlightDateSubQuery(CasesStatus::STATUS_PENDING)
-        ], 'cases.cs_id = sale.css_cs_id');
+            'sale_out' => CaseSale::find()
+            ->select([
+                'css_cs_id',
+                new Expression('
+                    MIN(css_out_date) AS last_out_date'),
+            ])
+            ->innerJoin(Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING)
+            ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+            ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_out.css_cs_id');
+
+        $query->leftJoin([
+            'sale_in' => CaseSale::find()
+            ->select([
+                'css_cs_id',
+                new Expression('
+                    MIN(css_in_date) AS last_in_date'),
+            ])
+            ->innerJoin(Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING)
+            ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+            ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_in.css_cs_id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
