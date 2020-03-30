@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     if ($model->nextFlight) {
                         $out =  '<i class="fa fa-calendar"></i> ';
-                        $out .= Yii::$app->formatter->asDatetime(strtotime($model->nextFlight));
+                        $out .= Yii::$app->formatter->asDate(strtotime($model->nextFlight));
                         return $out;
                     }
                     return '<span class="not-set">(not set)</span>';
