@@ -2,6 +2,7 @@
 
 namespace sales\entities\cases;
 
+use common\models\CaseSale;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
@@ -18,6 +19,11 @@ use yii\db\Query;
  *
  * @property string $solved_date
  * @property string $trash_date
+ * @property string $last_in_date
+ * @property string $last_out_date
+ * @property string $saleExist
+ * @property string|null $nextFlight
+ *
  */
 class CasesQSearch extends Cases
 {
@@ -27,6 +33,12 @@ class CasesQSearch extends Cases
     public $solved_date;
 
     public $trash_date;
+
+    public $last_in_date;
+    public $last_out_date;
+
+    public $saleExist;
+    public $nextFlight;
 
     /**
      * CasesSearch constructor.
@@ -46,32 +58,21 @@ class CasesQSearch extends Cases
     {
         return [
         	['cs_id', 'integer'],
-
             ['cs_gid', 'string'],
-
             ['cs_project_id', 'integer'],
-
             ['cs_subject', 'string'],
-
             ['cs_category_id', 'integer'],
-
             ['cs_status', 'integer'],
-
             ['cs_user_id', 'integer'],
-
             ['cs_lead_id', 'string'],
-
             ['cs_dep_id', 'integer'],
-
             ['cs_created_dt', 'string'],
-
             ['solved_date', 'string'],
-
             ['trash_date', 'string'],
-
             ['cs_need_action', 'boolean'],
-
             ['cs_order_uid', 'string'],
+            [['last_in_date', 'last_out_date'], 'string'],
+            [['saleExist', 'nextFlight'], 'safe'],
         ];
     }
 
@@ -137,22 +138,76 @@ class CasesQSearch extends Cases
         $query = $this->casesQRepository->getInboxQuery($user);
         $query->joinWith('project', true, 'INNER JOIN');
 
+        $query->addSelect('*');
+        $query->addSelect(new Expression('
+            CASE 
+                WHEN (NOT ISNULL(sale_out.css_cs_id) OR NOT ISNULL(sale_in.css_cs_id))
+                THEN 1
+                ELSE 0
+            END AS saleExist'));
+        $query->addSelect(new Expression('
+            DATE(if(last_out_date IS NULL, last_in_date, LEAST(last_in_date, last_out_date))) AS nextFlight'));
+
+        $query->leftJoin([
+            'sale_out' => CaseSale::find()
+            ->select([
+                'css_cs_id',
+                new Expression('
+                    MIN(css_out_date) AS last_out_date'),
+            ])
+            ->innerJoin(Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING)
+            ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+            ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_out.css_cs_id');
+
+        $query->leftJoin([
+            'sale_in' => CaseSale::find()
+            ->select([
+                'css_cs_id',
+                new Expression('
+                    MIN(css_in_date) AS last_in_date'),
+            ])
+            ->innerJoin(Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING)
+            ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+            ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_in.css_cs_id');
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => [
+                'saleExist' => SORT_DESC,
+                'nextFlight' => SORT_ASC,
                 'sort_order' => SORT_DESC,
-                'cs_id' => SORT_ASC
-                ]
+                'cs_id' => SORT_ASC,
+                ],
             ],
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
-        $dataProvider->sort->attributes['sort_order'] = [
-            'asc' => ['sort_order' => SORT_ASC],
-            'desc' => ['sort_order' => SORT_DESC],
-        ];
+        $sorting = $dataProvider->getSort();
+        $sorting->attributes = array_merge($sorting->attributes, [
+            'sort_order' => [
+                'asc' => ['sort_order' => SORT_ASC],
+                'desc' => ['sort_order' => SORT_DESC],
+            ],
+            'saleExist' => [
+                'asc' => ['saleExist' => SORT_ASC],
+                'desc' => ['saleExist' => SORT_DESC],
+                'default' => SORT_DESC,
+                'label' => 'Sale exist',
+            ],
+            'nextFlight' => [
+                'asc' => ['nextFlight' => SORT_ASC],
+                'desc' => ['nextFlight' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Next flight date',
+            ],
+        ]);
+        $dataProvider->setSort($sorting);
 
         $this->load($params);
 
@@ -182,6 +237,7 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+
 
         return $dataProvider;
     }
@@ -564,6 +620,7 @@ class CasesQSearch extends Cases
             'lastSolvedDate' => 'Solved',
             'cs_need_action' => 'Need Action',
             'cs_order_uid' => 'Booking ID',
+            'nextFlight' => 'Next Flight Date',
         ];
     }
 }
