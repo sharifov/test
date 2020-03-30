@@ -1713,6 +1713,6 @@ class Call extends \yii\db\ActiveRecord
      */
     public function getRecordingUrl(): string
     {
-        return Yii::$app->communication->recording_url . $this->c_recording_sid;
+        return $this->c_recording_sid ? Yii::$app->communication->recording_url . $this->c_recording_sid : '';
     }
 }

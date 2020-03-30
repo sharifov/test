@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_id',
                 'c_call_sid',
                 'c_parent_call_sid',
-                'c_recording_sid',
+
                 [
                     'attribute' => 'c_call_type_id',
                     'value' => static function (\common\models\Call $model) {
@@ -96,6 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
+            'c_recording_sid',
             'c_recording_url:url',
             'c_recording_duration',
 
