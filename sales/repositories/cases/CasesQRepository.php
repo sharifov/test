@@ -267,26 +267,6 @@ class CasesQRepository
         return $query;
     }
 
-
-    /**
-     * @return CaseSaleQuery
-     */
-    public function getLastFlightDatesSubQuery(): CaseSaleQuery
-    {
-        return CaseSale::find()
-            ->select([
-                'css_cs_id',
-                new Expression('
-                    MIN(if(css_in_date >= SUBDATE(CURDATE(), 1), css_in_date, NULL)) AS last_in_date'),
-                new Expression('
-                    MIN(if(css_out_date >= SUBDATE(CURDATE(), 1), css_out_date, NULL)) AS last_out_date'),
-            ])
-            ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
-            ->orWhere('css_in_date >= SUBDATE(CURDATE(), 1)')
-            ->groupBy('css_cs_id');
-    }
-
-
     /**
      * @param int $joinByStatus
      * @return CaseSaleQuery
