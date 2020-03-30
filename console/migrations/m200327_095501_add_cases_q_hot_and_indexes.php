@@ -21,6 +21,7 @@ class m200327_095501_add_cases_q_hot_and_indexes extends Migration
             Yii::$app->cache->flush();
         }
         Yii::$app->db->getSchema()->refreshTableSchema('{{%case_sale}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%cases}}');
     }
 
     /**
@@ -36,5 +37,6 @@ class m200327_095501_add_cases_q_hot_and_indexes extends Migration
             Yii::$app->cache->flush();
         }
         Yii::$app->db->getSchema()->refreshTableSchema('{{%case_sale}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%cases}}');
     }
 }
