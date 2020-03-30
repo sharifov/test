@@ -33,27 +33,43 @@ class OneTimeController extends Controller
         return parent::options($actionID);
     }
 
+    public function actionTruncateCallLogs(): void
+    {
+        $db  = \Yii::$app->db;
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=0;')->execute();
+        $db->createCommand()->truncateTable('{{%call_log}}')->execute();
+        $db->createCommand()->truncateTable('{{%call_log_lead}}')->execute();
+        $db->createCommand()->truncateTable('{{%call_log_case}}')->execute();
+        $db->createCommand()->truncateTable('{{%call_log_queue}}')->execute();
+        $db->createCommand()->truncateTable('{{%call_log_record}}')->execute();
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
+    }
+
     public function actionMigrateCallsToCallLog()
     {
-         $log = [];
+         $logs = [];
          $n = 0;
          Console::startProgress(0, 10, 'Counting objects: ', false);
          foreach (Call::find()->orderBy(['c_id' => SORT_ASC])->limit(10)->all() as $call) {
-             $this->createCallLogs($call, $log);
+             $this->createCallLogs($call, $logs);
              $n++;
              Console::updateProgress($n, 10);
          }
          Console::endProgress("done." . PHP_EOL);
-         VarDumper::dump($log);
+         if ($logs) {
+             foreach ($logs as $log) {
+                 print_r($log);
+             }
+         }
     }
 
     private function createCallLogs(Call $call, array &$log): void
     {
         if (CallLog::find()->andWhere(['cl_id' => $call->c_id])->exists()) {
-            $log[] = VarDumper::dumpAsString([
+            $log[] = [
                 'Call Id' =>  $call->c_id,
                 'Message' => ' is already exist',
-            ]);
+            ];
             return;
         }
 
@@ -118,7 +134,7 @@ class OneTimeController extends Controller
 
             if ($call->c_recording_duration || $call->c_recording_sid) {
                 $callLogRecord = new CallLogRecord([
-                    'clr_cl_id' => $callLog->cl_id,
+                    'clr_cl_id' => 'asdasd.as.da.sd',
                     'clr_duration' => $call->c_recording_duration,
                     'clr_record_sid' => $call->c_recording_sid,
                 ]);
@@ -130,10 +146,10 @@ class OneTimeController extends Controller
             $transaction->commit();
         } catch (\Throwable $e) {
             $transaction->rollBack();
-            $log[] = VarDumper::dumpAsString([
+            $log[] = [
                 'Call Id' =>  $call->c_id,
                 'Error' => $e->getMessage(),
-            ]);
+            ];
         }
     }
 
