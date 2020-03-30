@@ -128,7 +128,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'attribute' => 'joinDate',
                 'value' => static function (Employee $model) {
-					return $model->userProfile->up_join_date;
+					return $model->userProfile ? $model->userProfile->up_join_date : null;
                 },
 				'filter' => DatePicker::widget([
 					'model' => $searchModel,

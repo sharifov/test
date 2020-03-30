@@ -1169,4 +1169,12 @@ class TestController extends FController
         \yii\helpers\VarDumper::dump((isset($a['itinerary'][0]['segments'])), 10, true); exit();  /* FOR DEBUG:: must by remove */
     }
 
+    public function actionTestUserProfile()
+	{
+		$userProfile = new UserProfile();
+		$userProfile->up_join_date = '2019-01-01';
+		$expMonth = $userProfile->getExperienceMonth();
+		var_dump($expMonth);
+	}
+
 }
