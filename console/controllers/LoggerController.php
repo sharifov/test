@@ -78,4 +78,26 @@ class LoggerController extends Controller
 		printf("\nExecute Time: %s, count Old Logs: " . count($logs), $this->ansiFormat($time . ' s', Console::FG_RED));
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
+
+	public function actionRemoveOldGlobalLogs($limit = 2000, $countDays = 90)
+	{
+		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+		$time_start = microtime(true);
+		$time_end = microtime(true);
+		$db = \Yii::$app->db;
+
+		$maxGlId = $db->createCommand('Select max(gl_id) as gl_id from global_log where ABS(TIMESTAMPDIFF(DAY, curdate(), gl_created_at)) >= :days')->bindValue(':days', $countDays)->queryOne();
+
+		$count = $db->createCommand('Select count(gl_id) as count_gl_id from global_log where ABS(TIMESTAMPDIFF(DAY, curdate(), gl_created_at)) >= :days')->bindValue(':days', $countDays)->queryOne();
+
+		$iter = (int)($count['count_gl_id'] / $limit);
+
+		for ($i = 0; $i <= $iter; $i++) {
+			$db->createCommand('DELETE from global_log where gl_id <= :gl_id limit :limit')->bindValues([':gl_id' => $maxGlId['gl_id'], ':limit' => $limit])->execute();
+		}
+
+		$time = number_format(round($time_end - $time_start, 2), 2);
+		printf("\nExecute Time: %s, Count of removed old logs: " . $count['count_gl_id'], $this->ansiFormat($time . ' s', Console::FG_RED));
+		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+	}
 }
