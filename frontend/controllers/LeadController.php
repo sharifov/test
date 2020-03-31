@@ -61,6 +61,7 @@ use Yii;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -1054,6 +1055,7 @@ class LeadController extends FController
             $dataProviderCommunication->pagination->page = $pageCount;
         }
 
+		$query = (new Query())->select(['cl.*'])->from('call_log_lead')->leftJoin('call_log cl', 'cl.cl_id = cll_cl_id')->where(['cll_lead_id' => $lead->id])->all();
 
 //        $enableCommunication = false;
 //
