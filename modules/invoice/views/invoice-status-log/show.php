@@ -3,9 +3,9 @@
 use modules\invoice\src\entities\invoiceStatusLog\search\InvoiceStatusLogSearch;
 use modules\invoice\src\grid\columns\InvoiceStatusActionColumn;
 use modules\invoice\src\grid\columns\InvoiceStatusColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\DurationColumn;
-use sales\yii\grid\UserColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\DurationColumn;
+use common\components\grid\UserColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 

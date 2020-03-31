@@ -2,7 +2,7 @@
 
 use common\models\Employee;
 use yii\grid\ActionColumn;
-use sales\yii\grid\DateTimeColumn;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */

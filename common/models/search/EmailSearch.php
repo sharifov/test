@@ -6,6 +6,7 @@ use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
+use sales\helpers\query\QueryHelper;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -238,6 +239,7 @@ class EmailSearch extends Email
         }
 
         if (!$this->validate()) {
+            $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
@@ -279,6 +281,8 @@ class EmailSearch extends Email
             ->andFilterWhere(['like', 'e_error_message', $this->e_error_message])
             ->andFilterWhere(['like', 'e_message_id', $this->e_message_id])
             ->andFilterWhere(['like', 'e_ref_message_id', $this->e_ref_message_id]);
+
+        $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
 
         return $dataProvider;
     }

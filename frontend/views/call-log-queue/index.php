@@ -1,7 +1,7 @@
 <?php
 
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
-use sales\yii\grid\BooleanColumn;
+use common\components\grid\BooleanColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

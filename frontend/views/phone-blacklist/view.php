@@ -1,6 +1,6 @@
 <?php
 
-use sales\yii\i18n\Formatter;
+use common\components\i18n\Formatter;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 

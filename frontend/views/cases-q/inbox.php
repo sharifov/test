@@ -4,7 +4,7 @@ use common\models\Department;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
-use sales\yii\grid\cases\NeedActionColumn;
+use common\components\grid\cases\NeedActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
@@ -32,6 +32,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => function (CasesQSearch $model) {
+            if ($model->nextFlight) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             [
                 'attribute' => 'cs_id',
@@ -64,6 +69,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'cs_order_uid',
+            [
+                'attribute' => 'nextFlight',
+                'value' => static function (CasesQSearch $model) {
+
+                    if ($model->nextFlight) {
+                        $out =  '<i class="fa fa-calendar"></i> ';
+                        $out .= Yii::$app->formatter->asDate(strtotime($model->nextFlight));
+                        return $out;
+                    }
+                    return '<span class="not-set">(not set)</span>';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width: 180px']
+            ],
 			[
 				'attribute' => 'cs_dep_id',
 				'value' => static function (CasesQSearch $model) {

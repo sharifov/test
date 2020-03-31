@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use sales\yii\grid\DateTimeColumn;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserCommissionRulesSearch */
@@ -32,14 +32,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'ucr_order_profit',
             'ucr_value:percentInteger',
 			[
-				'class' => \sales\yii\grid\UserSelect2Column::class,
+				'class' => \common\components\grid\UserSelect2Column::class,
 				'attribute' => 'ucr_created_user_id',
 				'relation' => 'ucrCreatedUser',
 				'url' => '/employee/list-ajax',
 				'headerOptions' => ['style' => 'width:13%'],
 			],
 			[
-				'class' => \sales\yii\grid\UserSelect2Column::class,
+				'class' => \common\components\grid\UserSelect2Column::class,
 				'attribute' => 'ucr_updated_user_id',
 				'relation' => 'ucrUpdatedUser',
 				'url' => '/employee/list-ajax',

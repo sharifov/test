@@ -1,8 +1,8 @@
 <?php
 
 use modules\lead\src\grid\columns\LeadColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\project\ProjectColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\project\ProjectColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

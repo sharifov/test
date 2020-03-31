@@ -7,7 +7,7 @@ use frontend\extensions\DatePicker;
 use sales\access\ListsAccess;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
-use sales\yii\grid\cases\NeedActionColumn;
+use common\components\grid\cases\NeedActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
