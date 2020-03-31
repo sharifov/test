@@ -53,12 +53,12 @@ class LoggerController extends Controller
 		$this->globalLogFormatAttrService = $globalLogFormatAttrService;
 	}
 
-	public function actionFormatLogManagedAttr($limit = 1000): void
+	public function actionFormatLogManagedAttr($limit = 1000, $countDays = 90): void
 	{
 		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 		$time_start = microtime(true);
 
-		$logs = GlobalLog::find()->where(['gl_formatted_attr' => null])->limit($limit)->orderBy(['gl_id' => SORT_DESC])->all();
+		$logs = GlobalLog::find()->select(['gl_id', 'gl_formatted_attr', 'gl_model', 'gl_old_attr', 'gl_new_attr'])->where(['gl_formatted_attr' => null])->andWhere(['<=', 'ABS(TIMESTAMPDIFF(DAY, curdate(), gl_created_at))', $countDays])->limit($limit)->orderBy(['gl_id' => SORT_DESC])->all();
 
 		foreach ($logs as $log) {
 			$log->gl_formatted_attr = $this->globalLogFormatAttrService->formatAttr($log->gl_model, $log->gl_old_attr, $log->gl_new_attr);
