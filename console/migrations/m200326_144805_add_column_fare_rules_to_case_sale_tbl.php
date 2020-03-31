@@ -13,7 +13,7 @@ class m200326_144805_add_column_fare_rules_to_case_sale_tbl extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{%case_sale}}', 'css_fare_rules', $this->string(200));
+        $this->addColumn('{{%case_sale}}', 'css_fare_rules', $this->string(400));
         $this->afterRun();
     }
 
