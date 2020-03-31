@@ -714,7 +714,7 @@ class CasesController extends FController
 
             $arr = explode('|', base64_decode($hash));
             $id = (int)($arr[1] ?? 0);
-            $saleData = $this->findSale($id);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($id);
 
             $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
             if($cs) {
@@ -930,37 +930,6 @@ class CasesController extends FController
         }
 
         throw new NotFoundHttpException('The requested case does not exist.');
-    }
-
-    /**
-     * @param int $id
-     * @param int $withFareRules
-     * @return mixed
-     * @throws BadRequestHttpException
-     * @throws NotFoundHttpException
-     */
-    protected function findSale(int $id, int $withFareRules = 0)
-    {
-
-        try {
-            $data['sale_id'] = $id;
-            $data['withFareRules'] = $withFareRules;
-            $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', 90);
-
-            if ($response->isOk) {
-                $result = $response->data;
-                if ($result && is_array($result)) {
-                    return $result;
-                }
-            } else {
-                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
-            }
-
-        } catch (\Throwable $exception) {
-            throw new BadRequestHttpException($exception->getMessage());
-        }
-
-        throw new NotFoundHttpException('The requested Sale does not exist.');
     }
 
     /**
@@ -1439,8 +1408,14 @@ class CasesController extends FController
 		return true;
 	}
 
-	public function actionAjaxRefreshSaleInfo($caseId, $caseSaleId)
-	{
+    /**
+     * @param $caseId
+     * @param $caseSaleId
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxRefreshSaleInfo($caseId, $caseSaleId): Response
+    {
 		if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
 			throw new BadRequestHttpException();
 		}
@@ -1457,8 +1432,7 @@ class CasesController extends FController
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
 			$this->checkAccessToManageCaseSaleInfo($caseSale, true);
 
-			$saleData = $this->findSale((int)$caseSale->css_sale_id, $withFareRules);
-
+			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules);
 			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
 
 			$out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';

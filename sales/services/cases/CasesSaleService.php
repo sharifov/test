@@ -11,6 +11,8 @@ use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesSaleRepository;
 use Yii;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 
 class CasesSaleService
 {
@@ -400,24 +402,32 @@ class CasesSaleService
         return [];
     }
 
+
     /**
      * @param int $sale_id
-     * @return array|mixed
-     * @throws \yii\base\InvalidConfigException
+     * @param int $withFareRules
+     * @param int $requestTime
+     * @return array
+     * @throws BadRequestHttpException
      */
-    public function detailRequestToBackOffice(int $sale_id)
+    public function detailRequestToBackOffice(int $sale_id, int $withFareRules = 0, int $requestTime = 120): ?array
     {
-        $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id], 'POST', 120);
+        try {
+            $data['sale_id'] = $sale_id;
+            $data['withFareRules'] = $withFareRules;
+            $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id], 'POST', $requestTime);
 
-        if ($response->isOk) {
-            $result = $response->data;
-            if (is_array($result) && count($result) && array_key_exists('bookingId', $result)) {
-                return $result;
+            if ($response->isOk) {
+                $result = $response->data;
+                if (is_array($result) && count($result) && array_key_exists('bookingId', $result)) {
+                    return $result;
+                }
+                throw new \RuntimeException('BO request Error. Broken data. : ' . VarDumper::dumpAsString($response));
+            } else {
+                throw new \RuntimeException('BO request Error. Not isOk. : ' . VarDumper::dumpAsString($response->content));
             }
-
-            throw new \RuntimeException('BO broken response:detailRequestToBackOffice: ' . VarDumper::dumpAsString($response));
-        } else {
-            throw new \RuntimeException('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+        } catch (\Throwable $exception) {
+            throw new BadRequestHttpException($exception->getMessage());
         }
     }
 

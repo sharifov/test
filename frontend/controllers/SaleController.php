@@ -5,6 +5,8 @@ namespace frontend\controllers;
 use common\components\BackOffice;
 use common\models\CaseSale;
 use common\models\search\SaleSearch;
+use sales\helpers\app\AppHelper;
+use sales\services\cases\CasesSaleService;
 use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
@@ -16,11 +18,33 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
- * LeadsController implements the CRUD actions for Lead model.
+ * @property CasesSaleService $casesSaleService
  */
 class SaleController extends FController
 {
+    private $casesSaleService;
 
+    /**
+     * SaleController constructor.
+     * @param $id
+     * @param $module
+     * @param CasesSaleService $casesSaleService
+     * @param array $config
+     */
+    public function __construct(
+        $id,
+        $module,
+        CasesSaleService $casesSaleService,
+        $config = []
+    )
+    {
+        parent::__construct($id, $module, $config);
+        $this->casesSaleService = $casesSaleService;
+    }
+
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         $behaviors = [
@@ -67,19 +91,23 @@ class SaleController extends FController
      */
     public function actionView()
     {
+        $saleData = [];
 
-        $hash = Yii::$app->request->get('h');
+        try {
+            $hash = Yii::$app->request->get('h');
+            $arr = explode('|', base64_decode($hash));
+            $id = (int) ($arr[1] ?? 0);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($id);
 
-        $arr = explode('|', base64_decode($hash));
-        $id = (int) ($arr[1] ?? 0);
-
-        $model = $this->findSale($id);
-
-        if (Yii::$app->request->isAjax) {
-            return $this->renderAjax('view', ['data' => $model]);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), 'SaleController:actionView:ErrorBoRequest');
         }
 
-        return $this->render('view', ['data' => $model]);
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('view', ['data' => $saleData]);
+        }
+
+        return $this->render('view', ['data' => $saleData]);
     }
 
     /**
