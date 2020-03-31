@@ -714,7 +714,7 @@ class CasesController extends FController
 
             $arr = explode('|', base64_decode($hash));
             $id = (int)($arr[1] ?? 0);
-            $saleData = $this->findSale($id);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($id);
 
             $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
             if($cs) {
@@ -930,35 +930,6 @@ class CasesController extends FController
         }
 
         throw new NotFoundHttpException('The requested case does not exist.');
-    }
-
-    /**
-     * @param int $id
-     * @return mixed
-     * @throws BadRequestHttpException
-     * @throws NotFoundHttpException
-     */
-    protected function findSale(int $id)
-    {
-
-        try {
-            $data['sale_id'] = $id;
-            $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', 90);
-
-            if ($response->isOk) {
-                $result = $response->data;
-                if ($result && is_array($result)) {
-                    return $result;
-                }
-            } else {
-                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
-            }
-
-        } catch (\Throwable $exception) {
-            throw new BadRequestHttpException($exception->getMessage());
-        }
-
-        throw new NotFoundHttpException('The requested Sale does not exist.');
     }
 
     /**
@@ -1437,11 +1408,19 @@ class CasesController extends FController
 		return true;
 	}
 
-	public function actionAjaxRefreshSaleInfo($caseId, $caseSaleId)
-	{
+    /**
+     * @param $caseId
+     * @param $caseSaleId
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxRefreshSaleInfo($caseId, $caseSaleId): Response
+    {
 		if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
 			throw new BadRequestHttpException();
 		}
+
+        $withFareRules = Yii::$app->request->post('check_fare_rules', 0);
 
 		try {
 			$out = [
@@ -1453,8 +1432,7 @@ class CasesController extends FController
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
 			$this->checkAccessToManageCaseSaleInfo($caseSale, true);
 
-			$saleData = $this->findSale((int)$caseSale->css_sale_id);
-
+			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules);
 			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
 
 			$out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
@@ -1466,7 +1444,7 @@ class CasesController extends FController
 				$out['message'] = $throwable->getMessage();
 			}
 			Yii::error(
-			    \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+			    \yii\helpers\VarDumper::dumpAsString($throwable->getMessage(), 20),
 			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
 			);
 		}

@@ -54,6 +54,7 @@ $user = Yii::$app->user->identity;
 
                     <?php if ($user->isAdmin() || $user->isSuperAdmin()): ?>
                         <td>Refresh Data From B/O</td>
+                        <td>Check Fare rules</td>
                         <td>Remove Sale</td>
                     <?php endif; ?>
                 </tr>
@@ -90,13 +91,21 @@ $user = Yii::$app->user->identity;
 					            'class' => 'refresh-from-bo btn btn-info',
 								'data-case-id' => $item->css_cs_id,
 								'data-case-sale-id' => $item->css_sale_id,
+								'check-fare-rules' => 0,
                                 'title' => 'Refresh from B/O'
+                        ]) . '</td>';
+                        $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Check Fare rules', [
+					            'class' => 'refresh-from-bo btn btn-info',
+								'data-case-id' => $item->css_cs_id,
+								'data-case-sale-id' => $item->css_sale_id,
+								'check-fare-rules' => 1,
+                                'title' => 'Check Fare rules',
                         ]) . '</td>';
                         $label .= '<td>' . Html::button('<i class="fa fa-warning"></i> Remove', [
 					            'class' => 'remove-sale btn btn-warning',
 					            'data-case-id' => $item->css_cs_id,
 								'data-case-sale-id' => $item->css_sale_id,
-                                'title' => 'Remove Sale'
+                                'title' => 'Remove Sale',
                         ]) . '</td>';
                     }
                     $label .= '</tr></table>';
