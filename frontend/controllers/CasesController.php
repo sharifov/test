@@ -1444,7 +1444,7 @@ class CasesController extends FController
 				$out['message'] = $throwable->getMessage();
 			}
 			Yii::error(
-			    \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+			    \yii\helpers\VarDumper::dumpAsString($throwable->getMessage(), 20),
 			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
 			);
 		}

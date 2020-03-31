@@ -415,7 +415,7 @@ class CasesSaleService
         try {
             $data['sale_id'] = $sale_id;
             $data['withFareRules'] = $withFareRules;
-            $response = BackOffice::sendRequest2('cs/detail', ['sale_id' => $sale_id], 'POST', $requestTime);
+            $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', $requestTime);
 
             if ($response->isOk) {
                 $result = $response->data;
