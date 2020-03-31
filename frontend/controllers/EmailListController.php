@@ -6,6 +6,7 @@ use sales\auth\Auth;
 use sales\model\emailList\entity\EmailList;
 use sales\model\emailList\entity\search\EmailListSearch;
 use Yii;
+use yii\bootstrap4\Html;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -110,9 +111,10 @@ class EmailListController extends FController
         $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
 
         if ($q !== null) {
-            $data = EmailList::find()->select(['id' => 'el_id', 'text' => 'el_email', 'enabled' => 'el_enabled'])
+            $data = EmailList::find()->select(['id' => 'el_id', 'text' => 'el_email', 'enabled' => 'el_enabled', 'title' => 'el_title'])
                 ->where(['like', 'el_email', $q])
                 ->orWhere(['el_id' => (int)$q])
+                ->orWhere(['like', 'el_title', $q])
                 ->limit(20)
                 //->indexBy('id')
                 ->asArray()
@@ -121,6 +123,9 @@ class EmailListController extends FController
             if ($data) {
                 foreach ($data as $n => $item) {
                     $text = $item['enabled'] ? $item['text'] . ' (' . $item['id'] . ')' : ''  . $item['text'] . ' (' . $item['id'] . ')' . ' <span style="color:red"><b>DISABLED</b></span>';
+                    if ($item['title']) {
+                        $text .= ' - ' . Html::encode($item['title']);
+                    }
                     $data[$n]['text'] = $this->formatText($text, $q);
                     $data[$n]['selection'] = $item['text'];
                 }

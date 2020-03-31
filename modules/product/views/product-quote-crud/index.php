@@ -1,8 +1,8 @@
 <?php
 
 use modules\product\src\grid\columns\ProductColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\UserColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserColumn;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;

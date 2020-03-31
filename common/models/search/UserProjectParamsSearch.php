@@ -27,6 +27,7 @@ class UserProjectParamsSearch extends UserProjectParams
             [['upp_phone_number', 'upp_tw_sip_id', 'upp_created_dt', 'upp_updated_dt', 'upp_allow_general_line'], 'safe'],
             ['upp_phone_list_id', 'integer'],
             ['upp_email_list_id', 'integer'],
+            ['upp_dep_id', 'integer'],
         ];
     }
 
@@ -48,7 +49,7 @@ class UserProjectParamsSearch extends UserProjectParams
      */
     public function search($params)
     {
-        $query = UserProjectParams::find()->with('uppUpdatedUser', 'uppUser', 'uppProject', 'emailList', 'phoneList');
+        $query = UserProjectParams::find()->with('uppUpdatedUser', 'uppUser', 'uppProject', 'emailList', 'phoneList', 'uppDep');
 
         // add conditions that should always apply here
 
@@ -83,6 +84,7 @@ class UserProjectParamsSearch extends UserProjectParams
             'upp_allow_general_line' => $this->upp_allow_general_line,
             'upp_email_list_id' => $this->upp_email_list_id,
             'upp_phone_list_id' => $this->upp_phone_list_id,
+            'upp_dep_id' => $this->upp_dep_id,
         ]);
 
         if($this->supervision_id > 0) {

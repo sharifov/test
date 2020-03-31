@@ -5,8 +5,8 @@ use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMeth
 use modules\product\src\entities\productTypePaymentMethod\search\ProductTypePaymentMethodSearch;
 use modules\product\src\grid\columns\ProductTypeCountPaymentMethodsColumn;
 use modules\product\src\grid\columns\ProductTypeDefaultPaymentMethodServiceFeeColumn;
-use sales\yii\grid\BooleanColumn;
-use sales\yii\grid\DateTimeColumn;
+use common\components\grid\BooleanColumn;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;

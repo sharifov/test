@@ -1,7 +1,7 @@
 <?php
 
 use modules\offer\src\entities\offerViewLog\search\OfferViewLogSearch;
-use sales\yii\grid\DateTimeColumn;
+use common\components\grid\DateTimeColumn;
 use yii\grid\GridView;
 use yii\grid\SerialColumn;
 use yii\widgets\Pjax;

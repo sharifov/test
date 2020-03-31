@@ -1,7 +1,7 @@
 <?php
 
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\MonthColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\MonthColumn;
 use yii\grid\ActionColumn;
 use sales\model\user\entity\payroll\UserPayroll;
 use sales\model\user\entity\profit\search\UserProfitSearch;
@@ -10,7 +10,7 @@ use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
-use sales\yii\grid\UserColumn;
+use common\components\grid\UserColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\user\entity\payroll\search\UserPayrollSearch */

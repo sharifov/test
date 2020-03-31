@@ -1,9 +1,9 @@
 <?php
 
 use common\models\PhoneBlacklist;
-use sales\yii\grid\BooleanColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\UserColumn;
+use common\components\grid\BooleanColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserColumn;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;

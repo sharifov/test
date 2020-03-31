@@ -4,8 +4,8 @@ use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\search\object\QaTaskObjectSearch;
 use modules\qaTask\src\grid\columns\QaTaskRatingColumn;
 use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\UserColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 

@@ -2,8 +2,8 @@
 
 use modules\offer\src\entities\offerSendLog\search\OfferSendLogSearch;
 use modules\offer\src\grid\columns\OfferSendLogTypeColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\UserColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 

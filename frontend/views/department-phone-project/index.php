@@ -38,22 +38,22 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
             'dpp_id',
             [
-                'class' => \sales\yii\grid\project\ProjectColumn::class,
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'dpp_project_id',
                 'relation' => 'dppProject',
             ],
             'dpp_phone_number',
             [
-                'class' => \sales\yii\grid\PhoneSelect2Column::class,
+                'class' => \common\components\grid\PhoneSelect2Column::class,
                 'attribute' => 'dpp_phone_list_id',
                 'relation' => 'phoneList',
             ],
             [
-                'class' => \sales\yii\grid\BooleanColumn::class,
+                'class' => \common\components\grid\BooleanColumn::class,
                 'attribute' => 'dpp_redial',
             ],
             [
-                'class' => \sales\yii\grid\department\DepartmentColumn::class,
+                'class' => \common\components\grid\department\DepartmentColumn::class,
                 'attribute' => 'dpp_dep_id',
                 'relation' => 'dppDep',
             ],
@@ -79,28 +79,28 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'dpp_params',
             [
-                'class' => \sales\yii\grid\BooleanColumn::class,
+                'class' => \common\components\grid\BooleanColumn::class,
                 'attribute' => 'dpp_ivr_enable',
             ],
             [
-                'class' => \sales\yii\grid\BooleanColumn::class,
+                'class' => \common\components\grid\BooleanColumn::class,
                 'attribute' => 'dpp_enable',
             ],
             [
-                'class' => \sales\yii\grid\BooleanColumn::class,
+                'class' => \common\components\grid\BooleanColumn::class,
                 'attribute' => 'dpp_default',
             ],
             [
-                'class' => \sales\yii\grid\BooleanColumn::class,
+                'class' => \common\components\grid\BooleanColumn::class,
                 'attribute' => 'dpp_show_on_site',
             ],
             [
-                'class' => \sales\yii\grid\UserColumn::class,
+                'class' => \common\components\grid\UserColumn::class,
                 'attribute' => 'dpp_updated_user_id',
                 'relation' => 'dppUpdatedUser',
             ],
             [
-                'class' => \sales\yii\grid\DateTimeColumn::class,
+                'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'dpp_updated_dt',
             ],
             ['class' => 'yii\grid\ActionColumn'],
