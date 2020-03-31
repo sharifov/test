@@ -13,7 +13,7 @@ use yii\helpers\VarDumper;
 /* @var $csId int */
 /* @var $itemKey int */
 /* @var $caseSaleModel common\models\CaseSale */
-
+/* @var array $additionalData */
 
 if(Yii::$app->request->isPjax) {
 
@@ -37,6 +37,16 @@ if (!empty($caseSaleModel)) {
         <div class="col-md-12">
             <div class="error-dump"></div>
         </div>
+
+        <?php if (isset($additionalData) && $additionalData['withFareRules'] === 0) :?>
+            <div class="col-md-12">
+                <?php echo Html::a(
+                    'Check Fare rules',
+                    ['sale/view', 'h' => $additionalData['hash'], 'wfr' => 1],
+                    ['class' => 'btn btn-info']
+                ) ?>
+            </div>
+        <?php endif ?>
 
         <div class="col-md-3">
             <h2>General</h2>
