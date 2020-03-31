@@ -4,7 +4,7 @@ use kartik\grid\GridView;
 use kartik\export\ExportMenu;
 use sales\auth\Auth;
 
-$this->title = 'Leads Stats';
+$this->title = 'Agent Leads Report';
 $this->params['breadcrumbs'][] = $this->title;
 
 /**
@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Username',
             'attribute' => 'lfOwnerId',
             'value' => static function ($data) {
-                $employee = \common\models\Employee::findone($data['user_id']);
+                $employee = \common\models\Employee::findone($data['lf_owner_id']);
                 return $employee->username;
             },
             'format' => 'raw',
