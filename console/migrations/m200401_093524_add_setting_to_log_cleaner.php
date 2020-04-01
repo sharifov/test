@@ -17,6 +17,8 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
         $settingCategory->sc_name = 'Console';
         $settingCategory->save();
 
+        /* TODO:: global_log and api_log id to bigint */
+
         $this->insert('{{%setting}}', [
             's_key' => 'console_log_cleaner_enable',
             's_name' => 'Console log cleaner enable',
