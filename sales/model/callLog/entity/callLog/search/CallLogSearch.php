@@ -59,6 +59,7 @@ class CallLogSearch extends CallLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['cl_id' => SORT_DESC]],
         ]);
 
         $dataProvider->sort->attributes['lead_id'] = [

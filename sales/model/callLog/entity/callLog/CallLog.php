@@ -72,7 +72,7 @@ class CallLog extends \yii\db\ActiveRecord
 
             ['cl_duration', 'integer'],
 
-            [['cl_phone_from', 'cl_phone_to'], PhoneValidator::class],
+            [['cl_phone_from', 'cl_phone_to'], PhoneValidator::class, 'allowClientSellerNumbers' => true],
 
             [['cl_parent_id', 'cl_project_id', 'cl_client_id'], 'integer'],
 
