@@ -158,9 +158,9 @@ return [
 		'assetManager' => [
 			'forceCopy' => false,
 			'appendTimestamp' => false,
-            'hashCallback' => static function ($path) {
-                return hash('md4', $path);
-            },
+//            'hashCallback' => static function ($path) {
+//                return hash('md4', $path);
+//            },
 			'bundles' => [
 				BootstrapAsset::class => [
 					'sourcePath' => '@npm/bootstrap/dist',
