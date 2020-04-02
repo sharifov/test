@@ -54,13 +54,23 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
             's_key' => 'console_call_terminator_params',
             's_name' => 'Console call terminator params',
             's_type' => \common\models\Setting::TYPE_ARRAY,
-            's_value' => json_encode([],JSON_THROW_ON_ERROR),
+            's_value' => json_encode(
+                [
+                    'ringing_minutes' => 5,
+                    'queue_minutes' => 60,
+                    'in_progress_minutes' => 90,
+                ],JSON_THROW_ON_ERROR),
             's_updated_dt' => date('Y-m-d H:i:s'),
             's_category_id' => $settingCategory ? $settingCategory->sc_id : null,
         ]);
 
-        $this->alterColumn('{{%global_log}}', 'gl_id', $this->bigInteger()->notNull());
-        $this->alterColumn('{{%api_log}}', 'al_id', $this->bigInteger()->notNull());
+        /* TODO:: add index to call c_status_id + c_status_id */
+
+        /* TODO::
+        $this->alterColumn('{{%global_log}}', 'gl_id', $this->bigInteger() . 'NOT NULL AUTO_INCREMENT');
+        $this->alterColumn('{{%api_log}}', 'al_id', $this->bigInteger() . 'NOT NULL AUTO_INCREMENT');
+
+         */
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -77,8 +87,11 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
             'console_call_terminator_enable', 'console_call_terminator_params',
         ]]);
 
-        $this->alterColumn('{{%global_log}}', 'gl_id', $this->integer(11)->notNull());
-        $this->alterColumn('{{%api_log}}', 'al_id', $this->integer(11)->notNull());
+        /* TODO::
+        $this->alterColumn('{{%global_log}}', 'gl_id', $this->integer(11) . 'NOT NULL AUTO_INCREMENT');
+        $this->alterColumn('{{%api_log}}', 'al_id', $this->integer(11) . 'NOT NULL AUTO_INCREMENT');
+
+         */
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

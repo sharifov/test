@@ -20,6 +20,7 @@ use yii\helpers\Console;
  * @property int $defaultDays
  * @property int $defaultLimit
  * @property array $cleanerCollection
+ * @property OutputHelper $outputHelper
  */
 class LogController extends Controller
 {
@@ -30,15 +31,18 @@ class LogController extends Controller
     private $logCleanerParams;
     private $shortClassName;
     private $cleanerCollection;
+    private $outputHelper;
 
     /**
      * @param $id
      * @param $module
+     * @param OutputHelper $outputHelper
      * @param array $config
      */
-    public function __construct($id, $module, $config = [])
+    public function __construct($id, $module, OutputHelper $outputHelper, $config = [])
 	{
 		parent::__construct($id, $module, $config);
+		$this->outputHelper = $outputHelper;
 		$this->setSettings();
 	}
 
@@ -49,18 +53,17 @@ class LogController extends Controller
     public function actionCleaner(?int $days = null, ?int $limit = null): void
 	{
 	    $infoMessage = '';
-	    $outputHelper = new OutputHelper();
 	    $timeStart = microtime(true);
 	    $days = $days ?? $this->logCleanerParams['days'];
 	    $limit = $limit ?? $this->logCleanerParams['limit'];
 	    $point = $this->shortClassName . ':' .$this->action->id;
 	    
 	    if (!$this->logCleanerEnable) {
-            $outputHelper->printInfo('Cleaner is disable. ', $point, Console::FG_RED);
+            $this->outputHelper->printInfo('Cleaner is disable. ', $point, Console::FG_RED);
 	        return;
 	    }
 
-        $outputHelper->printInfo('Start. ', $point);
+        $this->outputHelper->printInfo('Start. ', $point);
 
         foreach ($this->cleanerCollection as $table => $params) {
 
@@ -69,12 +72,12 @@ class LogController extends Controller
             $message = '"' . $table . '" - Processed: ' . $result['processed'] . ' ExecutionTime: ' . $result['executionTime'];
             $message .= $result['status'] !== 1 ? ' Process are errors, check error logs' : '';
 
-            $outputHelper->printInfo($message, $point . ':' . $table, OutputHelper::getColorByStatusCode($result['status']));
+            $this->outputHelper->printInfo($message, $point . ':' . $table, OutputHelper::getColorByStatusCode($result['status']));
             $infoMessage .= $message . "\n";
         }
 
         $resultInfo = 'Total execution time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
-        $outputHelper->printInfo($resultInfo, $point);
+        $this->outputHelper->printInfo($resultInfo, $point);
         Yii::info($infoMessage . $resultInfo,'info\LogController:done');
 	}
 
@@ -149,8 +152,7 @@ class LogController extends Controller
 		        'days' => $this->defaultDays,
 		        'limit' => $this->defaultLimit,
            ];
-           Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->shortClassName. ':' . __FUNCTION__ . ':FailedJsonDecode');
+           Yii::error(AppHelper::throwableFormatter($throwable),$this->shortClassName. ':' . __FUNCTION__ . ':Failed');
 		}
 
         $this->cleanerCollection[GlobalLog::tableName()] =
