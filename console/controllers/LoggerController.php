@@ -79,23 +79,36 @@ class LoggerController extends Controller
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 
-	public function actionRemoveOldGlobalLogs($limit = 2000, $countDays = 90)
+	public function actionRemoveOldGlobalLogs(int $limit = 2000, int $countDays = 90)
 	{
+		if ($limit <= 0) {
+			printf($this->ansiFormat("\n Error: The limit must be greater than: %s \n", Console::FG_RED), $this->ansiFormat($limit, Console::FG_YELLOW));
+			exit;
+		}
+		if ($countDays <= 0) {
+			printf($this->ansiFormat("\n Error: The count days must be greater than: %s \n", Console::FG_RED), $this->ansiFormat($countDays, Console::FG_YELLOW));
+			exit;
+		}
+
 		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 		$time_start = microtime(true);
-		$time_end = microtime(true);
 		$db = \Yii::$app->db;
 
 		$maxGlId = $db->createCommand('Select max(gl_id) as gl_id from global_log where ABS(TIMESTAMPDIFF(DAY, curdate(), gl_created_at)) >= :days')->bindValue(':days', $countDays)->queryOne();
 
 		$count = $db->createCommand('Select count(gl_id) as count_gl_id from global_log where ABS(TIMESTAMPDIFF(DAY, curdate(), gl_created_at)) >= :days')->bindValue(':days', $countDays)->queryOne();
 
-		$iter = (int)($count['count_gl_id'] / $limit);
+		$iter = (int)(($count['count_gl_id']) / $limit);
 
-		for ($i = 0; $i <= $iter; $i++) {
-			$db->createCommand('DELETE from global_log where gl_id <= :gl_id limit :limit')->bindValues([':gl_id' => $maxGlId['gl_id'], ':limit' => $limit])->execute();
+		if ($count['count_gl_id']) {
+			for ($i = 0; $i <= $iter; $i++) {
+				$remain = abs($count['count_gl_id'] - $i * $limit);
+				echo 'Removed logs: ' . $i * $limit . '; Remains: ' . $remain .  PHP_EOL;
+				$db->createCommand('DELETE from global_log where gl_id <= :gl_id limit :limit')->bindValues([':gl_id' => (int)$maxGlId['gl_id'], ':limit' => $limit])->execute();
+			}
 		}
 
+		$time_end = microtime(true);
 		$time = number_format(round($time_end - $time_start, 2), 2);
 		printf("\nExecute Time: %s, Count of removed old logs: " . $count['count_gl_id'], $this->ansiFormat($time . ' s', Console::FG_RED));
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
