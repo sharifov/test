@@ -24,7 +24,7 @@ $params = array_merge(
     require __DIR__ . '/params-local.php'
 );
 
-$assetManagerHash = $params['release']['version'] ?? '';
+$appVersion = $params['release']['version'] ?? '';
 
 return [
     'id' => 'app-frontend',
@@ -160,8 +160,8 @@ return [
 		'assetManager' => [
 			'forceCopy' => false,
 			'appendTimestamp' => false,
-            'hashCallback' => static function ($path) use ($assetManagerHash) {
-                return hash('md4', $path . $assetManagerHash);
+            'hashCallback' => static function ($path) use ($appVersion) {
+                return hash('md4', $path . $appVersion);
             },
 			'bundles' => [
 				BootstrapAsset::class => [
