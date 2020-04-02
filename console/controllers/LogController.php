@@ -3,6 +3,9 @@
 
 namespace console\controllers;
 
+use common\models\ApiLog;
+use common\models\GlobalLog;
+use frontend\models\Log;
 use ReflectionClass;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -17,6 +20,7 @@ use yii\helpers\Console;
  * @property string $className
  * @property int $defaultDays
  * @property int $defaultLimit
+ * @property array $cleanerCollection
  */
 class LogController extends Controller
 {
@@ -26,6 +30,7 @@ class LogController extends Controller
     private $logCleanerEnable;
     private $logCleanerParams;
     private $className;
+    private $cleanerCollection;
 
     /**
      * LogController constructor.
@@ -39,7 +44,11 @@ class LogController extends Controller
 		$this->setSettings();
 	}
 
-	public function actionCleaner(?int $days, ?int $limit): void /* TODO::  arguments */
+    /**
+     * @param int|null $days
+     * @param int|null $limit
+     */
+    public function actionCleaner(?int $days = null, ?int $limit = null): void
 	{
 	    if (!$this->logCleanerEnable) {
             $this->printInfo('Cleaner is disable. ', $this->action->id, Console::FG_RED);
@@ -51,70 +60,27 @@ class LogController extends Controller
         $days = $days ?? $this->logCleanerParams['days'];
         $limit = $limit ?? $this->logCleanerParams['limit'];
 
+        $this->printInfo('Days:' . $days,  $this->action->id);
+
 	    $timeStart = microtime(true);
 
+        foreach ($this->cleanerCollection as $table => $params) {
 
-        //$cleanLog = $this->cleanLog($days, $limit);
+            $result = $this->baseCleaner($days, $limit, $params['prepareSql'], $params['deleteSql'], $table);
 
+            $message = '"' . $table . '" - Processed:' .
+                $result['processed'] . ' ExecutionTime: ' . $result['executionTime'];
+            if ($result['status'] !== 1) {
+                $message .= ' Process are errors, check error logs';
+            }
 
-        $cleanGlobalLog = $this->cleanGlobalLog($days, $limit);
+            $this->printInfo($message, 'cleaner:' . $table, $this->getColorInfo($result['status']));
+            Yii::info($message,'info\LogController:cleaner:' . $table);
+        }
 
-        $messageGlobalLog = 'GlobalLog clean result. Processed:' .
-            $cleanGlobalLog['processed'] . ' ExecutionTime: ' . $cleanGlobalLog['executionTime'];
-
-        $this->printInfo($messageGlobalLog,'cleanGlobalLog', $this->getColorInfo($cleanGlobalLog['status']));
-
-
-
-        Yii::info($messageGlobalLog,'info\LogController:cleanGlobalLog');
-
-        $status = ($cleanGlobalLog['status'] === 1); /* TODO:: add */
-        $resultInfo = (!$status ? 'Are errors in the process. Please check error log' : 'End') .
-            '. Total execution time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+        $resultInfo = 'End. Total execution time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
         $this->printInfo($resultInfo, $this->action->id);
 	}
-
-	/**
-     * @param int $days
-     * @param int $limit
-     * @return array [status,processed,executionTime]
-     */
-    private function cleanGlobalLog(int $days, int $limit): array
-    {
-        $prepareSql =
-            'SELECT 
-                MAX(gl_id) AS max_id,    
-                COUNT(gl_id) AS cnt
-            FROM
-                global_log
-            WHERE
-                gl_created_at < SUBDATE(CURDATE(), :days)';
-
-        $deleteSql = 'DELETE FROM global_log WHERE gl_id < :max_id limit :limit';
-
-        return $this->baseCleaner($days, $limit, $prepareSql, $deleteSql, __FUNCTION__);
-    }
-
-    /**
-     * @param int $days
-     * @param int $limit
-     * @return array [status,processed,executionTime]
-     */
-    private function cleanLog(int $days, int $limit): array
-    {
-        $prepareSql =
-            'SELECT 
-                MAX(id) AS max_id,    
-                COUNT(id) AS cnt
-            FROM
-                log
-            WHERE
-                log_time < :days';
-
-        $deleteSql = 'DELETE FROM log WHERE id < :max_id limit :limit';
-
-        return $this->baseCleaner($days, $limit, $prepareSql, $deleteSql, __FUNCTION__);
-    }
 
     /**
      * @param int $days
@@ -143,7 +109,7 @@ class LogController extends Controller
             Yii::error(AppHelper::throwableFormatter($throwable),
             $this->className . ':' . $methodName . ':FailedPrepareInfo');
             $result['status'] = -1;
-
+            $result['executionTime'] = number_format(round(microtime(true) - $timeStart, 2), 2);
             return $result;
         }
 
@@ -158,111 +124,6 @@ class LogController extends Controller
                 $result['status'] = 0;
                 Yii::error(AppHelper::throwableFormatter($throwable),
             $this->className. ':' . $methodName . ':FailedDelete');
-            }
-        }
-
-        $result['processed'] = $processed;
-        $result['executionTime'] = number_format(round(microtime(true) - $timeStart, 2), 2);
-
-        return $result;
-    }
-
-	private function cleanLogOld(int $days, int $limit): array
-    {
-        $processed = 0;
-        $timeStart = microtime(true);
-
-        $result = [
-            'status' => 1,
-            'processed' => $processed,
-            'executionTime' => $timeStart,
-        ];
-
-        try {
-            $prepareInfo = Yii::$app->db->createCommand(
-            'SELECT 
-                    MAX(id) AS max_id,    
-                    COUNT(id) AS cnt
-                FROM
-                    log
-                WHERE
-                    log_time < :days'
-            )->bindValue(':days', strtotime('-' . $days . ' day'))->queryOne();
-        } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->className . ':' . __FUNCTION__ . ':FailedPrepareInfo');
-
-            $result['status'] = -1;
-            return $result;
-        }
-
-        $iterations = (int)($prepareInfo['cnt'] / $limit);
-
-        for ($i = 0; $i <= $iterations; $i++) {
-            try {
-                $processed += Yii::$app->db->createCommand(
-                            'DELETE FROM log WHERE id < :max_id limit :limit')
-                            ->bindValues([':max_id' => $prepareInfo['max_id'], ':limit' => $limit])
-                            ->execute();
-            } catch (\Throwable $throwable) {
-                $result['status'] = 0;
-                Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->className. ':' . __FUNCTION__ . ':FailedDelete');
-            }
-        }
-
-        $result['processed'] = $processed;
-        $result['executionTime'] = number_format(round(microtime(true) - $timeStart, 2), 2);
-
-        return $result;
-    }
-
-    /**
-     * @param int $days
-     * @param int $limit
-     * @return array [status,processed,executionTime]
-     */
-    private function cleanGlobalLogOld(int $days, int $limit): array
-    {
-        $processed = 0;
-        $timeStart = microtime(true);
-
-        $result = [
-            'status' => 1,
-            'processed' => $processed,
-            'executionTime' => $timeStart,
-        ];
-
-        try {
-            $prepareInfo = Yii::$app->db->createCommand(
-            'SELECT 
-                    MAX(gl_id) AS max_id,    
-                    COUNT(gl_id) AS cnt
-                FROM
-                    global_log
-                WHERE
-                    gl_created_at < SUBDATE(CURDATE(), :days)'
-            )->bindValue(':days', $days)->queryOne();
-        } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->className . ':' . __FUNCTION__ . ':FailedPrepareInfo');
-
-            $result['status'] = -1;
-            return $result;
-        }
-
-        $iterations =  (int)($prepareInfo['cnt'] / $limit);
-
-        for ($i = 0; $i <= $iterations; $i++) {
-            try {
-                $processed += Yii::$app->db->createCommand(
-                            'DELETE FROM global_log WHERE gl_id < :max_id limit :limit')
-                            ->bindValues([':max_id' => $prepareInfo['max_id'], ':limit' => $limit])
-                            ->execute();
-            } catch (\Throwable $throwable) {
-                $result['status'] = 0;
-                Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->className. ':' . __FUNCTION__ . ':FailedDelete');
             }
         }
 
@@ -287,10 +148,9 @@ class LogController extends Controller
 		$this->logCleanerEnable = $settings['console_log_cleaner_enable'] ?? false;
 
 		try {
-		    $logCleanerParams = json_decode($settings['console_log_cleaner_params'],true,512,JSON_THROW_ON_ERROR);
 		    $this->logCleanerParams = [
-		        'days' => $logCleanerParams['days'],
-		        'limit' => $logCleanerParams['limit'],
+		        'days' => $settings['console_log_cleaner_params']['days'],
+		        'limit' => $settings['console_log_cleaner_params']['limit'],
             ];
 		} catch (\Throwable $throwable) {
 		   $this->logCleanerParams = [
@@ -300,6 +160,25 @@ class LogController extends Controller
            Yii::error(AppHelper::throwableFormatter($throwable),
             $this->className. ':' . __FUNCTION__ . ':FailedJsonDecode');
 		}
+
+        $this->cleanerCollection[GlobalLog::tableName()] =
+            [
+                'prepareSql' => 'SELECT MAX(gl_id) AS max_id, COUNT(gl_id) AS cnt 
+                    FROM ' . GlobalLog::tableName() . ' WHERE gl_created_at < SUBDATE(CURDATE(), :days)',
+                'deleteSql' => 'DELETE FROM ' . GlobalLog::tableName() . ' WHERE gl_id < :max_id limit :limit'
+            ];
+        $this->cleanerCollection[Log::tableName()] =
+            [
+                'prepareSql' => 'SELECT MAX(id) AS max_id, COUNT(id) AS cnt 
+                    FROM ' . Log::tableName() . ' WHERE log_time < UNIX_TIMESTAMP(SUBDATE(CURDATE(), :days))',
+                'deleteSql' => 'DELETE FROM ' . Log::tableName() . ' WHERE id < :max_id limit :limit'
+            ];
+        $this->cleanerCollection[ApiLog::tableName()] =
+            [
+                'prepareSql' => 'SELECT MAX(al_id) AS max_id, COUNT(al_id) AS cnt 
+                    FROM ' . ApiLog::tableName() . ' WHERE al_request_dt < SUBDATE(CURDATE(), :days)',
+                'deleteSql' => 'DELETE FROM ' . ApiLog::tableName() . ' WHERE al_id < :max_id limit :limit'
+            ];
 
         return $this;
     }
@@ -338,5 +217,4 @@ class LogController extends Controller
             $this->ansiFormat('(' . $this->className . ':' . $function . ')', $color)
         );
     }
-
 }

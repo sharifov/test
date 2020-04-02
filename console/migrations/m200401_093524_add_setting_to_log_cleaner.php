@@ -17,8 +17,6 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
         $settingCategory->sc_name = 'Console';
         $settingCategory->save();
 
-        /* TODO:: global_log and api_log id to bigint */
-
         $this->insert('{{%setting}}', [
             's_key' => 'console_log_cleaner_enable',
             's_name' => 'Console log cleaner enable',
@@ -61,6 +59,9 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
             's_category_id' => $settingCategory ? $settingCategory->sc_id : null,
         ]);
 
+        $this->alterColumn('{{%global_log}}', 'gl_id', $this->bigInteger()->notNull());
+        $this->alterColumn('{{%api_log}}', 'al_id', $this->bigInteger()->notNull());
+
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
@@ -75,6 +76,9 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
             'console_log_cleaner_enable', 'console_log_cleaner_params',
             'console_call_terminator_enable', 'console_call_terminator_params',
         ]]);
+
+        $this->alterColumn('{{%global_log}}', 'gl_id', $this->integer(11)->notNull());
+        $this->alterColumn('{{%api_log}}', 'al_id', $this->integer(11)->notNull());
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
