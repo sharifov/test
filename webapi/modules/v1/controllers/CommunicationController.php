@@ -19,6 +19,7 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\model\emailList\entity\EmailList;
@@ -410,7 +411,8 @@ class CommunicationController extends ApiBaseController
                             Notifications::TYPE_WARNING, true)
                         ) {
                             // Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                            Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                            Notifications::sendSocket('getNewNotification', ['user_id' => $user->id], $dataNotification);
                         }
                         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
                         return $this->createHoldCall($callModel, $user);

@@ -6,6 +6,7 @@ use common\models\Airline;
 use common\models\LeadFlightSegment;
 use common\models\Notifications;
 use common\models\Quote;
+use frontend\widgets\notification\NotificationMessage;
 use sales\events\lead\LeadSoldEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\user\UserRepository;
@@ -81,7 +82,8 @@ class LeadSoldNotificationsListener
 
         if ($ntf = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             // Notifications::socket($owner->id, null, 'getNewNotification', [], true);
-            Notifications::sendSocket('getNewNotification', ['user_id' => $owner->id]);
+            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+            Notifications::sendSocket('getNewNotification', ['user_id' => $owner->id], $dataNotification);
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,

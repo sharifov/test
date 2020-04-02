@@ -128,8 +128,15 @@ $js = <<<JS
                     
                     if(obj.command === 'getNewNotification') {
                         //alert(obj.command);
-                         updatePjaxNotify();
-                        //notificationInit(obj.notification);
+                         if (typeof obj.notification !== 'undefined') {
+                             if (userId == obj.notification.userId) {
+                                notificationInit(obj.notification);
+                             } else {
+                                 console.error('connecting user Id not equal notification user Id');
+                             }
+                         } else {
+                            updatePjaxNotify();    
+                         }
                     }
                                         
                     if(obj.command === 'updateCommunication') {

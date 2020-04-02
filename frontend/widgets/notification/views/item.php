@@ -3,7 +3,6 @@
 use common\models\Email;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
-use yii\helpers\Url;
 
 /** @var int $id */
 /** @var string $title */
@@ -15,7 +14,7 @@ $time = strtotime($createdDt);
 ?>
 
 <li data-id="<?= $id ?>">
-    <a href="<?= Url::to(['/notifications/view2', 'id' => $id]) ?>" data-pjax="0">
+    <a href="javascript:;" onclick="notificationShow(this);" id="notification-menu-element-show" data-title="<?= Html::encode($title) ?>" data-id="<?= $id ?>">
         <span class="glyphicon glyphicon-info-sign"> </span>
         <span>
             <span><?= Html::encode($title) ?></span>

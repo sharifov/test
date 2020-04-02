@@ -4,8 +4,10 @@ namespace sales\listeners\sms;
 
 use common\models\ClientPhone;
 use common\models\Notifications;
+use frontend\widgets\notification\NotificationMessage;
 use sales\events\sms\SmsCreatedByIncomingSalesEvent;
 use sales\repositories\user\UserProjectParamsRepository;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
 /**
@@ -34,23 +36,25 @@ class SmsCreatedByIncomingSalesNotificationListener
         if ($users = $this->projectParamsRepository->findUsersIdByPhone($event->userPhone)) {
             $clientName = $this->getClientName($event->clientPhone);
             foreach ($users as $userId) {
-                Notifications::create(
+                if ($ntf = Notifications::create(
                     $userId,
                     'New SMS ' . $event->clientPhone,
                     'SMS from ' . $event->clientPhone . ' (' . $clientName . ') to ' . $event->userPhone . ' <br> ' . nl2br(Html::encode($event->text))
                     . ($event->leadId ? '<br>Lead ID: ' . $event->leadId : ''),
                     Notifications::TYPE_INFO,
-                    true
-                );
-                //Notifications::socket($userId, null, 'getNewNotification', ['sms_id' => $event->sms->s_id], true);
-                Notifications::sendSocket('getNewNotification', ['user_id' => $userId], ['sms_id' => $event->sms->s_id]);
+                    true)
+                ) {
+//                    Notifications::socket($userId, null, 'getNewNotification', ['sms_id' => $event->sms->s_id], true);
+                    $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
+                }
             }
         }
 
-        if ($event->leadId) {
-            // Notifications::socket(null, $event->leadId, 'updateCommunication', ['sms_id' => $event->sms->s_id], true);
-            Notifications::sendSocket('getNewNotification', ['lead_id' => $event->leadId], ['sms_id' => $event->sms->s_id]);
-        }
+//        if ($event->leadId) {
+             //Notifications::socket(null, $event->leadId, 'updateCommunication', ['sms_id' => $event->sms->s_id], true);
+//            Notifications::sendSocket('getNewNotification', ['lead_id' => $event->leadId], ['sms_id' => $event->sms->s_id]);
+//        }
     }
 
     /**

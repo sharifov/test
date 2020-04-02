@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\jobs\AgentCallQueueJob;
 use common\models\query\CallUserAccessQuery;
+use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
 use Yii;
@@ -167,7 +168,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
         if ($insert) {
             if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true)) {
                 //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
-                Notifications::sendSocket('getNewNotification', ['user_id' => $this->cua_user_id]);
+                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::sendSocket('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
             }
 
             NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::INSERT, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
