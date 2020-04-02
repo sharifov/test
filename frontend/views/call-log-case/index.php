@@ -3,6 +3,7 @@
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -34,6 +35,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (CallLogCase $model) {
                     return $model->case ?: null;
                 }
+            ],
+            [
+                'attribute' => 'clc_case_status_log_id',
+                'value' => static function (CallLogCase $model) {
+                    return Html::a($model->clc_case_status_log_id, Url::to(['/case-status-log/index', 'CaseStatusLogSearch[csl_id]' => $model->clc_case_status_log_id]));
+                },
+                'format' => 'raw',
             ],
             ['class' => 'yii\grid\ActionColumn'],
         ],

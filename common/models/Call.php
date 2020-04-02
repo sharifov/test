@@ -57,7 +57,7 @@ use Locale;
  * @property int $c_case_id
  * @property int $c_client_id
  * @property int $c_status_id
- * @property int $c_parent_id
+ * @property int|null $c_parent_id
  * @property string $c_recording_sid
  * @property int $c_source_id
  * @property string $c_offset_gmt

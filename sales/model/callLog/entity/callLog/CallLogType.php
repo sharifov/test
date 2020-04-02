@@ -6,17 +6,17 @@ use yii\bootstrap4\Html;
 
 class CallLogType
 {
-    public const IN = 1;
-    public const OUT = 2;
+    public const OUT = 1;
+    public const IN = 2;
 
     private const LIST = [
-        self::IN => 'In',
         self::OUT => 'Out',
+        self::IN => 'In',
     ];
 
     private const CSS_CLASS_LIST = [
-        self::IN => 'info',
         self::OUT => 'warning',
+        self::IN => 'info',
     ];
 
     public static function getList(): array
