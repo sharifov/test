@@ -39,7 +39,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
         //$this->head();
 
-        $host = 'Sales';
+        $host = 'CRM';
         echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
     ?>
     <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
@@ -196,7 +196,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
         <!-- /page content -->
         <!-- footer content -->
         <footer>
-            <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?></p>
+            <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?>, <span title="<?=Yii::$app->params['release']['git_branch'] ?? ''?> : <?=Yii::$app->params['release']['git_hash'] ?? ''?>">v. <?=Yii::$app->params['release']['version'] ?? ''?></p>
             <p class="pull-right"><small><i><?=date('Y-m-d H:i:s')?></i></small></p>
 
             <div class="clearfix"></div>

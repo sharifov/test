@@ -25,6 +25,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?=Html::a('<i class="fas fa-remove"></i> Clear all Logs',['log/clear'],['class' => 'btn btn-danger', 'data' => ['confirm' => 'Delete all records from logs?']]) ?>
             </p>
 
+            <?php if (!empty(Yii::$app->params['release'])): ?>
+                App Version: <span class="label label-warning"><?=Yii::$app->params['release']['version'] ?? ''?></span> ,
+                GIT Branch: <span class="label label-info"><?=Yii::$app->params['release']['git_branch'] ?? ''?></span> ,
+                GIT Hash: <span class="label label-default"><?=Yii::$app->params['release']['git_hash'] ?? ''?></span>
+                <br><br>
+            <?php endif; ?>
+
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
