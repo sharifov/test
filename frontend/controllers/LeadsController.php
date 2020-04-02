@@ -181,7 +181,8 @@ class LeadsController extends FController
         //$totalLeads = Lead::find()->count();
 
         $limit = 10000;
-        $queryIterations = ceil($totalLeads / $limit);
+        //$queryIterations = ceil($totalLeads / $limit);
+        $queryIterations = 5;
 
         $fpath = fopen(Yii::getAlias('@runtime'. '/file.csv'), 'w');
 
