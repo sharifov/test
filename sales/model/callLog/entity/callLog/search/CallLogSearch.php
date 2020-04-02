@@ -48,6 +48,8 @@ class CallLogSearch extends CallLog
 
             ['lead_id', 'integer'],
             ['case_id', 'integer'],
+
+            ['cl_duration', 'integer'],
         ];
     }
 

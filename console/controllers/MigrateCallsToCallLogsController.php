@@ -5,6 +5,8 @@ namespace console\controllers;
 use common\models\Call;
 use common\models\CallUserAccess;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogCategory;
+use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
@@ -161,6 +163,9 @@ class MigrateCallsToCallLogsController extends Controller
         }
 
         $total = (clone $query)->count();
+        if ($total >= $limit) {
+            $total = $limit;
+        }
 
         Console::startProgress(0, $total, 'Counting objects: ', false);
 
@@ -179,7 +184,7 @@ class MigrateCallsToCallLogsController extends Controller
                 print_r($log);
             }
             $file = 'err_calls_' . $limit . '_' . $offset . '_' . str_replace([':', ' ', '-'], '', $dateFrom) . '_' . str_replace([':', ' ', '-'], '', $dateTo) . '.txt';
-            file_put_contents($file, VarDumper::dumpAsString($logs));
+            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR  . 'runtime' . DIRECTORY_SEPARATOR . $file, VarDumper::dumpAsString($logs));
             echo ' --- Errors(' . count($logs) . ') ---' . PHP_EOL;
             echo 'log file: ' . $file . PHP_EOL;
         }
@@ -246,58 +251,191 @@ class MigrateCallsToCallLogsController extends Controller
             return;
         }
 
+        if (
+            $call['c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['c_parent_id'] != null
+            && $call['c_id'] == $call['first_same_child_c_id']
+            && $call['parent_c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['parent_c_parent_id'] == null
+        ) {
+            $this->firstInAcceptedChildCall($call, $log);
+            return;
+        }
 
+        if (
+            $call['c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['c_parent_id'] != null
+            && $call['c_id'] != $call['first_same_child_c_id']
+            && $call['parent_c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['parent_c_parent_id'] == null
+        ) {
+            $this->inTransferInAcceptedChildCall($call, $log);
+            return;
+        }
 
+        if (
+            $call['c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['c_parent_id'] != null
+            && $call['c_id'] == $call['first_same_child_c_id']
+            && $call['parent_c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['parent_c_parent_id'] != null
+        ) {
+            $this->outTransferFirstInAcceptedChildCall($call, $log);
+            return;
+        }
 
+        if (
+            $call['c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['c_parent_id'] != null
+            && $call['c_id'] != $call['first_same_child_c_id']
+            && $call['parent_c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['parent_c_parent_id'] != null
+        ) {
+            $this->outTransferSecondInAcceptedChildCall($call, $log);
+            return;
+        }
 
+        if (
+            $call['c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['c_parent_id'] != null
+            && $call['parent_c_call_type_id'] == Call::CALL_TYPE_OUT
+            && $call['c_created_user_id'] != null
+        ) {
+            return;
+        }
 
-
-
-
-
-
-
-
-
-
-//        if ($call['c_call_type_id'] == Call::CALL_TYPE_OUT) {
-//            if ($call['c_parent_id']) {
-//                $this->processOutCall($call, $log);
-//                return;
-//            }
-////            return;
-//        }
-//
-//        if ($call['c_call_type_id'] == Call::CALL_TYPE_IN && $call['c_parent_id'] == null && $call['c_status_id'] != Call::STATUS_COMPLETED && $call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
-//            $this->directInNotAcceptedCall($call,$log);
-//            return;
-//        }
-//
-//        if ($call['c_call_type_id'] == Call::CALL_TYPE_IN && $call['c_parent_id'] == null && $call['c_status_id'] != Call::STATUS_COMPLETED && $call['c_source_type_id'] == Call::SOURCE_TRANSFER_CALL) {
-//            $this->transferInNotAcceptedCall($call,$log);
-//            return;
-//        }
-//
-//        if ($call['c_call_type_id'] == Call::CALL_TYPE_IN && $call['c_parent_id'] != null && $call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL && $call['parent_c_call_type_id'] == Call::CALL_TYPE_IN) {
-//            $this->firstInAcceptedCall($call,$log);
-//            return;
-//        }
-//
-//        if ($call['c_call_type_id'] == Call::CALL_TYPE_IN && $call['c_parent_id'] != null && $call['c_source_type_id'] == Call::SOURCE_TRANSFER_CALL && $call['parent_c_parent_id'] == null && $call['parent_c_call_type_id'] == Call::CALL_TYPE_IN) {
-//            $this->inTransferInAcceptedCall($call,$log);
-//            return;
-//        }
+        if (
+            $call['c_call_type_id'] == Call::CALL_TYPE_IN
+            && $call['c_parent_id'] != null
+            && $call['parent_c_call_type_id'] == Call::CALL_TYPE_OUT
+            && $call['c_created_user_id'] == null
+        ) {
+            $this->outTransferInNotAcceptedParentCall($call, $log);
+            return;
+        }
 
         $this->createCallLogs($call, $log, [], []);
 
     }
 
+    private function outTransferInNotAcceptedParentCall($call, array &$log): void
+    {
+        $call['c_parent_id'] = $call['parent_c_parent_id'];
+
+        if ($call['last_child_c_id'] == null) {
+            $callData['cl_call_created_dt'] = date('Y-m-d H:i:s', (strtotime($call['parent_c_created_dt']) + $call['parent_c_call_duration']));
+        } else {
+            $callData['cl_call_created_dt'] = date('Y-m-d H:i:s', (strtotime($call['last_child_c_created_dt']) + $call['last_child_c_call_duration']));
+        }
+        $callData['cl_call_finished_dt'] = date('Y-m-d H:i:s',(strtotime($call['c_created_dt']) + $call['c_call_duration']));
+        $callData['cl_duration'] = strtotime($callData['cl_call_finished_dt']) - strtotime($callData['cl_call_created_dt']);
+        $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
+        $callData['cl_status_id'] = CallLogStatus::NOT_ANSWERED;
+
+        $queueData['clq_queue_time'] = $callData['cl_duration'];
+        $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $call['c_id']])->andWhere(['>=', 'cua_created_dt', $callData['cl_call_created_dt']])->count();
+        $queueData['clq_is_transfer'] = true;
+
+        $call['c_recording_duration'] = null;
+        $call['c_recording_sid'] = null;
+
+        $this->createCallLogs(
+            $call,
+            $log,
+            $callData,
+            $queueData
+        );
+    }
+
+    private function outTransferSecondInAcceptedChildCall($call, array &$log): void
+    {
+        $current = $call;
+
+        $call['c_parent_id'] = $call['parent_c_parent_id'];
+
+        $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
+        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
+
+        $queueData['clq_queue_time'] = (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']) - strtotime($call['c_created_dt']);
+        $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $current['c_parent_id']])->andWhere(['>', 'cua_created_dt', $call['prev_child_c_created_dt']])->count();
+        $queueData['clq_is_transfer'] = true;
+
+        $this->createCallLogs(
+            $call,
+            $log,
+            $callData,
+            $queueData
+        );
+    }
+
+    private function outTransferFirstInAcceptedChildCall($call, array &$log): void
+    {
+        $current = $call;
+
+        $call['c_parent_id'] = $call['parent_c_parent_id'];
+
+        $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
+        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
+
+        $queueData['clq_queue_time'] = strtotime($call['parent_c_created_dt']) - strtotime($call['c_created_dt']);
+        $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $current['c_parent_id']])->andWhere(['<=', 'cua_created_dt', $call['c_created_dt']])->count();
+        $queueData['clq_is_transfer'] = true;
+
+        $this->createCallLogs(
+            $call,
+            $log,
+            $callData,
+            $queueData
+        );
+    }
+
+    private function inTransferInAcceptedChildCall($call, array &$log): void
+    {
+        $current = $call;
+
+        $call['c_parent_id'] = $call['parent_c_status_id'] == Call::STATUS_COMPLETED ? $call['first_same_child_c_id'] : $call['с_parent_id'];
+        $call['c_source_type_id'] = $call['first_same_child_c_call_type_id'];
+
+        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
+
+        $queueData['clq_queue_time'] = (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']) - strtotime($call['c_created_dt']);
+        $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $current['c_parent_id']])->andWhere(['>', 'cua_created_dt', $call['prev_child_c_created_dt']])->count();
+        $queueData['clq_is_transfer'] = true;
+
+        $this->createCallLogs(
+            $call,
+            $log,
+            $callData,
+            $queueData
+        );
+    }
+
+    private function firstInAcceptedChildCall($call, array &$log): void
+    {
+        $current = $call;
+
+        $call['c_parent_id'] = $call['parent_c_status_id'] == Call::STATUS_COMPLETED ? null : $call['c_parent_id'];
+
+        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
+
+        $queueData['clq_queue_time'] = strtotime($call['parent_c_created_dt']) - strtotime($call['c_created_dt']);
+        $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $current['c_parent_id']])->andWhere(['<=', 'cua_created_dt', $call['c_created_dt']])->count();
+
+        $this->createCallLogs(
+            $call,
+            $log,
+            $callData,
+            $queueData
+        );
+    }
+
     private function transferInNotAcceptedParentCall($call, array &$log): void
     {
+        $call['c_source_type_id'] = $call['first_child_c_source_type_id'];
+
         $callData['cl_call_created_dt'] = date('Y-m-d H:i:s', (strtotime($call['last_child_c_created_dt']) + $call['last_child_c_call_duration']));
         $callData['cl_call_finished_dt'] = date('Y-m-d H:i:s', (strtotime($call['c_created_dt']) + $call['c_call_duration']));
         $callData['cl_duration'] = strtotime($callData['cl_call_finished_dt']) - strtotime($callData['cl_call_created_dt']);
-        $callData['cl_category_id'] = $call['first_child_c_source_type_id'];
 
         $queueData['clq_queue_time'] = $callData['cl_duration'];
         $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $call['c_id']])->andWhere(['>=', 'cua_created_dt', $callData['cl_call_created_dt']])->count();
@@ -326,12 +464,12 @@ class MigrateCallsToCallLogsController extends Controller
 
     private function outChildCalls($call, array &$log): void
     {
-        $callData['cl_parent_id'] = null;
+        $call['c_parent_id'] = null;
 
         $this->createCallLogs(
             $call,
             $log,
-            $callData,
+            [],
             [],
             []
         );
@@ -351,76 +489,6 @@ class MigrateCallsToCallLogsController extends Controller
             [],
             $callRecordData
         );
-    }
-
-    private function inTransferInAcceptedCall($call, array &$log): void
-    {
-        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
-        $callData['cl_category_id'] = $call['first_same_child_c_source_type_id'];
-
-        $queueData['clq_queue_time'] = strtotime($call['c_created_dt']) - (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']);
-        $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $call['c_parent_id']])->andWhere(['>', 'cua_created_dt', $call['prev_child_c_created_dt']])->count();
-        $queueData['clq_is_transfer'] = true;
-
-        $this->createCallLogs(
-            $call,
-            $log,
-            $callData,
-            $queueData
-        );
-    }
-
-    private function firstInAcceptedCall($call, array &$log): void
-    {
-        $callData['cl_call_finished_dt'] = date('Y-m-d H:i:s', (strtotime($call['c_created_dt']) + $call['c_call_duration']));
-        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
-
-        $queueData['clq_queue_time'] = strtotime($call['c_created_dt']) - strtotime($call['parent_c_created_dt']);
-        $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $call['c_parent_id']])->andWhere(['<=', 'cua_created_dt', $call['c_created_dt']])->count();
-
-        $this->createCallLogs(
-            $call,
-            $log,
-            $callData,
-            $queueData
-        );
-    }
-
-    private function transferInNotAcceptedCall($call, array &$log): void
-    {
-        $callData['cl_call_created_dt'] = date('Y-m-d H:i:s', (strtotime($call['last_child_c_created_dt']) + $call['last_child_c_call_duration']));
-        $callData['cl_call_finished_dt'] = date('Y-m-d H:i:s', (strtotime($callData['cl_call_created_dt']) + $call['c_call_duration']));
-        $callData['cl_duration'] = strtotime($callData['cl_call_finished_dt']) -  strtotime($callData['cl_call_created_dt']);
-        $callData['cl_category_id'] = $call['first_child_c_source_type_id'];
-
-        $queueData['clq_queue_time'] = $callData['cl_duration'];
-        $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $call['c_id']])->andWhere(['>=', 'cua_created_dt', $callData['cl_call_created_dt']])->count();
-        $queueData['clq_is_transfer'] = true;
-
-        $this->createCallLogs(
-            $call,
-            $log,
-            $callData,
-            $queueData
-        );
-    }
-
-    private function directInNotAcceptedCall($call, array &$log): void
-    {
-        $this->createCallLogs(
-            $call,
-            $log,
-            [],
-            [
-                'clq_queue_time' => $call['c_call_duration'],
-                'clq_access_count' => CallUserAccess::find()->andWhere(['cua_call_id' => $call['c_id']])->count(),
-            ]
-        );
-    }
-
-    private function processOutCall($call, array &$log): void
-    {
-        $this->createCallLogs($call, $log, [], []);
     }
 
     private function createCallLogs($call, array &$log, array $callData = [], array $queueData = [], array $callRecordData = []): void
