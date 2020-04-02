@@ -990,41 +990,36 @@ class LeadSearch extends Lead
 
         $query->addSelect([
             'origin' =>(new Query())
-                ->select([LeadFlightSegment::tableName() . '.origin'])
+                ->select(['SUBSTRING_INDEX(group_concat(' . LeadFlightSegment::tableName() . '.origin SEPARATOR "-"),'. '"-"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())
-                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
+                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
             'destination' =>(new Query())
-                ->select([LeadFlightSegment::tableName() . '.destination'])
+                ->select(['SUBSTRING_INDEX(group_concat(' . LeadFlightSegment::tableName() . '.destination SEPARATOR "-"),'. '"-"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())
                 ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)')
+
         ]);
 
         $query->addSelect([
             'originCityFullName' => (new Query())
-                ->select(['city'])
+                ->select(['SUBSTRING_INDEX(group_concat(city SEPARATOR "--"),'. '"--"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.origin =' . Airport::tableName(). '.iata')
-                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
+                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
             'destinationCityFullName' => (new Query())
-                ->select(['city'])
+                ->select(['SUBSTRING_INDEX(group_concat(city SEPARATOR "--"),'. '"--"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.destination =' . Airport::tableName(). '.iata')
-                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
+                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
         ]);
 
         $query->addSelect([
             'originCountry' => (new Query())
-                ->select(['countryId'])
+                ->select(['SUBSTRING_INDEX(group_concat(countryId SEPARATOR "-"),'. '"-"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.origin =' . Airport::tableName(). '.iata')
-                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
+                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
             'destinationCountry' => (new Query())
-                ->select(['countryId'])
+                ->select(['SUBSTRING_INDEX(group_concat(countryId SEPARATOR "-"),'. '"-"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.destination =' . Airport::tableName(). '.iata')
                 ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
         ]);
 
         $query->addSelect([
