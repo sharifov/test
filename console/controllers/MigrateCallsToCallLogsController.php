@@ -68,7 +68,8 @@ class MigrateCallsToCallLogsController extends Controller
                          parent.c_created_dt as `parent_c_created_dt`,
                          parent.c_call_duration as `parent_c_call_duration`,
                          parent.c_call_type_id as `parent_c_call_type_id`,
-                         parent.c_source_type_id as `parent_c_source_type_id`'
+                         parent.c_source_type_id as `parent_c_source_type_id`,
+                         parent.c_status_id as `parent_c_status_id`'
             )
             ->addSelect(
                 'prev_child.c_id as `prev_child_c_id`,
@@ -111,11 +112,11 @@ class MigrateCallsToCallLogsController extends Controller
                          first_same_child.c_source_type_id as `first_same_child_c_source_type_id`'
             )
             ->leftJoin('(select * from `call`) `parent`', 'parent.c_id = c.c_parent_id')
-            ->leftJoin('(select * from `call`) `prev_child` on `prev_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_parent_id and c_id < c.c_id)')
-            ->leftJoin('(select * from `call`) `next_child` on `next_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_parent_id and c_id > c.c_id)')
-            ->leftJoin('(select * from `call`) `last_child` on `last_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_id and c_id > c.c_id)')
-            ->leftJoin('(select * from `call`) `first_child` on `first_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_id and c_id > c.c_id)')
-            ->leftJoin('(select * from `call`) `first_same_child` on `first_same_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_parent_id and c_id < c.c_id)')
+            ->leftJoin('(select * from `call`) `prev_child`', '`prev_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_parent_id and c_id < c.c_id)')
+            ->leftJoin('(select * from `call`) `next_child`', '`next_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_parent_id and c_id > c.c_id)')
+            ->leftJoin('(select * from `call`) `last_child`', '`last_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_id and c_id > c.c_id)')
+            ->leftJoin('(select * from `call`) `first_child`', '`first_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_id and c_id > c.c_id)')
+            ->leftJoin('(select * from `call`) `first_same_child`', '`first_same_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_parent_id)')
             ->orderBy(['c.c_id' => SORT_ASC])
             ->offset($offset)
             ->limit($limit)

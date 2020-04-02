@@ -198,6 +198,77 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $offset  = 0;
+        $limit = 100;
+        $dateFrom = '2020-01-01';
+        $dateTo = '2020-12-01';
+        $query = Call::find()->alias('c')
+            ->select('c.*')
+            ->addSelect(
+                'parent.c_id as `parent_c_id`,
+                         parent.c_parent_id as `parent_c_parent_id`,
+                         parent.c_created_dt as `parent_c_created_dt`,
+                         parent.c_call_duration as `parent_c_call_duration`,
+                         parent.c_call_type_id as `parent_c_call_type_id`,
+                         parent.c_source_type_id as `parent_c_source_type_id`,
+                         parent.c_status_id as `parent_c_status_id`'
+            )
+            ->addSelect(
+                'prev_child.c_id as `prev_child_c_id`,
+                         prev_child.c_parent_id as `prev_child_c_parent_id`,
+                         prev_child.c_created_dt as `prev_child_c_created_dt`,
+                         prev_child.c_call_duration as `prev_child_c_call_duration`,
+                         prev_child.c_call_type_id as `prev_child_c_call_type_id`,
+                         prev_child.c_source_type_id as `prev_child_c_source_type_id`'
+            )
+            ->addSelect(
+                'next_child.c_id as `next_child_c_id`,
+                         next_child.c_parent_id as `next_child_c_parent_id`,
+                         next_child.c_created_dt as `next_child_c_created_dt`,
+                         next_child.c_call_duration as `next_child_c_call_duration`,
+                         next_child.c_call_type_id as `next_child_c_call_type_id`,
+                         next_child.c_source_type_id as `next_child_c_source_type_id`'
+            )
+            ->addSelect(
+                'last_child.c_id as `last_child_c_id`,
+                         last_child.c_parent_id as `last_child_c_parent_id`,
+                         last_child.c_created_dt as `last_child_c_created_dt`,
+                         last_child.c_call_duration as `last_child_c_call_duration`,
+                         last_child.c_call_type_id as `last_child_c_call_type_id`,
+                         last_child.c_source_type_id as `last_child_c_source_type_id`'
+            )
+            ->addSelect(
+                'first_child.c_id as `first_child_c_id`,
+                         first_child.c_parent_id as `first_child_c_parent_id`,
+                         first_child.c_created_dt as `first_child_c_created_dt`,
+                         first_child.c_call_duration as `first_child_c_call_duration`,
+                         first_child.c_call_type_id as `first_child_c_call_type_id`,
+                         first_child.c_source_type_id as `first_child_c_source_type_id`'
+            )
+            ->addSelect(
+                'first_same_child.c_id as `first_same_child_c_id`,
+                         first_same_child.c_parent_id as `first_same_child_c_parent_id`,
+                         first_same_child.c_created_dt as `first_same_child_c_created_dt`,
+                         first_same_child.c_call_duration as `first_same_child_c_call_duration`,
+                         first_same_child.c_call_type_id as `first_same_child_c_call_type_id`,
+                         first_same_child.c_source_type_id as `first_same_child_c_source_type_id`'
+            )
+            ->leftJoin('(select * from `call`) `parent`', 'parent.c_id = c.c_parent_id')
+            ->leftJoin('(select * from `call`) `prev_child`', '`prev_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_parent_id and c_id < c.c_id)')
+            ->leftJoin('(select * from `call`) `next_child`', '`next_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_parent_id and c_id > c.c_id)')
+            ->leftJoin('(select * from `call`) `last_child`', '`last_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_id and c_id > c.c_id)')
+            ->leftJoin('(select * from `call`) `first_child`', '`first_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_id and c_id > c.c_id)')
+            ->leftJoin('(select * from `call`) `first_same_child`', '`first_same_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_parent_id)')
+            ->orderBy(['c.c_id' => SORT_ASC])
+            ->offset($offset)
+            ->limit($limit)
+            ->andWhere(['>=', 'c.c_created_dt', $dateFrom])
+            ->andWhere(['<', 'c.c_created_dt', $dateTo])
+            ->andWhere(['c.c_call_status' => [Call::TW_STATUS_COMPLETED, Call::TW_STATUS_BUSY, Call::TW_STATUS_NO_ANSWER, Call::TW_STATUS_FAILED, Call::TW_STATUS_CANCELED]])
+            ->asArray()
+        ->all();
+
+
         return $this->render('blank');
 
         $lead = Lead::findOne(371222);
