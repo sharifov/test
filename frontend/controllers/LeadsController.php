@@ -170,8 +170,6 @@ class LeadsController extends FController
 
     public function actionExportCsv()
     {
-        //set_time_limit(30);
-        //ini_set('memory_limit', '512M');
         $searchModel = new LeadSearch();
         $params = Yii::$app->request->queryParams;
         if(Yii::$app->user->identity->canRole('supervision')) {
@@ -209,7 +207,6 @@ class LeadsController extends FController
     }
 
         if(fclose($fpath)){
-            //return $this->redirect(['leads/download-csv']);
             return 'success';
         }
     }
