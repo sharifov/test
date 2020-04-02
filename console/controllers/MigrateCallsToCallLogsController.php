@@ -563,6 +563,9 @@ class MigrateCallsToCallLogsController extends Controller
             }
 
             if ($queueData) {
+                if (isset($queueData['clq_queue_time'])) {
+                    $queueData['clq_queue_time'] = abs($queueData['clq_queue_time']);
+                }
                 $callQueue = new CallLogQueue([
                     'clq_cl_id' => $callLog->cl_id,
                     'clq_access_count' => $queueData['clq_access_count'] ?? null,
