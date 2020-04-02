@@ -16,7 +16,7 @@ class CallLogStatus
         self::COMPLETE => 'Complete',
         self::BUSY => 'Busy',
         self::NOT_ANSWERED => 'Not answered',
-        self::FAILED => 'Not Failed',
+        self::FAILED => 'Failed',
         self::CANCELED => 'Canceled',
     ];
 
