@@ -266,7 +266,8 @@ class TestController extends FController
             ->andWhere(['<', 'c.c_created_dt', $dateTo])
             ->andWhere(['c.c_call_status' => [Call::TW_STATUS_COMPLETED, Call::TW_STATUS_BUSY, Call::TW_STATUS_NO_ANSWER, Call::TW_STATUS_FAILED, Call::TW_STATUS_CANCELED]])
             ->asArray()
-        ->all();
+        ->one();
+        var_dump($query);die;
 
 
         return $this->render('blank');
