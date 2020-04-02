@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use common\models\Employee;
+use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use yii\helpers\Html;
@@ -124,13 +125,16 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                             </ul>
                         </li>
 
-
-
                         <?php /*php if($isAdmin):*/ ?>
                             <?= frontend\widgets\OnlineConnection::widget() ?>
                             <?php //= frontend\widgets\Notifications::widget() ?>
-                            <?= NotificationWidget::widget(['userId' => Auth::id()]) ?>
-
+                            <?php
+                                if (Yii::$app->params['settings']['notification_web_socket']) {
+                                    echo NotificationSocketWidget::widget(['userId' => Auth::id()]);
+                                } else {
+                                    echo NotificationWidget::widget(['userId' => Auth::id()]);
+                                }
+                            ?>
 
                         <li class="nav-item">
                             <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>

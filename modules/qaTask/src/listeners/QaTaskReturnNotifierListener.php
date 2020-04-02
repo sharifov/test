@@ -2,6 +2,7 @@
 
 namespace modules\qaTask\src\listeners;
 
+use frontend\widgets\notification\NotificationMessage;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnEvent;
 use Yii;
@@ -73,7 +74,8 @@ class QaTaskReturnNotifierListener
 
         if ($ntf = Notifications::create($oldAssigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($oldAssigned->id, null, 'getNewNotification', [], true);
-            Notifications::sendSocket('getNewNotification', ['user_id' => $oldAssigned->id]);
+            $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+            Notifications::sendSocket('getNewNotification', ['user_id' => $oldAssigned->id], $dataNotification);
         } else {
             Yii::error(
                 'Not created Email notification to employee_id: ' . $oldAssigned->id . ', task: ' . $task->t_id,

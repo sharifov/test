@@ -31,6 +31,7 @@ class NotificationMessage
         return [
             'notification' => [
                 'command' => self::COMMAND_ADD,
+                'userId' => $ntf->n_user_id,
                 'id' => $ntf->n_id,
                 'url' => Url::to(['/notifications/view2', 'id' => $ntf->n_id]),
                 'title' => Html::encode($ntf->n_title),
@@ -44,21 +45,23 @@ class NotificationMessage
         ];
     }
 
-    public static function delete(int $id): array
+    public static function delete(Notifications $ntf): array
     {
         return [
             'notification' => [
                 'command' => self::COMMAND_DELETE,
-                'id' => $id,
+                'userId' => $ntf->n_user_id,
+                'id' => $ntf->n_id,
             ]
         ];
     }
 
-    public static function deleteAll(): array
+    public static function deleteAll(int $user_id): array
     {
         return [
             'notification' => [
                 'command' => self::COMMAND_DELETE_ALL,
+                'userId' => $user_id,
             ]
         ];
     }

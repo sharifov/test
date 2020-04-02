@@ -26,7 +26,8 @@ class NotifyAsset extends AssetBundle
     ];
 
     public $js = [
-        'js/pnotify/pnotify.custom.min.js',
+//        'js/pnotify/pnotify.custom.min.js',
+        'js/pnotify/pnotify.https.custom.min.js',
         //'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/js/ion.sound.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/favico.js/0.3.10/favico.min.js',
 
