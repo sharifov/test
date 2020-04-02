@@ -30,6 +30,7 @@ class CallLogLead extends \yii\db\ActiveRecord
             [['cll_cl_id', 'cll_lead_id'], 'unique', 'targetAttribute' => ['cll_cl_id', 'cll_lead_id']],
 
             ['cll_cl_id', 'exist', 'skipOnError' => true, 'targetClass' => CallLog::class, 'targetAttribute' => ['cll_cl_id' => 'cl_id']],
+            ['cll_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['cll_lead_id' => 'id']],
         ];
     }
 
