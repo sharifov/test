@@ -5,8 +5,8 @@ namespace console\controllers;
 
 use common\models\ApiLog;
 use common\models\GlobalLog;
+use console\helpers\OutputHelper;
 use frontend\models\Log;
-use ReflectionClass;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\console\Controller;
@@ -14,10 +14,9 @@ use yii\helpers\Console;
 
 /**
  * Class LogController
- * @package console\controllers
  * @property bool $logCleanerEnable
  * @property array $logCleanerParams
- * @property string $className
+ * @property string $shortClassName
  * @property int $defaultDays
  * @property int $defaultLimit
  * @property array $cleanerCollection
@@ -27,13 +26,12 @@ class LogController extends Controller
     public $defaultDays = 90;
     public $defaultLimit = 1000;
 
-    private $logCleanerEnable;
+    private $logCleanerEnable = false;
     private $logCleanerParams;
-    private $className;
+    private $shortClassName;
     private $cleanerCollection;
 
     /**
-     * LogController constructor.
      * @param $id
      * @param $module
      * @param array $config
@@ -50,36 +48,34 @@ class LogController extends Controller
      */
     public function actionCleaner(?int $days = null, ?int $limit = null): void
 	{
+	    $infoMessage = '';
+	    $outputHelper = new OutputHelper();
+	    $timeStart = microtime(true);
+	    $days = $days ?? $this->logCleanerParams['days'];
+	    $limit = $limit ?? $this->logCleanerParams['limit'];
+	    $point = $this->shortClassName . ':' .$this->action->id;
+	    
 	    if (!$this->logCleanerEnable) {
-            $this->printInfo('Cleaner is disable. ', $this->action->id, Console::FG_RED);
+            $outputHelper->printInfo('Cleaner is disable. ', $point, Console::FG_RED);
 	        return;
 	    }
 
-        $this->printInfo('Start. ',  $this->action->id);
-
-        $days = $days ?? $this->logCleanerParams['days'];
-        $limit = $limit ?? $this->logCleanerParams['limit'];
-
-        $this->printInfo('Days:' . $days,  $this->action->id);
-
-	    $timeStart = microtime(true);
+        $outputHelper->printInfo('Start. ', $point);
 
         foreach ($this->cleanerCollection as $table => $params) {
 
             $result = $this->baseCleaner($days, $limit, $params['prepareSql'], $params['deleteSql'], $table);
 
-            $message = '"' . $table . '" - Processed:' .
-                $result['processed'] . ' ExecutionTime: ' . $result['executionTime'];
-            if ($result['status'] !== 1) {
-                $message .= ' Process are errors, check error logs';
-            }
+            $message = '"' . $table . '" - Processed: ' . $result['processed'] . ' ExecutionTime: ' . $result['executionTime'];
+            $message .= $result['status'] !== 1 ? ' Process are errors, check error logs' : '';
 
-            $this->printInfo($message, 'cleaner:' . $table, $this->getColorInfo($result['status']));
-            Yii::info($message,'info\LogController:cleaner:' . $table);
+            $outputHelper->printInfo($message, $point . ':' . $table, OutputHelper::getColorByStatusCode($result['status']));
+            $infoMessage .= $message . "\n";
         }
 
-        $resultInfo = 'End. Total execution time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
-        $this->printInfo($resultInfo, $this->action->id);
+        $resultInfo = 'Total execution time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+        $outputHelper->printInfo($resultInfo, $point);
+        Yii::info($infoMessage . $resultInfo,'info\LogController:done');
 	}
 
     /**
@@ -87,10 +83,10 @@ class LogController extends Controller
      * @param int $limit
      * @param string $prepareSql
      * @param string $deleteSql
-     * @param string $methodName
+     * @param string $tableName
      * @return array
      */
-    private function baseCleaner(int $days, int $limit, string $prepareSql, string $deleteSql, string $methodName): array
+    private function baseCleaner(int $days, int $limit, string $prepareSql, string $deleteSql, string $tableName): array
     {
         $processed = 0;
         $timeStart = microtime(true);
@@ -107,7 +103,7 @@ class LogController extends Controller
                 ->queryOne();
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->className . ':' . $methodName . ':FailedPrepareInfo');
+            $this->shortClassName . ':' . $tableName . ':FailedPrepareInfo');
             $result['status'] = -1;
             $result['executionTime'] = number_format(round(microtime(true) - $timeStart, 2), 2);
             return $result;
@@ -123,7 +119,7 @@ class LogController extends Controller
             } catch (\Throwable $throwable) {
                 $result['status'] = 0;
                 Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->className. ':' . $methodName . ':FailedDelete');
+            $this->shortClassName. ':' . $tableName . ':FailedDelete');
             }
         }
 
@@ -138,11 +134,7 @@ class LogController extends Controller
      */
     private function setSettings(): LogController
     {
-        try {
-            $this->className = (new ReflectionClass(self::class))->getShortName();
-        } catch (\Throwable $throwable) {
-            $this->className = self::class;
-        }
+        $this->shortClassName = OutputHelper::getShortClassName(self::class);
 
         $settings = Yii::$app->params['settings'];
 		$this->logCleanerEnable = $settings['console_log_cleaner_enable'] ?? false;
@@ -158,7 +150,7 @@ class LogController extends Controller
 		        'limit' => $this->defaultLimit,
            ];
            Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->className. ':' . __FUNCTION__ . ':FailedJsonDecode');
+            $this->shortClassName. ':' . __FUNCTION__ . ':FailedJsonDecode');
 		}
 
         $this->cleanerCollection[GlobalLog::tableName()] =
@@ -181,40 +173,5 @@ class LogController extends Controller
             ];
 
         return $this;
-    }
-
-    /**
-     * @param int $statusCode
-     * @return int
-     */
-    private function getColorInfo(int $statusCode): int
-    {
-         switch ($statusCode) {
-            case -1:
-                $colorInfo = Console::FG_RED;
-                break;
-            case 0:
-                $colorInfo = Console::FG_YELLOW;
-                break;
-            default:
-                $colorInfo = Console::FG_GREEN;
-        }
-
-        return $colorInfo;
-    }
-
-    /**
-     * @param string $info
-     * @param string $function
-     * @param int $colorInfo
-     * @param int $color
-     */
-    private function printInfo(string $info, string $function = '', $colorInfo = Console::FG_GREEN, $color = Console::FG_CYAN): void
-    {
-        printf(
-            "\n --- %s %s --- \n",
-            $this->ansiFormat($info, $colorInfo),
-            $this->ansiFormat('(' . $this->className . ':' . $function . ')', $color)
-        );
-    }
+    }    
 }
