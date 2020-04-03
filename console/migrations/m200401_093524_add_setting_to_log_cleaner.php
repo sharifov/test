@@ -64,17 +64,15 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
             's_category_id' => $settingCategory ? $settingCategory->sc_id : null,
         ]);
 
-        /* TODO:: add index to call c_status_id + c_status_id */
+        $this->createIndex('IND-call_c_status_id-c_created_dt', '{{%call}}', ['c_status_id', 'c_created_dt']);
 
-        /* TODO::
-        $this->alterColumn('{{%global_log}}', 'gl_id', $this->bigInteger() . 'NOT NULL AUTO_INCREMENT');
-        $this->alterColumn('{{%api_log}}', 'al_id', $this->bigInteger() . 'NOT NULL AUTO_INCREMENT');
-
-         */
+        $this->alterColumn('{{%global_log}}', 'gl_id', $this->bigInteger() . ' NOT NULL AUTO_INCREMENT');
+        $this->alterColumn('{{%api_log}}', 'al_id', $this->bigInteger() . ' NOT NULL AUTO_INCREMENT');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
     }
 
     /**
@@ -87,14 +85,14 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
             'console_call_terminator_enable', 'console_call_terminator_params',
         ]]);
 
-        /* TODO::
-        $this->alterColumn('{{%global_log}}', 'gl_id', $this->integer(11) . 'NOT NULL AUTO_INCREMENT');
-        $this->alterColumn('{{%api_log}}', 'al_id', $this->integer(11) . 'NOT NULL AUTO_INCREMENT');
+        $this->dropIndex('IND-call_c_status_id-c_created_dt', '{{%call}}');
 
-         */
+        $this->alterColumn('{{%global_log}}', 'gl_id', $this->integer(11) . ' NOT NULL AUTO_INCREMENT');
+        $this->alterColumn('{{%api_log}}', 'al_id', $this->integer(11) . ' NOT NULL AUTO_INCREMENT');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
     }
 }
