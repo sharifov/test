@@ -7,13 +7,18 @@ use modules\flight\models\FlightPax;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
+use modules\flight\src\services\flight\FlightManageService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productType\ProductType;
+use modules\product\src\useCases\product\create\ProductCreateForm;
+use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
 use sales\repositories\lead\LeadRepository;
@@ -38,6 +43,8 @@ use yii\filters\VerbFilter;
  * @property ProductQuoteRepository $productQuoteRepository
  * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
  * @property LeadRepository $leadRepository
+ * @property ProductCreateService $productCreateService
+ * @property FlightManageService $flightManageService
  */
 class FlightQuoteController extends FController
 {
@@ -65,6 +72,14 @@ class FlightQuoteController extends FController
 	 * @var LeadRepository
 	 */
 	private $leadRepository;
+	/**
+	 * @var ProductCreateService
+	 */
+	private $productCreateService;
+	/**
+	 * @var FlightManageService
+	 */
+	private $flightManageService;
 
 	/**
 	 * FlightQuoteController constructor.
@@ -76,6 +91,8 @@ class FlightQuoteController extends FController
 	 * @param ProductQuoteRepository $productQuoteRepository
 	 * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
 	 * @param LeadRepository $leadRepository
+	 * @param ProductCreateService $productCreateService
+	 * @param FlightManageService $flightManageService
 	 * @param array $config
 	 */
 	public function __construct(
@@ -87,6 +104,8 @@ class FlightQuoteController extends FController
 		ProductQuoteRepository $productQuoteRepository,
 		FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository,
 		LeadRepository $leadRepository,
+		ProductCreateService $productCreateService,
+		FlightManageService $flightManageService,
 		$config = []
 	)
 	{
@@ -97,6 +116,8 @@ class FlightQuoteController extends FController
 		$this->productQuoteRepository = $productQuoteRepository;
 		$this->flightQuotePaxPriceRepository = $flightQuotePaxPriceRepository;
 		$this->leadRepository = $leadRepository;
+		$this->productCreateService = $productCreateService;
+		$this->flightManageService = $flightManageService;
 	}
 
 	/**
@@ -394,7 +415,7 @@ class FlightQuoteController extends FController
 
 	public function actionAjaxAddQuoteContent(): string
 	{
-//		$leadId = Yii::$app->request->post('leadId', 0);
+		$leadId = Yii::$app->request->post('leadId', 0);
 		$flightId = Yii::$app->request->post('flightId', 0);
 		$pjaxReloadId = Yii::$app->request->post('pjaxReloadId', 0);
 		$action = Yii::$app->request->post('action', 0);
@@ -402,8 +423,12 @@ class FlightQuoteController extends FController
 		$message = null;
 
 		try {
-//			$lead = $this->leadRepository->find($leadId);
+			$lead = $this->leadRepository->find($leadId);
 			$flight = $this->flightRepository->find($flightId);
+
+			if (empty($flight->flightSegments)) {
+				throw new \DomainException('Flight Segment data is not found; Create a new flight request;');
+			}
 
 			$data = CompositeFormHelper::prepareDataForMultiInput(
 				Yii::$app->request->post(),
@@ -420,6 +445,22 @@ class FlightQuoteController extends FController
 					return '<script>createNotify("Quote created", "Quote successfully created", "success"); $("#modal-md").modal("hide");pjaxReload({container: "#'.$pjaxReloadId.'"})</script>';
 				}
 
+				if ($action === FlightQuoteCreateForm::ACTION_CREATE_NEW_PRODUCT) {
+					$form->scenario = FlightQuoteCreateForm::ACTION_CREATE_NEW_PRODUCT;
+					if ($form->validate()) {
+						$preparedData = $this->flightQuoteManageService->prepareFlightQuoteData($form);
+						$this->flightManageService->createNewProductAndAssignNewQuote($form, $lead, $preparedData);
+						return '<script>createNotify("Created new Product: Flight", "Quote successfully assigned to a new product Flight", "success"); $("#modal-md").modal("hide");pjaxReload({container: "#pjax-lead-products-wrap"})</script>';
+					}
+				} else if ($action === FlightQuoteCreateForm::ACTION_UPDATE_FLIGHT_REQUEST) {
+					$form->scenario = FlightQuoteCreateForm::ACTION_CREATE_NEW_PRODUCT;
+					if ($form->validate()) {
+						$preparedData = $this->flightQuoteManageService->prepareFlightQuoteData($form);
+						$this->flightManageService->updateFlightRequestAndAssignNewQuote($form, $flight, $preparedData);
+						return '<script>createNotify("Flight Request successfully updated", "Quote successfully assigned to a product Flight", "success"); $("#modal-md").modal("hide");pjaxReload({container: "#pjax-lead-products-wrap"})</script>';
+					}
+				}
+
 				if ($action === FlightQuoteCreateForm::ACTION_APPLY_PRICING_INFO) {
 					$dump = FlightQuoteHelper::parsePriceDump($form->pricingInfo);
 					$form->updateDataByPricingDump($dump);
@@ -429,14 +470,12 @@ class FlightQuoteController extends FController
 				}
 			}
 
-		} catch (\RuntimeException $e) {
+		} catch (\RuntimeException | \DomainException $e) {
 			if (isset($form)) {
 				$form->addError('general', $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
 			}else {
 				$message = $e->getMessage();
 			}
-		} catch (NotFoundException $e) {
-			$message = $e->getMessage();
 		} catch (\Throwable $e) {
 			$message = 'Internal Server Error';
 			Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'FlightModule::FlightQuoteController::actionAjaxAddQuoteContent::Throwable');
@@ -446,7 +485,8 @@ class FlightQuoteController extends FController
 			'message' => $message,
 			'createQuoteForm' => $form ?? new FlightQuoteCreateForm(),
 			'flight' => $flight ?? new Flight(),
-			'pjaxReloadId' => $pjaxReloadId
+			'pjaxReloadId' => $pjaxReloadId,
+			'lead' => $lead
 		]);
 	}
 

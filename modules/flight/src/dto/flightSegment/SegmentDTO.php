@@ -3,6 +3,7 @@
 namespace modules\flight\src\dto\flightSegment;
 
 use modules\flight\models\forms\FlightSegmentForm;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 
 /**
  * Class SegmentDTO
@@ -79,6 +80,16 @@ class SegmentDTO
 		$this->originLabel = $form->fs_origin_iata_label;
 		$this->destinationLabel = $form->fs_destination_iata_label;
 		$this->departure = $form->fs_departure_date;
+
+		return $this;
+	}
+
+	public function fillByItineraryDumpDto(ItineraryDumpDTO $dto, int $flightId): SegmentDTO
+	{
+		$this->flightId = $flightId;
+		$this->origin = $dto->departureAirportCode;
+		$this->destination = $dto->destinationAirportCode;
+		$this->departure = $dto->departureTime;
 
 		return $this;
 	}

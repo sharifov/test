@@ -343,6 +343,11 @@ class Flight extends \yii\db\ActiveRecord implements Productable
 		return self::getCabinClassRealList()[$code] ?? '';
 	}
 
+	public static function getCabinByRealCode(string $code): string
+	{
+		return array_search($code, self::getCabinClassRealList(), false) ?? $code;
+	}
+
 	/**
 	 * @return int
 	 */
