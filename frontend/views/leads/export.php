@@ -609,6 +609,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         'panel' => [
             'type' => GridView::TYPE_PRIMARY,
             'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Export Leads</h3>',
+            'before' => '<span class="badge badge-secondary">* Limitation for Full Export is max 50 000 items</span>'
         ],
 
     ]); ?>

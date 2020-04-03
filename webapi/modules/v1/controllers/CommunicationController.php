@@ -611,7 +611,11 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
-                    if (!$call->c_dep_id && $call->c_project_id && isset($callOriginalData['FromAgentPhone']) && $callOriginalData['FromAgentPhone']) {
+                    if (isset($callOriginalData['lead_id']) && $callOriginalData['lead_id'] && ($lead = Lead::findOne((int)$callOriginalData['lead_id']))) {
+                        $call->c_dep_id = $lead->l_dep_id;
+                    } elseif (isset($callOriginalData['case_id']) && $callOriginalData['case_id'] && ($case = Cases::findOne((int)$callOriginalData['case_id']))) {
+                        $call->c_dep_id = $case->cs_dep_id;
+                    } elseif (!$call->c_dep_id && $call->c_project_id && isset($callOriginalData['FromAgentPhone']) && $callOriginalData['FromAgentPhone']) {
 //                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callOriginalData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
                         $upp = UserProjectParams::find()->byPhone($callOriginalData['FromAgentPhone'], false)->andWhere(['upp_project_id' => $call->c_project_id])->limit(1)->one();
                         if ($upp && $upp->upp_dep_id) {
