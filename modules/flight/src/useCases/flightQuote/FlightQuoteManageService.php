@@ -7,10 +7,17 @@ namespace modules\flight\src\useCases\flightQuote;
 use common\models\Lead;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuoteStatusLog;
+use modules\flight\models\FlightSegment;
+use modules\flight\models\forms\ItineraryEditForm;
+use modules\flight\src\dto\flightSegment\SegmentDTO;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
+use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
@@ -37,6 +44,9 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageC
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
+use modules\product\src\entities\productType\ProductType;
+use modules\product\src\useCases\product\create\ProductCreateForm;
+use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\helpers\product\ProductQuoteHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -223,11 +233,6 @@ class FlightQuoteManageService
 		];
 
 		return $quote;
-	}
-
-	public function createQuoteManually(Lead $lead, Flight $flight)
-	{
-		$flightQuote = new FlightQuote();
 	}
 
 	/**
