@@ -100,7 +100,7 @@ class CallController extends Controller
         $out = [];
         $errors = [];
         if ($items) {
-            $this->outputHelper->printInfo('Find ' . count($items) . ' items for update', '');
+            $this->outputHelper->printInfo('Find ' . count($items) . ' items for update', 'Count');
 
             /** @var Call $call */
             foreach ($items AS $call) {
@@ -114,15 +114,17 @@ class CallController extends Controller
                     ];
                 } else {
                     $errors[] = $call->errors;
-                    $call->getErrors(); $call->getFirstErrors();
                 }
             }
         } else {
-            echo $this->ansiFormat( 'No items to update ' . PHP_EOL, Console::FG_GREEN);
+            $this->outputHelper->printInfo('No items to update', 'Count:noItems');
         }
 
-        \Yii::warning(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]), 'info\Console:CallController:actionUpdateStatus');
-        echo $this->ansiFormat(PHP_EOL . 'Finish update' . PHP_EOL, Console::FG_GREEN);
+        $resultInfo = 'Processed: '. count($out) .' Total execution time: ' .
+            number_format(round(microtime(true) - $timeStart, 2), 2);
+        $this->outputHelper->printInfo($resultInfo, $point);
+        $resultInfo = count($out) ? VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo : $resultInfo;
+        Yii::info(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo,'info\Console:CallController::end');
     }
 
     public function actionUsers()
