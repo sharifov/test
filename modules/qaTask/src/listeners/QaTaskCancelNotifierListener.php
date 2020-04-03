@@ -2,6 +2,7 @@
 
 namespace modules\qaTask\src\listeners;
 
+use frontend\widgets\notification\NotificationMessage;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelEvent;
 use Yii;
 use common\models\Notifications;
@@ -67,7 +68,8 @@ class QaTaskCancelNotifierListener
 
         if ($ntf = Notifications::create($assigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($assigned->id, null, 'getNewNotification', [], true);
-            Notifications::sendSocket('getNewNotification', ['user_id' => $assigned->id]);
+            $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+            Notifications::sendSocket('getNewNotification', ['user_id' => $assigned->id], $dataNotification);
         } else {
             Yii::error(
                 'Not created Email notification to employee_id: ' . $assigned->id . ', task: ' . $task->t_id,

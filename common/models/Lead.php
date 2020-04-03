@@ -8,6 +8,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
 use DateTime;
+use frontend\widgets\notification\NotificationMessage;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -2675,7 +2676,8 @@ Reason: {reason}
                     if ($ntf = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true)) {
                         $isSend = true;
                         // Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                        Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                        $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                        Notifications::sendSocket('getNewNotification', ['user_id' => $user->id], $dataNotification);
                     }
 
 

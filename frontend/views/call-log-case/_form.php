@@ -10,16 +10,23 @@ use yii\widgets\ActiveForm;
 
 <div class="call-log-case-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <div class="row">
+        <div class="col-md-4">
 
-    <?= $form->field($model, 'clc_cl_id')->textInput() ?>
+            <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'clc_case_id')->textInput() ?>
+            <?= $form->field($model, 'clc_cl_id')->textInput() ?>
 
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+            <?= $form->field($model, 'clc_case_id')->textInput() ?>
+
+            <?= $form->field($model, 'clc_case_status_log_id')->textInput() ?>
+
+            <div class="form-group">
+                <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+            </div>
+
+            <?php ActiveForm::end(); ?>
+        </div>
     </div>
-
-    <?php ActiveForm::end(); ?>
 
 </div>

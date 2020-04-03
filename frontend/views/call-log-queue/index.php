@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'clq_cl_id:callLog',
-            'clq_queue_time:datetime',
+            'clq_queue_time',
             'clq_access_count',
             ['class' => BooleanColumn::class, 'attribute' => 'clq_is_transfer'],
 

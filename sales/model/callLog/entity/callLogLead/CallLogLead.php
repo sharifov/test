@@ -3,6 +3,7 @@
 namespace sales\model\callLog\entity\callLogLead;
 
 use common\models\Lead;
+use common\models\LeadFlow;
 use sales\model\callLog\entity\callLog\CallLog;
 use yii\db\ActiveQuery;
 
@@ -11,9 +12,11 @@ use yii\db\ActiveQuery;
  *
  * @property int $cll_cl_id
  * @property int $cll_lead_id
+ * @property int|null $cll_lead_flow_id
  *
  * @property CallLog $log
  * @property Lead $lead
+ * @property LeadFlow $leadFlow
  */
 class CallLogLead extends \yii\db\ActiveRecord
 {
@@ -30,6 +33,9 @@ class CallLogLead extends \yii\db\ActiveRecord
             [['cll_cl_id', 'cll_lead_id'], 'unique', 'targetAttribute' => ['cll_cl_id', 'cll_lead_id']],
 
             ['cll_cl_id', 'exist', 'skipOnError' => true, 'targetClass' => CallLog::class, 'targetAttribute' => ['cll_cl_id' => 'cl_id']],
+
+            ['cll_lead_flow_id', 'integer'],
+            ['cll_lead_flow_id', 'exist', 'skipOnError' => true, 'targetClass' => LeadFlow::class, 'targetAttribute' => ['cll_lead_flow_id' => 'id']],
         ];
     }
 
@@ -38,6 +44,7 @@ class CallLogLead extends \yii\db\ActiveRecord
         return [
             'cll_cl_id' => 'Log',
             'cll_lead_id' => 'Lead',
+            'cll_lead_flow_id' => 'Lead Flow Id',
         ];
     }
 
@@ -49,6 +56,11 @@ class CallLogLead extends \yii\db\ActiveRecord
     public function getLead(): ActiveQuery
     {
         return $this->hasOne(Lead::class, ['id' => 'cll_lead_id']);
+    }
+
+    public function getLeadFlow(): ActiveQuery
+    {
+        return $this->hasOne(LeadFlow::class, ['id' => 'cll_lead_flow_id']);
     }
 
     public static function find(): Scopes

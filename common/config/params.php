@@ -4,6 +4,8 @@ return [
     'serviceVersion' => '1.0.0',
     'appName' => 'Sales',
 
+    'release' => require __DIR__ . '/params-release.php',
+
     'url_address'      => 'https://sales.travelinsides.com',
     'url_api_address'  => 'https://sales.api.travelinsides.com/v1',
 

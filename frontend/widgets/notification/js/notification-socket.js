@@ -57,7 +57,7 @@ function notificationDeleteAllMessages() {
         }
     });
     if (!isDeleted) {
-        console.log('Messages not found');
+        console.error('Messages not found');
     } else {
         notificationCounterReset();
         console.log('Messages was deleted');
@@ -66,7 +66,7 @@ function notificationDeleteAllMessages() {
 
 function notificationDeleteMessage(id) {
     let isDeleted = false;
-    $( "#notification-menu li").each(function(e) {
+    $("#notification-menu li").each(function(e) {
         let messageId = $(this).data('id');
         if (messageId && messageId === id) {
             isDeleted = true;
@@ -77,13 +77,30 @@ function notificationDeleteMessage(id) {
         }
     });
     if (!isDeleted) {
-        console.log('Message Id: ' + id + ' not found');
+        console.error('Message Id: ' + id + ' not found');
     }
 }
 
+function notificationIsExist(id) {
+    let isExist = false;
+    $("#notification-menu li").each(function(e) {
+        let messageId = $(this).data('id');
+        if (messageId && messageId === id) {
+            isExist = true;
+            return false;
+        }
+    });
+    return isExist;
+}
+
 function notificationAddMessage(id, url, title, time, message, type, popup, notifyMessage, notifyDesktopMessage) {
+    if (notificationIsExist(id)) {
+        console.error('Message Id: ' + id + ' already exist on UI list');
+        return;
+    }
+
     let text = '<li data-id="' + id + '"> '
-        + '<a href="' + url + '">'
+        + '<a href="javascript:;" onclick="notificationShow(this);" id="notification-menu-element-show" data-title="' + title + '" data-id="' + id + '">'
         + '<span class="glyphicon glyphicon-info-sign"> </span> '
         + '<span>'
         + '<span>' + title + '</span>'
@@ -101,13 +118,12 @@ function notificationAddMessage(id, url, title, time, message, type, popup, noti
             let messageId = $(this).data('id');
             if (messageId) {
                 $(this).remove();
-                console.log('Message Id: ' + messageId + ' was delete from ui list');
+                console.log('Message Id: ' + messageId + ' was delete from UI list');
             }
         }
     });
     if (popup) {
-        notificationPNotify(type, title, notifyMessage, notifyDesktopMessage);
-        $.get('{$popupShowedUrl}', {id: id}, function(data) { });
+        notificationPNotify(id, type, title, notifyMessage, notifyDesktopMessage);
     }
     console.log('Message Id: ' + id + ' was added');
 }
@@ -131,7 +147,11 @@ function notificationCounterDecrement() {
         let count = $(this).text();
         if (count) {
             count = parseInt(count);
-            count--;
+            if (count > 1) {
+                count--;
+            } else {
+                count = '';
+            }
         } else {
             count = '';
         }
@@ -174,7 +194,7 @@ function notificationTimeDifference(current, previous) {
     }
 }
 
-function notificationPNotify(type, title, message, desktopMessage) {
+function notificationPNotify(id, type, title, message, desktopMessage) {
     new PNotify({
         type: type,
         title: title,
@@ -183,11 +203,30 @@ function notificationPNotify(type, title, message, desktopMessage) {
         desktop: {
             desktop: true,
             fallback: true,
-            text: desktopMessage
+            text: desktopMessage,
+            tag: 'notification-popup-showed-id-' + id
         },
         delay: 10000,
         mouse_reset: false,
-        hide: true
+        hide: true,
     });
     soundNotification();
+}
+
+function notificationCount(count) {
+    $(".notification-counter").text(count);
+}
+
+function notificationShow(element) {
+    let url = '/notifications/view2?id=' + $(element).data('id');
+    let title = $(element).data('title');
+    let modal = $('#modal-lg');
+    $.get(url,
+        function (data) {
+            modal.find('.modal-title').html(title);
+            modal.find('.modal-body').html(data);
+            modal.modal();
+        }
+    );
+    return false;
 }

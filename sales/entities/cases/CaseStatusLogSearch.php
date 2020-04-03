@@ -83,6 +83,7 @@ class CaseStatusLogSearch extends CaseStatusLog
 
         // grid filtering conditions
         $query->andFilterWhere([
+            'csl_id' => $this->csl_id,
             'csl_case_id' => $this->csl_case_id,
             'csl_from_status' => $this->csl_from_status,
             'csl_to_status' => $this->csl_to_status,
