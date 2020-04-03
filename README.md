@@ -318,7 +318,6 @@ CRONs
 10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
 30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
 40   0  1  *  *     php /var/www/sale/yii kpi/calculate-salary
-*/10   *  *  *  *   run-this-one php /var/www/sale/yii call/update-status
 20   0  *  *  *     php /var/www/sale/yii db/clear-user-site-activity-logs
 */5 * * * *         php /var/www/sale/yii logger/format-log-managed-attr
 */5 * * * *         php /var/www/sale/yii lead/return-lead-to-ready
@@ -326,6 +325,8 @@ CRONs
 */1  *  *  *  *     php /var/www/sale/yii db/compress-email 
 45 * * * *         php /var/www/sale/yii qa-task/lead-processing-quality
 */4 * * * *     php /var/www/sale/yii service/send-sms
+*/10   *  *  *  *   run-this-one php /var/www/sale/yii call/terminator
+30 11 * * * php /var/www/sale/yii log/cleaner
 ```
 Note: php /var/www/sale/yii db/compress-email - Временный скрипт. Удалить запись после дополнительного тикета по :
 ALTER TABLE "email" DROP "e_email_body_text";  
