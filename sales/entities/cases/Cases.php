@@ -144,6 +144,19 @@ class Cases extends ActiveRecord implements Objectable
         return $case;
     }
 
+    public static function createExchangeByImport(int $clientId, int $projectId, int $categoryId, string $subject, int $sourceType)
+	{
+		$case = self::create();
+		$case->cs_client_id = $clientId;
+		$case->cs_project_id = $projectId;
+		$case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+		$case->cs_category_id = $categoryId;
+		$case->cs_subject = $subject;
+		$case->cs_source_type_id = $sourceType;
+		$case->pending(null, 'Created by import');
+		return $case;
+	}
+
     /**
      * @param int $clientId
      * @param int $callId
