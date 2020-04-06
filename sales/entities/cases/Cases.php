@@ -144,7 +144,7 @@ class Cases extends ActiveRecord implements Objectable
         return $case;
     }
 
-    public static function createExchangeByImport(int $clientId, int $projectId, int $categoryId, string $subject, int $sourceType)
+    public static function createExchangeByImport(int $clientId, int $projectId, string $bookingId, int $categoryId, string $subject, int $sourceType)
 	{
 		$case = self::create();
 		$case->cs_client_id = $clientId;
@@ -153,6 +153,7 @@ class Cases extends ActiveRecord implements Objectable
 		$case->cs_category_id = $categoryId;
 		$case->cs_subject = $subject;
 		$case->cs_source_type_id = $sourceType;
+		$case->cs_order_uid = $bookingId;
 		$case->pending(null, 'Created by import');
 		return $case;
 	}
