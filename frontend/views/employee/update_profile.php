@@ -6,8 +6,10 @@
  * @var $qrcodeData string
  * @var $userCommissionRuleValue int
  * @var $userBonusRuleValue int
+ * @var userProfileForm $userProfileForm
  */
 
+use frontend\models\form\UserProfileForm;
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;
@@ -27,15 +29,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= $form->field($model, 'username')->textInput(['autocomplete' => "new-user", "readonly" => "readonly"]) ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
+                        <?= $form->field($userProfileForm, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'full_name')->textInput() ?>
+                        <?= $form->field($userProfileForm, 'full_name')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'email')->input('email') ?>
+                        <?= $form->field($userProfileForm, 'email')->input('email') ?>
                     </div>
                 </div>
 
