@@ -12,6 +12,7 @@ use sales\helpers\app\AppHelper;
 use Yii;
 use yii\console\Controller;
 use yii\console\Exception;
+use yii\helpers\Console;
 
 class CaseController extends Controller
 {
@@ -20,39 +21,22 @@ class CaseController extends Controller
 	 * @param string $importFileName
 	 * @throws Exception
 	 */
-	public function actionImportRefundData(string $importZipName = 'import_refund.zip', string $importFileName = 'import_refund.json'): void
+	public function actionImportRefundData(string $importFileName = 'import_refund.json'): void
 	{
+		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+		$time_start = microtime(true);
+
 		$runtimePath = '@console/runtime/';
 
-		if (!preg_match('/\.zip$/', $importZipName)) {
-			throw new Exception('Imported archive must be compressed to zip format');
+		if (!file_exists(\Yii::getAlias($runtimePath . $importFileName))) {
+			throw new Exception('File: '.$runtimePath . $importFileName.' is not found');
 		}
 
-		if (!file_exists(\Yii::getAlias($runtimePath . $importZipName))) {
-			throw new Exception('File: '.$runtimePath . $importZipName.' is not found');
+		if (!preg_match('/\.json$/', $importFileName)) {
+			throw new Exception('The imported file must be in json format');
 		}
 
-		$zip = new \ZipArchive();
-		if (!$zip->open(\Yii::getAlias($runtimePath . $importZipName))) {
-			throw new Exception('Unzip false');
-		}
-
-		$exportedFile = false;
-		for ($i = 0; $i < $zip->numFiles; $i++) {
-			$extractedFileName = $zip->getNameIndex($i);
-			if ($extractedFileName === $importFileName) {
-				$zip->extractTo(\Yii::getAlias('@console/runtime/'));
-				$exportedFile = true;
-				break;
-			}
-		}
-		$zip->close();
-
-		if (!$exportedFile) {
-			throw new Exception('File: ' . $importFileName . ' was not extracted from ' . $importZipName);
-		}
-
-		$refundData = file_get_contents(\Yii::getAlias('@console/runtime/' . $importFileName));
+		$refundData = file_get_contents(\Yii::getAlias($runtimePath . $importFileName));
 
 		$refundData = json_decode($refundData, true);
 
@@ -82,11 +66,25 @@ class CaseController extends Controller
 					Yii::$app->queue_job->priority(100)->push($job);
 
 					$transaction->commit();
+
+					echo '----------------' . PHP_EOL;
+					printf("\n Processed Data: \n ProjectId - %s \n BookingId - %s \n Email: %s \n",
+						$this->ansiFormat($refund['projectid'], Console::FG_GREEN),
+						$this->ansiFormat($refund['bookingid'], Console::FG_GREEN),
+						$this->ansiFormat($refund['email'], Console::FG_GREEN)
+					);
+					echo '----------------' . PHP_EOL;
+
 				} catch (\Throwable $e) {
 					$transaction->rollBack();
 					throw new Exception($e->getMessage());
 				}
 			}
 		}
+
+		$time_end = microtime(true);
+		$time = number_format(round($time_end - $time_start, 2), 2);
+		printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
+		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 }
