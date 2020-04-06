@@ -17,6 +17,8 @@ use yii\validators\Validator;
  *
  * @property bool $required
  * @property bool $allowClientSellerNumbers
+ * @property int $stringMax
+ * @property bool $boralesValidatorEnable
  *
  * Ex:
  *
@@ -47,6 +49,8 @@ class PhoneValidator extends Validator
     public $skipOnEmpty = false;
     public $required = false;
     public $allowClientSellerNumbers = false;
+    public $stringMax = 15;
+    public $boralesValidatorEnable = true;
 
     /**
      * @param Model $model
@@ -90,19 +94,21 @@ class PhoneValidator extends Validator
 
         $string = Yii::createObject([
             'class' => StringValidator::class,
-            'max' => 15,
+            'max' => (int)$this->stringMax,
         ]);
         $string->validateAttribute($model, $attribute);
         if ($model->hasErrors()) {
             return;
         }
 
-        $phoneInput = Yii::createObject([
-            'class' => PhoneInputValidator::class,
-        ]);
-        $phoneInput->validateAttribute($model, $attribute);
-        if ($model->hasErrors()) {
-            return;
+        if ($this->boralesValidatorEnable) {
+            $phoneInput = Yii::createObject([
+                'class' => PhoneInputValidator::class,
+            ]);
+            $phoneInput->validateAttribute($model, $attribute);
+            if ($model->hasErrors()) {
+                return;
+            }
         }
     }
 }
