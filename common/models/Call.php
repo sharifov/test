@@ -991,7 +991,7 @@ class Call extends \yii\db\ActiveRecord
 
 
 
-        if ($isChangedStatus || isset($changedAttributes['c_created_user_id'])) {
+        if ($isChangedStatus) {
             NativeEventDispatcher::recordEvent(CallEvents::class, CallEvents::CHANGE_STATUS, [CallEvents::class, 'updateUserStatus'], ['call' => $this, 'changedAttributes' => $changedAttributes]);
             NativeEventDispatcher::trigger(CallEvents::class, CallEvents::CHANGE_STATUS);
         }
