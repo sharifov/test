@@ -55,7 +55,7 @@ class CaseController extends Controller
 					if (!$clientEmail->save()) {
 						throw new Exception($clientEmail->getErrorSummary(true)[0]);
 					}
-					$case = Cases::createExchangeByImport($client->getPrimaryKey(), $refund['projectid'], 25, 'Corona Virus form', CasesSourceType::OTHER);
+					$case = Cases::createExchangeByImport($client->getPrimaryKey(), $refund['projectid'], $refund['bookingid'], 25, 'Corona Virus form', CasesSourceType::OTHER);
 					if (!$case->save()) {
 						throw new Exception($case->getErrorSummary(true)[0]);
 					}
