@@ -7,74 +7,104 @@ use common\models\Employee;
 use common\models\ProjectEmployeeAccess;
 use common\models\Sources;
 use common\models\UserProfile;
+use console\helpers\OutputHelper;
+use sales\helpers\app\AppHelper;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
+/**
+ * Class CallController
+ * @property bool $terminatorEnable
+ * @property array $terminatorParams
+ * @property string $shortClassName
+ * @property int $defaultRingingMinutes
+ * @property int $defaultQueueMinutes
+ * @property int defaultInProgressMinutes
+ * @property OutputHelper $outputHelper
+ */
 class CallController extends Controller
 {
+    public $defaultRingingMinutes = 5;
+    public $defaultQueueMinutes = 60;
+    public $defaultInProgressMinutes = 90;
+
+    private $shortClassName;
+    private $terminatorEnable = false;
+    private $terminatorParams;
+    private $outputHelper;
+
     /**
-     *  Update Call status for old items
-     *
+     * @param $id
+     * @param $module
+     * @param OutputHelper $outputHelper
+     * @param array $config
      */
-    public function actionUpdateStatus()
+    public function __construct($id, $module, OutputHelper $outputHelper, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->outputHelper = $outputHelper;
+		$this->setSettings();
+	}
+
+    /**
+     * @param int|null $ringingMinutes
+     * @param int|null $queueMinutes
+     * @param int|null $inProgressMinutes
+     * @throws \Exception
+     */
+    public function actionTerminator(?int $ringingMinutes = null, ?int $queueMinutes = null, ?int $inProgressMinutes = null): void
     {
-        echo $this->ansiFormat('starting console script...' . PHP_EOL, Console::FG_GREEN);
-        $dtRinging = (new \DateTime('now'))->modify('-5 minutes')->format('Y-m-d H:i:s');
-        $dtQueue = (new \DateTime('now'))->modify('-60 minutes')->format('Y-m-d H:i:s');
-        $dtInProgress= (new \DateTime('now'))->modify('-90 minutes')->format('Y-m-d H:i:s');
+        $timeStart = microtime(true);
+	    $ringingMinutes = $ringingMinutes ?? $this->terminatorParams['ringing_minutes'];
+	    $queueMinutes = $queueMinutes ?? $this->terminatorParams['queue_minutes'];
+	    $inProgressMinutes = $inProgressMinutes ?? $this->terminatorParams['in_progress_minutes'];
+	    $point = $this->shortClassName . ':' .$this->action->id;
 
-        $items = [];
+	    if (!$this->terminatorEnable) {
+            $this->outputHelper->printInfo('Call terminator is disable. ', $point, Console::FG_RED);
+	        return;
+	    }
 
-        $items_queued = Call::find()
-            ->where(['c_status_id' => Call::STATUS_QUEUE])
-            ->andWhere(['<=', 'c_created_dt', $dtQueue])
+        $this->outputHelper->printInfo('Start. ', $point);
+
+        $dtRinging = (new \DateTime('now'))->modify('-' . $ringingMinutes . ' minutes')->format('Y-m-d H:i:s');
+        $dtQueue = (new \DateTime('now'))->modify('-' . $queueMinutes . ' minutes')->format('Y-m-d H:i:s');
+        $dtInProgress = (new \DateTime('now'))->modify('-' . $inProgressMinutes . ' minutes')->format('Y-m-d H:i:s');
+
+        $items = Call::find()
+            ->where(['OR',
+                ['AND',
+                    ['c_status_id' => Call::STATUS_QUEUE],
+                    ['<=', 'c_created_dt', $dtQueue],
+                ],
+                ['AND',
+                    ['c_status_id' => Call::STATUS_RINGING],
+                    ['<=', 'c_created_dt', $dtRinging],
+                    ['IS NOT', 'c_parent_id', NULL],
+                ],
+                ['AND',
+                    ['c_status_id' =>  Call::STATUS_IN_PROGRESS],
+                    ['<=', 'c_created_dt', $dtInProgress],
+                    ['IS NOT', 'c_parent_id', NULL],
+                ]
+            ])
             ->orderBy(['c_id' => SORT_ASC])
+            ->indexBy('c_id')
             ->all();
 
-        //echo VarDumper::dumpAsString($items_queued, 5, false); exit;
-
-        if($items_queued) {
-            $items = array_merge($items, $items_queued);
-        }
-
-        $items_ringing = Call::find()
-            ->where(['c_status_id' => Call::STATUS_RINGING])
-            ->andWhere(['<=', 'c_created_dt', $dtRinging])
-            ->andWhere(['IS NOT', 'c_parent_id', null])
-            ->orderBy(['c_id' => SORT_ASC])
-            ->all();
-
-        if($items_ringing) {
-            $items = array_merge($items, $items_ringing);
-        }
-
-
-        $items_inprogress = Call::find()
-            ->where(['c_status_id' =>  Call::STATUS_IN_PROGRESS])
-            ->andWhere(['<=', 'c_created_dt', $dtInProgress])
-            ->andWhere(['IS NOT', 'c_parent_id', null])
-            ->orderBy(['c_id' => SORT_ASC])
-            ->all();
-
-        if($items_inprogress) {
-            $items =  array_merge($items, $items_inprogress);
-        }
-
-        //echo VarDumper::dumpAsString($items, 5, false); exit;
-
+        $this->outputHelper->printInfo('Query execution time: ' .
+            number_format(round(microtime(true) - $timeStart, 2), 2), 'Query:end');
 
         $out = [];
         $errors = [];
         if ($items) {
-            echo $this->ansiFormat('Find ' . count($items) . ' items for update' . PHP_EOL, Console::FG_GREEN);
+            $this->outputHelper->printInfo('Find ' . count($items) . ' items for update', 'Count');
 
             /** @var Call $call */
             foreach ($items AS $call) {
                 $old_status = $call->getStatusName();
-                //$call->c_call_status = Call::TW_STATUS_FAILED;
-
                 $call->setStatusFailed();
 
                 if ($call->save()) {
@@ -87,15 +117,15 @@ class CallController extends Controller
                 }
             }
         } else {
-            echo $this->ansiFormat( 'No items to update ' . PHP_EOL, Console::FG_GREEN);
-            return 0;
+            $this->outputHelper->printInfo('No items to update', 'Count:noItems');
         }
 
-        \Yii::warning(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]), 'info\Console:CallController:actionUpdateStatus');
-        echo $this->ansiFormat(PHP_EOL . 'Finish update' . PHP_EOL, Console::FG_GREEN);
-        return 0;
+        $resultInfo = 'Processed: '. count($out) .' Total execution time: ' .
+            number_format(round(microtime(true) - $timeStart, 2), 2);
+        $this->outputHelper->printInfo($resultInfo, $point);
+        $resultInfo = count($out) ? VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo : $resultInfo;
+        Yii::info(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo,'info\Console:CallController::end');
     }
-
 
     public function actionUsers()
     {
@@ -193,6 +223,33 @@ class CallController extends Controller
         }
         echo "Results redirects for hold calls: " . PHP_EOL .  VarDumper::dumpAsString( $results, 10, false) . PHP_EOL;
         return 0;
+    }
+
+    /**
+     * @return CallController
+     */
+    private function setSettings(): CallController
+    {
+        $this->shortClassName = OutputHelper::getShortClassName(self::class);
+
+        $settings = Yii::$app->params['settings'];
+		$this->terminatorEnable = $settings['console_call_terminator_enable'] ?? false;
+
+		try {
+		    $this->terminatorParams = [
+		        'ringing_minutes' => (int)$settings['console_call_terminator_params']['ringing_minutes'],
+		        'queue_minutes' => (int)$settings['console_call_terminator_params']['queue_minutes'],
+		        'in_progress_minutes' => (int)$settings['console_call_terminator_params']['in_progress_minutes'],
+            ];
+		} catch (\Throwable $throwable) {
+		   $this->terminatorParams = [
+		        'ringing_minutes' => $this->defaultRingingMinutes,
+		        'queue_minutes' => $this->defaultQueueMinutes,
+		        'in_progress_minutes' => $this->defaultInProgressMinutes,
+           ];
+           Yii::error(AppHelper::throwableFormatter($throwable),$this->shortClassName . ':' . __FUNCTION__ . ':Failed');
+		}
+        return $this;
     }
 
 }

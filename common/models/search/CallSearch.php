@@ -383,9 +383,9 @@ class CallSearch extends Call
             $this->defaultUserTz = $this->reportTimezone;
         }
 
-        if ($this->timeTo == ""){
+        /*if ($this->timeTo == ""){
             $differenceTimeToFrom  = "24:00";
-        } /*else {
+        } else {
             if((strtotime($this->timeTo) - strtotime($this->timeFrom)) <= 0){
                 $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
             } else {
@@ -396,19 +396,19 @@ class CallSearch extends Call
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($dates[0]));
-            $timeSub = date('G', strtotime($this->timeFrom));
+            //$timeSub = date('G', strtotime($this->timeFrom));
 
             $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
-            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+            //$utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         } else {
-            $timeSub = date('G', strtotime(date('00:00')));
+            //$timeSub = date('G', strtotime(date('00:00')));
 
             $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00').' -2 days'), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
-            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+            //$utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         }
 
         if (!empty($this->call_duration_from) && empty($this->call_duration_to)) {
@@ -421,8 +421,8 @@ class CallSearch extends Call
             $queryByDuration = '';
         }
 
-        $subQuery = new Query();
-        $subQuery->select(['c_created_user_id, DATE(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '.$timeSub.' HOUR), "+00:00", "'. $utcOffsetDST. '")) AS createdDate,
+        $query = new Query();
+        $query->select(['c_created_user_id,
         
         SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), c_call_duration, 0)) AS outgoingCallsDuration,
         SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCalls,
@@ -440,32 +440,32 @@ class CallSearch extends Call
         SUM(IF(c_source_type_id = '. self::SOURCE_REDIAL_CALL .' AND c_status_id = '. self::STATUS_COMPLETED .'  AND c_parent_call_sid IS NOT NULL '. $queryByDuration .', 1, 0)) AS redialCompleted           
             
         ']);
-        $subQuery->from('call');
-        $subQuery->where('c_created_dt ' .$between_condition);
-        $subQuery->andWhere('c_created_user_id IS NOT NULL');
-        $subQuery->andWhere('TIME(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '. $timeSub .' HOUR), "+00:00", "'. $utcOffsetDST. '")) <= TIME("'.$differenceTimeToFrom.'")');
+        $query->from('call');
+        $query->where('c_created_dt ' .$between_condition);
+        $query->andWhere('c_created_user_id IS NOT NULL');
+        //$query->andWhere('TIME(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '. $timeSub .' HOUR), "+00:00", "'. $utcOffsetDST. '")) <= TIME("'.$differenceTimeToFrom.'")');
 
         if(!empty($this->c_created_user_id)){
-            $subQuery->andWhere('c_created_user_id='. $this->c_created_user_id);
+            $query->andWhere('c_created_user_id='. $this->c_created_user_id);
         } else {
-            $subQuery->andWhere(['c_created_user_id' => EmployeeGroupAccess::getUsersIdsInCommonGroups(Auth::id())]);
+            $query->andWhere(['c_created_user_id' => EmployeeGroupAccess::getUsersIdsInCommonGroups(Auth::id())]);
         }
 
         if (isset($params['CallSearch']['callDepId']) && $params['CallSearch']['callDepId'] != "") {
-            $subQuery->andWhere('c_dep_id= ' . $params['CallSearch']['callDepId']);
+            $query->andWhere('c_dep_id= ' . $params['CallSearch']['callDepId']);
         }
 
         if(!empty($this->c_project_id)){
-            $subQuery->andWhere('c_project_id='. $this->c_project_id);
+            $query->andWhere('c_project_id='. $this->c_project_id);
         }
 
         if(!empty($this->userGroupId)){
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where('ugs_group_id = ' . $this->userGroupId);
-            $subQuery->andWhere(['c_created_user_id' => $userIdsByGroup]);
+            $query->andWhere(['c_created_user_id' => $userIdsByGroup]);
         }
-        $subQuery->groupBy(['c_created_user_id']);
+        $query->groupBy(['c_created_user_id']);
 
-        $subQuerycommand = $subQuery->createCommand();
+        /*$subQuerycommand = $subQuery->createCommand();
         $subQuerySQL = $subQuerycommand->getRawSql();
 
         $query = new Query();
@@ -484,7 +484,7 @@ class CallSearch extends Call
                         SUM(redialCompleted) as redialCompleted 
                 FROM ('. $subQuerySQL .') AS tbl        
         ']);
-        $query->groupBy(['tbl.c_created_user_id']);
+        $query->groupBy(['tbl.c_created_user_id']);*/
 
         $command = $query->createCommand();
         $data = $command->queryAll();

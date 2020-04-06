@@ -55,16 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'emailList.el_email:email',
             'upp_tw_phone_number',
             'phoneList.pl_phone_number',
-            [
-                'attribute' => 'upp_allow_general_line',
-                'format' => 'raw',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    if ($model->upp_allow_general_line) {
-                        return '<span class="label label-success">Yes</span>';
-                    }
-                    return '<span class="label label-danger">No</span>';
-                }
-            ],
+            'upp_allow_general_line:booleanByLabel',
             //'upp_tw_sip_id',
             [
                 'attribute' => 'upp_updated_dt',

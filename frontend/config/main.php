@@ -10,7 +10,7 @@ use modules\offer\OfferModule;
 use modules\order\OrderModule;
 use modules\product\ProductModule;
 use modules\qaTask\QaTaskModule;
-use sales\yii\i18n\Formatter;
+use common\components\i18n\Formatter;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
@@ -23,6 +23,8 @@ $params = array_merge(
     require __DIR__ . '/params.php',
     require __DIR__ . '/params-local.php'
 );
+
+$appVersion = $params['release']['version'] ?? '';
 
 return [
     'id' => 'app-frontend',
@@ -158,6 +160,9 @@ return [
 		'assetManager' => [
 			'forceCopy' => false,
 			'appendTimestamp' => false,
+            'hashCallback' => static function ($path) use ($appVersion) {
+                return hash('md4', $path . $appVersion);
+            },
 			'bundles' => [
 				BootstrapAsset::class => [
 					'sourcePath' => '@npm/bootstrap/dist',

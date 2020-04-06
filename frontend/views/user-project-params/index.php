@@ -1,8 +1,10 @@
 <?php
 
+use common\components\grid\BooleanColumn;
+use common\components\grid\department\DepartmentColumn;
 use common\models\Employee;
 use sales\access\EmployeeProjectAccess;
-use sales\yii\grid\UserSelect2Column;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -66,42 +68,23 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 //'format' => 'raw'
                 //'contentOptions' => ['class' => 'text-right']
             ],
-
-            [
-                'attribute' => 'upp_dep_id',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    return $model->uppDep ? ''.$model->uppDep->dep_name.'' : '-';
-                },
-                'filter' => \common\models\Department::getList()
-                //'format' => 'raw'
-                //'contentOptions' => ['class' => 'text-right']
-            ],
+            ['class' => DepartmentColumn::class, 'attribute' => 'upp_dep_id', 'relation' => 'uppDep'],
 
             //'upp_user_id',
             //'upp_project_id',
             'upp_email:email',
             [
-                'class' => \sales\yii\grid\EmailSelect2Column::class,
+                'class' => \common\components\grid\EmailSelect2Column::class,
                 'attribute' => 'upp_email_list_id',
                 'relation' => 'emailList',
             ],
             'upp_tw_phone_number',
             [
-                'class' => \sales\yii\grid\PhoneSelect2Column::class,
+                'class' => \common\components\grid\PhoneSelect2Column::class,
                 'attribute' => 'upp_phone_list_id',
                 'relation' => 'phoneList',
             ],
-            [
-                'attribute' => 'upp_allow_general_line',
-                'format' => 'raw',
-                'filter' => [1 => 'Yes', 0 => 'No'],
-                'value' => function(\common\models\UserProjectParams $model) {
-                    if ($model->upp_allow_general_line) {
-                        return '<span class="label label-success">Yes</span>';
-                    }
-                    return '<span class="label label-danger">No</span>';
-                }
-            ],
+            ['class' => BooleanColumn::class, 'attribute' => 'upp_allow_general_line'],
             //'upp_tw_sip_id',
             //'upp_created_dt',
             //'upp_updated_dt',
@@ -124,15 +107,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     ],
                 ]),
             ],
-
-            [
-                'label' => 'Updated User',
-                'attribute' => 'uppUpdatedUser.username',
-                /*'value' => function(\common\models\UserParams $model) {
-                    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
-                },
-                'contentOptions' => ['class' => 'text-right'],*/
-            ],
+            ['class' => UserSelect2Column::class, 'attribute' => 'upp_updated_user_id', 'relation' => 'uppUpdatedUser'],
             //'upp_updated_user_id',
 
             ['class' => 'yii\grid\ActionColumn'],

@@ -2,9 +2,9 @@
 
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
-use sales\yii\grid\CombinedDataColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\UserSelect2Column;
+use common\components\grid\CombinedDataColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;

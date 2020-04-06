@@ -6,23 +6,29 @@ use yii\bootstrap4\Html;
 
 class CallLogCategory
 {
-    public const GL = 1;
-    public const DL = 2;
-    public const RC = 3;
-    public const REDIAL = 4;
+    public const GENERAL_LINE = 1;
+    public const DIRECT_CALL = 2;
+    public const REDIRECT_CALL = 3;
+    public const TRANSFER_CALL   = 4;
+    public const CONFERENCE_CALL = 5;
+    public const REDIAL_CALL = 6;
 
     private const LIST = [
-        self::GL => 'GL',
-        self::DL => 'DL',
-        self::RC => 'RC',
-        self::REDIAL => 'Redial',
+        self::GENERAL_LINE => 'General Line',
+        self::DIRECT_CALL => 'Direct Call',
+        self::REDIRECT_CALL => 'Redirect Call',
+        self::TRANSFER_CALL => 'Transfer Call',
+        self::CONFERENCE_CALL => 'Conference Call',
+        self::REDIAL_CALL => 'Redial Call',
     ];
 
     private const CSS_CLASS_LIST = [
-        self::GL => 'info',
-        self::DL => 'warning',
-        self::RC => 'primary',
-        self::REDIAL => 'success',
+        self::GENERAL_LINE => 'info',
+        self::DIRECT_CALL => 'warning',
+        self::REDIRECT_CALL => 'primary',
+        self::TRANSFER_CALL => 'light',
+        self::CONFERENCE_CALL => 'dark',
+        self::REDIAL_CALL => 'success',
     ];
 
     public static function getList(): array

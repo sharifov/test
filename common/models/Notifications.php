@@ -218,6 +218,10 @@ class Notifications extends ActiveRecord
         $model->n_unique_id = $md5Hash;
         $model->n_new = true;
 
+        if ($model->n_popup && Yii::$app->params['settings']['notification_web_socket']) {
+            $model->n_popup_show = true;
+        }
+
         if ($model->save()) {
             return $model;
         }

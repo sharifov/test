@@ -5,6 +5,8 @@ namespace frontend\controllers;
 use common\components\BackOffice;
 use common\models\CaseSale;
 use common\models\search\SaleSearch;
+use sales\helpers\app\AppHelper;
+use sales\services\cases\CasesSaleService;
 use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
@@ -16,11 +18,33 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
- * LeadsController implements the CRUD actions for Lead model.
+ * @property CasesSaleService $casesSaleService
  */
 class SaleController extends FController
 {
+    private $casesSaleService;
 
+    /**
+     * SaleController constructor.
+     * @param $id
+     * @param $module
+     * @param CasesSaleService $casesSaleService
+     * @param array $config
+     */
+    public function __construct(
+        $id,
+        $module,
+        CasesSaleService $casesSaleService,
+        $config = []
+    )
+    {
+        parent::__construct($id, $module, $config);
+        $this->casesSaleService = $casesSaleService;
+    }
+
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         $behaviors = [
@@ -67,19 +91,36 @@ class SaleController extends FController
      */
     public function actionView()
     {
+        $hash = Yii::$app->request->get('h', '');
+        $withFareRules = (int) Yii::$app->request->get('wfr', 0);
 
-        $hash = Yii::$app->request->get('h');
+        try {
+            $arr = explode('|', base64_decode($hash));
+            $id = (int) ($arr[1] ?? 0);
 
-        $arr = explode('|', base64_decode($hash));
-        $id = (int) ($arr[1] ?? 0);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($id, $withFareRules);
 
-        $model = $this->findSale($id);
-
-        if (Yii::$app->request->isAjax) {
-            return $this->renderAjax('view', ['data' => $model]);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), 'SaleController:actionView:ErrorBoRequest');
         }
 
-        return $this->render('view', ['data' => $model]);
+        if (!count($saleData)) {
+            throw new BadRequestHttpException('Error. Broken data from BackOffice. ');
+        }
+
+        $result = [
+            'data' => $saleData,
+            'additionalData' => [
+                'hash' => $hash,
+                'withFareRules' => $withFareRules,
+            ],
+        ];
+
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('view', $result);
+        }
+
+        return $this->render('view', $result);
     }
 
     /**
@@ -106,37 +147,4 @@ class SaleController extends FController
         }
         return $result;
     }
-
-
-    /**
-     * @param int $id
-     * @return mixed
-     * @throws BadRequestHttpException
-     * @throws NotFoundHttpException
-     */
-    protected function findSale(int $id)
-    {
-
-        try {
-            $data['sale_id'] = $id;
-            $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', 90);
-
-            if ($response->isOk) {
-                $result = $response->data;
-                //VarDumper::dump($result); exit;
-
-                if ($result && is_array($result)) {
-                    return $result;
-                }
-            } else {
-                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
-            }
-
-        } catch (\Throwable $exception) {
-            throw new BadRequestHttpException($exception->getMessage());
-        }
-
-        throw new NotFoundHttpException('The requested Sale does not exist.');
-    }
-
 }

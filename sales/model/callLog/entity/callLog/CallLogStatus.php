@@ -6,17 +6,17 @@ use yii\bootstrap4\Html;
 
 class CallLogStatus
 {
-    public const COMPLETE = 1;
-    public const BUSY = 2;
-    public const NOT_ANSWERED = 3;
-    public const FAILED = 4;
-    public const CANCELED = 5;
+    public const COMPLETE = 5;
+    public const BUSY = 6;
+    public const NOT_ANSWERED = 7;
+    public const FAILED = 8;
+    public const CANCELED = 9;
 
     private const LIST = [
         self::COMPLETE => 'Complete',
         self::BUSY => 'Busy',
         self::NOT_ANSWERED => 'Not answered',
-        self::FAILED => 'Not Failed',
+        self::FAILED => 'Failed',
         self::CANCELED => 'Canceled',
     ];
 

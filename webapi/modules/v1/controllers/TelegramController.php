@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 use common\models\Employee;
 use common\models\Notifications;
 use common\models\UserProfile;
+use frontend\widgets\notification\NotificationMessage;
 use Yii;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
@@ -156,7 +157,8 @@ class TelegramController extends Controller
                                     } else {
                                         if ($ntf = Notifications::create($user->id, 'Telegram Auth', 'Hi, '.$result['message']['chat']['first_name'] ?? ''.' ('.$result['message']['chat']['username'] ?? ''.')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true)) {
                                             // Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                                            Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                                            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                            Notifications::sendSocket('getNewNotification', ['user_id' => $user->id], $dataNotification);
                                         }
 
                                         Yii::$app->telegram->sendMessage([

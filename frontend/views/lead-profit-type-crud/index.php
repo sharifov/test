@@ -4,7 +4,7 @@ use common\models\LeadProfitType;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use sales\yii\grid\DateTimeColumn;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadProfitTypeSearch */
@@ -42,13 +42,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'lpt_commission_max:percentInteger',
             'lpt_commission_fix:percentInteger',
 			[
-				'class' => \sales\yii\grid\UserSelect2Column::class,
+				'class' => \common\components\grid\UserSelect2Column::class,
 				'attribute' => 'lpt_created_user_id',
 				'relation' => 'createdUser',
 				'url' => '/employee/list-ajax',
 			],
 			[
-				'class' => \sales\yii\grid\UserSelect2Column::class,
+				'class' => \common\components\grid\UserSelect2Column::class,
 				'attribute' => 'lpt_updated_user_id',
 				'relation' => 'updatedUser',
 				'url' => '/employee/list-ajax',

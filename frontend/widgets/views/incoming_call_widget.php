@@ -57,8 +57,8 @@ use yii\widgets\Pjax;
     <?php if ($directCallUserAccessList || $generalCallUserAccessList):?>
 
     <?php if($generalCallUserAccessList || ($directCallUserAccessList && $userModel->isCallFree() && $userModel->isCallStatusReady())): ?>
-        <audio id="incomingCallAudio" loop="loop" style="display: none;"><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>
-        <?php
+        <audio id="incomingCallAudio" loop="loop" style="display: none;" <?= $userModel->userStatus->us_is_on_call ? 'muted' : '' ?> ><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>
+		<?php
             //$this->registerJs('ion.sound.play("incoming_call", {loop: 10});', \yii\web\View::POS_READY);
             $this->registerJs('getVisible();', \yii\web\View::POS_READY);
         ?>

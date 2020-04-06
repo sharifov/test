@@ -1,8 +1,8 @@
 <?php
 
-use sales\yii\grid\BooleanColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\UserSelect2Column;
+use common\components\grid\BooleanColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

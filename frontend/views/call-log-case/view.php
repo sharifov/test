@@ -2,6 +2,7 @@
 
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -27,12 +28,25 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'clc_cl_id:callLog',
-            'case:case',
-        ],
-    ]) ?>
+    <div class="row">
+        <div class="col-md-4">
+
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'clc_cl_id:callLog',
+                    'case:case',
+                    [
+                        'attribute' => 'clc_case_status_log_id',
+                        'value' => static function (CallLogCase $model) {
+                            return Html::a($model->clc_case_status_log_id, Url::to(['/case-status-log/index', 'CaseStatusLogSearch[csl_id]' => $model->clc_case_status_log_id]));
+                        },
+                        'format' => 'raw',
+                    ],
+                ],
+            ]) ?>
+
+        </div>
+    </div>
 
 </div>

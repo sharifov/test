@@ -1,9 +1,9 @@
 <?php
 
-use sales\yii\grid\BooleanColumn;
-use sales\yii\grid\department\DepartmentColumn;
-use sales\yii\grid\EmailSelect2Column;
-use sales\yii\grid\UserSelect2Column;
+use common\components\grid\BooleanColumn;
+use common\components\grid\department\DepartmentColumn;
+use common\components\grid\EmailSelect2Column;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
 			],
             'dep_email',
             [
-                'class' => \sales\yii\grid\EmailSelect2Column::class,
+                'class' => \common\components\grid\EmailSelect2Column::class,
                 'attribute' => 'dep_email_list_id',
                 'relation' => 'emailList',
             ],
@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => BooleanColumn::class, 'attribute' => 'dep_enable'],
             ['class' => BooleanColumn::class, 'attribute' => 'dep_default'],
             [
-                'class' => \sales\yii\grid\UserSelect2Column::class,
+                'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'dep_updated_user_id',
                 'relation' => 'depUpdatedUser',
             ],

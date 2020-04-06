@@ -3,6 +3,7 @@
 namespace sales\model\callLog\entity\callLogCase;
 
 use sales\entities\cases\Cases;
+use sales\entities\cases\CaseStatusLog;
 use sales\model\callLog\entity\callLog\CallLog;
 use yii\db\ActiveQuery;
 
@@ -11,9 +12,11 @@ use yii\db\ActiveQuery;
  *
  * @property int $clc_cl_id
  * @property int $clc_case_id
+ * @property int|null $clc_case_status_log_id
  *
  * @property CallLog $log
  * @property Cases $case
+ * @property CaseStatusLog $statusLog
  */
 class CallLogCase extends \yii\db\ActiveRecord
 {
@@ -31,6 +34,9 @@ class CallLogCase extends \yii\db\ActiveRecord
 
             ['clc_cl_id', 'exist', 'skipOnError' => true, 'targetClass' => CallLog::class, 'targetAttribute' => ['clc_cl_id' => 'cl_id']],
             ['clc_case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['clc_case_id' => 'cs_id']],
+
+            ['clc_case_status_log_id', 'integer'],
+            ['clc_case_status_log_id', 'exist', 'skipOnError' => true, 'targetClass' => CaseStatusLog::class, 'targetAttribute' => ['clc_case_status_log_id' => 'csl_id']],
         ];
     }
 
@@ -39,6 +45,7 @@ class CallLogCase extends \yii\db\ActiveRecord
         return [
             'clc_cl_id' => 'Log',
             'clc_case_id' => 'Case',
+            'clc_case_status_log_id' => 'Status Log Id',
         ];
     }
 
@@ -50,6 +57,11 @@ class CallLogCase extends \yii\db\ActiveRecord
     public function getCase(): ActiveQuery
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'clc_case_id']);
+    }
+
+    public function getStatusLog(): ActiveQuery
+    {
+        return $this->hasOne(CaseStatusLog::class, ['csl_id' => 'clc_case_status_log_id']);
     }
 
     public static function find(): Scopes

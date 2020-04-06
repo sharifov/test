@@ -16,13 +16,14 @@ use yii\validators\Validator;
  * Class PhoneValidator
  *
  * @property bool $required
+ * @property bool $allowClientSellerNumbers
  *
  * Ex:
  *
     public function rules(): array
     {
         return [
-            ['phone', PhoneValidator::class, 'required' => true],
+            ['phone', \common\components\validators\PhoneValidator::class, 'required' => true],
         ];
     }
  *
@@ -45,6 +46,7 @@ class PhoneValidator extends Validator
 {
     public $skipOnEmpty = false;
     public $required = false;
+    public $allowClientSellerNumbers = false;
 
     /**
      * @param Model $model
@@ -74,10 +76,17 @@ class PhoneValidator extends Validator
         $filter = Yii::createObject([
             'class' => FilterValidator::class,
             'filter' => static function ($value) {
-                return $value === null ? null : str_replace(['-', ' '], '', trim($value));
+                return $value === null ? null : str_replace(['-', ' ', '(', ')'], '', trim($value));
             }
         ]);
         $filter->validateAttribute($model, $attribute);
+
+        if ($this->allowClientSellerNumbers) {
+            preg_match('/^client:seller\d{1,5}$/', $model->{$attribute}, $matches);
+            if ($matches) {
+                return;
+            }
+        }
 
         $string = Yii::createObject([
             'class' => StringValidator::class,

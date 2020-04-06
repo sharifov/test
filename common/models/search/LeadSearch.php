@@ -990,41 +990,36 @@ class LeadSearch extends Lead
 
         $query->addSelect([
             'origin' =>(new Query())
-                ->select([LeadFlightSegment::tableName() . '.origin'])
+                ->select(['SUBSTRING_INDEX(group_concat(' . LeadFlightSegment::tableName() . '.origin SEPARATOR "-"),'. '"-"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())
-                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
+                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
             'destination' =>(new Query())
-                ->select([LeadFlightSegment::tableName() . '.destination'])
+                ->select(['SUBSTRING_INDEX(group_concat(' . LeadFlightSegment::tableName() . '.destination SEPARATOR "-"),'. '"-"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())
                 ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)')
+
         ]);
 
         $query->addSelect([
             'originCityFullName' => (new Query())
-                ->select(['city'])
+                ->select(['SUBSTRING_INDEX(group_concat(city SEPARATOR "--"),'. '"--"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.origin =' . Airport::tableName(). '.iata')
-                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
+                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
             'destinationCityFullName' => (new Query())
-                ->select(['city'])
+                ->select(['SUBSTRING_INDEX(group_concat(city SEPARATOR "--"),'. '"--"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.destination =' . Airport::tableName(). '.iata')
-                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
+                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
         ]);
 
         $query->addSelect([
             'originCountry' => (new Query())
-                ->select(['countryId'])
+                ->select(['SUBSTRING_INDEX(group_concat(countryId SEPARATOR "-"),'. '"-"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.origin =' . Airport::tableName(). '.iata')
-                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
+                ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
             'destinationCountry' => (new Query())
-                ->select(['countryId'])
+                ->select(['SUBSTRING_INDEX(group_concat(countryId SEPARATOR "-"),'. '"-"' . ',1)'])
                 ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.destination =' . Airport::tableName(). '.iata')
                 ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
-                ->having('COUNT(*)'),
         ]);
 
         $query->addSelect([
@@ -3435,9 +3430,9 @@ class LeadSearch extends Lead
             $timezone = $this->reportTimezone;
             $this->defaultUserTz = $this->reportTimezone;
         }
-        if ($this->timeTo == ""){
+        /*if ($this->timeTo == ""){
             $differenceTimeToFrom  = "24:00";
-        } /*else {
+        } else {
             if((strtotime($this->timeTo) - strtotime($this->timeFrom)) <= 0){
                 $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
             } else {
@@ -3447,27 +3442,27 @@ class LeadSearch extends Lead
         if ($this->createTimeRange != null) {
             $dates = explode(' - ', $this->createTimeRange);
             $hourSub = date('G', strtotime($dates[0]));
-            $timeSub = date('G', strtotime($this->timeFrom));
+            //$timeSub = date('G', strtotime($this->timeFrom));
 
             $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
-            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+            //$utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         } else {
-            $timeSub = date('G', strtotime(date('00:00')));
+            //$timeSub = date('G', strtotime(date('00:00')));
             $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00').' -2 days'), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
-            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+            //$utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         }
 
         if($this->lfOwnerId != null) {
-            $queryByOwner = " AND lf.lf_owner_id = '{$this->lfOwnerId}'";
+            $queryByOwner = " lf.lf_owner_id = '{$this->lfOwnerId}'";
         } else {
             $owners = "'" . implode("', '", array_map(function ($entry) {
                     return $entry;
                 }, EmployeeGroupAccess::getUsersIdsInCommonGroups(Auth::id()))) . "'";
-            $queryByOwner = " AND lf.lf_owner_id in " . "(" . $owners .")";
+            $queryByOwner = " lf.lf_owner_id in " . "(" . $owners .")";
         }
 
         if ($this->departmentId != null) {
@@ -3475,7 +3470,7 @@ class LeadSearch extends Lead
             $employeesFromDep = "'" . implode("', '", array_map(function ($entry) {
                     return $entry['ud_user_id'];
                 }, $userIdsByDepartment)) . "'";
-            $queryByDepartment = " AND lf.lf_owner_id in " . "(" . $employeesFromDep .")";
+            $queryByDepartment = "lf.lf_owner_id in " . "(" . $employeesFromDep .")";
         } else {
             $queryByDepartment = '';
         }
@@ -3485,26 +3480,26 @@ class LeadSearch extends Lead
             $employees = "'" . implode("', '", array_map(function ($entry) {
                     return $entry['ugs_user_id'];
                 }, $userIdsByGroup)) . "'";
-            $queryByGroup = " AND lf.lf_owner_id in " . "(" . $employees .")";
+            $queryByGroup = " lf.lf_owner_id in " . "(" . $employees .")";
         } else {
             $queryByGroup = '';
         }
 
         if ($this->projectId != null) {
-            $queryByProject = " AND ls.project_id = {$this->projectId}";
+            $queryByProject = "ls.project_id = {$this->projectId}";
         } else {
             $queryByProject = '';
         }
 
         if ($this->createdType != null) {
-            $queryByCreatedType = " AND ls.l_type_create = {$this->createdType}";
+            $queryByCreatedType = "ls.l_type_create = {$this->createdType}";
         } else {
             $queryByCreatedType = '';
         }
 
         $query = new Query();
 
-        $query->select(['user_id, SUM(newTotal) as newTotal, SUM(inboxLeadsTaken) as inboxLeadsTaken, SUM(callLeadsTaken) as callLeadsTaken,  SUM(redialLeadsTaken) as redialLeadsTaken, SUM(leadsCreated) as leadsCreated, SUM(leadsCloned) as leadsCloned, SUM(followUpTotal) as followUpTotal, SUM(toFollowUp) as toFollowUp, SUM(followUpLeadsTaken) as followUpLeadsTaken, SUM(trashLeads) as trashLeads, SUM(soldLeads) as soldLeads, SUM(profit) as profit, SUM(tips) as tips, GROUP_CONCAT(created_date SEPARATOR \' \') as created_date FROM
+        /*$query->select(['user_id, SUM(newTotal) as newTotal, SUM(inboxLeadsTaken) as inboxLeadsTaken, SUM(callLeadsTaken) as callLeadsTaken,  SUM(redialLeadsTaken) as redialLeadsTaken, SUM(leadsCreated) as leadsCreated, SUM(leadsCloned) as leadsCloned, SUM(followUpTotal) as followUpTotal, SUM(toFollowUp) as toFollowUp, SUM(followUpLeadsTaken) as followUpLeadsTaken, SUM(trashLeads) as trashLeads, SUM(soldLeads) as soldLeads, SUM(profit) as profit, SUM(tips) as tips, GROUP_CONCAT(created_date SEPARATOR \' \') as created_date FROM
         
             (SELECT lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt, 
                 
@@ -3522,10 +3517,37 @@ class LeadSearch extends Lead
                 (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS profit,    
                 (SELECT SUM(CASE WHEN ls.tips IS NOT NULL THEN ls.tips ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL '.$timeSub.' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("'. $differenceTimeToFrom .'") AND user_id = lf_owner_id AND lfw.status = '. Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType .') AS tips
                 
-            FROM lead_flow AS lf WHERE lf.created ' .$between_condition. ' AND lf.lf_owner_id IS NOT NULL '. $queryByOwner . $queryByGroup . $queryByDepartment. ' GROUP BY lf.lf_owner_id ) AS tbl       
+            FROM lead_flow AS lf WHERE lf.created ' .$between_condition. ' AND lf.lf_owner_id IS NOT NULL '. $queryByOwner . $queryByGroup . $queryByDepartment. ' GROUP BY lf.lf_owner_id,  created_date) AS tbl       
         ']);
 
-        $query->groupBy(['tbl.user_id']);
+        $query->groupBy(['tbl.user_id']);*/
+
+        $query->select(['lf_owner_id,
+            SUM(IF(lf.lf_from_status_id = '. Lead::STATUS_PENDING .' AND lf.status = '. Lead::STATUS_PROCESSING .', 1, 0)) newTotal,
+            SUM(IF(lf.lf_from_status_id = '. Lead::STATUS_PENDING .' AND lf.status = '. Lead::STATUS_PROCESSING .' AND lf.lf_description = "Take" AND lf.lf_owner_id = lf.employee_id, 1, 0)) inboxLeadsTaken,
+            SUM(IF(lf.lf_from_status_id = '. Lead::STATUS_PENDING .' AND lf.status = '. Lead::STATUS_PROCESSING .' AND lf.lf_description = "Call AutoCreated Lead", 1, 0)) callLeadsTaken,
+            SUM(IF(lf.lf_from_status_id = '. Lead::STATUS_PENDING .' AND lf.status = '. Lead::STATUS_PROCESSING .' AND lf.lf_description = "Lead redial", 1, 0)) redialLeadsTaken,
+            SUM(IF(lf.lf_from_status_id IS NULL AND lf.status = '. Lead::STATUS_PROCESSING .' AND ls.clone_id IS NULL AND lf.lf_owner_id = lf.employee_id, 1, 0)) leadsCreated,
+            SUM(IF(lf.lf_from_status_id IS NULL AND lf.status = '. Lead::STATUS_PROCESSING .' AND ls.clone_id IS NOT NULL AND lf.lf_owner_id = lf.employee_id AND lf.lf_description <> "Manual create", 1, 0)) leadsCloned,
+            SUM(IF(lf.lf_from_status_id = '. Lead::STATUS_FOLLOW_UP .' AND lf.status = '. Lead::STATUS_PROCESSING .', 1, 0)) followUpTotal,	
+            (SELECT COUNT(*) FROM lead_flow lfw WHERE lfw.created '. $between_condition .' AND lfw.employee_id = lf.lf_owner_id AND lfw.lf_from_status_id = '. Lead::STATUS_PROCESSING .' AND lfw.status = '. Lead::STATUS_FOLLOW_UP .' ) toFollowUp,
+            SUM(IF(lf.lf_from_status_id = '. Lead::STATUS_FOLLOW_UP .' AND lf.status = '. Lead::STATUS_PROCESSING .' AND lf.lf_owner_id = lf.employee_id, 1, 0)) followUpLeadsTaken,
+            SUM(IF(lf.lf_from_status_id = '. Lead::STATUS_PROCESSING .' AND lf.status = '. Lead::STATUS_TRASH .' AND lf.lf_owner_id = lf.employee_id, 1, 0)) trashLeads,
+            SUM(IF(lf.status = '. Lead::STATUS_SOLD .', 1, 0)) soldLeads,
+            SUM(IF(lf.status = '. Lead::STATUS_SOLD .' AND ls.final_profit IS NOT NULL AND ls.final_profit > 0, ls.final_profit, 0)) profit,
+            SUM(IF(lf.status = '. Lead::STATUS_SOLD .' AND ls.tips IS NOT NULL AND ls.final_profit > 0, ls.tips, 0)) tips
+        ']);
+
+        $query->from(LeadFlow::tableName() . ' lf' );
+        $query->leftJoin(Lead::tableName() . ' ls', 'lf.lead_id = ls.id');
+        $query->where('lf.created' . $between_condition);
+        $query->andWhere('lf_owner_id IS NOT NULL');
+        $query->andWhere($queryByOwner);
+        $query->andWhere($queryByDepartment);
+        $query->andWhere($queryByGroup);
+        $query->andWhere($queryByProject);
+        $query->andWhere($queryByCreatedType);
+        $query->groupBy('lf_owner_id');
 
         $command = $query->createCommand();
         $data = $command->queryAll();
