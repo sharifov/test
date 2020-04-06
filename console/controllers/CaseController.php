@@ -40,6 +40,8 @@ class CaseController extends Controller
 
 		$refundData = json_decode($refundData, true);
 
+		$totalRows = count($refundData);
+		$current = 1;
 		foreach ($refundData as $refund) {
 			$caseSale = CaseSale::findOne(['css_sale_book_id' => $refund['bookingid']]);
 			if (!$caseSale) {
@@ -73,13 +75,17 @@ class CaseController extends Controller
 						$this->ansiFormat($refund['bookingid'], Console::FG_GREEN),
 						$this->ansiFormat($refund['email'], Console::FG_GREEN)
 					);
+					printf("\n Total Rows: %s \n Current row: %s \n Remaining: %s \n",
+						$this->ansiFormat($totalRows, Console::FG_GREEN),
+						$this->ansiFormat($current, Console::FG_GREEN),
+						$this->ansiFormat($totalRows - $current, Console::FG_GREEN));
 					echo '----------------' . PHP_EOL;
-
 				} catch (\Throwable $e) {
 					$transaction->rollBack();
 					throw new Exception($e->getMessage());
 				}
 			}
+			$current++;
 		}
 
 		$time_end = microtime(true);
