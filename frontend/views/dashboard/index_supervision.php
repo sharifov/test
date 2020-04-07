@@ -21,31 +21,29 @@ JS;
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
-
 ?>
 
 <div class="site-index">
 
-    <h1><?=$this->title?></h1>
+    <h1><?= $this->title ?></h1>
     <div class="row">
         <div class="col-md-3">
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <tr>
                         <th>Server Date Time (UTC)</th>
-                        <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
+                        <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]') ?></td>
                     </tr>
                     <tr>
                         <th>Current Time Zone</th>
-                        <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
+                        <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone ?></td>
                     </tr>
                     <tr>
                         <th>Formatted Local Date Time</th>
-                        <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
+                        <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time()) ?></td>
                     </tr>
                 </table>
             </div>
-
         </div>
 
         <div class="col-md-3">
@@ -53,18 +51,18 @@ $user = Yii::$app->user->identity;
                 <table class="table table-bordered">
                     <tr>
                         <th>My Username:</th>
-                        <td><i class="fa fa-user"></i> <?= $user->username?> (<?=$user->id?>)</td>
+                        <td><i class="fa fa-user"></i> <?= $user->username ?> (<?= $user->id ?>)</td>
                     </tr>
                     <tr>
                         <th>My Role:</th>
-                        <td><?=implode(', ', $user->getRoles())?></td>
+                        <td><?= implode(', ', $user->getRoles()) ?></td>
                     </tr>
                     <tr>
                         <th>My User Groups:</th>
                         <td><i class="fa fa-users"></i>
                             <?php
                             $groupsValue = '';
-                            if( $groupsModel =  $user->ugsGroups) {
+                            if ($groupsModel = $user->ugsGroups) {
                                 $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
                                 $groupsValueArr = [];
@@ -82,11 +80,9 @@ $user = Yii::$app->user->identity;
                         <td><i class="fa fa-list"></i>
                             <?php
                             $projectsValue = '';
-
                             $projectList = $user->projects;
 
-                            if($projectList) {
-
+                            if ($projectList) {
                                 $groupsValueArr = [];
                                 foreach ($projectList as $project) {
                                     $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
@@ -103,10 +99,9 @@ $user = Yii::$app->user->identity;
 
         <div class="col-md-3">
             <?php
-
             /** @var \common\models\UserParams $modelUserParams */
             $modelUserParams = Yii::$app->user->identity->userParams;
-            if($modelUserParams) {
+            if ($modelUserParams) {
                 echo \yii\widgets\DetailView::widget([
                     'model' => $modelUserParams ?? null,
                     'attributes' => [
@@ -134,21 +129,17 @@ $user = Yii::$app->user->identity;
                             },
                             'format' => 'raw',
                         ],*/
-
                     ],
                 ]);
             }
             ?>
-
-
         </div>
-
     </div>
 
-    <?php if($modelUserParams):
+    <?php if ($modelUserParams):
 
         $js = <<<JS
-    //google.charts.load('current', {packages: ['corechart', 'bar']});
+    
     $("#myTimeline").timeline({
         type            : "bar",
         rows            : 1,
@@ -170,33 +161,37 @@ JS;
             <ul class="timeline-events">
                 <?php
                 $currentDateTS = strtotime(Yii::$app->formatter->asDate(time()));
-                $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm);
+                $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm);
                 echo $startTime;
                 $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
                 ?>
-                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+                <li data-timeline-node="{ start:'<?= $startTime ?>',end:'<?= $endTime ?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?= date('d-M [H:i]', strtotime($startTime)) ?>
+                    ........ <?= date('d-M [H:i]', strtotime($endTime)) ?> .....
+                    (<?= round($modelUserParams->up_work_minutes / 60, 1) ?> hours)
+                </li>
 
                 <?php
                 $currentDateTS = strtotime(Yii::$app->formatter->asDate(strtotime("+1 day")));
-                $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm, $currentDateTS);
+                $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm, $currentDateTS);
                 echo $startTime;
                 $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
                 ?>
-                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'2 shift',row:1 }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+                <li data-timeline-node="{ start:'<?= $startTime ?>',end:'<?= $endTime ?>',content:'2 shift',row:1 }"><?= date('d-M [H:i]', strtotime($startTime)) ?>
+                    ........ <?= date('d-M [H:i]', strtotime($endTime)) ?> .....
+                    (<?= round($modelUserParams->up_work_minutes / 60, 1) ?> hours)
+                </li>
 
             </ul>
         </div>
-
         <!-- Timeline Event Detail View Area (optional) -->
         <div class="timeline-event-view"></div>
-
-
 
     <?php endif; ?>
 
     <?php Pjax::begin(); ?>
     <div class="card card-default">
-        <div class="card-header">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
+        <div class="card-header">Agents
+            Stats <?= $searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : '' ?></div>
         <div class="card-body">
 
             <div class="row">
@@ -210,28 +205,28 @@ JS;
                 ]); ?>
 
                 <div class="col-md-3">
-                <?php
-                    echo  \kartik\daterange\DateRangePicker::widget([
-                        'model'=> $searchModel,
+                    <?php
+                    echo \kartik\daterange\DateRangePicker::widget([
+                        'model' => $searchModel,
                         'attribute' => 'timeRange',
                         //'name'=>'date_range',
-                        'useWithAddon'=>true,
+                        'useWithAddon' => true,
                         //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
-                        'presetDropdown'=>true,
-                        'hideInput'=>true,
-                        'convertFormat'=>true,
+                        'presetDropdown' => true,
+                        'hideInput' => true,
+                        'convertFormat' => true,
                         'startAttribute' => 'timeStart',
                         'endAttribute' => 'timeEnd',
                         //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
                         //'endInputOptions' => ['value' => '2017-07-20'],
-                        'pluginOptions'=>[
-                            'timePicker'=> true,
-                            'timePickerIncrement'=>1,
+                        'pluginOptions' => [
+                            'timePicker' => true,
+                            'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
-                            'locale'=>['format'=>'Y-m-d H:i']
+                            'locale' => ['format' => 'Y-m-d H:i']
                         ]
                     ]);
-                ?>
+                    ?>
                 </div>
 
                 <div class="form-group">
@@ -260,7 +255,7 @@ JS;
                     [
                         'attribute' => 'username',
                         'value' => static function (\common\models\Employee $model) {
-                            return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
+                            return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($model->username);
                         },
                         'format' => 'raw',
                         //'contentOptions' => ['title' => 'text-center'],
@@ -310,11 +305,11 @@ JS;
 
                     [
                         'label' => 'Tasks Result for Period',
-                        'value' => function(\common\models\Employee $model) use ($searchModel) {
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
                             return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);
                         },
                         'format' => 'raw',
-                        'contentOptions' => ['class' => 'text-left'],
+                        'contentOptions' => ['class' => 'text-left', 'style' => 'width:30%;'],
                         /*'filter' => \kartik\daterange\DateRangePicker::widget([
                             'model'=> $searchModel,
                             'attribute' => 'date_range',
@@ -338,17 +333,17 @@ JS;
 
                     ],
                     [
-                            'label' => 'Processing',
-                            'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                                $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->timeStart, $searchModel->timeEnd);
-                                return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                    'LeadFlowSearch[lf_owner_id]' => $model->id,
-                                    'LeadFlowSearch[status]' => \common\models\Lead::STATUS_PROCESSING,
-                                    'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
-                                    'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
-                                ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                            },
-                            'format' => 'raw',
+                        'label' => 'Processing',
+                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->timeStart, $searchModel->timeEnd);
+                            return $cnt ? Html::a($cnt, ['lead-flow/index',
+                                'LeadFlowSearch[lf_owner_id]' => $model->id,
+                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_PROCESSING,
+                                'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
+                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+                        },
+                        'format' => 'raw',
                     ],
                     /*[
                         'label' => 'Hold On',
@@ -416,7 +411,6 @@ JS;
                         'format' => 'raw',
                     ]
 
-
                     /*[
                         'class' => 'yii\grid\ActionColumn',
                         'template' => '{update}',
@@ -430,10 +424,7 @@ JS;
                 ]
             ])
             ?>
-
-
         </div>
     </div>
     <?php Pjax::end(); ?>
-
 </div>

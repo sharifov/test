@@ -539,7 +539,7 @@ $user = Yii::$app->user->identity;
                             return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);
                         },
                         'format' => 'raw',
-                        'contentOptions' => ['class' => 'text-left'],
+                        'contentOptions' => ['class' => 'text-left', 'style' => 'width:30%;'],
                         /*'filter' => \kartik\daterange\DateRangePicker::widget([
                             'model'=> $searchModel,
                             'attribute' => 'date_range',
