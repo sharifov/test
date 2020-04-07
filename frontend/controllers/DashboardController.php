@@ -70,25 +70,19 @@ class DashboardController extends FController
 
     public function dashboardSupervision(): string
     {
-
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-
         $params['EmployeeSearch']['supervision_id'] = $user->id;
         $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
-
-
 
         $dataProvider = $searchModel->searchByUserGroups($params);
 
         $searchModel->timeStart = date('Y-m-d H:i', strtotime('-0 day'));
         $searchModel->timeEnd = date('Y-m-d H:i');
-
-        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
         $newModels = [];
         foreach($dataProvider->getModels() as $model) {
@@ -109,7 +103,6 @@ class DashboardController extends FController
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
         ]);
-
     }
 
     public function dashboardAdmin(): string

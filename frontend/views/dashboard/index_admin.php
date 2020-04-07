@@ -28,15 +28,11 @@ $js = <<<JS
     google.charts.load('current', {packages: ['corechart', 'bar']});
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-//Yii::$app->formatter->timeZone = 'Asia/Calcutta';
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
-
 ?>
-
 <div class="site-index">
-
     <h1><?=$this->title?></h1>
     <div class="row">
         <div class="col-md-3">
@@ -150,14 +146,10 @@ $user = Yii::$app->user->identity;
                 </div>
             <?php endif;?>
         </div>
-
     </div>
-
-
 
     <div class="">
         <div class="row top_tiles">
-
             <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-users"></i></div>
@@ -201,9 +193,12 @@ $user = Yii::$app->user->identity;
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-phone"></i></div>
                     <div class="count">
-                        <?=\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->cache(600)->count()?>
+                        <?php
+                            $callsOutIn = \common\models\Call::find()->select(['SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_OUT . ', 1, 0)) as `cOut`', 'SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_IN . ', 1, 0)) as `cIn`'])->where('DATE(c_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
+                        ?>
+                        <?= $callsOutIn[0]['cOut'] ?? 0 ?>
                         /
-                        <?=\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->cache(600)->count()?>
+                        <?= $callsOutIn[0]['cIn'] ?? 0?>
                     </div>
 <!--                    <h3>Calls Out (--><?php //=number_format(\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->sum('c_price'), 3)?><!-- $) / In</h3>-->
                     <h3>Calls Out / In</h3>
@@ -215,16 +210,18 @@ $user = Yii::$app->user->identity;
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-comment"></i></div>
                     <div class="count">
-                        <?=\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_OUTBOX])->cache(600)->count()?>
+                        <?php
+                        $callsOutIn = \common\models\Sms::find()->select(['SUM(IF(s_type_id = '. \common\models\SMS::TYPE_OUTBOX .', 1, 0)) as `sOut`', 'SUM(IF(s_type_id = '. \common\models\SMS::TYPE_INBOX .', 1, 0)) as `sIn`'])->where('DATE(s_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
+                        ?>
+                        <?= $callsOutIn[0]['sOut'] ?? 0 ?>
                         /
-                        <?=\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_INBOX])->cache(600)->count()?>
+                        <?= $callsOutIn[0]['sIn'] ?? 0?>
                     </div>
 <!--                    <h3>--><?php //=Html::a('SMS', ['sms/index'])?><!-- Out (--><?php //=number_format(\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_OUTBOX])->sum('s_tw_price'), 3)?><!-- $) / In</h3>-->
                     <h3><?=Html::a('SMS', ['sms/index'])?> Out / In</h3>
                     <p>Today count of SMS Outgoing / Incoming</p>
                 </div>
             </div>
-
 
             <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
@@ -234,9 +231,6 @@ $user = Yii::$app->user->identity;
                     <p>Today count of Emails</p>
                 </div>
             </div>
-
-
-
 
             <?php /*
             <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
@@ -249,21 +243,15 @@ $user = Yii::$app->user->identity;
             </div>
             */ ?>
         </div>
-
     </div>
 
     <?php if ($dataStats): ?>
         <div class="row">
             <div class="col-md-12">
-
-
                 <div id="chart_div"></div>
-
-
                 <?php
                     $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                 ?>
-
                 <script>
                     function drawChart() {
                         var data = google.visualization.arrayToDataTable([
@@ -287,14 +275,8 @@ $user = Yii::$app->user->identity;
                             }
                         };
 
-                        //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-
-
                         var chart = new google.charts.Bar(document.getElementById('chart_div'));
-
                         chart.draw(data, options);
-                        //chart.draw(data, google.charts.Bar.convertOptions(options));
-
                     }
                 </script>
             </div>
@@ -307,11 +289,9 @@ $user = Yii::$app->user->identity;
             <div class="col-md-4">
                 <div id="chart_div_projects"></div>
                 <?php if ($dataSources): ?>
-
                         <?php
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
                         ?>
-
                         <script>
                             function drawBasic1() {
                                 var data = google.visualization.arrayToDataTable([
@@ -334,7 +314,7 @@ $user = Yii::$app->user->identity;
                                 ]);
 
                                 var options = {
-                                    title: 'Project API Request stats - Last <?=$days2?> days',
+                                    title: 'Project API Request stats - Last <?= $days2 ?> days',
                                     height: 400
                                 };
 
@@ -342,19 +322,15 @@ $user = Yii::$app->user->identity;
                                 chart.draw(data, options);
                             }
                         </script>
-
                 <?php endif; ?>
             </div>
-
 
             <div class="col-md-4">
                 <div id="chart_div2"></div>
                 <?php if($dataEmployee): ?>
-
                         <?php
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
                         ?>
-
                         <script>
                             function drawBasic2() {
                                 var data = google.visualization.arrayToDataTable([
@@ -384,11 +360,9 @@ $user = Yii::$app->user->identity;
             <div class="col-md-4">
                 <div id="chart_div3"></div>
                 <?php if ($dataEmployeeSold): ?>
-
                         <?php
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
                         ?>
-
                         <script>
                             function drawBasic3() {
                                 var data = google.visualization.arrayToDataTable([
@@ -411,14 +385,10 @@ $user = Yii::$app->user->identity;
                                 chart.draw(data, options);
                             }
                         </script>
-
                 <?php endif; ?>
             </div>
-
-
         </div>
     </div>
-
 
     <br>
 
@@ -539,7 +509,7 @@ $user = Yii::$app->user->identity;
                             return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);
                         },
                         'format' => 'raw',
-                        'contentOptions' => ['class' => 'text-left'],
+                        'contentOptions' => ['class' => 'text-left', 'style' => 'width:30%;'],
                         /*'filter' => \kartik\daterange\DateRangePicker::widget([
                             'model'=> $searchModel,
                             'attribute' => 'date_range',
@@ -641,7 +611,6 @@ $user = Yii::$app->user->identity;
                         'format' => 'raw',
                     ]
 
-
                     /*[
                         'class' => 'yii\grid\ActionColumn',
                         'template' => '{update}',
@@ -655,10 +624,7 @@ $user = Yii::$app->user->identity;
                 ]
             ])
             ?>
-
-
         </div>
     </div>
     <?php Pjax::end(); ?>
-
 </div>
