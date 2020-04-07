@@ -6,7 +6,7 @@
  * @var $qrcodeData string
  * @var $userCommissionRuleValue int
  * @var $userBonusRuleValue int
- * @var userProfileForm $userProfileForm
+ * @var $userProfileForm userProfileForm
  */
 
 use frontend\models\form\UserProfileForm;

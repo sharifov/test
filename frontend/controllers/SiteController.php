@@ -284,9 +284,9 @@ class SiteController extends FController
             'model' => $model,
             'modelUserParams' => $modelUserParams,
             'qrcodeData' => $qrCode->writeDataUri(),
-            'userProfileForm' => $userProfileForm,
 			'userCommissionRuleValue' => $userCommissionRulesValue,
-			'userBonusRuleValue' => $userBonusRulesValue,
+			'userBonusRuleValue' => $userBonusRulesValue
+            'userProfileForm' => $userProfileForm,
         ]);
     }
 
