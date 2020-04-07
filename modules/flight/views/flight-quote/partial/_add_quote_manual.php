@@ -2,6 +2,7 @@
 
 use common\models\Airline;
 use common\models\Employee;
+use common\models\Lead;
 use kartik\select2\Select2;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
@@ -19,6 +20,7 @@ use yii\widgets\Pjax;
  * @var $createQuoteForm FlightQuoteCreateForm
  * @var $flight Flight
  * @var $pjaxReloadId string
+ * @var $lead Lead
  */
 
 $paxCntTypes = [
@@ -27,6 +29,8 @@ $paxCntTypes = [
 	FlightPax::PAX_INFANT => $flight->fl_infants
 ];
 $pjaxId = 'pjax-container-prices';
+
+$readonly = $createQuoteForm->hasWarnings();
 ?>
 
 <?php if($message): ?>
@@ -47,79 +51,95 @@ $pjaxId = 'pjax-container-prices';
             ]) ?>
             <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'add-quote-form', 'enableClientValidation' => false]) ?>
 
-            <?= $form->errorSummary($createQuoteForm) ?>
+            <?php if ($createQuoteForm->hasWarnings()): ?>
+            <div class="_form-warning-wrapper">
+                <?= $createQuoteForm->warningSummary() ?>
 
-            <?= Html::hiddenInput('flightId', $flight->fl_id) ?>
-            <?= Html::hiddenInput('pjaxReloadId', $pjaxReloadId) ?>
-            <?= Html::hiddenInput('action', '', ['id' => 'add-quote-action']) ?>
-            <?= $form->field($createQuoteForm, 'oldPrices')->hiddenInput()->label(false) ?>
-            <table class="table table-striped table-neutral">
-                <thead>
-                <tr class="text-center">
-                    <th>Pax Type</th>
-                    <th>X</th>
-                    <th>Fare</th>
-                    <th>Taxes</th>
-                    <th>Mark-up</th>
-                    <th>SFP, %</th>
-                    <th>Selling Price, $</th>
-                    <th>Client Price, <?= $createQuoteForm->currencyCode ?></th>
-<!--                    <th></th>-->
-                </tr>
-                </thead>
-                <tbody>
-				<?php
-				$applyBtn = [];
-				/** @var $price FlightQuotePaxPriceForm */
-				foreach ($createQuoteForm->prices as $index => $price) : ?>
-                    <?= $form->field($createQuoteForm, 'prices[' . $index . '][paxCode]')->hiddenInput()->label(false) ?>
-                    <?= $form->field($createQuoteForm, 'prices[' . $index . '][paxCodeId]')->hiddenInput()->label(false) ?>
-                    <?= $form->field($createQuoteForm, 'prices[' . $index . '][cnt]')->hiddenInput()->label(false) ?>
-                    <tr class="pax-type-<?= $price->paxCode ?>" id="price-index-<?= $index ?>">
-                        <td class="td-input">
-							<?= $price->paxCode ?>
-                        </td>
-                        <td><?= $price->cnt ?></td>
-                        <td class="td-input">
-							<?= $form->field($createQuoteForm, 'prices[' . $index . '][fare]')->input('number', [
-								'class' => 'form-control alt-quote-price',
-                                'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
-                                'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
-                                'step' => 0.01
-							])->label(false) ?>
-                        </td>
-                        <td class="td-input">
-							<?= $form->field($createQuoteForm, 'prices[' . $index . '][taxes]')->input('number', [
-								'class' => 'form-control alt-quote-price',
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <?= Html::button('<i class="fa fa-close"></i> Cancel', ['class' => 'btn btn-primary _form-warning-cancel']) ?>
+                        <?= Html::button('<i class="fa fa-save"></i> Add new Product & Quote', ['class' => 'btn btn-success _form-warning-create-new-product']) ?>
+                        <?= Html::button('<i class="fa fa-refresh"></i> Update Flight Request & add quote', ['class' => 'btn btn-warning _form-warning-update-flight-request']) ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <div class="_form-fields-wrapper <?= $createQuoteForm->hasWarnings() ? 'd-none' : '' ?>">
+				<?= $form->errorSummary($createQuoteForm) ?>
+
+				<?= Html::hiddenInput('flightId', $flight->fl_id) ?>
+				<?= Html::hiddenInput('leadId', $lead->id) ?>
+				<?= Html::hiddenInput('pjaxReloadId', $pjaxReloadId) ?>
+				<?= Html::hiddenInput('action', '', ['id' => 'add-quote-action']) ?>
+				<?= $form->field($createQuoteForm, 'oldPrices')->hiddenInput()->label(false) ?>
+                <table class="table table-striped table-neutral">
+                    <thead>
+                    <tr class="text-center">
+                        <th>Pax Type</th>
+                        <th>X</th>
+                        <th>Fare</th>
+                        <th>Taxes</th>
+                        <th>Mark-up</th>
+                        <th>SFP, %</th>
+                        <th>Selling Price, $</th>
+                        <th>Client Price, <?= $createQuoteForm->currencyCode ?></th>
+                        <!--                    <th></th>-->
+                    </tr>
+                    </thead>
+                    <tbody>
+					<?php
+					$applyBtn = [];
+					/** @var $price FlightQuotePaxPriceForm */
+					foreach ($createQuoteForm->prices as $index => $price) : ?>
+						<?= $form->field($createQuoteForm, 'prices[' . $index . '][paxCode]')->hiddenInput()->label(false) ?>
+						<?= $form->field($createQuoteForm, 'prices[' . $index . '][paxCodeId]')->hiddenInput()->label(false) ?>
+						<?= $form->field($createQuoteForm, 'prices[' . $index . '][cnt]')->hiddenInput()->label(false) ?>
+                        <tr class="pax-type-<?= $price->paxCode ?>" id="price-index-<?= $index ?>">
+                            <td class="td-input">
+								<?= $price->paxCode ?>
+                            </td>
+                            <td><?= $price->cnt ?></td>
+                            <td class="td-input">
+								<?= $form->field($createQuoteForm, 'prices[' . $index . '][fare]')->input('number', [
+									'class' => 'form-control alt-quote-price',
+									'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
+									'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+									'step' => 0.01
+								])->label(false) ?>
+                            </td>
+                            <td class="td-input">
+								<?= $form->field($createQuoteForm, 'prices[' . $index . '][taxes]')->input('number', [
+									'class' => 'form-control alt-quote-price',
 //								'readonly' => true,
-								'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
-								'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
-								'step' => 0.01
-							])->label(false) ?>
-                        </td>
-                        <td class="td-input">
-							<?= $form->field($createQuoteForm, 'prices[' . $index . '][markup]')->input('number', [
-								'class' => 'form-control alt-quote-price mark-up',
-								'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
-								'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
-								'step' => 0.01
-							])->label(false) ?>
-                        </td>
-                        <td><?= $createQuoteForm->serviceFee ?></td>
-                        <td class="text-right">
-							<?= $form->field($createQuoteForm, 'prices[' . $index . '][selling]')->input('number', [
-								'class' => 'form-control alt-quote-price',
-								'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
-								'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
-								'step' => 0.01
-							])->label(false) ?>
-                        </td>
-                        <td class="td-input text-right">
-							<?= $form->field($createQuoteForm, 'prices[' . $index . '][clientSelling]')->input('number', [
-								'class' => 'form-control alt-quote-price',
-								'readonly' => true,
-							])->label(false) ?>
-							<?php /* if ($paxCntTypes[$price->paxCode] > 1 && !in_array($price->paxCodeId, $applyBtn, false)) {
+									'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
+									'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+									'step' => 0.01
+								])->label(false) ?>
+                            </td>
+                            <td class="td-input">
+								<?= $form->field($createQuoteForm, 'prices[' . $index . '][markup]')->input('number', [
+									'class' => 'form-control alt-quote-price mark-up',
+									'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
+									'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+									'step' => 0.01
+								])->label(false) ?>
+                            </td>
+                            <td><?= $createQuoteForm->serviceFee ?></td>
+                            <td class="text-right">
+								<?= $form->field($createQuoteForm, 'prices[' . $index . '][selling]')->input('number', [
+									'class' => 'form-control alt-quote-price',
+									'min' => FlightQuotePaxPriceForm::getMinDecimalVal(),
+									'max' => FlightQuotePaxPriceForm::getMaxDecimalVal(),
+									'step' => 0.01
+								])->label(false) ?>
+                            </td>
+                            <td class="td-input text-right">
+								<?= $form->field($createQuoteForm, 'prices[' . $index . '][clientSelling]')->input('number', [
+									'class' => 'form-control alt-quote-price',
+									'readonly' => true,
+								])->label(false) ?>
+								<?php /* if ($paxCntTypes[$price->paxCode] > 1 && !in_array($price->paxCodeId, $applyBtn, false)) {
 								$applyBtn[] = $price->paxCodeId;
 								echo Html::button('<i class="fa fa-copy"></i>', [
 									'title' => '',
@@ -131,62 +151,63 @@ $pjaxId = 'pjax-container-prices';
 									'data-type' => $price->paxCodeId
 								]);
 							} */ ?>
-                        </td>
-                    </tr>
-				<?php endforeach; ?>
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+					<?php endforeach; ?>
+                    </tbody>
+                </table>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="row">
-                        <div class="col-md-6">
-							<?= $form->field($createQuoteForm, 'pcc', ['labelOptions' => ['class' => 'control-label', 'max' => 10]])->textInput() ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-6">
+								<?= $form->field($createQuoteForm, 'pcc', ['labelOptions' => ['class' => 'control-label', 'max' => 10]])->textInput() ?>
 
-							<?= $form->field($createQuoteForm, 'gds', ['labelOptions' => ['class' => 'control-label']])->dropDownList(FlightQuote::getGdsList(), ['prompt' => '---']) ?>
+								<?= $form->field($createQuoteForm, 'gds', ['labelOptions' => ['class' => 'control-label']])->dropDownList(FlightQuote::getGdsList(), ['prompt' => '---']) ?>
 
-							<?= $form->field($createQuoteForm, 'cabin', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getCabinClassList(), ['prompt' => '---']) ?>
+								<?= $form->field($createQuoteForm, 'cabin', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getCabinClassList(), ['prompt' => '---']) ?>
 
-							<?= $form->field($createQuoteForm, 'quoteCreator', ['labelOptions' => ['class' => 'control-label']])->widget(sales\widgets\UserSelect2Widget::class, [
-							        'data' => [$createQuoteForm->quoteCreator => Employee::findOne($createQuoteForm->quoteCreator)->username ]
-                            ]) ?>
+								<?= $form->field($createQuoteForm, 'quoteCreator', ['labelOptions' => ['class' => 'control-label']])->widget(sales\widgets\UserSelect2Widget::class, [
+									'data' => [$createQuoteForm->quoteCreator => Employee::findOne($createQuoteForm->quoteCreator)->username ]
+								]) ?>
+                            </div>
+                            <div class="col-md-6">
+								<?= $form->field($createQuoteForm, 'recordLocator', ['labelOptions' => ['class' => 'control-label', 'max' => 8]])->textInput() ?>
+
+								<?= $form->field($createQuoteForm, 'tripType', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getTripTypeList(), ['prompt' => '---']) ?>
+
+                                <label for="" class="control-label"><?= $createQuoteForm->getAttributeLabel('validatingCarrier') ?></label>
+								<?= $form->field($createQuoteForm, 'validatingCarrier', [
+									'options' => [
+										'tag' => false,
+									],
+									'template' => '{input}',
+									'labelOptions' => ['class' => 'control-label']
+								])->widget(Select2::class, [
+									'data' => Airline::getAirlinesMapping(true),
+									'options' => ['placeholder' => 'Select'],
+									'pluginOptions' => [
+										'allowClear' => false
+									],
+									'size' => Select2::SIZE_SMALL
+								])->label(true) ?>
+
+								<?= $form->field($createQuoteForm, 'fareType', ['labelOptions' => ['class' => 'control-label'], 'options' => ['style' => 'margin-top: 9px;']])->dropDownList(FlightQuote::getFareTypeList(), ['prompt' => '---']) ?>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-							<?= $form->field($createQuoteForm, 'recordLocator', ['labelOptions' => ['class' => 'control-label', 'max' => 8]])->textInput() ?>
-
-							<?= $form->field($createQuoteForm, 'tripType', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getTripTypeList(), ['prompt' => '---']) ?>
-
-                            <label for="" class="control-label"><?= $createQuoteForm->getAttributeLabel('validatingCarrier') ?></label>
-							<?= $form->field($createQuoteForm, 'validatingCarrier', [
-								'options' => [
-									'tag' => false,
-								],
-								'template' => '{input}',
-                                'labelOptions' => ['class' => 'control-label']
-							])->widget(Select2::class, [
-								'data' => Airline::getAirlinesMapping(true),
-								'options' => ['placeholder' => 'Select'],
-								'pluginOptions' => [
-									'allowClear' => false
-								],
-                                'size' => Select2::SIZE_SMALL
-							])->label(true) ?>
-
-							<?= $form->field($createQuoteForm, 'fareType', ['labelOptions' => ['class' => 'control-label'], 'options' => ['style' => 'margin-top: 9px;']])->dropDownList(FlightQuote::getFareTypeList(), ['prompt' => '---']) ?>
+                        <div class="row">
+                            <div class="col-md-12">
+								<?= $form->field($createQuoteForm, 'reservationDump', ['labelOptions' => ['class' => 'control-label']])->textarea(['rows' => 7]) ?>
+                            </div>
+                            <div class="col-md-12">
+								<?= $form->field($createQuoteForm, 'pricingInfo', ['labelOptions' => ['class' => 'control-label']])->textarea(['class' => 'apply-pricing-field form-control', 'rows' => 7]) ?>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-							<?= $form->field($createQuoteForm, 'reservationDump', ['labelOptions' => ['class' => 'control-label']])->textarea(['rows' => 7]) ?>
-                        </div>
-                        <div class="col-md-12">
-							<?= $form->field($createQuoteForm, 'pricingInfo', ['labelOptions' => ['class' => 'control-label']])->textarea(['class' => 'apply-pricing-field form-control', 'rows' => 7]) ?>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 text-center">
-                            <?= Html::submitButton('<i class="fa fa-save"></i> Create', ['class' => 'btn btn-success', 'id' => 'add-quote-submit-btn']) ?>
-							<?= Html::submitButton('<i class="fas fa-file-code"></i> Apply Pricing Info', ['class' => 'btn btn-info ' . (empty($createQuoteForm->pricingInfo) ? ' d-none' : ''), 'id' => 'btn-apply-pricing']) ?>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+								<?= Html::submitButton('<i class="fa fa-save"></i> Create', ['class' => 'btn btn-success', 'id' => 'add-quote-submit-btn']) ?>
+								<?= Html::submitButton('<i class="fas fa-file-code"></i> Apply Pricing Info', ['class' => 'btn btn-info ' . (empty($createQuoteForm->pricingInfo) ? ' d-none' : ''), 'id' => 'btn-apply-pricing']) ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -197,6 +218,8 @@ $pjaxId = 'pjax-container-prices';
 			<?php
 			$actionApply = FlightQuoteCreateForm::ACTION_APPLY_PRICING_INFO;
 			$actionCalculate = FlightQuoteCreateForm::ACTION_CALCULATE_PRICES;
+			$actionCreateNewProduct = FlightQuoteCreateForm::ACTION_CREATE_NEW_PRODUCT;
+			$actionUpdateFlightRequest = FlightQuoteCreateForm::ACTION_UPDATE_FLIGHT_REQUEST;
 			$js = <<<JS
             var form = $('#add-quote-form');
             var pricingDumpField = $('.apply-pricing-field', form);
@@ -213,6 +236,14 @@ $pjaxId = 'pjax-container-prices';
                 $('#add-quote-action').val('$actionApply');
                 $('#add-quote-form').submit();
             });
+            $('body').off('click', '._form-warning-create-new-product').on('click', '._form-warning-create-new-product', function (e) {
+                $('#add-quote-action').val('$actionCreateNewProduct');
+                $('#add-quote-form').submit();
+            });
+            $('body').off('click', '._form-warning-update-flight-request').on('click', '._form-warning-update-flight-request', function (e) {
+                $('#add-quote-action').val('$actionUpdateFlightRequest');
+                $('#add-quote-form').submit();
+            });
             pricingDumpField.on('change', function () {
                 if ($(this).val() == '') {
                     $('#btn-apply-pricing').addClass('d-none');
@@ -222,6 +253,11 @@ $pjaxId = 'pjax-container-prices';
             });
             form.on('click', '#add-quote-submit-btn', function () {
                 $('#add-quote-action').val('');
+            });
+            
+            $('._form-warning-cancel').on('click', function () {
+                $(this).closest('._form-warning-wrapper').remove();
+                $('._form-fields-wrapper').removeClass('d-none');
             });
 JS;
 			$this->registerJs($js);

@@ -30,7 +30,9 @@ class CallLogQueue extends \yii\db\ActiveRecord
             ['clq_cl_id', 'unique'],
             ['clq_cl_id', 'exist', 'skipOnError' => true, 'targetClass' => CallLog::class, 'targetAttribute' => ['clq_cl_id' => 'cl_id']],
 
-            [['clq_queue_time', 'clq_access_count'], 'integer'],
+            ['clq_queue_time', 'integer', 'min' => 0, 'max' => 32767],
+
+            ['clq_access_count', 'integer', 'min' => 0, 'max' => 127],
 
             ['clq_is_transfer', 'boolean'],
         ];

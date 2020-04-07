@@ -1,16 +1,20 @@
 <?php
 /**
- * @var $this \yii\web\View
+ * @var $this View
  * @var $model Employee
- * @var $modelUserParams \common\models\UserParams
+ * @var $modelUserParams UserParams
  * @var $qrcodeData string
  * @var $userCommissionRuleValue int
  * @var $userBonusRuleValue int
+ * @var $userProfileForm userProfileForm
  */
 
+use common\models\UserParams;
+use frontend\models\form\UserProfileForm;
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;
+use yii\web\View;
 
 
 $this->title = 'My profile - ' . $model->username;
@@ -27,15 +31,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= $form->field($model, 'username')->textInput(['autocomplete' => "new-user", "readonly" => "readonly"]) ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
+                        <?= $form->field($userProfileForm, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'full_name')->textInput() ?>
+                        <?= $form->field($userProfileForm, 'full_name')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'email')->input('email') ?>
+                        <?= $form->field($userProfileForm, 'email')->input('email') ?>
                     </div>
                 </div>
 
@@ -135,25 +139,25 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             [
                 'label' => 'Start of work in the company',
-                'value' => static function (\common\models\UserParams $model) {
+                'value' => static function (UserParams $model) {
                     return $model->upUser->userProfile->up_join_date;
                 }
             ],
 			[
 				'label' => 'Experience',
-				'value' => static function (\common\models\UserParams $model) {
+				'value' => static function (UserParams $model) {
 					return $model->upUser->userProfile->getExperienceMonth() . ' Months';
 				}
 			],
             [
                 'attribute' => 'up_base_amount',
-                'value' => function(\common\models\UserParams $model) {
+                'value' => function(UserParams $model) {
                     return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
                 },
             ],
             [
                 'attribute' => 'up_commission_percent',
-                'value' => function(\common\models\UserParams $model) {
+                'value' => function(UserParams $model) {
                     return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
                 },
 

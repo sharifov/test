@@ -11,6 +11,8 @@ use common\models\search\LeadTaskSearch;
 use common\models\UserBonusRules;
 use common\models\UserCommissionRules;
 use common\models\UserParams;
+use frontend\models\form\UserProfileForm;
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -184,46 +186,53 @@ class SiteController extends FController
             throw new ForbiddenHttpException();
         }
 
-        /** @var Employee $model */
-        $model = Yii::$app->user->identity;
-
+        $model = Employee::findOne(Yii::$app->user->id);
         if (!$model) {
             throw new NotFoundHttpException('The requested User does not exist.');
         }
+
+        $userProfileForm = new UserProfileForm();
+        $userProfileForm->email = $model->email;
+        $userProfileForm->full_name = $model->full_name;
+        $userProfileForm->password = '';
 
         $modelUserParams = $model->userParams;
         if (!$modelUserParams) {
             $modelUserParams = new UserParams();
         }
 
+        if (Yii::$app->request->isPost) {
+            $updated = 0;
+            if ($userProfileForm->load(Yii::$app->request->post()) && $userProfileForm->validate()) {
+                if (!empty($userProfileForm->password)) {
+                    $model->setPassword($userProfileForm->password);
+                }
+                if ($model->email !== $userProfileForm->email) {
+                    $model->email = $userProfileForm->email;
+                }
+                $model->full_name = $userProfileForm->full_name;
 
-        //Yii::$app->request->isPost
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            //$attr = Yii::$app->request->post($model->formName());
-
-            if (!empty($this->password)) {
-                $this->setPassword($this->password);
+                try {
+                    if ($model->save(false)) {
+                        Yii::$app->session->setFlash('success', 'Profile successful updated');
+                        $model->refresh();
+                        $updated++;
+                    }
+                } catch (\Throwable $throwable) {
+                    Yii::error(AppHelper::throwableFormatter($throwable), 'SiteController:actionProfile:updProfile' );
+                }
             }
-
 
             if ($modelUserParams->load(Yii::$app->request->post()) && $modelUserParams->validate()) {
-                $modelUserParams->save();
+                if ($modelUserParams->save()) {
+                    Yii::$app->session->setFlash('success', 'Profile updated');
+                    $updated++;
+                }
             }
-            //$attr = Yii::$app->request->post($model->formName());
-
-            if (!empty($model->password)) {
-                $model->setPassword($model->password);
+            if ($updated) {
+                $this->redirect('/site/profile');
             }
-            //$model->prepareSave($attr);
-            if ($model->save()) {
-                Yii::$app->session->setFlash('success', 'Profile successful updated!');
-                $model->refresh();
-            }
-
         }
-
-        //new UserParams();
-
 
         $secureCode = md5(Yii::$app->user->id . '|' . Yii::$app->user->identity->username . '|' . date('Y-m-d'));
 
@@ -276,7 +285,8 @@ class SiteController extends FController
             'modelUserParams' => $modelUserParams,
             'qrcodeData' => $qrCode->writeDataUri(),
 			'userCommissionRuleValue' => $userCommissionRulesValue,
-			'userBonusRuleValue' => $userBonusRulesValue
+			'userBonusRuleValue' => $userBonusRulesValue,
+            'userProfileForm' => $userProfileForm,
         ]);
     }
 
