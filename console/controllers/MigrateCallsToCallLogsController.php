@@ -384,7 +384,7 @@ class MigrateCallsToCallLogsController extends Controller
             $call['c_status_id'] = Call::STATUS_NO_ANSWER;
         }
 
-        $call['c_parent_id'] = $call['parent_c_parent_id'];
+        $call['c_parent_id'] = $call['c_parent_id'];
 
         if ($call['last_child_c_id'] == null) {
             $callData['cl_call_created_dt'] = date('Y-m-d H:i:s', (strtotime($call['parent_c_created_dt']) + $call['parent_c_call_duration']));
@@ -417,7 +417,11 @@ class MigrateCallsToCallLogsController extends Controller
         $call['c_parent_id'] = $call['parent_c_parent_id'];
 
         $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
-        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
+        $callData['cl_is_transfer'] = (
+            $call['parent_c_created_user_id'] != $call['c_created_user_id']
+            || $call['parent_c_created_user_id'] == null
+            || $call['next_child_c_id'] != null
+        ) ? true : false;
 
         $queueData['clq_queue_time'] = (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']) - strtotime($call['c_created_dt']);
         $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $current['c_parent_id']])->andWhere(['>', 'cua_created_dt', $call['prev_child_c_created_dt']])->count();
@@ -438,7 +442,11 @@ class MigrateCallsToCallLogsController extends Controller
         $call['c_parent_id'] = $call['parent_c_parent_id'];
 
         $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
-        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
+        $callData['cl_is_transfer'] = (
+            $call['parent_c_created_user_id'] != $call['c_created_user_id']
+            || $call['parent_c_created_user_id'] == null
+            || $call['next_child_c_id'] != null
+        ) ? true : false;
 
         $queueData['clq_queue_time'] = strtotime($call['parent_c_created_dt']) - strtotime($call['c_created_dt']);
         $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $current['c_parent_id']])->andWhere(['<=', 'cua_created_dt', $call['c_created_dt']])->count();
@@ -471,7 +479,11 @@ class MigrateCallsToCallLogsController extends Controller
 
         $call['c_source_type_id'] = $call['first_same_child_c_call_type_id'];
 
-        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
+        $callData['cl_is_transfer'] = (
+            $call['parent_c_created_user_id'] != $call['c_created_user_id']
+            || $call['parent_c_created_user_id'] == null
+            || $call['next_child_c_id'] != null
+        ) ? true : false;
 
         $queueData['clq_queue_time'] = (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']) - strtotime($call['c_created_dt']);
         $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $current['c_parent_id']])->andWhere(['>', 'cua_created_dt', $call['prev_child_c_created_dt']])->count();
@@ -500,7 +512,11 @@ class MigrateCallsToCallLogsController extends Controller
             $call['c_parent_id'] = null;
         }
 
-        $callData['cl_is_transfer'] = ($call['next_child_c_id'] != null) ? true : false;
+        $callData['cl_is_transfer'] = (
+            $call['parent_c_created_user_id'] != $call['c_created_user_id']
+            || $call['parent_c_created_user_id'] == null
+            || $call['next_child_c_id'] != null
+        ) ? true : false;
 
         $queueData['clq_queue_time'] = strtotime($call['parent_c_created_dt']) - strtotime($call['c_created_dt']);
         $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $current['c_parent_id']])->andWhere(['<=', 'cua_created_dt', $call['c_created_dt']])->count();
