@@ -156,19 +156,19 @@ class EmailSearch extends Email
             ->andFilterWhere(['like', 'e_message_id', $this->e_message_id])
             ->andFilterWhere(['like', 'e_ref_message_id', $this->e_ref_message_id]);
 
-        $dataProvider->setSort([
-        	'attributes' => array_merge(
-        		$dataProvider->getSort()->attributes,
-				[
-					'e_template_type_name' => [
-						'asc' => ['e_template_type_id' => SORT_ASC],
-						'desc' => ['e_template_type_id' => SORT_DESC],
-						'label'   => 'e_template_type_id',
-						'default' => SORT_DESC,
-					]
-				]
-			)
-		]);
+//        $dataProvider->setSort([
+//        	'attributes' => array_merge(
+//        		$dataProvider->getSort()->attributes,
+//				[
+//					'e_template_type_name' => [
+//						'asc' => ['e_template_type_id' => SORT_ASC],
+//						'desc' => ['e_template_type_id' => SORT_DESC],
+//						'label'   => 'e_template_type_id',
+//						'default' => SORT_DESC,
+//					]
+//				]
+//			)
+//		]);
 
 		$dataProvider->totalCount = $query->count('distinct e_id');
 

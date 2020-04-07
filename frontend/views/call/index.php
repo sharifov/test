@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\UserSelect2Column;
 use common\models\Call;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
@@ -18,14 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
-
-if($user->isAdmin()) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId($user->id);
-    $projectList = \common\models\Project::getListByUser($user->id);
-}
 
 ?>
 <div class="call-index">
@@ -93,22 +86,37 @@ if($user->isAdmin()) {
                     }
                 ],
             ],
+
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'c_project_id',
-                'value' => static function (\common\models\Call $model) {
-                    return $model->cProject ? '<span class="badge badge-info">' . Html::encode($model->cProject->name) . '</span>' : '-';
-                },
-                'format' => 'raw',
-                'filter' => $projectList
+                'relation' => 'cProject',
             ],
+
+//            [
+//                'attribute' => 'c_project_id',
+//                'value' => static function (\common\models\Call $model) {
+//                    return $model->cProject ? '<span class="badge badge-info">' . Html::encode($model->cProject->name) . '</span>' : '-';
+//                },
+//                'format' => 'raw',
+//                'filter' => $projectList
+//            ],
+
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'c_created_user_id',
-                'value' => static function (\common\models\Call $model) {
-                    return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
-                },
-                'filter' => $userList,
-                'format' => 'raw'
+                'relation' => 'cCreatedUser',
+                'placeholder' => ''
             ],
+
+//            [
+//                'attribute' => 'c_created_user_id',
+//                'value' => static function (\common\models\Call $model) {
+//                    return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
+//                },
+//                'filter' => $userList,
+//                'format' => 'raw'
+//            ],
 
             [
                 'attribute' => 'c_status_id',
@@ -246,12 +254,13 @@ if($user->isAdmin()) {
                 'format' => 'raw'
             ],
 
-            [
-                'attribute' => 'c_client_id',
-                'value' => static function (\common\models\Call $model) {
-                    return  $model->c_client_id ?: '-';
-                },
-            ],
+            'c_client_id:client',
+//            [
+//                'attribute' => 'c_client_id',
+//                'value' => static function (\common\models\Call $model) {
+//                    return  $model->c_client_id ?: '-';
+//                },
+//            ],
 
             'c_from',
             'c_to',
