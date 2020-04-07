@@ -248,8 +248,22 @@ class MigrateCallsToCallLogsController extends Controller
             return;
         }
 
-        if ($call['c_call_type_id'] == Call::CALL_TYPE_OUT && $call['c_parent_id'] != null) {
+        if (
+            $call['c_call_type_id'] == Call::CALL_TYPE_OUT
+            && $call['c_parent_id'] != null
+            && $call['first_child_c_id'] == null
+            && $call['parent_c_parent_id'] == null
+        ) {
             $this->outChildCalls($call, $log);
+            return;
+        }
+
+        if (
+            $call['c_call_type_id'] == Call::CALL_TYPE_OUT
+            && $call['c_parent_id'] != null
+            && $call['first_child_c_id'] != null
+        ) {
+            $this->outTransferPrimaryChildCall($call, $log);
             return;
         }
 
@@ -344,7 +358,6 @@ class MigrateCallsToCallLogsController extends Controller
             && $call['c_parent_id'] != null
             && $call['parent_c_call_type_id'] == Call::CALL_TYPE_OUT
             && ($call['c_created_user_id'] == null || $call['c_created_user_id'] != $call['last_child_c_created_user_id'])
-            && $call['last_child_c_created_user_id'] != null
         ) {
             $this->outTransferInNotAcceptedParentCall($call, $log);
             return;
@@ -546,6 +559,21 @@ class MigrateCallsToCallLogsController extends Controller
             $log,
             [],
             $queueData
+        );
+    }
+
+    private function outTransferPrimaryChildCall($call, array &$log): void
+    {
+        $call['c_parent_id'] = null;
+
+        $callData['cl_is_transfer'] = true;
+
+        $this->createCallLogs(
+            $call,
+            $log,
+            $callData,
+            [],
+            []
         );
     }
 
