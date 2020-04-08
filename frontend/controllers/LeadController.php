@@ -1033,7 +1033,7 @@ class LeadController extends FController
         $queryCallLog = (new Query())
 			->select(['id' => new Expression('if (cl_parent_id is null, cl_id, cl_parent_id)')])
 			->addSelect(['type' => new Expression('"voice"')])
-			->addSelect(['lead_id' => 'call_log_lead.cll_lead_id', 'created_dt' => 'MAX(call_log.cl_call_created_dt)'])
+			->addSelect(['lead_id' => 'call_log_lead.cll_lead_id', 'created_dt' => 'MIN(call_log.cl_call_created_dt)'])
 			->from('call_log_lead')
 			->innerJoin('call_log', 'call_log.cl_id = call_log_lead.cll_cl_id')
 			->where(['cll_lead_id' => $lead->id])
