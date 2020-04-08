@@ -587,9 +587,11 @@ class LeadController extends FController
 
                     $upp = null;
                     if ($lead->project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+//                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
                         if ($upp) {
-                            $mailFrom = $upp->upp_email;
+//                            $mailFrom = $upp->upp_email;
+                            $mailFrom = $upp->getEmail();
                         }
                     }
 
@@ -697,9 +699,10 @@ class LeadController extends FController
                     $phoneFrom = '';
 
                     if ($lead->project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
                         if ($upp) {
-                            $phoneFrom = $upp->upp_tw_phone_number;
+//                            $phoneFrom = $upp->upp_tw_phone_number;
+                            $phoneFrom = $upp->getPhone();
                         }
                     }
 
@@ -783,7 +786,7 @@ class LeadController extends FController
 
                     $upp = null;
                     if ($lead->project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
                     }
 
 
@@ -793,7 +796,8 @@ class LeadController extends FController
 
                     if ($upp && $userModel) {
 
-                        if (!$upp->upp_tw_phone_number) {
+//                        if (!$upp->upp_tw_phone_number) {
+                        if (!$upp->getPhone()) {
                             $comForm->addError('c_sms_preview', 'Config Error: Not found TW phone number for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
                         } elseif (!$userModel->userProfile->up_sip) {
                             $comForm->addError('c_sms_preview', 'Config Error: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
@@ -838,9 +842,9 @@ class LeadController extends FController
 
                             if ($comForm->c_voice_status == 1) {
 
-                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $userModel->userProfile->up_sip, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
+                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $userModel->userProfile->up_sip, $upp->getPhone(), $comForm->c_phone_number, Yii::$app->user->identity->username);
 
-                                Yii::info('ProjectId: ' . $lead->project_id . ', sip:' . $userModel->userProfile->up_sip . ', phoneFrom:' . $upp->upp_tw_phone_number . ', phoneTo:' . $comForm->c_phone_number . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
+                                Yii::info('ProjectId: ' . $lead->project_id . ', sip:' . $userModel->userProfile->up_sip . ', phoneFrom:' . $upp->getPhone() . ', phoneTo:' . $comForm->c_phone_number . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
 
 
                                 if ($response && isset($response['data']['call'])) {
@@ -857,7 +861,8 @@ class LeadController extends FController
                                     $call->c_call_sid = $dataCall['sid'];
 
                                     $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
-                                    $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
+//                                    $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
+                                    $call->c_from = $upp->getPhone(); //$dataCall['from'];
                                     $call->c_caller_name = $dataCall['from'];
                                     $call->c_call_status = $dataCall['status'];
                                     $call->c_lead_id = $lead->id;

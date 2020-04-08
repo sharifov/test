@@ -2,9 +2,10 @@
 
 namespace common\models;
 
-use Yii;
+use sales\model\emailList\entity\EmailList;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -20,6 +21,7 @@ use yii\db\ActiveRecord;
  * @property int $dep_default
  * @property int $dep_updated_user_id
  * @property string $dep_updated_dt
+ * @property int|null $dep_email_list_id
  *
  * @property array $user_group_list
  *
@@ -29,6 +31,7 @@ use yii\db\ActiveRecord;
  * @property Employee $depUpdatedUser
  * @property DepartmentEmailProjectUserGroup[] $departmentEmailProjectUserGroups
  * @property UserGroup[] $dugUgs
+ * @property EmailList $emailList
  */
 class DepartmentEmailProject extends \yii\db\ActiveRecord
 {
@@ -48,17 +51,23 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['dep_email', 'dep_project_id'], 'required'],
+//            ['dep_email', 'required'],
+            ['dep_project_id', 'required'],
             [['dep_project_id', 'dep_dep_id', 'dep_source_id', 'dep_enable', 'dep_updated_user_id', 'dep_default'], 'integer'],
             [['dep_updated_dt'], 'safe'],
-            [['dep_email'], 'string', 'max' => 50],
+//            [['dep_email'], 'string', 'max' => 50],
             [['dep_description'], 'string', 'max' => 255],
-            [['dep_email'], 'unique'],
+//            [['dep_email'], 'unique'],
 			[['user_group_list'], 'safe'],
 			[['dep_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['dep_dep_id' => 'dep_id']],
             [['dep_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['dep_project_id' => 'id']],
             [['dep_source_id'], 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['dep_source_id' => 'id']],
             [['dep_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['dep_updated_user_id' => 'id']],
+
+            ['dep_email_list_id', 'required'],
+            ['dep_email_list_id', 'integer'],
+            ['dep_email_list_id', 'unique'],
+            ['dep_email_list_id', 'exist', 'skipOnError' => true, 'targetClass' => EmailList::class, 'targetAttribute' => ['dep_email_list_id' => 'el_id']],
         ];
     }
 
@@ -78,6 +87,8 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
             'dep_default' => 'Default',
             'dep_updated_user_id' => 'Updated User',
             'dep_updated_dt' => 'When Updated',
+            'dep_email_list_id' => 'Email List',
+            'emailList.el_email' => 'Email List',
         ];
     }
 
@@ -150,6 +161,25 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
     public function getDugUgs()
     {
         return $this->hasMany(UserGroup::class, ['ug_id' => 'dug_ug_id'])->viaTable('department_email_project_user_group', ['dug_dep_id' => 'dep_id']);
+    }
+
+    public function getEmail(bool $onlyEnabled = false): ?string
+    {
+        if (!$this->emailList) {
+            return null;
+        }
+        if ($onlyEnabled) {
+            if ($this->emailList->el_enabled) {
+                return $this->emailList->el_email;
+            }
+            return null;
+        }
+        return $this->emailList->el_email;
+    }
+
+    public function getEmailList(): ActiveQuery
+    {
+        return $this->hasOne(EmailList::class, ['el_id' => 'dep_email_list_id']);
     }
 
     /**

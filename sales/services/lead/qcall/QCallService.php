@@ -3,6 +3,7 @@
 namespace sales\services\lead\qcall;
 
 use common\models\Call;
+use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\Lead;
@@ -15,6 +16,7 @@ use common\models\LeadQcall;
 use common\models\QcallConfig;
 use yii\db\ActiveQuery;
 use yii\db\Query;
+use yii\helpers\VarDumper;
 
 /**
  * Class QCallService
@@ -250,9 +252,18 @@ class QCallService
      * @param int|null $leadId
      * @return string|null
      */
-    private function findPhone(?string $callFrom, $phoneSwitch, FindPhoneParams $findPhoneParams, ?int $leadId = null): ?string
+    public function findPhone(?string $callFrom, $phoneSwitch, FindPhoneParams $findPhoneParams, ?int $leadId = null): ?string
     {
-        $phonesQuery = DepartmentPhoneProject::find()->redialPhones($findPhoneParams->projectId, $findPhoneParams->departmentId);
+        $phonesQuery = DepartmentPhoneProject::find()//->redialPhones($findPhoneParams->projectId, $findPhoneParams->departmentId);
+//            ->select(['dpp_phone_number'])
+            ->select(['pl_phone_number'])
+            ->innerJoinWith('phoneList', false)
+            ->enabled()
+            ->redial()
+            ->byProject($findPhoneParams->projectId)
+            //->andWhere(['IS NOT', 'dpp_phone_number', null])
+            ->byDepartment($findPhoneParams->departmentId ?: Department::DEPARTMENT_SALES);
+
         $clone = clone $phonesQuery;
         $count = (int)$clone->count();
 
@@ -261,7 +272,8 @@ class QCallService
         }
 
         if ($count === 1) {
-            return ($phonesQuery->asArray()->one())['dpp_phone_number'];
+//            return ($phonesQuery->asArray()->one())['dpp_phone_number'];
+            return ($phonesQuery->asArray()->one())['pl_phone_number'];
         }
 
         if ($callFrom === null) {
@@ -293,7 +305,8 @@ class QCallService
                 (new Query())
                     ->from(Call::tableName())
                     ->select(['count(*)'])
-                    ->andWhere('c_from = dpp_phone_number')
+//                    ->andWhere('c_from = dpp_phone_number')
+                    ->andWhere('c_from = pl_phone_number')
                     ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
                     ->andWhere(['c_lead_id' => $leadId])
             ])
@@ -303,7 +316,8 @@ class QCallService
             ->one();
 
         if ($call) {
-            return $call['dpp_phone_number'];
+//            return $call['dpp_phone_number'];
+            return $call['pl_phone_number'];
         }
 
         return $this->getFirstPhone($firstPhoneClone);
@@ -323,7 +337,8 @@ class QCallService
                 (new Query())
                     ->from(Call::tableName())
                     ->select(['count(*)'])
-                    ->andWhere('c_from = dpp_phone_number')
+//                    ->andWhere('c_from = dpp_phone_number')
+                    ->andWhere('c_from = pl_phone_number')
                     ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
                     ->andWhere(['>', 'c_created_dt', $dt->format('Y-m-d H:i:s')])
             ])
@@ -333,7 +348,8 @@ class QCallService
             ->one();
 
         if ($call) {
-            return $call['dpp_phone_number'];
+//            return $call['dpp_phone_number'];
+            return $call['pl_phone_number'];
         }
 
         return $this->getFirstPhone($firstPhoneClone);
@@ -346,8 +362,8 @@ class QCallService
     private function getFirstPhone(DepartmentPhoneProjectQuery $phonesQuery): ?string
     {
         /** @var DepartmentPhoneProject $phone */
-        if ($phone = $phonesQuery->limit(1)->one()) {
-            return $phone->dpp_phone_number;
+        if ($phone = $phonesQuery->limit(1)->asArray()->one()) {
+            return $phone['pl_phone_number'];
         }
         return null;
     }

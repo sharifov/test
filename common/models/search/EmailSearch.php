@@ -6,6 +6,7 @@ use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
+use sales\helpers\query\QueryHelper;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -99,8 +100,9 @@ class EmailSearch extends Email
             $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         } elseif (!empty($params['EmailSearch']['e_created_dt'])) {
-            $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt))])
-                ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt) + 3600 * 24)]);
+            $query->andFilterWhere(['DATE(e_created_dt)' => date('Y-m-d', strtotime($this->e_created_dt))]);
+            /*$query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt))])
+                ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt) + 3600 * 24)]);*/
         }
 
         if($this->supervision_id > 0) {
@@ -131,6 +133,9 @@ class EmailSearch extends Email
             'e_updated_dt' => $this->e_updated_dt,
             'e_inbox_created_dt' => $this->e_inbox_created_dt,
             'e_inbox_email_id' => $this->e_inbox_email_id,
+            'e_email_from' => $this->e_email_from,
+            'e_email_to' => $this->e_email_to,
+            'e_language_id' => $this->e_language_id,
         ]);
 
         if ($this->e_template_type_name) {
@@ -140,15 +145,13 @@ class EmailSearch extends Email
 			}
 		}
 
-        $query->andFilterWhere(['like', 'e_email_from', $this->e_email_from])
-            ->andFilterWhere(['like', 'e_email_to', $this->e_email_to])
+        $query
             ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
             ->andFilterWhere(['like', 'e_email_bc', $this->e_email_bc])
             ->andFilterWhere(['like', 'e_email_subject', $this->e_email_subject])
             ->andFilterWhere(['like', 'e_email_body_text', $this->e_email_body_text])
             ->andFilterWhere(['like', 'e_attach', $this->e_attach])
             ->andFilterWhere(['like', 'e_email_data', $this->e_email_data])
-            ->andFilterWhere(['like', 'e_language_id', $this->e_language_id])
             ->andFilterWhere(['like', 'e_error_message', $this->e_error_message])
             ->andFilterWhere(['like', 'e_message_id', $this->e_message_id])
             ->andFilterWhere(['like', 'e_ref_message_id', $this->e_ref_message_id]);
@@ -185,7 +188,7 @@ class EmailSearch extends Email
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['e_created_dt' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['e_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 12,
             ],
@@ -217,8 +220,18 @@ class EmailSearch extends Email
 
 
         if(isset($params['EmailSearch']['user_id']) && $params['EmailSearch']['user_id'] > 0) {
-            $subQuery = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => $params['EmailSearch']['user_id']])->andWhere(['!=', 'upp_email', '']);
-            $query->andWhere(['or', ['=', 'e_created_user_id', $params['EmailSearch']['user_id']], ['IN', 'e_email_from', $subQuery], ['and', ['IN', 'e_email_to', $subQuery], ['e_type_id' => Email::TYPE_INBOX]]]);
+//            $subQuery = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => $params['EmailSearch']['user_id']])->andWhere(['!=', 'upp_email', '']);
+            $subQuery = UserProjectParams::find()->select(['el_email'])->joinWith('emailList', false, 'INNER JOIN')->where(['upp_user_id' => $params['EmailSearch']['user_id']]);
+            $query->andWhere([
+                'or',
+                ['=', 'e_created_user_id', $params['EmailSearch']['user_id']],
+                ['IN', 'e_email_from', $subQuery],
+                [
+                    'and',
+                    ['IN', 'e_email_to', $subQuery],
+                    ['e_type_id' => Email::TYPE_INBOX]
+                ]
+            ]);
         }
 
 
@@ -228,6 +241,7 @@ class EmailSearch extends Email
         }
 
         if (!$this->validate()) {
+            $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
@@ -255,20 +269,23 @@ class EmailSearch extends Email
             'e_updated_dt' => $this->e_updated_dt,
             'e_inbox_created_dt' => $this->e_inbox_created_dt,
             'e_inbox_email_id' => $this->e_inbox_email_id,
+            'e_email_to' => $this->e_email_to,
+            'e_email_from' => $this->e_email_from,
+            'e_language_id' => $this->e_language_id,
         ]);
 
-        $query->andFilterWhere(['like', 'e_email_from', $this->e_email_from])
-            ->andFilterWhere(['like', 'e_email_to', $this->e_email_to])
+        $query
             ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
             ->andFilterWhere(['like', 'e_email_bc', $this->e_email_bc])
             ->andFilterWhere(['like', 'e_email_subject', $this->e_email_subject])
             ->andFilterWhere(['like', 'e_email_body_text', $this->e_email_body_text])
             ->andFilterWhere(['like', 'e_attach', $this->e_attach])
             ->andFilterWhere(['like', 'e_email_data', $this->e_email_data])
-            ->andFilterWhere(['like', 'e_language_id', $this->e_language_id])
             ->andFilterWhere(['like', 'e_error_message', $this->e_error_message])
             ->andFilterWhere(['like', 'e_message_id', $this->e_message_id])
             ->andFilterWhere(['like', 'e_ref_message_id', $this->e_ref_message_id]);
+
+        $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
 
         return $dataProvider;
     }

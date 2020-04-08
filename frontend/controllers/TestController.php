@@ -85,6 +85,8 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
@@ -117,6 +119,7 @@ use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use sales\services\TransactionManager;
 use sales\temp\LeadFlowUpdate;
+use sales\widgets\PhoneSelect2Widget;
 use Twilio\TwiML\VoiceResponse;
 use webapi\models\ApiLead;
 use webapi\src\response\messages\DataMessage;
@@ -195,6 +198,7 @@ class TestController extends FController
 
     public function actionTest()
     {
+        return $this->render('blank');
 
         $lead = Lead::findOne(371222);
         $repo = Yii::createObject(LeadRepository::class);
@@ -1164,5 +1168,13 @@ class TestController extends FController
 
         \yii\helpers\VarDumper::dump((isset($a['itinerary'][0]['segments'])), 10, true); exit();  /* FOR DEBUG:: must by remove */
     }
+
+    public function actionTestUserProfile()
+	{
+		$userProfile = new UserProfile();
+		$userProfile->up_join_date = '2019-01-01';
+		$expMonth = $userProfile->getExperienceMonth();
+		var_dump($expMonth);
+	}
 
 }

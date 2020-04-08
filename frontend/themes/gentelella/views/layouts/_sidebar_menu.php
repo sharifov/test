@@ -51,12 +51,17 @@ $isSuperAdmin = $user->isSuperAdmin();
 
         $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
 
+//        $smsExist = \common\models\UserProjectParams::find()
+//            ->where(['upp_user_id' => $user->id])
+//            ->andWhere([
+//                'AND', ['IS NOT', 'upp_tw_phone_number', null],
+//                ['<>', 'upp_tw_phone_number', '']
+//            ])
+//            ->exists();
+
         $smsExist = \common\models\UserProjectParams::find()
-            ->where(['upp_user_id' => $user->id])
-            ->andWhere([
-                'AND', ['IS NOT', 'upp_tw_phone_number', null],
-                ['<>', 'upp_tw_phone_number', '']
-            ])
+            ->andWhere(['upp_user_id' => Yii::$app->user->id])
+            ->innerJoinWith('phoneList', false)
             ->exists();
 
         if ($smsExist) {
@@ -169,6 +174,7 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
 
         $menuCases = [];
+
         $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];

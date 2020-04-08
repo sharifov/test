@@ -1,5 +1,6 @@
 <?php
 
+use sales\widgets\PhoneSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -17,7 +18,13 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'dpp_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
 
-        <?= $form->field($model, 'dpp_phone_number')->textInput(['maxlength' => true]) ?>
+        <?php //= $form->field($model, 'dpp_phone_number')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'dpp_phone_list_id')->widget(PhoneSelect2Widget::class, [
+            'data' => $model->dpp_phone_list_id ? [
+                $model->dpp_phone_list_id => $model->phoneList->pl_phone_number
+            ] : [],
+        ]) ?>
 
         <?= $form->field($model, 'dpp_redial')->dropDownList([0 => 'No', 1 => 'Yes']) ?>
 

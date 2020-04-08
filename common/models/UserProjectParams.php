@@ -4,9 +4,12 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\query\UserProjectParamsQuery;
+use sales\model\emailList\entity\EmailList;
+use sales\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -22,11 +25,15 @@ use yii\db\ActiveRecord;
  * @property int $upp_updated_user_id
  * @property bool $upp_allow_general_line
  * @property int $upp_dep_id
+ * @property int|null $upp_phone_list_id
+ * @property int|null $upp_email_list_id
  *
  * @property Project $uppProject
  * @property Employee $uppUpdatedUser
  * @property Employee $uppUser
  * @property Department $uppDep
+ * @property PhoneList $phoneList
+ * @property EmailList $emailList
  */
 class UserProjectParams extends \yii\db\ActiveRecord
 {
@@ -47,21 +54,32 @@ class UserProjectParams extends \yii\db\ActiveRecord
             [['upp_user_id', 'upp_project_id'], 'required'],
             [['upp_user_id', 'upp_project_id', 'upp_updated_user_id', 'upp_dep_id'], 'integer'],
             [['upp_created_dt', 'upp_updated_dt'], 'safe'],
-            [['upp_email'], 'string', 'max' => 100],
-            [['upp_email'], 'trim'],
-            [['upp_email'], 'email'],
+//            [['upp_email'], 'string', 'max' => 100],
+//            [['upp_email'], 'trim'],
+//            [['upp_email'], 'email'],
 
-            ['upp_tw_phone_number', 'unique', 'targetAttribute' => ['upp_tw_phone_number']], //, 'message' => 'Twillio Phone Number must be unique'],
 
-            [['upp_phone_number', 'upp_tw_phone_number'], 'string', 'max' => 30],
+
+            ['upp_phone_number', 'string', 'max' => 30],
             [['upp_user_id', 'upp_project_id'], 'unique', 'targetAttribute' => ['upp_user_id', 'upp_project_id']],
             [['upp_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['upp_project_id' => 'id']],
             [['upp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upp_updated_user_id' => 'id']],
             [['upp_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upp_user_id' => 'id']],
             [['upp_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['upp_dep_id' => 'dep_id']],
-            [['upp_phone_number', 'upp_tw_phone_number'], PhoneInputValidator::class],
+            ['upp_phone_number', PhoneInputValidator::class],
 
-            ['upp_allow_general_line', 'boolean']
+//            ['upp_tw_phone_number', PhoneInputValidator::class],
+//            ['upp_tw_phone_number', 'unique', 'targetAttribute' => ['upp_tw_phone_number']], //, 'message' => 'Twillio Phone Number must be unique'],
+//            ['upp_tw_phone_number', 'string', 'max' => 30],
+
+            ['upp_allow_general_line', 'boolean'],
+
+            ['upp_phone_list_id', 'integer'],
+            ['upp_phone_list_id', 'unique'],
+            ['upp_phone_list_id', 'exist', 'skipOnError' => true, 'targetClass' => PhoneList::class, 'targetAttribute' => ['upp_phone_list_id' => 'pl_id']],
+
+            ['upp_email_list_id', 'integer'],
+            ['upp_email_list_id', 'exist', 'skipOnError' => true, 'targetClass' => EmailList::class, 'targetAttribute' => ['upp_email_list_id' => 'el_id']],
         ];
     }
 
@@ -80,7 +98,11 @@ class UserProjectParams extends \yii\db\ActiveRecord
             'upp_updated_dt' => 'Updated Dt',
             'upp_updated_user_id' => 'Updated User',
             'upp_allow_general_line' => 'Allow General Line',
-            'upp_dep_id' => 'Department'
+            'upp_dep_id' => 'Department',
+            'upp_phone_list_id' => 'Phone List',
+            'phoneList.pl_phone_number' => 'Phone List',
+            'upp_email_list_id' => 'Email List',
+            'emailList.el_email' => 'Email List',
         ];
     }
 
@@ -136,6 +158,44 @@ class UserProjectParams extends \yii\db\ActiveRecord
     public function getUppUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'upp_user_id']);
+    }
+
+    public function getPhone(bool $onlyEnabled = false): ?string
+    {
+        if (!$this->phoneList) {
+            return null;
+        }
+        if ($onlyEnabled) {
+            if ($this->phoneList->pl_phone_number) {
+                return $this->phoneList->pl_phone_number;
+            }
+            return null;
+        }
+        return $this->phoneList->pl_phone_number;
+    }
+
+    public function getPhoneList(): ActiveQuery
+    {
+        return $this->hasOne(PhoneList::class, ['pl_id' => 'upp_phone_list_id']);
+    }
+
+    public function getEmail(bool $onlyEnabled = false): ?string
+    {
+        if (!$this->emailList) {
+            return null;
+        }
+        if ($onlyEnabled) {
+            if ($this->emailList->el_enabled) {
+                return $this->emailList->el_email;
+            }
+            return null;
+        }
+        return $this->emailList->el_email;
+    }
+
+    public function getEmailList(): ActiveQuery
+    {
+        return $this->hasOne(EmailList::class, ['el_id' => 'upp_email_list_id']);
     }
 
     /**

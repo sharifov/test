@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use yii\grid\ActionColumn;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
@@ -36,6 +37,17 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 <div class="employee-index">
+
+    <?php $status = Yii::$app->params['settings']['two_factor_authentication_enable'] ?
+        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>' ?>
+
+    <div class="alert btn-secondary alert-dismissible fade show" role="alert">
+        Setting "Enable two factor authentication" is <?= $status ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
     <h1><?=$this->title?></h1>
 
     <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add new User', 'create', [
@@ -106,9 +118,40 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'attribute' => 'id',
                 'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
             ],
-
-
-
+            [
+                'label' => 'Work Experience',
+                'attribute' => 'experienceMonth',
+                'value' => static function (Employee $model) {
+                    return $model->userProfile ? $model->userProfile->getExperienceMonth() : 0;
+                }
+            ],
+            [
+                'attribute' => 'joinDate',
+                'value' => static function (Employee $model) {
+					return $model->userProfile ? $model->userProfile->up_join_date : null;
+                },
+				'filter' => DatePicker::widget([
+					'model' => $searchModel,
+					'attribute' => 'joinDate',
+					'clientOptions' => [
+						'autoclose' => true,
+						'format' => 'yyyy-mm-dd',
+					],
+					'options' => [
+						'autocomplete' => 'off',
+						'placeholder' =>'Choose Date',
+                        'style' => 'width: 150px'
+					],
+				]),
+			],
+             [
+                'label' => '2FA enable',
+                'value' => static function (\common\models\Employee $model) {
+                    return ($model->userProfile && $model->userProfile->up_2fa_enable) ?
+                        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
+                },
+                'format' => 'raw'
+            ],
 
             [
                 'class' => ActionColumn::class,
@@ -171,7 +214,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     return $roles ? implode(', ', $roles) : '-';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles()
+                'filter' => \common\models\Employee::getAllRoles(),
+                'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
 
             'email:email',
@@ -340,7 +384,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             $str .= '<tr>';
 //                                $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
                             $str .= '<td>'.Html::encode($projectParam->uppProject->name).'</td>';
-                            $str .= '<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+//                            $str .= '<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+                            $str .= '<td>'.Html::encode($projectParam->getPhone()).'</td>';
                             $str .= '<td title="' . ($projectParam->uppDep ? $projectParam->uppDep->dep_name : '-') . '">' . Html::encode($projectParam->upp_dep_id) . '</td>';
 
                             if ($projectParam->upp_allow_general_line) {

@@ -149,7 +149,7 @@ use \common\models\Call;
                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
                 <?php else: ?>
                     <span class="badge badge-primary"><?=gmdate('i:s', $sec)?></span> <?php //data-sec="<?=$sec" data-control="pause" data-format="%M:%S"?>
-                    <?php if ($model->c_recording_url):?>
+                    <?php if ($model->c_recording_sid):?>
                         <small><i class="fa fa-play-circle-o"></i></small>
                     <?php endif;?>
                     &nbsp;&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>

@@ -378,12 +378,14 @@ class CasesController extends FController
 
 
                     $upp = null;
-					if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::findOne(['dep_id' => $comForm->dep_email_id])) {
-						$mailFrom = $departmentEmail->dep_email;
+					if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::find()->andWhere(['dep_id' => $comForm->dep_email_id])->withEmailList()->one()) {
+//						$mailFrom = $departmentEmail->dep_email;
+						$mailFrom = $departmentEmail->getEmail();
 					} else if ($model->cs_project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
                         if ($upp) {
-                            $mailFrom = $upp->upp_email;
+//                            $mailFrom = $upp->upp_email;
+                            $mailFrom = $upp->getEmail();
                         }
                     }
 
@@ -408,7 +410,7 @@ class CasesController extends FController
                         $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
 
                         $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
-                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $content_data, $data, 'en-US', 10);
 
 
                         //VarDumper::dump($content_data, 10 , true); exit;
@@ -476,14 +478,16 @@ class CasesController extends FController
                     $content_data['project_id'] = $model->cs_project_id;
                     $phoneFrom = '';
 
-                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::findOne(['dpp_id' => $comForm->dpp_phone_id])) {
+                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::find()->andWhere(['dpp_id' => $comForm->dpp_phone_id])->withPhoneList()->one()) {
 
-						$phoneFrom = $departmentPhone->dpp_phone_number;
+//						$phoneFrom = $departmentPhone->dpp_phone_number;
+						$phoneFrom = $departmentPhone->getPhone();
 
 					} elseif ($model->cs_project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
                         if ($upp) {
-                            $phoneFrom = $upp->upp_tw_phone_number;
+//                            $phoneFrom = $upp->upp_tw_phone_number;
+                            $phoneFrom = $upp->getPhone();
                         }
                     }
 
@@ -710,7 +714,7 @@ class CasesController extends FController
 
             $arr = explode('|', base64_decode($hash));
             $id = (int)($arr[1] ?? 0);
-            $saleData = $this->findSale($id);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($id);
 
             $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
             if($cs) {
@@ -893,7 +897,7 @@ class CasesController extends FController
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
-            Yii::error($e, 'Cases:CasesController:Take');
+            //Yii::error($e, 'Cases:CasesController:Take');
         }
         return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
     }
@@ -926,35 +930,6 @@ class CasesController extends FController
         }
 
         throw new NotFoundHttpException('The requested case does not exist.');
-    }
-
-    /**
-     * @param int $id
-     * @return mixed
-     * @throws BadRequestHttpException
-     * @throws NotFoundHttpException
-     */
-    protected function findSale(int $id)
-    {
-
-        try {
-            $data['sale_id'] = $id;
-            $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', 90);
-
-            if ($response->isOk) {
-                $result = $response->data;
-                if ($result && is_array($result)) {
-                    return $result;
-                }
-            } else {
-                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
-            }
-
-        } catch (\Throwable $exception) {
-            throw new BadRequestHttpException($exception->getMessage());
-        }
-
-        throw new NotFoundHttpException('The requested Sale does not exist.');
     }
 
     /**
@@ -1433,11 +1408,19 @@ class CasesController extends FController
 		return true;
 	}
 
-	public function actionAjaxRefreshSaleInfo($caseId, $caseSaleId)
-	{
+    /**
+     * @param $caseId
+     * @param $caseSaleId
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxRefreshSaleInfo($caseId, $caseSaleId): Response
+    {
 		if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
 			throw new BadRequestHttpException();
 		}
+
+        $withFareRules = Yii::$app->request->post('check_fare_rules', 0);
 
 		try {
 			$out = [
@@ -1449,8 +1432,7 @@ class CasesController extends FController
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
 			$this->checkAccessToManageCaseSaleInfo($caseSale, true);
 
-			$saleData = $this->findSale((int)$caseSale->css_sale_id);
-
+			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules);
 			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
 
 			$out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
@@ -1462,7 +1444,7 @@ class CasesController extends FController
 				$out['message'] = $throwable->getMessage();
 			}
 			Yii::error(
-			    \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+			    \yii\helpers\VarDumper::dumpAsString($throwable->getMessage(), 20),
 			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
 			);
 		}

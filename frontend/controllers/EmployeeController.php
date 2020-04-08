@@ -545,6 +545,7 @@ class EmployeeController extends FController
             if(!$modelProfile) {
                 $modelProfile = new UserProfile();
                 $modelProfile->up_user_id = $id;
+                $modelProfile->up_join_date = date('Y-m-d');
             }
 
 

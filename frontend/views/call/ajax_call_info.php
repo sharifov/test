@@ -63,8 +63,8 @@ $this->registerJs($js);
 
 
     <div class="col-md-6">
-        <?php if($model->c_recording_url):?>
-            <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=$model->c_recording_url?>" type="audio/mpeg"></>
+        <?php if($model->recordingUrl):?>
+            <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=$model->recordingUrl?>" type="audio/mpeg"></>
         <?php endif;?>
 
         <?= DetailView::widget([
@@ -147,7 +147,6 @@ $this->registerJs($js);
             //'c_project_id',
             //'c_error_message',
             'c_is_new:boolean',
-            //'c_is_deleted',
         ],
     ]) ?>
     </div>

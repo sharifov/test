@@ -58,25 +58,48 @@ class LoginForm extends Model
         if ($this->validate()) {
             $user = $this->getUser();
 
-
             if($user) {
-
-                if($user->acl_rules_activated) {
-                    $clientIP = $this->getClientIPAddress();
-
-                    if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
-
-                        $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
-                        //Yii::$app->user->logout();
-                        //Yii::$app->getSession()->setFlash('danger', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
-                        return false;
-                    }
+                if (!$this->checkByIp($user)) {
+                    return false;
                 }
-
                 return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
             }
         }
         return false;
+    }
+
+    /**
+     * @return Employee|null
+     */
+    public function checkedUser(): ?Employee
+    {
+        if ($this->validate()) {
+            $user = $this->getUser();
+
+            if($user) {
+                if (!$this->checkByIp($user)) {
+                    return null;
+                }
+                return $user;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param $user
+     * @return bool
+     */
+    private function checkByIp($user): bool
+    {
+        if($user->acl_rules_activated) {
+            $clientIP = $this->getClientIPAddress();
+            if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
+                $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
+                return false;
+            }
+        }
+        return true;
     }
 
 

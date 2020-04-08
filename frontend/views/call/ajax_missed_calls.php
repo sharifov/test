@@ -140,7 +140,6 @@ use yii\widgets\Pjax;
 
             //'c_updated_dt',
             //'c_error_message',
-            //'c_is_deleted:boolean',
 
             [   'class' => 'yii\grid\ActionColumn',
                 'template' => '{view2}',

@@ -68,7 +68,7 @@ function renderChildCallsRecursive2($calls): void {
                                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
                                 <?php endif;?>
                             <?php endif;?>
-                            <?php if ($callItem->c_recording_url):?>
+                            <?php if ($callItem->c_recording_sid):?>
                                 <small><i class="fa fa-play-circle-o"></i></small>
                             <?php endif;?>
                         </td>

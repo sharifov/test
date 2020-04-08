@@ -385,7 +385,7 @@ $user = Yii::$app->user->identity;
                 <div id="chart_div3"></div>
                 <?php if ($dataEmployeeSold): ?>
 
-                        <?
+                        <?php
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
                         ?>
 

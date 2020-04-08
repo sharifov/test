@@ -4,7 +4,7 @@ namespace modules\flight\models\forms;
 
 use modules\flight\models\FlightSegment;
 use modules\flight\src\helpers\FlightSegmentHelper;
-use sales\yii\validators\IataValidator;
+use common\components\validators\IataValidator;
 
 /**
  * Class FlightSegmentForm
