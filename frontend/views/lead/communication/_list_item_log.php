@@ -80,7 +80,7 @@ $fromType = 'client';
 				<div><?php // $call->cl_duration > 0 ? 'Duration: ' . Yii::$app->formatter->asDuration($call->cl_duration) : ''?></div>
 
 				<?= $this->render('_list_call_recursive_log', [
-					'callList' => [$call]
+					'callList' => $call->childCalls
 				]) ?>
 
 

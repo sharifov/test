@@ -71,12 +71,6 @@ $child = $child ?? false;
 
 				</td>
 			</tr>
-            <?php if ($callItem->childCalls):?>
-                <?= $this->render('_list_call_recursive_log', [
-                    'callList' => $callItem->childCalls,
-                    'child' => true
-                ]) ?>
-            <?php endif; ?>
 		<?php endforeach;?>
 		<?php if (!$child): ?>
         </table>
