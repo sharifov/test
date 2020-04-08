@@ -132,15 +132,20 @@ $user = Yii::$app->user->identity;
             <?php endif;?>
 
 			<?php if ($enableCommunication) : ?>
-				<?= $this->render('communication/case_communication_log', [
-					'model'      => $model,
-					'previewEmailForm' => $previewEmailForm,
-					'previewSmsForm' => $previewSmsForm,
-					'comForm'       => $comForm,
-					'dataProvider'  => $dataProviderCommunicationLog,
-					'isAdmin'       => $isAdmin
-				]);
-				?>
+
+                <?php if(Yii::$app->params['settings']['new_communication_block_case']): ?>
+                    <?= $this->render('communication/case_communication_log', [
+                        'model'      => $model,
+                        'previewEmailForm' => $previewEmailForm,
+                        'previewSmsForm' => $previewSmsForm,
+                        'comForm'       => $comForm,
+                        'dataProvider'  => $dataProviderCommunicationLog,
+                        'isAdmin'       => $isAdmin
+                    ]);
+                    ?>
+                <?php else: ?>
+                    <div class="alert alert-info" role="alert">Communication Log block is turned off.</div>
+				<?php endif;?>
 			<?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
 			<?php endif;?>
