@@ -119,6 +119,7 @@ class SiteController extends FController
 
                 $session = Yii::$app->session;
                 $session->set('two_factor_email', $user->email);
+                $session->set('two_factor_username', $user->username);
                 $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
                 $session->set('two_factor_key', $twoFactorAuthSecretKey);
                 $session->set('two_factor_remember_me', $model->rememberMe);
@@ -153,6 +154,7 @@ class SiteController extends FController
         }
 
         $userEmail = $session->get('two_factor_email');
+        $userName = $session->get('two_factor_username');
         $twoFactorAuthKey = $session->get('two_factor_key');
 
         $model = (new LoginStepTwoForm())
@@ -164,7 +166,8 @@ class SiteController extends FController
             return $this->goHome();
         }
 
-        $totpUri = (new TOTPSecretKeyUriGeneratorService('travelinsides.com', $userEmail, $twoFactorAuthKey))->run();
+        $totpUri = (new TOTPSecretKeyUriGeneratorService(
+            Yii::$app->params['settings']['two_factor_company_name'], $userName, $twoFactorAuthKey))->run();
         $qrcodeSrc = (new QrCodeDataUriGeneratorService($totpUri))->run();
 
         return $this->render('step-two', [
