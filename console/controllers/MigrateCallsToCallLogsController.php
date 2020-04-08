@@ -472,9 +472,9 @@ class MigrateCallsToCallLogsController extends Controller
             || ($call['parent_c_created_user_id'] != $call['last_same_child_c_created_user_id'] && $call['last_same_child_c_created_user_id'] != null)
             || $call['parent_c_status_id'] != Call::STATUS_COMPLETED
         ) {
-            $call['c_parent_id'] = $call['first_same_child_c_id'];
+            $call['c_parent_id'] = $call['c_parent_id'];
         } else {
-            $call['c_parent_id'] = null;
+            $call['c_parent_id'] = $call['first_same_child_c_id'];
         }
 
         $call['c_source_type_id'] = $call['first_same_child_c_call_type_id'];
