@@ -198,7 +198,7 @@ class CallLog extends \yii\db\ActiveRecord
 
 	public function getChildCalls(): ActiveQuery
 	{
-		return $this->hasMany(self::class, ['cl_parent_id' => 'cl_id'])->orderBy(['cl_call_created_dt' => SORT_ASC]);
+		return $this->hasMany(self::class, ['cl_parent_id' => 'cl_id'])->orWhere(['cl_id' => 'cl_id'])->orderBy(['cl_call_created_dt' => SORT_ASC]);
 	}
 
     public static function find(): Scopes
