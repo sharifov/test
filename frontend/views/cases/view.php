@@ -13,6 +13,7 @@ use yii\bootstrap4\Modal;
  * @var $previewEmailForm frontend\models\CasePreviewEmailForm
  * @var $previewSmsForm frontend\models\CasePreviewSmsForm
  * @var $dataProviderCommunication yii\data\ActiveDataProvider
+ * @var $dataProviderCommunicationLog yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $isAdmin boolean
  *
@@ -116,7 +117,7 @@ $user = Yii::$app->user->identity;
         </div>
 
         <div class="col-md-6">
-                <?php if ($enableCommunication) : ?>
+            <?php if ($enableCommunication) : ?>
                 <?= $this->render('communication/case_communication', [
                     'model'      => $model,
                     'previewEmailForm' => $previewEmailForm,
@@ -129,6 +130,20 @@ $user = Yii::$app->user->identity;
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
+
+			<?php if ($enableCommunication) : ?>
+				<?= $this->render('communication/case_communication_log', [
+					'model'      => $model,
+					'previewEmailForm' => $previewEmailForm,
+					'previewSmsForm' => $previewSmsForm,
+					'comForm'       => $comForm,
+					'dataProvider'  => $dataProviderCommunicationLog,
+					'isAdmin'       => $isAdmin
+				]);
+				?>
+			<?php else: ?>
+                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
+			<?php endif;?>
         </div>
     </div>
 

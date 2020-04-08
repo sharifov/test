@@ -28,12 +28,12 @@ $child = $child ?? false;
 						<?= Html::encode($callItem->department->dep_name)?>
 					<?php endif; ?>
 				</td>
-				<td class="text-left">
+				<td class="text-left" style="width: 112px;">
 					<?=$callItem->getStatusIcon()?>  <?= CallLogStatus::getName($callItem->cl_status_id) ?>
 				</td>
 				<td class="text-center" style="width: 70px">
 					<?php if ($callItem->cl_duration):?>
-						<span class="badge badge-warning" title="Duration: <?=Yii::$app->formatter->asDuration($callItem->cl_duration)?>"><?=gmdate('i:s', $callItem->cl_duration)?></span>
+						<span class="badge badge-warning" data-toggle="tooltip" data-html="true" title="Duration: <?=Yii::$app->formatter->asDuration($callItem->cl_duration)?> <?php if($callItem->queue && $callItem->queue->clq_queue_time): ?><br> Queue Duration: <?= Yii::$app->formatter->asDuration($callItem->queue->clq_queue_time) ?> <?php endif; ?>"><?=gmdate('i:s', $callItem->cl_duration)?></span>
 					<?php endif;?>
 				</td>
 				<td>
