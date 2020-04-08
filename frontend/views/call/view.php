@@ -39,17 +39,17 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-12">
         <script>
             window.WS_InitOptions = {
-                pluginCdnTemplate: "https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/plugin/wavesurfer.[name].min.js",
-                splitChannels: true
+                pluginCdnTemplate: "https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/plugin/wavesurfer.[name].min.js"
             };
-
         </script>
-
 
         <wavesurfer
                 data-url="<?= $model->recordingUrl  ?>"
                 data-plugins="minimap,timeline,cursor"
+
                 data-split-channels="true"
+                data-media-controls="false"
+
                 data-minimap-height="30"
                 data-minimap-wave-color="#ddd"
                 data-minimap-progress-color="#999"
