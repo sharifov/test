@@ -6,6 +6,7 @@
  * @var $previewSmsForm LeadPreviewSmsForm
  * @var $quotesProvider ActiveDataProvider
  * @var $dataProviderCommunication ActiveDataProvider
+ * @var $dataProviderCommunicationLog ActiveDataProvider
  * @var $dataProviderCallExpert ActiveDataProvider
  * @var $dataProviderNotes ActiveDataProvider
  * @var $enableCommunication boolean
@@ -176,7 +177,7 @@ $lead = $leadForm->getLead();
 					'previewSmsForm' => $previewSmsForm,
 					'comForm'       => $comForm,
 					'leadId'        => $lead->id,
-					'dataProvider'  => $dataProviderCommunication,
+					'dataProvider'  => $dataProviderCommunicationLog,
 					'isAdmin'       => $is_admin
 				]);
 				?>

@@ -1,4 +1,21 @@
 <?php
+/**
+ * @var $this yii\web\View
+ * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $comForm CommunicationForm
+ * @var $leadForm LeadForm
+ * @var $previewEmailForm LeadPreviewEmailForm
+ * @var $previewSmsForm LeadPreviewSmsForm
+ * @var $isAdmin bool
+ *
+ */
+
+use frontend\models\CommunicationForm;
+use frontend\models\LeadForm;
+use frontend\models\LeadPreviewEmailForm;
+use frontend\models\LeadPreviewSmsForm;
+
+$c_type_id = $comForm->c_type_id;
 ?>
 
 <div class="x_panel">
@@ -10,7 +27,7 @@
 		<div class="clearfix"></div>
 	</div>
 	<div class="x_content">
-        <?php \yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication-log']) ?>
+        <?php \yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication-log', 'timeout' => 5000]) ?>
             <div class="panel">
                 <div class="chat__list">
 					<?= \yii\widgets\ListView::widget([
@@ -24,7 +41,7 @@
 						'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
 						'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
 						'itemView' => function ($model, $key, $index, $widget) use ($dataProvider) {
-							return $this->render('_list_item',['model' => $model, 'dataProvider' => $dataProvider]);
+							return $this->render('_list_item_log',['model' => $model, 'dataProvider' => $dataProvider]);
 						},
 
 						'itemOptions' => [
