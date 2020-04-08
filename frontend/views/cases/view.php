@@ -117,7 +117,7 @@ $user = Yii::$app->user->identity;
         </div>
 
         <div class="col-md-6">
-                <?php if ($enableCommunication) : ?>
+            <?php if ($enableCommunication) : ?>
                 <?= $this->render('communication/case_communication', [
                     'model'      => $model,
                     'previewEmailForm' => $previewEmailForm,
@@ -130,9 +130,7 @@ $user = Yii::$app->user->identity;
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
-        </div>
 
-        <div class="col-md-6">
 			<?php if ($enableCommunication) : ?>
 				<?= $this->render('communication/case_communication_log', [
 					'model'      => $model,

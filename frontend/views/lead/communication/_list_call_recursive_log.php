@@ -28,7 +28,7 @@ $child = $child ?? false;
 						<?= Html::encode($callItem->department->dep_name)?>
 					<?php endif; ?>
 				</td>
-				<td class="text-left">
+				<td class="text-left" style="width: 112px;">
 					<?=$callItem->getStatusIcon()?>  <?= CallLogStatus::getName($callItem->cl_status_id) ?>
 				</td>
 				<td class="text-center" style="width: 70px">
