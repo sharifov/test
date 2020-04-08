@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cl_project_id',
                 'relation' => 'project',
             ],
-            ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_created_dt'],
+            ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_created_dt', 'format' => 'byUserDateTimeWithSeconds'],
             ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_finished_dt'],
             ['class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class],
             'cl_client_id:client',
