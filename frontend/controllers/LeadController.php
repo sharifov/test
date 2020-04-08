@@ -1037,6 +1037,7 @@ class LeadController extends FController
 			->from('call_log_lead')
 			->innerJoin('call_log', 'call_log.cl_id = call_log_lead.cll_cl_id')
 			->where(['cll_lead_id' => $lead->id])
+			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'lead_id']);
 
         $queryUnion = $queryEmail->union($querySms);
