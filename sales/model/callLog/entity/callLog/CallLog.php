@@ -196,7 +196,7 @@ class CallLog extends \yii\db\ActiveRecord
         return $this->hasOne(CallLogRecord::class, ['clr_cl_id' => 'cl_id']);
     }
 
-	public function getChildCalls(): ActiveQuery
+	public function getChildCalls(): array
 	{
 		return (new ActiveQuery($this))
 			->where(['cl_parent_id' => $this->cl_id])
