@@ -38,6 +38,8 @@ use yii\db\Query;
  * @property int|null $cl_status_id
  * @property int|null $cl_client_id
  * @property float|null $cl_price
+ * @property int $cl_year
+ * @property int $cl_month
  *
  * @property Client $client
  * @property Department $department
@@ -197,7 +199,7 @@ class CallLog extends \yii\db\ActiveRecord
         return $this->hasOne(CallLogRecord::class, ['clr_cl_id' => 'cl_id']);
     }
 
-	public function getChildCalls()
+	public function getChildCalls(): array
 	{
 		return (new ActiveQuery($this))
 			->where(['cl_parent_id' => $this->cl_id])

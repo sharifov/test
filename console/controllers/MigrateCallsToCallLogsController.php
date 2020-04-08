@@ -4,6 +4,8 @@ namespace console\controllers;
 
 use common\models\Call;
 use common\models\CallUserAccess;
+use common\models\Lead;
+use sales\entities\cases\Cases;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
@@ -648,6 +650,19 @@ class MigrateCallsToCallLogsController extends Controller
             $callLog->cl_is_transfer = $callData['cl_is_transfer'] ?? false;
             $callLog->cl_department_id = $callData['cl_department_id'] ?? $call['c_dep_id'];
             $callLog->cl_client_id = $callData['cl_client_id'] ?? $call['c_client_id'];
+
+            if (!$callLog->cl_client_id) {
+                if ($call['c_lead_id']) {
+                    if ($lead = Lead::find()->select(['client_id'])->andWhere(['id' => $call['c_lead_id']])->asArray()->one()) {
+                        $callLog->cl_client_id = $lead['client_id'];
+                    }
+                } elseif ($call['c_case_id']) {
+                    if ($case = Cases::find()->select(['cs_client_id'])->andWhere(['cs_id' => $call['c_case_id']])->asArray()->one()) {
+                        $callLog->cl_client_id = $case['cs_client_id'];
+                    }
+                }
+            }
+
             $callLog->cl_parent_id = $callData['cl_parent_id'] ?? $call['c_parent_id'];
             $callLog->cl_status_id = $callData['cl_status_id'] ?? ($call['c_status_id'] ?: self::convertStatusFromTwStatus($call['c_call_status']));
 
@@ -659,6 +674,12 @@ class MigrateCallsToCallLogsController extends Controller
                 if ($phoneList = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $call['c_to']])->asArray()->one()) {
                     $callLog->cl_phone_list_id = $phoneList['pl_id'];
                 }
+            }
+
+            if ($callLog->cl_call_created_dt) {
+                $time = strtotime($callLog->cl_call_created_dt);
+                $callLog->cl_year = date('Y', $time);
+                $callLog->cl_month = date('m', $time);
             }
 
             if (!$callLog->save()) {
