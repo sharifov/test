@@ -52,12 +52,17 @@ $fromType = 'client';
 
 				<?php if($call->isIn()):?>
 					<div class="chat__sender">
-						<i class="fa fa-phone" title="<?=Html::encode($call->cl_phone_from)?>"></i> <?php //php $call->cClient ? Html::encode($call->cClient->full_name) : ''?>
-						to <b><?=($call->user ? '<i class="fa fa-user"></i> '.Html::encode($call->user->username) : '-') ?></b>
+                        <span title="<?=Html::encode($call->cl_phone_from)?>">
+                            <i class="fa fa-phone"></i> <?= $call->client ? Html::encode($call->client->full_name ?? '') : 'Client'?>
+                        </span>
+						to
+                        <span>
+                            <b><?=($call->user ? '<i class="fa fa-user"></i> '.Html::encode($call->user->username) : 'Agent') ?></b>
+                        </span>
 					</div>
 				<?php else: ?>
 					<div class="chat__sender">
-						from "<b title="<?=Html::encode($call->cl_phone_from)?>"><?=($call->user ? Html::encode($call->user->username) : '-') ?></b>" to <i class="fa fa-phone" title="<?=Html::encode($call->cl_phone_to)?>"></i>
+						from "<b title="<?=Html::encode($call->cl_phone_from)?>"><?=($call->user ? Html::encode($call->user->username) : 'Agent') ?></b>" to <i class="fa fa-phone" title="<?=Html::encode($call->cl_phone_to)?>"></i>
 						<?=Html::encode($call->cl_phone_to)?>
 					</div>
 				<?php endif;?>
