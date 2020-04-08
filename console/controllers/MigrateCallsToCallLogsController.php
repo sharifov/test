@@ -676,6 +676,12 @@ class MigrateCallsToCallLogsController extends Controller
                 }
             }
 
+            if ($callLog->cl_call_created_dt) {
+                $time = strtotime($callLog->cl_call_created_dt);
+                $callLog->cl_year = date('Y', $time);
+                $callLog->cl_month = date('m', $time);
+            }
+
             if (!$callLog->save()) {
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callLog->toArray(), 'message' => $callLog->getErrors()]));
             }

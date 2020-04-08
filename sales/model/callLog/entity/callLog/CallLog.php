@@ -37,6 +37,8 @@ use yii\db\ActiveQuery;
  * @property int|null $cl_status_id
  * @property int|null $cl_client_id
  * @property float|null $cl_price
+ * @property int $cl_year
+ * @property int $cl_month
  *
  * @property Client $client
  * @property Department $department
