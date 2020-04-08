@@ -61,6 +61,7 @@ use Yii;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -1004,12 +1005,12 @@ class LeadController extends FController
         $quotesProvider = $lead->getQuotesProvider([]);
 
 
-        $query1 = (new \yii\db\Query())
+        $queryEmail = (new \yii\db\Query())
             ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt'])
             ->from('email')
             ->where(['e_lead_id' => $lead->id]);
 
-        $query2 = (new \yii\db\Query())
+        $querySms = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
             ->from('sms')
             ->where(['s_lead_id' => $lead->id]);
@@ -1020,7 +1021,7 @@ class LeadController extends FController
 //            ->from('call')
 //            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
 
-        $query3 = (new \yii\db\Query())
+        $queryCall = (new \yii\db\Query())
             ->select(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
             ->addSelect(['type' => new Expression('"voice"')])
             ->addSelect(['lead_id' => 'c_lead_id', 'created_dt' => 'MAX(c_created_dt)'])
@@ -1029,12 +1030,27 @@ class LeadController extends FController
 //            ->addGroupBy(['id', 'c_lead_id', 'c_created_dt']);
             ->addGroupBy(['id']);
 
-//        VarDumper::dump($query3->createCommand()->getRawSql());die;
+        $queryCallLog = (new Query())
+			->select(['id' => new Expression('if (cl_parent_id is null, cl_id, cl_parent_id)')])
+			->addSelect(['type' => new Expression('"voice"')])
+			->addSelect(['lead_id' => 'call_log_lead.cll_lead_id', 'created_dt' => 'MIN(call_log.cl_call_created_dt)'])
+			->from('call_log_lead')
+			->innerJoin('call_log', 'call_log.cl_id = call_log_lead.cll_cl_id')
+			->where(['cll_lead_id' => $lead->id])
+			->groupBy(['id', 'type', 'lead_id']);
+
+        $queryUnion = $queryEmail->union($querySms);
+		$queryUnionLog = clone $queryUnion;
+
+		$unionQueryLog = (new Query())
+			->from(['union_table' => $queryUnionLog->union($queryCallLog)])
+			->orderBy(['created_dt' => SORT_ASC]);
 
         $unionQuery = (new \yii\db\Query())
-            ->from(['union_table' => $query1->union($query2)->union($query3)])
+            ->from(['union_table' => $queryUnion->union($queryCall)])
             ->orderBy(['created_dt' => SORT_ASC]);
 
+//        echo '<pre>';print_r($unionQueryLog->createCommand()->rawSql);die;
         //echo $query3->createCommand()->getRawSql(); exit;
 
         $dataProviderCommunication = new ActiveDataProvider([
@@ -1045,6 +1061,13 @@ class LeadController extends FController
             ],
         ]);
 
+        $dataProviderCommunicationLog = new ActiveDataProvider([
+        	'query' => $unionQueryLog,
+			'pagination' => [
+				'pageSize' => 10,
+			]
+		]);
+
 
         if (!Yii::$app->request->isAjax || !Yii::$app->request->get('page')) {
             $pageCount = ceil($dataProviderCommunication->totalCount / $dataProviderCommunication->pagination->pageSize) - 1;
@@ -1054,6 +1077,15 @@ class LeadController extends FController
             $dataProviderCommunication->pagination->page = $pageCount;
         }
 
+		if (!Yii::$app->request->isAjax || !Yii::$app->request->get('page')) {
+			$pageCountLog = ceil($dataProviderCommunicationLog->totalCount / $dataProviderCommunicationLog->pagination->pageSize) - 1;
+			if ($pageCountLog < 0) {
+				$pageCountLog = 0;
+			}
+			$dataProviderCommunicationLog->pagination->page = $pageCountLog;
+		}
+
+//		$query = (new Query())->select(['cl.*'])->from('call_log_lead')->leftJoin('call_log cl', 'cl.cl_id = cll_cl_id')->where(['cll_lead_id' => $lead->id])->all();
 
 //        $enableCommunication = false;
 //
@@ -1169,6 +1201,7 @@ class LeadController extends FController
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
             'dataProviderCommunication' => $dataProviderCommunication,
+            'dataProviderCommunicationLog' => $dataProviderCommunicationLog,
 //            'enableCommunication' => $enableCommunication,
             'dataProviderCallExpert' => $dataProviderCallExpert,
             'modelLeadCallExpert' => $modelLeadCallExpert,

@@ -6,6 +6,7 @@
  * @var $previewSmsForm LeadPreviewSmsForm
  * @var $quotesProvider ActiveDataProvider
  * @var $dataProviderCommunication ActiveDataProvider
+ * @var $dataProviderCommunicationLog ActiveDataProvider
  * @var $dataProviderCallExpert ActiveDataProvider
  * @var $dataProviderNotes ActiveDataProvider
  * @var $enableCommunication boolean
@@ -168,6 +169,21 @@ $lead = $leadForm->getLead();
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
+
+			<?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
+				<?= $this->render('communication/lead_communication_log', [
+					'leadForm'      => $leadForm,
+					'previewEmailForm' => $previewEmailForm,
+					'previewSmsForm' => $previewSmsForm,
+					'comForm'       => $comForm,
+					'leadId'        => $lead->id,
+					'dataProvider'  => $dataProviderCommunicationLog,
+					'isAdmin'       => $is_admin
+				]);
+				?>
+			<?php else: ?>
+                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
+			<?php endif;?>
 
 
             <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
