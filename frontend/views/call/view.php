@@ -12,6 +12,14 @@ $this->params['breadcrumbs'][] = ['label' => 'Calls', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/wavesurfer.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/wavesurfer-html-init.min.js"></script>
+
+<?php /*
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/plugin/wavesurfer.timeline.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/plugin/wavesurfer.minimap.js"></script>
+ */ ?>
+
 <div class="call-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
@@ -27,11 +35,38 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
+    <?php if($model->recordingUrl):?>
+    <div class="col-md-12">
+        <script>
+            window.WS_InitOptions = {
+                pluginCdnTemplate: "https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/plugin/wavesurfer.[name].min.js",
+                splitChannels: true
+            };
+
+        </script>
+
+
+        <wavesurfer
+                data-url="<?= $model->recordingUrl  ?>"
+                data-plugins="minimap,timeline,cursor"
+                data-split-channels="true"
+                data-minimap-height="30"
+                data-minimap-wave-color="#ddd"
+                data-minimap-progress-color="#999"
+                data-timeline-font-size="13px"
+                data-timeline-container="#timeline"
+        >
+        </wavesurfer>
+
+        <div id="timeline"></div>
+        <br/>
+    </div>
+    <?php endif;?>
 
     <div class="col-md-6">
-    <?php if($model->recordingUrl):?>
-        <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?= $model->recordingUrl  /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ?>" type="audio/mpeg"></audio>
-    <?php endif;?>
+
+       <?php /* <audio id="myAudio" controls="controls" controlsList="nodownload" style="width: 100%;" class="video-js vjs-default-skin"><source src="<?= $model->recordingUrl ?>" type="audio/mpeg"></audio> */ ?>
+
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
