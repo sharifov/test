@@ -13,7 +13,7 @@ $user = Yii::$app->user->identity;
 $child = $child ?? false;
 ?>
 <?php if ($callList):?>
-        <?php if ($child): ?>
+        <?php if (!$child): ?>
 	    <table class="table table-condensed" style="background-color: rgba(255, 255,255, .7); margin-bottom: 0;">
         <?php endif; ?>
 		<?php foreach ($callList as $callItem):?>
@@ -78,7 +78,7 @@ $child = $child ?? false;
                 ]) ?>
             <?php endif; ?>
 		<?php endforeach;?>
-		<?php if ($child): ?>
+		<?php if (!$child): ?>
         </table>
         <?php endif; ?>
 <?php endif; ?>
