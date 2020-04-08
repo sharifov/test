@@ -15,6 +15,7 @@ use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\phoneList\entity\PhoneList;
 use yii\db\ActiveQuery;
+use yii\db\Query;
 
 /**
  * This is the model class for table "{{%call_log}}".
@@ -196,9 +197,12 @@ class CallLog extends \yii\db\ActiveRecord
         return $this->hasOne(CallLogRecord::class, ['clr_cl_id' => 'cl_id']);
     }
 
-	public function getChildCalls(): ActiveQuery
+	public function getChildCalls()
 	{
-		return $this->hasMany(self::class, ['cl_parent_id' => 'cl_id'])->orWhere(['cl_id' => 'cl_id'])->orderBy(['cl_call_created_dt' => SORT_ASC]);
+		return (new ActiveQuery($this))
+			->where(['cl_parent_id' => $this->cl_id])
+			->orWhere(['cl_id' => $this->cl_id])
+			->orderBy(['cl_call_created_dt' => SORT_ASC])->all();
 	}
 
     public static function find(): Scopes
