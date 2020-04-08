@@ -6,14 +6,17 @@ use sales\model\callLog\entity\callLog\CallLogStatus;
 use yii\helpers\Html;
 
 /* @var $callList CallLog[] */
+/* @var $child bool */
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
-
+$child = $child ?? false;
 ?>
 <?php if ($callList):?>
-		<?php foreach ($callList as $callItem):?>
+        <?php if ($child): ?>
 	    <table class="table table-condensed" style="background-color: rgba(255, 255,255, .7); margin-bottom: 0;">
+        <?php endif; ?>
+		<?php foreach ($callList as $callItem):?>
 			<tr>
 				<td style="width:80px">
 					<?php if ($user->isAdmin()):?>
@@ -68,11 +71,14 @@ $user = Yii::$app->user->identity;
 
 				</td>
 			</tr>
-	    </table>
-			<?php if ($callItem->childCalls):?>
+            <?php if ($callItem->childCalls):?>
                 <?= $this->render('_list_call_recursive_log', [
-                    'callList' => $callItem->childCalls
+                    'callList' => $callItem->childCalls,
+                    'child' => true
                 ]) ?>
-			<?php endif; ?>
+            <?php endif; ?>
 		<?php endforeach;?>
+		<?php if ($child): ?>
+        </table>
+        <?php endif; ?>
 <?php endif; ?>
