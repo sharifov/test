@@ -459,9 +459,7 @@ class FlightQuoteController extends FController
 						$this->flightManageService->updateFlightRequestAndAssignNewQuote($form, $flight, $preparedData);
 						return '<script>createNotify("Flight Request successfully updated", "Quote successfully assigned to a product Flight", "success"); $("#modal-md").modal("hide");pjaxReload({container: "#pjax-lead-products-wrap"})</script>';
 					}
-				}
-
-				if ($action === FlightQuoteCreateForm::ACTION_APPLY_PRICING_INFO) {
+				} else if ($action === FlightQuoteCreateForm::ACTION_APPLY_PRICING_INFO) {
 					$dump = FlightQuoteHelper::parsePriceDump($form->pricingInfo);
 					$form->updateDataByPricingDump($dump);
 					FlightQuoteHelper::quoteCalculatePaxPrices($form);

@@ -42,7 +42,7 @@ $c_type_id = $comForm->c_type_id;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block;">
-    <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication' ,'enablePushState' => false]) ?>
+    <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication' , 'timeout' => 5000]) ?>
         <?php /*<h1><?=random_int(1, 100)?></h1>*/ ?>
         <div class="panel">
             <div class="chat__list">

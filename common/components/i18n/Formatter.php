@@ -439,6 +439,19 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]');
     }
 
+	/**
+	 * @param $dateTime
+	 * @return string
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function asByUserDateTimeWithSeconds($dateTime): string
+	{
+		if (!$dateTime) {
+			return $this->nullDisplay;
+		}
+		return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i:s]');
+	}
+
     /**
      * @param Employee|int|string|null $value
      * @return string

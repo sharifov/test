@@ -13,6 +13,7 @@ use yii\db\ActiveQuery;
  * @property int|null $clr_duration
  *
  * @property CallLog $log
+ * @property string $recordingUrl
  */
 class CallLogRecord extends \yii\db\ActiveRecord
 {
@@ -53,4 +54,9 @@ class CallLogRecord extends \yii\db\ActiveRecord
     {
         return new Scopes(static::class);
     }
+
+    public function getRecordingUrl(): string
+	{
+		return \Yii::$app->communication->recording_url . $this->clr_record_sid;
+	}
 }

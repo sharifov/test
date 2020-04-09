@@ -15,6 +15,7 @@ use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\phoneList\entity\PhoneList;
 use yii\db\ActiveQuery;
+use yii\db\Query;
 
 /**
  * This is the model class for table "{{%call_log}}".
@@ -37,6 +38,8 @@ use yii\db\ActiveQuery;
  * @property int|null $cl_status_id
  * @property int|null $cl_client_id
  * @property float|null $cl_price
+ * @property int $cl_year
+ * @property int $cl_month
  *
  * @property Client $client
  * @property Department $department
@@ -51,6 +54,7 @@ use yii\db\ActiveQuery;
  * @property Lead|null $lead
  * @property CallLogQueue $queue
  * @property CallLogRecord $record
+ * @property CallLog[] $childCalls
  */
 class CallLog extends \yii\db\ActiveRecord
 {
@@ -195,8 +199,62 @@ class CallLog extends \yii\db\ActiveRecord
         return $this->hasOne(CallLogRecord::class, ['clr_cl_id' => 'cl_id']);
     }
 
+	public function getChildCalls(): array
+	{
+		return (new ActiveQuery($this))
+			->where(['cl_parent_id' => $this->cl_id])
+			->orWhere(['cl_id' => $this->cl_id])
+			->orderBy(['cl_call_created_dt' => SORT_ASC])->all();
+	}
+
     public static function find(): Scopes
     {
         return new Scopes(static::class);
     }
+
+    public function isStatusCompleted(): bool
+	{
+		return $this->cl_status_id === CallLogStatus::COMPLETE;
+	}
+
+	public function isStatusCanceled(): bool
+	{
+		return $this->cl_status_id === CallLogStatus::CANCELED;
+	}
+
+	public function isStatusBusy(): bool
+	{
+		return $this->cl_status_id === CallLogStatus::BUSY;
+	}
+
+	public function isStatusNoAnswer(): bool
+	{
+		return $this->cl_status_id === CallLogStatus::NOT_ANSWERED;
+	}
+
+	public function isStatusFailed(): bool
+	{
+		return $this->cl_status_id === CallLogStatus::FAILED;
+	}
+
+	public function isIn(): bool
+	{
+		return $this->cl_type_id === CallLogType::IN;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getStatusIcon(): string
+	{
+		if ($this->isStatusCompleted()) {
+			$icon = 'fa fa-flag text-success';
+		} elseif ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusFailed()) {
+			$icon = 'fa fa-times-circle text-danger';
+		} else {
+			$icon = '';
+		}
+
+		return '<i class="' . $icon . '"></i>';
+	}
 }

@@ -107,7 +107,7 @@ class CallLogController extends FController
      */
     protected function findModel($id): CallLog
     {
-        if (($model = CallLog::findOne($id)) !== null) {
+        if (($model = CallLog::findOne(['cl_id' => $id])) !== null) {
             return $model;
         }
 

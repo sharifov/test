@@ -23,6 +23,7 @@ use DateTime;
 use common\components\ChartTools;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use DateTimeZone;
@@ -761,15 +762,27 @@ class Call extends \yii\db\ActiveRecord
 
                 if ((int)$this->c_source_type_id !== self::SOURCE_CONFERENCE_CALL && $this->isIn()) {
                     if (!$this->c_parent_id) {
-                        $isCallUserAccepted = CallUserAccess::find()->where([
-                            'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
-                            'cua_call_id' => $this->c_id
-                        ])->exists();
-
-                        if (!$isCallUserAccepted && !$this->isDeclined()) {
-                            $this->c_status_id = self::STATUS_NO_ANSWER;
-                            self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+//                        $isCallUserAccepted = CallUserAccess::find()->where([
+//                            'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
+//                            'cua_call_id' => $this->c_id
+//                        ])->exists();
+//
+//                        if (!$isCallUserAccepted && !$this->isDeclined()) {
+//                            $this->c_status_id = self::STATUS_NO_ANSWER;
+//                            self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+//                        }
+                        if (!$this->isDeclined()) {
+                            /** @var Call $lastChild */
+                            $lastChild = self::find()->andWhere(['c_parent_id' => $this->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+                            if (
+                                ($lastChild === null || $this->c_created_user_id == null)
+                                || ($lastChild && $lastChild->c_created_user_id != null && $this->c_created_user_id != $lastChild->c_created_user_id)
+                            ) {
+                                $this->c_status_id = self::STATUS_NO_ANSWER;
+                                self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+                            }
                         }
+
                     }
                 }
 
