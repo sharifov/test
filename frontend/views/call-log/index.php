@@ -1,6 +1,5 @@
 <?php
 
-use common\models\Call;
 use sales\model\callLog\entity\callLog\CallLog;
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
@@ -103,7 +102,35 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'buttons' => [
+                    'view' => static function ($url, CallLog $model) {
+                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/call-log/view', 'id' => $model->cl_id], [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                            'title' => 'View',
+                        ]);
+                    },
+                    'update' => static function ($url, CallLog $model) {
+                        return Html::a('<span class="glyphicon glyphicon-pencil"></span>', ['/call-log/update', 'id' => $model->cl_id], [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                            'title' => 'Update',
+                        ]);
+                    },
+                    'delete' => static function ($url, CallLog $model) {
+                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['/call-log/delete', 'id' => $model->cl_id], [
+                            'data-pjax' => 0,
+                            'title' => 'Delete',
+                            'data' => [
+                                'confirm' => 'Are you sure you want to delete this Call Log?',
+                                'method' => 'post',
+                            ],
+                        ]);
+                    },
+                ],
+            ]
         ],
     ]) ?>
 
