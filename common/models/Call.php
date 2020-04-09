@@ -761,7 +761,8 @@ class Call extends \yii\db\ActiveRecord
                 }
 
                 if ((int)$this->c_source_type_id !== self::SOURCE_CONFERENCE_CALL && $this->isIn()) {
-                    if (!$this->c_parent_id) {
+                    /** @var Call $parent */
+                    if (!$this->c_parent_id || (($parent = self::find()->andWhere(['c_id' => $this->c_parent_id])->one()) && $parent->isOut())) {
 //                        $isCallUserAccepted = CallUserAccess::find()->where([
 //                            'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
 //                            'cua_call_id' => $this->c_id
