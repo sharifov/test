@@ -94,11 +94,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => \common\components\grid\BooleanColumn::class,
                 'attribute' => 'dpp_show_on_site',
             ],
+
             [
-                'class' => \common\components\grid\UserColumn::class,
+                'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'dpp_updated_user_id',
                 'relation' => 'dppUpdatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'dpp_updated_dt',

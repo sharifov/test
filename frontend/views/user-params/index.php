@@ -29,14 +29,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'up_user_id',
-
+            /*'up_user_id',
             [
                 'attribute' => 'upUser.username',
-                /*'value' => function(\common\models\UserParams $model) {
-                    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
-                },
-                'contentOptions' => ['class' => 'text-right'],*/
+                //'value' => function(\common\models\UserParams $model) {
+                //    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                //},
+                //'contentOptions' => ['class' => 'text-right'],
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'up_user_id',
+                'relation' => 'upUser',
+                'placeholder' => 'Select User',
             ],
 
             //'up_commission_percent',
@@ -100,14 +106,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
-            'up_updated_user_id',
+           /* 'up_updated_user_id',
             [
                     'label' => 'Updated User',
                 'attribute' => 'upUpdatedUser.username',
-                /*'value' => function(\common\models\UserParams $model) {
-                    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
-                },
-                'contentOptions' => ['class' => 'text-right'],*/
+                //'value' => function(\common\models\UserParams $model) {
+                //    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                //},
+                //'contentOptions' => ['class' => 'text-right'],
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'up_updated_user_id',
+                'relation' => 'upUpdatedUser',
+                'placeholder' => 'Select User',
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

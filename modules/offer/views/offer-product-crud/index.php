@@ -3,7 +3,7 @@
 use modules\offer\src\grid\columns\OfferColumn;
 use modules\product\src\grid\columns\ProductQuoteColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -41,11 +41,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'op_product_quote_id',
                 'relation' => 'opProductQuote',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'op_created_user_id',
-                'relation' => 'opCreatedUser'
+                'relation' => 'opCreatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'op_created_dt',

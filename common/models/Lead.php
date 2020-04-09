@@ -1653,7 +1653,7 @@ class Lead extends ActiveRecord implements Objectable
             'client_id' => 'Client ID',
             'employee_id' => 'Employee ID',
             'status' => 'Status',
-            'project_id' => 'Project ID',
+            'project_id' => 'Project',
             'source_id' => 'Source ID',
             'trip_type' => 'Trip Type',
             'cabin' => 'Cabin',

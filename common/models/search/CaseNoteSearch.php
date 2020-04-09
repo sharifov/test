@@ -49,7 +49,7 @@ class CaseNoteSearch extends CaseNote
             'query' => $query,
             'sort'=> ['defaultOrder' => ['cn_id' => SORT_ASC]],
             'pagination' => [
-                'pageSize' => 10,
+                'pageSize' => 15,
             ],
         ]);
 

@@ -27,14 +27,22 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            [
+            /*[
 				'attribute' => 'upt_user_id',
 				'value' => static function (UserProductType $model) {
 					return '<i class="fa fa-user"></i> ' . Html::encode($model->user->username);
 				},
 				'format' => 'raw',
 				'filter' => Employee::getList()
-			],
+			],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'upt_user_id',
+                'relation' => 'user',
+                'placeholder' => 'Select User',
+            ],
+
             [
 				'attribute' => 'upt_product_type_id',
 				'value' => static function (UserProductType $model) {

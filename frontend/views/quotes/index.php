@@ -77,13 +77,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'lead_id',
                 'relation' => 'lead',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'employee_id',
                 'relation' => 'employee',
+                'placeholder' => 'Select User',
             ],
-            'record_locator',
 
+            'record_locator',
 
             [
                 'attribute' => 'gds',

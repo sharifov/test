@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'columns' => [
 
-                ['label' => 'User Id',
+                /*['label' => 'User Id',
                     'value' => static function(UserStatus $model) {
                         return $model->us_user_id;
                     },
@@ -58,6 +58,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => UserColumn::class,
                     'attribute' => 'us_user_id',
                     'relation' => 'usUser',
+                ],*/
+
+                [
+                    'class' => \common\components\grid\UserSelect2Column::class,
+                    'attribute' => 'us_user_id',
+                    'relation' => 'usUser',
+                    'placeholder' => 'Select User',
                 ],
 
                 'us_gl_call_count',

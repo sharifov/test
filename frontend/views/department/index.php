@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\UserSelect2Column;
 use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\DepartmentSearch */
@@ -31,13 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'dep_id',
             'dep_key',
             'dep_name',
+
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'dep_updated_user_id',
-                'value' => static function (\common\models\Department $model) {
-                    return $model->dep_updated_user_id ? '<i class="fa fa-user"></i> ' .Html::encode($model->depUpdatedUser->username) : $model->dep_updated_user_id;
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Employee::getList()
+                'relation' => 'depUpdatedUser',
+                'placeholder' => 'Select User',
             ],
 
             [

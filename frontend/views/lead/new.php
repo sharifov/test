@@ -39,8 +39,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
-
         [
+            'class' => \common\components\grid\project\ProjectColumn::class,
+            'attribute' => 'project_id',
+            'relation' => 'project'
+        ],
+
+        /*[
             'attribute' => 'project_id',
             'value' => static function (\common\models\Lead $model) {
                 return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
@@ -50,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:120px'
             ],
             'filter' => \common\models\Project::getList(),
-        ],
+        ],*/
 
         [
             'attribute' => 'source_id',

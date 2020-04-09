@@ -327,16 +327,14 @@ $this->registerJs($js);
             'visible' => !$isAgent,
             'format' => 'raw'
         ],
+
         [
+            'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
-            'value' => static function (Lead $model) {
-                return $model->project ? $model->project->name : '-';
-            },
-            'filter' => $lists->getProjects(),
-            'label' => 'Project'
+            'relation' => 'project',
+            'onlyUserProjects' => true
         ],
 
-        // 'project_id',
         // 'source_id',
         /*[
             'attribute' => 'source_id',

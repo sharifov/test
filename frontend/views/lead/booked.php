@@ -91,16 +91,11 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
+            'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
-            'value' => static function (\common\models\Lead $model) {
-                return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
-            },
-            'format' => 'raw',
-            'options' => [
-                'style' => 'width:120px'
-            ],
-            'filter' => $lists->getProjects(),
+            'relation' => 'project'
         ],
+
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',

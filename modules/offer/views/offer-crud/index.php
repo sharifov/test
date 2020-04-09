@@ -3,7 +3,7 @@
 use modules\lead\src\grid\columns\LeadColumn;
 use modules\offer\src\grid\columns\OfferStatusColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -50,21 +50,28 @@ $this->params['breadcrumbs'][] = $this->title;
             'of_app_total',
             'of_client_total',
             'of_profit_amount',
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'of_owner_user_id',
                 'relation' => 'ofOwnerUser',
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'of_created_user_id',
                 'relation' => 'ofCreatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'of_updated_user_id',
                 'relation' => 'ofUpdatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'of_created_dt',

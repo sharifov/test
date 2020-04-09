@@ -2,7 +2,7 @@
 
 use sales\model\user\entity\profit\UserProfit;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -32,11 +32,14 @@ $this->params['breadcrumbs'][] = $this->title;
 		},
         'columns' => [
             'up_id',
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'up_user_id',
-				'relation' => 'upUser',
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'up_user_id',
+                'relation' => 'upUser',
+                'placeholder' => 'Select User',
+            ],
+
             [
                 'attribute' => 'up_lead_id',
                 'value' => static function (UserProfit $model) {

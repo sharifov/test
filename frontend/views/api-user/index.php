@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'class' => DateTimeColumn::class,
                         'attribute' => 'au_updated_dt',
                     ],
-                    'auProject.name',
+                    'auProject.name:projectName',
                     /*[
                             'attribute' => 'auUpdatedUser.username',
                     ]*/

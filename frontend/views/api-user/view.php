@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'au_rate_limit_number',
                         'au_rate_limit_reset',
                         //'auUpdatedUser.username',
-                        'auProject.name',
+                        'auProject.name:projectName',
                     ],
                 ]) ?>
             </div>

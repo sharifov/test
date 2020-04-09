@@ -37,12 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
 
-            [
-                'attribute' => 'upp_project_id',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    return $model->uppProject ? ''.$model->uppProject->name.'' : '-';
-                },
-            ],
+            'upp_project_id:projectName',
 
             [
                 'attribute' => 'upp_dep_id',

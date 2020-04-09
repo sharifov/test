@@ -98,14 +98,13 @@ $gridId = 'cases-grid-id';
                 ]
             ],
             'cs_gid',
+
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'cs_project_id',
-                'value' => static function (Cases $model) {
-                    return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
-                },
-                'format' => 'raw',
-                'filter' => EmployeeProjectAccess::getProjects()
+                'relation' => 'project'
             ],
+
             [
                 'attribute' => 'cs_dep_id',
                 'value' => static function (Cases $model) {
@@ -121,7 +120,7 @@ $gridId = 'cases-grid-id';
                 'filter' => CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
             ],
             [
-                    'class' => CasesStatusColumn::class,
+                'class' => CasesStatusColumn::class,
             ],
             [
                 'class' => CasesSourceTypeColumn::class,
@@ -137,14 +136,22 @@ $gridId = 'cases-grid-id';
                     'style' => 'word-break: break-all; white-space:normal'
                 ]
             ],
-            [
+            /*[
                 'attribute' => 'cs_user_id',
                 'value' => static function (Cases $model) {
                     return $model->owner ? '<i class="fa fa-user"></i> ' .Html::encode($model->owner->username) : '-';
                 },
                 'format' => 'raw',
                 'filter' => $userFilter
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'cs_user_id',
+                'relation' => 'owner',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'attribute' => 'cs_lead_id',
                 'value' => static function (Cases $model) {

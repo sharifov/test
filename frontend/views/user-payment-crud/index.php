@@ -1,7 +1,7 @@
 <?php
 
 use sales\model\user\entity\payment\UserPayment;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\userPayment\UserPaymentCategoryIdColumn;
 use yii\helpers\Html;
@@ -36,11 +36,14 @@ $this->params['breadcrumbs'][] = $this->title;
 		},
         'columns' => [
             'upt_id',
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'upt_assigned_user_id',
-				'relation' => 'uptAssignedUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'upt_assigned_user_id',
+                'relation' => 'uptAssignedUser',
+                'placeholder' => 'Select User',
+            ],
+
             [
                 'class' => UserPaymentCategoryIdColumn::class,
 				'attribute' => 'upt_category_id',
@@ -57,16 +60,21 @@ $this->params['breadcrumbs'][] = $this->title;
 				'attribute' => 'upt_date',
                 'format' => 'date'
 			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'upt_created_user_id',
-				'relation' => 'uptCreatedUser'
-			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'upt_updated_user_id',
-				'relation' => 'uptUpdatedUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'upt_created_user_id',
+                'relation' => 'uptCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'upt_updated_user_id',
+                'relation' => 'uptUpdatedUser',
+                'placeholder' => 'Select User',
+            ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'upt_created_dt',

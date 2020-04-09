@@ -9,7 +9,7 @@ use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
 use modules\qaTask\src\helpers\formatters\QaTaskStatusReasonFormatter;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\DurationColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -76,16 +76,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => QaTaskActionColumn::class,
                 'attribute' => 'tsl_action_id',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'tsl_assigned_user_id',
                 'relation' => 'assignedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'tsl_created_user_id',
                 'relation' => 'createdUser',
+                'placeholder' => 'Select User',
             ],
+
             ['class' => ActionColumn::class],
         ],
     ]) ?>

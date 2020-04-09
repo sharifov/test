@@ -3,7 +3,7 @@
 use modules\product\src\grid\columns\ProductTypeColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\MonthColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -34,11 +34,14 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => ProductTypeColumn::class,
 				'attribute' => 'upc_product_type_id',
 			],
+
             [
-				'class' => UserColumn::class,
-				'attribute' => 'upc_user_id',
-				'relation' => 'upcUser'
-			],
+                'class' => UserSelect2Column::class,
+                'attribute' => 'upc_user_id',
+                'relation' => 'upcUser',
+                'placeholder' => 'Select User',
+            ],
+
             'upc_year',
 			[
 				'class' => MonthColumn::class,
@@ -46,16 +49,21 @@ $this->params['breadcrumbs'][] = $this->title;
 			],
             'upc_performance:percentInteger',
             'upc_commission_percent:percentInteger',
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'upc_created_user_id',
-				'relation' => 'upcCreatedUser'
-			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'upc_updated_user_id',
-				'relation' => 'upcCreatedUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'upc_created_user_id',
+                'relation' => 'upcCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'upc_updated_user_id',
+                'relation' => 'upcUpdatedUser',
+                'placeholder' => 'Select User',
+            ],
+
 			[
 				'class' => DateTimeColumn::class,
 				'attribute' => 'upc_created_dt',

@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+use common\components\grid\UserSelect2Column;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseSaleSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -54,8 +55,21 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             //'css_sale_data',
-            'css_created_user_id',
-            'css_updated_user_id',
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'css_created_user_id',
+                'relation' => 'cssCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'css_updated_user_id',
+                'relation' => 'cssUpdatedUser',
+                'placeholder' => 'Select User',
+            ],
+
             [
                 'attribute' => 'css_created_dt',
                 'value' => function(\common\models\CaseSale $model) {

@@ -4,7 +4,7 @@ use modules\product\src\grid\columns\ProductOptionColumn;
 use modules\product\src\grid\columns\ProductQuoteColumn;
 use modules\product\src\grid\columns\ProductQuoteOptionStatusColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -52,16 +52,21 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqo_price',
             'pqo_client_price',
             'pqo_extra_markup',
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'pqo_created_user_id',
                 'relation' => 'pqoCreatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'pqo_updated_user_id',
                 'relation' => 'pqoUpdatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pqo_created_dt',

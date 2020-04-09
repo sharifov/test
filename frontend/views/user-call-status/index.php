@@ -77,14 +77,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => \common\models\UserCallStatus::STATUS_TYPE_LIST
             ],
-            //'us_user_id',
-            [
+
+            /*[
                 'attribute' => 'us_user_id',
                 'value' => static function (\common\models\UserCallStatus $model) {
                     return ($model->usUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->usUser->username) : $model->us_user_id);
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Employee::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'us_user_id',
+                'relation' => 'usUser',
+                'placeholder' => 'Select User',
             ],
 
             [

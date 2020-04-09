@@ -1,12 +1,11 @@
 <?php
 
-use common\models\Employee;
 use common\models\PaymentMethod;
 use modules\product\src\entities\productType\ProductTypeQuery;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethod;
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -63,16 +62,21 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => BooleanColumn::class,
 				'attribute' => 'ptpm_default',
 			],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'ptpm_created_user_id',
-                'relation' => 'ptpmCreatedUser'
+                'relation' => 'ptpmCreatedUser',
+                'placeholder' => 'Select User',
             ],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'ptpm_updated_user_id',
-				'relation' => 'ptpmUpdatedUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'ptpm_updated_user_id',
+                'relation' => 'ptpmUpdatedUser',
+                'placeholder' => 'Select User',
+            ],
+
 			[
 				'class' => DateTimeColumn::class,
 				'attribute' => 'ptpm_created_dt',

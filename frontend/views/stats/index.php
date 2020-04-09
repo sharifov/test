@@ -153,7 +153,7 @@ $user = Yii::$app->user->identity;
                         'contentOptions' => ['class' => 'text-center'],
                         'options' => ['style' => 'width:60px'],
                     ],
-                    [
+                    /*[
                         'attribute' => 'username',
                         'value' => static function (\common\models\Employee $model) {
                             return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
@@ -161,7 +161,9 @@ $user = Yii::$app->user->identity;
                         'format' => 'raw',
                         //'contentOptions' => ['title' => 'text-center'],
                         'options' => ['style' => 'width:180px'],
-                    ],
+                    ],*/
+
+                    'username:userName',
 
                     [
                         //'attribute' => 'username',
