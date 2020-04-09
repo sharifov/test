@@ -41,6 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class],
             ['class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class],
             ['class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class],
+            ['class' => BooleanColumn::class, 'attribute' => 'cl_is_transfer'],
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'cl_project_id',
@@ -80,7 +81,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cl_phone_list_id',
                 'relation' => 'phoneList',
             ],
-            ['class' => BooleanColumn::class, 'attribute' => 'cl_is_transfer'],
             'cl_price',
             [
                 'attribute' => 'clq_queue_time',
