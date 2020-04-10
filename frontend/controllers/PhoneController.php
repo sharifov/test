@@ -617,8 +617,8 @@ class PhoneController extends FController
                 $originCall->cParent->c_is_transfer = true;
 
                 if (!$originCall->c_group_id) {
-                    $originCall->c_group_id = $originCall->cParent->c_id;
-                    $originCall->cParent->c_group_id = $originCall->cParent->c_id;
+                    $originCall->c_group_id = $originCall->c_id;
+                    $originCall->cParent->c_group_id = $originCall->c_id;
                 }
 
                 if (!$originCall->save()) {
@@ -639,8 +639,8 @@ class PhoneController extends FController
                     $childCall->c_is_transfer = true;
 
                     if (!$originCall->c_group_id) {
-                        $originCall->c_group_id = $childCall->c_id;
-                        $childCall->c_group_id = $childCall->c_id;
+                        $originCall->c_group_id = $originCall->c_id;
+                        $childCall->c_group_id = $originCall->c_id;
                     }
 
                     if (!$originCall->save()) {
