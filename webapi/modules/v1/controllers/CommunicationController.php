@@ -855,6 +855,7 @@ class CommunicationController extends ApiBaseController
                 $call->c_project_id = $parentCall->c_project_id;
                 $call->c_dep_id = $parentCall->c_dep_id;
                 $call->c_source_type_id = $parentCall->c_source_type_id;
+                $call->c_group_id = $parentCall->c_group_id;
 
                 if ($parentCall->callUserGroups && !$call->callUserGroups) {
                     foreach ($parentCall->callUserGroups as $cugItem) {
@@ -958,6 +959,7 @@ class CommunicationController extends ApiBaseController
                 $call->c_lead_id = $parentCall->c_lead_id;
                 $call->c_case_id = $parentCall->c_case_id;
                 $call->c_client_id = $parentCall->c_client_id;
+                $call->c_group_id = $parentCall->c_group_id;
 
                 $call->c_created_user_id = $parentCall->c_created_user_id;
 

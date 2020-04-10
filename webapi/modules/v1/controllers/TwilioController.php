@@ -225,7 +225,13 @@ class TwilioController extends ApiBaseNoAuthController
                 $call->c_to = $from;
             }
             if ($isTransfer) {
-                $call->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+                if ($type === 'user') {
+                    $call->c_source_type_id = Call::SOURCE_DIRECT_CALL;
+                } elseif ($type === 'department') {
+                    $call->c_source_type_id = Call::SOURCE_GENERAL_LINE;
+                } else {
+                    $call->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+                }
                 $call->c_call_type_id = Call::CALL_TYPE_IN;
             }
 

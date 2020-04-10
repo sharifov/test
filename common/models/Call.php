@@ -65,6 +65,9 @@ use Locale;
  * @property string $c_from_country
  * @property string $c_from_state
  * @property string $c_from_city
+ * @property bool $c_is_transfer
+ * @property string $c_queue_start_dt
+ * @property int|null $c_group_id
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
@@ -231,6 +234,13 @@ class Call extends \yii\db\ActiveRecord
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
             [['c_parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['c_parent_id' => 'c_id']],
             [['c_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['c_project_id' => 'id']],
+
+            ['c_is_transfer', 'default', 'value' => false],
+            ['c_is_transfer', 'boolean'],
+
+            ['c_queue_start_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['c_group_id', 'integer'],
         ];
     }
 
@@ -269,7 +279,10 @@ class Call extends \yii\db\ActiveRecord
             'c_client_id' => 'Client',
             'c_status_id' => 'Status ID',
             'c_parent_id' => 'Parent ID',
-            'c_recording_sid' => 'Recording SID'
+            'c_recording_sid' => 'Recording SID',
+            'c_is_transfer' => 'Transfer',
+            'c_queue_start_dt' => 'Queue start dt',
+            'c_group_id' => 'Group ID',
         ];
     }
 
@@ -1571,6 +1584,9 @@ class Call extends \yii\db\ActiveRecord
      */
     public function setStatusQueue(): int
     {
+        if (!$this->isStatusQueue()) {
+            $this->c_queue_start_dt = date('Y-m-d H:i:s');
+        }
         return $this->c_status_id = self::STATUS_QUEUE;
     }
 
