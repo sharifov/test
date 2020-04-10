@@ -293,7 +293,11 @@ class LeadRedialService
      */
     public function findOrUpdatePhoneNumberFrom(Lead $lead): string
     {
-        if (($qCall = $lead->leadQcall) && ($phoneFrom = $qCall->lqc_call_from) && DepartmentPhoneProject::find()->isRedial($phoneFrom)) {
+        if (
+            ($qCall = $lead->leadQcall)
+            && ($phoneFrom = $qCall->lqc_call_from)
+            && DepartmentPhoneProject::find()->enabled()->redial()->byPhone($phoneFrom, false)->exists()
+        ) {
             return $phoneFrom;
         }
 

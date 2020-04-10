@@ -7,6 +7,7 @@ use common\components\ReceiveEmailsJob;
 use common\models\DepartmentEmailProject;
 use common\models\Email;
 use common\models\UserProjectParams;
+use sales\model\emailList\entity\EmailList;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -56,8 +57,10 @@ class CommunicationController extends Controller
      */
     private function getEmailsForReceivedMessages(): array
     {
-        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
-        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+//        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
+        $mailsUpp = UserProjectParams::find()->select('el_email')->distinct()->joinWith('emailList', false, 'INNER JOIN')->column();
+//        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+        $mailsDep = DepartmentEmailProject::find()->select(['el_email'])->distinct()->joinWith('emailList', false, 'INNER JOIN')->column();
         $list = array_merge($mailsUpp, $mailsDep);
         return $list;
     }

@@ -1,5 +1,9 @@
 <?php
 
+use common\components\grid\BooleanColumn;
+use common\components\grid\department\DepartmentColumn;
+use common\components\grid\EmailSelect2Column;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -38,13 +42,16 @@ $this->params['breadcrumbs'][] = $this->title;
 				'format' => 'raw',
 			],
             'dep_email',
-			[
-				'attribute' => 'dep_dep_id',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					return $model->depDep ? $model->depDep->dep_name : '-';
-				},
-				'filter' => \common\models\Department::getList()
-			],
+            [
+                'class' => \common\components\grid\EmailSelect2Column::class,
+                'attribute' => 'dep_email_list_id',
+                'relation' => 'emailList',
+            ],
+            [
+                'class' => DepartmentColumn::class,
+                'attribute' => 'dep_dep_id',
+                'relation' => 'depDep',
+            ],
 			[
 				'label' => 'User Groups',
 				'value' => static function (\common\models\DepartmentEmailProject $model) {
@@ -65,16 +72,13 @@ $this->params['breadcrumbs'][] = $this->title;
 				},
 				'filter' => \common\models\Sources::getList(true)
 			],
-			'dep_enable:boolean',
-			'dep_default:boolean',
-			[
-				'attribute' => 'dep_updated_user_id',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					return $model->dep_updated_user_id ? '<i class="fa fa-user"></i> ' .Html::encode($model->depUpdatedUser->username) : $model->dep_updated_user_id;
-				},
-				'format' => 'raw',
-				'filter' => \common\models\Employee::getList()
-			],
+            ['class' => BooleanColumn::class, 'attribute' => 'dep_enable'],
+            ['class' => BooleanColumn::class, 'attribute' => 'dep_default'],
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'dep_updated_user_id',
+                'relation' => 'depUpdatedUser',
+            ],
 			[
 				'attribute' => 'dep_updated_dt',
 				'value' => static function (\common\models\DepartmentEmailProject $model) {

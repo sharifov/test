@@ -5,7 +5,7 @@ namespace sales\model\lead\useCases\lead\api\create;
 use common\models\Lead;
 use common\models\Sources;
 use sales\helpers\lead\LeadHelper;
-use sales\yii\validators\IsArrayValidator;
+use common\components\validators\IsArrayValidator;
 use yii\base\Model;
 
 /**

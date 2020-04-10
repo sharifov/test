@@ -81,7 +81,8 @@ class CallService
         }
 
         if (
-            ($upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $internalPhoneNumber])->limit(1)->one())
+//            ($upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $internalPhoneNumber])->limit(1)->one())
+            ($upp = UserProjectParams::find()->byPhone($internalPhoneNumber, false)->limit(1)->one())
             && ($user = $upp->uppUser)
         ) {
             if ($ntf = Notifications::create($user->id, 'Declined Call',

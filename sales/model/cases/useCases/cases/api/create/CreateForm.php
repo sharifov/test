@@ -5,7 +5,7 @@ namespace sales\model\cases\useCases\cases\api\create;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use sales\entities\cases\CaseCategory;
 use sales\services\client\InternalPhoneValidator;
-use sales\yii\validators\IsArrayValidator;
+use common\components\validators\IsArrayValidator;
 use yii\base\Model;
 
 /**

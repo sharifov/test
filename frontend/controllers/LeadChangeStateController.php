@@ -95,17 +95,13 @@ class LeadChangeStateController extends FController
                 $this->assignService->takeOver($lead, $user, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
-                //Yii::$app->errorHandler->logException($e);
-                Yii::warning($e, __CLASS__ . ':' . __FUNCTION__);
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             } catch (\Throwable $e) {
-                //Yii::$app->errorHandler->logException($e);
-                Yii::warning($e, __CLASS__ . ':' . __FUNCTION__);
-                throw $e;
+                Yii::error($e, __CLASS__ . ':' . __FUNCTION__);
+                Yii::$app->getSession()->setFlash('error', 'Server error');
             }
         } elseif ($form->getErrors()) {
             Yii::$app->getSession()->setFlash('error', 'Error validate form.');
-            Yii::warning(VarDumper::dumpAsString($form->getErrors()), 'LeadChangeStateController:TakeOverReasonForm:Validate');
         }
         return $this->redirect(['lead/view', 'gid' => $lead->gid]);
     }
@@ -149,7 +145,6 @@ class LeadChangeStateController extends FController
                 $this->stateService->followUp($lead, null, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
-                Yii::warning($e, __CLASS__ . ':' . __FUNCTION__);
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             }
         } else {
@@ -193,8 +188,6 @@ class LeadChangeStateController extends FController
                 }
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
-                //Yii::$app->errorHandler->logException($e);
-                Yii::warning($e, __CLASS__ . ':' . __FUNCTION__);
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             }
         } else {
@@ -234,8 +227,6 @@ class LeadChangeStateController extends FController
                 $this->stateService->snooze($lead, $lead->employee_id, $form->snoozeFor, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
-                //Yii::$app->errorHandler->logException($e);
-                Yii::warning($e, __CLASS__ . ':' . __FUNCTION__);
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             }
         } else {
@@ -282,8 +273,6 @@ class LeadChangeStateController extends FController
                    Yii::$app->getSession()->setFlash('error', 'Error');
                }
             } catch (\DomainException $e) {
-                //Yii::$app->errorHandler->logException($e);
-                Yii::warning($e, __CLASS__ . ':' . __FUNCTION__);
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             }
         } else {
@@ -323,8 +312,6 @@ class LeadChangeStateController extends FController
                 $this->stateService->reject($lead, $lead->employee_id, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
-                //Yii::$app->errorHandler->logException($e);
-                Yii::warning($e, __CLASS__ . ':' . __FUNCTION__);
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             }
         } else {

@@ -2,7 +2,7 @@
 
 namespace sales\forms\api;
 
-use sales\yii\validators\IsNotArrayValidator;
+use common\components\validators\IsNotArrayValidator;
 use yii\base\Model;
 
 /**

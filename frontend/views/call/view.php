@@ -29,8 +29,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     <div class="col-md-6">
-    <?php if($model->c_recording_url):?>
-        <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?= $model->c_recording_url  /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ?>" type="audio/mpeg"></audio>
+    <?php if($model->recordingUrl):?>
+        <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?= $model->recordingUrl  /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ?>" type="audio/mpeg"></audio>
     <?php endif;?>
         <?= DetailView::widget([
             'model' => $model,
@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_id',
                 'c_call_sid',
                 'c_parent_call_sid',
-                'c_recording_sid',
+
                 [
                     'attribute' => 'c_call_type_id',
                     'value' => static function (\common\models\Call $model) {
@@ -96,6 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
+            'c_recording_sid',
             'c_recording_url:url',
             'c_recording_duration',
 
@@ -145,7 +146,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'c_error_message',
             'c_is_new:boolean',
-            'c_is_deleted:boolean',
             [
                 'attribute' => 'c_price',
                 'value' => static function (\common\models\Call $model) {

@@ -1873,24 +1873,35 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     /**
      * @param int $user_id
+     * @param bool $onyEnabled
      * @return array
      */
-    public static function getPhoneList(int $user_id) : array
+    public static function getPhoneList(int $user_id, $onyEnabled = false) : array
     {
-        $phoneList = [];
+//        $phoneList = [];
+//
+//
+//        $phones = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $user_id])
+//            ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]])
+//            ->asArray()->all();
+//
+//        if($phones) {
+//            $phoneList = ArrayHelper::map($phones, 'upp_tw_phone_number', 'upp_tw_phone_number');
+//        }
 
-
-        $phones = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $user_id])
-            ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]])
-            ->asArray()->all();
-
-        if($phones) {
-            $phoneList = ArrayHelper::map($phones, 'upp_tw_phone_number', 'upp_tw_phone_number');
-        }
+        $phoneList = UserProjectParams::find()
+            ->select(['pl_phone_number', 'upp_phone_list_id'])
+            ->byUserId($user_id)
+            ->innerJoinWith(['phoneList' => static function(\sales\model\phoneList\entity\Scopes $query) use ($onyEnabled) {
+                if ($onyEnabled) {
+                    $query->andOnCondition(['pl_enabled' => true]);
+                }
+            }], false)
+            ->indexBy('pl_phone_number')
+            ->column();
 
         return $phoneList;
     }
-
 
     /**
      * @return bool

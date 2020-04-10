@@ -199,8 +199,10 @@ class SmsSearch extends Sms
 
         if(isset($params['SmsSearch']['user_id']) && $params['SmsSearch']['user_id'] > 0) {
 
-            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
-                ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]]);
+//            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
+//                ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]]);
+
+            $subQuery = UserProjectParams::find()->select(['pl_phone_number'])->distinct()->byUserId($params['SmsSearch']['user_id'])->innerJoinWith('phoneList', false);
 
             //$subQuery2 = UserProjectParams::find()->select(['DISTINCT(upp_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
             //    ->andWhere(['and', ['<>', 'upp_phone_number', ''], ['IS NOT', 'upp_phone_number', null]]);

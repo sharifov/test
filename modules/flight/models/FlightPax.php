@@ -122,6 +122,11 @@ class FlightPax extends \yii\db\ActiveRecord
 		return self::PAX_LIST_ID;
 	}
 
+	public static function getPaxList(): array
+	{
+		return self::PAX_LIST;
+	}
+
 	/**
 	 * @param string $type
 	 * @return int|null

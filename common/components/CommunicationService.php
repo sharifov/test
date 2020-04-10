@@ -32,6 +32,7 @@ class CommunicationService extends Component
     public $username;
     public $password;
     public $request;
+    public $recording_url = '';
 
 
     public function init() : void

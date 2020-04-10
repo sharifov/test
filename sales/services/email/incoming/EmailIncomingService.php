@@ -138,7 +138,7 @@ class EmailIncomingService
         if ($lead = Lead::find()->findLastSalesLeadByClient($clientId, $projectId)->one()) {
             return $lead->id;
         }
-        Yii::warning('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new lead creation allowed on email.', 'EmailIncomingService');
+        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new lead creation allowed on email.', 'info\EmailIncomingService');
         return null;
     }
 
@@ -161,7 +161,7 @@ class EmailIncomingService
         if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $projectId)->one()) {
             return $case->cs_id;
         }
-        Yii::warning('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new exchange case creation allowed on Email.', 'EmailIncomingService');
+        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new exchange case creation allowed on Email.', 'info\EmailIncomingService');
         return null;
     }
 
@@ -184,7 +184,7 @@ class EmailIncomingService
         if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
             return $case->cs_id;
         }
-        Yii::warning('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'EmailIncomingService');
+        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
         return null;
     }
 
@@ -206,15 +206,14 @@ class EmailIncomingService
         } elseif ($case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $projectId)->one()) {
             $caseId = $case->cs_id;
         } else {
-            if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
+            if ((bool)Yii::$app->params['settings']['create_case_only_department_email'] === false) {
                 $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
                 return new Process(null, $case->cs_id);
-            } else {
-                if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
-                    return $case->cs_id;
-                }
-                Yii::warning('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'EmailIncomingService');
             }
+            if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
+                return $case->cs_id;
+            }
+            Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
         }
 
         return new Process($leadId, $caseId);

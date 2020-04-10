@@ -140,6 +140,16 @@ class FlightQuote extends ActiveRecord implements Quotable
 		self::TYPE_ALTERNATIVE => 'Alternative',
 	];
 
+	public const GDS_SABRE = 'S';
+	public const GDS_AMADEUS = 'A';
+	public const GDS_WORLD_SPAN = 'W';
+
+	public CONST GDS_LIST = [
+		self::GDS_SABRE => 'Sabre',
+		self::GDS_AMADEUS => 'Amadeus',
+		self::GDS_WORLD_SPAN => 'WorldSpan',
+	];
+
 	public const SERVICE_FEE = 0.035;
 
 	/**
@@ -563,4 +573,9 @@ class FlightQuote extends ActiveRecord implements Quotable
         }
         return $result;
     }
+
+    public static function getGdsList(): array
+	{
+		return self::GDS_LIST;
+	}
 }

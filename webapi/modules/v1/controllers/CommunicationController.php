@@ -21,6 +21,7 @@ use common\models\Sources;
 use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\emailList\entity\EmailList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\repositories\lead\LeadRepository;
 use sales\services\call\CallDeclinedException;
@@ -318,7 +319,8 @@ class CommunicationController extends ApiBaseController
                 return $this->startConference($conferenceRoom, $postCall);
             }
 
-            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
+//            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
+            $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
 
                 $project = $departmentPhone->dppProject;
@@ -372,7 +374,8 @@ class CommunicationController extends ApiBaseController
 
             } else {
 
-                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
+//                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
+                $upp = UserProjectParams::find()->byPhone($incoming_phone_number, false)->limit(1)->one();
                 if ($upp) {
 
                     if ($upp->upp_dep_id) {
@@ -471,21 +474,33 @@ class CommunicationController extends ApiBaseController
 
             if ($call && $callData['RecordingUrl']) {
 
-                $call->c_recording_url = $callData['RecordingUrl'] ?? null;
+                //$call->c_recording_url = $callData['RecordingUrl'] ?? null;
+
+//                if (!$call->c_recording_sid && !empty($callData['RecordingUrl'])) {
+//                    preg_match('~(RE[0-9a-zA-Z]{32})$~', $callData['RecordingUrl'], $math);
+//                    if (!empty($math[1])) {
+//                        $call->c_recording_sid = $math[1];
+//                    }
+//                }
+
+                if (!$call->c_recording_sid && $callData['RecordingSid']) {
+                    $call->c_recording_sid = $callData['RecordingSid'];
+                }
+
                 $call->c_recording_duration = $callData['RecordingDuration'] ?? null;
 
                 if(!$call->save()) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceRecord:Call:save');
                 }
 
-                if ($call->c_lead_id) {
-                    //if ($call->c_created_user_id) {
-                        // Notifications::create($call->c_created_user_id, 'Call Recording Completed  from ' . $call->c_from . ' to ' . $call->c_to . ' <br>Lead ID: ' . $call->c_lead_id , Notifications::TYPE_INFO, true);
-                    //}
-                    // Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
-
-                    Notifications::sendSocket('recordingUpdate', ['lead_id' => $call->c_lead_id], ['url' => $call->c_recording_url]);
-                }
+//                if ($call->c_lead_id) {
+//                    //if ($call->c_created_user_id) {
+//                        // Notifications::create($call->c_created_user_id, 'Call Recording Completed  from ' . $call->c_from . ' to ' . $call->c_to . ' <br>Lead ID: ' . $call->c_lead_id , Notifications::TYPE_INFO, true);
+//                    //}
+//                    // Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
+//
+//                    Notifications::sendSocket('recordingUpdate', ['lead_id' => $call->c_lead_id], ['url' => $call->recordingUrl]);
+//                }
             }
         } else {
             $response['error'] = 'Not found callData[CallSid] or callData[RecordingSid] in voiceRecord';
@@ -594,8 +609,13 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
-                    if (!$call->c_dep_id && $call->c_project_id && isset($callOriginalData['FromAgentPhone']) && $callOriginalData['FromAgentPhone']) {
-                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callOriginalData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
+                    if (isset($callOriginalData['lead_id']) && $callOriginalData['lead_id'] && ($lead = Lead::findOne((int)$callOriginalData['lead_id']))) {
+                        $call->c_dep_id = $lead->l_dep_id;
+                    } elseif (isset($callOriginalData['case_id']) && $callOriginalData['case_id'] && ($case = Cases::findOne((int)$callOriginalData['case_id']))) {
+                        $call->c_dep_id = $case->cs_dep_id;
+                    } elseif (!$call->c_dep_id && $call->c_project_id && isset($callOriginalData['FromAgentPhone']) && $callOriginalData['FromAgentPhone']) {
+//                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callOriginalData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
+                        $upp = UserProjectParams::find()->byPhone($callOriginalData['FromAgentPhone'], false)->andWhere(['upp_project_id' => $call->c_project_id])->limit(1)->one();
                         if ($upp && $upp->upp_dep_id) {
                             $call->c_dep_id = $upp->upp_dep_id;
                         }
@@ -607,7 +627,8 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if (!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
+//                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
+                    $upp = UserProjectParams::find()->byPhone($call->c_from, false)->one();
                 }
 
                 if ($upp && $upp->uppUser) {
@@ -721,13 +742,10 @@ class CommunicationController extends ApiBaseController
      */
     private function voiceDefault(array $post = []): array
     {
-
-        $response = [];
-        $trace = [];
-
-        //Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceDefault');
-
-        //$agentId = null;
+        $response = [
+            'trace' => [],
+            'error' => '',
+        ];
 
         if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
 
@@ -735,7 +753,6 @@ class CommunicationController extends ApiBaseController
             $call = $this->findOrCreateCallByData($callData);
 
             if($call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusCanceled() || $call->isStatusFailed()) {
-
                 if ($call->c_lead_id) {
                     if (($lead = $call->cLead) && !$lead->isCallCancel()) {
                         try {
@@ -744,31 +761,22 @@ class CommunicationController extends ApiBaseController
                             $leadRepository->save($lead);
                         } catch (\Throwable $e) {
                             Yii::error('LeadId: ' . $lead->id . ' Message: ' . $e->getMessage() ,'API:Communication:voiceDefault:Lead:save');
+                            $response['error'] = 'Error in method voiceDefault. LeadId: ' . $lead->id . ' Message: ' . $e->getMessage();
                         }
                     }
                 }
 
             }
-
-
-//            if ($call->c_source_type_id === Call::SOURCE_CONFERENCE_CALL && isset($callData['CallStatus'])) {
-//                $call->c_call_status = $callData['CallStatus'];
-//                $call->setStatusByTwilioStatus($call->c_call_status);
-//            }
-
-            /*else {
+            /*if ($call->c_source_type_id === Call::SOURCE_CONFERENCE_CALL && isset($callData['CallStatus'])) {
+                $call->c_call_status = $callData['CallStatus'];
+                $call->setStatusByTwilioStatus($call->c_call_status);
+            } else {
                 $call->c_call_status = $call_status;
                 $call->setStatusByTwilioStatus($call_status);
             }*/
-            //if(!$childCall) {
-
-
-            //}
-
             /*if (!$call->c_price && isset($post['call']['c_tw_price']) && $post['call']['c_tw_price']) {
                 $call->c_price = abs((float) $post['call']['c_tw_price']);
             }*/
-
             /*if(isset($post['call']['c_call_duration']) && $post['call']['c_call_duration']) {
                 $call->c_call_duration = (int) $post['call']['c_call_duration'];
             } else {
@@ -777,14 +785,15 @@ class CommunicationController extends ApiBaseController
 
             if (!$call->save()) {
                 Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
+                $response['error'] = 'Error in method voiceDefault. ' . $call->getErrorSummary(false)[0];
             }
 
         } else {
             Yii::error('Not found POST[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceDefault:callData:notFound');
-            $response['error'] = 'Not found POST[callData][CallSid]';
+            $response['error'] = 'Error in method voiceDefault. Not found POST[callData][CallSid]';
         }
 
-        $response['trace'] = $trace;
+        $response['status'] = $response['error'] !== '' ? 'Fail' : 'Success';
 
         return $response;
     }
@@ -1826,8 +1835,10 @@ class CommunicationController extends ApiBaseController
      */
     private function getEmailsForReceivedMessages(): array
     {
-        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
-        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+//        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
+        $mailsUpp = UserProjectParams::find()->select('el_email')->distinct()->joinWith('emailList', false, 'INNER JOIN')->column();
+//        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+        $mailsDep = DepartmentEmailProject::find()->select(['el_email'])->distinct()->joinWith('emailList', false, 'INNER JOIN')->column();
         $list = array_merge($mailsUpp, $mailsDep);
         return $list;
     }
@@ -2044,12 +2055,16 @@ class CommunicationController extends ApiBaseController
      * @param array $response
      * @param ApiLog $apiLog
      * @return array
-     * @throws UnprocessableEntityHttpException
      */
     private function getResponseData(array $response, ApiLog $apiLog): array
     {
         if (isset($response['error']) && $response['error']) {
-            $responseData = [];
+            $responseData = [
+                'status'    => 422,
+                'name'      => 'Error',
+                'code'      => $response['error_code'] ?? 0,
+                'message'   => is_string($response['error']) ? $response['error'] : @json_encode($response['error'])
+            ];
         } else {
             $responseData = [
                 'status'    => 200,
@@ -2062,15 +2077,6 @@ class CommunicationController extends ApiBaseController
         $responseData['data']['response'] = $response;
         $responseData = $apiLog->endApiLog($responseData);
 
-        if (isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = $response['error_code'];
-            } else {
-                $error_code = 0;
-            }
-            throw new UnprocessableEntityHttpException($json, $error_code);
-        }
         return $responseData;
     }
 

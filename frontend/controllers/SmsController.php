@@ -139,8 +139,8 @@ class SmsController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
 
-            $upp = UserProjectParams::find()
-                ->where(['upp_tw_phone_number' => $model->s_phone_from])->limit(1)->one();
+//            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $model->s_phone_from])->limit(1)->one();
+            $upp = UserProjectParams::find()->byPhone($model->s_phone_from, false)->limit(1)->one();
             if($upp && $upp->upp_project_id) {
                 $model->s_project_id = $upp->upp_project_id;
             } else {
@@ -189,7 +189,8 @@ class SmsController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
 
-            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $model->s_phone_from])->limit(1)->one();
+//            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $model->s_phone_from])->limit(1)->one();
+            $upp = UserProjectParams::find()->byPhone($model->s_phone_from, false)->limit(1)->one();
             if($upp && $upp->upp_project_id) {
                 $model->s_project_id = $upp->upp_project_id;
             } else {
@@ -297,8 +298,8 @@ class SmsController extends FController
         $phoneList[$model->s_phone_to] = $model->s_phone_to;
         $phoneList[$model->s_phone_from] = $model->s_phone_from;
 
-        $access = UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])
-            ->andWhere(['upp_tw_phone_number' => $phoneList])->exists();
+//        $access = UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['upp_tw_phone_number' => $phoneList])->exists();
+        $access = UserProjectParams::find()->byUserId(Yii::$app->user->id)->byPhone($phoneList, false)->exists();
 
         if(!$access) {
             throw new ForbiddenHttpException('Access denied for this SMS. Check User Project Params phones');

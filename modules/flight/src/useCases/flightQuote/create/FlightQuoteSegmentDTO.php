@@ -46,28 +46,28 @@ class FlightQuoteSegmentDTO
 	{
 		$this->flightQuoteId = $flightQuote->fq_id;
 		$this->flightQuoteTripId = $flightQuoteTrip->fqt_id;
-		$this->departureDt = $segment['departureTime'];
-		$this->arrivalDt = $segment['arrivalTime'];
-		$this->stop = $segment['stop'];
-		$this->flightNumber = $segment['flightNumber'];
-		$this->bookingClass = $segment['bookingClass'];
-		$this->duration = $segment['duration'];
-		$this->departureAirportIata = $segment['departureAirportCode'];
+		$this->departureDt = $segment['departureTime'] ?? '';
+		$this->arrivalDt = $segment['arrivalTime'] ?? '';
+		$this->stop = $segment['stop'] ?? null;
+		$this->flightNumber = $segment['flightNumber'] ?? '';
+		$this->bookingClass = $segment['bookingClass'] ?? '';
+		$this->duration = $segment['duration'] ?? '';
+		$this->departureAirportIata = $segment['departureAirportCode'] ?? '';
 		$this->departureAirportTerminal = $segment['departureAirportTerminal'] ?? '';
-		$this->arrivalAirportIata = $segment['arrivalAirportCode'];
+		$this->arrivalAirportIata = $segment['arrivalAirportCode'] ?? '';
 		$this->arrivalAirportTerminal = $segment['arrivalAirportTerminal'] ?? '';
-		$this->operatingAirline = $segment['operatingAirline'];
-		$this->marketingAirline = $segment['marketingAirline'];
-		$this->airEquipType = $segment['airEquipType'];
+		$this->operatingAirline = $segment['operatingAirline'] ?? '';
+		$this->marketingAirline = $segment['marketingAirline'] ?? '';
+		$this->airEquipType = $segment['airEquipType'] ?? '';
 		$this->marriageGroup = $segment['marriageGroup'] ?? '';
-		$this->cabinClass = $segment['cabin'];
+		$this->cabinClass = $segment['cabin'] ?? '';
 		$this->meal = $segment['meal'] ?? '';
-		$this->fareCode = $segment['fareCode'];
+		$this->fareCode = $segment['fareCode'] ?? '';
 		$this->ticketId = $ticketId;
-		$this->recheckBaggage = $segment['recheckBaggage'] ? 1 : 0;
+		$this->recheckBaggage = !empty($segment['recheckBaggage']) ? 1 : 0;
 		$this->mileage = $segment['mileage'] ?? '';
-		$this->key = '#'.$segment['flightNumber'].
-			($segment['stop']>0?'('.$segment['stop'].')':'').
-			$segment['departureAirportCode'].'-'.$segment['arrivalAirportCode'].' '.$segment['departureTime'];
+		$this->key = '#'.$this->flightNumber.
+			($this->stop > 0 ? '('.$this->stop.')' : '') .
+			$this->departureAirportIata.'-'.$this->arrivalAirportIata.' '.$this->departureDt;
 	}
 }

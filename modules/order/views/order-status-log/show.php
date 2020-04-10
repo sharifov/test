@@ -3,9 +3,9 @@
 use modules\order\src\entities\orderStatusLog\search\OrderStatusLogSearch;
 use modules\order\src\grid\columns\OrderStatusActionColumn;
 use modules\order\src\grid\columns\OrderStatusColumn;
-use sales\yii\grid\DateTimeColumn;
-use sales\yii\grid\DurationColumn;
-use sales\yii\grid\UserColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\DurationColumn;
+use common\components\grid\UserColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 

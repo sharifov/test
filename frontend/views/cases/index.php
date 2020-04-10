@@ -6,8 +6,8 @@ use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CaseCategory;
-use sales\yii\grid\cases\CasesSourceTypeColumn;
-use sales\yii\grid\cases\CasesStatusColumn;
+use common\components\grid\cases\CasesSourceTypeColumn;
+use common\components\grid\cases\CasesStatusColumn;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\entities\cases\Cases;
@@ -128,7 +128,7 @@ $gridId = 'cases-grid-id';
                 'attribute' => 'cs_source_type_id',
             ],
             [
-                'class' => \sales\yii\grid\cases\NeedActionColumn::class,
+                'class' => \common\components\grid\cases\NeedActionColumn::class,
                 'attribute' => 'cs_need_action',
             ],
             [

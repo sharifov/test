@@ -1,6 +1,6 @@
 <?php
 
-use sales\yii\grid\DateTimeColumn;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

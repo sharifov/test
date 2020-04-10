@@ -1,7 +1,7 @@
 <?php
 
 use modules\qaTask\src\useCases\qaTask\escalate\QaTaskEscalateForm;
-use sales\yii\bootstrap4\activeForm\ActiveForm;
+use common\components\bootstrap4\activeForm\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\web\View;
 

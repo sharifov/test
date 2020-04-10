@@ -3,7 +3,7 @@
 namespace sales\forms\lead;
 
 use sales\helpers\lead\LeadFlightSegmentHelper;
-use sales\yii\validators\IataValidator;
+use common\components\validators\IataValidator;
 use yii\base\Model;
 
 /**

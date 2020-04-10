@@ -33,12 +33,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             [
-                'class' => \sales\yii\grid\UserColumn::class,
+                'class' => \common\components\grid\UserColumn::class,
                 'attribute' => 'uo_user_id',
                 'relation' => 'uoUser',
             ],
             [
-                'class' => \sales\yii\grid\DateTimeColumn::class,
+                'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'uo_updated_dt',
             ],
 

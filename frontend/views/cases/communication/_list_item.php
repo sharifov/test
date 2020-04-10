@@ -57,9 +57,9 @@ use \common\models\Call;
             <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt))?></div> <?php //11:01AM | June 9?>
         </div>
         <div class="card-body">
-            <?php if($call->c_recording_url):?>
+            <?php if($call->recordingUrl):?>
                 <audio controls="controls" controlsList="nodownload" class="chat__audio">
-                    <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
+                    <source src="<?=$call->recordingUrl?>" type="audio/mpeg">
                     Your browser does not support the audio element
                 </audio>
             <?php else: ?>

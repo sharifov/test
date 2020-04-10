@@ -265,9 +265,11 @@ class ApiLead extends Model
 	public function checkForExistence($attribute, $params): void
 	{
 		foreach ($this->phones as $phone) {
-			if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $phone])->exists()) {
+//			if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $phone])->exists()) {
+			if (DepartmentPhoneProject::find()->byPhone($phone, false)->exists()) {
 				$this->addError($attribute, $phone . ' - This phone number is not allowed (General)');
-			} elseif (UserProjectParams::find()->where(['upp_tw_phone_number' => $phone])->exists()) {
+//			} elseif (UserProjectParams::find()->where(['upp_tw_phone_number' => $phone])->exists()) {
+			} elseif (UserProjectParams::find()->byPhone($phone, false)->exists()) {
 				$this->addError($attribute, $phone . ' - This phone number is not allowed (Direct)');
 			}
 		}

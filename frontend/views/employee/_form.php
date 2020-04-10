@@ -355,6 +355,19 @@ JS;
 
             <div class="row">
                 <div class="col-md-3">
+                    <?php if ($modelProfile->up_join_date === null): $modelProfile->up_join_date = date('Y-m-d'); endif; ?>
+                    <?= $form->field($modelProfile, 'up_join_date')->widget(\dosamigos\datepicker\DatePicker::class, [
+						'clientOptions' => [
+							'autoclose' => true,
+							'format' => 'yyyy-mm-dd',
+						],
+						'options' => [
+							'autocomplete' => 'off',
+							'placeholder' =>'Choose Date',
+						],
+                    ]) ?>
+                </div>
+                <div class="col-md-3">
                     <?= $form->field($modelProfile, 'up_call_type_id')->dropDownList(\common\models\UserProfile::CALL_TYPE_LIST) ?>
                 </div>
                 <div class="col-md-3">
@@ -368,7 +381,10 @@ JS;
                     <?= $form->field($modelProfile, 'up_skill')->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---']) ?>
                     <?= $form->field($modelProfile, 'up_auto_redial')->checkbox() ?>
                     <?= $form->field($modelProfile, 'up_kpi_enable')->checkbox() ?>
-
+                </div>
+                <div class="col-md-3">
+                    <?= $form->field($modelProfile, 'up_2fa_enable')->checkbox() ?>
+                    <?= $form->field($modelProfile, 'up_2fa_secret')->textInput(['maxlength' => true])->label('2fa secret. Clean for reset') ?>
                 </div>
             </div>
 
@@ -434,8 +450,18 @@ JS;
                     //'upp_user_id',
                     //'upp_project_id',
                     'upp_email:email',
+                    [
+                        'class' => \common\components\grid\EmailSelect2Column::class,
+                        'attribute' => 'upp_email_list_id',
+                        'relation' => 'emailList',
+                    ],
                     //'upp_phone_number',
                     'upp_tw_phone_number',
+                    [
+                        'class' => \common\components\grid\PhoneSelect2Column::class,
+                        'attribute' => 'upp_phone_list_id',
+                        'relation' => 'phoneList',
+                    ],
                     [
                         'attribute' => 'upp_allow_general_line',
                         'format' => 'raw',
@@ -610,8 +636,8 @@ JS;
 $js = <<<JS
 
     $('#modal-df').on('hidden.bs.modal', function () {
-        $.pjax.reload({container:'#pjax-grid-upp'});
-        $.pjax.reload({container: "#pjax-grid-product-type"});
+        $.pjax.reload({container:'#pjax-grid-upp', 'async': false});
+        $.pjax.reload({container: "#pjax-grid-product-type", 'async': false});
         
         /*new PNotify({
             title: 'Params successfully updated',

@@ -31,7 +31,6 @@ class CasesQSearch extends Cases
     private $casesQRepository;
 
     public $solved_date;
-
     public $trash_date;
 
     public $last_in_date;

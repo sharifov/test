@@ -56,7 +56,7 @@
 		"pda/pheanstalk": "^3.2",
 		"index0h/yii2-log": "0.0.3",
 		"twilio/sdk": "^5.34",
-		"2amigos/qrcode-library": "~1.1",
+		"2amigos/qrcode-library": "^2.0",
 		"aki/yii2-bot-telegram": "*",
 		"yii2mod/yii2-rbac": "*",
 		"unclead/yii2-multiple-input": "~2.0",
@@ -71,7 +71,8 @@
 		"ext-zlib": "*",
 		"webmozart/assert": "^1.7",
 		"thamtech/yii2-uuid": "^1.2",
-        "kivork/yii2-rbac-export-import": "@dev"
+		"kivork/yii2-rbac-export-import": "@dev",
+		"2amigos/2fa-library": "^2.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -92,7 +93,7 @@
 		},
       {
         "type": "vcs",
-        "url": "https://github.com/kivork/yii2-rbac-export-import.git"
+        "url": "https://stash.travelinsides.com/scm/lib/yii2-rbac-export-import.git"
       }
 	]
 }

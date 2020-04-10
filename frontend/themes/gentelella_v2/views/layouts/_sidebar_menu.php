@@ -81,6 +81,7 @@ $isSuperAdmin = $user->isSuperAdmin();
         $menuCases = [];
         $menuCases[] = ['label' => 'Create new Case', 'url' => ['/cases/create'], 'icon' => 'plus'];
         $menuCases[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
+
         $menuCases[] = ['label' => 'Case Need Action <span id="cases-q-need-action" data-type="need-action" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/need-action'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
@@ -124,12 +125,17 @@ $isSuperAdmin = $user->isSuperAdmin();
 
         $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
 
+//        $smsExist = \common\models\UserProjectParams::find()
+//            ->where(['upp_user_id' => Yii::$app->user->id])
+//            ->andWhere([
+//                'AND', ['IS NOT', 'upp_tw_phone_number', null],
+//                ['<>', 'upp_tw_phone_number', '']
+//            ])
+//            ->exists();
+
         $smsExist = \common\models\UserProjectParams::find()
-            ->where(['upp_user_id' => Yii::$app->user->id])
-            ->andWhere([
-                'AND', ['IS NOT', 'upp_tw_phone_number', null],
-                ['<>', 'upp_tw_phone_number', '']
-            ])
+            ->andWhere(['upp_user_id' => Yii::$app->user->id])
+            ->innerJoinWith('phoneList', false)
             ->exists();
 
         if ($smsExist) {
@@ -146,6 +152,18 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'th-list',
             'items' => [
                 ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                [
+                    'label' => 'Call logs',
+                    'url' => 'javascript:',
+                    'icon' => 'phone',
+                    'items' => [
+                        ['label' => 'Log', 'url' => ['/call-log/index'], 'icon' => 'list'],
+                        ['label' => 'Cases', 'url' => ['/call-log-case/index'], 'icon' => 'list'],
+                        ['label' => 'Leads', 'url' => ['/call-log-lead/index'], 'icon' => 'list'],
+                        ['label' => 'Queue', 'url' => ['/call-log-queue/index'], 'icon' => 'list'],
+                        ['label' => 'Record', 'url' => ['/call-log-record/index'], 'icon' => 'list'],
+                    ],
+                ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'comments warning'],
                 ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
@@ -213,8 +231,10 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ],
                 ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
-                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                ['label' => 'Us er Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                 ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
+                ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -274,6 +294,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                     ['label' => 'KPI Product Commission', 'url' => '/kpi-product-commission-crud/index'],
                     ['label' => 'KPI User Product Commission', 'url' => '/kpi-user-product-commission-crud/index'],
                 ], 'hasChild' => true],
+                ['label' => 'Lead Profit Type', 'url' => ['/lead-profit-type-crud/index']]
             ]
         ];
 
@@ -285,6 +306,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                     $menuNewData,
                 ['label' => 'Projects', 'url' => ['/project/index'], 'icon' => 'product-hunt'],
                 ['label' => 'Project Sources', 'url' => ['/sources/index'], 'icon' => 'product-hunt'],
+                ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'list'],
+                ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'list'],
                 ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
                 ['label' => 'Department Emails', 'url' => ['/department-email-project/index'], 'icon' => 'envelope'],
                 ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
@@ -362,8 +385,10 @@ $isSuperAdmin = $user->isSuperAdmin();
             'items' => [
                 ['label' => 'Agents report', 'url' => ['/agent-report/index'], 'icon' => 'users'],
                 ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
-                ['label' => 'Calls report', 'url' => ['/report/calls-report'], 'icon' => 'table'],
-                ['label' => 'Leads report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
+                ['label' => 'Calls Report', 'url' => ['/report/calls-report'], 'icon' => 'table'],
+                ['label' => 'Agent Calls Report', 'url' => ['/stats/calls-stats'], 'icon' => 'table'],
+                ['label' => 'Leads Report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
+                ['label' => 'Agent Leads Report', 'url' => ['/stats/leads-stats'], 'icon' => 'table'],
                 ['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],

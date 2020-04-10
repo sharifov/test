@@ -1,7 +1,7 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
-use sales\yii\grid\call\CallDurationColumn;
+use common\components\grid\call\CallDurationColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -267,7 +267,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
             //'c_updated_dt',
             //'c_error_message',
-            //'c_is_deleted:boolean',
 
             [   'class' => 'yii\grid\ActionColumn',
                 'template' => '{view2}',
