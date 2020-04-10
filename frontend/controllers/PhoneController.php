@@ -365,8 +365,8 @@ class PhoneController extends FController
 
             if (!$originalCall->c_group_id) {
                 if ($lastChild) {
-                    $lastChild->c_group_id = $lastChild->c_id;
-                    $originalCall->c_group_id = $lastChild->c_id;
+                    $lastChild->c_group_id = $originalCall->c_id;
+                    $originalCall->c_group_id = $originalCall->c_id;
                 } else {
                     $originalCall->c_group_id = $originalCall->c_id;
                 }
