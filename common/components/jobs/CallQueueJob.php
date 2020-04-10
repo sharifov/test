@@ -131,6 +131,9 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 $lead = (Yii::createObject(LeadManageService::class))->createByIncomingCall($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
                             }
                             $call->c_lead_id = $lead->id;
+                            if (!$call->c_client_id) {
+                                $call->c_client_id = $lead->client_id;
+                            }
                             if (!$lead->isCallReady() && $call->isEnded()) {
                                 $leadRepository = Yii::createObject(LeadRepository::class);
                                 $lead->callReady();
@@ -155,6 +158,9 @@ class CallQueueJob extends BaseObject implements JobInterface
                             (int)$call->c_dep_id
                         );
                         $call->c_case_id = $case->cs_id;
+                        if (!$call->c_client_id) {
+                            $call->c_client_id = $case->cs_client_id;
+                        }
 //                        if (!$call->update()) {
 //                            Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');
 //                        }
