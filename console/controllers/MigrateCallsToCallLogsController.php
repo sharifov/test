@@ -706,11 +706,12 @@ class MigrateCallsToCallLogsController extends Controller
                 }
             }
 
-            if ($call['c_recording_duration'] || $call['c_recording_sid'] || $callRecordData) {
+            $recordSid = $callRecordData['clr_record_sid'] ?? $call['c_recording_sid'];
+            if ($recordSid) {
                 $callLogRecord = new CallLogRecord([
                     'clr_cl_id' => $callLog->cl_id,
                     'clr_duration' => $callRecordData['clr_duration'] ?? $call['c_recording_duration'],
-                    'clr_record_sid' => $callRecordData['clr_record_sid'] ?? $call['c_recording_sid'],
+                    'clr_record_sid' => $recordSid,
                 ]);
                 if (!$callLogRecord->save()) {
                     throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callLogRecord->toArray(), 'message' => $callLogRecord->getErrors()]));
