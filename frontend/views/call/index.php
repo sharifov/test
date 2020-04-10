@@ -1,5 +1,7 @@
 <?php
 
+use common\components\grid\BooleanColumn;
+use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use common\models\Call;
 use common\models\Employee;
@@ -126,7 +128,9 @@ $user = Yii::$app->user->identity;
                 'format' => 'raw',
                 'filter' => \common\models\Call::STATUS_LIST
             ],
-
+            ['class' => BooleanColumn::class, 'attribute' => 'c_is_transfer'],
+            ['class' => DateTimeColumn::class, 'attribute' => 'c_queue_start_dt'],
+            'c_group_id',
             [
                 'attribute' => 'c_created_dt',
                 'value' => static function (\common\models\Call $model) {
