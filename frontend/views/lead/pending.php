@@ -173,13 +173,15 @@ $this->params['breadcrumbs'][] = $this->title;
             //'filter' => \common\models\Employee::getList()
         ],*/
 
-        [
+        /*[
             'attribute' => 'client_id',
             'value' => static function (\common\models\Lead $model) {
                 return $model->client_id ? Html::a($model->client_id, ['client/view', 'id' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',
-        ],
+        ],*/
+
+        'client_id:client',
 
         /*[
             'attribute' => 'client.phone',
