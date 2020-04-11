@@ -361,6 +361,11 @@ class PhoneController extends FController
                     $sid = $lastChild->c_call_sid;
                     $firstTransferToNumber = true;
                 }
+            } else {
+                $originalCall->cParent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+                if (!$originalCall->cParent->save()) {
+                    Yii::error('Can save parent call', 'PhoneController:actionAjaxCallRedirect');
+                }
             }
 
             if (!$originalCall->c_group_id) {
