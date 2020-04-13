@@ -241,8 +241,13 @@ JS;
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
-                'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
+                /*'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
                     if ($model->isDeleted()) {
+                        return ['class' => 'danger'];
+                    }
+                },*/
+                'rowOptions' => function ($model, $index, $widget, $grid) {
+                    if ($model['status'] == false) {
                         return ['class' => 'danger'];
                     }
                 },
@@ -254,8 +259,8 @@ JS;
                     ],
                     [
                         'attribute' => 'username',
-                        'value' => static function (\common\models\Employee $model) {
-                            return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($model->username);
+                        'value' => static function ($model) {
+                            return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($model['username']);
                         },
                         'format' => 'raw',
                         //'contentOptions' => ['title' => 'text-center'],
@@ -265,25 +270,23 @@ JS;
                     [
                         //'attribute' => 'username',
                         'label' => 'Role',
-                        'value' => static function (\common\models\Employee $model) {
-                            $roles = $model->getRoles();
-                            return $roles ? implode(', ', $roles) : '-';
+                        'value' => static function (/*\common\models\Employee*/ $model) {
+                           /* $roles = $model->getRoles();
+                            return $roles ? implode(', ', $roles) : '-';*/
+                           //var_dump(Yii::$app->authManager->getRolesByUser($model['id'])); die();
+                            $roleDescriptions = [];
+                            $roles = Yii::$app->authManager->getRolesByUser($model['id']);
+                            foreach ($roles as $roleObj)
+                            {
+                                array_push($roleDescriptions, $roleObj->description);
+                            }
+                            return $roleDescriptions ? implode(', ', $roleDescriptions) : '-';;
                         },
                         'options' => ['style' => 'width:150px'],
                         //'format' => 'raw'
                     ],
 
-                    /*'email:email',
-                    [
-                        'attribute' => 'status',
-                        'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                        'value' => static function (\common\models\Employee $model) {
-                            return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
-                        },
-                        'format' => 'html'
-                    ],*/
-
-                    [
+                    /*[
                         'label' => 'User Groups',
                         'attribute' => 'user_group_id',
                         'value' => static function (\common\models\Employee $model) {
@@ -310,28 +313,8 @@ JS;
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left', 'style' => 'width:30%;'],
-                        /*'filter' => \kartik\daterange\DateRangePicker::widget([
-                            'model'=> $searchModel,
-                            'attribute' => 'date_range',
-                            //'name'=>'date_range',
-                            'useWithAddon'=>true,
-                            //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
-                            'presetDropdown'=>true,
-                            'hideInput'=>true,
-                            'convertFormat'=>true,
-                            'startAttribute' => 'datetime_start',
-                            'endAttribute' => 'datetime_end',
-                            //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
-                            //'endInputOptions' => ['value' => '2017-07-20'],
-                            'pluginOptions'=>[
-                                'timePicker'=> false,
-                                'timePickerIncrement'=>15,
-                                'locale'=>['format'=>'Y-m-d']
-                            ]
-                        ])*/
-                        //'options' => ['style' => 'width:200px'],
-
                     ],
+
                     [
                         'label' => 'Processing',
                         'value' => static function (\common\models\Employee $model) use ($searchModel) {
@@ -345,19 +328,7 @@ JS;
                         },
                         'format' => 'raw',
                     ],
-                    /*[
-                        'label' => 'Hold On',
-                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_ON_HOLD], $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[lf_owner_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_ON_HOLD,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ],*/
+
                     [
                         'label' => 'Booked',
                         'value' => static function (\common\models\Employee $model) use ($searchModel) {
@@ -409,18 +380,7 @@ JS;
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
-                    ]
-
-                    /*[
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{update}',
-                        'visibleButtons' => [
-                            'update' => function (\common\models\Employee $model, $key, $index) use ($user) {
-                                return $user->isAdmin() || !$model->isAdmin();
-                            },
-                        ],
-
-                    ],*/
+                    ]*/
                 ]
             ])
             ?>

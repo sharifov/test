@@ -15,7 +15,9 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
+use yii\data\ArrayDataProvider;
 use yii\helpers\VarDumper;
+use sales\auth\Auth;
 
 /**
  * EmployeeSearch represents the model behind the search form of `common\models\Employee`.
@@ -256,6 +258,94 @@ class EmployeeSearch extends Employee
             ->andFilterWhere(['<', 'createdAt', $this->timeEnd]);*/
 
         return $dataProvider;
+    }
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ArrayDataProvider
+     */
+    public function searchByUserGroupsForSupervision($params)
+    {
+        $query = Employee::find()->select(['id', 'username', 'status', 'auth_assignment.item_name'])->leftJoin('auth_assignment', 'id = user_id');
+
+        // add conditions that should always apply here
+
+        /*$dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);*/
+
+        $this->load($params);
+
+        /*if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }*/
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id
+        ]);
+
+        if ($this->user_group_id > 0) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if ($this->supervision_id > 0) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        $query->andFilterWhere(['like', 'username', $this->username]);
+
+        $command = $query->createCommand();
+        $data = $command->queryAll();
+
+        $newModels = [];
+        $filteredUserIds = [];
+        foreach ($data as $key => $model){
+
+            if (Auth::user()->isSupervision() && $model['item_name'] == 'agent' && !in_array($model['id'], $filteredUserIds)) {
+                $newModels[] = $model;
+                array_push($filteredUserIds, $model['id']);
+            } elseif (Auth::user()->isExSuper() && $model['item_name'] == 'ex_agent' && !in_array($model['id'], $filteredUserIds)) {
+                $newModels[] = $model;
+                array_push($filteredUserIds, $model['id']);
+            } elseif (Auth::user()->isSupSuper() && $model['item_name'] == 'sup_agent' && !in_array($model['id'], $filteredUserIds)) {
+                $newModels[] = $model;
+                array_push($filteredUserIds, $model['id']);
+            } elseif ($model['id'] == Auth::id() && !in_array($model['id'], $filteredUserIds)) {
+                $newModels[] = $model;
+                array_push($filteredUserIds, $model['id']);
+            }
+        }
+
+        $paramsData = [
+            'allModels' => $newModels,
+            'sort' => [
+                'defaultOrder' => ['id' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'username',
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ];
+
+        //var_dump($data); die();
+        //var_dump($query->createCommand()->getSql()); die();
+        return $dataProvider = new ArrayDataProvider($paramsData);;
     }
 
 
