@@ -286,10 +286,21 @@ JS;
                         //'format' => 'raw'
                     ],
 
-                    /*[
+                    [
                         'label' => 'User Groups',
                         'attribute' => 'user_group_id',
-                        'value' => static function (\common\models\Employee $model) {
+                        'value' => static function ($model) {
+                            $groups = \common\models\UserGroupAssign::getGroupsNameByUserId($model['id']);
+                            $groupsValueArr = [];
+
+                            foreach ($groups as $group) {
+                                $groupsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' . Html::encode($group), ['class' => 'label label-default']);
+                            }
+
+                            $groupsValue = implode(' ', $groupsValueArr);
+                            return $groupsValue;
+                        },
+                        /*'value' => static function (\common\models\Employee $model) {
 
                             $groups = $model->getUserGroupList();
                             $groupsValueArr = [];
@@ -301,12 +312,12 @@ JS;
                             $groupsValue = implode(' ', $groupsValueArr);
 
                             return $groupsValue;
-                        },
+                        },*/
                         'format' => 'raw',
                         'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                     ],
 
-                    [
+                    /*[
                         'label' => 'Tasks Result for Period',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
                             return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);

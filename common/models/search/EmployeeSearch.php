@@ -16,6 +16,7 @@ use yii\data\ActiveDataProvider;
 use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use yii\data\ArrayDataProvider;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 use sales\auth\Auth;
 
@@ -313,7 +314,6 @@ class EmployeeSearch extends Employee
         $newModels = [];
         $filteredUserIds = [];
         foreach ($data as $key => $model){
-
             if (Auth::user()->isSupervision() && $model['item_name'] == 'agent' && !in_array($model['id'], $filteredUserIds)) {
                 $newModels[] = $model;
                 array_push($filteredUserIds, $model['id']);
@@ -339,7 +339,7 @@ class EmployeeSearch extends Employee
                 ],
             ],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 15,
             ],
         ];
 
