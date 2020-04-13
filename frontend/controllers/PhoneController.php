@@ -357,11 +357,14 @@ class PhoneController extends FController
 
             if ($originalCall->isGeneralParent()) {
                 if ($lastChild = Call::find()->lastChild($originalCall->c_id)->one()) {
+                    $lastChild->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                     $lastChild->c_is_transfer = true;
                     $sid = $lastChild->c_call_sid;
                     $firstTransferToNumber = true;
+
                 }
             } else {
+                $originalCall->cParent->c_is_transfer = true;
                 $originalCall->cParent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                 $originalCall->cParent->c_group_id = $originalCall->c_id;
                 if (!$originalCall->cParent->save()) {
@@ -371,19 +374,13 @@ class PhoneController extends FController
 
             if (!$originalCall->c_group_id) {
                 if ($lastChild) {
-                    if ($originalCall->isIn()) {
-                        $lastChild->c_group_id = $originalCall->c_id;
-                        $originalCall->c_group_id = $originalCall->c_id;
-                    } else {
-                        $lastChild->c_group_id = $lastChild->c_id;
-                       // $originalCall->c_group_id = $lastChild->c_id;
-                    }
+                    $lastChild->c_group_id = $originalCall->c_id;
+                    $originalCall->c_group_id = $originalCall->c_id;
+
                 } else {
                     $originalCall->c_group_id = $originalCall->c_id;
                 }
             }
-
-
 
             if (!$originalCall->save()) {
                 Yii::error(VarDumper::dumpAsString(['message' => 'Cant save original call', 'errors' => $originalCall->getErrors()]), 'PhoneController:actionAjaxCallRedirect');
