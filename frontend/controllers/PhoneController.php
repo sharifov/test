@@ -370,12 +370,19 @@ class PhoneController extends FController
 
             if (!$originalCall->c_group_id) {
                 if ($lastChild) {
-                    $lastChild->c_group_id = $originalCall->c_id;
-                    $originalCall->c_group_id = $originalCall->c_id;
+                    if ($originalCall->isOut()) {
+                        $lastChild->c_group_id = $originalCall->c_id;
+                        $originalCall->c_group_id = $originalCall->c_id;
+                    } else {
+                        $lastChild->c_group_id = $lastChild->c_id;
+                        $originalCall->c_group_id = $lastChild->c_id;
+                    }
                 } else {
                     $originalCall->c_group_id = $originalCall->c_id;
                 }
             }
+
+
 
             if (!$originalCall->save()) {
                 Yii::error(VarDumper::dumpAsString(['message' => 'Cant save original call', 'errors' => $originalCall->getErrors()]), 'PhoneController:actionAjaxCallRedirect');
