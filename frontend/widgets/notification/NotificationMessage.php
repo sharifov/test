@@ -6,7 +6,6 @@ use common\models\Email;
 use common\models\Notifications;
 use yii\bootstrap4\Html;
 use yii\helpers\StringHelper;
-use yii\helpers\Url;
 
 /**
  * Class NotificationMessage
@@ -33,7 +32,6 @@ class NotificationMessage
                 'command' => self::COMMAND_ADD,
                 'userId' => $ntf->n_user_id,
                 'id' => $ntf->n_id,
-                'url' => Url::to(['/notifications/view2', 'id' => $ntf->n_id]),
                 'title' => Html::encode($ntf->n_title),
                 'time' => strtotime($ntf->n_created_dt),
                 'message' => StringHelper::truncate(Email::strip_html_tags($ntf->n_message), 80, '...'),
