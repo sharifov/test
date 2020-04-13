@@ -370,7 +370,7 @@ class PhoneController extends FController
 
             if (!$originalCall->c_group_id) {
                 if ($lastChild) {
-                    if ($originalCall->isOut()) {
+                    if ($originalCall->isIn()) {
                         $lastChild->c_group_id = $originalCall->c_id;
                         $originalCall->c_group_id = $originalCall->c_id;
                     } else {

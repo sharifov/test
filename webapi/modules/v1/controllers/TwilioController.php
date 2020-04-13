@@ -254,6 +254,9 @@ class TwilioController extends ApiBaseNoAuthController
                     }
                 }
 
+                if (isset($call->cCreatedUser->userStatus)) {
+                    $call->cCreatedUser->userStatus->us_is_on_call = false;
+                }
 
                 if ($type === 'user') {
                     if ($id) {
