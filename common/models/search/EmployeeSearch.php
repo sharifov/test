@@ -103,7 +103,6 @@ class EmployeeSearch extends Employee
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'username' => $this->username,
             'status' => $this->status,
             'last_activity' => $this->last_activity,
             'acl_rules_activated' => $this->acl_rules_activated,
