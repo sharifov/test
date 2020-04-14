@@ -89,20 +89,11 @@ class UserStatus extends ActiveRecord
 
     public static function updateIsOnnCall(Call $call): void
     {
-        $onCallWithAnotherCall = Call::find()->
-            where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+        $onCallWithAnotherCall = Call::find()
+            ->where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
             ->andWhere(['<>', 'c_group_id', $call->c_group_id])
             ->exists();
-        Yii::info(VarDumper::dumpAsString([
-            'models' => Call::find()->
-                                where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
-                                ->andWhere(['<>', 'c_group_id', $call->c_group_id])
-                                ->asArray()->all(),
-            'query' => Call::find()
-                                ->where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
-                                ->andWhere(['<>', 'c_group_id', $call->c_group_id])->createCommand()->getRawSql()
-        ]), 'info\DebugCallRedirect');
-        if (!$onCallWithAnotherCall && isset($call->cCreatedUser->userStatus)) {
+        if (!$onCallWithAnotherCall && $call->cCreatedUser->userStatus) {
             $call->cCreatedUser->userStatus->us_is_on_call = false;
             if (!$call->cCreatedUser->userStatus->save()) {
                 Yii::error('Cant update user status', 'UserStatus:updateIsOnnCall');
