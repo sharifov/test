@@ -267,20 +267,11 @@ class EmployeeSearch extends Employee
      * @param array $params
      *
      * @return ArrayDataProvider
+     * @throws \yii\db\Exception
      */
-    public function searchByUserGroupsForSupervision($params)
+    public function searchByUserGroupsForSupervision(array $params):ArrayDataProvider
     {
         $query = Employee::find()->select(['id', 'username', 'status', 'auth_assignment.item_name'])->leftJoin('auth_assignment', 'id = user_id');
-
-        // add conditions that should always apply here
-
-        /*$dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
-            'pagination' => [
-                'pageSize' => 30,
-            ],
-        ]);*/
 
         $this->load($params);
 
@@ -339,15 +330,13 @@ class EmployeeSearch extends Employee
                 ],
             ],
             'pagination' => [
-                'pageSize' => 15,
+                'pageSize' => 10,
             ],
         ];
 
-        //var_dump($data); die();
         //var_dump($query->createCommand()->getSql()); die();
         return $dataProvider = new ArrayDataProvider($paramsData);;
     }
-
 
     public function searchAgentLeads($params)
     {
