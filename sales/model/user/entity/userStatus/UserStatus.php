@@ -8,6 +8,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "user_status".
@@ -92,6 +93,15 @@ class UserStatus extends ActiveRecord
             where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
             ->andWhere(['<>', 'c_group_id', $call->c_group_id])
             ->exists();
+        Yii::info(VarDumper::dumpAsString([
+            'models' => Call::find()->
+                                where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+                                ->andWhere(['<>', 'c_group_id', $call->c_group_id])
+                                ->asArray()->all(),
+            'query' => Call::find()
+                                ->where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+                                ->andWhere(['<>', 'c_group_id', $call->c_group_id])->createCommand()->getRawSql()
+        ]), 'info\DebugCallRedirect');
         if (!$onCallWithAnotherCall && isset($call->cCreatedUser->userStatus)) {
             $call->cCreatedUser->userStatus->us_is_on_call = false;
             if (!$call->cCreatedUser->userStatus->save()) {
