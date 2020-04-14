@@ -254,8 +254,17 @@ class TwilioController extends ApiBaseNoAuthController
                     }
                 }
 
-                if (isset($call->cCreatedUser->userStatus)) {
-                    $call->cCreatedUser->userStatus->us_is_on_call = false;
+                if ($call->c_created_user_id) {
+                    $onCallWithAnotherCall = Call::find()->
+                        where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+                        ->andWhere(['<>', 'c_id', $call->c_id])
+                        ->exists();
+                    if (!$onCallWithAnotherCall && isset($call->cCreatedUser->userStatus)) {
+                        $call->cCreatedUser->userStatus->us_is_on_call = false;
+                        if (!$call->cCreatedUser->userStatus->save()) {
+                            Yii::error('Cant update user status. Redirect call', 'TwilioController:actionRedirectCall');
+                        }
+                    }
                 }
 
                 if ($type === 'user') {
