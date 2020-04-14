@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'cl_id',
-            'cl_parent_id',
+            'cl_group_id',
             ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_created_dt', 'format' => 'byUserDateTimeWithSeconds'],
             ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_finished_dt'],
             'cl_duration',

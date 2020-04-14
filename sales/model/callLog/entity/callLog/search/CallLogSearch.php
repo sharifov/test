@@ -43,7 +43,7 @@ class CallLogSearch extends CallLog
 
             ['cl_phone_list_id', 'integer'],
 
-            [['cl_id', 'cl_parent_id', 'cl_category_id', 'cl_is_transfer', 'cl_phone_list_id', 'cl_user_id', 'cl_department_id', 'cl_project_id', 'cl_client_id'], 'integer'],
+            [['cl_id', 'cl_group_id', 'cl_category_id', 'cl_is_transfer', 'cl_phone_list_id', 'cl_user_id', 'cl_department_id', 'cl_project_id', 'cl_client_id'], 'integer'],
 
             [['cl_call_sid', 'cl_phone_from', 'cl_phone_to'], 'string'],
 
@@ -114,11 +114,11 @@ class CallLogSearch extends CallLog
             $query->andWhere(['clq_access_count' => $this->clq_access_count]);
         }
 
-        if ($this->cl_parent_id) {
+        if ($this->cl_group_id) {
             $query->andWhere([
                 'OR',
-                ['cl_id' => $this->cl_parent_id],
-                ['cl_parent_id' => $this->cl_parent_id],
+                ['cl_id' => $this->cl_group_id],
+                ['cl_group_id' => $this->cl_group_id],
             ]);
         }
 

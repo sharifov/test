@@ -24,7 +24,7 @@ use yii\widgets\ActiveForm;
 
             <?php $form = ActiveForm::begin(); ?>
 
-            <?= $form->field($model, 'cl_parent_id')->textInput() ?>
+            <?= $form->field($model, 'cl_group_id')->textInput() ?>
 
             <?= $form->field($model, 'cl_call_sid')->textInput(['maxlength' => true]) ?>
 

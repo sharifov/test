@@ -719,7 +719,7 @@ class CasesController extends FController
 			->where(['s_case_id' => $model->cs_id]);
 
 		$query3 = (new \yii\db\Query())
-			->select(['id' => new Expression('if (cl_parent_id is null, cl_id, cl_parent_id)')])
+			->select(['id' => new Expression('if (cl_group_id is null, cl_id, cl_group_id)')])
 			->addSelect(['type' => new Expression('"voice"')])
 			->addSelect(['case_id' => 'call_log_case.clc_case_id', 'created_dt' => 'MIN(call_log.cl_call_created_dt)'])
 			->from('call_log_case')
