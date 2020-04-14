@@ -87,16 +87,20 @@ class UserStatus extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'us_user_id']);
     }
 
-    public static function updateIsOnnCall(Call $call): void
+    public static function updateIsOnnCall(int $createdUserId, ?int $groupId): void
     {
-        $onCallWithAnotherCall = Call::find()
-            ->where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
-            ->andWhere(['<>', 'c_group_id', $call->c_group_id])
+        if (!$user = Employee::findOne($createdUserId)) {
+            return;
+        }
+
+        $activeAnotherCall = Call::find()
+            ->where(['c_created_user_id' => $user->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+            ->andWhere(['<>', 'c_group_id', $groupId])
             ->exists();
-        if (!$onCallWithAnotherCall && $call->cCreatedUser->userStatus) {
-            Yii::info('test', 'info\DebugCallRedirect');
-            $call->cCreatedUser->userStatus->us_is_on_call = false;
-            if (!$call->cCreatedUser->userStatus->save()) {
+
+        if (!$activeAnotherCall && $user->userStatus) {
+            $user->userStatus->us_is_on_call = false;
+            if (!$user->userStatus->save()) {
                 Yii::error('Cant update user status', 'UserStatus:updateIsOnnCall');
             }
         }

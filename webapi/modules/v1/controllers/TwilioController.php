@@ -255,10 +255,6 @@ class TwilioController extends ApiBaseNoAuthController
                     }
                 }
 
-                if ($call->c_created_user_id) {
-                    UserStatus::updateIsOnnCall($call);
-                }
-
                 if ($type === 'user') {
                     if ($id) {
                         $call->c_created_user_id = $id;

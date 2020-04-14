@@ -356,14 +356,20 @@ class PhoneController extends FController
 
             $lastChild = null;
 
+            $createdUserId = null;
+
             if ($originalCall->isGeneralParent()) {
                 if ($lastChild = Call::find()->lastChild($originalCall->c_id)->one()) {
+                    $createdUserId = $lastChild->c_created_user_id;
                     $lastChild->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+                    $lastChild->c_created_user_id = null;
                     $lastChild->c_is_transfer = true;
                     $sid = $lastChild->c_call_sid;
                     $firstTransferToNumber = true;
                 }
             } else {
+                $createdUserId = $originalCall->cParent->c_created_user_id;
+                $originalCall->cParent->c_created_user_id = null;
                 $originalCall->cParent->c_is_transfer = true;
                 $originalCall->cParent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                 if (!$originalCall->cParent->c_group_id) {
@@ -374,18 +380,21 @@ class PhoneController extends FController
                 }
             }
 
+            $groupId = null;
             if (!$originalCall->c_group_id) {
                 if ($lastChild) {
-                    $lastChild->c_group_id = $originalCall->c_id;
-                    $originalCall->c_group_id = $originalCall->c_id;
+                    $groupId = $originalCall->c_id;
+                    $lastChild->c_group_id = $groupId;
+                    $originalCall->c_group_id = $groupId;
 
                 } else {
-                    $originalCall->c_group_id = $originalCall->c_id;
+                    $groupId = $originalCall->c_id;
+                    $originalCall->c_group_id = $groupId;
                 }
             }
 
-            if ($originalCall->c_created_user_id) {
-                UserStatus::updateIsOnnCall($originalCall);
+            if ($createdUserId) {
+                UserStatus::updateIsOnnCall($createdUserId, $groupId);
             }
 
             if (!$originalCall->save()) {
@@ -627,14 +636,24 @@ class PhoneController extends FController
             $data['type'] = $type;
             $data['isTransfer'] = true;
 
+            $groupId = $originCall->c_group_id;
+            $createdUserId = $originCall->c_created_user_id;
+
             if ($originCall->cParent) {
 
                 $originCall->c_is_transfer = true;
                 $originCall->cParent->c_is_transfer = true;
 
                 if (!$originCall->c_group_id) {
-                    $originCall->c_group_id = $originCall->c_id;
-                    $originCall->cParent->c_group_id = $originCall->c_id;
+                    $groupId = $originCall->c_id;
+                    $originCall->c_group_id = $groupId;
+                    $originCall->cParent->c_group_id = $groupId;
+                }
+
+                $originCall->cParent->c_created_user_id = null;
+
+                if ($createdUserId) {
+                    UserStatus::updateIsOnnCall($createdUserId, $groupId);
                 }
 
                 if (!$originCall->save()) {
@@ -655,8 +674,15 @@ class PhoneController extends FController
                     $childCall->c_is_transfer = true;
 
                     if (!$originCall->c_group_id) {
-                        $originCall->c_group_id = $originCall->c_id;
-                        $childCall->c_group_id = $originCall->c_id;
+                        $groupId = $originCall->c_id;
+                        $originCall->c_group_id = $groupId;
+                        $childCall->c_group_id = $groupId;
+                    }
+
+                    $childCall->c_created_user_id = null;
+
+                    if ($createdUserId) {
+                        UserStatus::updateIsOnnCall($createdUserId, $groupId);
                     }
 
                     if (!$originCall->save()) {
