@@ -131,24 +131,22 @@ $user = Yii::$app->user->identity;
         </div>
     </div>
 
-    <?php if ($modelUserParams):
-
-        $js = <<<JS
+<?php if ($modelUserParams):
+    $js = <<<JS
+        
+        $("#myTimeline").timeline({
+            type            : "bar",
+            rows            : 1,
+            //rowHeight       : 80,
+            height          : "auto",
+            langsDir        : "/js/jquery.timeline-master/dist/langs/",
+            httpLnaguage    : true
     
-    $("#myTimeline").timeline({
-        type            : "bar",
-        rows            : 1,
-        //rowHeight       : 80,
-        height          : "auto",
-        langsDir        : "./js/jquery.timeline-master/dist/langs/",
-        httpLnaguage    : true
-
-  //      startDatetime   : "current"
-    });
+      //      startDatetime   : "current"
+        });
 JS;
-        $this->registerJs($js, \yii\web\View::POS_READY);
-
-        ?>
+    $this->registerJs($js, \yii\web\View::POS_READY);
+ ?>
 
         <h3>My Shift Timeline</h3>
         <!-- Timeline Block -->
