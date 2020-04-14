@@ -94,6 +94,7 @@ class UserStatus extends ActiveRecord
             ->andWhere(['<>', 'c_group_id', $call->c_group_id])
             ->exists();
         if (!$onCallWithAnotherCall && $call->cCreatedUser->userStatus) {
+            Yii::info('test', 'info\DebugCallRedirect');
             $call->cCreatedUser->userStatus->us_is_on_call = false;
             if (!$call->cCreatedUser->userStatus->save()) {
                 Yii::error('Cant update user status', 'UserStatus:updateIsOnnCall');
