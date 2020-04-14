@@ -129,7 +129,7 @@ $user = Yii::$app->user->identity;
                 'filter' => \common\models\Call::STATUS_LIST
             ],
             ['class' => BooleanColumn::class, 'attribute' => 'c_is_transfer'],
-            ['class' => DateTimeColumn::class, 'attribute' => 'c_queue_start_dt'],
+            ['class' => DateTimeColumn::class, 'attribute' => 'c_queue_start_dt', 'format' => 'byUserDateTimeWithSeconds'],
             'c_group_id',
             [
                 'attribute' => 'c_created_dt',
