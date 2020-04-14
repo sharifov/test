@@ -4,6 +4,7 @@ use common\models\Employee;
 use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogType;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
@@ -196,7 +197,7 @@ $user = Yii::$app->user->identity;
                     <div class="count">
                         <?php
                             //$callsOutIn = \common\models\Call::find()->select(['SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_OUT . ', 1, 0)) as `cOut`', 'SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_IN . ', 1, 0)) as `cIn`'])->where('DATE(c_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
-                            $callsOutIn = CallLog::find()->select(['SUM(IF(cl_type_id = '. \common\models\Call::CALL_TYPE_OUT . ', 1, 0)) as `cOut`', 'SUM(IF(cl_type_id = '. \common\models\Call::CALL_TYPE_IN . ', 1, 0)) as `cIn`'])->where('DATE(cl_call_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
+                            $callsOutIn = CallLog::find()->select(['SUM(IF(cl_type_id = '. CallLogType::OUT . ', 1, 0)) as `cOut`', 'SUM(IF(cl_type_id = '. CallLogType::IN . ', 1, 0)) as `cIn`'])->where('DATE(cl_call_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
                         ?>
                         <?= $callsOutIn[0]['cOut'] ?? 0 ?>
                         /
