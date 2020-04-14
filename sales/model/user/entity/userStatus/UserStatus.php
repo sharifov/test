@@ -90,8 +90,7 @@ class UserStatus extends ActiveRecord
     {
         $onCallWithAnotherCall = Call::find()->
             where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
-            ->andWhere(['<>', 'c_id', $call->c_id])
-            ->andWhere(['<>', 'c_id', $call->c_parent_id])
+            ->andWhere(['<>', 'c_group_id', $call->c_group_id])
             ->exists();
         if (!$onCallWithAnotherCall && isset($call->cCreatedUser->userStatus)) {
             $call->cCreatedUser->userStatus->us_is_on_call = false;
