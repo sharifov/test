@@ -84,21 +84,6 @@ class DashboardController extends FController
         $searchModel->timeStart = date('Y-m-d H:i', strtotime('-0 day'));
         $searchModel->timeEnd = date('Y-m-d H:i');
 
-        /*$newModels = [];
-        foreach($dataProvider->getModels() as $model) {*/
-            /**@var Employee $model */
-            /*if ($user->isSupervision() && $model->isAgent()) {
-                $newModels[] = $model;
-            } elseif ($user->isExSuper() && $model->isExAgent()) {
-                $newModels[] = $model;
-            } elseif ($user->isSupSuper() && $model->isSupAgent()) {
-                $newModels[] = $model;
-            } elseif ($model->id === $user->id) {
-                $newModels[] = $model;
-            }
-        }
-        $dataProvider->setModels($newModels);*/
-
         return $this->render('index_supervision', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
@@ -107,9 +92,6 @@ class DashboardController extends FController
 
     public function dashboardAdmin(): string
     {
-
-        //$userId = Yii::$app->user->id;
-
         $days = 20;
         $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date")
             ->where(['<>', 'status', Lead::STATUS_TRASH])
@@ -118,7 +100,6 @@ class DashboardController extends FController
             ->groupBy('DATE(created)')
             ->orderBy('DATE(created) DESC')
             ->limit(30)->asArray()->all();
-
 
         $dataStatsPending = Lead::find()->select("COUNT(*) AS pending_count, DATE(created) AS created_date")
             ->where([
@@ -131,7 +112,6 @@ class DashboardController extends FController
             ->groupBy(['DATE(created)'])
             ->orderBy('DATE(created) DESC')
             ->limit(30)->asArray()->all();
-
 
         $dataStatsBooked = Lead::find()->select("COUNT(*) AS book_count, DATE(created) AS created_date")
             ->where([
@@ -181,9 +161,6 @@ class DashboardController extends FController
             ->orderBy('DATE(created) DESC')
             ->limit(30)->asArray()->all();
 
-
-        //print_r($dataStatsPending);
-
         $dataStats = [];
 
         foreach ($dataStatsDone as $item) {
@@ -212,7 +189,6 @@ class DashboardController extends FController
             }
         }
 
-
         foreach ($dataStatsBooked as $item) {
             $item['done_count'] = 0;
             $item['pending_count'] = 0;
@@ -229,7 +205,6 @@ class DashboardController extends FController
             }
         }
 
-
         foreach ($dataStatsTrash as $item) {
             $item['done_count'] = 0;
             $item['pending_count'] = 0;
@@ -243,7 +218,6 @@ class DashboardController extends FController
                 $dataStats[$item['created_date']] = $item;
             }
         }
-
 
         foreach ($dataStatsProcessing as $item) {
             $item['done_count'] = 0;
@@ -260,7 +234,6 @@ class DashboardController extends FController
                 $dataStats[$item['created_date']] = $item;
             }
         }
-
 
         foreach ($dataStatsSold as $item) {
             $item['done_count'] = 0;
@@ -280,7 +253,6 @@ class DashboardController extends FController
 
         ksort($dataStats);
 
-
         $days2 = 7;
 
         $dataSources = ApiLog::find()->select('COUNT(*) AS cnt, al_user_id')
@@ -288,7 +260,6 @@ class DashboardController extends FController
             ->groupBy(['al_user_id'])
             ->orderBy('cnt DESC')
             ->asArray()->all();
-
 
         $dataEmployee = Lead::find()->select("COUNT(*) AS cnt, employee_id")//, SUM(tr_total_price) AS sum_price
         ->where([
@@ -302,7 +273,6 @@ class DashboardController extends FController
             ->orderBy('cnt DESC')
             ->limit(20)->asArray()->all();
 
-
         $dataEmployeeSold = Lead::find()->select("COUNT(*) AS cnt, employee_id")//, SUM(tr_total_price) AS sum_price
         ->where([
             'status' => [
@@ -314,24 +284,12 @@ class DashboardController extends FController
             ->orderBy('cnt DESC')
             ->limit(20)->asArray()->all();
 
-
-        $searchModel = new EmployeeSearch();
+        /*$searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
-
-
-        //$params['EmployeeSearch']['supervision_id'] = $userId;
-
         $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
-
-
         $dataProvider = $searchModel->searchByUserGroups($params);
-
         $searchModel->timeStart = date('Y-m-d H:i', strtotime('-0 day'));
-        $searchModel->timeEnd = date('Y-m-d H:i');
-
-        //var_dump($searchModel);
-
-        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
+        $searchModel->timeEnd = date('Y-m-d H:i');*/
 
 
         $crontabJobList = [];
@@ -366,10 +324,9 @@ class DashboardController extends FController
             }
         }
 
-
         return $this->render('index_admin', [
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
+            /*'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,*/
             'dataStats' => $dataStats,
             'dataSources' => $dataSources,
             'dataEmployee' => $dataEmployee,
@@ -378,7 +335,6 @@ class DashboardController extends FController
             'crontabJobList' => $crontabJobList,
             'processList' => $processList,
         ]);
-
     }
 
     public function dashboardAgent(): string

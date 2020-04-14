@@ -3,6 +3,7 @@
 use common\models\Employee;
 use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
+use sales\model\callLog\entity\callLog\CallLog;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
@@ -194,7 +195,8 @@ $user = Yii::$app->user->identity;
                     <div class="icon"><i class="fa fa-phone"></i></div>
                     <div class="count">
                         <?php
-                            $callsOutIn = \common\models\Call::find()->select(['SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_OUT . ', 1, 0)) as `cOut`', 'SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_IN . ', 1, 0)) as `cIn`'])->where('DATE(c_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
+                            //$callsOutIn = \common\models\Call::find()->select(['SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_OUT . ', 1, 0)) as `cOut`', 'SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_IN . ', 1, 0)) as `cIn`'])->where('DATE(c_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
+                            $callsOutIn = CallLog::find()->select(['SUM(IF(cl_type_id = '. \common\models\Call::CALL_TYPE_OUT . ', 1, 0)) as `cOut`', 'SUM(IF(cl_type_id = '. \common\models\Call::CALL_TYPE_IN . ', 1, 0)) as `cIn`'])->where('DATE(cl_call_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
                         ?>
                         <?= $callsOutIn[0]['cOut'] ?? 0 ?>
                         /
@@ -391,24 +393,24 @@ $user = Yii::$app->user->identity;
     </div>
 
     <br>
-
-    <?php Pjax::begin(); ?>
+<!--
+    <?php /*Pjax::begin(); */?>
     <div class="card card-default">
-        <div class="card-header">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
+        <div class="card-header">Agents Stats <?/*=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''*/?></div>
         <div class="card-body">
             <div class="row">
-                <?php $form = ActiveForm::begin([
+                <?php /*$form = ActiveForm::begin([
                     'action' => ['index'],
                     'method' => 'get',
                     'options' => [
                         'data-pjax' => 1,
                         'style' => 'width: 100%;margin-top: 5px;'
                     ],
-                ]); ?>
+                ]); */?>
 
                 <div class="col-md-3">
                     <?php
-                    echo  \kartik\daterange\DateRangePicker::widget([
+/*                    echo  \kartik\daterange\DateRangePicker::widget([
                         'model'=> $searchModel,
                         'attribute' => 'timeRange',
                         'useWithAddon'=>true,
@@ -426,19 +428,19 @@ $user = Yii::$app->user->identity;
                             ]
                         ]
                     ]);
-                    ?>
+                    */?>
                 </div>
 
                 <div class="form-group">
-                    <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-primary']) ?>
-                    <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                    <?/*= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-primary']) */?>
+                    <?php /*//= Html::resetButton('Reset', ['class' => 'btn btn-default']) */?>
                 </div>
 
-                <?php ActiveForm::end(); ?>
+                <?php /*ActiveForm::end(); */?>
             </div>
 
 
-            <?= GridView::widget([
+            <?/*= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
                 'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
@@ -473,16 +475,6 @@ $user = Yii::$app->user->identity;
                         //'format' => 'raw'
                     ],
 
-                    /*'email:email',
-                    [
-                        'attribute' => 'status',
-                        'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                        'value' => static function (\common\models\Employee $model) {
-                            return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
-                        },
-                        'format' => 'html'
-                    ],*/
-
                     [
                         'label' => 'User Groups',
                         'attribute' => 'user_group_id',
@@ -510,27 +502,6 @@ $user = Yii::$app->user->identity;
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left', 'style' => 'width:30%;'],
-                        /*'filter' => \kartik\daterange\DateRangePicker::widget([
-                            'model'=> $searchModel,
-                            'attribute' => 'date_range',
-                            //'name'=>'date_range',
-                            'useWithAddon'=>true,
-                            //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
-                            'presetDropdown'=>true,
-                            'hideInput'=>true,
-                            'convertFormat'=>true,
-                            'startAttribute' => 'datetime_start',
-                            'endAttribute' => 'datetime_end',
-                            //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
-                            //'endInputOptions' => ['value' => '2017-07-20'],
-                            'pluginOptions'=>[
-                                'timePicker'=> false,
-                                'timePickerIncrement'=>15,
-                                'locale'=>['format'=>'Y-m-d']
-                            ]
-                        ])*/
-                        //'options' => ['style' => 'width:200px'],
-
                     ],
                     [
                         'label' => 'Processing',
@@ -545,19 +516,7 @@ $user = Yii::$app->user->identity;
                         },
                         'format' => 'raw',
                     ],
-                    /*[
-                        'label' => 'Hold On',
-                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_ON_HOLD], $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_ON_HOLD,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ],*/
+
                     [
                         'label' => 'Booked',
                         'value' => static function (\common\models\Employee $model) use ($searchModel) {
@@ -610,21 +569,10 @@ $user = Yii::$app->user->identity;
                         },
                         'format' => 'raw',
                     ]
-
-                    /*[
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{update}',
-                        'visibleButtons' => [
-                            'update' => function (\common\models\Employee $model, $key, $index) use ($user) {
-                                return ($user->isAdmin() || !$model->isAdmin());
-                            },
-                        ],
-
-                    ],*/
                 ]
             ])
-            ?>
+            */?>
         </div>
     </div>
-    <?php Pjax::end(); ?>
+    --><?php /*Pjax::end(); */?>
 </div>
