@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use common\models\Lead;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -14,17 +15,11 @@ use yii\widgets\ActiveForm;
 $bundle = \frontend\assets\TimelineAsset::register($this);
 $this->title = 'Dashboard - Supervision';
 
-/*$js = <<<JS
-    google.charts.load('current', {packages: ['corechart', 'bar']});
-JS;
-//$this->registerJs($js, \yii\web\View::POS_READY);*/
-
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 ?>
 
 <div class="site-index">
-
     <h1><?= $this->title ?></h1>
     <div class="row">
         <div class="col-md-3">
@@ -136,24 +131,22 @@ $user = Yii::$app->user->identity;
         </div>
     </div>
 
-    <?php if ($modelUserParams):
-
-        $js = <<<JS
+<?php if ($modelUserParams):
+    $js = <<<JS
+        
+        $("#myTimeline").timeline({
+            type            : "bar",
+            rows            : 1,
+            //rowHeight       : 80,
+            height          : "auto",
+            langsDir        : "/js/jquery.timeline-master/dist/langs/",
+            httpLnaguage    : true
     
-    $("#myTimeline").timeline({
-        type            : "bar",
-        rows            : 1,
-        //rowHeight       : 80,
-        height          : "auto",
-        langsDir        : "./js/jquery.timeline-master/dist/langs/",
-        httpLnaguage    : true
-
-  //      startDatetime   : "current"
-    });
+      //      startDatetime   : "current"
+        });
 JS;
-        $this->registerJs($js, \yii\web\View::POS_READY);
-
-        ?>
+    $this->registerJs($js, \yii\web\View::POS_READY);
+ ?>
 
         <h3>My Shift Timeline</h3>
         <!-- Timeline Block -->
@@ -233,16 +226,14 @@ JS;
                     <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-primary']) ?>
                     <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
                 </div>
-
                 <?php ActiveForm::end(); ?>
             </div>
-
 
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
-                'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
-                    if ($model->isDeleted()) {
+                'rowOptions' => function ($model, $index, $widget, $grid) {
+                    if ($model['status'] == false) {
                         return ['class' => 'danger'];
                     }
                 },
@@ -254,8 +245,8 @@ JS;
                     ],
                     [
                         'attribute' => 'username',
-                        'value' => static function (\common\models\Employee $model) {
-                            return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($model->username);
+                        'value' => static function ($model) {
+                            return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($model['username']);
                         },
                         'format' => 'raw',
                         //'contentOptions' => ['title' => 'text-center'],
@@ -263,32 +254,25 @@ JS;
                     ],
 
                     [
-                        //'attribute' => 'username',
                         'label' => 'Role',
-                        'value' => static function (\common\models\Employee $model) {
-                            $roles = $model->getRoles();
-                            return $roles ? implode(', ', $roles) : '-';
+                        'value' => static function ($model) {
+                            $roleDescriptions = [];
+                            $roles = Yii::$app->authManager->getRolesByUser($model['id']);
+                            foreach ($roles as $roleObj)
+                            {
+                                array_push($roleDescriptions, $roleObj->description);
+                            }
+                            return $roleDescriptions ? implode(', ', $roleDescriptions) : '-';;
                         },
                         'options' => ['style' => 'width:150px'],
                         //'format' => 'raw'
                     ],
 
-                    /*'email:email',
-                    [
-                        'attribute' => 'status',
-                        'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                        'value' => static function (\common\models\Employee $model) {
-                            return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
-                        },
-                        'format' => 'html'
-                    ],*/
-
                     [
                         'label' => 'User Groups',
                         'attribute' => 'user_group_id',
-                        'value' => static function (\common\models\Employee $model) {
-
-                            $groups = $model->getUserGroupList();
+                        'value' => static function ($model) {
+                            $groups = \common\models\UserGroupAssign::getGroupsNameByUserId($model['id']);
                             $groupsValueArr = [];
 
                             foreach ($groups as $group) {
@@ -296,75 +280,43 @@ JS;
                             }
 
                             $groupsValue = implode(' ', $groupsValueArr);
-
                             return $groupsValue;
                         },
+
                         'format' => 'raw',
                         'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                     ],
 
                     [
                         'label' => 'Tasks Result for Period',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);
+                        'value' => function ($model) use ($searchModel) {
+                            return Employee::getTaskStatsSupervision($searchModel->timeStart, $searchModel->timeEnd, $model['id']);
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left', 'style' => 'width:30%;'],
-                        /*'filter' => \kartik\daterange\DateRangePicker::widget([
-                            'model'=> $searchModel,
-                            'attribute' => 'date_range',
-                            //'name'=>'date_range',
-                            'useWithAddon'=>true,
-                            //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
-                            'presetDropdown'=>true,
-                            'hideInput'=>true,
-                            'convertFormat'=>true,
-                            'startAttribute' => 'datetime_start',
-                            'endAttribute' => 'datetime_end',
-                            //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
-                            //'endInputOptions' => ['value' => '2017-07-20'],
-                            'pluginOptions'=>[
-                                'timePicker'=> false,
-                                'timePickerIncrement'=>15,
-                                'locale'=>['format'=>'Y-m-d']
-                            ]
-                        ])*/
-                        //'options' => ['style' => 'width:200px'],
-
                     ],
+
                     [
                         'label' => 'Processing',
-                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->timeStart, $searchModel->timeEnd);
+                        'value' => static function ($model) use ($searchModel) {
+                            $cnt = Employee::getLeadCountByStatusSupervision([Lead::STATUS_PROCESSING], $searchModel->timeStart, $searchModel->timeEnd, $model['id']);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[lf_owner_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_PROCESSING,
+                                'LeadFlowSearch[lf_owner_id]' => $model['id'],
+                                'LeadFlowSearch[status]' => Lead::STATUS_PROCESSING,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
                     ],
-                    /*[
-                        'label' => 'Hold On',
-                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_ON_HOLD], $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[lf_owner_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_ON_HOLD,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ],*/
+
                     [
                         'label' => 'Booked',
-                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_BOOKED], $searchModel->timeStart, $searchModel->timeEnd);
+                        'value' => static function ($model) use ($searchModel) {
+                            $cnt = Employee::getLeadCountByStatusSupervision([Lead::STATUS_BOOKED], $searchModel->timeStart, $searchModel->timeEnd, $model['id']);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[lf_owner_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_BOOKED,
+                                'LeadFlowSearch[lf_owner_id]' => $model['id'],
+                                'LeadFlowSearch[status]' => Lead::STATUS_BOOKED,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
@@ -373,11 +325,11 @@ JS;
                     ],
                     [
                         'label' => 'Sold',
-                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_SOLD], $searchModel->timeStart, $searchModel->timeEnd);
+                        'value' => static function ($model) use ($searchModel) {
+                            $cnt = Employee::getLeadCountByStatusSupervision([Lead::STATUS_SOLD], $searchModel->timeStart, $searchModel->timeEnd, $model['id']);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[lf_owner_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_SOLD,
+                                'LeadFlowSearch[lf_owner_id]' => $model['id'],
+                                'LeadFlowSearch[status]' => Lead::STATUS_SOLD,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
@@ -386,11 +338,11 @@ JS;
                     ],
                     [
                         'label' => 'Follow Up',
-                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->timeStart, $searchModel->timeEnd);
+                        'value' => static function ($model) use ($searchModel) {
+                            $cnt = Employee::getLeadCountByStatusSupervision([Lead::STATUS_FOLLOW_UP], $searchModel->timeStart, $searchModel->timeEnd, $model['id']);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[lf_owner_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_FOLLOW_UP,
+                                'LeadFlowSearch[lf_owner_id]' => $model['id'],
+                                'LeadFlowSearch[status]' => Lead::STATUS_FOLLOW_UP,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
@@ -399,28 +351,17 @@ JS;
                     ],
                     [
                         'label' => 'Trash',
-                        'value' => static function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_TRASH], $searchModel->timeStart, $searchModel->timeEnd);
+                        'value' => static function ($model) use ($searchModel) {
+                            $cnt = Employee::getLeadCountByStatusSupervision([Lead::STATUS_TRASH], $searchModel->timeStart, $searchModel->timeEnd, $model['id']);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[lf_owner_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_TRASH,
+                                'LeadFlowSearch[lf_owner_id]' => $model['id'],
+                                'LeadFlowSearch[status]' => Lead::STATUS_TRASH,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
                     ]
-
-                    /*[
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{update}',
-                        'visibleButtons' => [
-                            'update' => function (\common\models\Employee $model, $key, $index) use ($user) {
-                                return $user->isAdmin() || !$model->isAdmin();
-                            },
-                        ],
-
-                    ],*/
                 ]
             ])
             ?>

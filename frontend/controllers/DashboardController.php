@@ -79,15 +79,15 @@ class DashboardController extends FController
         $params['EmployeeSearch']['supervision_id'] = $user->id;
         $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
 
-        $dataProvider = $searchModel->searchByUserGroups($params);
+        $dataProvider = $searchModel->searchByUserGroupsForSupervision($params);
 
         $searchModel->timeStart = date('Y-m-d H:i', strtotime('-0 day'));
         $searchModel->timeEnd = date('Y-m-d H:i');
 
-        $newModels = [];
-        foreach($dataProvider->getModels() as $model) {
+        /*$newModels = [];
+        foreach($dataProvider->getModels() as $model) {*/
             /**@var Employee $model */
-            if ($user->isSupervision() && $model->isAgent()) {
+            /*if ($user->isSupervision() && $model->isAgent()) {
                 $newModels[] = $model;
             } elseif ($user->isExSuper() && $model->isExAgent()) {
                 $newModels[] = $model;
@@ -97,7 +97,7 @@ class DashboardController extends FController
                 $newModels[] = $model;
             }
         }
-        $dataProvider->setModels($newModels);
+        $dataProvider->setModels($newModels);*/
 
         return $this->render('index_supervision', [
             'dataProvider' => $dataProvider,

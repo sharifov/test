@@ -6,6 +6,7 @@ use common\models\query\UserGroupAssignQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "user_group_assign".
@@ -91,5 +92,14 @@ class UserGroupAssign extends \yii\db\ActiveRecord
     public static function find()
     {
         return new UserGroupAssignQuery(static::class);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getGroupsNameByUserId($userID) : array
+    {
+        $data = self::find()->with('ugsGroup')->where(['ugs_user_id' => $userID])->asArray()->all();
+        return ArrayHelper::getColumn(ArrayHelper::getColumn($data, 'ugsGroup'), 'ug_name');
     }
 }
