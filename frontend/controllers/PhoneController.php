@@ -14,6 +14,7 @@ use common\models\Project;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
+use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -361,9 +362,14 @@ class PhoneController extends FController
                     $lastChild->c_is_transfer = true;
                     $sid = $lastChild->c_call_sid;
                     $firstTransferToNumber = true;
-
+                    if ($lastChild->c_created_user_id) {
+                        UserStatus::updateIsOnnCall($lastChild);
+                    }
                 }
             } else {
+                if ($originalCall->c_created_user_id) {
+                    UserStatus::updateIsOnnCall($originalCall);
+                }
                 $originalCall->cParent->c_is_transfer = true;
                 $originalCall->cParent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                 if (!$originalCall->cParent->c_group_id) {

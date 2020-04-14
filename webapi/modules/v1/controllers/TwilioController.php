@@ -8,6 +8,7 @@ use common\models\ClientPhone;
 use common\models\DepartmentPhoneProject;
 use common\models\DepartmentPhoneProjectUserGroup;
 use sales\helpers\app\AppHelper;
+use sales\model\user\entity\userStatus\UserStatus;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\base\Exception;
@@ -255,16 +256,7 @@ class TwilioController extends ApiBaseNoAuthController
                 }
 
                 if ($call->c_created_user_id) {
-                    $onCallWithAnotherCall = Call::find()->
-                        where(['c_created_user_id' => $call->c_created_user_id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
-                        ->andWhere(['<>', 'c_id', $call->c_id])
-                        ->exists();
-                    if (!$onCallWithAnotherCall && isset($call->cCreatedUser->userStatus)) {
-                        $call->cCreatedUser->userStatus->us_is_on_call = false;
-                        if (!$call->cCreatedUser->userStatus->save()) {
-                            Yii::error('Cant update user status. Redirect call', 'TwilioController:actionRedirectCall');
-                        }
-                    }
+                    UserStatus::updateIsOnnCall($call);
                 }
 
                 if ($type === 'user') {
