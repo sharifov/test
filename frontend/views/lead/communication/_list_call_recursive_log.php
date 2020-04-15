@@ -36,7 +36,7 @@ $child = $child ?? false;
 						<span class="badge badge-warning" data-toggle="tooltip" data-html="true" title="Duration: <?=Yii::$app->formatter->asDuration($callItem->cl_duration)?> <?php if($callItem->queue && $callItem->queue->clq_queue_time): ?><br> Queue Duration: <?= Yii::$app->formatter->asDuration($callItem->queue->clq_queue_time) ?> <?php endif; ?>"><?=gmdate('i:s', $callItem->cl_duration)?></span>
 					<?php endif;?>
 				</td>
-				<td>
+				<td style="width: 80px">
 					<?php  if ($callItem->record && $callItem->record->clr_record_sid):?>
 						<?=  Html::button(gmdate('i:s', $callItem->record->clr_duration) . ' <i class="fa fa-play-circle-o"></i>',
 							['class' => 'btn btn-' . ($callItem->record->clr_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->record->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ])*/ ]) ?>
