@@ -87,7 +87,9 @@ class SiteController extends FController
 
     public function actionLogout()
     {
-        Yii::$app->user->logout();
+        if (Yii::$app->user->logout()) {
+            LoginForm::removeWsIdentityCookie();
+        }
 
         return $this->goHome();
     }

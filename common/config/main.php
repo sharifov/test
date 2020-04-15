@@ -88,6 +88,19 @@ return [
             'tube' => 'queue_job',
         ],
 
+        'queue_message' => [
+            'class' => \yii\queue\amqp_interop\Queue::class,
+            'port' => 5672,
+            'user' => 'guest',
+            'password' => 'guest',
+            'queueName' => 'queue_message',
+            'driver' => yii\queue\amqp_interop\Queue::ENQUEUE_AMQP_LIB,
+            // или
+            'dsn' => 'amqp://guest:guest@localhost:5672/%2F',
+            // или
+            //'dsn' => 'amqp:',
+        ],
+
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botToken' => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',

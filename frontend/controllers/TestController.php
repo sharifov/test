@@ -1154,4 +1154,14 @@ class TestController extends FController
 		var_dump($expMonth);
 	}
 
+
+    public function actionWebSocket()
+    {
+        $this->layout = 'main2';
+
+        VarDumper::dump(Yii::$app->session->id);
+
+        return $this->render('websocket');
+    }
+
 }

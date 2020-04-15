@@ -20,6 +20,7 @@ use Yii;
  * @property string $uc_ip
  * @property string $uc_created_dt
  * @property int $uc_case_id
+ * @property string $uc_connection
  *
  * @property Cases $ucCase
  * @property Lead $ucLead
@@ -48,6 +49,7 @@ class UserConnection extends \yii\db\ActiveRecord
             [['uc_controller_id', 'uc_action_id'], 'string', 'max' => 50],
             [['uc_page_url'], 'string', 'max' => 500],
             [['uc_ip'], 'string', 'max' => 40],
+            [['uc_connection'], 'string'],
             [['uc_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['uc_case_id' => 'cs_id']],
             [['uc_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['uc_lead_id' => 'id']],
             [['uc_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uc_user_id' => 'id']],
@@ -71,6 +73,7 @@ class UserConnection extends \yii\db\ActiveRecord
             'uc_ip' => 'IP',
             'uc_created_dt' => 'Created Dt',
             'uc_case_id' => 'Case ID',
+            'uc_connection' => 'Connection Object'
         ];
     }
 

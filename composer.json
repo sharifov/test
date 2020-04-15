@@ -73,14 +73,18 @@
 		"thamtech/yii2-uuid": "^1.2",
 		"kivork/yii2-rbac-export-import": "@dev",
 		"2amigos/2fa-library": "^2.0",
-		"yiisoft/yii2-redis": "~2.0.0"
+		"yiisoft/yii2-redis": "~2.0.0",
+		"immusen/yii2-swoole-websocket": "~1.0",
+		"consik/yii2-websocket": "^1.0",
+		"swoole-foundation/yii2-swoole-extension": "^1.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
 		"yiisoft/yii2-gii" : "~2.1",
 		"yiisoft/yii2-faker" : "~2.0",
 		"codeception/base" : "^2.5",
-		"codeception/verify" : "~0.4"
+		"codeception/verify" : "~0.4",
+		"eaglewu/swoole-ide-helper": "dev-master"
 	},
 	"config" : {
 		"process-timeout" : 1800,

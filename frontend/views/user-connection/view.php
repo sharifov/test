@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'uc_page_url:url',
             'uc_ip',
             'uc_created_dt',
+            'uc_connection:text'
         ],
     ]) ?>
 
