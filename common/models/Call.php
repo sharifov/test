@@ -790,8 +790,14 @@ class Call extends \yii\db\ActiveRecord
                             /** @var Call $lastChild */
                             $lastChild = self::find()->andWhere(['c_parent_id' => $this->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
                             if (
-                                ($lastChild === null || $this->c_created_user_id == null)
-                                || ($lastChild && $lastChild->c_created_user_id != null && $this->c_created_user_id != $lastChild->c_created_user_id)
+                                $lastChild === null
+                                || (
+                                    $lastChild
+                                    && $lastChild->c_created_user_id != null
+                                    && (
+                                        $this->c_created_user_id == null || $this->c_created_user_id != $lastChild->c_created_user_id
+                                    )
+                                )
                             ) {
                                 $this->c_status_id = self::STATUS_NO_ANSWER;
                                 self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);

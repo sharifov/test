@@ -110,7 +110,6 @@ class CallLogTransferService
             $call->isIn()
             && !$call->isStatusCompleted()
             && $call->isTransfer()
-            && !$call->isSourceTransfer()
             && (
                 $call->isGeneralParent()
                 || (!$call->isGeneralParent() && (strtotime($call->c_queue_start_dt) > strtotime($call->c_created_dt)))
