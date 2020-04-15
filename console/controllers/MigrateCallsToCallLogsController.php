@@ -378,6 +378,7 @@ class MigrateCallsToCallLogsController extends Controller
             && $call['parent_c_parent_id'] != null
         ) {
             $this->outTransferSecondaryOutChildCall($call, $log);
+            return;
         }
 
         $this->createCallLogs($call, $log, [], []);
