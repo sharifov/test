@@ -67,7 +67,7 @@ class CallLogTransferService
 
     public function transfer(Call $call): void
     {
-        $this->call = $call->toArray();
+        $this->call = $call->getAttributes();
 
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
             //Out Parent Call
