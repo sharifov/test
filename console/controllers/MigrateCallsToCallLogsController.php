@@ -613,6 +613,7 @@ class MigrateCallsToCallLogsController extends Controller
         $call['c_parent_id'] = $call['c_id'];
 
         $callData['cl_is_transfer'] = true;
+        $callData['cl_category_id'] = $call['parent_c_source_type_id'];
 
         $this->createCallLogs(
             $call,
