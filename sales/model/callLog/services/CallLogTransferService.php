@@ -185,6 +185,8 @@ class CallLogTransferService
 
     private function directInNotAcceptedParentCall(): void
     {
+        $this->callLog['cl_group_id'] = $this->call['c_id'];
+
         $this->queue['clq_queue_time'] = $this->call['c_call_duration'];
         $this->queue['clq_access_count'] =  (int)CallUserAccess::find()->andWhere(['cua_call_id' => $this->call['c_id']])->count();
 
@@ -321,7 +323,7 @@ class CallLogTransferService
 
         } catch (\Throwable $e) {
             $transaction->rollBack();
-            \Yii::error($e->getMessage(), 'CallLogTransferService:createCallLogs');
+            \Yii::error(VarDumper::dumpAsString(['Call' =>  $this->call, 'error' => $e->getMessage()]), 'CallLogTransferService:createCallLogs');
         }
     }
 
