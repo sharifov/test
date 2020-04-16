@@ -1064,7 +1064,7 @@ class Call extends \yii\db\ActiveRecord
 
         $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
         if ($logEnable) {
-            if (($insert || $isChangedStatus) && $this->isFinishStatus()) {
+            if (($insert || $isChangedStatus) && $this->isTwFinishStatus()) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
             }
             if (array_key_exists('c_recording_sid', $changedAttributes) && $changedAttributes['c_recording_sid'] === null && $this->c_recording_sid) {
@@ -1074,9 +1074,9 @@ class Call extends \yii\db\ActiveRecord
 
     }
 
-    public function isFinishStatus(): bool
+    public function isTwFinishStatus(): bool
     {
-        return $this->isStatusCompleted() || $this->isStatusBusy() || $this->isStatusNoAnswer() || $this->isStatusFailed() || $this->isStatusCanceled();
+        return $this->isCompletedTw() || $this->isBusyTw() || $this->isNoAnswerTw() || $this->isFailedTw() || $this->isCanceledTw();
     }
 
     /**
