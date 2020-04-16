@@ -218,7 +218,7 @@ class Call extends \yii\db\ActiveRecord
 
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
-            [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id'], 'default', 'value' => null],
+            [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id', 'c_call_duration'], 'default', 'value' => null],
 
             [['c_is_new'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
