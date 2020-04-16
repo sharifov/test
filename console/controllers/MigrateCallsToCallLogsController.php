@@ -447,6 +447,8 @@ class MigrateCallsToCallLogsController extends Controller
 
         $call['c_parent_id'] = $call['parent_c_parent_id'];
 
+        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']));
+
         $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
         $callData['cl_is_transfer'] = (
             $call['parent_c_created_user_id'] != $call['c_created_user_id']
@@ -471,6 +473,8 @@ class MigrateCallsToCallLogsController extends Controller
         $current = $call;
 
         $call['c_parent_id'] = $call['parent_c_parent_id'];
+
+        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - strtotime($call['parent_c_created_dt']));
 
         $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
         $callData['cl_is_transfer'] = (
@@ -508,6 +512,8 @@ class MigrateCallsToCallLogsController extends Controller
             $call['c_parent_id'] = $call['first_same_child_c_id'];
         }
 
+        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']));
+
         $call['c_source_type_id'] = $call['first_same_child_c_call_type_id'];
 
         $callData['cl_is_transfer'] = (
@@ -542,6 +548,8 @@ class MigrateCallsToCallLogsController extends Controller
         } else {
             $call['c_parent_id'] = $call['c_id'];
         }
+
+        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - strtotime($call['parent_c_created_dt']));
 
         $callData['cl_is_transfer'] = (
             $call['parent_c_created_user_id'] != $call['c_created_user_id']

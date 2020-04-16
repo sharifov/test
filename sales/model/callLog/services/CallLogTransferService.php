@@ -139,6 +139,8 @@ class CallLogTransferService
 
     private function transferInAcceptedChildCall(): void
     {
+        $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+
         $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
         $this->queue['clq_access_count'] =
             (int)CallUserAccess::find()
@@ -154,6 +156,7 @@ class CallLogTransferService
 
     private function simpleInAcceptedChildCall(): void
     {
+        $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
         $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
