@@ -11,6 +11,7 @@ use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
 use sales\events\call\CallCreatedEvent;
 use sales\model\call\entity\call\events\CallEvents;
+use sales\model\callLog\services\CallLogTransferService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -789,8 +790,14 @@ class Call extends \yii\db\ActiveRecord
                             /** @var Call $lastChild */
                             $lastChild = self::find()->andWhere(['c_parent_id' => $this->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
                             if (
-                                ($lastChild === null || $this->c_created_user_id == null)
-                                || ($lastChild && $lastChild->c_created_user_id != null && $this->c_created_user_id != $lastChild->c_created_user_id)
+                                $lastChild === null
+                                || (
+                                    $lastChild
+                                    && $lastChild->c_created_user_id != null
+                                    && (
+                                        $this->c_created_user_id == null || $this->c_created_user_id != $lastChild->c_created_user_id
+                                    )
+                                )
                             ) {
                                 $this->c_status_id = self::STATUS_NO_ANSWER;
                                 self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
@@ -1054,6 +1061,22 @@ class Call extends \yii\db\ActiveRecord
 //        }
 
         Notifications::pingUserMap();
+
+        $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+        if ($logEnable) {
+            if (($insert || $isChangedStatus) && $this->isFinishStatus()) {
+                (Yii::createObject(CallLogTransferService::class))->transfer($this);
+            }
+            if (array_key_exists('c_recording_sid', $changedAttributes) && $changedAttributes['c_recording_sid'] === null && $this->c_recording_sid) {
+                (Yii::createObject(CallLogTransferService::class))->saveRecord($this);
+            }
+        }
+
+    }
+
+    public function isFinishStatus(): bool
+    {
+        return $this->isStatusCompleted() || $this->isStatusBusy() || $this->isStatusNoAnswer() || $this->isStatusFailed() || $this->isStatusCanceled();
     }
 
     /**
@@ -1702,9 +1725,16 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isTransfer(): bool
     {
-        return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
+        return $this->c_is_transfer ? true : false;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSourceTransfer(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
+    }
 
     /**
      * @return bool
