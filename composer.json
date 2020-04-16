@@ -76,7 +76,8 @@
 		"yiisoft/yii2-redis": "~2.0.0",
 		"immusen/yii2-swoole-websocket": "~1.0",
 		"consik/yii2-websocket": "^1.0",
-		"swoole-foundation/yii2-swoole-extension": "^1.0"
+		"swoole-foundation/yii2-swoole-extension": "^1.0",
+		"hollisho/yii2-redis-pub-sub": "^0.1.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

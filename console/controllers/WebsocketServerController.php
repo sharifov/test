@@ -3,6 +3,7 @@ namespace console\controllers;
 
 use common\models\Employee;
 use console\daemons\ChatServer;
+use hollisho\redis_pub_sub\RedisPubSub;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -86,8 +87,29 @@ class WebsocketServerController extends Controller
     {
         /** @var \yii\redis\Connection $redis */
         $redis = \Yii::$app->redis;
-        $redis->publish('user-' . $userId, $message);
+        for ($i =1; $i <= 10; $i++) {
+            $redis->publish('user-' . $userId, $message . $i);
+        }
         echo 'UserId: ' . $userId . ', Message: ' . $message;
+    }
+
+    public function actionStart3()
+    {
+       $client = new \swoole_redis;
+//        $client->on('message', static function (\Swoole\Redis $client, $result) {
+//            // process data, broadcast to websocket clients
+//            if ($result[0] == 'message') {
+//                echo ' -- ' . $result[1] . PHP_EOL;
+//                /*foreach($server->connections as $fd) {
+//                    $server->push($fd, $result[1]);
+//                    echo ' -- ' . $result[1] . PHP_EOL;
+//                }*/
+//            }
+//        });
+//        $client->connect('localhost', 6379, static function (\Swoole\Redis $client, $result) {
+//            $client->subscribe('user-167');
+//        });
+        echo 123;
     }
 
 
@@ -99,19 +121,59 @@ class WebsocketServerController extends Controller
             require \Yii::getAlias('@frontend/config/main-local.php')
         );
 
-        $server = new \Swoole\Websocket\Server('localhost', 8080);
-        $server->set(['worker_num' => 2, 'task_worker_num' => 2,]);
+
+
+//        $redis2 = new \Swoole\Coroutine\Redis();
+//        $redis2->connect("localhost", 6379);
+
+
+        /* @var $redisPubSub RedisPubSub */
+        //$redisPubSub = \Yii::$app->redisPubSub;
+        //$redisPubSub->setOptReadTimeout(-1);
+
+        $wsConfig = \Yii::$app->params['webSocketServer'];
+        $wsHost = $wsConfig['host'] ?: 'localhost';
+        $wsPort = $wsConfig['port'] ?: 8080;
+
+        $server = new \Swoole\Websocket\Server($wsHost, $wsPort);
+
+        if (!empty($wsConfig['settings'])) {
+            $server->set($wsConfig['settings']); //, 'task_worker_num' => 1]);
+        }
 
         $server->on('start', static function (\Swoole\WebSocket\Server $server) {
             echo '- Swoole WebSocket Server is started at ' . $server->host.':'.$server->port . PHP_EOL;
         });
 
+        $server->on('workerStart', static function ($server, $workerId) {
+
+            echo '- Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
 
 
 
-        $server->on('pipeMessage', static function(\Swoole\WebSocket\Server $server, $src_worker_id, $data) {
-            echo "#{$server->worker_id} message from #$src_worker_id: $data\n";
+
+//            $client = new \Swoole\Redis;
+//            $client->on('message', static function (\Swoole\Redis $client, $result) use ($server) {
+//                // process data, broadcast to websocket clients
+//                if ($result[0] == 'message') {
+//                    foreach($server->connections as $fd) {
+//                        $server->push($fd, $result[1]);
+//                        echo ' -- ' . $result[1] . PHP_EOL;
+//                    }
+//                }
+//            });
+//            $client->connect('localhost', 6379, static function (\Swoole\Redis $client, $result) {
+//                $client->subscribe('user-167');
+//            });
         });
+
+
+//        $server->on('pipeMessage', static function(\Swoole\WebSocket\Server $server, $src_worker_id, $data) {
+//            echo "#{$server->worker_id} message from #$src_worker_id: $data\n";
+//        });
+
+        /** @var \yii\redis\Connection $redis */
+        //$redis = \Yii::$app->redis;
 
         $server->on('open', static function(\Swoole\WebSocket\Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass) {
 
@@ -121,12 +183,10 @@ class WebsocketServerController extends Controller
 
             if ($user) {
                 $server->push($request->fd, json_encode(['userInit', date('H:i:s')])); //WEBSOCKET_OPCODE_PING
-
-                \Yii::$app->redis->subscribe('user-' . $user->getId());
-
             } else {
                 echo '- not init user' . PHP_EOL;
                 $server->push($request->fd, json_encode(['userNotInit', date('H:i:s')])); //WEBSOCKET_OPCODE_PING
+                $server->disconnect($request->fd, 403, 'Access denied');
             }
 
             //\yii\helpers\VarDumper::dump($session);
@@ -136,9 +196,86 @@ class WebsocketServerController extends Controller
             //$user = Employee::find()->orderBy('id DESC')->limit(1)->one();
             //\yii\helpers\VarDumper::dump($frontendConfig['components']['user']['identityCookie']['name']);
 
-            $server->tick(5000, static function() use ($server, $request) {
+            $server->tick(10000, static function() use ($server, $request) {
                 $server->push($request->fd, json_encode(['pong', date('H:i:s')])); //WEBSOCKET_OPCODE_PING
             });
+
+
+            if ($user) {
+
+                VarDumper::dump($request);
+
+                $userId = $user->getId();
+                $redisCor = new \Swoole\Coroutine\Redis();
+                $redisCor->connect('127.0.0.1', 6379);
+                //$val = $redis->get('key');
+
+                $msg = $redisCor->subscribe(['user-' . $userId]);
+
+                //VarDumper::dump($msg);
+
+                while ($msg = $redisCor->recv())
+                {
+                    VarDumper::dump($msg);
+                    if (!empty($msg[0]) && $msg[0] === 'message') {
+                       echo $msg[2] . PHP_EOL;
+
+                        $server->push($request->fd, json_encode(['message' => $msg[2], 't' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
+                    }
+                }
+
+//                $msg = $redis2->subscribe(['user-' . $userId]);
+//                while ($msg = $redis2->recv())
+//                {
+//                    VarDumper::dump($msg);
+//                }
+
+//                $server->tick(2000, static function() use ($server, $request, $redis, $userId) {
+//                    $msg = $redis->subscribe('user-' . $userId);
+//                   // VarDumper::dump($msg);
+//                    if (!empty($msg[0]) && $msg[0] === 'message') {
+//                       echo $msg[2] . PHP_EOL;
+//
+//                        $server->push($request->fd, json_encode(['message' => $msg[2], 't' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
+//                    }
+//                });
+
+//                while(1) {
+//                    $msg = $redis->subscribe('user-' . $user->getId());
+//                    if (!empty($msg[0]) && $msg[0] == 'message') {
+//                        echo $msg[0] . PHP_EOL;
+//                    }
+//                }
+                //$subscription
+                //VarDumper::dump($msg);
+
+//                $redis->on('message', function ($e) {
+//                    VarDumper::dump($e);
+//                });
+
+                /*\Yii::$app->redisPubSub->subscribe('user-' . $user->getId(), static function($instance, $channelName, $message) {
+                    var_dump($message);
+                });*/
+
+                //$redis = new \Redis();
+
+
+//                $redisPubSub->subscribe('user-' . $user->getId(), function($instance, $channelName, $message) {
+//                    VarDumper::dump($instance);
+//                    VarDumper::dump($channelName);
+//                    VarDumper::dump($message);
+//                });
+
+
+//                $redis->subscribe('user-' . $user->getId(), static function($instance, $channelName, $message) {
+//                    var_dump($message);
+//                });
+
+//                while ($msg) {
+//                    VarDumper::dump($msg);
+//                }
+            }
+
         });
 
 

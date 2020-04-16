@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b5826f2683fd293dc0274246d13d268a",
+    "content-hash": "3b3611d4d127d99ab08b1725c8d46fb9",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -2617,6 +2617,42 @@
             "time": "2017-01-10T10:39:54+00:00"
         },
         {
+            "name": "hollisho/yii2-redis-pub-sub",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hollisho/yii2-redis-pub-sub.git",
+                "reference": "d19daa3c6928bb28aca180a8b77e952ef435d41b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hollisho/yii2-redis-pub-sub/zipball/d19daa3c6928bb28aca180a8b77e952ef435d41b",
+                "reference": "d19daa3c6928bb28aca180a8b77e952ef435d41b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "hollisho\\redis_pub_sub\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hollis Ho",
+                    "email": "he_wenzhi@126.com"
+                }
+            ],
+            "description": "Yii2 Redis pub/sub(Publish,Subscribe)",
+            "time": "2018-11-22T10:56:17+00:00"
+        },
+        {
             "name": "ikimea/browser",
             "version": "1.12.0",
             "source": {
@@ -4003,6 +4039,50 @@
                 "yii2"
             ],
             "time": "2019-08-25T20:12:24+00:00"
+        },
+        {
+            "name": "lanfix/yii2-redis-pub-sub",
+            "version": "0.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lanfix/yii2-redis-pub-sub.git",
+                "reference": "69a100c66f131ce835de00ed33a51323311a2f65"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lanfix/yii2-redis-pub-sub/zipball/69a100c66f131ce835de00ed33a51323311a2f65",
+                "reference": "69a100c66f131ce835de00ed33a51323311a2f65",
+                "shasum": ""
+            },
+            "require": {
+                "ext-redis": "*",
+                "php": ">=7.0.0",
+                "yiisoft/yii2": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "lanfix\\redis_pub_sub\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "lanfix",
+                    "email": "lanfix.object@gmail.com"
+                }
+            ],
+            "description": "Yii2 pub/sub component for Redis",
+            "keywords": [
+                "pub",
+                "redis",
+                "sub",
+                "yii2"
+            ],
+            "time": "2020-04-12T15:34:12+00:00"
         },
         {
             "name": "markbaker/complex",
