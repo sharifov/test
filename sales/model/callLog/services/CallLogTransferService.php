@@ -247,7 +247,13 @@ class CallLogTransferService
                     $log->cl_category_id = null;
                 }
             }
-            $log->cl_is_transfer = (array_key_exists('cl_is_transfer', $this->callLog)) ? $this->callLog['cl_is_transfer'] : false;
+            if (array_key_exists('cl_is_transfer', $this->callLog)) {
+                $log->cl_is_transfer = $this->callLog['cl_is_transfer'];
+            } elseif ($this->call['c_is_transfer']) {
+                $log->cl_is_transfer = $this->call['c_is_transfer'];
+            } else {
+                $log->cl_is_transfer = false;
+            }
             $log->cl_department_id = $this->map('cl_department_id', 'c_dep_id');
             $log->cl_client_id = $this->map('cl_client_id', 'c_client_id');
             if (!$log->cl_client_id) {

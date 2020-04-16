@@ -1067,9 +1067,6 @@ class Call extends \yii\db\ActiveRecord
             if (($insert || $isChangedStatus) && $this->isTwFinishStatus()) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
             }
-            if (array_key_exists('c_recording_sid', $changedAttributes) && $changedAttributes['c_recording_sid'] === null && $this->c_recording_sid) {
-                (Yii::createObject(CallLogTransferService::class))->saveRecord($this);
-            }
         }
 
     }
