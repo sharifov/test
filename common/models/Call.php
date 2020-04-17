@@ -1648,9 +1648,9 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @return bool
      */
-    public function setStatusCompleted(): bool
+    public function setStatusCompleted(): int
     {
-        return $this->c_status_id === self::STATUS_COMPLETED;
+        return $this->c_status_id = self::STATUS_COMPLETED;
     }
 
     /**
