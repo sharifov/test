@@ -137,6 +137,12 @@ class MigrateCallsToCallLogsController extends Controller
                          top_parent.c_created_dt as `top_parent_c_created_dt`,
                          top_parent.c_call_duration as `top_parent_c_call_duration`'
             )
+            ->addSelect(
+                'bottom_child.c_id as `bottom_child_c_id`,
+                         bottom_child.c_created_dt as `bottom_child_c_created_dt`,
+                         bottom_child.c_call_duration as `bottom_child_c_call_duration`,
+                         bottom_child.c_created_user_id as `bottom_child_c_created_user'
+            )
             ->leftJoin('(select * from `call`) `parent`', 'parent.c_id = c.c_parent_id')
             ->leftJoin('(select * from `call`) `prev_child`', '`prev_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_parent_id and c_id < c.c_id)')
             ->leftJoin('(select * from `call`) `next_child`', '`next_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_parent_id and c_id > c.c_id)')
@@ -145,6 +151,7 @@ class MigrateCallsToCallLogsController extends Controller
             ->leftJoin('(select * from `call`) `first_same_child`', '`first_same_child`.`c_id` = (select min(c_id) from `call` where c_parent_id = c.c_parent_id)')
             ->leftJoin('(select * from `call`) `last_same_child`', '`last_same_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_parent_id)')
             ->leftJoin('(select * from `call`) `top_parent`', '`top_parent`.`c_id` = parent.c_parent_id')
+            ->leftJoin('(select * from `call`) `bottom_child`', '`bottom_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = first_child.c_id)')
             ->orderBy(['c.c_id' => SORT_ASC])
             ->offset($offset)
             ->limit($limit)
@@ -248,9 +255,8 @@ class MigrateCallsToCallLogsController extends Controller
         if (
             $call['c_call_type_id'] == Call::CALL_TYPE_OUT
             && $call['c_parent_id'] == null
-            && (
-                $call['first_child_c_id'] != null && $call['first_child_c_call_type_id'] == Call::CALL_TYPE_IN
-            )
+            && $call['first_child_c_id'] != null
+            && $call['bottom_child_c_id'] != null
         ) {
             $this->outTransferParentCalls($call, $log);
             return;
@@ -271,7 +277,7 @@ class MigrateCallsToCallLogsController extends Controller
             && $call['c_parent_id'] != null
             && $call['first_child_c_id'] != null
         ) {
-            $this->outTransferPrimaryChildCall($call, $log);
+//            $this->outTransferPrimaryChildCall($call, $log);
             return;
         }
 
@@ -298,9 +304,11 @@ class MigrateCallsToCallLogsController extends Controller
             && $call['c_parent_id'] == null
             && $call['last_child_c_id'] != null
             && (
-                $call['c_created_user_id'] == null
-                || ($call['c_created_user_id'] != $call['last_child_c_created_user_id'] && $call['last_child_c_created_user_id'] != null)
-                || $call['c_status_id'] != Call::STATUS_COMPLETED
+                $call['c_status_id'] != Call::STATUS_COMPLETED
+                || (
+                    ($call['c_created_user_id'] == null || ($call['c_created_user_id'] != $call['last_child_c_created_user_id']))
+                    && $call['last_child_c_created_user_id'] != null
+                )
             )
         ) {
             $this->transferInNotAcceptedParentCall($call, $log);
@@ -355,9 +363,13 @@ class MigrateCallsToCallLogsController extends Controller
             $call['c_call_type_id'] == Call::CALL_TYPE_IN
             && $call['c_parent_id'] != null
             && $call['parent_c_call_type_id'] == Call::CALL_TYPE_OUT
-            && $call['c_created_user_id'] != null
-            && $call['c_created_user_id'] == $call['last_child_c_created_user_id']
+            && $call['c_status_id'] == Call::STATUS_COMPLETED
+            && (
+                $call['last_child_c_created_user_id'] == null
+                || ($call['c_created_user_id'] == $call['last_child_c_created_user_id'] && $call['c_created_user_id'] != null)
+            )
         ) {
+            // OutTransferInAcceptedParentCall
             return;
         }
 
@@ -365,7 +377,10 @@ class MigrateCallsToCallLogsController extends Controller
             $call['c_call_type_id'] == Call::CALL_TYPE_IN
             && $call['c_parent_id'] != null
             && $call['parent_c_call_type_id'] == Call::CALL_TYPE_OUT
-            && ($call['c_created_user_id'] == null || $call['c_created_user_id'] != $call['last_child_c_created_user_id'])
+            && (
+                $call['c_status_id'] != Call::STATUS_COMPLETED
+                || ($call['last_child_c_created_user_id'] != null && ($call['c_created_user_id'] == null || $call['c_created_user_id'] != $call['last_child_c_created_user_id']))
+            )
         ) {
             $this->outTransferInNotAcceptedParentCall($call, $log);
             return;
@@ -389,10 +404,12 @@ class MigrateCallsToCallLogsController extends Controller
     {
         $call['c_created_user_id'] = null;
 
+        $callData['cl_group_id'] = $call['parent_c_parent_id'];
+
         $this->createCallLogs(
             $call,
             $log,
-            [],
+            $callData,
             [],
             []
         );
@@ -415,7 +432,7 @@ class MigrateCallsToCallLogsController extends Controller
             $call['c_status_id'] = Call::STATUS_NO_ANSWER;
         }
 
-        $call['c_parent_id'] = $call['c_parent_id'];
+        $callData['cl_group_id'] = $call['c_parent_id'];
 
         if ($call['last_child_c_id'] == null) {
             $callData['cl_call_created_dt'] = date('Y-m-d H:i:s', (strtotime($call['parent_c_created_dt']) + $call['parent_c_call_duration']));
@@ -502,16 +519,17 @@ class MigrateCallsToCallLogsController extends Controller
 //        $call['c_parent_id'] = $call['parent_c_status_id'] == Call::STATUS_COMPLETED ? $call['first_same_child_c_id'] : $call['с_parent_id'];
 //        $call['c_parent_id'] = $call['first_same_child_c_id'];
 
-        if (
-            $call['parent_c_created_user_id'] == null
-            || ($call['parent_c_created_user_id'] != $call['last_same_child_c_created_user_id'] && $call['last_same_child_c_created_user_id'] != null)
-            || $call['parent_c_status_id'] != Call::STATUS_COMPLETED
-        ) {
-            $call['c_parent_id'] = $call['c_parent_id'];
-        } else {
-            $call['c_parent_id'] = $call['first_same_child_c_id'];
-        }
+//        if (
+//            $call['parent_c_created_user_id'] == null
+//            || ($call['parent_c_created_user_id'] != $call['last_same_child_c_created_user_id'] && $call['last_same_child_c_created_user_id'] != null)
+//            || $call['parent_c_status_id'] != Call::STATUS_COMPLETED
+//        ) {
+//            $call['c_parent_id'] = $call['c_parent_id'];
+//        } else {
+//            $call['c_parent_id'] = $call['first_same_child_c_id'];
+//        }
 
+        $callData['cl_group_id'] = $call['first_same_child_c_id'];
         $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']));
 
         $call['c_source_type_id'] = $call['first_same_child_c_call_type_id'];
@@ -539,16 +557,17 @@ class MigrateCallsToCallLogsController extends Controller
         $current = $call;
 
 //        $call['c_parent_id'] = $call['parent_c_status_id'] == Call::STATUS_COMPLETED ? null : $call['c_parent_id'];
-        if (
-            $call['parent_c_created_user_id'] == null
-            || ($call['parent_c_created_user_id'] != $call['last_same_child_c_created_user_id'] && $call['last_same_child_c_created_user_id'] != null)
-            || $call['parent_c_status_id'] != Call::STATUS_COMPLETED
-        ) {
-            $call['c_parent_id'] = $call['c_parent_id'];
-        } else {
-            $call['c_parent_id'] = $call['c_id'];
-        }
+//        if (
+//            $call['parent_c_created_user_id'] == null
+//            || ($call['parent_c_created_user_id'] != $call['last_same_child_c_created_user_id'] && $call['last_same_child_c_created_user_id'] != null)
+//            || $call['parent_c_status_id'] != Call::STATUS_COMPLETED
+//        ) {
+//            $call['c_parent_id'] = $call['c_parent_id'];
+//        } else {
+//            $call['c_parent_id'] = $call['c_id'];
+//        }
 
+        $callData['cl_group_id'] = $call['c_id'];
         $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - strtotime($call['parent_c_created_dt']));
 
         $callData['cl_is_transfer'] = (
@@ -584,9 +603,9 @@ class MigrateCallsToCallLogsController extends Controller
         } else {
             $call['c_status_id'] = Call::STATUS_NO_ANSWER;
         }
-        $call['c_parent_id'] = $call['c_id'];
         $call['c_source_type_id'] = $call['first_child_c_source_type_id'];
 
+        $callData['cl_group_id'] = $call['first_child_c_id'];
         $callData['cl_call_created_dt'] = date('Y-m-d H:i:s', (strtotime($call['last_child_c_created_dt']) + $call['last_child_c_call_duration']));
         $callData['cl_call_finished_dt'] = date('Y-m-d H:i:s', (strtotime($call['c_created_dt']) + $call['c_call_duration']));
         $callData['cl_duration'] = strtotime($callData['cl_call_finished_dt']) - strtotime($callData['cl_call_created_dt']);
@@ -605,13 +624,15 @@ class MigrateCallsToCallLogsController extends Controller
 
     private function directInNotAcceptedParentCall($call, array &$log): void
     {
+        $callData['cl_group_id'] = $call['c_id'];
+
         $queueData['clq_queue_time'] = $call['c_call_duration'];
         $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $call['c_id']])->count();
 
         $this->createCallLogs(
             $call,
             $log,
-            [],
+            $callData,
             $queueData
         );
     }
@@ -634,12 +655,12 @@ class MigrateCallsToCallLogsController extends Controller
 
     private function outChildCalls($call, array &$log): void
     {
-        $call['c_parent_id'] = $call['c_id'];
+        $callData['cl_group_id'] = $call['c_id'];
 
         $this->createCallLogs(
             $call,
             $log,
-            [],
+            $callData,
             [],
             []
         );
@@ -647,6 +668,7 @@ class MigrateCallsToCallLogsController extends Controller
 
     private function outTransferParentCalls($call, array &$log): void
     {
+        $callData['cl_group_id'] = $call['c_id'];
         $callData['cl_is_transfer'] = true;
 
         $callRecordData['clr_record_sid'] = $call['first_child_c_recording_sid'];
@@ -700,10 +722,16 @@ class MigrateCallsToCallLogsController extends Controller
                 }
             }
 
-            $callLog->cl_group_id = $callData['cl_group_id'] ?? $call['c_parent_id'];
-            if (!$callLog->cl_group_id) {
-                $callLog->cl_group_id = $call['c_id'];
+            if (array_key_exists('cl_group_id', $callData)) {
+                $callLog->cl_group_id = $callData['cl_group_id'];
+            } else {
+                if ($call['c_parent_id']) {
+                    $callLog->cl_group_id = $call['c_parent_id'];
+                } else {
+                    $callLog->cl_group_id = $call['c_id'];
+                }
             }
+
             $callLog->cl_status_id = $callData['cl_status_id'] ?? ($call['c_status_id'] ?: self::convertStatusFromTwStatus($call['c_call_status']));
 
             if ($call['c_from'] && $call['c_call_type_id'] == Call::CALL_TYPE_OUT) {
