@@ -69,6 +69,8 @@ class CallLogTransferService
     {
         $this->call = $call->getAttributes();
 
+        Yii::info(VarDumper::dumpAsString(['call' => $this->call]), 'info\CallTransferDebug');
+
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
             //Out Parent Call
             return;
@@ -209,7 +211,6 @@ class CallLogTransferService
 
     private function outTransferParentCall(): void
     {
-        Yii::info(VarDumper::dumpAsString(['call' => $this->call]), 'info\CallTransferDebug');
         $this->createCallLogs();
     }
 
