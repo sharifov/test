@@ -114,7 +114,7 @@ class CallController extends Controller
             foreach ($items AS $call) {
                 $old_status = $call->getStatusName();
                 if ($call->isStatusDelay()) {
-                    $call->setStatus(Call::STATUS_COMPLETED);
+                    $call->setStatusCompleted();
                 } else {
                     $call->setStatusFailed();
                 }                
