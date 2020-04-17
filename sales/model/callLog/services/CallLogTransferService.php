@@ -61,15 +61,13 @@ class CallLogTransferService
                 ]), 'CallLogTransferService');
             }
         } catch (\Throwable $e) {
-            Yii::error($e->getMessage(), 'CallLogTransferService:saveRecord');
+            Yii::error(VarDumper::dumpAsString(['category' => 'saveRecord', 'error' => $e->getMessage()]), 'CallLogTransferService');
         }
     }
 
     public function transfer(Call $call): void
     {
         $this->call = $call->getAttributes();
-
-        Yii::info(VarDumper::dumpAsString(['call' => $this->call]), 'info\CallTransferDebug');
 
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
             //Out Parent Call
@@ -136,7 +134,26 @@ class CallLogTransferService
             return;
         }
 
-        Yii::error('Call Id: ' . $call->c_id . ' not transfer to Call Log', 'CallLogTransferService');
+        if (
+            $call->isIn()
+            && !$call->isGeneralParent()
+            && !$call->isTransfer()
+            && !$call->isStatusCompleted()
+            && (strtotime($call->c_queue_start_dt) > strtotime($call->c_created_dt))
+            && $call->c_group_id != null
+        ) {
+            $this->exceptionCall();
+            return;
+        }
+
+        Yii::error(VarDumper::dumpAsString(['message' => 'Call Id: ' . $call->c_id . ' not found rule for transfer Call to Call Log', 'Call' => $this->call]), 'CallLogTransferService');
+        $this->createCallLogs();
+    }
+
+    private function exceptionCall(): void
+    {
+        Yii::error(VarDumper::dumpAsString(['category' => 'exceptionCall', 'Call' => $this->call]), 'CallLogTransferService');
+        $this->createCallLogs();
     }
 
     private function transferInAcceptedChildCall(): void
@@ -334,7 +351,7 @@ class CallLogTransferService
 
         } catch (\Throwable $e) {
             $transaction->rollBack();
-            \Yii::error(VarDumper::dumpAsString(['Call' =>  $this->call, 'error' => $e->getMessage()]), 'CallLogTransferService:createCallLogs');
+            \Yii::error(VarDumper::dumpAsString(['category' => 'createCallLogs', 'Call' =>  $this->call, 'error' => $e->getMessage()]), 'CallLogTransferService');
         }
     }
 
