@@ -174,7 +174,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     },
                     'take' => static function ($url, CasesQSearch $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid, 'is_over' => false], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

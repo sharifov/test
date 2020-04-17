@@ -925,18 +925,24 @@ class CasesController extends FController
 
     /**
      * @param $gid
+     * @param $is_over
      * @return Response
      * @throws NotFoundHttpException
      */
-    public function actionTake($gid): Response
+    public function actionTake($gid, $is_over): Response
     {
         $gId = (string) $gid;
+        $isOver = (bool)$is_over;
         $userId = Yii::$app->user->id;
         $case = $this->findModelByGid($gId);
         try {
             $this->caseTakeGuard->guard($case);
             $user = $this->userRepository->find($userId);
-            $this->casesManageService->take($case->cs_id, $user->id, $user->id);
+            if ($is_over) {
+                $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id);
+            } else {
+                $this->casesManageService->take($case->cs_id, $user->id, $user->id);
+            }
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());

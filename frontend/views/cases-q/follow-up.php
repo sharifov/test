@@ -178,7 +178,7 @@ $lists = new ListsAccess($user->id);
                         ]);
                     },
                     'take' => function ($url, Cases $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid, 'is_over' => false], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

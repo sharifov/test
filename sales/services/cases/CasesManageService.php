@@ -94,6 +94,35 @@ class CasesManageService
      */
     public function take(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
     {
+        $case = $this->finder->caseFind($caseId);
+        $user = $this->finder->userFind($userId);
+
+        if (!($case->isPending() || $case->isFollowUp() || $case->isTrash())) {
+            throw new \DomainException('Case must be in Pending or FollowUp or Trash.');
+        }
+
+        $this->processing($case, $user, $creatorId, $description);
+    }
+
+    /**
+     * @param int $caseId
+     * @param int $userId
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function takeOver(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
+    {
+        $case = $this->finder->caseFind($caseId);
+        $user = $this->finder->userFind($userId);
+
+        if (!$case->isProcessing()) {
+            throw new \DomainException('Case is not Processing.');
+        }
+
+        if ($case->isOwner($user->id)) {
+            throw new \DomainException('User already assigned.');
+        }
+
         $this->processing($caseId, $userId, $creatorId, $description);
     }
 
