@@ -209,6 +209,7 @@ class CallLogTransferService
 
     private function outTransferParentCall(): void
     {
+        Yii::info(VarDumper::dumpAsString(['call' => $this->call]), 'info\CallTransferDebug');
         $this->createCallLogs();
     }
 

@@ -701,6 +701,9 @@ class MigrateCallsToCallLogsController extends Controller
             }
 
             $callLog->cl_group_id = $callData['cl_group_id'] ?? $call['c_parent_id'];
+            if (!$callLog->cl_group_id) {
+                $callLog->cl_group_id = $call['c_id'];
+            }
             $callLog->cl_status_id = $callData['cl_status_id'] ?? ($call['c_status_id'] ?: self::convertStatusFromTwStatus($call['c_call_status']));
 
             if ($call['c_from'] && $call['c_call_type_id'] == Call::CALL_TYPE_OUT) {
