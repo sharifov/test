@@ -3,7 +3,9 @@
 namespace common\models;
 
 use common\models\query\UserConnectionQuery;
+use sales\dispatchers\NativeEventDispatcher;
 use sales\entities\cases\Cases;
+use sales\model\user\entity\userConnection\events\UserConnectionEvents;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -91,9 +93,8 @@ class UserConnection extends \yii\db\ActiveRecord
                 'class' => TimestampBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['uc_created_dt'],
-                    //ActiveRecord::EVENT_BEFORE_UPDATE => ['uc_created_dt'],
                 ],
-                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+                'value' => date('Y-m-d H:i:s')
             ],
         ];
     }
@@ -129,5 +130,39 @@ class UserConnection extends \yii\db\ActiveRecord
     public static function find()
     {
         return new UserConnectionQuery(static::class);
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            NativeEventDispatcher::recordEvent(UserConnectionEvents::class, UserConnectionEvents::INSERT, [UserConnectionEvents::class, 'insertUserOnline'], $this);
+            NativeEventDispatcher::trigger(UserConnectionEvents::class, UserConnectionEvents::INSERT);
+        }
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        NativeEventDispatcher::recordEvent(UserConnectionEvents::class, UserConnectionEvents::DELETE, [UserConnectionEvents::class, 'deleteUserOnline'], $this);
+        return true;
+    }
+
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        NativeEventDispatcher::trigger(UserConnectionEvents::class, UserConnectionEvents::DELETE);
     }
 }

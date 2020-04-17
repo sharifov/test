@@ -46,6 +46,11 @@ return [
             'console/config/main-local.php',
             'webapi/config/main-local.php',
         ],
+//        'setInitConfig' => [
+//            'frontend/config/main-local.php',
+//            'console/config/main-local.php',
+//            'webapi/config/main-local.php',
+//        ],
     ],
     'Development' => [
         'path' => 'dev',
