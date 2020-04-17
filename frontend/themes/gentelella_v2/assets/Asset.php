@@ -19,6 +19,7 @@ class Asset extends \yii\web\AssetBundle
     public $js = [
         'js/util.js',
 		'js/extension.js',
+        '/js/centrifuge-js-master/dist/centrifuge.js'
 	];
 
     public $depends = [

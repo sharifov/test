@@ -73,7 +73,8 @@
 		"thamtech/yii2-uuid": "^1.2",
 		"kivork/yii2-rbac-export-import": "@dev",
 		"2amigos/2fa-library": "^2.0",
-		"yiisoft/yii2-redis": "~2.0.0"
+		"yiisoft/yii2-redis": "~2.0.0",
+		"centrifugal/phpcent": "~3.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

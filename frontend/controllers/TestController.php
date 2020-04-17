@@ -137,6 +137,7 @@ use yii\helpers\Inflector;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
+use common\components\CentrifugoService;
 use yii\queue\Queue;
 
 
@@ -1153,5 +1154,26 @@ class TestController extends FController
 		$expMonth = $userProfile->getExperienceMonth();
 		var_dump($expMonth);
 	}
+
+	public function actionCent()
+    {
+        //$this->layout = '@frontend/themes/gentelella_v2/views/layouts/main2';
+        /*$client = new \phpcent\Client("http://localhost:8000");
+        $token = $client->setSecret("bd08a6f0-1323-441c-9a1f-b9075e66694b")->generateConnectionToken("658", time() + 5*60);*/
+
+        /*$client->setApiKey("620b23a5-1885-4755-9908-527360b8bc8a");
+        $client->publish("channel", ["message" => "Hello Centrifugo World"]);
+
+        //$client = new Client("http://localhost:8000/api", "620b23a5-1885-4755-9908-527360b8bc8a", "bd08a6f0-1323-441c-9a1f-b9075e66694b");
+        $token = $client->setSecret("bd08a6f0-1323-441c-9a1f-b9075e66694b")->generateConnectionToken('658');
+
+        $client->publish("channel", ["message" => "Hello Centrifugo World"]);
+        //CentrifugoService::sentMsg();*/
+        return $this->render('cent');
+    }
+
+    public function actionCentSend(){
+        CentrifugoService::sentMsg();
+    }
 
 }

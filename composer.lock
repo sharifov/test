@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "73c00f1b9ba71caa19c521202d14ce05",
+    "content-hash": "f9fc2aa069f9eee28c7822ed8e0d4719",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -761,7 +761,7 @@
             "version": "3.4.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:jquery/jquery-dist.git",
+                "url": "https://github.com/jquery/jquery-dist.git",
                 "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d"
             },
             "dist": {
@@ -923,6 +923,48 @@
                 "markdown-extra"
             ],
             "time": "2018-03-26T11:24:36+00:00"
+        },
+        {
+            "name": "centrifugal/phpcent",
+            "version": "3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/centrifugal/phpcent.git",
+                "reference": "cc444c30a112f6eb819469522086acaa594b1953"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/centrifugal/phpcent/zipball/cc444c30a112f6eb819469522086acaa594b1953",
+                "reference": "cc444c30a112f6eb819469522086acaa594b1953",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "5.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "phpcent\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHP library to communicate with Centrifugo HTTP API",
+            "homepage": "https://github.com/centrifugal/phpcent",
+            "keywords": [
+                "centrifugo",
+                "messaging",
+                "realtime",
+                "websocket"
+            ],
+            "time": "2020-03-12T19:05:49+00:00"
         },
         {
             "name": "ckeditor/ckeditor",
