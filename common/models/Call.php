@@ -1646,7 +1646,7 @@ class Call extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return bool
+     * @return int
      */
     public function setStatusCompleted(): int
     {
