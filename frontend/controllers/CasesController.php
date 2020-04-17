@@ -929,7 +929,7 @@ class CasesController extends FController
      * @return Response
      * @throws NotFoundHttpException
      */
-    public function actionTake($gid, $is_over): Response
+    public function actionTake($gid, $is_over = false): Response
     {
         $gId = (string) $gid;
         $isOver = (bool)$is_over;
@@ -938,7 +938,7 @@ class CasesController extends FController
         try {
             $this->caseTakeGuard->guard($case);
             $user = $this->userRepository->find($userId);
-            if ($is_over) {
+            if ($isOver) {
                 $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id);
             } else {
                 $this->casesManageService->take($case->cs_id, $user->id, $user->id);
