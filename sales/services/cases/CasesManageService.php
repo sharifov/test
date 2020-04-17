@@ -98,7 +98,7 @@ class CasesManageService
         $user = $this->finder->userFind($userId);
 
         if (!($case->isPending() || $case->isFollowUp() || $case->isTrash())) {
-            throw new \DomainException('Case must be in Pending or FollowUp or Trash.');
+            throw new \DomainException('Case could not be taken now.');
         }
 
         $this->processing($case, $user, $creatorId, $description);
