@@ -141,7 +141,7 @@ class MigrateCallsToCallLogsController extends Controller
                 'bottom_child.c_id as `bottom_child_c_id`,
                          bottom_child.c_created_dt as `bottom_child_c_created_dt`,
                          bottom_child.c_call_duration as `bottom_child_c_call_duration`,
-                         bottom_child.c_created_user_id as `bottom_child_c_created_user'
+                         bottom_child.c_created_user_id as `bottom_child_c_created_user`'
             )
             ->leftJoin('(select * from `call`) `parent`', 'parent.c_id = c.c_parent_id')
             ->leftJoin('(select * from `call`) `prev_child`', '`prev_child`.`c_id` = (select max(c_id) from `call` where c_parent_id = c.c_parent_id and c_id < c.c_id)')
