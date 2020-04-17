@@ -1157,23 +1157,17 @@ class TestController extends FController
 
 	public function actionCent()
     {
-        //$this->layout = '@frontend/themes/gentelella_v2/views/layouts/main2';
-        /*$client = new \phpcent\Client("http://localhost:8000");
-        $token = $client->setSecret("bd08a6f0-1323-441c-9a1f-b9075e66694b")->generateConnectionToken("658", time() + 5*60);*/
-
-        /*$client->setApiKey("620b23a5-1885-4755-9908-527360b8bc8a");
-        $client->publish("channel", ["message" => "Hello Centrifugo World"]);
-
-        //$client = new Client("http://localhost:8000/api", "620b23a5-1885-4755-9908-527360b8bc8a", "bd08a6f0-1323-441c-9a1f-b9075e66694b");
-        $token = $client->setSecret("bd08a6f0-1323-441c-9a1f-b9075e66694b")->generateConnectionToken('658');
-
-        $client->publish("channel", ["message" => "Hello Centrifugo World"]);
-        //CentrifugoService::sentMsg();*/
+        CentrifugoService::sendMsg('Message from ACTION Cent', 'publicChannel1');
         return $this->render('cent');
     }
 
     public function actionCentSend(){
-        CentrifugoService::sentMsg();
+        CentrifugoService::sendMsg('Message from ACTION CentSend -> publicChannel1', 'publicChannel1');
     }
 
+    public function actionCentSend2(){
+        CentrifugoService::sendMsg('Message from  ACTION CentSend 2 -> publicChannel2 ', 'publicChannel2');
+    }
 }
+
+

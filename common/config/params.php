@@ -51,5 +51,11 @@ return [
         'method'    => 'aes-256-cbc',
         'password'  => '',
         'iv'        => '',
+    ],
+    'centrifugo' => [
+        'apiKey' => '620b23a5-1885-4755-9908-527360b8bc8a',
+        'jsClientUrl' => 'wss://localhost:8000/connection/websocket',
+        'serviceUrl' => 'https://localhost:8000/api',
+        'tokenHmacSecretKey' => 'bd08a6f0-1323-441c-9a1f-b9075e66694b'
     ]
 ];
