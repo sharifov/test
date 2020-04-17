@@ -27,6 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
             'uc_id',
+            'uc_connection_uid',
             'uc_connection_id',
             //'uc_user_id',
             [
@@ -42,7 +43,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'uc_user_agent',
             'uc_controller_id',
             'uc_action_id',
-            'uc_page_url:url',
+            [
+                'attribute' => 'uc_page_url',
+                'value' => static function (\common\models\UserConnection $model) {
+                    return  $model->uc_page_url ? '<i class="fa fa-link"></i> ' .Html::a('Link', $model->uc_page_url, ['target' => '_blank', 'data-pjax' => 0, 'title' => Html::encode($model->uc_page_url)]) : '-';
+                },
+                'format' => 'raw',
+            ],
             'uc_ip',
             [
                 'attribute' => 'uc_created_dt',

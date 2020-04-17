@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'uc_id',
             'uc_connection_id',
+            'uc_connection_uid',
             'uc_user_id',
             'uc_lead_id',
             'uc_case_id',
@@ -40,7 +41,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'uc_page_url:url',
             'uc_ip',
             'uc_created_dt',
-            'uc_connection:text'
         ],
     ]) ?>
 

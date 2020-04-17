@@ -152,7 +152,7 @@ $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.
 
 
 $js = <<<JS
-var chat = new WebSocket('wss://sales.zeit.test/ws/');
+var chat = new WebSocket('wss://sales.zeit.test/ws/?p=aaa&z=bbb');
     chat.onmessage = function(e) {
         
         
