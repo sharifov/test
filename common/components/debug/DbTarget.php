@@ -2,23 +2,30 @@
 
 namespace common\components\debug;
 
+use Webmozart\Assert\Assert;
+use Yii;
+
 /**
  * Class DbTarget
  *
  * @property string $category
+ * @property string $level
  */
 class DbTarget implements Target
 {
     private $category;
+    private $level;
 
-    public function __construct(string $category)
+    public function __construct(string $category, string $level = 'info')
     {
+        Assert::oneOf($level, ['info', 'warning', 'error']);
         $this->category = $category;
+        $this->level = $level;
     }
 
     public function log(Message $message): void
     {
-        \Yii::info($this->process($message), $this->category);
+        Yii::getLogger()->log($this->process($message), $this->level, $this->category);
     }
 
     public function logs(Message ...$messages): void
@@ -35,7 +42,7 @@ class DbTarget implements Target
             $out .= $this->process($message);
 
         }
-        \Yii::info($out, $this->category);
+        Yii::getLogger()->log($out, $this->level, $this->category);
     }
 
     public function isDeffer(): bool
