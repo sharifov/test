@@ -4,7 +4,7 @@ use yii\helpers\Inflector;
 use yii\helpers\StringHelper;
 
 /* @var $this yii\web\View */
-/* @var $generator yii\gii\generators\crud\Generator */
+/* @var $generator common\components\gii\crud\Generator */
 
 $urlParams = $generator->generateUrlParams();
 $modelClassName = Inflector::camel2words(StringHelper::basename($generator->modelClass));
@@ -19,7 +19,7 @@ if ($generator->enableI18N) {
 echo "<?php\n";
 ?>
 
-use yii\helpers\Html;
+use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
 /* @var $model <?= ltrim($generator->modelClass, '\\') ?> */

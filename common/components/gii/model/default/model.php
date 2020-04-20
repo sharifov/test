@@ -36,36 +36,27 @@ use Yii;
  */
 class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . "\n" ?>
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+    public function rules(): array
     {
-        return '<?= $generator->generateTableName($tableName) ?>';
+        return [
+<?php foreach ($rules as $rule) {
+    if ($rule) {
+        echo '            ' . $rule . ",\n";
+    } else {
+        echo "\n";
     }
-<?php if ($generator->db !== 'db'): ?>
+} ?>
+        ];
+    }
+<?php foreach ($relations as $name => $relation): ?>
 
-    /**
-     * @return \yii\db\Connection the database connection used by this AR class.
-     */
-    public static function getDb()
+    public function get<?= $name ?>(): \yii\db\ActiveQuery
     {
-        return Yii::$app->get('<?= $generator->db ?>');
+        <?= $relation[0] . "\n" ?>
     }
-<?php endif; ?>
+<?php endforeach; ?>
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [<?= empty($rules) ? '' : ("\n            " . implode(",\n            ", $rules) . ",\n        ") ?>];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
 <?php foreach ($labels as $name => $label): ?>
@@ -73,30 +64,29 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
 <?php endforeach; ?>
         ];
     }
-<?php foreach ($relations as $name => $relation): ?>
-
-    /**
-     * Gets query for [[<?= $name ?>]].
-     *
-     * @return <?= $relationsClassHints[$name] . "\n" ?>
-     */
-    public function get<?= $name ?>()
-    {
-        <?= $relation[0] . "\n" ?>
-    }
-<?php endforeach; ?>
 <?php if ($queryClassName): ?>
 <?php
     $queryClassFullName = ($generator->ns === $generator->queryNs) ? $queryClassName : '\\' . $generator->queryNs . '\\' . $queryClassName;
     echo "\n";
 ?>
-    /**
-     * {@inheritdoc}
-     * @return <?= $queryClassFullName ?> the active query used by this AR class.
-     */
-    public static function find()
+    public static function find(): <?= $queryClassFullName  . "\n"?>
     {
-        return new <?= $queryClassFullName ?>(get_called_class());
+        return new <?= $queryClassFullName ?>(static::class);
+    }
+<?php endif; ?>
+
+    public static function tableName(): string
+    {
+        return '<?= $generator->generateTableName($tableName) ?>';
+    }
+<?php if ($generator->db !== 'db'): ?>
+
+    /**
+    * @return \yii\db\Connection the database connection used by this AR class.
+    */
+    public static function getDb()
+    {
+        return Yii::$app->get('<?= $generator->db ?>');
     }
 <?php endif; ?>
 }

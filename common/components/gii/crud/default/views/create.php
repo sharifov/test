@@ -4,12 +4,12 @@ use yii\helpers\Inflector;
 use yii\helpers\StringHelper;
 
 /* @var $this yii\web\View */
-/* @var $generator yii\gii\generators\crud\Generator */
+/* @var $generator common\components\gii\crud\Generator */
 
 echo "<?php\n";
 ?>
 
-use yii\helpers\Html;
+use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
 /* @var $model <?= ltrim($generator->modelClass, '\\') ?> */
