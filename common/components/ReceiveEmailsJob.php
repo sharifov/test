@@ -66,6 +66,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
         Yii::info(VarDumper::dumpAsString(['last_email_id' => $this->last_email_id, 'request_data' => $this->request_data]), 'info\JOB:ReceiveEmailsJob');
 
+        return true;
+
         try {
         	$this->emailService = Yii::createObject(EmailService::class);
         	$this->casesSaleService = Yii::createObject(CasesSaleService::class);
