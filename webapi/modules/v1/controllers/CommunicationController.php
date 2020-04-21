@@ -22,6 +22,7 @@ use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\callLog\services\CallLogTransferService;
 use sales\model\emailList\entity\EmailList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\repositories\lead\LeadRepository;
@@ -493,6 +494,13 @@ class CommunicationController extends ApiBaseController
 
                 if(!$call->save()) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceRecord:Call:save');
+                } else {
+                    $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+                    if ($logEnable) {
+                        if ($call->c_recording_sid) {
+                            (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
+                        }
+                    }
                 }
 
 //                if ($call->c_lead_id) {

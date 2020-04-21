@@ -61,7 +61,7 @@ class CallLogTransferService
                 ]), 'CallLogTransferService');
             }
         } catch (\Throwable $e) {
-            Yii::error($e->getMessage(), 'CallLogTransferService:saveRecord');
+            Yii::error(VarDumper::dumpAsString(['category' => 'saveRecord', 'error' => $e->getMessage()]), 'CallLogTransferService');
         }
     }
 
