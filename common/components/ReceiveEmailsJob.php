@@ -184,9 +184,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         if ($case_id) {
 							$caseArray[$case_id] = $case_id;
 						}
-
-                        Yii::info(VarDumper::dumpAsString(['model' => $email->getAttributes()]), 'info\Debug');
-
+                        
                         if (!$email->save()) {
                             \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
                         } else {
@@ -267,7 +265,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //                }
 //            }
         } catch (\Throwable $e) {
-            \Yii::error($e->getTraceAsString(), 'ReceiveEmailsJob:execute');
+            \Yii::error($e, 'ReceiveEmailsJob:execute');
         }
         if ($debug) {
             echo "cicleCount:" . $cicleCount . " countTotal:" . $countTotal . PHP_EOL;
