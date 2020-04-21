@@ -12,8 +12,8 @@ $js = <<<JS
 var centrifuge = new Centrifuge('$centrifugoUrl');
 centrifuge.setToken('$token');
 
-
 let  channels = $passChannelsToJs;
+
 channels.forEach(channelConnector)
 
 function channelConnector(chName)
@@ -38,8 +38,12 @@ function channelConnector(chName)
 });
 }
 
-
 centrifuge.connect();
+
+centrifuge.on('connect', function(context) {
+    // now client connected to Centrifugo and authorized
+    console.info('Client connected to notifications server')
+});
 
 JS;
 $this->registerJs($js);

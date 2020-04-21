@@ -42,8 +42,6 @@ class CentrifugoNotificationWidget extends Widget
     {
         $this->registerAssets();
         $client = new Client($this->centrifugoUrl);
-        // $timestamp = time();
-
         $token = $client->setSecret($this->tokenHmacSecretKey)->generateConnectionToken($this->userId,  '');
 
         return $this->render('index',[

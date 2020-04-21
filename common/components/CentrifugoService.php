@@ -21,12 +21,4 @@ class CentrifugoService
         $client->publish($channel, ["message" => $message]);
     }
 
-    /*public static function sendMsg(string $message){
-        $client = new Client(Yii::$app->params['centrifugo']['serviceUrl']);
-
-        $client->setSafety(false);
-
-        $client->setApiKey("620b23a5-1885-4755-9908-527360b8bc8a");
-        $client->publish("news", ["message" => $message]);
-    }*/
 }

@@ -53,9 +53,9 @@ return [
         'iv'        => '',
     ],
     'centrifugo' => [
-        'apiKey' => '620b23a5-1885-4755-9908-527360b8bc8a',
+        'apiKey' => '76ef8707-2b9a-4998-af61-3d4a99a887e9',
         'jsClientUrl' => 'wss://localhost:8000/connection/websocket',
         'serviceUrl' => 'https://localhost:8000/api',
-        'tokenHmacSecretKey' => 'bd08a6f0-1323-441c-9a1f-b9075e66694b'
+        'tokenHmacSecretKey' => 'dcb423b8-f93b-479a-8555-17648f6cd7db'
     ]
 ];

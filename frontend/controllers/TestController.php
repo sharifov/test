@@ -1155,19 +1155,15 @@ class TestController extends FController
 		var_dump($expMonth);
 	}
 
-	public function actionCent()
+	public function actionCentSend()
     {
-        CentrifugoService::sendMsg('Message from ACTION Cent', 'publicChannel1');
-        return $this->render('cent');
+        CentrifugoService::sendMsg('Message from channel "ownUserChannel"', 'ownUserChannel' . Auth::id());
     }
 
-    public function actionCentSend(){
-        CentrifugoService::sendMsg('Message from ACTION CentSend -> publicChannel1', 'publicChannel1');
+    public function actionCentSend1(){
+        CentrifugoService::sendMsg('Message from channel "multipleUsersChannel"', 'multipleUsersChannel#658,659');
     }
 
-    public function actionCentSend2(){
-        CentrifugoService::sendMsg('Message from  ACTION CentSend 2 -> publicChannel2 ', 'publicChannel2');
-    }
 }
 
 
