@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\mail\src\gmail\message;
+namespace modules\email\src\protocol\gmail\message;
 
 use Google_Client;
 use Google_Service_Gmail;

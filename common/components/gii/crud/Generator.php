@@ -6,6 +6,8 @@ use yii\helpers\ArrayHelper;
 
 class Generator extends \yii\gii\generators\crud\Generator
 {
+    public $enablePjax = true;
+
     public function generateSearchRules(): array
     {
         $rules = [];

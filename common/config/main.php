@@ -87,6 +87,12 @@ return [
             'port' => 11300,
             'tube' => 'queue_job',
         ],
+        'queue_gmail_download' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_gmail_download',
+        ],
 
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
@@ -98,6 +104,7 @@ return [
         'queue_email_job',
         'queue_phone_check',
         'queue_job',
+        'queue_gmail_download',
         \common\components\SettingsBootstrap::class,
         common\bootstrap\SetUp::class,
         common\bootstrap\SetUpListeners::class,

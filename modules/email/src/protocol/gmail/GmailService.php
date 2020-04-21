@@ -1,59 +1,50 @@
 <?php
 
-namespace modules\mail\src\gmail;
+namespace modules\email\src\protocol\gmail;
 
 use common\components\debug\Logger;
 use common\components\debug\Message;
-use modules\mail\src\gmail\message\Gmail;
-use common\components\mail\MailHelper;
-use common\components\mail\MailProjects;
-use common\components\mail\Result;
-use common\models\EmailAccount;
-use common\models\EmailIncoming;
+use common\models\Email;
 use Google_Service_Gmail_Message;
+use modules\email\src\entity\emailAccount\EmailAccount;
+use modules\email\src\helpers\MailHelper;
+use modules\email\src\protocol\gmail\message\Gmail;
+use modules\email\src\Result;
+use sales\services\email\EmailService;
 use yii\helpers\VarDumper;
 
 /**
  * Class Gmail
  *
  * @property GmailApiService $api
- * @property MailProjects $projects
  * @property EmailAccount $emailAccount
  * @property int|null $lastEmailSavedId
  * @property array $processedEmails
  * @property array $savedEmails
  * @property array $existEmails
  * @property array $debugEmails
+ * @property array $emailsTo
  * @property Logger $logger
+ * @property EmailService $emailService
  */
 class GmailService
 {
-    public const COMMAND_DELETE = 'delete';
-    public const COMMAND_MARK_READ = 'read';
-    public const COMMAND_NO_ACTION = 'no-action';
-
-    public const COMMAND_LIST = [
-        self::COMMAND_DELETE => self::COMMAND_DELETE,
-        self::COMMAND_MARK_READ => self::COMMAND_MARK_READ,
-        self::COMMAND_NO_ACTION => self::COMMAND_NO_ACTION,
-    ];
-
     private $api;
-    private $projects;
     private $emailAccount;
-    private $lastEmailSavedId;
     private $processedEmails = [];
     private $savedEmails = [];
     private $existEmails = [];
     private $debugEmails = [];
+    private $emailsTo = [];
     private $logger;
+    private $emailService;
 
-    public function __construct(GmailApiService $api, EmailAccount $account, array $projectList, Logger $logger)
+    public function __construct(GmailApiService $api, EmailAccount $account, Logger $logger, EmailService $emailService)
     {
         $this->api = $api;
         $this->emailAccount = $account;
-        $this->projects = new MailProjects($projectList);
         $this->logger = $logger;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -66,7 +57,6 @@ class GmailService
         $this->logger->timerStart('download_messages')->log(Message::info('GmailService downloadMessages Start'));
         $this->logger->log(Message::success(
             'Account Id: "' . $this->emailAccount->ea_id
-            . '" Account Username: "' . $this->emailAccount->ea_username
             . '" Account email: "' . $this->emailAccount->ea_email
             . '" Criteria: "' . $criteria->toString() . '"'
         ));
@@ -81,7 +71,7 @@ class GmailService
 
         if (!$count) {
             $this->logger->log(Message::info('GmailService downloadMessages Finish'));
-            return new Result(0);
+            return new Result([]);
         }
 
         $this->logger->timerStart('get_messages')->log(Message::info('Start get messages'));
@@ -105,7 +95,7 @@ class GmailService
         $this->logger->log(Message::success('Debug emails: ' . count($this->debugEmails)));
         $this->logger->timerStop('download_messages')->log(Message::info('GmailService downloadMessages Finish'));
 
-        return new Result($this->getLastEmailSavedId(), $this->projects->getProjectIds());
+        return new Result($this->emailsTo);
     }
 
     private function saveMessages(Gmail ...$messages): void
@@ -175,38 +165,37 @@ class GmailService
 
             $this->logger->log(Message::info('.'));
 
-            if ($updEmailIncoming = $this->findEmailIncoming($gmail, $emailTo)) {
-                $this->updateEmail($gmail, $updEmailIncoming);
+            if ($this->emailExist($messageId, $emailTo)) {
                 $this->addExistEmail($gmail->getId());
                 continue;
             }
 
-            if (!$projectId = $this->projects->getProjectId($emailTo)) {
-                $this->logger->log(Message::warning('(EmailToHost for emailTo: "' . $emailTo . '" not found in Projects)'));
-            }
+            $email = new Email();
+            $email->e_type_id = Email::TYPE_INBOX;
+            $email->e_status_id = Email::STATUS_DONE;
+            $email->e_is_new = true;
+            $email->e_email_to = $emailTo;
+            $email->e_email_from = $gmail->getFromEmail();
+            $email->e_email_from_name = $gmail->getFromName();
+            $email->e_email_subject = $gmail->getSubject();
+            $email->e_project_id = $this->getProjectId();
+            $email->body_html = $gmail->getContent();
+            $email->e_created_dt = date('Y-m-d H:i:s');
+            $email->e_inbox_created_dt = $gmail->getDate();
+            $email->e_ref_message_id = $gmail->getReferences();
+            $email->e_message_id = $gmail->getMessageId();
 
-            $eIncoming = new EmailIncoming();
-            $eIncoming->ei_deleted = false;
-            $eIncoming->ei_email_from = $gmail->getFromEmail();
-            $eIncoming->ei_email_from_name = MailHelper::cleanText($gmail->getFromName());
-            $eIncoming->ei_email_subject = MailHelper::cleanText($gmail->getSubject());
-            $eIncoming->ei_email_to = $emailTo;
-            $eIncoming->ei_project_id = $projectId;
-            $eIncoming->ei_email_text = $emailText;
-            $eIncoming->ei_account_id = $this->emailAccount->ea_id;
-            $eIncoming->ei_ref_mess_ids = $gmail->getReferences();
-            $eIncoming->ei_message_id = $messageId;
-            $eIncoming->ei_received_dt = $gmail->getDate();
+            $lead_id = $this->emailService->detectLeadId($email);
+            $case_id = $this->emailService->detectCaseId($email);
 
-            if ($eIncoming->save()) {
+            if ($email->save()) {
                 $this->logger->log(Message::info('+'));
-                $this->projects->addProjectId($projectId);
-                $this->lastEmailSavedId = $eIncoming->ei_id;
                 $this->addSavedEmail($gmail->getId());
+                $this->addEmailTo($emailTo);
             } else {
                 $savedError = true;
-                $this->logger->log(Message::error('(' . VarDumper::dumpAsString($eIncoming->getErrors()) . ')'));
-                self::error(['category' => 'saveMessage', 'messageId' => $gmail->getId(), 'model' => $eIncoming->getAttributes(), 'error' => $eIncoming->getErrors()]);
+                $this->logger->log(Message::error('(' . VarDumper::dumpAsString($email->getErrors()) . ')'));
+                self::error(['category' => 'saveMessage', 'messageId' => $gmail->getId(), 'model' => $email->getAttributes(), 'error' => $email->getErrors()]);
             }
 
         }
@@ -216,25 +205,30 @@ class GmailService
 
     }
 
+    private function getProjectId(): ?int
+    {
+        return null;
+    }
+
     private function processProcessedEmails(string $command, array $processedEmailsIds): void
     {
         if (!$processedEmailsIds) {
             return;
         }
 
-        if ($command === self::COMMAND_DELETE) {
+        if ($command === EmailAccount::GMAIL_COMMAND_DELETE) {
             $this->logger->timerStart('delete')->log(Message::info('Start delete'));
             $this->api->deleteEmails($processedEmailsIds);
             $this->logger->timerStop('delete')->log(Message::info('Finish delete'));
             return;
         }
-        if ($command === self::COMMAND_MARK_READ) {
+        if ($command === EmailAccount::GMAIL_COMMAND_MARK_READ) {
             $this->logger->timerStart('read')->log(Message::info('Start mark read'));
             $this->api->markReadEmails($processedEmailsIds);
             $this->logger->timerStop('read')->log(Message::info('Finish mark read'));
             return;
         }
-        if ($command === self::COMMAND_NO_ACTION) {
+        if ($command === EmailAccount::GMAIL_COMMAND_NO_ACTION) {
             $this->logger->log(Message::info('No actions'));
             return;
         }
@@ -243,41 +237,9 @@ class GmailService
         self::error(['category' => 'processSavedMessages', 'error' => 'Undefined command: ' . $command]);
     }
 
-    private function updateEmail(Gmail $gmail, EmailIncoming $existEmail): void
+    private function emailExist(string $messageId, string $emailTo): bool
     {
-        $receivedDtChanged = false;
-        if ($existEmail->ei_received_dt !== $gmail->getDate()) {
-            $receivedDtChanged = true;
-            $existEmail->ei_received_dt = $gmail->getDate();
-        }
-        $existEmail->ei_updated_dt = date('Y-m-d H:i:s');
-        if ($existEmail->save()) {
-            $this->logger->log(Message::warning(
-                '(Email Id: "' . $existEmail->ei_id
-                . '" Gmail Id: "' . $gmail->getId() . '" Gmail Message-Id: "' . $gmail->getMessageId() . '" already exist.'
-                . ($receivedDtChanged ? ' Received date was updated' : '') . ')'
-            ));
-        } else {
-            self::error(['category' => 'updateEmail', 'error' => $existEmail->getErrors(), 'model' => $existEmail->getAttributes()]);
-            $this->logger->log(Message::error('(' . VarDumper::dumpAsString($existEmail->getErrors()) . ')'));
-        }
-//        $this->addDebugEmail(
-//            $gmail->getId(), 'Already_exist', [
-//                'old time created' => $existEmail->ei_created_dt,
-//                'now time' => date('Y-m-d H:i:s'),
-//                'exist model' => $existEmail->getAttributes(),
-//                'gmail' => $gmail->toArray()
-//        ]);
-    }
-
-    private function findEmailIncoming(Gmail $gmail, string $emailTo): ?EmailIncoming
-    {
-        return EmailIncoming::find()->where(['ei_message_id' => $gmail->getMessageId(), 'ei_email_to' => $emailTo])->one();
-    }
-
-    private function getLastEmailSavedId(): ?int
-    {
-        return $this->lastEmailSavedId;
+        return Email::find()->where(['e_message_id' => $messageId, 'e_email_to' => $emailTo])->exists();
     }
 
     private function addProcessedEmail(string $id): void
@@ -293,6 +255,11 @@ class GmailService
     private function addExistEmail(string $id): void
     {
         $this->existEmails[] = $id;
+    }
+
+    private function addEmailTo(string $id): void
+    {
+        $this->emailsTo[] = $id;
     }
 
     private function addDebugEmail(string $id, string $category, $message = ''): void

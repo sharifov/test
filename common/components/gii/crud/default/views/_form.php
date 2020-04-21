@@ -17,11 +17,11 @@ echo "<?php\n";
 ?>
 
 use yii\bootstrap4\Html;
-use common\components\bootstrap4\activeForm\ActiveForm;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model <?= ltrim($generator->modelClass, '\\') ?> */
-/* @var $form common\components\bootstrap4\activeForm\ActiveForm */
+/* @var $form ActiveForm */
 ?>
 
 <div class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>-form">

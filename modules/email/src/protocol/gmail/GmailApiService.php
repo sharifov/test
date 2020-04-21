@@ -1,10 +1,10 @@
 <?php
 
-namespace modules\mail\src\gmail;
+namespace modules\email\src\protocol\gmail;
 
 use common\components\debug\Logger;
 use common\components\debug\Message;
-use modules\mail\src\gmail\message\Gmail;
+use modules\email\src\protocol\gmail\message\Gmail;
 use Google_Client;
 use Google_Service_Gmail;
 use Google_Service_Gmail_BatchDeleteMessagesRequest;
@@ -24,6 +24,8 @@ use yii\helpers\VarDumper;
  */
 class GmailApiService
 {
+    private const LABEL_UNREAD = 'UNREAD';
+
     private $client;
     private $service;
     private $userId;
@@ -145,7 +147,7 @@ class GmailApiService
 
     public function markReadEmailsWithButchModify(array $messagesIds): void
     {
-        $this->batchModifyMessages($messagesIds, [], ['UNREAD']);
+        $this->batchModifyMessages($messagesIds, [], [self::LABEL_UNREAD]);
     }
 
     public function batchModifyMessages(array $messagesIds, array $labelsToAdd = [], array $labelsToRemove = [], array $oprParams = []): void
@@ -164,7 +166,7 @@ class GmailApiService
 
     public function markReadEmail(string $messageId): void
     {
-        if ($this->modifyMessage($messageId, [], ['UNREAD'])) {
+        if ($this->modifyMessage($messageId, [], [self::LABEL_UNREAD])) {
             $this->logger->log(Message::success('+'));
         } else {
             $this->logger->log(Message::error('-'));

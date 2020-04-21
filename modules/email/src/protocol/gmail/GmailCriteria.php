@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\mail\src\gmail;
+namespace modules\email\src\protocol\gmail;
 
 /**
  * Class GmailCriteria
@@ -12,12 +12,13 @@ namespace modules\mail\src\gmail;
 class GmailCriteria
 {
     private const MAX_RESULT = 400;
+    private const DEFAULT_SEARCH_LABELS = ['INBOX', 'UNREAD'];
 
     private $labelIds;
     private $maxResults;
     private $q;
 
-    public function __construct(?int $dayTo, int $maxResults, ?int $dayFrom, array $labelIds = ['INBOX', 'UNREAD'])
+    public function __construct(?int $dayTo, int $maxResults, ?int $dayFrom, array $labelIds = self::DEFAULT_SEARCH_LABELS)
     {
         if ($maxResults > self::MAX_RESULT) {
             $this->maxResults = self::MAX_RESULT;

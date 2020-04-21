@@ -1,12 +1,13 @@
 <?php
 
-namespace modules\mail\src\gmail;
+namespace modules\email\src\protocol\gmail;
 
 use common\components\debug\DbTarget;
 use common\components\debug\Logger;
 use common\components\debug\Message;
-use common\components\mail\MailJob;
-use common\models\EmailAccount;
+use modules\email\src\entity\emailAccount\EmailAccount;
+use modules\email\src\Notifier;
+use sales\services\email\EmailService;
 use yii\base\BaseObject;
 use yii\queue\JobInterface;
 
@@ -42,15 +43,23 @@ class GmailJob extends BaseObject implements JobInterface
         }
 
         try {
+
             $logger->timerStart('gmail_service')->log(Message::info('Start Gmail Service'));
+
             $api = new GmailApiService(GmailClient::createByAccount($account), $account->ea_email, $logger, $useBatchRequest = true);
-            $result = (new GmailService($api, $account, $this->projectList, $logger))
-                ->downloadMessages($account->ea_gmail_api_command, new GmailCriteria($this->dayTo, $this->limit, $this->dayFrom));
+            $emailService = \Yii::createObject(EmailService::class);
+            $result = (new GmailService($api, $account, $logger, $emailService))
+                ->downloadMessages($account->ea_gmail_command, new GmailCriteria($this->dayTo, $this->limit, $this->dayFrom));
+
+            if ($result->emailsTo) {
+                $logger->timerStart('notify')->log(Message::info('Start Notify'));
+                $notifier = new Notifier();
+                $notifier->notify($result->emailsTo);
+                $logger->timerStop('notify')->log(Message::info('Finish Notify'));
+            }
+
             $logger->timerStop('gmail_service')->log(Message::info('End Gmail Service'));
 
-            if ($result->lastEmailId > 0) {
-                (new MailJob($result->projectsIds, $result->lastEmailId, $logger))->createJob();
-            }
         } catch (\Throwable $e) {
             \Yii::error($e, 'GmailJob');
             $logger->log(Message::error($e->getMessage()));

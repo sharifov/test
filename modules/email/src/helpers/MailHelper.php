@@ -1,6 +1,6 @@
 <?php
 
-namespace common\components\mail;
+namespace modules\email\src\helpers;
 
 class MailHelper
 {
