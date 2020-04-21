@@ -46,7 +46,7 @@ class SmsCreatedByIncomingSalesNotificationListener
                 ) {
 //                    Notifications::socket($userId, null, 'getNewNotification', ['sms_id' => $event->sms->s_id], true);
                     $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
+                    Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
                 }
             }
         }

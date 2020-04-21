@@ -1567,7 +1567,7 @@ class LeadController extends ApiBaseController
                 if ($ntf = Notifications::create($leadCallExpert->lce_agent_user_id, 'Expert Response', 'Expert ('.Html::encode($leadCallExpert->lce_expert_username).') Response ('.$leadCallExpert->getStatusName().'). Lead ID: ' . $leadCallExpert->lce_lead_id, Notifications::TYPE_INFO, true)) {
                     // Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::sendSocket('getNewNotification', ['user_id' => $leadCallExpert->lce_agent_user_id], $dataNotification);
+                    Notifications::publish('getNewNotification', ['user_id' => $leadCallExpert->lce_agent_user_id], $dataNotification);
                 }
 
             }

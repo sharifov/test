@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\query\NotificationsQuery;
 use frontend\widgets\notification\NotificationCache;
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\TagDependency;
@@ -289,45 +290,119 @@ class Notifications extends ActiveRecord
 //    }
 
 
+//    /**
+//     * @param string $command
+//     * @param array $params
+//     * @param array $data
+//     * @param bool $multiple
+//     * @return bool
+//     */
+//    public static function sendSocket(string $command, array $params = [], array $data = [], bool $multiple = true) : bool
+//    {
+//        $socket = 'tcp://127.0.0.1:1234';
+//        if($command) {
+//            $data['command'] = $command;
+//        }
+//        $jsonData = [];
+//
+//        if (isset($params['user_id'])) {
+//            $jsonData['user_id'] = $params['user_id'];
+//        }
+//
+//        if(isset($params['lead_id'])) {
+//            $jsonData['lead_id'] = $params['lead_id'];
+//        }
+//
+//        if(isset($params['case_id'])) {
+//            $jsonData['case_id'] = $params['case_id'];
+//        }
+//
+//        $jsonData['multiple'] = $multiple;
+//        $jsonData['data'] = $data;
+//
+//        try {
+//            // connect tcp-server
+//            $instance = stream_socket_client($socket);
+//            // send message
+//            if (fwrite($instance, Json::encode($jsonData) . "\n")) {
+//                return true;
+//            }
+//        } catch (\Throwable $exception) {
+//            Yii::error(VarDumper::dumpAsString($exception->getMessage(), 10), 'Notifications:socket:stream_socket_client');
+//        }
+//        return false;
+//    }
+
     /**
      * @param string $command
      * @param array $params
      * @param array $data
-     * @param bool $multiple
      * @return bool
      */
-    public static function sendSocket(string $command, array $params = [], array $data = [], bool $multiple = true) : bool
+    public static function publish(string $command, array $params = [], array $data = []) : bool
     {
-        $socket = 'tcp://127.0.0.1:1234';
+        $redis = \Yii::$app->redis;
+        $channels = [];
+
         if($command) {
-            $data['command'] = $command;
+            $data['cmd'] = $command;
         }
         $jsonData = [];
 
         if (isset($params['user_id'])) {
-            $jsonData['user_id'] = $params['user_id'];
+            $jsonData['user_id'] = (int) $params['user_id'];
+            $channels[] = 'user-' . $jsonData['user_id'];
+
         }
 
         if(isset($params['lead_id'])) {
             $jsonData['lead_id'] = $params['lead_id'];
+            $channels[] = 'lead-' . $jsonData['lead_id'];
         }
 
         if(isset($params['case_id'])) {
             $jsonData['case_id'] = $params['case_id'];
+            $channels[] = 'case-' . $jsonData['case_id'];
         }
 
-        $jsonData['multiple'] = $multiple;
-        $jsonData['data'] = $data;
+        //$jsonData['multiple'] = $multiple;
+        $jsonData = $data;
 
         try {
-            // connect tcp-server
-            $instance = stream_socket_client($socket);
-            // send message
-            if (fwrite($instance, Json::encode($jsonData) . "\n")) {
+            if ($channels) {
+                foreach ($channels as $channel) {
+                    $redis->publish($channel, Json::encode($jsonData));
+                }
                 return true;
             }
-        } catch (\Throwable $exception) {
-            Yii::error(VarDumper::dumpAsString($exception->getMessage(), 10), 'Notifications:socket:stream_socket_client');
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), 'Notifications:publish:redis');
+        }
+        return false;
+    }
+
+    /**
+     * @param array $channels
+     * @param string $command
+     * @param array $data
+     * @return bool
+     */
+    public static function pub(array $channels, string $command, array $data = []) : bool
+    {
+        $redis = \Yii::$app->redis;
+        if($command) {
+            $data['cmd'] = $command;
+        }
+        $jsonData = $data;
+        try {
+            if ($channels) {
+                foreach ($channels as $channel) {
+                    $redis->publish($channel, Json::encode($jsonData));
+                }
+                return true;
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), 'Notifications:pub:redis');
         }
         return false;
     }
@@ -348,7 +423,7 @@ class Notifications extends ActiveRecord
         if($users) {
             foreach ($users as $user_id) {
                 // self::socket($user_id, null, 'callMapUpdate', [], true);
-                self::sendSocket('callMapUpdate', ['user_id' => $user_id]);
+                self::publish('callMapUpdate', ['user_id' => $user_id]);
             }
         }
     }

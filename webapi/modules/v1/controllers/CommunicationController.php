@@ -413,7 +413,7 @@ class CommunicationController extends ApiBaseController
                         ) {
                             // Notifications::socket($user->id, null, 'getNewNotification', [], true);
                             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                            Notifications::sendSocket('getNewNotification', ['user_id' => $user->id], $dataNotification);
+                            Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
                         }
                         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
                         return $this->createHoldCall($callModel, $user);

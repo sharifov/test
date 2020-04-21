@@ -328,7 +328,7 @@ class QuoteController extends ApiBaseController
                                 if ($ntf = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true)) {
                                     // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
                                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                    Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
+                                    Notifications::publish('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
                                 }
                             }
                         }
@@ -346,7 +346,7 @@ class QuoteController extends ApiBaseController
                         if ($ntf = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true)) {
                             // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
                             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                            Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
+                            Notifications::publish('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
                         }
                     }
                 }

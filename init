@@ -71,7 +71,7 @@ foreach ($files as $file) {
     }
 }
 
-$callbacks = ['setCookieValidationKey', 'setWritable', 'setExecutable', 'createSymlink'];
+$callbacks = ['setCookieValidationKey', 'setWritable', 'setExecutable', 'createSymlink', 'setInitConfig'];
 foreach ($callbacks as $callback) {
     if (!empty($env[$callback])) {
         $callback($root, $env[$callback]);
@@ -204,6 +204,71 @@ function setCookieValidationKey($root, $paths)
         $key = strtr(substr(base64_encode($bytes), 0, $length), '+/=', '_-.');
         $content = preg_replace('/(("|\')cookieValidationKey("|\')\s*=>\s*)(""|\'\')/', "\\1'$key'", file_get_contents($file));
         file_put_contents($file, $content);
+    }
+}
+
+function setInitConfig($root, $paths)
+{
+    $envFile = $root . '/environments/env.conf';
+    if (file_exists($envFile)) {
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $envData = [];
+
+        $patternList = [];
+        $replaceList = [];
+
+        if ($lines) {
+            foreach ($lines as $nl => $line) {
+                $linesArray = explode('=', $line);
+                if ($linesArray && isset($linesArray[1])) {
+                    // echo $nl . "\n";  print_r($linesArray);
+                    $typeArr = explode(':', $linesArray[0]);
+                    if (!empty($typeArr[1])) {
+                        $type = $typeArr[1];
+                    } else {
+                        $type = '';
+                    }
+
+                    $keyVal = trim($linesArray[0]);
+                    unset($linesArray[0]);
+                    $value = implode('=', $linesArray);
+
+                    switch ($type) {
+                        case 'bool':
+                            $val = (bool)$value;
+                            $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
+                            $replaceList[$nl] = $val ? 'true' : 'false';
+                            break;
+                        case 'int':
+                            $val = (int)$value;
+                            $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
+                            $replaceList[$nl] = $val;
+                            break;
+                        case 'str':
+                            $val = (string) str_replace("'", "\'", $value);
+                            $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
+                            $replaceList[$nl] = '\\1' . $val . '\\3';
+                            break;
+                        default:
+                            $val = str_replace("'", "\'", $value);
+                            $patternList[$nl] = '~(\{\{[ ]*' . $keyVal . '[ ]*\}\})~';
+                            $replaceList[$nl] = $val;
+                    }
+                    $envData[$keyVal] = [$nl, $patternList[$nl], $replaceList[$nl]];
+                }
+            }
+        }
+
+        foreach ($paths as $file) {
+            echo "  set config key in '$file'\n";
+            $file = $root . '/' . $file;
+            $content = preg_replace($patternList, $replaceList,
+                file_get_contents($file));
+            file_put_contents($file, $content);
+        }
+        // print_r($envData);
+    } else {
+        printError("Cannot find environment file: $envFile.");
     }
 }
 

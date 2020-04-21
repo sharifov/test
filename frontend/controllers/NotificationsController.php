@@ -108,7 +108,7 @@ class NotificationsController extends FController
             $model->n_new = false;
             if ($model->save()) {
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
-                Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
+                Notifications::publish('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
             }
         }
 
@@ -135,13 +135,13 @@ class NotificationsController extends FController
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //Notifications::socket($model->n_user_id, null, 'getNewNotification', [], true);
             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($model) : [];
-            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
             return $this->redirect(['view', 'id' => $model->n_id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -156,11 +156,11 @@ class NotificationsController extends FController
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->n_id]);
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -176,7 +176,7 @@ class NotificationsController extends FController
         if ($model->delete()) {
             NotificationCache::invalidate($model->n_user_id);
             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
-            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
         }
 
         return $this->redirect(['index']);
@@ -198,7 +198,7 @@ class NotificationsController extends FController
         $model->n_deleted = true;
         if ($model->save()) {
             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
-            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
         }
         return $this->redirect(['list']);
     }
@@ -212,7 +212,7 @@ class NotificationsController extends FController
         if (Notifications::updateAll(['n_deleted' => true], ['n_deleted' => false, 'n_user_id' => $userId])) {
             NotificationCache::invalidate($userId);
             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::deleteAll($userId) : [];
-            Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
         }
         return $this->redirect(['list']);
     }
@@ -226,7 +226,7 @@ class NotificationsController extends FController
         if (Notifications::updateAll(['n_new' => false, 'n_read_dt' => date('Y-m-d H:i:s')], ['n_read_dt' => null, 'n_user_id' => $userId])) {
             NotificationCache::invalidate($userId);
             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::deleteAll($userId) : [];
-            Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
         }
         return $this->redirect(['list']);
     }

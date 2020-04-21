@@ -1,5 +1,6 @@
 <?php
 return [
+    'appInstance' => '{{ common.config.params.appInstance:str }}',
     'getAirportUrl' => 'https://backoffice.travelinsides.com/api/v2/airport/search',
     'sync' => [
         'ver' => '1.0.0',
