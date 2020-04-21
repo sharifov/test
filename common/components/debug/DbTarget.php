@@ -13,12 +13,16 @@ use Yii;
  */
 class DbTarget implements Target
 {
+    public const LEVEL_INFO = \yii\log\Logger::LEVEL_INFO;
+    public const LEVEL_WARNING = \yii\log\Logger::LEVEL_WARNING;
+    public const LEVEL_ERROR = \yii\log\Logger::LEVEL_ERROR;
+
     private $category;
     private $level;
 
-    public function __construct(string $category, string $level = 'info')
+    public function __construct(string $category, int $level = self::LEVEL_INFO)
     {
-        Assert::oneOf($level, ['info', 'warning', 'error']);
+        Assert::oneOf($level, [self::LEVEL_INFO, self::LEVEL_WARNING, self::LEVEL_ERROR]);
         $this->category = $category;
         $this->level = $level;
     }

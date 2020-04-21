@@ -305,7 +305,7 @@ return [
 				]
 			]
 		],
-        'email' => [
+        'mail' => [
             'class' => EmailModule::class,
         ],
     ],

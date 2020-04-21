@@ -143,7 +143,7 @@ return [
 
             //'googleApiKey'              => 'AIzaSyCBz5uH4JyegEa_vqN_OGJCORq-UpkmTiQ',
         ],
-        'email' => [
+        'mail' => [
             'class' => EmailModule::class,
         ],
     ],

@@ -27,6 +27,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     'method' => 'post',
                 ],
             ]) ?>
+            <?= Html::a('Request Gmail API access token', ['email-account/request-access-token', 'id' => $model->ea_id], ['class' => 'btn btn-success']) ?>
+            <?= Html::a('Remove API access token', ['email-account/remove-access-token', 'id' => $model->ea_id], ['class' => 'btn btn-danger']) ?>
         </p>
 
         <?= DetailView::widget([

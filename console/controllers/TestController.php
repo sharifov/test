@@ -25,8 +25,8 @@ class TestController extends Controller
         $dayFrom = null;
         $debugMode = true;
 
-//        $logger = new Logger($debugMode, new DbTarget('info\GmailJob'));
-        $logger = new Logger($debugMode, new ConsoleTarget());
+        $logger = new Logger($debugMode, new DbTarget('info\GmailJob'));
+//        $logger = new Logger($debugMode, new ConsoleTarget());
         $logger->timerStart('gmail_job')->log(Message::info('Start Gmail Job ' . date('Y-m-d H:i:s')));
 
         if (!$account = EmailAccount::findOne($emailAccountId)) {

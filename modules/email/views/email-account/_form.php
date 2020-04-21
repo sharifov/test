@@ -17,6 +17,15 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ea_email')->textInput(['maxlength' => true]) ?>
 
+        <b>Imap settings example</b>
+
+        <pre>
+{
+    "path": "imap.gmail.com:993/imap/ssl/novalidate-cert}INBOX",
+    "login": "login",
+    "password": "password"
+}        </pre>
+
         <?php
         try {
             echo $form->field($model, 'ea_imap_settings')->widget(
