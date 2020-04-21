@@ -1,3 +1,8 @@
+composer require tightenco/collect
+composer require google/apiclient:"^2.0"
+
+---
+
 Example settings for supervisor
 
 [program:QueueGmailDownload]
