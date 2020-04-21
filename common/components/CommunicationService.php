@@ -12,6 +12,7 @@ use yii\base\Component;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
+use yii\httpclient\Exception;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
 
@@ -69,7 +70,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param array $headers
      * @param array $options
      * @return \yii\httpclient\Response
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
     {
@@ -103,7 +104,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param array $email_data
      * @param string $language
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function mailPreview(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US') : array
     {
@@ -150,7 +151,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param string|null $language
      * @param int $delay
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function mailSend(int $project_id, ?string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], ?string $language = 'en-US', int $delay = 0) : array
     {
@@ -224,7 +225,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     /**
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function mailTypes() : array
     {
@@ -251,7 +252,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     /**
      * @param array $filter
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function mailGetMessages(array $filter = []) : array
     {
@@ -306,7 +307,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param array $sms_data
      * @param string|null $language
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function smsPreview(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $sms_data = [], ?string $language = 'en-US') : array
     {
@@ -346,7 +347,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param string|null $language
      * @param int|null $delay
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function smsSend(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $content_data = [], array $sms_data = [], ?string $language = 'en-US', ?int $delay = 0) : array
     {
@@ -387,7 +388,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     /**
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function smsTypes() : array
     {
@@ -414,7 +415,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     /**
      * @param array $filter
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function smsGetMessages(array $filter = []) : array
     {
@@ -472,7 +473,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param string $from_name
      * @param array $options
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function callToPhone(int $project_id, string $phone_from, string $from_number, string $phone_to, string $from_name = '', array $options = []) : array
     {
@@ -508,7 +509,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param string $sid
      * @param array $updateData
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function updateCall(string $sid, array $updateData = []) : array
     {
@@ -539,12 +540,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param array $data
      * @param string $callBackUrl
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function redirectCall(string $sid, array $data = [], string $callBackUrl = '') : array
     {
         $out = ['error' => false, 'data' => []];
-
+/* TODO:: ? */
         $data['sid'] = $sid;
         $data['data'] = $data;
         $data['callBackUrl'] = $callBackUrl;
@@ -565,11 +566,53 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
+    /**
+     * @param string $sid
+     * @param string $status (paused|in-progress|stopped)
+     * @param string|null $recordingSid
+     * @return array
+     * @throws Exception
+     */
+    public function updateRecordingStatus(string $sid, string $status, ?string $recordingSid = null) : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['sid'] = $sid;
+        $data['status'] = $status;
+        if ($recordingSid) {
+            $data['recording_sid'] = $recordingSid;
+        }
+
+        $response = $this->sendRequest('voice/update-recording-status', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+
+                if (isset($response->data['error'])) {
+                    \Yii::error(VarDumper::dumpAsString($out['error']),
+                    'CommunicationService::updateRecordingStatus:errorResponse');
+                } else {
+                    \Yii::info('Call sid: ' . $sid . ' set record status to: ' . $status,
+                    'info\CommunicationService:updateRecordingStatus');
+                }
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']),
+            'CommunicationService::updateRecordingStatus:failRequest');
+        }
+
+        return $out;
+    }
+
 
     /**
      * @param string $username
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function getJwtToken($username = '') : array
     {
@@ -604,7 +647,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param string $username
      * @param bool $deleteCache
      * @return mixed
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function getJwtTokenCache($username = '', $deleteCache = false)
     {
@@ -634,7 +677,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param $to
      * @param  bool $firstTransferToNumber
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function callRedirect($cid, $type, $from, $to, $firstTransferToNumber = false)
     {
