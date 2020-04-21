@@ -27,17 +27,15 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-
             'cua_call_id',
-            //'cua_user_id',
+
             [
+                'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'cua_user_id',
-                'value' => static function (\common\models\CallUserAccess $model) {
-                    return $model->cuaUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cuaUser->username) : '-';
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Employee::getList()
+                'relation' => 'cuaUser',
+                'placeholder' => 'Select User',
             ],
+
             //'cua_status_id',
             [
                 'attribute' => 'cua_status_id',

@@ -143,7 +143,7 @@ class SmsIncomingService
         $sms = Sms::createByIncomingSales($form, $clientId, $ownerId, $leadId);
         $this->smsRepository->save($sms);
         if ($leadId === null) {
-            Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new lead creation allowed on SMS.', 'SmsIncomingService');
+            Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new lead creation allowed on SMS.', 'info\SmsIncomingService');
         }
         return $sms;
     }
@@ -177,7 +177,7 @@ class SmsIncomingService
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
         if ($caseId === null) {
-            Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new support case creation allowed on SMS.', 'SmsIncomingService');
+            Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new support case creation allowed on SMS.', 'info\SmsIncomingService');
         }
         return $sms;
     }
@@ -211,7 +211,7 @@ class SmsIncomingService
         $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
         if ($caseId === null) {
-            Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new exchange case creation allowed on SMS.', 'SmsIncomingService');
+            Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new exchange case creation allowed on SMS.', 'info\SmsIncomingService');
         }
         return $sms;
     }
@@ -267,7 +267,7 @@ class SmsIncomingService
         $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
         $this->smsRepository->save($sms);
         if ($caseId === null) {
-            Yii::error('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new support case creation allowed on SMS.', 'SmsIncomingService');
+            Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new support case creation allowed on SMS.', 'info\SmsIncomingService');
         }
         return $sms;
     }

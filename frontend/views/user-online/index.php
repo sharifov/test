@@ -27,16 +27,26 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            ['label' => 'User Id',
+            [
+                'label' => 'User ID',
                 'value' => static function($model) {
                     return $model->uo_user_id;
                 },
             ],
+
             [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'label' => 'User',
+                'attribute' => 'uo_user_id',
+                'relation' => 'uoUser',
+                'placeholder' => 'Select User',
+            ],
+
+            /*[
                 'class' => \common\components\grid\UserColumn::class,
                 'attribute' => 'uo_user_id',
                 'relation' => 'uoUser',
-            ],
+            ],*/
             [
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'uo_updated_dt',

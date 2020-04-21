@@ -6,7 +6,6 @@ use common\models\Email;
 use common\models\Notifications;
 use yii\bootstrap4\Html;
 use yii\helpers\StringHelper;
-use yii\helpers\Url;
 
 /**
  * Class NotificationMessage
@@ -31,8 +30,8 @@ class NotificationMessage
         return [
             'notification' => [
                 'command' => self::COMMAND_ADD,
+                'userId' => $ntf->n_user_id,
                 'id' => $ntf->n_id,
-                'url' => Url::to(['/notifications/view2', 'id' => $ntf->n_id]),
                 'title' => Html::encode($ntf->n_title),
                 'time' => strtotime($ntf->n_created_dt),
                 'message' => StringHelper::truncate(Email::strip_html_tags($ntf->n_message), 80, '...'),
@@ -44,21 +43,23 @@ class NotificationMessage
         ];
     }
 
-    public static function delete(int $id): array
+    public static function delete(Notifications $ntf): array
     {
         return [
             'notification' => [
                 'command' => self::COMMAND_DELETE,
-                'id' => $id,
+                'userId' => $ntf->n_user_id,
+                'id' => $ntf->n_id,
             ]
         ];
     }
 
-    public static function deleteAll(): array
+    public static function deleteAll(int $user_id): array
     {
         return [
             'notification' => [
                 'command' => self::COMMAND_DELETE_ALL,
+                'userId' => $user_id,
             ]
         ];
     }

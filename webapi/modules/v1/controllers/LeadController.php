@@ -11,6 +11,7 @@ use common\models\LeadFlightSegment;
 use common\models\Notifications;
 use common\models\Sources;
 use common\models\VisitorLog;
+use frontend\widgets\notification\NotificationMessage;
 use modules\flight\models\FlightSegment;
 use modules\product\src\useCases\product\api\create\flight\Handler;
 use sales\repositories\lead\LeadRepository;
@@ -1565,7 +1566,8 @@ class LeadController extends ApiBaseController
             if($leadCallExpert->lce_agent_user_id) {
                 if ($ntf = Notifications::create($leadCallExpert->lce_agent_user_id, 'Expert Response', 'Expert ('.Html::encode($leadCallExpert->lce_expert_username).') Response ('.$leadCallExpert->getStatusName().'). Lead ID: ' . $leadCallExpert->lce_lead_id, Notifications::TYPE_INFO, true)) {
                     // Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
-                    Notifications::sendSocket('getNewNotification', ['user_id' => $leadCallExpert->lce_agent_user_id, 'lead_id' => $leadCallExpert->lce_lead_id]);
+                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::sendSocket('getNewNotification', ['user_id' => $leadCallExpert->lce_agent_user_id], $dataNotification);
                 }
 
             }

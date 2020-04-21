@@ -1391,6 +1391,101 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param string|null $start_dt
+     * @param string|null $end_dt
+     * @param int $userID
+     * @return string
+     */
+    public static function getTaskStatsSupervision(string $start_dt = null, string $end_dt = null, int $userID): string
+    {
+        if ($start_dt) {
+            $start_dt = date('Y-m-d', strtotime($start_dt));
+        } else {
+            $start_dt = null;
+        }
+
+        if ($end_dt) {
+            $end_dt = date('Y-m-d', strtotime($end_dt));
+        } else {
+            $end_dt = null;
+        }
+
+        $taskListAllQuery = \common\models\LeadTask::find()->with('ltTask')->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
+            ->where(['lt_user_id' => $userID])
+            ->andFilterWhere(['>=', 'lt_date', $start_dt])
+            ->andFilterWhere(['<=', 'lt_date', $end_dt])
+            ->groupBy(['lt_task_id'])
+            ->orderBy(['lt_task_id' => SORT_ASC]);
+
+        $taskListCheckedQuery = \common\models\LeadTask::find()->with('ltTask')->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
+            ->where(['lt_user_id' => $userID])
+            ->andWhere(['IS NOT', 'lt_completed_dt', null])
+            ->andFilterWhere(['>=', 'lt_date', $start_dt])
+            ->andFilterWhere(['<=', 'lt_date', $end_dt])
+            ->groupBy(['lt_task_id']);
+
+        $taskListAllQuery->joinWith(['ltLead' => function ($q) {
+            //$q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            $q->where(['leads.status' => Lead::STATUS_PROCESSING]);
+        }]);
+
+        $taskListCheckedQuery->joinWith(['ltLead' => function ($q) {
+            //$q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            $q->where(['leads.status' => Lead::STATUS_PROCESSING]);
+        }]);
+
+        $taskListAll = $taskListAllQuery->all();
+        $taskListChecked = $taskListCheckedQuery->all();
+
+        $completed = [];
+        if ($taskListChecked) {
+            foreach ($taskListChecked as $taskItem) {
+                $completed[$taskItem->lt_task_id] = $taskItem->field_cnt;
+            }
+        }
+        $item = [];
+
+        if ($taskListAll) {
+            foreach ($taskListAll as $task) {
+                $completedTasks = $completed[$task->lt_task_id] ?? 0;
+
+                $str = '<tr><td><small>' . Html::encode($task->ltTask->t_name) . '</small></td><td><small>' . $completedTasks . ' / ' . Html::a($task->field_cnt,
+                        ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $userID],
+                        ['data-pjax' => 0, 'target' => '_blank']) . '</small></td>';
+
+                if ($task->field_cnt > 0) {
+                    $percent = (int)($completedTasks * 100 / $task->field_cnt);
+                } else {
+                    $percent = 0;
+                }
+
+                $str .= '<td width="100"><div class="progress" style="margin-bottom: 0" title="' . $percent . '%">
+                          <div class="progress-bar" role="progressbar" aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $percent . '%;">
+                            ' . $percent . '%
+                          </div>
+                        </div></td></tr>';
+                $item[] = $str;
+            }
+        }
+
+
+        if ($item) {
+            $str = '<table class="table table-bordered table-condensed">';
+            //$str .= '<tr><th class="text-center">'.implode('</th><th class="text-center">', $itemHeader).'</th></tr>';
+
+            //$str .= '<tr>';
+            //$str .= '<td class="text-center">' . implode('</td><td class="text-center">', $item) . '</td>';
+            //$str .= '</tr>';
+            $str .= implode('', $item);
+            $str .= '</table>';
+        } else {
+            $str = '-';
+        }
+
+        return $str;
+    }
+
+    /**
      * @return array
      */
     public function paramsForSalary() : array
@@ -1528,6 +1623,30 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['lf_owner_id' => $this->id, 'status' => $statusList]);
+        $query->andFilterWhere(['>=', 'created', $startDate]);
+        $query->andFilterWhere(['<=', 'created', $endDate]);
+        $count = $query->asArray()->scalar();
+        return $count;
+    }
+
+    /**
+     * @param array $statusList
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @param int $userID
+     * @return int
+     */
+    public static function getLeadCountByStatusSupervision(array $statusList = [], string $startDate = null, string $endDate = null, int $userID): int
+    {
+        if ($startDate) {
+            $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
+        }
+
+        if ($endDate) {
+            $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+        }
+
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['lf_owner_id' => $userID, 'status' => $statusList]);
         $query->andFilterWhere(['>=', 'created', $startDate]);
         $query->andFilterWhere(['<=', 'created', $endDate]);
         $count = $query->asArray()->scalar();

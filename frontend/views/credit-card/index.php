@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\UserSelect2Column;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CreditCardSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -65,8 +66,21 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'cc_status_id',
             'cc_is_expired:boolean',
-            'cc_created_user_id:UserName',
-            'cc_updated_user_id:UserName',
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'cc_created_user_id',
+                'relation' => 'ccCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'cc_updated_user_id',
+                'relation' => 'ccCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
             'cc_created_dt:ByUserDateTime',
             'cc_updated_dt:ByUserDateTime',
 

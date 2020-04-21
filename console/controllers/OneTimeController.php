@@ -10,7 +10,6 @@ use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\console\Controller;
-use yii\helpers\BaseConsole;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 

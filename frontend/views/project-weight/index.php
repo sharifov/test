@@ -29,11 +29,18 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            [
+            /*[
                 'attribute' => 'pw_project_id',
                 'value' => 'project.name',
                 'filter' => Project::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'pw_project_id',
+                'relation' => 'project',
             ],
+
             'pw_weight',
 
             ['class' => 'yii\grid\ActionColumn'],

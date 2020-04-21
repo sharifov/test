@@ -59,7 +59,7 @@ use dosamigos\datepicker\DatePicker;
                     'style' => 'width:800px'
                 ],
             ],
-            [
+            /*[
                 'attribute' => 'hqsl_created_user_id',
                 'value' => static function (HotelQuoteServiceLog $model) {
                     if ($model->hqsl_created_user_id) {
@@ -70,7 +70,15 @@ use dosamigos\datepicker\DatePicker;
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Employee::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'hqsl_created_user_id',
+                'relation' => 'createdUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'attribute' => 'hqsl_created_dt',
                 'value' => static function (HotelQuoteServiceLog $model) {

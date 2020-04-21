@@ -10,21 +10,18 @@ use yii\helpers\Html;
 
 class CasesViewRenderHelper
 {
-    public static function renderTakeButton(Cases $model, Employee $user): string
+    public static function renderTakeButton(Cases $case, Employee $user): string
     {
-        if ($model->isSolved()) {
+        if ($case->isSolved()) {
             return '';
         }
-        $allowActionsList = CasesStatusTransferList::getAllowTransferListByUser($model->cs_status, $user);
+        $allowActionsList = CasesStatusTransferList::getAllowTransferListByUser($case->cs_status, $user);
         if (isset($allowActionsList[CasesStatus::STATUS_PROCESSING])) {
-            if (!$model->isOwner($user->id)) {
-                if ($model->isProcessing()) {
-                    return Html::a('Take over ', ['cases/take', 'gid' => $model->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take over']);
-                }
-                return Html::a('Take', ['cases/take', 'gid' => $model->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
+            if ($case->isProcessing() && !$case->isOwner($user->id)) {
+                return Html::a('Take over', ['/cases/take', 'gid' => $case->cs_gid, 'is_over' => true], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take over']);
             }
-            if ($model->isTrash()) {
-                return Html::a('Take', ['cases/take', 'gid' => $model->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
+            if ($case->isPending() || $case->isFollowUp() || $case->isTrash()) {
+                return Html::a('Take', ['/cases/take', 'gid' => $case->cs_gid, 'is_over' => false], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
             }
         }
         return '';

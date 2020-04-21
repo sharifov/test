@@ -30,7 +30,15 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'cn_id',
             'cn_cs_id',
-            'cn_user_id',
+            //'cn_user_id',
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'cn_user_id',
+                'relation' => 'cnUser',
+                'placeholder' => 'Select User',
+            ],
+
             'cn_text:ntext',
             [
                 'attribute' => 'cn_created_dt',

@@ -53,13 +53,13 @@ $lists = new ListsAccess($user->id);
                 'label' => 'Time left',
                 'attribute' => 'time_left',
             ],
-			[
-				'attribute' => 'cs_project_id',
-				'value' => static function (CasesQSearch $model) {
-					return $model->project ? $model->project->name : '';
-				},
-				'filter' => Project::getList()
-			],
+
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'cs_project_id',
+                'relation' => 'project'
+            ],
+
             [
                 'attribute' => 'cs_subject',
                 'contentOptions' => [
@@ -131,7 +131,7 @@ $lists = new ListsAccess($user->id);
                     return $model->getClientTime();
                 },
             ],
-			[
+			/*[
 				'attribute' => 'cs_user_id',
                 'label' => 'Agent',
 				'value' => static function (CasesQSearch $model) {
@@ -139,7 +139,17 @@ $lists = new ListsAccess($user->id);
 				},
 				'filter' => $lists->getEmployees(),
 				'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
-			],
+			],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'label' => 'Agent',
+                'attribute' => 'cs_user_id',
+                'relation' => 'owner',
+                'placeholder' => 'Select User',
+                'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
+            ],
+
 			[
 				'attribute' => 'cs_last_action_dt',
 				'label' => 'Last Action',
@@ -168,7 +178,7 @@ $lists = new ListsAccess($user->id);
                         ]);
                     },
                     'take' => function ($url, Cases $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid, 'is_over' => false], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

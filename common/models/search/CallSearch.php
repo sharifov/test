@@ -95,6 +95,10 @@ class CallSearch extends Call
             [['createTimeStart', 'createTimeEnd'], 'safe'],
             [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
             [['reportTimezone', 'timeFrom', 'timeTo'], 'string'],
+
+            ['c_is_transfer', 'boolean'],
+            ['c_queue_start_dt', 'date', 'format' => 'php:Y-m-d'],
+            ['c_group_id', 'integer'],
         ];
     }
 
@@ -184,6 +188,10 @@ class CallSearch extends Call
         $query->andFilterWhere(['<=','c_call_duration', $this->call_duration_to]);
 
 
+        if ($this->c_queue_start_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_queue_start_dt', $this->c_queue_start_dt, $user->timezone);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'c_id' => $this->c_id,
@@ -203,7 +211,10 @@ class CallSearch extends Call
             'c_client_id' => $this->c_client_id,
             'c_sequence_number' => $this->c_sequence_number,
             'c_recording_sid' => $this->c_recording_sid,
-            'c_status_id' => $this->c_status_id
+            'c_status_id' => $this->c_status_id,
+            'c_is_transfer' => $this->c_is_transfer,
+            'c_group_id' => $this->c_group_id,
+
 
         ]);
 

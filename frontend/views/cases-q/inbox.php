@@ -42,13 +42,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cs_id',
                 'label' => 'ID',
             ],
-			[
-				'attribute' => 'cs_project_id',
-				'value' => static function (CasesQSearch $model) {
-					return $model->project ? $model->project->name : '';
-				},
-				'filter' => Project::getList()
-			],
+
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'cs_project_id',
+                'relation' => 'project'
+            ],
+
             [
                 'attribute' => 'cs_subject',
                 'contentOptions' => [
@@ -174,7 +174,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     },
                     'take' => static function ($url, CasesQSearch $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid, 'is_over' => false], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

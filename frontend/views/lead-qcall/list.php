@@ -37,7 +37,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
 
-            [
+            'lqcLead.project_id:projectName',
+
+            /*[
                 'attribute' => 'lqcLead.project_id',
                 'value' => static function (\common\models\LeadQcall $model) {
                     return $model->lqcLead->project ? '<span class="badge badge-info">' . Html::encode($model->lqcLead->project->name) . '</span>' : '-';
@@ -47,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'style' => 'width:120px'
                 ],
                 'filter' => \common\models\Project::getList(),
-            ],
+            ],*/
 
             [
                 'attribute' => 'lqcLead.source_id',

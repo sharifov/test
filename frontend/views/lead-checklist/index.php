@@ -89,13 +89,20 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'lc_notes',
 
-            [
+            /*[
                 'attribute' => 'lc_user_id',
                 'value' => static function (\common\models\LeadChecklist $model) {
                     return  $model->lcUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->lcUser->username) : $model->lc_user_id;
                 },
                 'filter' => \common\models\Employee::getList(),
                 'format' => 'raw'
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'lc_user_id',
+                'relation' => 'lcUser',
+                'placeholder' => 'Select User',
             ],
 
             [

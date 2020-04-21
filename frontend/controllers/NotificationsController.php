@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use frontend\widgets\notification\NotificationCache;
+use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use Yii;
@@ -106,8 +107,15 @@ class NotificationsController extends FController
             $model->n_read_dt = date('Y-m-d H:i:s');
             $model->n_new = false;
             if ($model->save()) {
-                Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
+                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
+                Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
             }
+        }
+
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('view-ajax', [
+                'model' => $model,
+            ]);
         }
 
         return $this->render('view2', [
@@ -126,7 +134,8 @@ class NotificationsController extends FController
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //Notifications::socket($model->n_user_id, null, 'getNewNotification', [], true);
-            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
+            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($model) : [];
+            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
             return $this->redirect(['view', 'id' => $model->n_id]);
         } else {
             return $this->render('create', [
@@ -146,7 +155,6 @@ class NotificationsController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
             return $this->redirect(['view', 'id' => $model->n_id]);
         } else {
             return $this->render('update', [
@@ -167,7 +175,8 @@ class NotificationsController extends FController
 
         if ($model->delete()) {
             NotificationCache::invalidate($model->n_user_id);
-            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
+            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
+            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
         }
 
         return $this->redirect(['index']);
@@ -188,7 +197,8 @@ class NotificationsController extends FController
 
         $model->n_deleted = true;
         if ($model->save()) {
-            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
+            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
+            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
         }
         return $this->redirect(['list']);
     }
@@ -198,9 +208,11 @@ class NotificationsController extends FController
      */
     public function actionAllDelete()
     {
-        if (Notifications::updateAll(['n_deleted' => true], ['n_deleted' => false, 'n_user_id' => Yii::$app->user->id])) {
-            NotificationCache::invalidate(Yii::$app->user->id);
-            Notifications::sendSocket('getNewNotification', ['user_id' => Yii::$app->user->id]);
+        $userId = Auth::id();
+        if (Notifications::updateAll(['n_deleted' => true], ['n_deleted' => false, 'n_user_id' => $userId])) {
+            NotificationCache::invalidate($userId);
+            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::deleteAll($userId) : [];
+            Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
         }
         return $this->redirect(['list']);
     }
@@ -210,9 +222,11 @@ class NotificationsController extends FController
      */
     public function actionAllRead()
     {
-        if (Notifications::updateAll(['n_new' => false, 'n_read_dt' => date('Y-m-d H:i:s')], ['n_read_dt' => null, 'n_user_id' => Yii::$app->user->id])) {
-            NotificationCache::invalidate(Yii::$app->user->id);
-            Notifications::sendSocket('getNewNotification', ['user_id' => Yii::$app->user->id]);
+        $userId = Auth::id();
+        if (Notifications::updateAll(['n_new' => false, 'n_read_dt' => date('Y-m-d H:i:s')], ['n_read_dt' => null, 'n_user_id' => $userId])) {
+            NotificationCache::invalidate($userId);
+            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::deleteAll($userId) : [];
+            Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
         }
         return $this->redirect(['list']);
     }
@@ -244,6 +258,6 @@ class NotificationsController extends FController
         } elseif(Yii::$app->request->referrer) {
             return $this->redirect(Yii::$app->request->referrer);
         }
-        return $this->redirect(['site/profile']);
+        return $this->redirect(['/site/profile']);
     }
 }

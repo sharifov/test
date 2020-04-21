@@ -32,14 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'dep_id',
             'dep_email',
             'emailList.el_email',
-			[
-				'attribute' => 'dep_project_id',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					return $model->depProject ? '<span class="badge">' . Html::encode($model->depProject->name) . '</span>' : '-';
-				},
-				'filter' => \common\models\Project::getList(true),
-				'format' => 'raw',
-			],
+			'dep_project_id:projectName',
             'dep_dep_id:department',
 			[
 				'attribute' => 'dep_source_id',

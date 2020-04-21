@@ -45,13 +45,13 @@ $lists = new ListsAccess($user->id);
         'columns' => [
             'cs_id',
             'cs_gid',
+
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'cs_project_id',
-                'value' => static function (CasesQSearch $model) {
-                    return $model->project ? $model->project->name : '';
-                },
-                'filter' => Project::getList()
+                'relation' => 'project'
             ],
+
             [
                 'attribute' => 'cs_subject',
                 'contentOptions' => [
@@ -65,7 +65,7 @@ $lists = new ListsAccess($user->id);
                 },
                 'filter' => CaseCategory::getList()
             ],
-            [
+            /*[
                 'attribute' => 'cs_user_id',
                 'label' => 'Agent',
                 'value' => static function (CasesQSearch $model) {
@@ -73,7 +73,17 @@ $lists = new ListsAccess($user->id);
                 },
                 'filter' => $lists->getEmployees(),
                 'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'label' => 'Agent',
+                'attribute' => 'cs_user_id',
+                'relation' => 'owner',
+                'placeholder' => 'Select User',
+                'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
             ],
+
             [
                 'attribute' => 'cs_lead_id',
                 'value' => static function (CasesQSearch $model) {

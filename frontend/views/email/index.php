@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\UserSelect2Column;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
@@ -16,13 +17,6 @@ $this->params['breadcrumbs'][] = $this->title;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-if ($user->isAdmin() || $user->isQa()) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId($user->id);
-    $projectList = \common\models\Project::getListByUser($user->id);
-}
 ?>
 <div class="email-index">
 
@@ -99,18 +93,26 @@ if ($user->isAdmin() || $user->isQa()) {
                 ],
             ],
             //'e_reply_id',
-            'e_lead_id',
-            'e_case_id',
+
             //'e_project_id',
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'e_project_id',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->eProject ? $model->eProject->name : '-';
-                },
-                'filter' => $projectList
+                'relation' => 'eProject',
             ],
-            'e_email_from:email',
-            'e_email_to:email',
+//            [
+//                'attribute' => 'e_project_id',
+//                'value' => static function (\common\models\Email $model) {
+//                    return $model->eProject ? '<span class="badge badge-info">' . Html::encode($model->eProject->name) . '</span>' : '-';
+//                },
+//                'format' => 'raw',
+//                'filter' => $projectList
+//            ],
+            'e_email_from',
+            'e_email_to',
+
+            'e_lead_id',
+            'e_case_id',
             //'e_email_cc:email',
             //'e_email_bc:email',
             //'e_email_subject:email',
@@ -168,13 +170,20 @@ if ($user->isAdmin() || $user->isQa()) {
             ],*/
 
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'e_created_user_id',
-                'value' => static function (\common\models\Email $model) {
-                    return ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
-                },
-                'filter' => $userList,
-                'format' => 'raw'
+                'relation' => 'eCreatedUser',
+                'placeholder' => ''
             ],
+
+//            [
+//                'attribute' => 'e_created_user_id',
+//                'value' => static function (\common\models\Email $model) {
+//                    return ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
+//                },
+//                'filter' => $userList,
+//                'format' => 'raw'
+//            ],
             /*[
                 'attribute' => 'e_updated_dt',
                 'value' => static function (\common\models\Email $model) {

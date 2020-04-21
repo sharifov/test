@@ -10,7 +10,7 @@ use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\user\entity\payroll\search\UserPayrollSearch */
@@ -81,11 +81,14 @@ $this->params['breadcrumbs'][] = $this->title;
 		},
         'columns' => [
             'ups_id',
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'ups_user_id',
-				'relation' => 'upsUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'ups_user_id',
+                'relation' => 'upsUser',
+                'placeholder' => 'Select User',
+            ],
+
             [
                 'label' => 'Profit Count',
                 'value' => static function (UserPayroll $model) {

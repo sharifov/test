@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     'cl_id',
-                    'cl_parent_id',
+                    'cl_group_id',
                     'cl_call_sid',
                     'cl_type_id:callLogType',
                     'cl_category_id:callLogCategory',

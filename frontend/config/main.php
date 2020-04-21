@@ -24,6 +24,8 @@ $params = array_merge(
     require __DIR__ . '/params-local.php'
 );
 
+$appVersion = $params['release']['version'] ?? '';
+
 return [
     'id' => 'app-frontend',
     'name'  => 'Sales',
@@ -158,6 +160,9 @@ return [
 		'assetManager' => [
 			'forceCopy' => false,
 			'appendTimestamp' => false,
+            'hashCallback' => static function ($path) use ($appVersion) {
+                return hash('md4', $path . $appVersion);
+            },
 			'bundles' => [
 				BootstrapAsset::class => [
 					'sourcePath' => '@npm/bootstrap/dist',

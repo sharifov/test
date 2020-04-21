@@ -17,12 +17,7 @@ $this->title = 'My Calls';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="call-index">
-
     <h1><i class="fa fa-phone"></i> <?= Html::encode($this->title) ?></h1>
-
-
-
-
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -159,16 +154,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Call::SOURCE_LIST
             ],
 
-            //'c_project_id',
-
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'c_project_id',
-                'value' => static function (\common\models\Call $model) {
-                    return $model->cProject ? $model->cProject->name : '-';
-                },
-                'filter' => $projectList
+                'relation' => 'cProject',
             ],
-
 
             'c_from',
             'c_to',

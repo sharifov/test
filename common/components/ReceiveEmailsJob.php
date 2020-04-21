@@ -7,6 +7,7 @@ use common\components\jobs\CreateSaleFromBOJob;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
+use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
 use sales\helpers\app\AppHelper;
@@ -244,24 +245,25 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                 foreach ($userArray as $user_id) {
                     if ($ntf = Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true)) {
                         // Notifications::socket($user_id, null, 'getNewNotification', [], true);
-                        Notifications::sendSocket('getNewNotification', ['user_id' => $user_id]);
+                        $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                        Notifications::sendSocket('getNewNotification', ['user_id' => $user_id], $dataNotification);
                     }
                 }
             }
 
-            if ($leadArray) {
-                foreach ($leadArray as $lead_id) {
-                    // Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
-                    Notifications::sendSocket('getNewNotification', ['lead_id' => $lead_id]);
-                }
-            }
+//            if ($leadArray) {
+//                foreach ($leadArray as $lead_id) {
+//                    // Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
+//                    Notifications::sendSocket('getNewNotification', ['lead_id' => $lead_id]);
+//                }
+//            }
 
-            if ($caseArray) {
-                foreach ($caseArray as $case_id) {
-                    // Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
-                    Notifications::sendSocket('getNewNotification', ['case_id' => $case_id]);
-                }
-            }
+//            if ($caseArray) {
+//                foreach ($caseArray as $case_id) {
+//                    // Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
+//                    Notifications::sendSocket('getNewNotification', ['case_id' => $case_id]);
+//                }
+//            }
         } catch (\Throwable $e) {
             \Yii::error($e->getTraceAsString(), 'ReceiveEmailsJob:execute');
         }

@@ -5,7 +5,7 @@ use modules\qaTask\src\grid\columns\QaTaskObjectTypeColumn;
 use modules\qaTask\src\grid\columns\QaTaskActionColumn;
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -51,15 +51,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => BooleanColumn::class,
                 'attribute' => 'tar_enabled',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'tar_created_user_id',
-                'relation' => 'createdUser'
+                'relation' => 'createdUser',
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'tar_updated_user_id',
                 'relation' => 'updatedUser',
+                'placeholder' => 'Select User',
             ],
 
             [

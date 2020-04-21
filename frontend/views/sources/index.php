@@ -53,14 +53,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width: 100px']
             ],
 
-            //'project_id',
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'project_id',
-                'value' => static function (\common\models\Sources $model) {
-                    return $model->project ? $model->project->name : '-';
-                },
-                'filter' => \common\models\Project::getList()
+                'relation' => 'project',
             ],
+
             'name',
             'cid',
             //'last_update',
