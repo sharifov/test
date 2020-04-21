@@ -124,6 +124,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                     foreach ($res['data']['emails'] as $mail) {
 
+                        Yii::info(VarDumper::dumpAsString($mail), 'info\DebugEmail');
+
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
                         $find = Email::find()->where([
@@ -184,7 +186,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         if ($case_id) {
 							$caseArray[$case_id] = $case_id;
 						}
-                        
+
                         if (!$email->save()) {
                             \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
                         } else {
