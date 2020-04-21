@@ -1069,7 +1069,7 @@ class Call extends \yii\db\ActiveRecord
 
         $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
         if ($logEnable) {
-            $isChangedTwStatus = isset($changedAttributes['c_call_status']);
+            $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
             if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
             }
