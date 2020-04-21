@@ -1,5 +1,6 @@
 <?php
 return [
+    'appInstance' => '{{ common.config.params.appInstance:str }}',
     'url_address'      => '{{ common.config.params.url_address:str }}',
     'email_from' => [
         'sales' => '{{ common.config.params.email_from.sales:str }}',
