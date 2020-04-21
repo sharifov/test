@@ -15,7 +15,6 @@ use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\phoneList\entity\PhoneList;
 use yii\db\ActiveQuery;
-use yii\db\Query;
 
 /**
  * This is the model class for table "{{%call_log}}".
