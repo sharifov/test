@@ -199,10 +199,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $notifier = new Notifier();
-        $notifier->notify(['serge.murphy@ovago.com', 'andrew@techwork.com']);
-
-
         return $this->render('blank');
     }
 

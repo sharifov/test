@@ -1,7 +1,5 @@
 <?php
 
-use modules\email\EmailModule;
-
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -35,7 +33,6 @@ return [
                 'modules\order\migrations',
                 'modules\invoice\migrations',
                 'modules\qaTask\migrations',
-                'modules\email\migrations',
             ],
         ],
 
@@ -142,9 +139,6 @@ return [
             ],
 
             //'googleApiKey'              => 'AIzaSyCBz5uH4JyegEa_vqN_OGJCORq-UpkmTiQ',
-        ],
-        'mail' => [
-            'class' => EmailModule::class,
         ],
     ],
     'params' => $params,

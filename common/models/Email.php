@@ -18,7 +18,7 @@ use yii\helpers\VarDumper;
  *
  * @property int $e_id
  * @property int $e_reply_id
- * @property int $e_lead_id
+ * @property int|null $e_lead_id
  * @property int $e_project_id
  * @property string $e_email_from
  * @property string $e_email_to
@@ -52,7 +52,7 @@ use yii\helpers\VarDumper;
  * @property int $e_inbox_email_id
  * @property string $e_email_from_name
  * @property string $e_email_to_name
- * @property int $e_case_id
+ * @property int|null $e_case_id
  *
  * @property string $body_html
  *

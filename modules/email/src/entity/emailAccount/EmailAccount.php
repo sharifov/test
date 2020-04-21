@@ -52,14 +52,19 @@ class EmailAccount extends \yii\db\ActiveRecord
         return new ImapSettings($this);
     }
 
-    public function isImap(): bool
+    public function isImapProtocol(): bool
     {
         return $this->ea_protocol === self::PROTOCOL_IMAP;
     }
 
-    public function isGmailApi(): bool
+    public function isGmailApiProtocol(): bool
     {
         return $this->ea_protocol === self::PROTOCOL_GMAIL_API;
+    }
+
+    public function removeGmailToken(): void
+    {
+        $this->ea_gmail_token = null;
     }
 
     public function rules(): array

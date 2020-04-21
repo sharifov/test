@@ -8,6 +8,7 @@ use common\components\debug\Logger;
 use common\components\debug\Message;
 use modules\email\src\entity\emailAccount\EmailAccount;
 use modules\email\src\protocol\gmail\GmailJob;
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\console\Controller;
 use yii\helpers\VarDumper;
@@ -27,7 +28,7 @@ class EmailController extends Controller
             foreach ($accounts as $account) {
                 try {
 
-                    if ($account->isGmailApi()) {
+                    if ($account->isGmailApiProtocol()) {
                         $logger->log(Message::info('-- GMAIL API protocol start --'));
                         $job = new GmailJob([
                             'emailAccountId' => $account->ea_id,
@@ -44,18 +45,13 @@ class EmailController extends Controller
                         }
                         $logger->log(Message::info('-- GMAIL API protocol finish --'));
                     } else {
-//                        $logger->log(Message::info('-- IMAP protocol start --'));
-//                        $result = (new ImapService($account, $logger, $dayTo, $limit, $dayFrom))->saveAccountMails(true, $projectList);
-//                        if ($result->lastEmailId > 0) {
-//                            (new MailJob($result->projectsIds, $result->lastEmailId, $logger))->createJob();
-//                        }
-//                        $logger->log(Message::info('-- IMAP protocol finish --'));
+                        $logger->log(Message::info('-- IMAP protocol TODO--'));
                     }
 
                     $processed++;
                 } catch (\Throwable $throwable) {
                     $logger->log(Message::error(VarDumper::dumpAsString($throwable->getMessage(), 20)));
-                    Yii::error(VarDumper::dumpAsString($throwable->getMessage(), 20), 'ImapController:actionIndex:precessing');
+                    Yii::error(AppHelper::throwableFormatter($throwable), 'ImapController:actionIndex:precessing');
                     $failed++;
                 }
             }

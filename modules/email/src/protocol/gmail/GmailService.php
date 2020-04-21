@@ -4,13 +4,19 @@ namespace modules\email\src\protocol\gmail;
 
 use common\components\debug\Logger;
 use common\components\debug\Message;
+use common\components\jobs\CreateSaleFromBOJob;
 use common\models\Email;
 use Google_Service_Gmail_Message;
 use modules\email\src\entity\emailAccount\EmailAccount;
 use modules\email\src\helpers\MailHelper;
+use modules\email\src\Projects;
 use modules\email\src\protocol\gmail\message\Gmail;
 use modules\email\src\Result;
+use sales\helpers\app\AppHelper;
+use sales\services\cases\CasesManageService;
 use sales\services\email\EmailService;
+use sales\services\email\incoming\EmailIncomingService;
+use Yii;
 use yii\helpers\VarDumper;
 
 /**
@@ -26,6 +32,8 @@ use yii\helpers\VarDumper;
  * @property array $emailsTo
  * @property Logger $logger
  * @property EmailService $emailService
+ * @property Projects $projects
+ * @property array $usersForNotification
  */
 class GmailService
 {
@@ -38,17 +46,26 @@ class GmailService
     private $emailsTo = [];
     private $logger;
     private $emailService;
+    private $projects;
+    private $usersForNotification = [];
 
-    public function __construct(GmailApiService $api, EmailAccount $account, Logger $logger, EmailService $emailService)
+    public function __construct(
+        GmailApiService $api,
+        EmailAccount $account,
+        Logger $logger,
+        EmailService $emailService,
+        Projects $projects
+    )
     {
         $this->api = $api;
         $this->emailAccount = $account;
         $this->logger = $logger;
         $this->emailService = $emailService;
+        $this->projects = $projects;
     }
 
     /**
-     * @param string $command 'read', 'delete'
+     * @param string $command 'read', 'delete', 'no-action'
      * @param GmailCriteria $criteria
      * @return Result
      */
@@ -178,7 +195,7 @@ class GmailService
             $email->e_email_from = $gmail->getFromEmail();
             $email->e_email_from_name = $gmail->getFromName();
             $email->e_email_subject = $gmail->getSubject();
-            $email->e_project_id = $this->getProjectId();
+            $email->e_project_id = $this->projects->getProjectId($emailTo);
             $email->body_html = $gmail->getContent();
             $email->e_created_dt = date('Y-m-d H:i:s');
             $email->e_inbox_created_dt = $gmail->getDate();
@@ -188,26 +205,61 @@ class GmailService
             $lead_id = $this->emailService->detectLeadId($email);
             $case_id = $this->emailService->detectCaseId($email);
 
-            if ($email->save()) {
-                $this->logger->log(Message::info('+'));
-                $this->addSavedEmail($gmail->getId());
-                $this->addEmailTo($emailTo);
-            } else {
+            if ($users = $email->getUsersIdByEmail()) {
+                $email->e_created_user_id = end($users);
+                reset($users);
+            }
+
+            if (!$email->save()) {
                 $savedError = true;
                 $this->logger->log(Message::error('(' . VarDumper::dumpAsString($email->getErrors()) . ')'));
                 self::error(['category' => 'saveMessage', 'messageId' => $gmail->getId(), 'model' => $email->getAttributes(), 'error' => $email->getErrors()]);
+                continue;
             }
 
+            $this->logger->log(Message::info('+'));
+            $this->addSavedEmail($gmail->getId());
+            $this->addUsersForNotification($users);
+            $this->processEmail($email);
         }
+
         if ($savedError === false) {
             $this->addProcessedEmail($gmail->getId());
         }
 
     }
 
-    private function getProjectId(): ?int
+    private function processEmail(Email $email): void
     {
-        return null;
+        if ($email->e_lead_id === null && $email->e_case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
+            try {
+                $process = (Yii::createObject(EmailIncomingService::class))->create(
+                    $email->e_id,
+                    $email->e_email_from,
+                    $email->e_email_to,
+                    $email->e_project_id
+                );
+                $email->e_lead_id = $process->leadId;
+                $email->e_case_id = $process->caseId;
+                $email->save(false);
+            } catch (\DomainException $e) {
+                Yii::info(['category' => 'processEmail', 'error' => $e->getMessage()]);
+            } catch (\Throwable $e) {
+                self::error(['category' => 'processEmail', 'error' => $e->getMessage()]);
+            }
+        }
+
+        if ($email->e_case_id) {
+            try {
+                (Yii::createObject(CasesManageService::class))->needAction($email->e_case_id);
+                $job = new CreateSaleFromBOJob();
+                $job->case_id = $email->e_case_id;
+                $job->email = $email->e_email_from;
+                Yii::$app->queue_job->priority(100)->push($job);
+            } catch (\Throwable $throwable) {
+                self::error(['category' => 'addToJobFailed', 'error' => AppHelper::throwableFormatter($throwable)]);
+            }
+        }
     }
 
     private function processProcessedEmails(string $command, array $processedEmailsIds): void
@@ -260,6 +312,13 @@ class GmailService
     private function addEmailTo(string $id): void
     {
         $this->emailsTo[] = $id;
+    }
+
+    private function addUsersForNotification(array $users): void
+    {
+        foreach ($users as $user) {
+            $this->usersForNotification[$user] = $user;
+        }
     }
 
     private function addDebugEmail(string $id, string $category, $message = ''): void

@@ -38,6 +38,26 @@ class EmailAccountController extends Controller
      * @return Response
      * @throws NotFoundHttpException
      */
+    public function actionRemoveAccessToken($id): Response
+    {
+        if (!$account = EmailAccount::findOne($id)) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        $account->removeGmailToken();
+        if ($account->save()) {
+            Yii::$app->session->setFlash('success', 'Access token was successfully removed.');
+        } else {
+            Yii::$app->session->setFlash('error', VarDumper::dumpAsString(['error' => $account->getErrors()]));
+        }
+        return $this->redirect(['email-account/view', 'id' => $account->ea_id]);
+    }
+
+    /**
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     */
     public function actionRequestAccessToken($id): Response
     {
         if (!$account = EmailAccount::findOne($id)) {
