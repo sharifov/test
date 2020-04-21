@@ -1,9 +1,11 @@
 <?php
 /**
- * User: alex.connor
+ * User: alexandr
  * Date: 12/20/18
  * Time: 5:27 PM
  */
+
+
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -28,8 +30,8 @@ echo 'Current UTC: ' . date('Y-m-d H:i:s')."\r\n";
 try {
     //$options = [PDO::ATTR_TIMEOUT => 1, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
     $db = new PDO($config['components']['db']['dsn'], $config['components']['db']['username'], $config['components']['db']['password']); // , $options
-    $db->exec('DELETE FROM user_connection WHERE uc_created_dt <= "' . date('Y-m-d H:i:s', strtotime('-10 minutes')) . '"');
-    $db->exec('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT uc_user_id FROM user_connection)');
+    $db->exec('DELETE FROM user_connection');
+    $db->exec('DELETE FROM user_online');
 } catch (PDOException $e) {
     print 'Error!: ' . $e->getMessage() . "\r\n";
     die();
@@ -44,88 +46,74 @@ $user = [];
 /** @var \Workerman\Connection\TcpConnection[][] $userConnections */
 $userConnections = [];
 
+/** @var \Workerman\Connection\TcpConnection[] $leadConnections */
+$leadConnections = [];
+
+/** @var \Workerman\Connection\TcpConnection[] $caseConnections */
+$caseConnections = [];
+
 $connectionsUser = [];
+$connectionsLead = [];
+$connectionsCase = [];
 
-$worker = new Worker('websocket://127.0.0.1:8080');
-$worker->name = 'WebsocketWorker';
-$worker->user = 'www-data';
+$ws_worker = new Worker('websocket://127.0.0.1:8080');
+$ws_worker->name = 'WebsocketWorker';
+$ws_worker->user = 'www-data';
 
-$worker::$pidFile = __DIR__ . '/../console/runtime/worker.pid';
+$ws_worker::$pidFile = __DIR__ . '/../console/runtime/worker.pid';
 
 
-$worker->onWorkerStart = static function() use (&$user, &$userConnections)
+$ws_worker->onWorkerStart = function() use (&$user, &$userConnections, &$leadConnections, &$caseConnections)
 {
 
     $inner_tcp_worker = new Worker('tcp://127.0.0.1:1234');
     $inner_tcp_worker->name = 'TcpWorker';
     //$inner_tcp_worker->user = 'www-data';
 
-    $inner_tcp_worker->onMessage = static function(\Workerman\Connection\TcpConnection $connection, $data) use (&$userConnections)
+    $inner_tcp_worker->onMessage = function(\Workerman\Connection\TcpConnection $connection, $data) use (&$user, &$userConnections, &$leadConnections, &$caseConnections)
     {
 
         //$connection->send('Hello '.$data);
         $data = @json_decode($data);
 
-        // Send message
+        // Send message - userId
         if ($data) {
-            if(!empty($data->user_id)) {
+            if(isset($data->user_id) && $data->user_id) {
 
-
-
-                $sqlQuery = 'SELECT DISTINCT connection_id FROM user_connection WHERE uc_user_id = :user_id';
-
-                $sqlData = [
-                    'user_id'    => $data->user_id,
-                ];
-
-                $stmt= $db->prepare($sqlQuery);
-                $stmt->execute($sqlData);
-                $connectionList = $stmt->fetchAll();
-
-                if (!empty($connectionList)) {
-                    foreach ($connectionList as $item) {
-                        if (!empty($item['uc_connection'])) {
-                            $wc = unserialize($item['uc_connection']);
+                if ($data->multiple) {
+                    if (isset($userConnections[$data->user_id]) && is_array($userConnections[$data->user_id])) {
+                        foreach ($userConnections[$data->user_id] as $wc) {
                             $wc->send(json_encode($data->data));
-                            echo '> send one message to con: "' . $wc->id . '", user: ' . $data->user_id . "\r\n";
+                            echo '>> send multiple messages to con: "' . $wc->id . '", user: ' . $data->user_id . "\r\n";
                         }
                     }
-                }
 
-//                if ($data->multiple) {
-//                    if (isset($userConnections[$data->user_id]) && is_array($userConnections[$data->user_id])) {
-//                        foreach ($userConnections[$data->user_id] as $wc) {
-//                            $wc->send(json_encode($data->data));
-//                            echo '>> send multiple messages to con: "' . $wc->id . '", user: ' . $data->user_id . "\r\n";
-//                        }
-//                    }
-//
-//                } else {
-//
-//                    if (isset($user[$data->user_id]) && $wc = $user[$data->user_id]) {
-//                        $wc->send(json_encode($data->data));
-//                        echo '> send one message to con: "' . $wc->id . '", user: ' . $data->user_id . "\r\n";
-//                    }
-//                }
+                } else {
+
+                    if (isset($user[$data->user_id]) && $wc = $user[$data->user_id]) {
+                        $wc->send(json_encode($data->data));
+                        echo '> send one message to con: "' . $wc->id . '", user: ' . $data->user_id . "\r\n";
+                    }
+                }
             }
 
-//            if(isset($data->lead_id)) {
-//                if (isset($leadConnections[$data->lead_id]) && is_array($leadConnections[$data->lead_id])) {
-//                    foreach ($leadConnections[$data->lead_id] as $wc) {
-//                        $wc->send(json_encode($data->data));
-//                        echo '>> send multiple message to con: "' . $wc->id . '", lead_id: ' . $data->lead_id . "\r\n";
-//                    }
-//                }
-//            }
-//
-//            if(isset($data->case_id)) {
-//                if (isset($caseConnections[$data->case_id]) && is_array($caseConnections[$data->case_id])) {
-//                    foreach ($caseConnections[$data->case_id] as $wc) {
-//                        $wc->send(json_encode($data->data));
-//                        echo '>> send multiple message to con: "' . $wc->id . '", case_id: ' . $data->case_id . "\r\n";
-//                    }
-//                }
-//            }
+            if(isset($data->lead_id)) {
+                if (isset($leadConnections[$data->lead_id]) && is_array($leadConnections[$data->lead_id])) {
+                    foreach ($leadConnections[$data->lead_id] as $wc) {
+                        $wc->send(json_encode($data->data));
+                        echo '>> send multiple message to con: "' . $wc->id . '", lead_id: ' . $data->lead_id . "\r\n";
+                    }
+                }
+            }
+
+            if(isset($data->case_id)) {
+                if (isset($caseConnections[$data->case_id]) && is_array($caseConnections[$data->case_id])) {
+                    foreach ($caseConnections[$data->case_id] as $wc) {
+                        $wc->send(json_encode($data->data));
+                        echo '>> send multiple message to con: "' . $wc->id . '", case_id: ' . $data->case_id . "\r\n";
+                    }
+                }
+            }
 
 
         }
@@ -133,9 +121,9 @@ $worker->onWorkerStart = static function() use (&$user, &$userConnections)
     $inner_tcp_worker->listen();
 };
 
-$worker->onConnect = static function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$connectionsUser, &$db, &$config)
+$ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$caseConnections, &$connectionsUser, &$connectionsLead, &$connectionsCase, &$db, &$config)
 {
-    $connection->onWebSocketConnect = static function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$connectionsUser, &$db, &$config)
+    $connection->onWebSocketConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$caseConnections, &$connectionsUser, &$connectionsLead, &$connectionsCase, &$db, &$config)
     {
 
         date_default_timezone_set('UTC');
@@ -144,21 +132,21 @@ $worker->onConnect = static function(\Workerman\Connection\TcpConnection $connec
         $lead_id = isset($_GET['lead_id']) && $_GET['lead_id'] > 0 ? (int) $_GET['lead_id'] : null;
         $case_id = isset($_GET['case_id']) && $_GET['case_id'] > 0 ? (int) $_GET['case_id'] : null;
 
-//        if($user_id) {
-//            $user[$user_id] = $connection;
-//            $userConnections[$user_id][$connection->id] = $connection;
-//            $connectionsUser[$connection->id] = $user_id;
-//        }
+        if($user_id) {
+            $user[$user_id] = $connection;
+            $userConnections[$user_id][$connection->id] = $connection;
+            $connectionsUser[$connection->id] = $user_id;
+        }
 
-//        if($lead_id) {
-//            $leadConnections[$lead_id][$connection->id] = $connection;
-//            $connectionsLead[$connection->id] = $lead_id;
-//        }
-//
-//        if($case_id) {
-//            $caseConnections[$case_id][$connection->id] = $connection;
-//            $connectionsCase[$connection->id] = $case_id;
-//        }
+        if($lead_id) {
+            $leadConnections[$lead_id][$connection->id] = $connection;
+            $connectionsLead[$connection->id] = $lead_id;
+        }
+
+        if($case_id) {
+            $caseConnections[$case_id][$connection->id] = $connection;
+            $connectionsCase[$connection->id] = $case_id;
+        }
 
 
         echo '+ connect "'.$connection->id.'", ';
@@ -238,11 +226,10 @@ $worker->onConnect = static function(\Workerman\Connection\TcpConnection $connec
             'uc_ip'                     => $ip, //$connection->getRemoteIp(),
             'uc_created_dt'             => date('Y-m-d H:i:s'),
             'uc_case_id'                => $case_id,
-            'uc_connection'             => serialize($connection)
         ];
 
-        $sql = 'INSERT INTO user_connection (uc_connection_id, uc_user_id, uc_lead_id, uc_user_agent, uc_controller_id, uc_action_id, uc_page_url, uc_ip, uc_created_dt, uc_case_id, uc_connection) 
-                VALUES (:uc_connection_id, :uc_user_id, :uc_lead_id, :uc_user_agent, :uc_controller_id, :uc_action_id, :uc_page_url, :uc_ip, :uc_created_dt, :uc_case_id, :uc_connection)';
+        $sql = 'INSERT INTO user_connection (uc_connection_id, uc_user_id, uc_lead_id, uc_user_agent, uc_controller_id, uc_action_id, uc_page_url, uc_ip, uc_created_dt, uc_case_id) 
+                VALUES (:uc_connection_id, :uc_user_id, :uc_lead_id, :uc_user_agent, :uc_controller_id, :uc_action_id, :uc_page_url, :uc_ip, :uc_created_dt, :uc_case_id)';
 
         $uc_id = 0;
 
@@ -280,7 +267,7 @@ $worker->onConnect = static function(\Workerman\Connection\TcpConnection $connec
     };
 };
 
-$worker->onClose = static function(\Workerman\Connection\TcpConnection $connection) use(&$user, &$userConnections, &$connectionsUser, &$db)
+$ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) use(&$user, &$userConnections, &$leadConnections, &$caseConnections, &$connectionsUser, &$connectionsLead, &$connectionsCase, &$db)
 {
     /*$user_id = array_search($connection, $user);
     if($user_id) {
@@ -310,44 +297,68 @@ $worker->onClose = static function(\Workerman\Connection\TcpConnection $connecti
     }
 
 
-//    if(isset($connectionsUser[$connection->id]) && $connectionsUser[$connection->id]) {
-//
-//        $user_id = $connectionsUser[$connection->id];
-//        unset($connectionsUser[$connection->id]);
-//        if(isset($userConnections[$user_id][$connection->id])) {
-//            unset($userConnections[$user_id][$connection->id]);
-//            if(isset($userConnections[$user_id]) && count($userConnections[$user_id]) > 0) {
-//
-//                foreach ($userConnections[$user_id] as $connectionId) {
-//                    $user[$user_id] = $connectionId;
-//                    //break;
-//                }
-//
-//            } else {
-//                if(isset($user[$user_id])) {
-//                    unset($user[$user_id]);
-//                }
-//            }
-//        }
-//
-//        if (!isset($user[$user_id]) || !$user[$user_id]) {
-//            try {
-//                $sql = 'DELETE FROM user_online WHERE uo_user_id = :user_id';
-//                $stmt = $db->prepare($sql);
-//                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-//                $stmt->execute();
-//            } catch (PDOException $e) {
-//                print 'Error!: ' . $e->getMessage() . "\r\n";
-//            }
-//            // echo "not exist uc: " . $user_id . "\r\n";
-//        }
-//
-//
-//
-//        echo '- disconnect "'.$connection->id.'"  user: ' . $user_id . "\r\n";
-//    }
+    if(isset($connectionsUser[$connection->id]) && $connectionsUser[$connection->id]) {
 
-    $db->exec('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT uc_user_id FROM user_connection)');
+        $user_id = $connectionsUser[$connection->id];
+        unset($connectionsUser[$connection->id]);
+        if(isset($userConnections[$user_id][$connection->id])) {
+            unset($userConnections[$user_id][$connection->id]);
+            if(isset($userConnections[$user_id]) && count($userConnections[$user_id]) > 0) {
+
+                foreach ($userConnections[$user_id] as $connectionId) {
+                    $user[$user_id] = $connectionId;
+                    //break;
+                }
+
+            } else {
+                if(isset($user[$user_id])) {
+                    unset($user[$user_id]);
+                }
+            }
+        }
+
+        if (!isset($user[$user_id]) || !$user[$user_id]) {
+            try {
+                $sql = 'DELETE FROM user_online WHERE uo_user_id = :user_id';
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+                $stmt->execute();
+            } catch (PDOException $e) {
+                print 'Error!: ' . $e->getMessage() . "\r\n";
+            }
+            // echo "not exist uc: " . $user_id . "\r\n";
+        }
+
+
+        echo '- disconnect "'.$connection->id.'"  user: ' . $user_id . "\r\n";
+    }
+
+    if(isset($connectionsLead[$connection->id]) && $connectionsLead[$connection->id]) {
+
+        $lead_id = $connectionsLead[$connection->id];
+
+        unset($connectionsLead[$connection->id]);
+
+        if(isset($leadConnections[$lead_id][$connection->id])) {
+            unset($leadConnections[$lead_id][$connection->id]);
+        }
+
+        echo '- disconnect "'.$connection->id.'" lead: ' . $lead_id . "\r\n";
+
+    }
+
+    if(isset($connectionsCase[$connection->id]) && $connectionsCase[$connection->id]) {
+
+        $case_id = $connectionsCase[$connection->id];
+        unset($connectionsCase[$connection->id]);
+
+        if(isset($caseConnections[$case_id][$connection->id])) {
+            unset($caseConnections[$case_id][$connection->id]);
+        }
+
+        echo '- disconnect "'.$connection->id.'" case: ' . $case_id . "\r\n";
+
+    }
 
     $json = json_encode(['connection_id' => $connection->id, 'command' => 'closeConnection']);
 
@@ -356,7 +367,7 @@ $worker->onClose = static function(\Workerman\Connection\TcpConnection $connecti
 
 
 
-$worker->onMessage = static function(\Workerman\Connection\TcpConnection $connection, $data) use (&$connectionsUser)
+$ws_worker->onMessage = function(\Workerman\Connection\TcpConnection $connection, $data) use (&$connectionsUser, &$connectionsLead, &$connectionsCase)
 {
     $dataObj = @json_decode($data);
 
@@ -367,10 +378,10 @@ $worker->onMessage = static function(\Workerman\Connection\TcpConnection $connec
             switch ($dataObj->act) {
                 case 'getUserConnections': $dataResponse = ['command' => 'countUserConnection', 'cnt' => count($connectionsUser)];
                     break;
-//                case 'getLeadConnections': $dataResponse = ['command' => 'countLeadConnection', 'cnt' => count($connectionsLead)];
-//                    break;
-//                case 'getCaseConnections': $dataResponse = ['command' => 'countCaseConnection', 'cnt' => count($connectionsCase)];
-//                    break;
+                case 'getLeadConnections': $dataResponse = ['command' => 'countLeadConnection', 'cnt' => count($connectionsLead)];
+                    break;
+                case 'getCaseConnections': $dataResponse = ['command' => 'countCaseConnection', 'cnt' => count($connectionsCase)];
+                    break;
             }
         }
     }
