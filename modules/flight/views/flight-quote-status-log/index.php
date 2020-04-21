@@ -28,7 +28,15 @@ $this->params['breadcrumbs'][] = $this->title;
 //            ['class' => 'yii\grid\SerialColumn'],
 
             'qsl_id',
-            'qsl_created_user_id',
+            //'qsl_created_user_id',
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'qsl_created_user_id',
+                'relation' => 'qslCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
             'qsl_flight_quote_id',
             'qsl_status_id',
             'qsl_created_dt',

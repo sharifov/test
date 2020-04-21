@@ -33,14 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'dep_id',
-			[
-				'attribute' => 'dep_project_id',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					return $model->depProject ? '<span class="badge">' . Html::encode($model->depProject->name) . '</span>' : '-';
-				},
-				'filter' => \common\models\Project::getList(true),
-				'format' => 'raw',
-			],
+
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'dep_project_id',
+                'relation' => 'depProject',
+            ],
+
             'dep_email',
             [
                 'class' => \common\components\grid\EmailSelect2Column::class,

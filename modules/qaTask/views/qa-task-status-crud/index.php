@@ -3,7 +3,7 @@
 use modules\qaTask\src\grid\columns\QaTaskStatusColumn;
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -41,16 +41,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'ts_enabled',
             ],
             'ts_css_class',
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'ts_created_user_id',
                 'relation' => 'createdUser',
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'ts_updated_user_id',
                 'relation' => 'updatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'ts_created_dt',

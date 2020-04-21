@@ -6,6 +6,7 @@ use common\models\Employee;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use yii\data\ActiveDataProvider;
 use sales\model\callLog\entity\callLog\CallLog;
 
@@ -14,11 +15,15 @@ use sales\model\callLog\entity\callLog\CallLog;
  *
  * @property int|null $lead_id
  * @property int|null $case_id
+ * @property int $clq_queue_time
+ * @property int $clq_access_count
  */
 class CallLogSearch extends CallLog
 {
     public $lead_id;
     public $case_id;
+    public $clq_queue_time;
+    public $clq_access_count;
 
     public function rules(): array
     {
@@ -38,7 +43,7 @@ class CallLogSearch extends CallLog
 
             ['cl_phone_list_id', 'integer'],
 
-            [['cl_id', 'cl_parent_id', 'cl_category_id', 'cl_is_transfer', 'cl_phone_list_id', 'cl_user_id', 'cl_department_id', 'cl_project_id', 'cl_client_id'], 'integer'],
+            [['cl_id', 'cl_group_id', 'cl_category_id', 'cl_is_transfer', 'cl_phone_list_id', 'cl_user_id', 'cl_department_id', 'cl_project_id', 'cl_client_id'], 'integer'],
 
             [['cl_call_sid', 'cl_phone_from', 'cl_phone_to'], 'string'],
 
@@ -50,18 +55,21 @@ class CallLogSearch extends CallLog
             ['case_id', 'integer'],
 
             ['cl_duration', 'integer'],
+
+            [['clq_access_count', 'clq_queue_time'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            [['clq_access_count', 'clq_queue_time'], 'integer'],
         ];
     }
 
     public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find()
-            ->with(['project', 'department', 'phoneList', 'user'])
-            ->joinWith(['callLogLead.lead', 'callLogCase.case']);
+            ->with(['project', 'department', 'phoneList', 'user', 'record'])
+            ->joinWith(['callLogLead.lead', 'callLogCase.case', 'queue']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cl_id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['cl_call_created_dt' => SORT_DESC]],
         ]);
 
         $dataProvider->sort->attributes['lead_id'] = [
@@ -72,6 +80,16 @@ class CallLogSearch extends CallLog
         $dataProvider->sort->attributes['case_id'] = [
             'asc' => ['clc_case_id' => SORT_ASC],
             'desc' => ['clc_case_id' => SORT_DESC],
+        ];
+
+        $dataProvider->sort->attributes['clq_access_count'] = [
+            'asc' => ['clq_access_count' => SORT_ASC],
+            'desc' => ['clq_access_count' => SORT_DESC],
+        ];
+
+        $dataProvider->sort->attributes['clq_queue_time'] = [
+            'asc' => ['clq_queue_time' => SORT_ASC],
+            'desc' => ['clq_queue_time' => SORT_DESC],
         ];
 
         $this->load($params);
@@ -88,10 +106,25 @@ class CallLogSearch extends CallLog
             \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_finished_dt', $this->cl_call_finished_dt, $user->timezone);
         }
 
+        if ($this->clq_queue_time || $this->clq_queue_time === 0) {
+            $query->andWhere(['clq_queue_time' => $this->clq_queue_time]);
+        }
+
+        if ($this->clq_access_count || $this->clq_access_count === 0) {
+            $query->andWhere(['clq_access_count' => $this->clq_access_count]);
+        }
+
+        if ($this->cl_group_id) {
+            $query->andWhere([
+                'OR',
+                ['cl_id' => $this->cl_group_id],
+                ['cl_group_id' => $this->cl_group_id],
+            ]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'cl_id' => $this->cl_id,
-            'cl_parent_id' => $this->cl_parent_id,
             'cl_type_id' => $this->cl_type_id,
             'cl_category_id' => $this->cl_category_id,
             'cl_is_transfer' => $this->cl_is_transfer,

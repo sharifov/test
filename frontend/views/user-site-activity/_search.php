@@ -73,7 +73,9 @@ use yii\widgets\ActiveForm;
             </div>
 
             <div class="col-md-2">
-                <?= $form->field($model, 'usa_user_id') ?>
+                <?= $form->field($model, 'usa_user_id',  ['inputOptions' => [
+                    'class' => 'form-control','id' => 'usaUserId'
+                ]]) ?>
             </div>
 
             <div class="col-md-2">

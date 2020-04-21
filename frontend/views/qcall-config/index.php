@@ -53,13 +53,12 @@ $this->params['breadcrumbs'][] = $this->title;
 //            ],
 
             [
+                'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'qc_updated_user_id',
-                'value' => static function (\common\models\QcallConfig $model) {
-                    return  $model->qcUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->qcUpdatedUser->username) : $model->qc_updated_user_id;
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Employee::getActiveUsersList()
+                'relation' => 'qcUpdatedUser',
+                'placeholder' => 'Select User',
             ],
+
             //'c_created_dt',
 //            [
 //                'attribute' => 'qc_created_dt',

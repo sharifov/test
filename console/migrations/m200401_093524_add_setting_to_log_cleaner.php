@@ -33,7 +33,7 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
             's_value' => json_encode(
                 [
                     'days' => 90,
-                    'limitIteration' => 2000,
+                    'limit' => 2000,
                 ],
                 JSON_THROW_ON_ERROR
             ),

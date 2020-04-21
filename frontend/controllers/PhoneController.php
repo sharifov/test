@@ -14,6 +14,7 @@ use common\models\Project;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\entities\cases\Cases;
+use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -349,12 +350,59 @@ class PhoneController extends FController
             //$call = null;
 
             $firstTransferToNumber = false;
-            $call = Call::find()->andWhere(['c_call_sid' => $sid])->one();
-            if ($call->isGeneralParent()) {
-                if ($call = Call::find()->lastChild($call->c_id)->one()) {
-                    $sid = $call->c_call_sid;
+
+            $originalCall = Call::find()->andWhere(['c_call_sid' => $sid])->one();
+            $originalCall->c_is_transfer = true;
+
+            $lastChild = null;
+
+            $createdUserId = null;
+
+            if ($originalCall->isGeneralParent()) {
+                if ($lastChild = Call::find()->lastChild($originalCall->c_id)->one()) {
+                    $createdUserId = $lastChild->c_created_user_id;
+                    $lastChild->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+                    $lastChild->c_created_user_id = null;
+                    $lastChild->c_is_transfer = true;
+                    $sid = $lastChild->c_call_sid;
                     $firstTransferToNumber = true;
                 }
+            } else {
+                $createdUserId = $originalCall->cParent->c_created_user_id;
+                $originalCall->cParent->c_created_user_id = null;
+                $originalCall->cParent->c_is_transfer = true;
+                $originalCall->cParent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+                if (!$originalCall->cParent->c_group_id) {
+                    $originalCall->cParent->c_group_id = $originalCall->c_id;
+                }
+                if (!$originalCall->cParent->save()) {
+                    Yii::error('Can save parent call', 'PhoneController:actionAjaxCallRedirect');
+                }
+            }
+
+            $groupId = null;
+            if (!$originalCall->c_group_id) {
+                if ($lastChild) {
+                    $groupId = $originalCall->c_id;
+                    $lastChild->c_group_id = $groupId;
+                    $originalCall->c_group_id = $groupId;
+
+                } else {
+                    $groupId = $originalCall->c_id;
+                    $originalCall->c_group_id = $groupId;
+                }
+            }
+
+            if ($createdUserId) {
+                UserStatus::updateIsOnnCall($createdUserId, $groupId);
+            }
+
+            if (!$originalCall->save()) {
+                Yii::error(VarDumper::dumpAsString(['message' => 'Cant save original call', 'errors' => $originalCall->getErrors()]), 'PhoneController:actionAjaxCallRedirect');
+            }
+
+            if ($lastChild && !$lastChild->save()) {
+                Yii::error(VarDumper::dumpAsString(['message' => 'Cant save last child call', 'errors' => $lastChild->getErrors()]), 'PhoneController:actionAjaxCallRedirect');
             }
 
             if (!$from) {
@@ -588,13 +636,62 @@ class PhoneController extends FController
             $data['type'] = $type;
             $data['isTransfer'] = true;
 
+            $groupId = $originCall->c_group_id;
+            $createdUserId = $originCall->c_created_user_id;
+
             if ($originCall->cParent) {
+
+                $originCall->c_is_transfer = true;
+                $originCall->cParent->c_is_transfer = true;
+
+                if (!$originCall->c_group_id) {
+                    $groupId = $originCall->c_id;
+                    $originCall->c_group_id = $groupId;
+                    $originCall->cParent->c_group_id = $groupId;
+                }
+
+                $originCall->cParent->c_created_user_id = null;
+
+                if ($createdUserId) {
+                    UserStatus::updateIsOnnCall($createdUserId, $groupId);
+                }
+
+                if (!$originCall->save()) {
+                    Yii::error('Cant save original call', 'PhoneController:AjaxCallTransfer');
+                }
+                if (!$originCall->cParent->save()) {
+                    Yii::error('Cant save original->parent call', 'PhoneController:AjaxCallTransfer');
+                }
+
                 $callSid = $originCall->cParent->c_call_sid;
                 $result = $communication->redirectCall($callSid, $data, $callbackUrl);
             } else {
                 $childCall = Call::find()->where(['c_parent_id' => $originCall->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
                 if ($childCall) {
+
+                    $originCall->c_is_transfer = true;
+                    $childCall->c_is_transfer = true;
+
+                    if (!$originCall->c_group_id) {
+                        $groupId = $originCall->c_id;
+                        $originCall->c_group_id = $groupId;
+                        $childCall->c_group_id = $groupId;
+                    }
+
+                    $childCall->c_created_user_id = null;
+
+                    if ($createdUserId) {
+                        UserStatus::updateIsOnnCall($createdUserId, $groupId);
+                    }
+
+                    if (!$originCall->save()) {
+                        Yii::error('Cant save original call. Point 2', 'PhoneController:AjaxCallTransfer');
+                    }
+                    if (!$childCall->save()) {
+                        Yii::error('Cant save child call. Point 2', 'PhoneController:AjaxCallTransfer');
+                    }
+
                     $callSid = $childCall->c_call_sid;
                     $result = $communication->redirectCall($callSid, $data, $callbackUrl);
                 } else {

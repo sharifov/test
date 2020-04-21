@@ -22,6 +22,7 @@ use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\callLog\services\CallLogTransferService;
 use sales\model\emailList\entity\EmailList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\repositories\lead\LeadRepository;
@@ -493,6 +494,13 @@ class CommunicationController extends ApiBaseController
 
                 if(!$call->save()) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceRecord:Call:save');
+                } else {
+                    $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+                    if ($logEnable) {
+                        if ($call->c_recording_sid) {
+                            (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
+                        }
+                    }
                 }
 
 //                if ($call->c_lead_id) {
@@ -855,6 +863,8 @@ class CommunicationController extends ApiBaseController
                 $call->c_project_id = $parentCall->c_project_id;
                 $call->c_dep_id = $parentCall->c_dep_id;
                 $call->c_source_type_id = $parentCall->c_source_type_id;
+                $call->c_group_id = $parentCall->c_group_id;
+                $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
 
                 if ($parentCall->callUserGroups && !$call->callUserGroups) {
                     foreach ($parentCall->callUserGroups as $cugItem) {
@@ -958,6 +968,8 @@ class CommunicationController extends ApiBaseController
                 $call->c_lead_id = $parentCall->c_lead_id;
                 $call->c_case_id = $parentCall->c_case_id;
                 $call->c_client_id = $parentCall->c_client_id;
+                $call->c_group_id = $parentCall->c_group_id;
+                $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
 
                 $call->c_created_user_id = $parentCall->c_created_user_id;
 

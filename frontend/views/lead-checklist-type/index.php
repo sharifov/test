@@ -58,12 +58,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
-            [
+            /*[
                 'attribute' => 'lct_updated_user_id',
                 'value' => static function (\common\models\LeadChecklistType $model) {
                     return  $model->lctUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->lctUpdatedUser->username) : $model->lct_updated_user_id;
                 },
                 'format' => 'raw'
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'lct_updated_user_id',
+                'relation' => 'lctUpdatedUser',
+                'placeholder' => 'Select User',
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

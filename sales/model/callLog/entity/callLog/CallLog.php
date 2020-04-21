@@ -15,13 +15,12 @@ use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\phoneList\entity\PhoneList;
 use yii\db\ActiveQuery;
-use yii\db\Query;
 
 /**
  * This is the model class for table "{{%call_log}}".
  *
  * @property int $cl_id
- * @property int|null $cl_parent_id
+ * @property int|null $cl_group_id
  * @property string|null $cl_call_sid
  * @property int|null $cl_type_id
  * @property int|null $cl_category_id
@@ -80,7 +79,7 @@ class CallLog extends \yii\db\ActiveRecord
                 ['cl_phone_from', 'cl_phone_to'], PhoneValidator::class, 'allowClientSellerNumbers' => true, 'stringMax' => 18, 'boralesValidatorEnable' => false
             ],
 
-            [['cl_parent_id', 'cl_project_id', 'cl_client_id'], 'integer'],
+            [['cl_group_id', 'cl_project_id', 'cl_client_id'], 'integer'],
 
             ['cl_status_id', 'integer'],
             ['cl_status_id', 'in', 'range' => array_keys(CallLogStatus::getList())],
@@ -102,7 +101,7 @@ class CallLog extends \yii\db\ActiveRecord
             ['cl_department_id', 'integer'],
             ['cl_department_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['cl_department_id' => 'dep_id']],
 
-            [['cl_parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['cl_parent_id' => 'cl_id']],
+//            [['cl_group_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['cl_group_id' => 'cl_id']],
 
             [['cl_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cl_project_id' => 'id']],
         ];
@@ -112,7 +111,7 @@ class CallLog extends \yii\db\ActiveRecord
     {
         return [
             'cl_id' => 'ID',
-            'cl_parent_id' => 'Parent ID',
+            'cl_group_id' => 'Group ID',
             'cl_call_sid' => 'Call Sid',
             'cl_type_id' => 'Type',
             'cl_category_id' => 'Category',
@@ -146,12 +145,12 @@ class CallLog extends \yii\db\ActiveRecord
 
     public function getParent(): ActiveQuery
     {
-        return $this->hasOne(static::class, ['cl_id' => 'cl_parent_id']);
+        return $this->hasOne(static::class, ['cl_id' => 'cl_group_id']);
     }
 
     public function getChildren(): ActiveQuery
     {
-        return $this->hasMany(static::class, ['cl_parent_id' => 'cl_id']);
+        return $this->hasMany(static::class, ['cl_group_id' => 'cl_id']);
     }
 
     public function getPhoneList(): ActiveQuery
@@ -202,7 +201,7 @@ class CallLog extends \yii\db\ActiveRecord
 	public function getChildCalls(): array
 	{
 		return (new ActiveQuery($this))
-			->where(['cl_parent_id' => $this->cl_id])
+			->where(['cl_group_id' => $this->cl_id])
 			->orWhere(['cl_id' => $this->cl_id])
 			->orderBy(['cl_call_created_dt' => SORT_ASC])->all();
 	}

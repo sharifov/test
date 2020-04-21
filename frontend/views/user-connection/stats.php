@@ -50,14 +50,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
                 ],
 
-
-                [
+                /*[
                     'attribute' => 'username',
                     'value' => static function (\common\models\Employee $model) {
                         return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
                     },
                     'format' => 'raw'
-                ],
+                ],*/
+
+               'username:userName',
 
                 [
                     //'attribute' => 'username',

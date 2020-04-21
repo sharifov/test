@@ -11,6 +11,7 @@ use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
 use sales\events\call\CallCreatedEvent;
 use sales\model\call\entity\call\events\CallEvents;
+use sales\model\callLog\services\CallLogTransferService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -23,6 +24,7 @@ use DateTime;
 use common\components\ChartTools;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use DateTimeZone;
@@ -64,6 +66,9 @@ use Locale;
  * @property string $c_from_country
  * @property string $c_from_state
  * @property string $c_from_city
+ * @property bool $c_is_transfer
+ * @property string $c_queue_start_dt
+ * @property int|null $c_group_id
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
@@ -213,7 +218,7 @@ class Call extends \yii\db\ActiveRecord
 
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
-            [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id'], 'default', 'value' => null],
+            [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id', 'c_call_duration'], 'default', 'value' => null],
 
             [['c_is_new'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
@@ -230,6 +235,13 @@ class Call extends \yii\db\ActiveRecord
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
             [['c_parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['c_parent_id' => 'c_id']],
             [['c_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['c_project_id' => 'id']],
+
+            ['c_is_transfer', 'default', 'value' => false],
+            ['c_is_transfer', 'boolean'],
+
+            ['c_queue_start_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['c_group_id', 'integer'],
         ];
     }
 
@@ -268,7 +280,10 @@ class Call extends \yii\db\ActiveRecord
             'c_client_id' => 'Client',
             'c_status_id' => 'Status ID',
             'c_parent_id' => 'Parent ID',
-            'c_recording_sid' => 'Recording SID'
+            'c_recording_sid' => 'Recording SID',
+            'c_is_transfer' => 'Transfer',
+            'c_queue_start_dt' => 'Queue start dt',
+            'c_group_id' => 'Group ID',
         ];
     }
 
@@ -760,16 +775,35 @@ class Call extends \yii\db\ActiveRecord
                 }
 
                 if ((int)$this->c_source_type_id !== self::SOURCE_CONFERENCE_CALL && $this->isIn()) {
-                    if (!$this->c_parent_id) {
-                        $isCallUserAccepted = CallUserAccess::find()->where([
-                            'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
-                            'cua_call_id' => $this->c_id
-                        ])->exists();
-
-                        if (!$isCallUserAccepted && !$this->isDeclined()) {
-                            $this->c_status_id = self::STATUS_NO_ANSWER;
-                            self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+                    /** @var Call $parent */
+                    if (!$this->c_parent_id || (($parent = self::find()->andWhere(['c_id' => $this->c_parent_id])->one()) && $parent->isOut())) {
+//                        $isCallUserAccepted = CallUserAccess::find()->where([
+//                            'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
+//                            'cua_call_id' => $this->c_id
+//                        ])->exists();
+//
+//                        if (!$isCallUserAccepted && !$this->isDeclined()) {
+//                            $this->c_status_id = self::STATUS_NO_ANSWER;
+//                            self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+//                        }
+                        if (!$this->isDeclined()) {
+                            /** @var Call $lastChild */
+                            $lastChild = self::find()->andWhere(['c_parent_id' => $this->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+                            if (
+                                $lastChild === null
+                                || (
+                                    $lastChild
+                                    && $lastChild->c_created_user_id != null
+                                    && (
+                                        $this->c_created_user_id == null || $this->c_created_user_id != $lastChild->c_created_user_id
+                                    )
+                                )
+                            ) {
+                                $this->c_status_id = self::STATUS_NO_ANSWER;
+                                self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+                            }
                         }
+
                     }
                 }
 
@@ -1032,6 +1066,20 @@ class Call extends \yii\db\ActiveRecord
 //        }
 
         Notifications::pingUserMap();
+
+        $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+        if ($logEnable) {
+            $isChangedTwStatus = isset($changedAttributes['c_call_status']);
+            if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
+                (Yii::createObject(CallLogTransferService::class))->transfer($this);
+            }
+        }
+
+    }
+
+    public function isTwFinishStatus(): bool
+    {
+        return $this->isCompletedTw() || $this->isBusyTw() || $this->isNoAnswerTw() || $this->isFailedTw() || $this->isCanceledTw();
     }
 
     /**
@@ -1562,6 +1610,9 @@ class Call extends \yii\db\ActiveRecord
      */
     public function setStatusQueue(): int
     {
+        if (!$this->isStatusQueue()) {
+            $this->c_queue_start_dt = date('Y-m-d H:i:s');
+        }
         return $this->c_status_id = self::STATUS_QUEUE;
     }
 
@@ -1677,9 +1728,16 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isTransfer(): bool
     {
-        return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
+        return $this->c_is_transfer ? true : false;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSourceTransfer(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
+    }
 
     /**
      * @return bool

@@ -3,7 +3,6 @@
 use common\components\grid\BooleanColumn;
 use common\components\grid\department\DepartmentColumn;
 use common\models\Employee;
-use sales\access\EmployeeProjectAccess;
 use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -18,7 +17,6 @@ $this->title = 'User Project Params';
 $this->params['breadcrumbs'][] = $this->title;
 
 $userList = [];
-$projectList = [];
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
@@ -28,9 +26,6 @@ if ($user->isAdmin()) {
 } else {
     $userList = \common\models\Employee::getListByUserId($user->id);
 }
-
-$projectList = EmployeeProjectAccess::getProjects($user->id);
-
 
 ?>
 <div class="user-project-params-index">
@@ -60,18 +55,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             ],
 
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'upp_project_id',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    return $model->uppProject ? ''.$model->uppProject->name.'' : '-';
-                },
-                'filter' => $projectList
-                //'format' => 'raw'
-                //'contentOptions' => ['class' => 'text-right']
+                'relation' => 'uppProject',
             ],
+
             ['class' => DepartmentColumn::class, 'attribute' => 'upp_dep_id', 'relation' => 'uppDep'],
 
-            //'upp_user_id',
-            //'upp_project_id',
             'upp_email:email',
             [
                 'class' => \common\components\grid\EmailSelect2Column::class,

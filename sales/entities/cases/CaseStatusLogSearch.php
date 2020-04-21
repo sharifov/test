@@ -46,6 +46,8 @@ class CaseStatusLogSearch extends CaseStatusLog
 
             ['csl_owner_id', 'integer'],
 
+            ['csl_created_user_id', 'integer'],
+
             ['csl_case_id', 'integer'],
 
             [['csl_start_dt', 'csl_end_dt'], 'string'],
@@ -88,6 +90,7 @@ class CaseStatusLogSearch extends CaseStatusLog
             'csl_from_status' => $this->csl_from_status,
             'csl_to_status' => $this->csl_to_status,
             'csl_owner_id' => $this->csl_owner_id,
+            'csl_created_user_id' => $this->csl_created_user_id,
         ]);
 
         if ($this->created_date_from || $this->created_date_to) {

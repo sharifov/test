@@ -38,6 +38,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Employee::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'uc_user_id',
+                'relation' => 'ucUser',
+                'placeholder' => 'Select User',
             ],
             [
                 'attribute' => 'uc_sub_list',

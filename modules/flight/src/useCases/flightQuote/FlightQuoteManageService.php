@@ -226,11 +226,11 @@ class FlightQuoteManageService
 				'markup' => $price->markup,
 			];
 		}
-		$itinerary = ArrayHelper::toArray($form->itinerary);
-		$quote['trips'][] = [
-			'segments' => $itinerary,
-			'duration' => @array_sum(ArrayHelper::getColumn($itinerary, 'duration'))
-		];
+//		$itinerary = ArrayHelper::toArray($form->itinerary);
+
+		$trips = FlightQuoteHelper::getTripsSegmentsData($form->reservationDump, $form->cabin, (int)$form->tripType);
+
+		$quote['trips'] = $trips;
 
 		return $quote;
 	}

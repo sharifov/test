@@ -71,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'n_title',
                 'value' => static function (\common\models\Notifications $model) {
-                    return Html::a($model->n_title, ['/notifications/view2', 'id' => $model->n_id]);
+                    return Html::a($model->n_title, ['/notifications/view2', 'id' => $model->n_id], ['data-pjax' => 0]);
                 },
                 'format' => 'raw'
             ],

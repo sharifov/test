@@ -43,7 +43,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'fq_trip_type_id',
             'fq_main_airline',
             'fq_fare_type_id',
-            'fq_created_user_id',
+            //'fq_created_user_id',
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'fq_created_user_id',
+                'relation' => 'fqCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
             'fq_created_expert_id',
             'fq_created_expert_name',
             'fq_reservation_dump:ntext',

@@ -8,7 +8,7 @@ use modules\qaTask\src\grid\columns\QaTaskRatingColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\department\DepartmentColumn;
 use common\components\grid\project\ProjectColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -67,24 +67,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'department',
                 'filter' => $searchModel->getDepartmentList(),
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 't_assigned_user_id',
                 'relation' => 'assignedUser',
-                'filter' => $searchModel->getUserList(),
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 't_created_user_id',
                 'relation' => 'createdUser',
-                'filter' => $searchModel->getUserList(),
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 't_updated_user_id',
                 'relation' => 'updatedUser',
-                'filter' => $searchModel->getUserList(),
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 't_deadline_dt',

@@ -2,7 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\MonthColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -28,27 +28,35 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'up_user_id',
-				'relation' => 'upUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'up_user_id',
+                'relation' => 'upUser',
+                'placeholder' => 'Select User',
+            ],
+
             'up_year',
 			[
 				'class' => MonthColumn::class,
 				'attribute' => 'up_month',
 			],
             'up_performance:percentInteger',
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'up_created_user_id',
-				'relation' => 'upCreatedUser'
-			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'up_updated_user_id',
-				'relation' => 'upUpdatedUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'up_created_user_id',
+                'relation' => 'upCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'up_updated_user_id',
+                'relation' => 'upUpdatedUser',
+                'placeholder' => 'Select User',
+            ],
+
 			[
 				'class' => DateTimeColumn::class,
 				'attribute' => 'up_created_dt',

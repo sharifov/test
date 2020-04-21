@@ -192,7 +192,9 @@ $this->registerJs($js);
             ]
         ],
 
-        [
+        'client_id:client',
+
+        /*[
             'attribute' => 'client_id',
             'value' => static function (Lead $model) {
                 return $model->client_id ? Html::a($model->client_id, ['client/index', 'ClientSearch[id]' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
@@ -204,7 +206,7 @@ $this->registerJs($js);
             'contentOptions' => [
                 'class' => 'text-center'
             ]
-        ],
+        ],*/
         /*[
             // 'attribute' => 'client_id',
             'header' => 'Client name',
@@ -327,16 +329,14 @@ $this->registerJs($js);
             'visible' => !$isAgent,
             'format' => 'raw'
         ],
+
         [
+            'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
-            'value' => static function (Lead $model) {
-                return $model->project ? $model->project->name : '-';
-            },
-            'filter' => $lists->getProjects(),
-            'label' => 'Project'
+            'relation' => 'project',
+            'onlyUserProjects' => true
         ],
 
-        // 'project_id',
         // 'source_id',
         /*[
             'attribute' => 'source_id',
@@ -747,9 +747,16 @@ $this->registerJs($js);
 
     <?php Pjax::end(); ?>
 
-    <?php
+<?php
 
 $js = <<<JS
+
+    $(document).on('beforeSubmit', '#lead_form', function(event) {
+        let btn = $(this).find('.search_leads_btn');
+        
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading');        
+        btn.prop("disabled", true)
+    });
 
     $(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
@@ -759,6 +766,5 @@ $js = <<<JS
 
 JS;
     $this->registerJs($js, View::POS_READY);
-    ?>
+?>
 
-</div>

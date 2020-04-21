@@ -4,7 +4,7 @@ use modules\product\src\grid\columns\ProductOptionPriceTypeColumn;
 use modules\product\src\grid\columns\ProductTypeColumn;
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -51,16 +51,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => BooleanColumn::class,
                 'attribute' => 'po_enabled',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'po_created_user_id',
                 'relation' => 'poCreatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'po_updated_user_id',
                 'relation' => 'poUpdatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'po_created_dt',

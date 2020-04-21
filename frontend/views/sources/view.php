@@ -39,12 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'default:boolean',
             'hidden:boolean',
-            [
-                'attribute' => 'project_id',
-                'value' => static function (\common\models\Sources $model) {
-                    return $model->project ? $model->project->name : '-';
-                },
-            ],
+            'project_id:projectName',
             'name',
             'cid',
             //'last_update',

@@ -2,11 +2,13 @@
 
 namespace sales\model\user\entity\userStatus;
 
+use common\models\Call;
 use common\models\Employee;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "user_status".
@@ -83,5 +85,24 @@ class UserStatus extends ActiveRecord
     public function getUsUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'us_user_id']);
+    }
+
+    public static function updateIsOnnCall(int $createdUserId, ?int $groupId): void
+    {
+        if (!$user = Employee::findOne($createdUserId)) {
+            return;
+        }
+
+        $activeAnotherCall = Call::find()
+            ->where(['c_created_user_id' => $user->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+            ->andWhere(['<>', 'c_group_id', $groupId])
+            ->exists();
+
+        if (!$activeAnotherCall && $user->userStatus) {
+            $user->userStatus->us_is_on_call = false;
+            if (!$user->userStatus->save()) {
+                Yii::error('Cant update user status', 'UserStatus:updateIsOnnCall');
+            }
+        }
     }
 }

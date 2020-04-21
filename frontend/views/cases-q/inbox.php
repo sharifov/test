@@ -42,13 +42,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cs_id',
                 'label' => 'ID',
             ],
-			[
-				'attribute' => 'cs_project_id',
-				'value' => static function (CasesQSearch $model) {
-					return $model->project ? $model->project->name : '';
-				},
-				'filter' => Project::getList()
-			],
+
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'cs_project_id',
+                'relation' => 'project'
+            ],
+
             [
                 'attribute' => 'cs_subject',
                 'contentOptions' => [

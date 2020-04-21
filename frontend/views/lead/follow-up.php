@@ -275,13 +275,13 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
+
         [
+            'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
-            'value' => static function (Lead $lead) {
-                return $lead->project ? $lead->project->name : '-';
-            },
-            'filter' => $lists->getProjects(),
+            'relation' => 'project'
         ],
+
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',

@@ -9,7 +9,7 @@ use yii\db\ActiveQuery;
  * This is the model class for table "{{%call_log_record}}".
  *
  * @property int $clr_cl_id
- * @property string|null $clr_record_sid
+ * @property string $clr_record_sid
  * @property int|null $clr_duration
  *
  * @property CallLog $log
@@ -32,6 +32,7 @@ class CallLogRecord extends \yii\db\ActiveRecord
 
             ['clr_duration', 'integer'],
 
+            ['clr_record_sid', 'required'],
             ['clr_record_sid', 'string', 'max' => 34],
         ];
     }

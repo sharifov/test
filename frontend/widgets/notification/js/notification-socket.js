@@ -16,7 +16,6 @@ function notificationInit(data) {
         try {
             notificationAddMessage(
                 data['id'],
-                data['url'],
                 data['title'],
                 data['time'],
                 data['message'],
@@ -93,7 +92,7 @@ function notificationIsExist(id) {
     return isExist;
 }
 
-function notificationAddMessage(id, url, title, time, message, type, popup, notifyMessage, notifyDesktopMessage) {
+function notificationAddMessage(id, title, time, message, type, popup, notifyMessage, notifyDesktopMessage) {
     if (notificationIsExist(id)) {
         console.error('Message Id: ' + id + ' already exist on UI list');
         return;
