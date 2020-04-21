@@ -1644,6 +1644,14 @@ class Call extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return int
+     */
+    public function setStatusCompleted(): int
+    {
+        return $this->c_status_id = self::STATUS_COMPLETED;
+    }
+
+    /**
      * @return bool
      */
     public function isStatusNoAnswer(): bool
