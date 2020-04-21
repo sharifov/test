@@ -51,7 +51,7 @@ class LeadFollowUpNotificationsListener
 
         if ($ntf = Notifications::create($newOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-            Notifications::sendSocket('getNewNotification', ['user_id' => $newOwner->id], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $newOwner->id], $dataNotification);
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $newOwner->id . ', lead: ' . $event->lead->id,

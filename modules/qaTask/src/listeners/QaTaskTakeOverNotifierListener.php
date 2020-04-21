@@ -65,7 +65,7 @@ class QaTaskTakeOverNotifierListener
         if ($ntf = Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($oldOwner->id, null, 'getNewNotification', [], true);
             $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-            Notifications::sendSocket('getNewNotification', ['user_id' => $oldOwner->id], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $oldOwner->id], $dataNotification);
         } else {
             Yii::error(
                 'Not created Email notification to employee_id: ' . $oldOwner->id . ', task: ' . $task->t_id,

@@ -21,6 +21,9 @@
  *         'setCookieValidationKey' => [
  *             // list of config files that need to be inserted with automatically generated cookie validation keys
  *         ],
+ *         'setInitConfig' => [
+ *             // list of config files that need to be replace with automatically tags
+ *         ],
  *         'createSymlink' => [
  *             // list of symlinks to be created. Keys are symlinks, and values are the targets.
  *         ],
@@ -46,11 +49,6 @@ return [
             'console/config/main-local.php',
             'webapi/config/main-local.php',
         ],
-//        'setInitConfig' => [
-//            'frontend/config/main-local.php',
-//            'console/config/main-local.php',
-//            'webapi/config/main-local.php',
-//        ],
     ],
     'Development' => [
         'path' => 'dev',
@@ -69,6 +67,47 @@ return [
             'console/config/main-local.php',
             'webapi/config/main-local.php',
         ],
+        'setInitConfig' => [
+            'common/config/main-local.php',
+            'common/config/params-local.php',
+            'frontend/config/main-local.php',
+            'frontend/config/params-local.php',
+            'console/config/main-local.php',
+            'console/config/params-local.php',
+            'webapi/config/main-local.php',
+            'webapi/config/params-local.php',
+            'modules/flight/config/config-local.php',
+            'modules/hotel/config/config-local.php',
+        ],
+    ],
+    'Stage' => [
+        'path' => 'stage',
+        'setWritable' => [
+            'frontend/runtime',
+            'frontend/web/assets',
+            'console/runtime',
+            'webapi/runtime',
+        ],
+        'setExecutable' => [
+            'yii',
+        ],
+        'setCookieValidationKey' => [
+            'frontend/config/main-local.php',
+            'console/config/main-local.php',
+            'webapi/config/main-local.php',
+        ],
+        'setInitConfig' => [
+            'common/config/main-local.php',
+            'common/config/params-local.php',
+            'frontend/config/main-local.php',
+            'frontend/config/params-local.php',
+            'console/config/main-local.php',
+            'console/config/params-local.php',
+            'webapi/config/main-local.php',
+            'webapi/config/params-local.php',
+            'modules/flight/config/config-local.php',
+            'modules/hotel/config/config-local.php',
+        ],
     ],
     'Production' => [
         'path' => 'prod',
@@ -85,6 +124,18 @@ return [
             'frontend/config/main-local.php',
             'console/config/main-local.php',
             'webapi/config/main-local.php',
+        ],
+        'setInitConfig' => [
+            'common/config/main-local.php',
+            'common/config/params-local.php',
+            'frontend/config/main-local.php',
+            'frontend/config/params-local.php',
+            'console/config/main-local.php',
+            'console/config/params-local.php',
+            'webapi/config/main-local.php',
+            'webapi/config/params-local.php',
+            'modules/flight/config/config-local.php',
+            'modules/hotel/config/config-local.php',
         ],
     ],
 ];
