@@ -185,25 +185,30 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 							$caseArray[$case_id] = $case_id;
 						}
 
-                        if (!$email->save()) {
-                            \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
-                        } else {
-                            if ($lead_id === null && $case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
-                                try {
-                                    $emailIncomingService = Yii::createObject(EmailIncomingService::class);
-                                    $process = $emailIncomingService->create(
-                                        $email->e_id,
-                                        $email->e_email_from,
-                                        $email->e_email_to,
-                                        $email->e_project_id
-                                    );
-                                    $email->e_lead_id = $process->leadId;
-                                    $email->e_case_id = $process->caseId;
-                                    $email->save(false);
-                                } catch (\Throwable $e) {
-                                    Yii::error($e->getMessage(), 'ReceiveEmailsJob:EmailIncomingService:create');
+                        try {
+                            if (!$email->save()) {
+                                \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
+                            } else {
+                                if ($lead_id === null && $case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
+                                    try {
+                                        $emailIncomingService = Yii::createObject(EmailIncomingService::class);
+                                        $process = $emailIncomingService->create(
+                                            $email->e_id,
+                                            $email->e_email_from,
+                                            $email->e_email_to,
+                                            $email->e_project_id
+                                        );
+                                        $email->e_lead_id = $process->leadId;
+                                        $email->e_case_id = $process->caseId;
+                                        $email->save(false);
+                                    } catch (\Throwable $e) {
+                                        Yii::error($e->getMessage(), 'ReceiveEmailsJob:EmailIncomingService:create');
+                                    }
                                 }
                             }
+                        } catch (\Throwable $e) {
+                            Yii::error(VarDumper::dumpAsString(['attr' => $email->getAttributes(), 'error' => $e->getMessage()]));
+                            throw $e;
                         }
 
 //                        if ($email->e_case_id && ($case = Cases::findOne($email->e_case_id))) {
