@@ -121,8 +121,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     && isset($res['data']['emails'][0])
                     && $res['data']['emails'][0]
                 ) {
-
+                    
                     foreach ($res['data']['emails'] as $mail) {
+
+                        if ($debug) {
+                            echo '.';
+                        }
 
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
@@ -265,6 +269,9 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //                }
 //            }
         } catch (\Throwable $e) {
+            if ($debug) {
+                echo "error: " . VarDumper::dumpAsString($e);
+            }
             \Yii::error($e, 'ReceiveEmailsJob:execute');
         }
         if ($debug) {
