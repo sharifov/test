@@ -246,7 +246,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     if ($ntf = Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true)) {
                         // Notifications::socket($user_id, null, 'getNewNotification', [], true);
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                        Notifications::sendSocket('getNewNotification', ['user_id' => $user_id], $dataNotification);
+                        Notifications::publish('getNewNotification', ['user_id' => $user_id], $dataNotification);
                     }
                 }
             }

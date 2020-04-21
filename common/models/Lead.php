@@ -2677,7 +2677,7 @@ Reason: {reason}
                         $isSend = true;
                         // Notifications::socket($user->id, null, 'getNewNotification', [], true);
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                        Notifications::sendSocket('getNewNotification', ['user_id' => $user->id], $dataNotification);
+                        Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
                     }
 
 

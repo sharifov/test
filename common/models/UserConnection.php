@@ -26,6 +26,8 @@ use yii\db\ActiveRecord;
  * @property string $uc_created_dt
  * @property int $uc_case_id
  * @property string $uc_connection_uid
+ * @property string $uc_app_instance
+ * @property string $uc_sub_list
  *
  * @property Cases $ucCase
  * @property Lead $ucLead
@@ -51,10 +53,11 @@ class UserConnection extends \yii\db\ActiveRecord
             [['uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id'], 'integer'],
             [['uc_connection_uid'], 'string', 'max' => 30],
             [['uc_connection_uid'], 'unique'],
-            [['uc_user_agent'], 'string', 'max' => 255],
+            [['uc_user_agent', 'uc_sub_list'], 'string', 'max' => 255],
             [['uc_controller_id', 'uc_action_id'], 'string', 'max' => 50],
             [['uc_page_url'], 'string', 'max' => 500],
             [['uc_ip'], 'string', 'max' => 40],
+            [['uc_app_instance'], 'string', 'max' => 20],
             [['uc_created_dt'], 'safe'],
             [['uc_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['uc_case_id' => 'cs_id']],
             [['uc_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['uc_lead_id' => 'id']],
@@ -79,7 +82,9 @@ class UserConnection extends \yii\db\ActiveRecord
             'uc_ip' => 'IP',
             'uc_created_dt' => 'Created Dt',
             'uc_case_id' => 'Case ID',
-            'uc_connection_uid' => 'Connection UID'
+            'uc_connection_uid' => 'Connection UID',
+            'uc_app_instance' => 'App Instance',
+            'uc_sub_list' => 'Subscribe List',
         ];
     }
 
@@ -165,4 +170,27 @@ class UserConnection extends \yii\db\ActiveRecord
         parent::afterDelete();
         NativeEventDispatcher::trigger(UserConnectionEvents::class, UserConnectionEvents::DELETE);
     }
+
+    /**
+     * @param int $userId
+     * @return array|UserConnection|null
+     */
+    public static function getLastUserConnection(int $userId)
+    {
+        return self::find()->select(['uc_id'])->where(['uc_user_id' => $userId])->orderBy(['uc_id' => SORT_DESC])->limit(1)->one();
+    }
+
+    /**
+     * @param int $userId
+     * @return string|null
+     */
+    public static function getLastUserChannel(int $userId): ?string
+    {
+        $uc = self::getLastUserConnection($userId);
+        if ($uc & $uc->uc_id) {
+            return 'con-' . $uc->uc_id;
+        }
+        return null;
+    }
+
 }
