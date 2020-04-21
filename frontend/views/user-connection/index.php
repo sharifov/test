@@ -31,14 +31,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'uc_connection_id',
             'uc_app_instance',
             //'uc_user_id',
-            [
-                'attribute' => 'uc_user_id',
-                'value' => static function (\common\models\UserConnection $model) {
-                    return  ($model->ucUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->ucUser->username) : $model->uc_user_id);
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Employee::getList()
-            ],*/
 
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
