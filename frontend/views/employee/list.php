@@ -118,40 +118,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'attribute' => 'id',
                 'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
             ],
-            [
-                'label' => 'Work Experience',
-                'attribute' => 'experienceMonth',
-                'value' => static function (Employee $model) {
-                    return $model->userProfile ? $model->userProfile->getExperienceMonth() : 0;
-                }
-            ],
-            [
-                'attribute' => 'joinDate',
-                'value' => static function (Employee $model) {
-					return $model->userProfile ? $model->userProfile->up_join_date : null;
-                },
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'joinDate',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd',
-					],
-					'options' => [
-						'autocomplete' => 'off',
-						'placeholder' =>'Choose Date',
-                        'style' => 'width: 150px'
-					],
-				]),
-			],
-             [
-                'label' => '2FA enable',
-                'value' => static function (\common\models\Employee $model) {
-                    return ($model->userProfile && $model->userProfile->up_2fa_enable) ?
-                        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
-                },
-                'format' => 'raw'
-            ],
+
 
             [
                 'class' => ActionColumn::class,
@@ -178,10 +145,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         return Html::a('<span class="fa fa-list"></span>', ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id], ['title' => 'Projects', 'target' => '_blank']);
                     },
                     'groups' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-users"></span>', ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id], ['title' => 'User Groups', 'target' => '_blank']);
+                        return Html::a('<span class="fa fa-users text-info"></span>', ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id], ['title' => 'User Groups', 'target' => '_blank']);
                     },
                     'switch' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-sign-in"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
+                        return Html::a('<span class="fa fa-sign-in text-warning"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
                             'confirm' => 'Are you sure you want to switch user?',
                             //'method' => 'get',
                         ],]);
@@ -237,6 +204,20 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'format' => 'raw'
             ],
 
+            [
+                'label' => 'Call type',
+                'attribute' => 'user_call_type_id',
+                'value' => static function (\common\models\Employee $model) {
+                    $call_type_id = '';
+                    if($model->userProfile && is_numeric($model->userProfile->up_call_type_id)) {
+                        $call_type_id = $model->userProfile->up_call_type_id;
+                    }
+
+                    return \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+                },
+                'format' => 'raw',
+                'filter' => \common\models\UserProfile::CALL_TYPE_LIST
+            ], 
             [
                 'label' => 'Call Ready',
                 'filter' => false,
@@ -346,20 +327,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'format' => 'raw',
                 'filter' => $projectList
             ],*/
-            [
-                'label' => 'Call type',
-                'attribute' => 'user_call_type_id',
-                'value' => static function (\common\models\Employee $model) {
-                    $call_type_id = '';
-                    if($model->userProfile && is_numeric($model->userProfile->up_call_type_id)) {
-                        $call_type_id = $model->userProfile->up_call_type_id;
-                    }
 
-                    return \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-                },
-                'format' => 'raw',
-                'filter' => \common\models\UserProfile::CALL_TYPE_LIST
-            ],
             /*[
                 'label' => 'Sip',
                 'attribute' => 'user_sip',
@@ -537,7 +505,40 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 },
                 'format' => 'raw',
             ],*/
-
+//            [
+//                'label' => 'Work Experience',
+//                'attribute' => 'experienceMonth',
+//                'value' => static function (Employee $model) {
+//                    return $model->userProfile ? $model->userProfile->getExperienceMonth() : 0;
+//                }
+//            ],
+//            [
+//                'attribute' => 'joinDate',
+//                'value' => static function (Employee $model) {
+//                    return $model->userProfile ? $model->userProfile->up_join_date : null;
+//                },
+//                'filter' => DatePicker::widget([
+//                    'model' => $searchModel,
+//                    'attribute' => 'joinDate',
+//                    'clientOptions' => [
+//                        'autoclose' => true,
+//                        'format' => 'yyyy-mm-dd',
+//                    ],
+//                    'options' => [
+//                        'autocomplete' => 'off',
+//                        'placeholder' =>'Choose Date',
+//                        'style' => 'width: 150px'
+//                    ],
+//                ]),
+//            ],
+            [
+                'label' => '2FA enable',
+                'value' => static function (\common\models\Employee $model) {
+                    return ($model->userProfile && $model->userProfile->up_2fa_enable) ?
+                        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
+                },
+                'format' => 'raw'
+            ],
 
             [
                 'attribute' => 'updated_at',
