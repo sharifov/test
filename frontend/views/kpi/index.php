@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
         },
         'filterModel' => $searchModel,
         'columns' => [
-            [
+            /*[
                 'attribute' => 'kh_user_id',
                 'label' => 'Employee',
                 'value' => static function (\common\models\KpiHistory $model) {
@@ -77,7 +77,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => $userList,
                 'visible' => !$isAgent
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'label' => 'Employee',
+                'attribute' => 'kh_user_id',
+                'relation' => 'khUser',
+                'placeholder' => 'Select User',
+                'visible' => !$isAgent
             ],
+
             [
                 'attribute' => 'kh_date_dt',
                 'label' => 'Month-Year',

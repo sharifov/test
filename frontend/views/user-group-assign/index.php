@@ -29,12 +29,19 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             //'ugs_user_id',
-            [
+           /* [
                 'attribute' => 'ugs_user_id',
                 'value' => function(\common\models\UserGroupAssign $model) {
                     return $model->ugsUser ? $model->ugsUser->username : '-' ;
                 },
                 'filter' => \common\models\Employee::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'ugs_user_id',
+                'relation' => 'ugsUser',
+                'placeholder' => 'Select User',
             ],
 
             [

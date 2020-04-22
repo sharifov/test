@@ -2,7 +2,7 @@
 
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
@@ -39,11 +39,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'oup_user_id',
-				'relation' => 'oupUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'oup_user_id',
+                'relation' => 'oupUser',
+                'placeholder' => 'Select User',
+            ],
+
             'oup_percent',
             'oup_amount',
 			[
@@ -54,16 +57,20 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => DateTimeColumn::class,
 				'attribute' => 'oup_updated_dt',
 			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'oup_created_user_id',
-				'relation' => 'oupCreatedUser'
-			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'oup_updated_user_id',
-				'relation' => 'oupUpdatedUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'oup_created_user_id',
+                'relation' => 'oupCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'oup_updated_user_id',
+                'relation' => 'oupUpdatedUser',
+                'placeholder' => 'Select User',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

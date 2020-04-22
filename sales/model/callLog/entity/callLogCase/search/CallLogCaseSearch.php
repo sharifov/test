@@ -10,7 +10,7 @@ class CallLogCaseSearch extends CallLogCase
     public function rules(): array
     {
         return [
-            [['clc_cl_id', 'clc_case_id'], 'integer'],
+            [['clc_cl_id', 'clc_case_id', 'clc_case_status_log_id'], 'integer'],
         ];
     }
 
@@ -31,6 +31,7 @@ class CallLogCaseSearch extends CallLogCase
         $query->andFilterWhere([
             'clc_cl_id' => $this->clc_cl_id,
             'clc_case_id' => $this->clc_case_id,
+            'clc_case_status_log_id' => $this->clc_case_status_log_id,
         ]);
 
         return $dataProvider;

@@ -1,5 +1,6 @@
 <?php
 
+use sales\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -12,8 +13,14 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <div class="col-md-6">
-    <?= $form->field($model, 'n_user_id')->dropDownList(\common\models\Employee::getList()) ?>
+    <div class="col-md-4">
+    <?php /*= $form->field($model, 'n_user_id')->dropDownList(\common\models\Employee::getList())*/ ?>
+
+    <?= $form->field($model, 'n_user_id')->widget(UserSelect2Widget::class, [
+        'data' => $model->n_user_id ? [
+            $model->n_user_id => $model->nUser->username
+        ] : [],
+    ]) ?>
 
     <?= $form->field($model, 'n_type_id')->dropDownList(\common\models\Notifications::getTypeList()) ?>
 

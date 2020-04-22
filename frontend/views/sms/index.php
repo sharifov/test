@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\UserSelect2Column;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
@@ -16,14 +17,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
-
-if($user->isAdmin() || $user->isQa()) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId($user->id);
-    $projectList = \common\models\Project::getListByUser($user->id);
-}
 ?>
 <div class="sms-index">
 
@@ -132,7 +125,7 @@ if($user->isAdmin() || $user->isQa()) {
             ],
 
             //'s_is_new:boolean',
-            's_tw_message_sid',
+
 
             [
                 'attribute' => 's_type_id',
@@ -151,12 +144,21 @@ if($user->isAdmin() || $user->isQa()) {
             ],
 
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 's_project_id',
-                'value' => static function (\common\models\Sms $model) {
-                    return $model->sProject ? $model->sProject->name : '-';
-                },
-                'filter' => $projectList
+                'relation' => 'sProject',
             ],
+
+
+//            [
+//                'attribute' => 's_project_id',
+//                'value' => static function (\common\models\Sms $model) {
+//                    return $model->sProject ? '<span class="badge badge-info">' . Html::encode($model->sProject->name) . '</span>' : '-';
+//                },
+//                'format' => 'raw',
+//                'filter' => $projectList
+//            ],
+
 
             [
                 'attribute' => 's_lead_id',
@@ -192,6 +194,8 @@ if($user->isAdmin() || $user->isQa()) {
                 },
                 'options' => ['style' => 'width: 100px']
             ],
+            's_client_id:client',
+            's_tw_message_sid',
             //'s_sms_data:ntext',
             //'s_type_id',
             //'s_template_type_id',
@@ -252,13 +256,20 @@ if($user->isAdmin() || $user->isQa()) {
             ],*/
 
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 's_created_user_id',
-                'value' => static function (\common\models\Sms $model) {
-                    return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
-                },
-                'format' => 'raw',
-                'filter' => $userList
+                'relation' => 'sCreatedUser',
+                'placeholder' => ''
             ],
+
+//            [
+//                'attribute' => 's_created_user_id',
+//                'value' => static function (\common\models\Sms $model) {
+//                    return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
+//                },
+//                'format' => 'raw',
+//                'filter' => $userList
+//            ],
             [
                 'attribute' => 's_created_dt',
                 'value' => static function (\common\models\Sms $model) {

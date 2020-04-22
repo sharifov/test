@@ -105,14 +105,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]),
             ],
 
-            [
+            /*[
                 'label' => 'Employee',
                 'attribute' => 'lce_agent_user_id',
                 'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->lceAgentUser ? $model->lceAgentUser->username : '-';
                 },
                 'filter' => \common\models\Employee::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'label' => 'Employee',
+                'attribute' => 'lce_agent_user_id',
+                'relation' => 'lceAgentUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'label' => 'User Role',
                 'attribute' => 'employeeRole',

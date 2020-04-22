@@ -570,6 +570,7 @@ class CasesController extends FController
 
 
         $dataProviderCommunication = $this->getCommunicationDataProvider($model);
+        $dataProviderCommunicationLog = $this->getCommunicationLogDataProvider($model);
 
         if (!Yii::$app->request->isAjax || !Yii::$app->request->get('page')) {
             $pageCount = ceil($dataProviderCommunication->totalCount / $dataProviderCommunication->pagination->pageSize) - 1;
@@ -577,6 +578,12 @@ class CasesController extends FController
                 $pageCount = 0;
             }
             $dataProviderCommunication->pagination->page = $pageCount;
+
+			$pageCount = ceil($dataProviderCommunicationLog->totalCount / $dataProviderCommunicationLog->pagination->pageSize) - 1;
+			if ($pageCount < 0) {
+				$pageCount = 0;
+			}
+			$dataProviderCommunicationLog->pagination->page = $pageCount;
         }
 
         // Sale Search
@@ -636,6 +643,7 @@ class CasesController extends FController
             'comForm' => $comForm,
             'enableCommunication' => $enableCommunication,
             'dataProviderCommunication' => $dataProviderCommunication,
+            'dataProviderCommunicationLog' => $dataProviderCommunicationLog,
             'isAdmin' => $isAdmin,
 
             'saleSearchModel' => $saleSearchModel,
@@ -697,6 +705,41 @@ class CasesController extends FController
 
         return $dataProviderCommunication;
     }
+
+    private function getCommunicationLogDataProvider(Cases $model): ActiveDataProvider
+	{
+		$query1 = (new \yii\db\Query())
+			->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
+			->from('email')
+			->where(['e_case_id' => $model->cs_id]);
+
+		$query2 = (new \yii\db\Query())
+			->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
+			->from('sms')
+			->where(['s_case_id' => $model->cs_id]);
+
+		$query3 = (new \yii\db\Query())
+			->select(['id' => new Expression('if (cl_group_id is null, cl_id, cl_group_id)')])
+			->addSelect(['type' => new Expression('"voice"')])
+			->addSelect(['case_id' => 'call_log_case.clc_case_id', 'created_dt' => 'MIN(call_log.cl_call_created_dt)'])
+			->from('call_log_case')
+			->innerJoin('call_log', 'call_log.cl_id = call_log_case.clc_cl_id')
+			->where(['clc_case_id' => $model->cs_id])
+			->orderBy(['created_dt' => SORT_ASC])
+			->groupBy(['id', 'type', 'case_id']);
+
+		$unionQuery = (new \yii\db\Query())
+			->from(['union_table' => $query1->union($query2)->union($query3)])
+			->orderBy(['created_dt' => SORT_ASC]);
+
+
+		return new ActiveDataProvider([
+			'query' => $unionQuery,
+			'pagination' => [
+				'pageSize' => 10,
+			],
+		]);
+	}
 
     /**
      * @return array
@@ -882,18 +925,24 @@ class CasesController extends FController
 
     /**
      * @param $gid
+     * @param $is_over
      * @return Response
      * @throws NotFoundHttpException
      */
-    public function actionTake($gid): Response
+    public function actionTake($gid, $is_over = false): Response
     {
         $gId = (string) $gid;
+        $isOver = (bool)$is_over;
         $userId = Yii::$app->user->id;
         $case = $this->findModelByGid($gId);
         try {
             $this->caseTakeGuard->guard($case);
             $user = $this->userRepository->find($userId);
-            $this->casesManageService->take($case->cs_id, $user->id, $user->id);
+            if ($isOver) {
+                $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id);
+            } else {
+                $this->casesManageService->take($case->cs_id, $user->id, $user->id);
+            }
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());

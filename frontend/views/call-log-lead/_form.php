@@ -10,16 +10,22 @@ use yii\widgets\ActiveForm;
 
 <div class="call-log-lead-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <div class="row">
+        <div class="col-md-4">
+            <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'cll_cl_id')->textInput() ?>
+            <?= $form->field($model, 'cll_cl_id')->textInput() ?>
 
-    <?= $form->field($model, 'cll_lead_id')->textInput() ?>
+            <?= $form->field($model, 'cll_lead_id')->textInput() ?>
 
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+            <?= $form->field($model, 'cll_lead_flow_id')->textInput() ?>
+
+            <div class="form-group">
+                <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+            </div>
+
+            <?php ActiveForm::end(); ?>
+        </div>
     </div>
-
-    <?php ActiveForm::end(); ?>
 
 </div>

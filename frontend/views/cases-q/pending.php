@@ -33,13 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'cs_id',
             'cs_gid',
+
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'cs_project_id',
-                'value' => static function (Cases $model) {
-                    return $model->project ? $model->project->name : '';
-                },
-//                'filter' => Project::getList()
+                'relation' => 'project'
             ],
+
             [
                 'attribute' => 'cs_subject',
                 'contentOptions' => [

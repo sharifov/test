@@ -66,12 +66,12 @@ class LeadChecklistSearch extends LeadChecklist
             return $dataProvider;
         }
 
-        if(empty($this->lc_created_dt) && isset($params['LeadChecklistSearch']['date_range'])){
+        if(isset($params['LeadChecklistSearch']['date_range'])){
             $query->andFilterWhere(['>=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
-        if (isset($params['LeadChecklistSearch']['lc_created_dt'])) {
+        if ($this->lc_created_dt) {
             $query->andFilterWhere(['>=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lc_created_dt))])
                 ->andFilterWhere(['<=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lc_created_dt) + 3600 *24)]);
         }
@@ -114,7 +114,7 @@ class LeadChecklistSearch extends LeadChecklist
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 

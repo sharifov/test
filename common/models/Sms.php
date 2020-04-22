@@ -328,6 +328,7 @@ class Sms extends \yii\db\ActiveRecord
             's_created_dt' => 'Created Dt',
             's_updated_dt' => 'Updated Dt',
             's_case_id' => 'Case ID',
+            's_client_id' => 'Client ID',
         ];
     }
 

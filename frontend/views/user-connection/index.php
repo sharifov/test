@@ -28,15 +28,23 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
             'uc_id',
             'uc_connection_id',
-            //'uc_user_id',
-            [
+
+            /*[
                 'attribute' => 'uc_user_id',
                 'value' => static function (\common\models\UserConnection $model) {
                     return  ($model->ucUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->ucUser->username) : $model->uc_user_id);
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Employee::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'uc_user_id',
+                'relation' => 'ucUser',
+                'placeholder' => 'Select User',
             ],
+
             'uc_lead_id',
             'uc_case_id',
             'uc_user_agent',

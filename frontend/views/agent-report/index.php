@@ -48,12 +48,12 @@ $this->registerJs("$(function() {
 
             'columns' =>
             [
-                [
-                    'label' => 'Agent ID',
-                    'attribute' => 'id',
-                    'filter' => false,
-                    ],
                     [
+                        'label' => 'Agent ID',
+                        'attribute' => 'id',
+                        'filter' => false,
+                    ],
+                    /*[
                         'label' => 'Agent',
                         'attribute' => 'username',
                         'value' => static function ($data) {
@@ -61,7 +61,10 @@ $this->registerJs("$(function() {
                         },
                         'format' => 'raw',
                         'filter' => true,
-                    ],
+                    ],*/
+
+                    'username:userName',
+
                     [
                         'label' => 'Inbound calls',
                         'attribute' => 'inbound_calls',

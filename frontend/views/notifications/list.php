@@ -35,7 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
 
     </p>
-    <?php Pjax::begin(); ?>    <?= GridView::widget([
+    <?php Pjax::begin(); ?>
+    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'options' => ['class' => 'table-responsive'],
@@ -70,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'n_title',
                 'value' => static function (\common\models\Notifications $model) {
-                    return Html::a($model->n_title, ['/notifications/view2', 'id' => $model->n_id]);
+                    return Html::a($model->n_title, ['/notifications/view2', 'id' => $model->n_id], ['data-pjax' => 0]);
                 },
                 'format' => 'raw'
             ],
@@ -143,7 +144,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons' => [
                     'view2' => function ($url, $model) {
                         return Html::a('<i class="glyphicon glyphicon-search"></i>', $url, [
-                            'title' => Yii::t('notifications', 'View'),
+                            'title' => Yii::t('notifications', 'View'), 'data-pjax' => 0
                         ]);
                     },
                     'soft-delete' => function ($url, $model) {

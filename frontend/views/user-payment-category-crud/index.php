@@ -2,7 +2,7 @@
 
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -37,16 +37,21 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => BooleanColumn::class,
 				'attribute' => 'upc_enabled',
 			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'upc_created_user_id',
-				'relation' => 'upcCreatedUser'
-			],
+
             [
-				'class' => UserColumn::class,
-				'attribute' => 'upc_updated_user_id',
-				'relation' => 'upcUpdatedUser'
-			],
+                'class' => UserSelect2Column::class,
+                'attribute' => 'upc_created_user_id',
+                'relation' => 'upcCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'upc_updated_user_id',
+                'relation' => 'upcUpdatedUser',
+                'placeholder' => 'Select User',
+            ],
+
 			[
 				'class' => DateTimeColumn::class,
 				'attribute' => 'upc_created_dt',

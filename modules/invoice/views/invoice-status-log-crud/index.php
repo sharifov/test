@@ -5,7 +5,7 @@ use modules\invoice\src\grid\columns\InvoiceStatusActionColumn;
 use modules\invoice\src\grid\columns\InvoiceStatusColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\DurationColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -67,11 +67,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => InvoiceStatusActionColumn::class,
                 'attribute' => 'invsl_action_id'
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'invsl_created_user_id',
                 'relation' => 'createdUser',
+                'placeholder' => 'Select User',
             ],
+
             ['class' => ActionColumn::class],
         ],
     ]) ?>

@@ -3,7 +3,7 @@
 use modules\lead\src\grid\columns\LeadColumn;
 use modules\product\src\grid\columns\ProductTypeColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -48,16 +48,21 @@ $this->params['breadcrumbs'][] = $this->title;
             'pr_service_fee_percent',
             'pr_market_price',
             'pr_client_budget',
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'pr_created_user_id',
                 'relation' => 'prCreatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'pr_updated_user_id',
                 'relation' => 'prUpdatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pr_created_dt',

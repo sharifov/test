@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\UserSelect2Column;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -66,13 +67,21 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'n_id',
             //'n_user_id',
+//            [
+//                'attribute' => 'n_user_id',
+//                'value' => function(\common\models\Notifications $model){
+//                    return $model->nUser->username;
+//                },
+//                'filter' => \common\models\Employee::getList()
+//            ],
+
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'n_user_id',
-                'value' => function(\common\models\Notifications $model){
-                    return $model->nUser->username;
-                },
-                'filter' => \common\models\Employee::getList()
+                'relation' => 'nUser',
+                'placeholder' => ''
             ],
+
             [
                 'attribute' => 'n_type_id',
                 'value' => function(\common\models\Notifications $model){

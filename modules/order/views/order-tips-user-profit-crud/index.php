@@ -2,7 +2,7 @@
 
 use modules\order\src\grid\columns\OrderColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -35,11 +35,14 @@ $this->params['breadcrumbs'][] = $this->title;
 				'attribute' => 'otup_order_id',
 				'relation' => 'otupOrder',
 			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'otup_user_id',
-				'relation' => 'otupUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'otup_user_id',
+                'relation' => 'otupUser',
+                'placeholder' => 'Select User',
+            ],
+
             'otup_percent:percentInteger',
             'otup_amount',
 			[
@@ -50,16 +53,20 @@ $this->params['breadcrumbs'][] = $this->title;
 				'class' => DateTimeColumn::class,
 				'attribute' => 'otup_updated_dt',
 			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'otup_created_user_id',
-				'relation' => 'otupCreatedUser'
-			],
-			[
-				'class' => UserColumn::class,
-				'attribute' => 'otup_updated_user_id',
-				'relation' => 'otupCreatedUser'
-			],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'otup_created_user_id',
+                'relation' => 'otupCreatedUser',
+                'placeholder' => 'Select User',
+            ],
+
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'otup_updated_user_id',
+                'relation' => 'otupCreatedUser',
+                'placeholder' => 'Select User',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

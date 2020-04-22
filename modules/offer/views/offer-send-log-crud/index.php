@@ -3,7 +3,7 @@
 use modules\offer\src\grid\columns\OfferColumn;
 use modules\offer\src\grid\columns\OfferSendLogTypeColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -46,11 +46,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'ntext',
                 'options' => ['style' => 'width:280px'],
             ],
+
             [
-                'class' => UserColumn::class,
-                'relation' => 'createdUser',
+                'class' => UserSelect2Column::class,
                 'attribute' => 'ofsndl_created_user_id',
+                'relation' => 'createdUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'ofsndl_created_dt',

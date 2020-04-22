@@ -6,6 +6,7 @@ use common\models\Call;
 use common\models\Notifications;
 use common\models\PhoneBlacklist;
 use common\models\UserProjectParams;
+use frontend\widgets\notification\NotificationMessage;
 use sales\repositories\call\CallRepository;
 use sales\services\ServiceFinder;
 use yii\helpers\VarDumper;
@@ -89,7 +90,8 @@ class CallService
                 'Declined Call Id: ' . $call->c_id . ' Reason: Blacklisted',
                 Notifications::TYPE_WARNING, true)
             ) {
-                Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+                $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::sendSocket('getNewNotification', ['user_id' => $user->id], $dataNotification);
             }
         }
 

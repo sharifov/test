@@ -439,6 +439,19 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]');
     }
 
+	/**
+	 * @param $dateTime
+	 * @return string
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function asByUserDateTimeWithSeconds($dateTime): string
+	{
+		if (!$dateTime) {
+			return $this->nullDisplay;
+		}
+		return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i:s]');
+	}
+
     /**
      * @param Employee|int|string|null $value
      * @return string
@@ -546,7 +559,7 @@ class Formatter extends \yii\i18n\Formatter
             throw new \InvalidArgumentException('value must be Project|int|string|null');
         }
 
-        return Html::tag('span', Html::encode($name));
+        return Html::tag('span', Html::encode($name), ['class' => 'badge badge-info']);
     }
 
     public function asPercentInteger($value): string

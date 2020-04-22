@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+use common\components\grid\UserSelect2Column;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SmsTemplateTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -51,12 +52,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'stp_updated_user_id',
-                'value' => static function (\common\models\SmsTemplateType $model) {
-                    return ($model->stpUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->stpUpdatedUser->username) : $model->stp_updated_user_id);
-                },
-                'format' => 'raw'
+                'relation' => 'stpUpdatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'attribute' => 'stp_updated_dt',
                 'value' => static function (\common\models\SmsTemplateType $model) {
@@ -78,12 +79,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'stp_created_user_id',
-                'value' => static function (\common\models\SmsTemplateType $model) {
-                    return  ($model->stpCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->stpCreatedUser->username) : $model->stp_created_user_id);
-                },
-                'format' => 'raw'
+                'relation' => 'stpCreatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'attribute' => 'stp_created_dt',
                 'value' => static function (\common\models\SmsTemplateType $model) {

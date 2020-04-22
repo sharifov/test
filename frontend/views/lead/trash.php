@@ -85,17 +85,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
+
         [
+            'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
-            'value' => static function (\common\models\Lead $model) {
-                return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
-            },
-            'format' => 'raw',
-            'options' => [
-                'style' => 'width:120px'
-            ],
-            'filter' => $lists->getProjects(),
+            'relation' => 'project'
         ],
+
         [
             'attribute' => 'created',
             'label' => 'Pending Time',
@@ -290,7 +286,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'format' => 'raw'
         ],
 
-        [
+        /*[
             //'header' => 'Agent',
             'attribute' => 'employee_id',
             'format' => 'raw',
@@ -298,7 +294,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $lists->getEmployees(),
+        ],*/
+
+        [
+            'class' => \common\components\grid\UserSelect2Column::class,
+            'attribute' => 'employee_id',
+            'relation' => 'employee',
+            'placeholder' => 'Select User',
         ],
+
         /*[
             'attribute' => 'update',
             'label' => 'Last Update',

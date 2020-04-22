@@ -56,15 +56,9 @@ use yii\widgets\DetailView;
                             },
                             'format' => 'raw'
                         ],
+                        'cs_project_id:projectName',
                         [
-                            'attribute' => 'cs_project_id',
-                            'value' => static function (Cases $model) {
-                                return $model->project ? '<span class="badge badge-info">' . $model->project->name .'</span>' : '';
-                            },
-                            'format' => 'raw'
-                        ],
-                        [
-                                'label' => 'Agent',
+                            'label' => 'Agent',
                             'attribute' => 'cs_user_id',
                             'value' => static function (Cases $model) {
                                 return $model->owner ? '<i class="fa fa-user"></i> ' . Html::encode($model->owner->username) : '-';

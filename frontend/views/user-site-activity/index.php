@@ -29,15 +29,23 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
 
             'usa_id',
-            //'usa_user_id',
-            [
+
+           /*[
                 'attribute' => 'usa_user_id',
                 'value' => static function (\frontend\models\UserSiteActivity $model) {
                     return  ($model->usaUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->usaUser->username) : $model->usa_user_id);
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Employee::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'usa_user_id',
+                'relation' => 'usaUser',
+                'placeholder' => 'Select User',
             ],
+
             'usa_request_url',
             'usa_page_url',
             'usa_ip',

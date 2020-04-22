@@ -13,6 +13,8 @@ use sales\auth\Auth;
 use sales\forms\CompositeForm;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\helpers\VarDumper;
 
 /**
  * Class FlightQuoteCreateForm
@@ -58,11 +60,20 @@ class FlightQuoteCreateForm extends CompositeForm
 
 	public $clientSelling;
 
+	private $flight;
+
+	private $warning = false;
+
+	private $warningMessages = [];
+
 	public const ACTION_APPLY_PRICING_INFO = 'apply_pricing';
 	public const ACTION_CALCULATE_PRICES = 'calculate_prices';
+	public const ACTION_CREATE_NEW_PRODUCT = 'create_new_product';
+	public const ACTION_UPDATE_FLIGHT_REQUEST = 'update_flight_request';
 
 	public function __construct(?Flight $flight = null, ?int $creatorId = null, $config = [])
 	{
+		$this->flight = $flight;
 		if ($flight && $creatorId) {
 			$this->tripType = $flight->fl_trip_type_id;
 			$this->cabin = $flight->fl_cabin_class;
@@ -76,13 +87,22 @@ class FlightQuoteCreateForm extends CompositeForm
 		parent::__construct($config);
 	}
 
+	public function scenarios()
+	{
+		$scenarios = parent::scenarios();
+		$scenarios[self::ACTION_CREATE_NEW_PRODUCT] = [
+			'gds', 'pcc', 'tripType', 'cabin', 'validatingCarrier',
+			'fareType', 'reservationDump', 'pricingInfo', 'quoteCreator',
+			'prices', 'recordLocator', 'oldPrices', 'serviceFee'
+		];
+		return $scenarios;
+	}
+
 	public function afterValidate()
 	{
 		if (!empty($this->pricingInfo)) {
 			$this->parsedPricingInfo = FlightQuoteHelper::parsePriceDump($this->pricingInfo);
 		}
-
-		$this->cabin = SearchService::getCabinRealCode($this->cabin);
 	}
 
 	public function internalForms(): array
@@ -107,6 +127,8 @@ class FlightQuoteCreateForm extends CompositeForm
 			['fareType', 'in',  'range' => array_keys(FlightQuote::getFareTypeList())],
 			['cabin', 'in',  'range' => array_keys(Flight::getCabinClassList())],
 			[['reservationDump'], 'checkReservationDump'],
+			[['tripType'], 'checkTripType', 'on' => self::SCENARIO_DEFAULT],
+			[['cabin'], 'checkCabin', 'on' => self::SCENARIO_DEFAULT],
 		];
 	}
 
@@ -115,6 +137,20 @@ class FlightQuoteCreateForm extends CompositeForm
 		$dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, true, $this->itinerary);
 		if (empty($dumpParser)) {
 			$this->addError('reservationDump', 'Incorrect reservation dump!');
+		}
+	}
+
+	public function checkTripType(): void
+	{
+		if ((int)$this->tripType !== $this->flight->fl_trip_type_id) {
+			$this->addWarning('Trip Type is not equal to Origin Trip Type');
+		}
+	}
+
+	public function checkCabin(): void
+	{
+		if ($this->cabin !== $this->flight->fl_cabin_class) {
+			$this->addWarning('Cabin class is not equal to Origin Cabin class');
 		}
 	}
 
@@ -135,5 +171,47 @@ class FlightQuoteCreateForm extends CompositeForm
 				}
 			}
 		}
+	}
+
+	private function addWarning(string $message): void
+	{
+		$this->warningMessages[] = $message;
+	}
+
+	public function hasWarnings(): bool
+	{
+		return $this->warning;
+	}
+
+	public function warningSummary(): string
+	{
+		if ($this->warning) {
+			$title = Html::tag('p', 'There are some warnings; Follow the action below');
+			$warningList = Html::ul($this->warningMessages);
+			return Html::tag('div',$title . $warningList, ['class' => 'alert alert-warning']);
+		}
+		return '';
+	}
+
+	public function validate($attributeNames = null, $clearErrors = true)
+	{
+		$mainValidation = parent::validate($attributeNames, $clearErrors);
+
+		foreach ($this->prices as $key => $price) {
+			if ($price->hasErrors()) {
+				$this->addError('*', $price->getErrorSummary(true)[0]);
+				return false;
+			}
+		}
+
+		if (!$this->hasErrors() && !empty($this->warningMessages)) {
+			$this->warning = true;
+		}
+
+		if (!$this->hasErrors() && !$this->hasWarnings()) {
+			$this->cabin = SearchService::getCabinRealCode($this->cabin);
+		}
+
+		return $mainValidation && !$this->hasWarnings();
 	}
 }

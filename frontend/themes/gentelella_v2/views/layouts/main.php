@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use common\models\Employee;
+use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use yii\helpers\Html;
@@ -38,7 +39,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
         //$this->head();
 
-        $host = 'Sales';
+        $host = 'CRM';
         echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
     ?>
     <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
@@ -124,13 +125,16 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                             </ul>
                         </li>
 
-
-
                         <?php /*php if($isAdmin):*/ ?>
                             <?= frontend\widgets\OnlineConnection::widget() ?>
                             <?php //= frontend\widgets\Notifications::widget() ?>
-                            <?= NotificationWidget::widget(['userId' => Auth::id()]) ?>
-
+                            <?php
+                                if (Yii::$app->params['settings']['notification_web_socket']) {
+                                    echo NotificationSocketWidget::widget(['userId' => Auth::id()]);
+                                } else {
+                                    echo NotificationWidget::widget(['userId' => Auth::id()]);
+                                }
+                            ?>
 
                         <li class="nav-item">
                             <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>
@@ -192,7 +196,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
         <!-- /page content -->
         <!-- footer content -->
         <footer>
-            <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?></p>
+            <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?>, <span title="<?=Yii::$app->params['release']['git_branch'] ?? ''?> : <?=Yii::$app->params['release']['git_hash'] ?? ''?>">v. <?=Yii::$app->params['release']['version'] ?? ''?></p>
             <p class="pull-right"><small><i><?=date('Y-m-d H:i:s')?></i></small></p>
 
             <div class="clearfix"></div>

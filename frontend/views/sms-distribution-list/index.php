@@ -76,13 +76,18 @@ $gridId = 'sms-grid-id';
 
             'sdl_id',
 //            'sdl_project_id',
+//            [
+//                'attribute' => 'sdl_project_id',
+//                'value' => static function (SmsDistributionList $model) {
+//                    return $model->sdlProject ? '<span class="label label-default">' . Html::encode($model->sdlProject->name) . '</span>' : '';
+//                },
+//                'format' => 'raw',
+//                'filter' => \common\models\Project::getList()
+//            ],
             [
+                'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'sdl_project_id',
-                'value' => static function (SmsDistributionList $model) {
-                    return $model->sdlProject ? '<span class="label label-default">' . Html::encode($model->sdlProject->name) . '</span>' : '';
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Project::getList()
+                'relation' => 'sdlProject',
             ],
             [
                 'attribute' => 'sdl_status_id',

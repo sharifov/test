@@ -408,12 +408,11 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             },
         ],
 
-
         [
             'header' => 'Project info',
-            'value' => function(\common\models\Lead $model) {
-                return $model->project ? $model->project->name : '-';
-            },
+            'class' => \common\components\grid\project\ProjectColumn::class,
+            'attribute' => 'project_id',
+            'relation' => 'project',
         ],
 
         [

@@ -49,7 +49,7 @@ use yii\log\Logger;
         <br>
         <div class="form-group text-center">
             <?= Html::submitButton('<i class="fa fa-close"></i> Delete logs', [
-                'class' => 'btn btn-primary',
+                'class' => 'btn btn-danger',
                 'data' =>[
                     'confirm' =>'You want to remove logs by selected criteria?'
                 ]

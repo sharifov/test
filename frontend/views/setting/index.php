@@ -73,13 +73,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'filter' => false
             ],
 
-            [
+            /*[
                 'attribute' => 's_updated_user_id',
                 'value' => static function (\common\models\Setting $model) {
                     return ($model->sUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sUpdatedUser->username) : $model->s_updated_user_id);
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Employee::getList()
+            ],*/
+
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 's_updated_user_id',
+                'relation' => 'sUpdatedUser',
+                'placeholder' => 'Select User',
             ],
 
             [

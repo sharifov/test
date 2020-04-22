@@ -3,6 +3,7 @@
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\callLog\entity\callLogLead\search\CallLogLeadSearch */
@@ -33,6 +34,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (CallLogLead $model) {
                     return $model->lead ?: null;
                 }
+            ],
+            [
+                'attribute' => 'cll_lead_flow_id',
+                'value' => static function (CallLogLead $model) {
+                    return Html::a($model->cll_lead_flow_id, Url::to(['/lead-flow/index', 'LeadFlowSearch[id]' => $model->cll_lead_flow_id]));
+                },
+                'format' => 'raw',
             ],
             ['class' => 'yii\grid\ActionColumn'],
         ],

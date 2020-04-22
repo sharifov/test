@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+use common\components\grid\UserSelect2Column;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmailTemplateTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -50,13 +51,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => \common\models\Department::getList()
             ],
+
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'etp_updated_user_id',
-                'value' => static function (\common\models\EmailTemplateType $model) {
-                    return ($model->etpUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->etpUpdatedUser->username) : $model->etp_updated_user_id);
-                },
-                'format' => 'raw'
+                'relation' => 'etpUpdatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'attribute' => 'etp_updated_dt',
                 'value' => static function (\common\models\EmailTemplateType $model) {
@@ -78,12 +80,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'etp_created_user_id',
-                'value' => static function (\common\models\EmailTemplateType $model) {
-                    return  ($model->etpCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->etpCreatedUser->username) : $model->etp_created_user_id);
-                },
-                'format' => 'raw'
+                'relation' => 'etpCreatedUser',
+                'placeholder' => 'Select User',
             ],
+
             [
                 'attribute' => 'etp_created_dt',
                 'value' => static function (\common\models\EmailTemplateType $model) {

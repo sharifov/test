@@ -72,17 +72,11 @@ $this->registerCssFile('/css/style-duplicate.css');
         'l_request_hash',
 
         [
+            'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
-            'value' => static function (\common\models\Lead $model) {
-                return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
-            },
-            'format' => 'raw',
-            'options' => [
-                'style' => 'width:120px'
-            ],
-            'filter' => $lists->getProjects(),
-            //'visible' => ! $isAgent
+            'relation' => 'project'
         ],
+
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
@@ -268,10 +262,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 
                 $content .= sprintf('Cabin: %s', Lead::getCabin($model['cabin']));
 
-
-
                 $parentModel = $model->lDuplicateLead;
-
 
                 $contentParent = '';
                 if($parentModel) {
@@ -281,16 +272,12 @@ $this->registerCssFile('/css/style-duplicate.css');
                     $contentParent .= sprintf('Cabin: %s', Lead::getCabin($parentModel['cabin']));
                 }
 
-
-
-
                 $options = array(
                     'context' => 3,
                     'ignoreNewLines' => false,
                     'ignoreWhitespace' => false,
                     'ignoreCase' => false
                 );
-
 
 
                 if (!is_array($content)) {
@@ -404,7 +391,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             //'format' => 'raw'
         ],
 
-        [
+        /*[
             //'header' => 'Agent',
             'attribute' => 'employee_id',
             'format' => 'raw',
@@ -413,7 +400,16 @@ $this->registerCssFile('/css/style-duplicate.css');
             },
             'filter' => $lists->getEmployees(),
             'visible' => $lists->getEmployees(),
+        ],*/
+
+        [
+            'class' => \common\components\grid\UserSelect2Column::class,
+            'attribute' => 'employee_id',
+            'relation' => 'employee',
+            'placeholder' => 'Select User',
+            'visible' => $lists->getEmployees(),
         ],
+
         /*[
             'attribute' => 'update',
             'label' => 'Last Update',

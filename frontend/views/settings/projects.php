@@ -74,7 +74,7 @@ $this->registerJs($js);
             //'layout' => $template,
             'columns' => [
                 'id',
-                'name',
+                'name:projectName',
                 [
                     'attribute' => 'link',
                     'value' => static function (\common\models\Project $model) {

@@ -3,6 +3,7 @@
 use modules\product\src\grid\columns\ProductColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserColumn;
+use common\components\grid\UserSelect2Column;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -65,20 +66,25 @@ $this->params['breadcrumbs'][] = $this->title;
                     return number_format($model->pq_price * $model->pq_client_currency_rate, 2);
                 }
             ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'pq_owner_user_id',
                 'relation' => 'pqOwnerUser',
+                'placeholder' => 'Select User',
             ],
+
 //            [
 //                'class' => UserColumn::class,
 //                'attribute' => 'pq_created_user_id',
 //                'relation' => 'pqCreatedUser',
 //            ],
+
             [
-                'class' => UserColumn::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'pq_updated_user_id',
                 'relation' => 'pqUpdatedUser',
+                'placeholder' => 'Select User',
             ],
 //            [
 //                'class' => DateTimeColumn::class,
@@ -93,5 +99,4 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
     <?php Pjax::end(); ?>
-
 </div>

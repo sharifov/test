@@ -10,6 +10,7 @@ use common\models\Notifications;
 use common\models\Quote;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
+use frontend\widgets\notification\NotificationMessage;
 use Yii;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -538,7 +539,8 @@ class QuoteController extends ApiBaseController
 
                                 if ($ntf = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true)) {
                                     // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
-                                    Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id]);
+                                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                    Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
                                 }
                             }
                         }
