@@ -1,6 +1,7 @@
 <?php
 namespace webapi\modules\v1\controllers;
 
+use common\components\CommunicationService;
 use common\components\jobs\CallQueueJob;
 use common\components\TwilioClient;
 use common\models\Call;
@@ -274,6 +275,8 @@ class TwilioController extends ApiBaseNoAuthController
      */
     public function actionRedirectCall()
     {
+        /** @var CommunicationService $communication */
+        $communication = Yii::$app->communication;
 
         //$this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
@@ -374,6 +377,8 @@ class TwilioController extends ApiBaseNoAuthController
                 //$call->setStatusByTwilioStatus($call->c_call_status);
 
                 $call->setStatusQueue();
+
+                $communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
 
                 $callUserAccessAny = $call->callUserAccesses; //CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {

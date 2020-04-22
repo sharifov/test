@@ -271,6 +271,7 @@ class CommunicationController extends ApiBaseController
      */
     private function voiceIncoming(array $post, string $type): array
     {
+        /* TODO:: ? in */
         $response = [];
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
@@ -576,6 +577,8 @@ class CommunicationController extends ApiBaseController
     private function voiceClient(array $post = []): array
     {
         $response = [];
+
+        /* TODO:: ?in */
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceClient');
 
@@ -1099,6 +1102,8 @@ class CommunicationController extends ApiBaseController
      */
     protected function createDirectCall(Call $callModel, Employee $user): array
     {
+        /* TODO:: ? */
+
         $jobId = null;
         $callModel->c_created_user_id = $user->id;
         $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
@@ -1179,7 +1184,7 @@ class CommunicationController extends ApiBaseController
      */
     protected function createHoldCall(Call $callModel, Employee $user): array
     {
-
+        /* TODO:: ? */
         $callModel->c_created_user_id = null;
         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
 
