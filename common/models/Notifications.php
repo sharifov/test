@@ -413,17 +413,29 @@ class Notifications extends ActiveRecord
      */
     public static function pingUserMap(): void
     {
-        $users = UserConnection::find()
-            ->select('uc_user_id')
+//        $user = UserConnection::find()
+//            ->select('uc_user_id')
+//            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
+//            ->groupBy(['uc_user_id'])
+//            ->cache(60)
+//            ->column();
+
+        $userConnections = UserConnection::find()
+            ->select('uc_id')
             ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
-            ->groupBy(['uc_user_id'])
             ->cache(60)
             ->column();
 
-        if($users) {
-            foreach ($users as $user_id) {
+        if($userConnections) {
+            $pubChannelList = [];
+            foreach ($userConnections as $uc_id) {
                 // self::socket($user_id, null, 'callMapUpdate', [], true);
-                self::publish('callMapUpdate', ['user_id' => $user_id]);
+                // self::publish('callMapUpdate', ['user_id' => $user_id]);
+                $pubChannelList[] = 'con-' . $uc_id;
+                // Notifications::pub([$pubChannel], 'callMapUpdate', ['uc_id' => $uc_id]);
+            }
+            if ($pubChannelList) {
+                self::pub($pubChannelList, 'callMapUpdate', ['uc_id' => $uc_id]);
             }
         }
     }
