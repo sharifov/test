@@ -148,8 +148,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $email->e_email_to = $mail['ei_email_to'];
                         $email->e_email_to_name = $mail['ei_email_to_name'] ?? null;
                         $email->e_email_from = $mail['ei_email_from'];
-                        $email->e_email_from_name = $mail['ei_email_from_name'] ?? null;
-                        $email->e_email_subject = $mail['ei_email_subject'];
+                        if (isset($mail['ei_email_from_name'])) {
+                            $email->e_email_from_name = $this->filter($mail['ei_email_from_name']);
+                        }
+                        if (isset($mail['ei_email_subject'])) {
+                            $email->e_email_subject = $this->filter($mail['ei_email_subject']);
+                        }
                         if ($mail['ei_project_id'] > 0) {
                             $project = Project::findOne($mail['ei_project_id']);
                             if ($project) {
@@ -278,5 +282,13 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
             echo "cicleCount:" . $cicleCount . " countTotal:" . $countTotal . PHP_EOL;
         }
         return true;
+    }
+
+    private function filter($str)
+    {
+        if (!$str) {
+            return $str;
+        }
+        return filter_var($str, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW|FILTER_FLAG_STRIP_HIGH);
     }
 }
