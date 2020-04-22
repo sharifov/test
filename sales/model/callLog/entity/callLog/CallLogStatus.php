@@ -11,6 +11,7 @@ class CallLogStatus
     public const NOT_ANSWERED = 7;
     public const FAILED = 8;
     public const CANCELED = 9;
+    public const DECLINED = 11;
 
     private const LIST = [
         self::COMPLETE => 'Complete',
@@ -18,6 +19,7 @@ class CallLogStatus
         self::NOT_ANSWERED => 'Not answered',
         self::FAILED => 'Failed',
         self::CANCELED => 'Canceled',
+        self::DECLINED => 'Declined',
     ];
 
     private const CSS_CLASS_LIST = [
@@ -26,6 +28,7 @@ class CallLogStatus
         self::NOT_ANSWERED => 'info',
         self::FAILED => 'danger',
         self::CANCELED => 'dark',
+        self::DECLINED => 'light',
     ];
 
     public static function getList(): array

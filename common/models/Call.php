@@ -11,6 +11,7 @@ use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
 use sales\events\call\CallCreatedEvent;
 use sales\model\call\entity\call\events\CallEvents;
+use sales\model\callLog\services\CallLogTransferService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -217,7 +218,7 @@ class Call extends \yii\db\ActiveRecord
 
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
-            [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id'], 'default', 'value' => null],
+            [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id', 'c_call_duration'], 'default', 'value' => null],
 
             [['c_is_new'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
@@ -789,8 +790,14 @@ class Call extends \yii\db\ActiveRecord
                             /** @var Call $lastChild */
                             $lastChild = self::find()->andWhere(['c_parent_id' => $this->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
                             if (
-                                ($lastChild === null || $this->c_created_user_id == null)
-                                || ($lastChild && $lastChild->c_created_user_id != null && $this->c_created_user_id != $lastChild->c_created_user_id)
+                                $lastChild === null
+                                || (
+                                    $lastChild
+                                    && $lastChild->c_created_user_id != null
+                                    && (
+                                        $this->c_created_user_id == null || $this->c_created_user_id != $lastChild->c_created_user_id
+                                    )
+                                )
                             ) {
                                 $this->c_status_id = self::STATUS_NO_ANSWER;
                                 self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
@@ -841,10 +848,13 @@ class Call extends \yii\db\ActiveRecord
 
                             if ($ntf = Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
                                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
+                                Notifications::publish('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
                             }
 //                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
-                            Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
+                            // Notifications::publish('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
+
+                            $pubChannel = UserConnection::getLastUserChannel($lead->employee_id);
+                            Notifications::pub([$pubChannel], 'openUrl', ['url' => $host . '/lead/view/' . $lead->gid]);
 
                         } catch (\Throwable $e) {
                             Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:afterSave:Lead:Answered:Processing');
@@ -892,11 +902,13 @@ class Call extends \yii\db\ActiveRecord
 
                             if ($ntf = Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
                                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                Notifications::sendSocket('getNewNotification', ['user_id' => $case->cs_user_id], $dataNotification);
+                                Notifications::publish('getNewNotification', ['user_id' => $case->cs_user_id], $dataNotification);
                             }
 
 //                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
-                            Notifications::sendSocket('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+                            // Notifications::publish('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+                            $pubChannel = UserConnection::getLastUserChannel($case->cs_user_id);
+                            Notifications::pub([$pubChannel], 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid]);
                         } catch (\Throwable $e) {
                             Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
                         }
@@ -939,7 +951,7 @@ class Call extends \yii\db\ActiveRecord
                 foreach ($userListNotifications as $userId) {
                     if ($ntf = Notifications::create($userId, $title, $message, Notifications::TYPE_WARNING, true)) {
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                        Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
+                        Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
                     }
                     // Notifications::socket($userId, null, 'getNewNotification', [], true);
 //                    $userListSocketNotification[$userId] = $userId;
@@ -1027,7 +1039,7 @@ class Call extends \yii\db\ActiveRecord
         if ($this->c_created_user_id && ($insert || $isChangedStatus))  {
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 
-            Notifications::sendSocket('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id],
+            Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id],
                 ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number, 'leadId' => $this->c_lead_id]);
         }
 
@@ -1043,7 +1055,7 @@ class Call extends \yii\db\ActiveRecord
                 $socketParams['case_id'] = $this->c_case_id;
             }
 
-            Notifications::sendSocket('updateCommunication', $socketParams, ['lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
+            Notifications::publish('updateCommunication', $socketParams, ['lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
         }
 
 //        if ($userListSocketNotification) {
@@ -1054,6 +1066,20 @@ class Call extends \yii\db\ActiveRecord
 //        }
 
         Notifications::pingUserMap();
+
+        $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+        if ($logEnable) {
+            $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
+            if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
+                (Yii::createObject(CallLogTransferService::class))->transfer($this);
+            }
+        }
+
+    }
+
+    public function isTwFinishStatus(): bool
+    {
+        return $this->isCompletedTw() || $this->isBusyTw() || $this->isNoAnswerTw() || $this->isFailedTw() || $this->isCanceledTw();
     }
 
     /**
@@ -1101,7 +1127,7 @@ class Call extends \yii\db\ActiveRecord
                     ) {
                         // Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                        Notifications::sendSocket('getNewNotification', ['user_id' => $call->c_created_user_id], $dataNotification);
+                        Notifications::publish('getNewNotification', ['user_id' => $call->c_created_user_id], $dataNotification);
                     }
 
 
@@ -1623,6 +1649,14 @@ class Call extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return int
+     */
+    public function setStatusCompleted(): int
+    {
+        return $this->c_status_id = self::STATUS_COMPLETED;
+    }
+
+    /**
      * @return bool
      */
     public function isStatusNoAnswer(): bool
@@ -1702,9 +1736,16 @@ class Call extends \yii\db\ActiveRecord
      */
     public function isTransfer(): bool
     {
-        return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
+        return $this->c_is_transfer ? true : false;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSourceTransfer(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_TRANSFER_CALL;
+    }
 
     /**
      * @return bool

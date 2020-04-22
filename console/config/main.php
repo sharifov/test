@@ -1,4 +1,5 @@
 <?php
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -31,7 +32,7 @@ return [
                 'modules\offer\migrations',
                 'modules\order\migrations',
                 'modules\invoice\migrations',
-                'modules\qaTask\migrations'
+                'modules\qaTask\migrations',
             ],
         ],
 

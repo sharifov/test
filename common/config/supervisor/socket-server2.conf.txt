@@ -1,0 +1,14 @@
+[program:SocketServer2]
+process_name=%(program_name)s_%(process_num)02d
+command=/usr/bin/php /var/www/sale/yii websocket-server/start
+stdout_logfile=/var/www/sale/console/runtime/socket-server2.log
+autostart=true
+autorestart=true
+user=root
+stopsignal=KILL
+numprocs=1
+
+[inet_http_server]
+port=127.0.0.1:9001
+username=supervisor
+password=Supervisor2019!

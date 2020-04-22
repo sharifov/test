@@ -18,7 +18,30 @@ use yii\queue\Queue;
 
 class CommunicationController extends Controller
 {
+    public function actionExecuteJobGetEmails()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
+        $lastId = BaseConsole::input('Enter Last Communication Id: ');
+        $limit = BaseConsole::input('Enter Limit: ');
+
+        $lastId = (int)$lastId;
+        $limit = (int)$limit;
+
+        $job = new ReceiveEmailsJob();
+
+        $job->request_data = [
+            'last_email_id' => $lastId,
+            'email_list' => $this->getEmailsForReceivedMessages(),
+            'limit' => $limit,
+        ];
+
+        $job->last_email_id = $lastId;
+        
+        $job->execute('job');
+
+        printf("\n --- Finish %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
 
     public function actionRunJobGetEmails()
     {

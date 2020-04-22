@@ -21,16 +21,16 @@ class RecordingUrlColumn extends DataColumn
             return '-';
         }
 
-        if ($model->cl_duration && $model->cl_duration >= 3600) {
+        if ($model->record->clr_duration && $model->record->clr_duration >= 3600) {
             $format = 'H:i:s';
         } else {
             $format = 'i:s';
         }
 
         return Html::button(
-            gmdate($format, $model->cl_duration) . ' <i class="fa fa-volume-up"></i>',
+            gmdate($format, $model->record->clr_duration) . ' <i class="fa fa-volume-up"></i>',
             [
-                'title' => $model->cl_duration . ' (sec)', 'class' => 'btn btn-' . ($model->cl_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url',
+                'title' => $model->record->clr_duration . ' (sec)', 'class' => 'btn btn-' . ($model->record->clr_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url',
                 'data-source_src' => $model->record->getRecordingUrl()
             ]
         );

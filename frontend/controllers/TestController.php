@@ -38,6 +38,7 @@ use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
 use frontend\widgets\notification\NotificationWidget;
+use modules\email\src\Notifier;
 use modules\hotel\HotelModule;
 use modules\lead\src\entities\lead\LeadQuery;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -137,7 +138,6 @@ use yii\helpers\Inflector;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
-use common\components\CentrifugoService;
 use yii\queue\Queue;
 
 
@@ -199,7 +199,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-
         return $this->render('blank');
     }
 
@@ -1155,15 +1154,14 @@ class TestController extends FController
 		var_dump($expMonth);
 	}
 
-	public function actionCentSend()
-    {
-        CentrifugoService::sendMsg('Message from channel "ownUserChannel"', 'ownUserChannel' . Auth::id());
-    }
 
-    public function actionCentSend1(){
-        CentrifugoService::sendMsg('Message from channel "multipleUsersChannel"', 'multipleUsersChannel#658,659');
+    public function actionWebSocket()
+    {
+        $this->layout = 'main2';
+
+        VarDumper::dump(Yii::$app->session->id);
+
+        return $this->render('websocket');
     }
 
 }
-
-

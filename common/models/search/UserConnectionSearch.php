@@ -35,7 +35,7 @@ class UserConnectionSearch extends UserConnection
     {
         return [
             [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id', 'dep_id'], 'integer'],
-            [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_created_dt'], 'safe'],
+            [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_created_dt', 'uc_connection_uid', 'uc_app_instance', 'uc_sub_list'], 'safe'],
             ['ug_ids', 'each', 'rule' => ['integer']],
         ];
     }
@@ -64,6 +64,12 @@ class UserConnectionSearch extends UserConnection
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['uc_id' => SORT_DESC]
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -85,13 +91,17 @@ class UserConnectionSearch extends UserConnection
             'uc_connection_id' => $this->uc_connection_id,
             'uc_user_id' => $this->uc_user_id,
             'uc_lead_id' => $this->uc_lead_id,
-            'uc_case_id' => $this->uc_case_id
+            'uc_case_id' => $this->uc_case_id,
+            'uc_connection_uid' => $this->uc_connection_uid,
+            'uc_app_instance' => $this->uc_app_instance,
+
         ]);
 
         $query->andFilterWhere(['like', 'uc_user_agent', $this->uc_user_agent])
             ->andFilterWhere(['like', 'uc_controller_id', $this->uc_controller_id])
             ->andFilterWhere(['like', 'uc_action_id', $this->uc_action_id])
             ->andFilterWhere(['like', 'uc_page_url', $this->uc_page_url])
+            ->andFilterWhere(['like', 'uc_sub_list', $this->uc_sub_list])
             ->andFilterWhere(['like', 'uc_ip', $this->uc_ip]);
 
         return $dataProvider;

@@ -64,7 +64,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
         $cicleCount = 1;
         $countTotal = 0;
 
-        //Yii::info(VarDumper::dumpAsString(['last_email_id' => $this->last_email_id, 'request_data' => $this->request_data]), 'info\JOB:ReceiveEmailsJob');
+//        Yii::info(VarDumper::dumpAsString(['last_email_id' => $this->last_email_id, 'request_data' => $this->request_data]), 'info\JOB:ReceiveEmailsJob');
 
         try {
         	$this->emailService = Yii::createObject(EmailService::class);
@@ -121,8 +121,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     && isset($res['data']['emails'][0])
                     && $res['data']['emails'][0]
                 ) {
-
+                    
                     foreach ($res['data']['emails'] as $mail) {
+
+                        if ($debug) {
+                            echo '.';
+                        }
 
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
@@ -246,7 +250,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     if ($ntf = Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true)) {
                         // Notifications::socket($user_id, null, 'getNewNotification', [], true);
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                        Notifications::sendSocket('getNewNotification', ['user_id' => $user_id], $dataNotification);
+                        Notifications::publish('getNewNotification', ['user_id' => $user_id], $dataNotification);
                     }
                 }
             }
@@ -265,7 +269,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //                }
 //            }
         } catch (\Throwable $e) {
-            \Yii::error($e->getTraceAsString(), 'ReceiveEmailsJob:execute');
+            if ($debug) {
+                echo "error: " . VarDumper::dumpAsString($e);
+            }
+            \Yii::error($e, 'ReceiveEmailsJob:execute');
         }
         if ($debug) {
             echo "cicleCount:" . $cicleCount . " countTotal:" . $countTotal . PHP_EOL;

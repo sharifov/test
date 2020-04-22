@@ -14,11 +14,17 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'uc_connection_id')->textInput() ?>
 
+    <?= $form->field($model, 'uc_connection_uid')->textInput() ?>
+
+    <?= $form->field($model, 'uc_app_instance')->textInput() ?>
+
     <?= $form->field($model, 'uc_user_id')->textInput() ?>
 
     <?= $form->field($model, 'uc_lead_id')->textInput() ?>
 
     <?= $form->field($model, 'uc_user_agent')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'uc_sub_list')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'uc_controller_id')->textInput(['maxlength' => true]) ?>
 

@@ -3,8 +3,10 @@ return [
     'serviceName' => 'crm',
     'serviceVersion' => '1.0.0',
     'appName' => 'Sales',
+    'appInstance' => '1',
 
     'release' => require __DIR__ . '/params-release.php',
+    'wsIdentityCookie' => ['name' => '_identity_ws', 'httpOnly' => true],
 
     'url_address'      => 'https://sales.travelinsides.com',
     'url_api_address'  => 'https://sales.api.travelinsides.com/v1',

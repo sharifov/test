@@ -52,15 +52,18 @@ class CallController extends Controller
      * @param int|null $ringingMinutes
      * @param int|null $queueMinutes
      * @param int|null $inProgressMinutes
-     * @throws \Exception
+     * @param int|null $delayMinutes
      */
-    public function actionTerminator(?int $ringingMinutes = null, ?int $queueMinutes = null, ?int $inProgressMinutes = null): void
+    public function actionTerminator(?int $ringingMinutes = null, ?int $queueMinutes = null, ?int $inProgressMinutes = null, ?int $delayMinutes = null): void
     {
         $timeStart = microtime(true);
 	    $ringingMinutes = $ringingMinutes ?? $this->terminatorParams['ringing_minutes'];
 	    $queueMinutes = $queueMinutes ?? $this->terminatorParams['queue_minutes'];
 	    $inProgressMinutes = $inProgressMinutes ?? $this->terminatorParams['in_progress_minutes'];
-	    $point = $this->shortClassName . ':' .$this->action->id;
+	    $delayMinutesDefault = $this->terminatorParams['in_progress_minutes'] ?? 120;
+	    $delayMinutes = $delayMinutes ?? $delayMinutesDefault;
+
+	    $point = $this->shortClassName . ':' . $this->action->id;
 
 	    if (!$this->terminatorEnable) {
             $this->outputHelper->printInfo('Call terminator is disable. ', $point, Console::FG_RED);
@@ -72,6 +75,7 @@ class CallController extends Controller
         $dtRinging = (new \DateTime('now'))->modify('-' . $ringingMinutes . ' minutes')->format('Y-m-d H:i:s');
         $dtQueue = (new \DateTime('now'))->modify('-' . $queueMinutes . ' minutes')->format('Y-m-d H:i:s');
         $dtInProgress = (new \DateTime('now'))->modify('-' . $inProgressMinutes . ' minutes')->format('Y-m-d H:i:s');
+        $dtDelay = (new \DateTime('now'))->modify('-' . $delayMinutes . ' minutes')->format('Y-m-d H:i:s');
 
         $items = Call::find()
             ->where(['OR',
@@ -88,7 +92,11 @@ class CallController extends Controller
                     ['c_status_id' =>  Call::STATUS_IN_PROGRESS],
                     ['<=', 'c_created_dt', $dtInProgress],
                     ['IS NOT', 'c_parent_id', NULL],
-                ]
+                ],
+                ['AND',
+                    ['c_status_id' =>  Call::STATUS_DELAY],
+                    ['<=', 'c_created_dt', $dtDelay],
+                ],
             ])
             ->orderBy(['c_id' => SORT_ASC])
             ->indexBy('c_id')
@@ -105,7 +113,11 @@ class CallController extends Controller
             /** @var Call $call */
             foreach ($items AS $call) {
                 $old_status = $call->getStatusName();
-                $call->setStatusFailed();
+                if ($call->isStatusDelay()) {
+                    $call->setStatusCompleted();
+                } else {
+                    $call->setStatusFailed();
+                }                
 
                 if ($call->save()) {
                     $out[] = ['c_id' => $call->c_id,
