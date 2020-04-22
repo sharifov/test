@@ -1154,6 +1154,14 @@ class TestController extends FController
 		var_dump($expMonth);
 	}
 
+    public function actionCentSend()
+    {
+        CentrifugoService::sendMsg('Message from channel "ownUserChannel"', 'ownUserChannel' . Auth::id());
+    }
+
+    public function actionCentSend1(){
+        CentrifugoService::sendMsg('Message from channel "multipleUsersChannel"', 'multipleUsersChannel#658,659');
+    }
 
     public function actionWebSocket()
     {
