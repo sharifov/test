@@ -25,13 +25,14 @@
 // const socket = new WebSocket('wss:\\sales.dev.travelinsides.com:8888/?user_id=1&controller_id=test&action_id=test&page_url=test&lead_id=15636');
 
 $urlParams = [
-        'controller_id' => $controllerId,
-        'action_id' => $actionId,
-        'page_url' => $pageUrl,
-        'lead_id' => $leadId,
-        'case_id' => $caseId,
-        'ip'    => $ipAddress,
-        'sub_list' => $subList
+    'user_id' => $userId,
+    'controller_id' => $controllerId,
+    'action_id' => $actionId,
+    'page_url' => $pageUrl,
+    'lead_id' => $leadId,
+    'case_id' => $caseId,
+    'ip'    => $ipAddress,
+    'sub_list' => $subList,
 ];
 
 if ($leadId) {
@@ -70,7 +71,7 @@ $js = <<<JS
         try {
     
             //const socket = new WebSocket(wsUrl);
-            var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 10000});
+            var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 15000});
             
             socket.onopen = function (e) {
                 //socket.send('{"user2_id":' + user_id + '}');

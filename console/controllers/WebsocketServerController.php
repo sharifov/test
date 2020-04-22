@@ -115,7 +115,7 @@ class WebsocketServerController extends Controller
 
                 $server->push($request->fd, json_encode(['cmd' => 'userInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
 
-                $server->tick(20000, static function() use ($server, $request) {
+                $server->tick(30000, static function() use ($server, $request) {
                     $server->push($request->fd, json_encode(['cmd' => 'pong', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
                 });
 
