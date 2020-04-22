@@ -545,7 +545,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public function redirectCall(string $sid, array $data = [], string $callBackUrl = '') : array
     {
         $out = ['error' => false, 'data' => []];
-/* TODO:: ? */
+
         $data['sid'] = $sid;
         $data['data'] = $data;
         $data['callBackUrl'] = $callBackUrl;
