@@ -578,64 +578,91 @@ class TwilioController extends ApiBaseNoAuthController
 	{
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
-		$post = Yii::$app->request->post();
+//		$post = Yii::$app->request->post();
+//		$responseData = [
+//			'post'      => $post
+//		];
+//
+//		$conferenceSid = mb_substr(Yii::$app->request->post('ConferenceSid'), 0, 34);
+//
+//		try {
+//
+//			if ($conferenceSid) {
+//
+//				$cf = Conference::findOne(['cf_sid' => $conferenceSid]);
+//				if (!$cf) {
+//					$cf = new Conference();
+//					$cf->cf_sid = $conferenceSid;
+//					$cf->cf_friendly_name = Yii::$app->request->post('FriendlyName');
+//					$cf->cf_call_sid = Yii::$app->request->post('CallSid');
+//
+//					if (!$cf->save()) {
+//						Yii::error(VarDumper::dumpAsString($cf->errors),
+//							'API:TwilioController:actionConferenceStatusCallback:Conference:save');
+//					}
+//				}
+//
+//				$cLog = new ConferenceLog();
+//				$cLog->cl_cf_id = $cf->cf_id;
+//				$cLog->cl_cf_sid = $conferenceSid;
+//				$cLog->cl_sequence_number = Yii::$app->request->post('SequenceNumber');
+//				$cLog->cl_status_callback_event = Yii::$app->request->post('StatusCallbackEvent');
+//				$cLog->cl_json_data = json_encode($post, JSON_THROW_ON_ERROR);
+//
+//				if (!$cLog->save()) {
+//					Yii::error(VarDumper::dumpAsString($cf->errors),
+//						'API:TwilioController:actionConferenceStatusCallback:ConferenceLog:save');
+//				}
+//
+//				$data = [
+//					'uniqid' => uniqid('', true),
+//					'conferenceData' => $post,
+//					'conference' => $cf->attributes,
+//				];
+//
+//				$this->communicationService->voiceConferenceCallback($data);
+//
+//				$responseData['conference'] = $cf->attributes;
+//				$responseData['conference_log'] = $cLog->attributes;
+//
+//			} else {
+//				$responseData['error'] = 'Not found ConferenceSid';
+//				Yii::error('Not found POST "ConferenceSid" ' . VarDumper::dumpAsString($post),
+//					'API:TwilioController:actionConferenceStatusCallback');
+//			}
+//		} catch (\Throwable $throwable) {
+//			$responseData['error'] = $throwable->getMessage() . ', ' .  $throwable->getFile() . ':' .  $throwable->getLine();
+//
+//			Yii::error($responseData['error'],
+//				'API:TwilioController:actionConferenceStatusCallback:Throwable');
+//		}
+
 		$responseData = [
-			'post'      => $post
+			'date'      => date('Y-m-d'),
+			'ip'        => Yii::$app->request->getUserIP(),
+			'get'       => Yii::$app->request->get(),
+			'post'      => Yii::$app->request->post(),
 		];
 
-		$conferenceSid = mb_substr(Yii::$app->request->post('ConferenceSid'), 0, 34);
+		Yii::warning(VarDumper::dumpAsString($responseData), 'Twilio ConferenceStatusCallback');
 
-		try {
 
-			if ($conferenceSid) {
+		$conferenceSid = Yii::$app->request->post('ConferenceSid');
 
-				$cf = Conference::findOne(['cf_sid' => $conferenceSid]);
-				if (!$cf) {
-					$cf = new Conference();
-					$cf->cf_sid = $conferenceSid;
-					$cf->cf_friendly_name = Yii::$app->request->post('FriendlyName');
-					$cf->cf_call_sid = Yii::$app->request->post('CallSid');
-
-					if (!$cf->save()) {
-						Yii::error(VarDumper::dumpAsString($cf->errors),
-							'API:TwilioController:actionConferenceStatusCallback:Conference:save');
-					}
-				}
-
-				$cLog = new ConferenceLog();
-				$cLog->cl_cf_id = $cf->cf_id;
-				$cLog->cl_cf_sid = $conferenceSid;
-				$cLog->cl_sequence_number = Yii::$app->request->post('SequenceNumber');
-				$cLog->cl_status_callback_event = Yii::$app->request->post('StatusCallbackEvent');
-				$cLog->cl_json_data = json_encode($post, JSON_THROW_ON_ERROR);
-
-				if (!$cLog->save()) {
-					Yii::error(VarDumper::dumpAsString($cf->errors),
-						'API:TwilioController:actionConferenceStatusCallback:ConferenceLog:save');
-				}
-
-				$data = [
-					'uniqid' => uniqid('', true),
-					'conferenceData' => $post,
-					'conference' => $cf->attributes,
-				];
-
-				$this->communicationService->voiceConferenceCallback($data);
-
-				$responseData['conference'] = $cf->attributes;
-				$responseData['conference_log'] = $cLog->attributes;
-
-			} else {
-				$responseData['error'] = 'Not found ConferenceSid';
-				Yii::error('Not found POST "ConferenceSid" ' . VarDumper::dumpAsString($post),
-					'API:TwilioController:actionConferenceStatusCallback');
-			}
-		} catch (\Throwable $throwable) {
-			$responseData['error'] = $throwable->getMessage() . ', ' .  $throwable->getFile() . ':' .  $throwable->getLine();
-
-			Yii::error($responseData['error'],
-				'API:TwilioController:actionConferenceStatusCallback:Throwable');
-		}
+//        [
+//            'Coaching' => 'false'
+//    'FriendlyName' => 'room1'
+//    'SequenceNumber' => '1'
+//    'ConferenceSid' => 'CF4a296dff23784c3e25e4f166529fa0ff'
+//    'EndConferenceOnExit' => 'true'
+//    'CallSid' => 'CA16e5e86828dbb27fef7bff9b1a40a645'
+//    'StatusCallbackEvent' => 'participant-join'
+//    'Timestamp' => 'Fri, 25 Oct 2019 06:37:44 +0000'
+//    'StartConferenceOnEnter' => 'true'
+//    'Hold' => 'false'
+//    'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c'
+//    'Muted' => 'true'
+//]
 
 		$apiLog->endApiLog($responseData);
 
