@@ -2,6 +2,7 @@
 
 namespace sales\model\phoneList\entity;
 
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\components\validators\PhoneValidator;
 use yii\behaviors\AttributeBehavior;
@@ -23,6 +24,7 @@ use yii\db\ActiveRecord;
  *
  * @property Employee $createdUser
  * @property Employee $updatedUser
+ * @property DepartmentPhoneProject $departmentPhoneProject
  */
 class PhoneList extends \yii\db\ActiveRecord
 {
@@ -89,6 +91,11 @@ class PhoneList extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'pl_updated_user_id']);
     }
+
+    public function getDepartmentPhoneProject(): ActiveQuery
+	{
+		return $this->hasOne(DepartmentPhoneProject::class, ['dpp_phone_list_id' => 'pl_id']);
+	}
 
     public static function find(): Scopes
     {

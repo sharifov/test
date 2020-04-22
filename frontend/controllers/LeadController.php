@@ -36,6 +36,7 @@ use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
