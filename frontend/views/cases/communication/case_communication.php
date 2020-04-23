@@ -763,7 +763,7 @@ $js = <<<JS
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
         
         var popup = $('#modal-email-view');
-        popup.find('#modal-email-view-label').html('Email view: ' + subject + ' | ' + from + ' | ' + to + ' | ' +  date);
+        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
