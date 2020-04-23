@@ -1800,7 +1800,6 @@ class LeadController extends FController
      */
     public function actionFailedBookings(): string
     {
-
         $params = Yii::$app->request->queryParams;
 
         /** @var Employee $user */
@@ -1825,53 +1824,18 @@ class LeadController extends FController
             } else {
                 throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
             }
-
-
-            /*if($checkShiftTime = !$user->checkShiftTime()) {
-                throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
-            }*/
         }
 
-        //$checkShiftTime = true;
-
         $searchModel = new LeadSearch();
-        //$dataProvider = $searchModel->searchInbox($params, $user);
 
-        $user_id = \Yii::$app->user->id;
-        $cache = \Yii::$app->cache;
+        $isAccessNewLead = $user->accessTakeNewLead();
 
-        $sql = \common\models\Lead::find()->select('COUNT(*)')->where(['status' => Lead::STATUS_PENDING])->createCommand()->rawSql;
-
-        $duration = null;
-        $dependency = new DbDependency();
-        $dependency->sql = $sql;
-
-        //$key = 'queue_inbox_' . $user_id;
-
-        //$cache->delete($key);
-
-        //$result = $cache->get($key);
-//        if ($result === false) {
-            $result['isAccessNewLead'] = $user->accessTakeNewLead();
-            $result['taskSummary'] = $user->getCurrentShiftTaskInfoSummary();
-            $result['dataProvider'] = $searchModel->searchFailedBookings($params, $user);
-
-//            $cache->set($key, $result, $duration, $dependency);
-
-            //echo 123; exit;
-//        } else {
-            //echo 'cache'; exit;
-//        }
-
-        $isAccessNewLead = $result['isAccessNewLead']; //$user->accessTakeNewLead();
-        $taskSummary = $result['taskSummary']; //$user->getCurrentShiftTaskInfoSummary();
-        $dataProvider = $result['dataProvider'];
-
+        $dataProvider = $searchModel->searchFailedBookings($params, $user);
 
         $accessLeadByFrequency = [];
 
         if ($isAccessNewLead) {
-            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], [Lead::STATUS_BOOK_FAILED]);
             if (!$accessLeadByFrequency['access']) {
                 $isAccessNewLead = $accessLeadByFrequency['access'];
             }
@@ -1884,9 +1848,6 @@ class LeadController extends FController
             'isAgent' => $isAgent,
             'isAccessNewLead' => $isAccessNewLead,
             'accessLeadByFrequency' => $accessLeadByFrequency,
-            'user' => $user,
-            'newLeadsCount' => $user->getCountNewLeadCurrentShift(),
-            'taskSummary' => $taskSummary
         ]);
     }
 
