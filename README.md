@@ -388,6 +388,44 @@ CRYPTO - PHP
 
 Command must return the time zone of the USA - California ---> America/Los_Angeles
 
+Cetrifugo Server
+-------------------
+*Install on Ubuntu:*
+```
+curl -s https://packagecloud.io/install/repositories/FZambia/centrifugo/script.deb.sh | sudo bash
+sudo apt update
+sudo apt-get install centrifugo=2.4.0-0
+```
+* Centrifugo docs:  ```https://centrifugal.github.io/centrifugo/```
+* Installation docs:  ```https://packagecloud.io/FZambia/centrifugo```
+
+*Default local config:*
+```
+cd /etc/centrifugo
+config.json
+   {
+       "token_hmac_secret_key": "",          //generated automatically on installation
+       "admin_password": "",                 //generated automatically on installation
+       "admin_secret": "",                   //generated automatically on installation
+       "api_key": "",                        //generated automatically on installation
+       "admin": true,                        //enable web UI https://localhost:8000
+       "tls": true,                          //enable TLS/SSL layer https://centrifugal.github.io/centrifugo/deploy/tls/
+       "tls_key": "centrifugossl.key",
+       "tls_cert": "centrifugossl.crt"      
+   }     
+```
+*Set ```tls_key``` and ```tls_cert``` on local centrifugo server:*
+```
+cd /var/www/sales
+./self-signed-tls.sh
+mv *all new generated files* /etc/centrifugo
+```
+*Set supervisor to operate with centrifugo:*
+```
+In .. config/supervisor 
+rename file centrifugo.conf.txt 
+sudo service supervisor restart
+```
 
 DIRECTORY STRUCTURE
 -------------------
