@@ -1179,7 +1179,6 @@ class CommunicationController extends ApiBaseController
      */
     protected function createHoldCall(Call $callModel, Employee $user): array
     {
-        /* TODO:: ? */
         $callModel->c_created_user_id = null;
         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
 
