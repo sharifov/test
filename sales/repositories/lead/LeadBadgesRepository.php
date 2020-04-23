@@ -76,6 +76,39 @@ class LeadBadgesRepository
      * @param Employee $user
      * @return int
      */
+    public function getFailedBookingsCount(Employee $user): int
+    {
+        return $this->getFailedBookingsQuery($user)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getFailedBookingsQuery(Employee $user): ActiveQuery
+    {
+
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_BOOK_FAILED])->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_QUEUE]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isAgent() || $user->isExAgent()) {
+            $conditions = $this->freeLead();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
     public function getFollowUpCount(Employee $user): int
     {
         return $this->getFollowUpQuery($user)->count();

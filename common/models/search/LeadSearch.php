@@ -2321,6 +2321,59 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchFailedBookings($params, Employee $user): ActiveDataProvider
+    {
+        $query = $this->leadBadgesRepository->getFailedBookingsQuery($user);
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $leadTable = Lead::tableName();
+
+        $this->load($params);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
+        ]);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+
+		if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
+			$query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
+		}
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable . '.id' => $this->id,
+            $leadTable . '.cabin' => $this->cabin,
+            $leadTable . '.request_ip' => $this->request_ip,
+        ]);
+
+        if ($this->limit > 0) {
+            $query->limit($this->limit);
+            //$dataProvider->setTotalCount($this->limit);
+        }
+
+        if ($user->isAdmin()) {
+            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+        }
+
+        return $dataProvider;
+    }
+
 //
 //    /**
 //     * @param $params

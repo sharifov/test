@@ -1796,6 +1796,102 @@ class LeadController extends FController
 
     /**
      * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionFailedBookings(): string
+    {
+
+        $params = Yii::$app->request->queryParams;
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $checkShiftTime = true;
+
+        if ($isAgent) {
+            $checkShiftTime = $user->checkShiftTime();
+            $userParams = $user->userParams;
+
+            if ($userParams) {
+                if ($userParams->up_inbox_show_limit_leads > 0) {
+                    $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
+                }
+            } else {
+                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
+            }
+
+
+            /*if($checkShiftTime = !$user->checkShiftTime()) {
+                throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
+            }*/
+        }
+
+        //$checkShiftTime = true;
+
+        $searchModel = new LeadSearch();
+        //$dataProvider = $searchModel->searchInbox($params, $user);
+
+        $user_id = \Yii::$app->user->id;
+        $cache = \Yii::$app->cache;
+
+        $sql = \common\models\Lead::find()->select('COUNT(*)')->where(['status' => Lead::STATUS_PENDING])->createCommand()->rawSql;
+
+        $duration = null;
+        $dependency = new DbDependency();
+        $dependency->sql = $sql;
+
+        //$key = 'queue_inbox_' . $user_id;
+
+        //$cache->delete($key);
+
+        //$result = $cache->get($key);
+//        if ($result === false) {
+            $result['isAccessNewLead'] = $user->accessTakeNewLead();
+            $result['taskSummary'] = $user->getCurrentShiftTaskInfoSummary();
+            $result['dataProvider'] = $searchModel->searchFailedBookings($params, $user);
+
+//            $cache->set($key, $result, $duration, $dependency);
+
+            //echo 123; exit;
+//        } else {
+            //echo 'cache'; exit;
+//        }
+
+        $isAccessNewLead = $result['isAccessNewLead']; //$user->accessTakeNewLead();
+        $taskSummary = $result['taskSummary']; //$user->getCurrentShiftTaskInfoSummary();
+        $dataProvider = $result['dataProvider'];
+
+
+        $accessLeadByFrequency = [];
+
+        if ($isAccessNewLead) {
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+            if (!$accessLeadByFrequency['access']) {
+                $isAccessNewLead = $accessLeadByFrequency['access'];
+            }
+        }
+
+        return $this->render('failed-bookings', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'checkShiftTime' => $checkShiftTime,
+            'isAgent' => $isAgent,
+            'isAccessNewLead' => $isAccessNewLead,
+            'accessLeadByFrequency' => $accessLeadByFrequency,
+            'user' => $user,
+            'newLeadsCount' => $user->getCountNewLeadCurrentShift(),
+            'taskSummary' => $taskSummary
+        ]);
+    }
+
+    /**
+     * @return string
      */
     public function actionSold(): string
     {
