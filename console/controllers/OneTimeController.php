@@ -307,16 +307,17 @@ class OneTimeController extends Controller
      */
     public function actionSaleToCase(string $fromDate, string $toDate, int $status): void
     {
-        echo Console::renderColoredString('%g --- Start %W[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . $this->action->id .' %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
         $time_start = microtime(true);
 
         $fromDate = date('Y-m-d', strtotime($fromDate));
         $toDate = date('Y-m-d', strtotime($toDate));
-        $processed = 0;
+        $processed = $countCases = 0;
 
         try {
             $cases = $this->getCaseNotSale($fromDate, $toDate, $status);
-            Console::startProgress(0, count($cases));
+            $countCases = count($cases);
+            Console::startProgress(0, $countCases);
 
             foreach ($cases as $key => $value) {
                 $job = new CreateSaleFromBOJob();
@@ -324,7 +325,7 @@ class OneTimeController extends Controller
                 $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
                 Yii::$app->queue_job->priority(100)->push($job);
                 $processed ++;
-                Console::updateProgress($processed, count($cases));
+                Console::updateProgress($processed, $countCases);
             }
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
@@ -335,8 +336,9 @@ class OneTimeController extends Controller
         Console::endProgress(false);
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %W['. $time .' s] %gProcessed: %W[' . $processed . '] %n'), PHP_EOL;
-        echo Console::renderColoredString('%g --- End : %W[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . $this->action->id .' %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %gFind cases: %w[' . $countCases . '] %g Added to queue: %w[' . $processed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
     }
 
 
