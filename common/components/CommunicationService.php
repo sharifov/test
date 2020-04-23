@@ -25,7 +25,7 @@ use yii\httpclient\Response;
  * @property Request $request
  */
 
-class CommunicationService extends Component
+class CommunicationService extends Component implements CommunicationServiceInterface
 {
     public $url;
     public $url2;

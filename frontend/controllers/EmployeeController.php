@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
+use common\models\LoginForm;
 use common\models\ProjectEmployeeAccess;
 use common\models\search\EmployeeSearch;
 use common\models\search\UserProjectParamsSearch;
@@ -710,7 +711,9 @@ class EmployeeController extends FController
             //VarDumper::dump($user->attributes, 10, true);
             //exit;
 
-            if(!Yii::$app->user->login($user)) {
+            if(Yii::$app->user->login($user)) {
+                LoginForm::sendWsIdentityCookie(Yii::$app->user->identity, 0);
+            } else {
                 echo 'Not logined'; exit;
             }
             //$this->redirect(['site/index']);

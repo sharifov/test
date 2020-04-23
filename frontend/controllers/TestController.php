@@ -38,6 +38,7 @@ use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
 use frontend\widgets\notification\NotificationWidget;
+use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
 use modules\hotel\HotelModule;
 use modules\lead\src\entities\lead\LeadQuery;

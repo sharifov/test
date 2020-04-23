@@ -6,6 +6,7 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\SmsQuery;
 use DateTime;
+use modules\twilio\components\TwilioCommunicationService;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\events\sms\SmsCreatedByIncomingSalesEvent;
@@ -92,6 +93,7 @@ class Sms extends \yii\db\ActiveRecord
     public const STATUS_CANCEL  = 4;
     public const STATUS_DONE    = 5;
     public const STATUS_ERROR   = 6;
+    public const STATUS_SENT 	= 7;
 
     public const STATUS_LIST = [
         self::STATUS_NEW        => 'New',
@@ -100,6 +102,7 @@ class Sms extends \yii\db\ActiveRecord
         self::STATUS_CANCEL     => 'Cancel',
         self::STATUS_DONE       => 'Done',
         self::STATUS_ERROR      => 'Error',
+        self::STATUS_SENT       => 'Sent',
     ];
 
     public const PRIORITY_LOW       = 1;
@@ -380,6 +383,14 @@ class Sms extends \yii\db\ActiveRecord
         return self::TYPE_LIST[$this->s_type_id] ?? '-';
     }
 
+	/**
+	 * @return array|string[]
+	 */
+    public static function getSmsTypeList(): array
+	{
+		return self::TYPE_LIST;
+	}
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -454,6 +465,7 @@ class Sms extends \yii\db\ActiveRecord
         $communication = Yii::$app->communication;
         $data = [];
         $data['project_id'] = $this->s_project_id;
+        $data['s_id'] = $this->s_id;
 
         $content_data['sms_text'] = $this->s_sms_text;
 

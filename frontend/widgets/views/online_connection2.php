@@ -8,6 +8,9 @@
 /* @var $ipAddress string */
 /* @var $webSocketHost string */
 /* @var $subList array */
+
+\frontend\assets\WebSocketAsset::register($this);
+
 ?>
     <li>
         <a href="javascript:;" class="info-number" title="Online Connection" id="online-connection-indicator">
@@ -22,13 +25,14 @@
 // const socket = new WebSocket('wss:\\sales.dev.travelinsides.com:8888/?user_id=1&controller_id=test&action_id=test&page_url=test&lead_id=15636');
 
 $urlParams = [
-        'controller_id' => $controllerId,
-        'action_id' => $actionId,
-        'page_url' => $pageUrl,
-        'lead_id' => $leadId,
-        'case_id' => $caseId,
-        'ip'    => $ipAddress,
-        'sub_list' => $subList
+    'user_id' => $userId,
+    'controller_id' => $controllerId,
+    'action_id' => $actionId,
+    'page_url' => $pageUrl,
+    'lead_id' => $leadId,
+    'case_id' => $caseId,
+    'ip'    => $ipAddress,
+    'sub_list' => $subList,
 ];
 
 if ($leadId) {
@@ -61,165 +65,174 @@ $js = <<<JS
     const userId = '$userId';
     const wsUrl = '$wsUrl';
     const onlineObj = $('#online-connection-indicator');
-
-    try {
-
-        const socket = new WebSocket(wsUrl);
+    
+    function wsInitConnect(){
         
-        socket.onopen = function (e) {
-            //socket.send('{"user2_id":' + user_id + '}');
-            console.info('Socket Status: ' + socket.readyState + ' (Open)');
-            onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
-            //console.log(e);
-        };
-        
-        socket.onmessage = function (e) {
-            // onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
-            console.info('socket.onmessage');
-            try {
-                var obj = JSON.parse(e.data); // $.parseJSON( e.data );
-                console.log(obj);
-            } catch (error) {
-                console.error('Invalid JSON data on socket.onmessage');
-                console.error(e.data);
-            }
+        try {
+    
+            //const socket = new WebSocket(wsUrl);
+            var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 15000});
             
-            try {
-                if (typeof obj.cmd !== 'undefined') {
-                    
-                    if(obj.cmd === 'initConnection') {
-                        if (typeof obj.uc_id !== 'undefined') {
-                            if(obj.uc_id > 0) {
-                                onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
-                            } else {
-                                onlineObj.attr('title', 'Timeout DB connection: restart service').find('i').removeClass('danger').removeClass('success').addClass('warning');
-                            }    
-                        }
-                    }
-                    
-                    if(obj.cmd === 'getNewNotification') {
-                        //alert(obj.cmd);
-                         if (typeof obj.notification !== 'undefined') {
-                             if (userId == obj.notification.userId) {
-                                notificationInit(obj.notification);
-                             } else {
-                                 console.error('connecting user Id not equal notification user Id');
-                             }
-                         } else {
-                            updatePjaxNotify();    
-                         }
-                    }
-                                        
-                    if(obj.cmd === 'updateCommunication') {
-                        // updatePjaxNotify();
-                        updateCommunication();
-                    }
-                    
-                    if(obj.cmd === 'callUpdate') {
-                        /*if (typeof callUpdate === "function") {
-                            callUpdate(obj);
-                        }*/
-                        
-                        if (typeof refreshCallBox === "function") {
-                            refreshCallBox(obj);
-                        }
-                        
-                         if (typeof webCallLeadRedialUpdate === "function") {
-                            webCallLeadRedialUpdate(obj);
-                        }
-                    }
-                    
-                    if(obj.cmd === 'webCallUpdate') {
-                        //console.info('webCallUpdate - 1');
-                        if (typeof webCallUpdate === "function") {
-                            //console.info('webCallUpdate - 2');
-                            webCallUpdate(obj);
-                        }
-                        
-                        
-                    }
-                    
-                    if(obj.cmd === 'recordingUpdate') {
-                        updatePjaxNotify();
-                        updateCommunication();
-                    }
-                    
-                    /*if(obj.cmd === 'incomingCall') {
-                        if (typeof incomingCall === "function") {
-                            incomingCall(obj);
-                        }
-                    }*/
-                    
-                    if(obj.cmd === 'updateUserCallStatus') {
-                        /*if (typeof updateUserCallStatus === "function") {
-                            updateUserCallStatus(obj);
-                        }*/
-                        
-                        if (typeof refreshCallBox === "function") {
-                            refreshCallBox(obj);
-                        }
-                        
-                        
-                    }
-                    
-                    if(obj.cmd === 'updateIncomingCall') {
-                        if (typeof refreshInboxCallWidget === "function") {
-                            refreshInboxCallWidget(obj);
-                        }
-                    }
-                    
-                    
-                    if(obj.cmd === 'callMapUpdate') {
-                        $('#btn-user-call-map-refresh').click();
-                    }
-                    
-                    if(obj.cmd === 'openUrl') {
-                        window.open(obj.url); //, '_blank'
-                        /*var hiddenLink = $("#hidden_link");
-                        hiddenLink.attr("href", obj.url);
-                        hiddenLink.attr("target", "_blank");
-                        hiddenLink.attr("data-pjax", "0");
-                        hiddenLink[0].click();*/
-                    }
+            socket.onopen = function (e) {
+                //socket.send('{"user2_id":' + user_id + '}');
+                console.info('Socket Status: ' + socket.readyState + ' (Open)');
+                onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
+                //console.log(e);
+            };
+            
+            socket.onmessage = function (e) {
+                // onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
+                console.info('socket.onmessage');
+                try {
+                    var obj = JSON.parse(e.data); // $.parseJSON( e.data );
+                    console.log(obj);
+                } catch (error) {
+                    console.error('Invalid JSON data on socket.onmessage');
+                    console.error(e.data);
                 }
-                // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
-            } catch (error) {
-                console.error('Error in functions - socket.onmessage');
-                console.error(error);
-            }
+                
+                try {
+                    if (typeof obj.cmd !== 'undefined') {
+                        
+                        if(obj.cmd === 'initConnection') {
+                            if (typeof obj.uc_id !== 'undefined') {
+                                if(obj.uc_id > 0) {
+                                    onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
+                                } else {
+                                    onlineObj.attr('title', 'Timeout DB connection: restart service').find('i').removeClass('danger').removeClass('success').addClass('warning');
+                                }    
+                            }
+                        }
+                        
+                        if(obj.cmd === 'getNewNotification') {
+                            //alert(obj.cmd);
+                             if (typeof obj.notification !== 'undefined') {
+                                 if (userId == obj.notification.userId) {
+                                    notificationInit(obj.notification);
+                                 } else {
+                                     console.error('connecting user Id not equal notification user Id');
+                                 }
+                             } else {
+                                updatePjaxNotify();    
+                             }
+                        }
+                                            
+                        if(obj.cmd === 'updateCommunication') {
+                            // updatePjaxNotify();
+                            updateCommunication();
+                        }
+                        
+                        if(obj.cmd === 'callUpdate') {
+                            /*if (typeof callUpdate === "function") {
+                                callUpdate(obj);
+                            }*/
+                            
+                            if (typeof refreshCallBox === "function") {
+                                refreshCallBox(obj);
+                            }
+                            
+                             if (typeof webCallLeadRedialUpdate === "function") {
+                                webCallLeadRedialUpdate(obj);
+                            }
+                        }
+                        
+                        if(obj.cmd === 'webCallUpdate') {
+                            //console.info('webCallUpdate - 1');
+                            if (typeof webCallUpdate === "function") {
+                                //console.info('webCallUpdate - 2');
+                                webCallUpdate(obj);
+                            }
+                            
+                            
+                        }
+                        
+                        if(obj.cmd === 'recordingUpdate') {
+                            updatePjaxNotify();
+                            updateCommunication();
+                        }
+                        
+                        /*if(obj.cmd === 'incomingCall') {
+                            if (typeof incomingCall === "function") {
+                                incomingCall(obj);
+                            }
+                        }*/
+                        
+                        if(obj.cmd === 'updateUserCallStatus') {
+                            /*if (typeof updateUserCallStatus === "function") {
+                                updateUserCallStatus(obj);
+                            }*/
+                            
+                            if (typeof refreshCallBox === "function") {
+                                refreshCallBox(obj);
+                            }
+                            
+                            
+                        }
+                        
+                        if(obj.cmd === 'updateIncomingCall') {
+                            if (typeof refreshInboxCallWidget === "function") {
+                                refreshInboxCallWidget(obj);
+                            }
+                        }
+                        
+                        
+                        if(obj.cmd === 'callMapUpdate') {
+                            $('#btn-user-call-map-refresh').click();
+                        }
+                        
+                        if(obj.cmd === 'openUrl') {
+                            window.open(obj.url); //, '_blank'
+                            /*var hiddenLink = $("#hidden_link");
+                            hiddenLink.attr("href", obj.url);
+                            hiddenLink.attr("target", "_blank");
+                            hiddenLink.attr("data-pjax", "0");
+                            hiddenLink[0].click();*/
+                        }
+                    }
+                    // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
+                } catch (error) {
+                    console.error('Error in functions - socket.onmessage');
+                    console.error(error);
+                }
+                
+            };
+    
+            socket.onclose = function (event) {
+                
+                if (event.wasClean) {
+                    console.log('Connection closed success (Close)');
+                } else {
+                    console.error('Disconnect (Error)'); // Example kill process of server
+                }
+                //console.log('Code: ' + event.code);
+                
+                onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
+                // setTimeout(function() {
+                //   wsInitConnect();
+                // }, 5000);
+                //console.log('Socket Status: ' + socket.readyState + ' (Closed)');
+            };
+    
+            socket.onerror = function(event) {
+                //if (socket.readyState == 1) {
+                    console.log('Socket error: ' + event.message);
+                //}
+                onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
+            };
             
-        };
-
-        socket.onclose = function (event) {
-            
-            if (event.wasClean) {
-                console.log('Connection closed success (Close)');
-            } else {
-                console.error('Disconnect (Error)'); // Example kill process of server
-            }
-            //console.log('Code: ' + event.code);
-            
-            onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
-            //console.log('Socket Status: ' + socket.readyState + ' (Closed)');
-        };
-
-        socket.onerror = function(event) {
-            //if (socket.readyState == 1) {
-                console.log('Socket error: ' + event.message);
-            //}
-            onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
-        };
-        
-        /*socket.setTimeout(function () {
-        console.log('2 seconds passed, closing the socket');
-      socket.close();
-    }, 2000);*/
-
-
-    } catch (error) {
-        console.error(error);
-        onlineObj.attr('title', 'Online Connection: error').find('i').removeClass('success').addClass('danger');
+            /*socket.setTimeout(function () {
+            console.log('2 seconds passed, closing the socket');
+          socket.close();
+        }, 2000);*/
+    
+    
+        } catch (error) {
+            console.error(error);
+            onlineObj.attr('title', 'Online Connection: error').find('i').removeClass('success').addClass('danger');
+        }
     }
+    
+    wsInitConnect();
 
 JS;
 

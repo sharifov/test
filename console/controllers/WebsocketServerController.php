@@ -115,7 +115,7 @@ class WebsocketServerController extends Controller
 
                 $server->push($request->fd, json_encode(['cmd' => 'userInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
 
-                $server->tick(20000, static function() use ($server, $request) {
+                $server->tick(30000, static function() use ($server, $request) {
                     $server->push($request->fd, json_encode(['cmd' => 'pong', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
                 });
 
@@ -154,10 +154,17 @@ class WebsocketServerController extends Controller
                     \Yii::error(VarDumper::dumpAsString($userConnection->errors), 'WS:UserConnection:save');
                 }
 
-                foreach($server->tblConnections as $row)
-                {
-                    VarDumper::dump($row);
-                }
+//                foreach($server->tblConnections as $row)
+//                {
+//                    VarDumper::dump($row);
+//                }
+
+                VarDumper::dump(['fd' => $request->fd,
+                    'uid' => $uid,
+                    'user_id' => $userId,
+                    'name' => $user->username,
+                    'dt' => date('Y-m-d H:i:s')]);
+
                 unset($user);
 
 
@@ -219,7 +226,7 @@ class WebsocketServerController extends Controller
                 {
                     //VarDumper::dump($msg);
                     if (!empty($msg[0]) && $msg[0] === 'message') {
-                        echo 'mes: ' . $msg[2] . PHP_EOL;
+                        // echo 'mes: ' . $msg[2] . PHP_EOL;
                         $server->push($request->fd, $msg[2]); //WEBSOCKET_OPCODE_PING
                     }
                 }

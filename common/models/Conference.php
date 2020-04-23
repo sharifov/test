@@ -21,6 +21,8 @@ use yii\db\ActiveRecord;
  * @property string $cf_recording_sid
  * @property string $cf_created_dt
  * @property string $cf_updated_dt
+ * @property string $cf_friendly_name
+ * @property string $cf_call_sid
  *
  * @property ConferenceRoom $cfCr
  * @property ConferenceParticipant[] $conferenceParticipants

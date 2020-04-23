@@ -185,10 +185,10 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                     <?php echo \yii\bootstrap4\Breadcrumbs::widget([
                         'homeLink' => [
                             'label' => false,
-                            'template' => '<li class="breadcrumb-item"><a href="'.Yii::$app->urlManager->createUrl('/').'">Home</a></li>',
+                            'template' => '<li class="breadcrumb-item"><a href="' . Yii::$app->urlManager->createUrl('/') . '">Home</a></li>',
                         ],
                         'links' => $this->params['breadcrumbs'] ?? [],
-                    ]);?>
+                    ]); ?>
                 </div>
 
                 <div class="col-md-12 col-sm-12 col-xs-12">
@@ -196,10 +196,11 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                         <div class="spinner">
                         </div>
                     </div>
-                    <?=\frontend\themes\gentelella_v2\widgets\FlashAlert::widget()?>
+                    <?= \frontend\themes\gentelella_v2\widgets\FlashAlert::widget() ?>
                     <?= $content ?>
                 </div>
             </div>
+        </div>
         </div>
         <!-- /page content -->
         <!-- footer content -->

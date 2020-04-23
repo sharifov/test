@@ -19,12 +19,14 @@ use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\FindWeightParams;
 use sales\services\lead\qcall\QCallService;
+use webapi\src\services\communication\RequestDataDTO;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use DateTimeZone;
@@ -359,6 +361,36 @@ class Call extends \yii\db\ActiveRecord
         $call->declined();
         return $call;
     }
+
+    public static function createByIncoming(RequestDataDTO $requestDataDTO, ?int $projectId, ?int $depId, ?int $clientId): Call
+	{
+		$call = self::create();
+		$call->c_call_sid = $requestDataDTO->CallSid ?? null;
+		$call->c_call_type_id = self::CALL_TYPE_IN;
+		$call->c_parent_call_sid = $requestDataDTO->ParentCallSid ?? null;
+		$call->c_offset_gmt = self::getClientTime(ArrayHelper::toArray($requestDataDTO));
+		$call->c_from_country = self::getDisplayRegion($requestDataDTO->FromCountry);
+		$call->c_from_state = $requestDataDTO->FromState ?? null;
+		$call->c_from_city = $requestDataDTO->FromCity ?? null;
+		$call->c_is_new = true;
+		$call->c_created_dt = date('Y-m-d H:i:s');
+		$call->c_from = $requestDataDTO->From;
+		$call->c_to = $requestDataDTO->To; //Called
+		$call->c_created_user_id = null;
+		$call->c_project_id = $projectId;
+		$call->c_dep_id = $depId;
+		$call->c_client_id = $clientId;
+		$call->setStatusIvr();
+		return $call;
+	}
+
+	public function assignParentCall(int $callId, int $projectId, int $depId, int $sourceTypeId): void
+	{
+		$this->c_parent_id = $callId;
+		$this->c_project_id = $projectId;
+		$this->c_dep_id = $depId;
+		$this->c_source_type_id = $sourceTypeId;
+	}
 
     /**
      * @return bool
