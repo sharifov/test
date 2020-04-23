@@ -2,14 +2,18 @@
 
 namespace console\controllers;
 
+use common\components\jobs\CreateSaleFromBOJob;
 use common\models\Client;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\UserProjectParams;
+use sales\helpers\app\AppHelper;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use thamtech\uuid\helpers\UuidHelper;
+use Yii;
 use yii\console\Controller;
+use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -294,5 +298,114 @@ class OneTimeController extends Controller
 
         printf(PHP_EOL . 'Execute Time: %s' . PHP_EOL, $this->ansiFormat($time . ' s', Console::FG_RED));
         printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    /**
+     * @param string $fromDate
+     * @param string $toDate
+     * @param int $status
+     */
+    public function actionSaleToCase(string $fromDate, string $toDate, int $status): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+        $time_start = microtime(true);
+
+        $fromDate = date('Y-m-d', strtotime($fromDate));
+        $toDate = date('Y-m-d', strtotime($toDate));
+        $processed = $countCases = 0;
+
+        try {
+            $cases = $this->getCaseNotSale($fromDate, $toDate, $status);
+            $countCases = count($cases);
+            Console::startProgress(0, $countCases);
+
+            foreach ($cases as $key => $value) {
+                $job = new CreateSaleFromBOJob();
+                $job->case_id = $value['cs_id'];
+                $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
+                Yii::$app->queue_job->priority(100)->push($job);
+                $processed ++;
+                Console::updateProgress($processed, $countCases);
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable),
+                'OneTimeController:actionSaleToCase:Throwable' );
+            echo Console::renderColoredString('%r --- Error : '. $throwable->getMessage() .' %n'), PHP_EOL;
+        }
+
+        Console::endProgress(false);
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %gFind cases: %w[' . $countCases . '] %g Added to queue: %w[' . $processed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+    }
+
+
+    /**
+     * @param string $fromDate
+     * @param string $toDate
+     * @param int $status
+     * @param array|int[] $notType
+     * @return array|\yii\db\DataReader
+     * @throws \yii\db\Exception
+     */
+    protected function getCaseNotSale(string $fromDate, string $toDate, int $status, string $notType = '9')
+    {
+        return Yii::$app->db->createCommand(
+            'SELECT 
+                    cases.cs_id,
+                    cases.cs_client_id
+                FROM
+                    cases
+                LEFT JOIN
+                    case_sale ON case_sale.css_cs_id = cases.cs_id
+                INNER JOIN
+                    client_phone 
+                    ON 
+                    client_phone.client_id = cases.cs_client_id
+                    AND 
+                    client_phone.type NOT IN (:not_type)
+                WHERE
+                    case_sale.css_cs_id IS NULL
+                    AND DATE(cases.cs_created_dt) BETWEEN :from_date AND :to_date
+                    AND cases.cs_status = :status
+                GROUP BY 
+                    cases.cs_id,
+                    cases.cs_client_id',
+            [
+                ':from_date' => $fromDate,
+                ':to_date' => $toDate,
+                ':status' => $status,
+                ':not_type' => $notType,
+            ]
+        )->queryAll();
+    }
+
+    /**
+     * @param int $clientId
+     * @param string $notType
+     * @return array|false|\yii\db\DataReader
+     * @throws \yii\db\Exception
+     */
+    protected function getPhoneByClient(int $clientId, string $notType = '9')
+    {
+        return Yii::$app->db->createCommand(
+            'SELECT 
+                    client_phone.phone
+                FROM
+                    client_phone
+                WHERE 
+                    client_id = :client_id
+                    AND
+                    client_phone.type NOT IN (:not_type)	
+                ORDER BY 
+                    created DESC
+                LIMIT 1',
+            [
+                ':client_id' => $clientId,
+                ':not_type' => $notType,
+            ]
+        )->queryOne();
     }
 }
