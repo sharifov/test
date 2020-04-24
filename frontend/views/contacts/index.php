@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'created',
                 'value' => function(Client $model) {
-                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([
