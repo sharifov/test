@@ -25,12 +25,13 @@ class MigrateCallsToCallLogsController extends Controller
     public $offset;
     public $dateFrom;
     public $dateTo;
+    public $callId;
 
     public function options($actionID)
     {
         if ($actionID === 'migrate-calls-to-call-log') {
             return array_merge(parent::options($actionID), [
-                'limit', 'offset', 'dateFrom', 'dateTo'
+                'limit', 'offset', 'dateFrom', 'dateTo', 'callId'
             ]);
         }
         return parent::options($actionID);
@@ -48,7 +49,7 @@ class MigrateCallsToCallLogsController extends Controller
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
     }
 
-    private function getQueryBefore($limit, $offset, $dateFrom, $dateTo)
+    private function getQueryBefore($limit, $offset, $dateFrom, $dateTo, $callId)
     {
         $query = Call::find()
             ->orderBy(['c_id' => SORT_ASC])
@@ -59,10 +60,13 @@ class MigrateCallsToCallLogsController extends Controller
             ->andWhere(['<', 'c_created_dt', self::DATE])
             ->andWhere(['c_call_status' => [Call::TW_STATUS_COMPLETED, Call::TW_STATUS_BUSY, Call::TW_STATUS_NO_ANSWER, Call::STATUS_FAILED, Call::TW_STATUS_CANCELED]])
             ->asArray();
+        if ($callId) {
+            $query->andWhere(['c_id' => $callId]);
+        }
         return $query;
     }
 
-    private function getQueryAfter($limit, $offset, $dateFrom, $dateTo)
+    private function getQueryAfter($limit, $offset, $dateFrom, $dateTo, $callId)
     {
         $query = Call::find()->alias('c')
             ->select('c.*')
@@ -159,10 +163,13 @@ class MigrateCallsToCallLogsController extends Controller
             ->andWhere(['<', 'c.c_created_dt', $dateTo])
             ->andWhere(['c.c_call_status' => [Call::TW_STATUS_COMPLETED, Call::TW_STATUS_BUSY, Call::TW_STATUS_NO_ANSWER, Call::TW_STATUS_FAILED, Call::TW_STATUS_CANCELED]])
             ->asArray();
+        if ($callId) {
+            $query->andWhere(['c.c_id' => $callId]);
+        }
         return $query;
     }
 
-    public function actionMigrateCallsToCallLog($limit, $offset, $dateFrom, $dateTo): void
+    public function actionMigrateCallsToCallLog($limit, $offset, $dateFrom, $dateTo, $callId = null): void
     {
         $limit = ($limit);
         $offset = ($offset);
@@ -188,9 +195,9 @@ class MigrateCallsToCallLogsController extends Controller
         $n = 0;
 
         if (strtotime($dateFrom) < strtotime(self::DATE)) {
-            $query = $this->getQueryBefore($limit, $offset, $dateFrom, $dateTo);
+            $query = $this->getQueryBefore($limit, $offset, $dateFrom, $dateTo, $callId);
         } else {
-            $query = $this->getQueryAfter($limit, $offset, $dateFrom, $dateTo);
+            $query = $this->getQueryAfter($limit, $offset, $dateFrom, $dateTo, $callId);
         }
 
         $total = (clone $query)->count();
@@ -202,7 +209,7 @@ class MigrateCallsToCallLogsController extends Controller
 
         foreach ($query->batch() as $calls) {
             foreach ($calls as $call) {
-                $this->processCall($call, $logs);
+                $this->processCall($call, $logs, $callId);
                 $n++;
                 Console::updateProgress($n, $total);
             }
@@ -227,8 +234,12 @@ class MigrateCallsToCallLogsController extends Controller
         printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
     }
 
-    private function processCall($call, &$log): void
+    private function processCall($call, &$log, $callId): void
     {
+        if ($callId) {
+            \Yii::info($call, 'info\Debug');
+        }
+
         if (CallLog::find()->andWhere(['cl_id' => $call['c_id']])->exists()) {
             $log[] = [
                 'Call Id' => $call['c_id'],
