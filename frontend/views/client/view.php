@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Client;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -41,7 +42,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'is_public:boolean',
             'disabled:boolean',
             'rating',
-            'parent_id',
+            [
+                'attribute' => 'parent_id',
+                'value' => function(\common\models\Client $model) {
+
+                    $out = '<span class="not-set">(not set)</span>';
+                    if ($model->parent_id && $parent = Client::findOne(['id' => $model->parent_id])) {
+                        return '<i class="fa fa-user"></i> ' . $parent->full_name;
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+            ],
         ],
     ]) ?>
     </div>
