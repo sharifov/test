@@ -23,7 +23,6 @@ if(Yii::$app->request->isPjax) {
 
 $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 
-//$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 $caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
 if (!empty($caseSaleModel)) {
     $canManageSaleInfo =  $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->user->identity, $data['passengers'] ?? []);

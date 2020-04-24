@@ -351,7 +351,7 @@ class FlightQuoteController extends FController
 		$productQuote = $this->productQuoteRepository->find($productQuoteId);
 		$lead = $productQuote->pqProduct->prLead;
 
-		if($lead->isInTrash() && Yii::$app->user->identity->canRole('agent')) {
+		if($lead->isInTrash() && Auth::user()->isAgent()) {
 			throw new ForbiddenHttpException('Access Denied for Agent');
 		}
 
