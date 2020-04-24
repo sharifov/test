@@ -245,10 +245,10 @@ class MigrateCallsToCallLogsController extends Controller
         if (
             $call['c_call_type_id'] == Call::CALL_TYPE_OUT
             && $call['c_parent_id'] == null
-            && (
-                $call['first_child_c_id'] == null || $call['first_child_c_call_type_id'] == Call::CALL_TYPE_OUT
-            )
+            && $call['first_child_c_id'] != null
+            && $call['bottom_child_c_id'] == null
         ) {
+            $this->outParentCalls($call, $log);
             return;
         }
 
@@ -265,10 +265,9 @@ class MigrateCallsToCallLogsController extends Controller
         if (
             $call['c_call_type_id'] == Call::CALL_TYPE_OUT
             && $call['c_parent_id'] != null
-            && $call['first_child_c_id'] == null
             && $call['parent_c_parent_id'] == null
         ) {
-            $this->outChildCalls($call, $log);
+            //$this->outChildCalls($call, $log);
             return;
         }
 
@@ -400,11 +399,28 @@ class MigrateCallsToCallLogsController extends Controller
 
     }
 
+    private function outParentCalls($call, array &$log): void
+    {
+        $callData['cl_group_id'] = $call['c_id'];
+
+        $callRecordData['clr_record_sid'] = $call['first_child_c_recording_sid'];
+        $callRecordData['clr_duration'] = $call['first_child_c_recording_duration'];
+
+        $this->createCallLogs(
+            $call,
+            $log,
+            $callData,
+            [],
+            $callRecordData
+        );
+    }
+
     private function outTransferSecondaryOutChildCall($call, array &$log): void
     {
         $call['c_created_user_id'] = null;
 
         $callData['cl_group_id'] = $call['parent_c_parent_id'];
+        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['top_parent_c_created_dt']) + $call['top_parent_c_call_duration']));
 
         $this->createCallLogs(
             $call,
@@ -491,7 +507,7 @@ class MigrateCallsToCallLogsController extends Controller
 
         $call['c_parent_id'] = $call['parent_c_parent_id'];
 
-        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - strtotime($call['parent_c_created_dt']));
+        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['top_parent_c_created_dt']) + $call['top_parent_c_call_duration']));
 
         $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
         $callData['cl_is_transfer'] = (
