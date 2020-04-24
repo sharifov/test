@@ -34,21 +34,59 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(Client $model) {
                     $out = '';
                     $first_name = $model->first_name ? Html::encode($model->first_name) : '<span class="not-set">(not set)</span>';
-                    $out .= '<em>First name:</em> ' . $first_name . '<br />';
+                    $out .= '<i class="fa fa-check"></i> <em>First name:</em> ' . $first_name . '<br />';
                     $middle_name = $model->middle_name ? Html::encode($model->middle_name) : '<span class="not-set">(not set)</span>';
-                    $out .= '<em>Middle name:</em> ' . $middle_name. '<br />';
+                    $out .= '<i class="fa fa-check"></i> <em>Middle name:</em> ' . $middle_name . '<br />';
                     $last_name = $model->last_name ? Html::encode($model->last_name) : '<span class="not-set">(not set)</span>';
-                    $out .= '<em>Last name:</em> ' . $last_name . '<br />';
+                    $out .= '<i class="fa fa-check"></i> <em>Last name:</em> ' . $last_name . '<br />';
 
                     return $out;
                 },
                 'format' => 'raw',
             ],
             'company_name',
-
-            'is_company:boolean', /* TODO::  */
-            'is_public:boolean',
-            'disabled:boolean',
+            [
+                'attribute' => 'is_company',
+                'value' => function(Client $model) {
+                    $out = '<span class="not-set">(not set)</span>';
+                    if ($model->is_company) {
+                        $out = $model->is_company ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'options' => [
+                    'style' => 'width:100px'
+                ],
+            ],
+            [
+                'attribute' => 'is_public',
+                'value' => function(Client $model) {
+                    $out = '<span class="not-set">(not set)</span>';
+                    if ($model->is_public) {
+                        $out = $model->is_public ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'options' => [
+                    'style' => 'width:100px'
+                ],
+            ],
+            [
+                'attribute' => 'disabled',
+                'value' => function(Client $model) {
+                    $out = '<span class="not-set">(not set)</span>';
+                    if ($model->disabled) {
+                        $out = $model->disabled ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+                'filter' => [1 => 'Yes', 0 => 'No']
+            ],
             [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
@@ -108,25 +146,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => DatePicker::widget([
                     'model' => $searchModel,
                     'attribute' => 'created',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
-            ],
-            [
-                'attribute' => 'updated',
-                'value' => function(Client $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'updated',
                     'clientOptions' => [
                         'autoclose' => true,
                         'format' => 'yyyy-mm-dd',
