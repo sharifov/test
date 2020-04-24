@@ -10,7 +10,7 @@ class m200424_043826_add_columns_to_client extends Migration
     /**
      * {@inheritdoc}
      */
-     public function safeUp()
+    public function safeUp()
     {
         $this->addColumn('{{%clients}}', 'parent_id', $this->integer());
         $this->addColumn('{{%clients}}', 'is_company', $this->boolean());
