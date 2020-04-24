@@ -9,11 +9,11 @@ use yii\db\Migration;
  */
 class m200424_085000_add_permissions_for_contacts extends Migration
 {
-    public $routes = [
+    public $routesContacts = [
         '/contacts/*',
     ];
 
-    public $roles = [
+    public $rolesContacts = [
         Employee::ROLE_ADMIN,
         Employee::ROLE_SUPER_ADMIN,
         Employee::ROLE_AGENT,
@@ -27,11 +27,22 @@ class m200424_085000_add_permissions_for_contacts extends Migration
         Employee::ROLE_SALES_SENIOR,
     ];
 
+    public $routes = [
+        '/user-contact-list/*',
+        '/client-project/*',
+    ];
+
+    public $roles = [
+        Employee::ROLE_ADMIN,
+        Employee::ROLE_SUPER_ADMIN,
+    ];
+
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
+        (new RbacMigrationService())->up($this->routesContacts, $this->rolesContacts);
         (new RbacMigrationService())->up($this->routes, $this->roles);
 
         if (\Yii::$app->cache) {
@@ -44,7 +55,8 @@ class m200424_085000_add_permissions_for_contacts extends Migration
      */
     public function safeDown()
     {
-        (new RbacMigrationService())->down($this->routes, $this->roles);
+        (new RbacMigrationService())->down($this->routesContacts, $this->rolesContacts);
+        (new RbacMigrationService())->up($this->routes, $this->roles);
 
         if (\Yii::$app->cache) {
 			\Yii::$app->cache->flush();

@@ -3,17 +3,17 @@
 namespace frontend\controllers;
 
 use Yii;
-use common\models\UserContactList;
-use common\models\search\UserContactListSearch;
+use common\models\ClientProject;
+use common\models\search\ClientProjectSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * UserContactListController implements the CRUD actions for UserContactList model.
+ * ClientProjectController implements the CRUD actions for ClientProject model.
  */
-class UserContactListController extends FController
+class ClientProjectController extends FController
 {
     /**
      * @return array
@@ -32,12 +32,12 @@ class UserContactListController extends FController
     }
 
     /**
-     * Lists all UserContactList models.
+     * Lists all ClientProject models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new UserContactListSearch();
+        $searchModel = new ClientProjectSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -47,30 +47,30 @@ class UserContactListController extends FController
     }
 
     /**
-     * Displays a single UserContactList model.
-     * @param integer $ucl_user_id
-     * @param integer $ucl_client_id
+     * Displays a single ClientProject model.
+     * @param integer $cp_client_id
+     * @param integer $cp_project_id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($ucl_user_id, $ucl_client_id)
+    public function actionView($cp_client_id, $cp_project_id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($ucl_user_id, $ucl_client_id),
+            'model' => $this->findModel($cp_client_id, $cp_project_id),
         ]);
     }
 
     /**
-     * Creates a new UserContactList model.
+     * Creates a new ClientProject model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new UserContactList();
+        $model = new ClientProject();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ucl_user_id' => $model->ucl_user_id, 'ucl_client_id' => $model->ucl_client_id]);
+            return $this->redirect(['view', 'cp_client_id' => $model->cp_client_id, 'cp_project_id' => $model->cp_project_id]);
         }
 
         return $this->render('create', [
@@ -79,19 +79,19 @@ class UserContactListController extends FController
     }
 
     /**
-     * Updates an existing UserContactList model.
+     * Updates an existing ClientProject model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $ucl_user_id
-     * @param integer $ucl_client_id
+     * @param integer $cp_client_id
+     * @param integer $cp_project_id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($ucl_user_id, $ucl_client_id)
+    public function actionUpdate($cp_client_id, $cp_project_id)
     {
-        $model = $this->findModel($ucl_user_id, $ucl_client_id);
+        $model = $this->findModel($cp_client_id, $cp_project_id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ucl_user_id' => $model->ucl_user_id, 'ucl_client_id' => $model->ucl_client_id]);
+            return $this->redirect(['view', 'cp_client_id' => $model->cp_client_id, 'cp_project_id' => $model->cp_project_id]);
         }
 
         return $this->render('update', [
@@ -100,31 +100,31 @@ class UserContactListController extends FController
     }
 
     /**
-     * Deletes an existing UserContactList model.
+     * Deletes an existing ClientProject model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $ucl_user_id
-     * @param integer $ucl_client_id
+     * @param integer $cp_client_id
+     * @param integer $cp_project_id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($ucl_user_id, $ucl_client_id)
+    public function actionDelete($cp_client_id, $cp_project_id)
     {
-        $this->findModel($ucl_user_id, $ucl_client_id)->delete();
+        $this->findModel($cp_client_id, $cp_project_id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the UserContactList model based on its primary key value.
+     * Finds the ClientProject model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $ucl_user_id
-     * @param integer $ucl_client_id
-     * @return UserContactList the loaded model
+     * @param integer $cp_client_id
+     * @param integer $cp_project_id
+     * @return ClientProject the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($ucl_user_id, $ucl_client_id)
+    protected function findModel($cp_client_id, $cp_project_id)
     {
-        if (($model = UserContactList::findOne(['ucl_user_id' => $ucl_user_id, 'ucl_client_id' => $ucl_client_id])) !== null) {
+        if (($model = ClientProject::findOne(['cp_client_id' => $cp_client_id, 'cp_project_id' => $cp_project_id])) !== null) {
             return $model;
         }
 
