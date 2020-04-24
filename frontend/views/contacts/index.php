@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'uuid',
 
             'first_name',
-            'middle_name',
+            'middle_name', /* TODO::  */
             'last_name',
 
             'company_name',

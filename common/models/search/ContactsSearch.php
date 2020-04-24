@@ -42,6 +42,21 @@ class ContactsSearch extends Client
     }
 
     /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            [['id'], 'integer'],
+            [['client_email', 'client_phone'], 'string'],
+            [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
+            ['uuid', 'string', 'max' => 36],
+            [['company_name'], 'string', 'max' => 150],
+            [['is_company', 'is_public', 'disabled'], 'boolean'],
+        ];
+    }
+
+    /**
      * Creates data provider instance with search query applied
      *
      * @param array $params
