@@ -23,8 +23,14 @@ use yii\db\ActiveQuery;
  * @property string $created
  * @property string $updated
  * @property string $uuid
- *
  * @property string $full_name
+ * @property int $parent_id
+ * @property bool $is_company
+ * @property bool $is_public
+ * @property string $company_name
+ * @property string $description
+ * @property bool $disabled
+ * @property int $rating
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -34,7 +40,6 @@ use yii\db\ActiveQuery;
  */
 class Client extends ActiveRecord
 {
-
     use EventTrait;
 
     public $full_name;
@@ -81,10 +86,12 @@ class Client extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['first_name'], 'required'],
             [['created', 'updated'], 'safe'],
             [['first_name', 'middle_name', 'last_name'], 'string', 'max' => 100],
-
+            [['company_name'], 'string', 'max' => 150],
+            [['description'], 'string'],
+            [['is_company', 'is_public', 'disabled'], 'boolean'],
+            [['parent_id', 'rating'], 'integer'],
             ['uuid', 'unique'],
             ['uuid', UuidValidator::class],
         ];
@@ -103,9 +110,15 @@ class Client extends ActiveRecord
             'created' => 'Created',
             'updated' => 'Updated',
             'full_name' => 'Full Name',
+            'parent_id' => 'Parent id',
+            'is_company' => 'Is company',
+            'is_public' => 'Is public',
+            'company_name' => 'Company name',
+            'description' => 'Description',
+            'disabled' => 'Disabled',
+            'rating' => 'Rating',
         ];
     }
-
 
     public function afterFind(): void
     {
@@ -240,6 +253,15 @@ class Client extends ActiveRecord
     public static function getList(): array
     {
         $data = self::find()->orderBy(['id' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'id', 'first_name');
+    }
+
+    /**
+     * @return array
+     */
+    public static function getParentList(): array
+    {
+        $data = self::find()->where(['IS', 'parent_id', null])->orderBy(['id' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'id', 'first_name');
     }
 

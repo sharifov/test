@@ -35,6 +35,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'first_name',
             'middle_name',
             'last_name',
+            'company_name',
+            'description',
+            'is_company:boolean',
+            'is_public:boolean',
+            'disabled:boolean',
+            'rating',
+            'parent_id',
         ],
     ]) ?>
     </div>
