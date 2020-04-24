@@ -2,10 +2,15 @@
 
 namespace frontend\controllers;
 
+use common\models\UserContactList;
+use sales\access\ListsAccess;
+use sales\auth\Auth;
+use sales\model\user\entity\Access;
 use Yii;
 use common\models\Client;
 use common\models\search\ContactsSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -37,7 +42,8 @@ class ContactsController extends FController
      */
     public function actionIndex()
     {
-        $searchModel = new ContactsSearch();
+        $searchModel = new ContactsSearch(Auth::id());
+
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -70,8 +76,14 @@ class ContactsController extends FController
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
-            /* TODO:: add to user_contact_list */
+            $userContactList = new UserContactList();
+            $userContactList->ucl_client_id = $model->id;
+            $userContactList->ucl_user_id = Auth::id();
 
+            if(!$userContactList->save()) {
+                Yii::error(VarDumper::dumpAsString($userContactList->errors),
+                    'ContactsController:actionCreate:save');
+            }
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
