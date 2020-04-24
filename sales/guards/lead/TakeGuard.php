@@ -7,22 +7,14 @@ use common\models\Employee;
 class TakeGuard
 {
 
-    /**
-     * @param Employee $user
-     * @param array $flowDescriptions
-     */
-    public function frequencyMinutesGuard(Employee $user, array $flowDescriptions = []): void
+    public function frequencyMinutesGuard(Employee $user, array $flowDescriptions = [], array $fromStatuses = []): void
     {
-        $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes($flowDescriptions);
+        $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes($flowDescriptions, $fromStatuses);
         if (!$isAccessNewLeadByFrequency['access']) {
             throw new \DomainException('Access is denied (frequency)');
         }
     }
 
-    /**
-     * @param Employee $user
-     * @param array $flowDescriptions
-     */
     public function minPercentGuard(Employee $user, array $flowDescriptions = []): void
     {
         $isAccessNewLead = $user->accessTakeNewLead($flowDescriptions);
@@ -31,9 +23,6 @@ class TakeGuard
         }
     }
 
-    /**
-     * @param Employee $user
-     */
     public function shiftTimeGuard(Employee $user): void
     {
         if (!$user->checkShiftTime()) {

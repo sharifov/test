@@ -56,6 +56,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
 
 
+        $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/failed-bookings'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Bonus <span id="badges-bonus" data-type="bonus" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/bonus'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];

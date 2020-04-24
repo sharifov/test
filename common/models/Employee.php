@@ -1275,11 +1275,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     /**
      * @param array $flowDescriptions
+     * @param array $fromStatuses
      * @return string
      */
-    public function getLastTakenLeadDt(array $flowDescriptions = []): string
+    public function getLastTakenLeadDt(array $flowDescriptions = [], array $fromStatuses = []): string
     {
-        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id, $flowDescriptions)->one()) {
+        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id, $flowDescriptions, $fromStatuses)->one()) {
             return $leadFlow['created'];
         }
         return '';
@@ -1953,10 +1954,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     /**
      * @param array $flowDescriptions
+     * @param array $fromStatuses
      * @return array
      * @throws \Exception
      */
-    public function accessTakeLeadByFrequencyMinutes(array $flowDescriptions = []): array
+    public function accessTakeLeadByFrequencyMinutes(array $flowDescriptions = [], array $fromStatuses = []): array
     {
         $access = true;
         $takeDt = new \DateTime();
@@ -1964,7 +1966,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if (
             ($params = $this->userParams)
             && ($frequencyMinutes = $params->up_frequency_minutes)
-            && ($lastTakenDt = $this->getLastTakenLeadDt($flowDescriptions))
+            && ($lastTakenDt = $this->getLastTakenLeadDt($flowDescriptions, $fromStatuses))
         ) {
 
             $nextTakeUTC = (new \DateTime($lastTakenDt, new \DateTimeZone('UTC')))
