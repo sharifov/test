@@ -378,7 +378,6 @@ class TwilioController extends ApiBaseNoAuthController
 
                 $call->setStatusQueue();
 
-                $communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
 
                 $callUserAccessAny = $call->callUserAccesses; //CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {
