@@ -398,7 +398,7 @@ class OneTimeController extends Controller
                 WHERE 
                     client_id = :client_id
                     AND
-                    client_phone.type NOT IN (:not_type)	
+                    (client_phone.type NOT IN (:not_type) OR client_phone.type IS NULL)	
                 ORDER BY 
                     created DESC
                 LIMIT 1',
