@@ -365,7 +365,7 @@ class OneTimeController extends Controller
                     ON 
                     client_phone.client_id = cases.cs_client_id
                     AND 
-                    client_phone.type NOT IN (:not_type)
+                    (client_phone.type NOT IN (:not_type) OR client_phone.type IS NULL)
                 WHERE
                     case_sale.css_cs_id IS NULL
                     AND DATE(cases.cs_created_dt) BETWEEN :from_date AND :to_date
