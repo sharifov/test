@@ -66,13 +66,6 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 <div class="container body">
     <div class="main_container">
         <?php if(!Yii::$app->user->isGuest):?>
-            <?= CentrifugoNotificationWidget::widget([
-                    'userId' => Auth::id(),
-                    'userAllowedChannels' => [
-                        'ownUserChannel#' . Auth::id(),
-                        'multipleUsersChannel#658,659'
-                    ]
-            ]) ?>
         <div class="col-md-3 left_col">
             <div class="left_col scroll-view">
 
@@ -143,6 +136,13 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                                     echo NotificationWidget::widget(['userId' => Auth::id()]);
                                 }
                             ?>
+                        <?= CentrifugoNotificationWidget::widget([
+                            'userId' => Auth::id(),
+                            'userAllowedChannels' => [
+                                'ownUserChannel#' . Auth::id(),
+                                'multipleUsersChannel#658,659'
+                            ]
+                        ]) ?>
 
                         <li class="nav-item">
                             <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>

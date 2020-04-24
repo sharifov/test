@@ -137,9 +137,11 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
+use common\components\CentrifugoService;
 
 
 /**
@@ -1157,11 +1159,31 @@ class TestController extends FController
 
     public function actionCentSend()
     {
-        CentrifugoService::sendMsg('Message from channel "ownUserChannel"', 'ownUserChannel' . Auth::id());
+        CentrifugoService::sendMsg('Message from channel "ownUserChannel"', 'ownUserChannel#' . Auth::id());
     }
 
     public function actionCentSend1(){
         CentrifugoService::sendMsg('Message from channel "multipleUsersChannel"', 'multipleUsersChannel#658,659');
+    }
+
+    public function actionCentrifugoNotifications()
+    {
+        $count = Notifications::findNewCount(Auth::id());
+        CentrifugoService::sendMsg(json_encode(['count' => $count]), 'ownUserChannel#' . Auth::id());
+
+        $notifications = Notifications::findNew(Auth::id());
+
+        foreach ($notifications as $notification){
+            CentrifugoService::sendMsg(json_encode(['msg' => [
+                'n_id' => $notification['n_id'],
+                'n_title' => $notification['n_title'],
+                'n_msg' => StringHelper::truncate(Email::strip_html_tags($notification['n_message']), 80, '...'),
+                'n_created_dt' => strtotime($notification['n_created_dt']),
+                'relative_created_dt' => Yii::$app->formatter->asRelativeTime($notification['n_created_dt'])
+            ]
+            ]), 'ownUserChannel#' . Auth::id());
+            sleep(1);
+        }
     }
 
     public function actionWebSocket()
