@@ -29,9 +29,25 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'uuid',
 
-            'first_name',
-            'middle_name', /* TODO::  */
-            'last_name',
+            /*'first_name',
+            'middle_name',
+            'last_name',*/
+            /* TODO::  */
+            [
+                'header' => 'Name',
+                'attribute' => 'by_name',
+                'value' => function(Client $model) {
+
+                    $out = '';
+                    $first_name = $model->first_name ? Html::encode($model->first_name) : '<span class="not-set">(not set)</span>';
+                    $out .= 'First name: ' . $first_name ;
+                    $first_name = $model->first_name ? Html::encode($model->first_name) : '<span class="not-set">(not set)</span>';
+                    $out .= 'First name: ' . $first_name ;
+
+                    return $out;
+                },
+                'format' => 'raw',
+            ],
 
             'company_name',
 
@@ -46,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = [];
                     if($phones) {
                         foreach ($phones as $k => $phone) {
-                            $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>';
+                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone).'</code>';
                         }
                     }
                     return implode('<br>', $data);

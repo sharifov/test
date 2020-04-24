@@ -15,13 +15,15 @@ use yii\helpers\ArrayHelper;
  * ContactsSearch represents the model behind the search form of `common\models\Client`.
  *
  * @property int $userId
- * @property int $isPublic
- * @property int $isDisabled
+ * @property bool $isPublic
+ * @property bool $isDisabled
+ * @property string $by_name
  */
 class ContactsSearch extends Client
 {
     public $client_email;
     public $client_phone;
+    public $by_name;
 
     public $userId;
     public $isPublic = true;
@@ -51,7 +53,7 @@ class ContactsSearch extends Client
             [['client_email', 'client_phone'], 'string'],
             [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
             ['uuid', 'string', 'max' => 36],
-            [['company_name'], 'string', 'max' => 150],
+            [['company_name', 'by_name'], 'string', 'max' => 150],
             [['is_company', 'is_public', 'disabled'], 'boolean'],
         ];
     }
@@ -119,6 +121,16 @@ class ContactsSearch extends Client
             'disabled' => $this->disabled,
             'rating' => $this->rating,
         ]);
+
+        if ($this->by_name)  {
+            $query->andWhere(
+                ['OR',
+                    ['like', 'first_name', $this->by_name],
+                    ['like', 'middle_name', $this->by_name],
+                    ['like', 'last_name', $this->by_name],
+                ]
+            );
+        }
 
         $query->andFilterWhere(['like', 'first_name', $this->first_name])
             ->andFilterWhere(['like', 'middle_name', $this->middle_name])
