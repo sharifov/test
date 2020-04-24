@@ -258,6 +258,7 @@ class MigrateCallsToCallLogsController extends Controller
             && $call['c_parent_id'] == null
             && $call['first_child_c_id'] != null
             && $call['bottom_child_c_id'] == null
+            && $call['first_child_c_call_type_id'] == Call::CALL_TYPE_OUT
         ) {
             $this->outParentCalls($call, $log);
             return;
@@ -267,7 +268,7 @@ class MigrateCallsToCallLogsController extends Controller
             $call['c_call_type_id'] == Call::CALL_TYPE_OUT
             && $call['c_parent_id'] == null
             && $call['first_child_c_id'] != null
-            && $call['bottom_child_c_id'] != null
+            && ($call['bottom_child_c_id'] != null || $call['first_child_c_call_type_id'] == Call::CALL_TYPE_IN)
         ) {
             $this->outTransferParentCalls($call, $log);
             return;
