@@ -109,6 +109,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 	private const CALL_EXPERT_SHIFT_MINUTES = 12*60;
 
+	private const LEVEL_PERMISSION_IS_AGENT = 'isAgent';
+
     public $password;
     public $deleted;
 
@@ -137,6 +139,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $projectAccess = [];
 
     private $access;
+    private $permissionList = [];
 
     public function loadCache(UserCache $cache): void
     {
@@ -256,7 +259,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isAgent(): bool
     {
-        return in_array(self::ROLE_AGENT, $this->getRoles(true), true);
+        if (isset($this->permissionList[self::LEVEL_PERMISSION_IS_AGENT])) {
+            return $this->permissionList[self::LEVEL_PERMISSION_IS_AGENT];
+        }
+        $this->permissionList[self::LEVEL_PERMISSION_IS_AGENT] = Yii::$app->authManager->checkAccess($this->id, self::LEVEL_PERMISSION_IS_AGENT);
+        return $this->permissionList[self::LEVEL_PERMISSION_IS_AGENT];
+//        return in_array(self::ROLE_AGENT, $this->getRoles(true), true);
     }
 
     public function isSimpleAgent(): bool
@@ -1032,7 +1040,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return array
      */
-    public static function getListByRole($role = 'agent'): array
+    public static function getListByRole($role = self::ROLE_AGENT): array
     {
         $data = self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'id', 'username');
@@ -1042,7 +1050,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 	 * @param array $role
 	 * @return array
 	 */
-	public static function getListSplitProfitByRole(array $role = ['agent']): array
+	public static function getListSplitProfitByRole(array $role = [self::ROLE_AGENT]): array
 	{
 		$data = self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['in', 'auth_assignment.item_name', $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
 		return ArrayHelper::map($data, 'id', 'username');
@@ -1987,7 +1995,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return ['access' => $access, 'takeDt' => $takeDt, 'takeDtUTC' => $takeDtUTC];
     }
 
-    public static function getAllEmployeesByRole($role = 'agent')
+    public static function getAllEmployeesByRole($role = self::ROLE_AGENT)
     {
         return self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->all();
     }

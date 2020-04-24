@@ -7,9 +7,6 @@ use yii\widgets\ActiveForm;
 /* @var $model common\models\search\LeadSearch */
 /* @var $form yii\widgets\ActiveForm */
 
-
-$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
-
 ?>
 
 <div class="lead-search">
