@@ -81,7 +81,7 @@ class WebsocketServerController extends Controller
 
         $server->on('open', static function(Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig) {
 
-            echo '+ ' . date('m-d H:i:s'). " op: {$request->fd}\n";
+            echo '+ ' . date('m-d H:i:s'). " op: {$request->fd}";
             $user = $thisClass->getIdentityByCookie($request, $frontendConfig);
 
             if ($user) {
@@ -139,6 +139,8 @@ class WebsocketServerController extends Controller
 //                    'user_id' => $userId,
 //                    'name' => $user->username,
 //                    'dt' => date('Y-m-d H:i:s')]);
+
+                echo ' : ' . $user->username . ' ('.$userId.')' . PHP_EOL;
 
                 unset($user);
 
@@ -206,7 +208,7 @@ class WebsocketServerController extends Controller
                 }
 
             } else {
-                echo '- not init user' . PHP_EOL;
+                echo ' : not init user' . PHP_EOL;
                 $server->push($request->fd, json_encode(['cmd' => 'userNotInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
                 $server->disconnect($request->fd, 403, 'Access denied');
             }
