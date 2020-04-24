@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); ?>
 
     <p>
-        <?= Html::a('Contact Client', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Contact', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
@@ -28,11 +28,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'id',
             'uuid',
+
             'first_name',
             'middle_name',
             'last_name',
+
             'company_name',
-            'is_company:boolean',
+
+            'is_company:boolean', /* TODO::  */
             'is_public:boolean',
             'disabled:boolean',
             [
@@ -54,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Emails',
                 'attribute' => 'client_email',
-                'value' => function(\common\models\Client $model) {
+                'value' => function(Client $model) {
                     $emails = $model->clientEmails;
                     $data = [];
                     if($emails) {
@@ -70,7 +73,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Leads',
                 'value' => function(Client $model) {
-
                     $leads = $model->leads;
                     $data = [];
                     if($leads) {

@@ -246,6 +246,9 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
                 ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
                 ['label' => 'Clients emails', 'url' => ['/client-email/index'], 'icon' => 'envelope '],
+                ['label' => 'Contacts', 'url' => ['/contacts/index'], 'icon' => 'user'],
+                ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'sitemap'],
+                ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'sitemap'],
             ]
         ];
 
