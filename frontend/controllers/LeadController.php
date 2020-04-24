@@ -1800,54 +1800,39 @@ class LeadController extends FController
      */
     public function actionFailedBookings(): string
     {
-        $params = Yii::$app->request->queryParams;
-
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
-        if ($user->isAgent()) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
+        $user = Auth::user();
 
         $checkShiftTime = true;
+        $isAccessNewLead = true;
+        $accessLeadByFrequency = [];
+        $limit = null;
 
-        if ($isAgent) {
+        if ($user->isAgent()) {
             $checkShiftTime = $user->checkShiftTime();
             $userParams = $user->userParams;
-
             if ($userParams) {
                 if ($userParams->up_inbox_show_limit_leads > 0) {
-                    $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
+                    $limit = $userParams->up_inbox_show_limit_leads;
                 }
             } else {
                 throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
             }
-        }
-
-        $searchModel = new LeadSearch();
-
-        $isAccessNewLead = $user->accessTakeNewLead();
-
-        $dataProvider = $searchModel->searchFailedBookings($params, $user);
-
-        $accessLeadByFrequency = [];
-
-        if ($isAccessNewLead) {
             $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], [Lead::STATUS_BOOK_FAILED]);
             if (!$accessLeadByFrequency['access']) {
                 $isAccessNewLead = $accessLeadByFrequency['access'];
             }
         }
 
+        $searchModel = new LeadSearch();
+        $dataProvider = $searchModel->searchFailedBookings(Yii::$app->request->queryParams, $user, $limit);
+
         return $this->render('failed-bookings', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'checkShiftTime' => $checkShiftTime,
-            'isAgent' => $isAgent,
             'isAccessNewLead' => $isAccessNewLead,
             'accessLeadByFrequency' => $accessLeadByFrequency,
+            'user' => $user,
         ]);
     }
 

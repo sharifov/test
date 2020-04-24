@@ -200,7 +200,6 @@ class TestController extends FController
 
     public function actionTest()
     {
-
         return $this->render('blank');
     }
 

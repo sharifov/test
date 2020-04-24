@@ -2324,10 +2324,12 @@ class LeadSearch extends Lead
     /**
      * @param $params
      * @param Employee $user
+     * @param int|null $limit
      * @return ActiveDataProvider
      */
-    public function searchFailedBookings($params, Employee $user): ActiveDataProvider
+    public function searchFailedBookings($params, Employee $user, ?int $limit): ActiveDataProvider
     {
+        $this->limit = $limit;
         $query = $this->leadBadgesRepository->getFailedBookingsQuery($user);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();

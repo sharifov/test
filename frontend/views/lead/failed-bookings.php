@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use sales\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
@@ -11,10 +12,9 @@ use common\models\Lead;
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $checkShiftTime bool */
-/* @var $isAgent bool */
 /* @var $isAccessNewLead bool */
 /* @var $accessLeadByFrequency array */
-/* @var $user \common\models\Employee */
+/* @var $user Employee */
 
 $this->title = 'Failed Bookings Queue';
 
@@ -56,9 +56,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     aria-hidden="true">&times;</span></button>
                         <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?= Yii::$app->formatter->asTime(time()) ?>)
                     </div>
-
-                    <?php  \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
-                <?php echo date('Y-m-d H:i:s') ?>
                 </div>
             <?php endif; ?>
 
@@ -96,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\Lead $model) {
                     return $model->id;
                 },
-                'visible' => !$isAgent,
+                'visible' => !$user->isAgent(),
                 'options' => [
                     'style' => 'width:80px'
                 ]
@@ -116,7 +113,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'style' => 'width:180px'
                 ],
                 'format' => 'raw',
-                'visible' => !$isAgent,
+                'visible' => !$user->isAgent(),
             ],
 
             [
@@ -141,7 +138,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' => 'Choose Date'
                     ],
                 ]),
-                'enableSorting' => !$isAgent
+                'enableSorting' => !$user->isAgent(),
             ],
 
             [
@@ -168,7 +165,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     return $clientName;
                 },
-                'visible' => !$isAgent,
+                'visible' => !$user->isAgent(),
                 'options' => [
                     'style' => 'width:160px'
                 ]
@@ -237,7 +234,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
                 },
                 'format' => 'raw',
-                'visible' => !$isAgent,
+                'visible' => !$user->isAgent(),
                 'contentOptions' => [
                     'class' => 'text-left'
                 ],
@@ -252,7 +249,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return '<span title="adult"><i class="fa fa-male"></i> ' . $model->adults . '</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants . '</span>';
                 },
                 'format' => 'raw',
-                'visible' => !$isAgent,
+                'visible' => !$user->isAgent(),
                 'contentOptions' => [
                     'class' => 'text-center'
                 ],
@@ -277,7 +274,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\Lead $model) {
                     return $model->getClientTime();
                 },
-                'visible' => ! $isAgent,
+                'visible' => !$user->isAgent(),
                 //'options' => ['style' => 'width:110px'],
 
             ],*/
@@ -318,17 +315,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{action}',
                 'buttons' => [
-                    'action' => static function ($url, \common\models\Lead $model, $key) use ($checkShiftTime, $isAccessNewLead, $isAgent) {
+                    'action' => static function ($url, \common\models\Lead $model, $key) use ($checkShiftTime, $isAccessNewLead, $user) {
                         $buttons = '';
 
-                        if ($isAgent) {
-                            if (!$isAccessNewLead) {
-                                $buttons .= '<i class="fa fa-warning warning"></i> Access is denied (limit) - "Take lead"<br/>';
-                            }
+                        if (!$isAccessNewLead) {
+                            $buttons .= '<i class="fa fa-warning warning"></i> Access is denied (limit) - "Take lead"<br/>';
+                        }
 
-                            if (!$checkShiftTime) {
-                                $buttons .= '<i class="fa fa-warning warning"></i> Time shift limit access<br>';
-                            }
+                        if (!$checkShiftTime) {
+                            $buttons .= '<i class="fa fa-warning warning"></i> Time shift limit access<br>';
                         }
 
                         if (!$buttons) {
@@ -337,7 +332,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'data-pjax' => 0
                             ]);
 
-                            if (!$isAgent) {
+                            if (!$user->isAgent()) {
                                 $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
                                     'class' => 'btn btn-info btn-xs',
                                     'data-pjax' => 0
@@ -364,14 +359,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'condensed' => false,
                 'responsive' => false,
                 'hover' => true,
-//    'floatHeader' => true,
                 'floatHeaderOptions' => [
                     'scrollingTop' => 20
                 ],
-                /*'panel' => [
-                    'type' => GridView::TYPE_PRIMARY,
-                    'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Processing</h3>'
-                ],*/
 
             ]) . '</div>';
         ?>

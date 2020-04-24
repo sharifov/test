@@ -113,10 +113,6 @@ class LeadAssignService
 
     private function checkTakeAccess(Lead $lead, Employee $user): void
     {
-        if (!$user->accessTakeNewLead()) {
-            throw new \DomainException('Access is denied - action "take new lead"');
-        }
-
         if ($user->isAgent() && ($lead->isPending() || $lead->isBookFailed())) {
             if ($lead->isPending()) {
                 $this->takeGuard->minPercentGuard($user);
