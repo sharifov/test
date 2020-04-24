@@ -28,27 +28,22 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'id',
             'uuid',
-
-            /*'first_name',
-            'middle_name',
-            'last_name',*/
-            /* TODO::  */
             [
                 'header' => 'Name',
                 'attribute' => 'by_name',
                 'value' => function(Client $model) {
-
                     $out = '';
                     $first_name = $model->first_name ? Html::encode($model->first_name) : '<span class="not-set">(not set)</span>';
-                    $out .= 'First name: ' . $first_name ;
-                    $first_name = $model->first_name ? Html::encode($model->first_name) : '<span class="not-set">(not set)</span>';
-                    $out .= 'First name: ' . $first_name ;
+                    $out .= '<em>First name:</em> ' . $first_name . '<br />';
+                    $middle_name = $model->middle_name ? Html::encode($model->middle_name) : '<span class="not-set">(not set)</span>';
+                    $out .= '<em>Middle name:</em> ' . $middle_name. '<br />';
+                    $last_name = $model->last_name ? Html::encode($model->last_name) : '<span class="not-set">(not set)</span>';
+                    $out .= '<em>Last name:</em> ' . $last_name . '<br />';
 
                     return $out;
                 },
                 'format' => 'raw',
             ],
-
             'company_name',
 
             'is_company:boolean', /* TODO::  */
