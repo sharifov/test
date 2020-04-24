@@ -173,7 +173,7 @@ class CallLogTransferService
 
     private function transferInAcceptedChildCall(): void
     {
-        if ($this->call['c_status_id'] != Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
+        if ($this->call['c_status_id'] == Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
             $this->callLog['cl_status_id'] = CallLogStatus::FAILED;
         } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
@@ -195,7 +195,7 @@ class CallLogTransferService
 
     private function simpleInAcceptedChildCall(): void
     {
-        if ($this->call['c_status_id'] != Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
+        if ($this->call['c_status_id'] == Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
             $this->callLog['cl_status_id'] = CallLogStatus::FAILED;
         } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
