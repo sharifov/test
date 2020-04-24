@@ -22,7 +22,7 @@ class WebsocketServerController extends Controller
      */
     public function actionStart()
     {
-        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        printf("\n--- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         $thisClass = $this;
         $frontendConfig = ArrayHelper::merge(
@@ -63,7 +63,7 @@ class WebsocketServerController extends Controller
         $server->tblConnections = $tblConnections;
 
         $server->on('start', static function (Server $server) {
-            echo '- Swoole WebSocket Server is started at ' . $server->host.':'.$server->port . PHP_EOL;
+            echo ' Swoole WebSocket Server is started at ' . $server->host.':'.$server->port . PHP_EOL;
             if (!empty(\Yii::$app->params['appInstance'])) {
                 $ucList = UserConnection::find()->where(['uc_app_instance' => \Yii::$app->params['appInstance']])->all();
                 if ($ucList) {
@@ -76,37 +76,12 @@ class WebsocketServerController extends Controller
         });
 
         $server->on('workerStart', static function ($server, $workerId) {
-
-            echo '- Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
-
-
-
-
-//            $client = new \Swoole\Redis;
-//            $client->on('message', static function (\Swoole\Redis $client, $result) use ($server) {
-//                // process data, broadcast to websocket clients
-//                if ($result[0] == 'message') {
-//                    foreach($server->connections as $fd) {
-//                        $server->push($fd, $result[1]);
-//                        echo ' -- ' . $result[1] . PHP_EOL;
-//                    }
-//                }
-//            });
-//            $client->connect('localhost', 6379, static function (\Swoole\Redis $client, $result) {
-//                $client->subscribe('user-167');
-//            });
+            echo ' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
         });
-
-
-//        $server->on('pipeMessage', static function(\Swoole\WebSocket\Server $server, $src_worker_id, $data) {
-//            echo "#{$server->worker_id} message from #$src_worker_id: $data\n";
-//        });
-
 
         $server->on('open', static function(Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig) {
 
-            echo "- connection open: {$request->fd}\n";
-
+            echo '+ ' . date('m-d H:i:s'). " op: {$request->fd}\n";
             $user = $thisClass->getIdentityByCookie($request, $frontendConfig);
 
             if ($user) {
@@ -159,14 +134,13 @@ class WebsocketServerController extends Controller
 //                    VarDumper::dump($row);
 //                }
 
-                VarDumper::dump(['fd' => $request->fd,
-                    'uid' => $uid,
-                    'user_id' => $userId,
-                    'name' => $user->username,
-                    'dt' => date('Y-m-d H:i:s')]);
+//                VarDumper::dump(['fd' => $request->fd,
+//                    'uid' => $uid,
+//                    'user_id' => $userId,
+//                    'name' => $user->username,
+//                    'dt' => date('Y-m-d H:i:s')]);
 
                 unset($user);
-
 
 
                 /*
@@ -251,7 +225,7 @@ class WebsocketServerController extends Controller
         });
 
         $server->on('close', static function(Server $server, int $fd) {
-            echo "- connection close: {$fd}\n";
+            echo '- ' . date('m-d H:i:s'). " cl: {$fd}\n";
             $row = $server->tblConnections->get($fd);
             $server->tblConnections->del($fd);
 
@@ -268,7 +242,7 @@ class WebsocketServerController extends Controller
 
         $server->on('workerError', static function(Server $server, int $workerId, $workerPid, $exitCode, $signal) {
             $message = "Error Worker (Id: {$workerId}): pid={$workerPid} code={$exitCode} signal={$signal}";
-            echo '- ' . $message . PHP_EOL;
+            echo '> ' . $message . PHP_EOL;
             \Yii::error($message, 'WS:'. __METHOD__);
         });
 
@@ -323,9 +297,6 @@ class WebsocketServerController extends Controller
         $cookieValidationKey = $frontendConfig['components']['request']['cookieValidationKey'] ?? '';
 
         $dataCookie = \Yii::$app->getSecurity()->validateData($cookieValue, $cookieValidationKey);
-
-//            \yii\helpers\VarDumper::dump($cookieName);
-//            \yii\helpers\VarDumper::dump($dataCookie);
 
         if ($dataCookie) {
             $data = @unserialize($dataCookie, ['allowed_classes' => false]);
