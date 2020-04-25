@@ -5,6 +5,8 @@ namespace frontend\controllers;
 use common\components\BackOffice;
 use common\models\CaseSale;
 use common\models\search\SaleSearch;
+use sales\auth\Auth;
+use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\services\cases\CasesSaleService;
 use Yii;
@@ -13,6 +15,7 @@ use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -134,7 +137,14 @@ class SaleController extends FController
 
         if (Yii::$app->request->isAjax) {
             $saleId = Yii::$app->request->post('sale_id');
-            $csId = Yii::$app->request->post('case_id');
+            $csId = (int)Yii::$app->request->post('case_id');
+
+            $model = $this->findCase($csId);
+
+            if (!Auth::can('cases/update', ['case' => $model])) {
+                $result['error'] = 'Access denied.';
+                return $result;
+            }
 
             if ($sale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
                 try {
@@ -146,5 +156,19 @@ class SaleController extends FController
             }
         }
         return $result;
+    }
+
+    /**
+     * @param $id
+     * @return Cases
+     * @throws NotFoundHttpException
+     */
+    protected function findCase($id): Cases
+    {
+        if (($model = Cases::findOne(['cs_id' => $id])) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested case does not exist.');
     }
 }

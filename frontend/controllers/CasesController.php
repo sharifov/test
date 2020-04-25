@@ -133,6 +133,11 @@ class CasesController extends FController
             'access' => [
                 'allowActions' => [
                     'mark-checked',
+                    'view',
+                    'ajax-update',
+                    'add-sale',
+                    'take',
+                    'take-over',
                 ],
             ],
         ];
@@ -172,8 +177,12 @@ class CasesController extends FController
      */
     public function actionView($gid): string
     {
+        $model = $this->findModelByGid((string)$gid);
 
-        $model = $this->findModelByGid($gid);
+        if (!Auth::can('cases/view', ['case' => $model])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         /** @var Employee $userModel */
         $userModel = Yii::$app->user->identity;
 
@@ -591,7 +600,11 @@ class CasesController extends FController
         $params = Yii::$app->request->queryParams;
 
         try {
-            $saleDataProvider = $saleSearchModel->search($params);
+            if (Auth::can('cases/update', ['case' => $model])) {
+                $saleDataProvider = $saleSearchModel->search($params);
+            } else {
+                $saleDataProvider = new ArrayDataProvider();
+            }
         } catch (\Exception $exception) {
             $saleDataProvider = new ArrayDataProvider();
             Yii::error(VarDumper::dumpAsString([$exception->getFile(), $exception->getCode(), $exception->getMessage()]), 'SaleController:actionSearch');
@@ -754,6 +767,10 @@ class CasesController extends FController
 
         try {
             $model = $this->findModelByGid($gid);
+
+            if (!Auth::can('cases/update', ['case' => $model])) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
 
             $arr = explode('|', base64_decode($hash));
             $id = (int)($arr[1] ?? 0);
@@ -925,28 +942,49 @@ class CasesController extends FController
 
     /**
      * @param $gid
-     * @param $is_over
      * @return Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    public function actionTake($gid, $is_over = false): Response
+    public function actionTake($gid): Response
     {
-        $gId = (string) $gid;
-        $isOver = (bool)$is_over;
-        $userId = Yii::$app->user->id;
-        $case = $this->findModelByGid($gId);
+        $case = $this->findModelByGid((string)$gid);
+
+        if (!Auth::can('cases/take', ['case' => $case])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         try {
             $this->caseTakeGuard->guard($case);
-            $user = $this->userRepository->find($userId);
-            if ($isOver) {
-                $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id);
-            } else {
-                $this->casesManageService->take($case->cs_id, $user->id, $user->id);
-            }
+            $user = $this->userRepository->find(Auth::id());
+            $this->casesManageService->take($case->cs_id, $user->id, $user->id);
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
-            //Yii::error($e, 'Cases:CasesController:Take');
+        }
+        return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+    }
+
+    /**
+     * @param $gid
+     * @return Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionTakeOver($gid): Response
+    {
+        $case = $this->findModelByGid((string)$gid);
+
+        if (!Auth::can('cases/takeOver', ['case' => $case])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        try {
+            $user = $this->userRepository->find(Auth::id());
+            $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id);
+            Yii::$app->session->setFlash('success', 'Success');
+        } catch (\Throwable $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
         }
         return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
     }
@@ -1263,15 +1301,18 @@ class CasesController extends FController
         ]);
     }
 
-
-
     /**
      * @return string|Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionAjaxUpdate()
     {
         $case = $this->findModelByGid((string)Yii::$app->request->get('gid'));
+
+        if (!Auth::can('cases/update', ['case' => $case])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
 
         $form = new UpdateInfoForm(
             $case,

@@ -2,6 +2,7 @@
 
 use common\models\Department;
 use common\models\Project;
+use sales\auth\Auth;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
 use common\components\grid\cases\NeedActionColumn;
@@ -9,6 +10,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
 use sales\entities\cases\Cases;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -157,8 +159,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {take}',
                 'visibleButtons' => [
+                    'view' => static function (CasesQSearch $model, $key, $index) {
+                        return Auth::can('cases/view', ['case' => $model]);
+                    },
                     'take' => static function (CasesQSearch $model, $key, $index) {
-                        return !$model->isOwner(Yii::$app->user->id);
+                        return Auth::can('cases/take', ['case' => $model]);
                     },
                 ],
                 'buttons' => [
@@ -174,7 +179,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     },
                     'take' => static function ($url, CasesQSearch $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid, 'is_over' => false], [
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

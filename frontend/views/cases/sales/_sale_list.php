@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -17,7 +18,7 @@ $user = Yii::$app->user->identity;
     <div class="x_title">
         <h2><i class="fa fa-list"></i> Sale List</h2>
         <ul class="nav navbar-right panel_toolbox">
-            <?php if($caseModel->isProcessing()):?>
+            <?php if (Auth::can('cases/update', ['case' => $caseModel])) : ?>
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Search Sales', null, ['class' => 'modal', 'id' => 'search-sale-btn', 'title' => 'Search Sales for Case'])?>
                 </li>
@@ -101,12 +102,16 @@ $user = Yii::$app->user->identity;
 								'check-fare-rules' => 1,
                                 'title' => 'Check Fare rules',
                         ]) . '</td>';
-                        $label .= '<td>' . Html::button('<i class="fa fa-warning"></i> Remove', [
-					            'class' => 'remove-sale btn btn-warning',
-					            'data-case-id' => $item->css_cs_id,
-								'data-case-sale-id' => $item->css_sale_id,
+                        $label .= '<td>';
+                        if (Auth::can('cases/update', ['case' => $caseModel])) {
+                            $label .= Html::button('<i class="fa fa-warning"></i> Remove', [
+                                'class' => 'remove-sale btn btn-warning',
+                                'data-case-id' => $item->css_cs_id,
+                                'data-case-sale-id' => $item->css_sale_id,
                                 'title' => 'Remove Sale',
-                        ]) . '</td>';
+                            ]);
+                        }
+                        $label .= '</td>';
                     }
                     $label .= '</tr></table>';
 

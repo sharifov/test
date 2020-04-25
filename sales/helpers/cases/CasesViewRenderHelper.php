@@ -3,6 +3,7 @@
 namespace sales\helpers\cases;
 
 use common\models\Employee;
+use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusTransferList;
@@ -15,15 +16,14 @@ class CasesViewRenderHelper
         if ($case->isSolved()) {
             return '';
         }
-        $allowActionsList = CasesStatusTransferList::getAllowTransferListByUser($case->cs_status, $user);
-        if (isset($allowActionsList[CasesStatus::STATUS_PROCESSING])) {
-            if ($case->isProcessing() && !$case->isOwner($user->id)) {
-                return Html::a('Take over', ['/cases/take', 'gid' => $case->cs_gid, 'is_over' => true], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take over']);
-            }
-            if ($case->isPending() || $case->isFollowUp() || $case->isTrash()) {
-                return Html::a('Take', ['/cases/take', 'gid' => $case->cs_gid, 'is_over' => false], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
-            }
+
+        if (Auth::can('cases/take', ['case' => $case])) {
+            return Html::a('Take', ['/cases/take', 'gid' => $case->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take']);
         }
+        if (Auth::can('cases/takeOver', ['case' => $case])) {
+            return Html::a('Take over', ['/cases/take-over', 'gid' => $case->cs_gid], ['class' => 'btn btn-primary take-processing-btn', 'title' => 'Take over']);
+        }
+
         return '';
     }
 

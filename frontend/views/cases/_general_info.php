@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use yii\helpers\Html;
@@ -14,7 +15,7 @@ use yii\widgets\DetailView;
     <div class="x_title">
         <h2><i class="fa fa-info"></i> General Info</h2>
         <ul class="nav navbar-right panel_toolbox">
-            <?php if($model->isProcessing()):?>
+            <?php if (Auth::can('cases/update', ['case' => $model])) : ?>
             <li>
                 <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-case-update', 'title' => 'Update Case'])?>
             </li>
