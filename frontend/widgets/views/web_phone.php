@@ -765,27 +765,31 @@ $js = <<<JS
             if(connection.status() !== 'open') {
                 connection.accept();
             }
-                           
-            $.ajax({
-                type: 'post',
-                data: {
-                    'sid': connection.parameters.CallSid,
-                    'id': objValue,
-                    'type': objType
-                },
-                url: ajaxCallTransferUrl,
-                success: function (data) {
-                    if (data.error) {
-                        alert(data.message);
+                        
+            if (objValue && objType) {
+                $.ajax({
+                    type: 'post',
+                    data: {
+                        'sid': connection.parameters.CallSid,
+                        'id': objValue,
+                        'type': objType
+                    },
+                    url: ajaxCallTransferUrl,
+                    success: function (data) {
+                        if (data.error) {
+                            alert(data.message);
+                        }
+                        modal.modal('hide').find('.modal-body').html('');
+                    },
+                    error: function (error) {
+                        console.error(error);
+                        modal.modal('hide').find('.modal-body').html('');
                     }
-                    modal.modal('hide').find('.modal-body').html('');
-                },
-                error: function (error) {
-                    console.error(error);
-                    modal.modal('hide').find('.modal-body').html('');
-                }
-            });
-
+                });
+            } else {
+                new PNotify({title: "Transfer call", type: "error", text: "Please try again after some seconds", hide: true});
+            }
+                    
         } else {
             alert('Error: Not found active connection or CallSid');
         }
