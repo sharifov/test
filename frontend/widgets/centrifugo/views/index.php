@@ -23,19 +23,25 @@ function channelConnector(chName)
     let messageObj = JSON.parse(message.data.message);
     
     if(messageObj.count != undefined){
+        
+        getOldNotificationsIds()
+        
+        //$(".n-list").not(':last').remove(); 
         if(messageObj.count != 0) {            
             $(".cent-notification-counter").addClass('badge bg-green');
             $(".cent-notification-counter").text(messageObj.count);
         } else {
             $(".cent-notification-counter").removeClass('badge bg-green');
             $(".cent-notification-counter").text('');
-        } 
+        }
     } 
     
     if(messageObj.msg != undefined){
         console.log(messageObj);
         let obj = messageObj.msg;
-        centNotify(obj.n_msg)
+        if (!getOldNotificationsIds().includes(obj.n_id)){
+            centNotify(obj.n_msg)
+        }        
                
         //$("#cent-notification-menu").prepend(renderNotificationItems(obj.n_id, obj.n_title, obj.n_msg, obj.n_created_dt, obj.relative_created_dt))
         $(".n-list:last").before(renderNotificationItems(obj.n_id, obj.n_title, obj.n_msg, obj.n_created_dt, obj.relative_created_dt))
@@ -51,6 +57,17 @@ centrifuge.on('connect', function(context) {
     centRefreshNotifications();
     console.info('Client connected to notifications server')
 });
+
+function getOldNotificationsIds()
+{
+    var ids = [];
+    $( "#cent-notification-menu li").each(function(e) {
+        let messageId = $(this).data('id');
+        ids.push(messageId)        
+    });
+    console.log(ids)
+    return ids;
+}
 
 function centNotify(message){
     new PNotify({
@@ -69,11 +86,13 @@ function centNotify(message){
     });
 }
 
-//setInterval(centRefreshNotifications, 30 * 1000);
-function centRefreshNotifications(){
+setInterval(centRefreshNotifications, 30 * 1000);
+function centRefreshNotifications(){ 
+    let counter = $(".cent-notification-counter").text();
     $.ajax({
             url: '/test/centrifugo-notifications',
-            type: 'POST',            
+            type: 'POST',
+            data: {'msgCount' : counter != "" ? counter : 0 },            
             success: function(data) { 
                  //console.log('Trigger to centrifugo!!');                 
             }

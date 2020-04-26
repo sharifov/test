@@ -1168,21 +1168,24 @@ class TestController extends FController
 
     public function actionCentrifugoNotifications()
     {
+        $clientMsgCount = Yii::$app->request->post('msgCount');
+
         $count = Notifications::findNewCount(Auth::id());
-        CentrifugoService::sendMsg(json_encode(['count' => $count]), 'ownUserChannel#' . Auth::id());
+        if ($clientMsgCount != $count){
+            CentrifugoService::sendMsg(json_encode(['count' => $count]), 'ownUserChannel#' . Auth::id());
 
-        $notifications = Notifications::findNew(Auth::id());
-
-        foreach ($notifications as $notification){
-            CentrifugoService::sendMsg(json_encode(['msg' => [
-                'n_id' => $notification['n_id'],
-                'n_title' => $notification['n_title'],
-                'n_msg' => StringHelper::truncate(Email::strip_html_tags($notification['n_message']), 80, '...'),
-                'n_created_dt' => strtotime($notification['n_created_dt']),
-                'relative_created_dt' => Yii::$app->formatter->asRelativeTime($notification['n_created_dt'])
-            ]
-            ]), 'ownUserChannel#' . Auth::id());
-            sleep(1);
+            $notifications = Notifications::findNew(Auth::id());
+            foreach ($notifications as $notification){
+                CentrifugoService::sendMsg(json_encode(['msg' => [
+                    'n_id' => $notification['n_id'],
+                    'n_title' => $notification['n_title'],
+                    'n_msg' => StringHelper::truncate(Email::strip_html_tags($notification['n_message']), 80, '...'),
+                    'n_created_dt' => strtotime($notification['n_created_dt']),
+                    'relative_created_dt' => Yii::$app->formatter->asRelativeTime($notification['n_created_dt'])
+                ]
+                ]), 'ownUserChannel#' . Auth::id());
+                sleep(1);
+            }
         }
     }
 
