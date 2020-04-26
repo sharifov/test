@@ -2,6 +2,7 @@
 
 namespace sales\listeners\lead;
 
+use common\components\Purifier;
 use frontend\widgets\notification\NotificationMessage;
 use Yii;
 use sales\repositories\NotFoundException;
@@ -39,14 +40,11 @@ class LeadFollowUpNotificationsListener
             return;
         }
 
-        $host = Yii::$app->params['url_address'];
-
         $subject = Yii::t('email', "Lead-{id} to FOLLOW-UP", ['id' => $event->lead->id]);
-        $body = Yii::t('email', 'Your Lead (ID: {lead_id}) has been changed status to FOLLOW-UP! Reason: {reason} {url}',
+        $body = Yii::t('email', 'Your Lead (Id: {lead_id}) has been changed status to FOLLOW-UP! Reason: {reason}',
             [
-                'lead_id' => $event->lead->id,
+                'lead_id' => Purifier::createLeadShortLink($event->lead),
                 'reason' => $event->reason ?: '-',
-                'url' => $host . '/lead/view/' . $event->lead->gid,
             ]);
 
         if ($ntf = Notifications::create($newOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {

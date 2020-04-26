@@ -1,5 +1,6 @@
 <?php
 
+use common\components\Purifier;
 use common\models\Email;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
@@ -20,6 +21,6 @@ $time = strtotime($createdDt);
             <span><?= Html::encode($title) ?></span>
             <span class="time" data-time="<?= $time ?>"><?= Yii::$app->formatter->asRelativeTime($time) ?></span>
         </span>
-        <span class="message"><?= StringHelper::truncate(Email::strip_html_tags($message), 80, '...') ?><br></span>
+        <span class="message"><?= StringHelper::truncate(Email::strip_html_tags(Purifier::replaceCodesToId($message)), 80, '...') ?><br></span>
     </a>
 </li>

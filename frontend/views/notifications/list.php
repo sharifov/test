@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
 
-            'n_message:ntext',
+            'n_message:ntextWithPurify',
 
             'n_new:boolean',
 

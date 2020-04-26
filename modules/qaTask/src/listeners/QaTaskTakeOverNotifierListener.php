@@ -2,6 +2,7 @@
 
 namespace modules\qaTask\src\listeners;
 
+use common\components\Purifier;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
@@ -9,7 +10,6 @@ use Yii;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\user\UserRepository;
-use yii\helpers\Url;
 
 /**
  * Class QaTaskTakeOverNotifierListener
@@ -46,20 +46,19 @@ class QaTaskTakeOverNotifierListener
 
         $task = $event->task;
 
-        $subject = Yii::t('email', 'You task #{id} has been taken by {username}', ['id' => $task->t_id, 'username' => $newOwner->username]);
+        $subject = Yii::t('email', 'You task (Id: {id}) has been taken by {username}', ['id' => $task->t_id, 'username' => $newOwner->username]);
 
         $reason = '';
         if ($reasonModel = QaTaskActionReason::findOne($event->getChangeStateLog()->reasonId)) {
             $reason = $reasonModel->tar_name;
         }
 
-        $body = Yii::t('email', "You task #{id} has been taken by {username} ({role}). Reason: {reason}. {url}",
+        $body = Yii::t('email', "You task (Id: {id}) has been taken by {username} ({role}). Reason: {reason}.",
             [
-                'id' => $task->t_id,
+                'id' => Purifier::createQaTaskShortLink($task),
                 'username' => $newOwner->username,
                 'role' => implode(',', $newOwner->getRoles(true)),
                 'reason' => $reason,
-                'url' => Url::toRoute( ['/qa-task/qa-task/view', 'gid' => $task->t_gid], true),
             ]);
 
         if ($ntf = Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {

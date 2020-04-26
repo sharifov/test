@@ -2,6 +2,7 @@
 
 namespace sales\listeners\lead;
 
+use common\components\Purifier;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use sales\events\lead\LeadOwnerChangedEvent;
@@ -52,15 +53,12 @@ class LeadOwnerChangedNotificationsListener
 
         $lead = $event->lead;
 
-        $host = \Yii::$app->params['url_address'];
-
         $subject = Yii::t('email', 'Lead-{id} reassigned to ({username})', ['id' => $lead->id, 'username' => $newOwner->username]);
 
-        $body = Yii::t('email', "Attention! Your Lead (ID: {lead_id}) has been reassigned to another agent ({name}). {url}",
+        $body = Yii::t('email', "Attention! Your Lead (Id: {lead_id}) has been reassigned to another agent ({name}).",
             [
-                'lead_id' => $lead->id,
+                'lead_id' => Purifier::createLeadShortLink($lead),
                 'name' => $newOwner->username,
-                'url' => $host . '/lead/view/' . $lead->gid,
             ]);
 
         if ($ntf = Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
