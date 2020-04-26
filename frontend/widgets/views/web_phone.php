@@ -84,7 +84,7 @@ use yii\helpers\Html;
                         </div>
 
                         <div class="btn-group" id="btn-group-id-mute" style="display: none;">
-                            <?=Html::button('Mute', ['id' => 'btn-mute-microphone', 'class' => 'btn btn-sm btn-warning'])?>
+                            <?=Html::button('<i class="fa fa-microphone"></i> Mute', ['id' => 'btn-mute-microphone', 'class' => 'btn btn-sm btn-success'])?>
                         </div>
                     </td>
                 </tr>
@@ -956,11 +956,11 @@ $js = <<<JS
     
     $(document).on('click', '#btn-mute-microphone', function(e) {
         let mute = $(this).html();
-        if (mute === 'Mute') {
+        if (mute === '<i class="fa fa-microphone"></i> Mute') {
             if (connection) {
                 connection.mute(true);
                 if (connection.isMuted()) {
-                    $(this).html('Unmute').removeClass('btn-warning').addClass('btn-success');
+                    $(this).html('<i class="fa fa-microphone"></i> Unmute').removeClass('btn-success').addClass('btn-warning');
                 } else {
                     new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
                 }
@@ -969,7 +969,7 @@ $js = <<<JS
             if (connection) {
                 connection.mute(false);
                 if (!connection.isMuted()) {
-                    $(this).html('Mute').removeClass('btn-success').addClass('btn-warning');
+                    $(this).html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
                 } else {
                     new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
                 }
