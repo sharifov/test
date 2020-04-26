@@ -82,6 +82,10 @@ use yii\helpers\Html;
                                 <?=Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
                             </div>
                         </div>
+
+                        <div class="btn-group" id="btn-group-id-mute" style="display: none;">
+                            <?=Html::button('Mute', ['id' => 'btn-mute-microphone', 'class' => 'btn btn-sm btn-warning'])?>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -560,6 +564,8 @@ use yii\helpers\Html;
                     //console.info(conn.parameters);
                     //alert(clientId + ' - ' + conn.parameters.From);
                     $('#btn-group-id-hangup').show();
+                    $('#btn-mute-microphone').html('Mute').removeClass('btn-success').addClass('btn-warning');
+                    $('#btn-group-id-mute').show();
 
                     if (conn.parameters.From === undefined) {
                         $('#btn-group-id-redirect').show();
@@ -582,6 +588,7 @@ use yii\helpers\Html;
 
                     $('#btn-group-id-hangup').hide();
                     $('#btn-group-id-redirect').hide();
+                    $('#btn-group-id-mute').hide();
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
                 });
@@ -945,6 +952,29 @@ $js = <<<JS
             }
         }, 'json');
         
+    });
+    
+    $(document).on('click', '#btn-mute-microphone', function(e) {
+        let mute = $(this).html();
+        if (mute === 'Mute') {
+            if (connection) {
+                connection.mute(true);
+                if (connection.isMuted()) {
+                    $(this).html('Unmute').removeClass('btn-warning').addClass('btn-success');
+                } else {
+                    new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
+                }
+            }
+        } else {
+            if (connection) {
+                connection.mute(false);
+                if (!connection.isMuted()) {
+                    $(this).html('Mute').removeClass('btn-success').addClass('btn-warning');
+                } else {
+                    new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
+                }
+            }
+        }
     });
     
     webPhoneWidget.css({left:'50%', 'margin-left':'-' + (webPhoneWidget.width() / 2) + 'px'}); //.slideDown();
