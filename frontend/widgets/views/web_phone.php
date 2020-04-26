@@ -564,7 +564,7 @@ use yii\helpers\Html;
                     //console.info(conn.parameters);
                     //alert(clientId + ' - ' + conn.parameters.From);
                     $('#btn-group-id-hangup').show();
-                    $('#btn-mute-microphone').html('Mute').removeClass('btn-success').addClass('btn-warning');
+                    $('#btn-mute-microphone').html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
                     $('#btn-group-id-mute').show();
 
                     if (conn.parameters.From === undefined) {
