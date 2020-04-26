@@ -77,6 +77,21 @@ class WebsocketServerController extends Controller
 
         $server->on('workerStart', static function ($server, $workerId) {
             echo ' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
+
+
+            $server->tick(20000, static function() use ($server) {
+                if (!empty($server->tblConnections)) {
+                    foreach ($server->tblConnections as $connection) {
+                        // $server->push($connection['fd'], json_encode(['cmd' => 'pong', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
+                        $server->push($connection['fd'], 'ping', WEBSOCKET_OPCODE_PING);
+                    }
+                }
+            });
+
+            $server->tick(30000, static function() use ($server) {
+                \Yii::$app->db->createCommand('SELECT 1')->execute();
+            });
+
         });
 
         $server->on('open', static function(Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig) {
@@ -90,9 +105,13 @@ class WebsocketServerController extends Controller
 
                 $server->push($request->fd, json_encode(['cmd' => 'userInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
 
-                $server->tick(30000, static function() use ($server, $request) {
-                    $server->push($request->fd, json_encode(['cmd' => 'pong', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
-                });
+//                $server->tick(30000, static function() use ($server, $request) {
+//                    //$server->push($request->fd, json_encode(['cmd' => 'pong', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
+//                    $server->push($request->fd, 'ping', WEBSOCKET_OPCODE_PING); //WEBSOCKET_OPCODE_PING
+//                });
+
+
+
 
                 //VarDumper::dump($request);
                 //VarDumper::dump($request->get);
@@ -177,7 +196,7 @@ class WebsocketServerController extends Controller
                  */
 
 
-                $json = json_encode(['cmd' => 'initConnection', 'connection_id' => $userConnection->uc_connection_id, 'uc_id' => $userConnection->uc_id]);
+                $json = json_encode(['cmd' => 'initConnection', 'fd' => $userConnection->uc_connection_id, 'uc_id' => $userConnection->uc_id]);
                 $server->push($request->fd, $json); //WEBSOCKET_OPCODE_PING
 
                 $redis = new \Swoole\Coroutine\Redis();
