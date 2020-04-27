@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Client;
+use sales\access\ContactUpdateAccess;
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -96,7 +98,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = [];
                     if($phones) {
                         foreach ($phones as $k => $phone) {
-                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone).'</code>';
+                            $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
+                            $data[] = $sms . '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
                         }
                     }
                     return implode('<br>', $data);
@@ -112,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = [];
                     if($emails) {
                         foreach ($emails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
                         }
                     }
                     return implode('<br>', $data);
@@ -123,7 +126,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'created',
                 'value' => function(Client $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([
@@ -139,8 +142,17 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
-
-            ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{update}{view}',
+                'visibleButtons'=>
+                [
+                     'update' => static function (Client $model) {
+                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
+                     },
+                    'view' => true,
+                ],
+            ],
         ],
     ]); ?>
     <?php Pjax::end(); ?>

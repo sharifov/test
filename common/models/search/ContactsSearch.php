@@ -18,6 +18,7 @@ use yii\helpers\ArrayHelper;
  * @property bool $isPublic
  * @property bool $isDisabled
  * @property string $by_name
+ * @property Employee $user
  */
 class ContactsSearch extends Client
 {
@@ -28,6 +29,8 @@ class ContactsSearch extends Client
     public $userId;
     public $isPublic = true;
     public $isDisabled = false;
+
+    private $user;
 
     /**
      * @param int $userId
@@ -40,6 +43,7 @@ class ContactsSearch extends Client
         $this->userId = $userId;
         $this->isPublic = $isPublic;
         $this->isDisabled = $isDisabled;
+        $this->user = Employee::findIdentity($this->userId);
         parent::__construct($config);
     }
 
@@ -72,9 +76,14 @@ class ContactsSearch extends Client
         $query->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
             'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id');
 
-        $query->andWhere(['user_contact_list.ucl_user_id' => $this->userId])
-            ->andWhere(['is_public' => $this->isPublic])
-            ->andWhere(['disabled' => $this->isDisabled]);
+        if (!$this->isRoleAdmin()) {
+            $query->andWhere(['user_contact_list.ucl_user_id' => $this->userId]);
+            $query->orWhere(['AND',
+               ['!=', 'user_contact_list.ucl_user_id', $this->userId],
+               ['disabled' => $this->isDisabled],
+               ['is_public' => $this->isPublic],
+            ]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -140,5 +149,10 @@ class ContactsSearch extends Client
             ->andFilterWhere(['like', 'description', $this->description]);
 
         return $dataProvider;
+    }
+
+    private function isRoleAdmin()
+    {
+        return ($this->user->isAdmin() || $this->user->isSuperAdmin());
     }
 }
