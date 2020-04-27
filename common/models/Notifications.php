@@ -436,7 +436,7 @@ class Notifications extends ActiveRecord
                 // Notifications::pub([$pubChannel], 'callMapUpdate', ['uc_id' => $uc_id]);
             }
             if ($pubChannelList) {
-                self::pub($pubChannelList, 'callMapUpdate', ['uc_id' => $uc_id]);
+                self::pub($pubChannelList, 'callMapUpdate', ['cnt' => count($pubChannelList)]);
             }
         }
     }
