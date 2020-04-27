@@ -3,12 +3,14 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\Lead;
 use common\models\search\LeadQcallSearch;
 use sales\repositories\lead\LeadBadgesRepository;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use Yii;
 
@@ -278,6 +280,22 @@ class BadgesController extends FController
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        return $this->leadBadgesRepository->getFailedBookingsCount($user);
+
+        $limit = 0;
+        if ($user->isAgent()) {
+            $userParams = $user->userParams;
+            if ($userParams) {
+                if ($userParams->up_inbox_show_limit_leads > 0) {
+                    $limit = $userParams->up_inbox_show_limit_leads;
+                }
+            } else {
+                return null;
+            }
+        }
+        $count = $this->leadBadgesRepository->getFailedBookingsCount($user);
+        if ($limit > 0 && $count > 0 && $count > $limit) {
+            return $limit;
+        }
+        return $count;
     }
 }
