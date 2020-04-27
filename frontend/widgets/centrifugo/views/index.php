@@ -24,9 +24,6 @@ function channelConnector(chName)
     
     if(messageObj.count != undefined){
         
-        getOldNotificationsIds()
-        
-        //$(".n-list").not(':last').remove(); 
         if(messageObj.count != 0) {            
             $(".cent-notification-counter").addClass('badge bg-green');
             $(".cent-notification-counter").text(messageObj.count);
@@ -36,16 +33,36 @@ function channelConnector(chName)
         }
     } 
     
-    if(messageObj.msg != undefined){
+    if(messageObj.newMessages != undefined){
+        let ids = getOldNotificationsIds()
+         
+        $(".n-list").not(':last').remove();
+       
+        let msg = messageObj.newMessages        
+        for (index = 0; index < msg.length; ++index) {                       
+            let obj = msg[index];            
+            $(".n-list:last").before(renderNotificationItems(obj.n_id, obj.n_title, obj.n_msg, obj.n_created_dt, obj.relative_created_dt)) 
+        }
+        
+        for (index = 0; index < msg.length; ++index) { 
+           
+            let obj = msg[index];            
+            if (!ids.includes(obj.n_id) && ids[0] !== undefined) {
+                 console.log(ids)
+                centNotify(obj.n_msg)
+            }
+        } 
+    }
+    
+    //console.log(messageObj);
+    /*if(messageObj.msg != undefined){
         console.log(messageObj);
         let obj = messageObj.msg;
         if (!getOldNotificationsIds().includes(obj.n_id)){
             centNotify(obj.n_msg)
-        }        
-               
-        //$("#cent-notification-menu").prepend(renderNotificationItems(obj.n_id, obj.n_title, obj.n_msg, obj.n_created_dt, obj.relative_created_dt))
+        } 
         $(".n-list:last").before(renderNotificationItems(obj.n_id, obj.n_title, obj.n_msg, obj.n_created_dt, obj.relative_created_dt))
-    } 
+    }*/ 
     
 });
 }
@@ -64,8 +81,7 @@ function getOldNotificationsIds()
     $( "#cent-notification-menu li").each(function(e) {
         let messageId = $(this).data('id');
         ids.push(messageId)        
-    });
-    console.log(ids)
+    });   
     return ids;
 }
 
@@ -86,7 +102,7 @@ function centNotify(message){
     });
 }
 
-setInterval(centRefreshNotifications, 30 * 1000);
+setInterval(centRefreshNotifications, 10 * 1000);
 function centRefreshNotifications(){ 
     let counter = $(".cent-notification-counter").text();
     $.ajax({
