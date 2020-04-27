@@ -20,6 +20,12 @@ class FilterShortCodeToLink implements Filter
         $this->host = \Yii::$app->params['url_address'];
     }
 
+    /**
+     * Ex. {case-10-qwerty} => <a href="https://....com/cases/view/qwerty">10</a>
+     *
+     * @param string|null $content
+     * @return string|null
+     */
     public function filter(?string $content): ?string
     {
         if ($content === null) {

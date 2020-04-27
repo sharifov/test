@@ -11,6 +11,12 @@ class FilterShortCodeToId implements Filter
 {
     private $content;
 
+    /**
+     * Ex. {case-10-qwerty} => 10
+     *
+     * @param string|null $content
+     * @return string|null
+     */
     public function filter(?string $content): ?string
     {
         if ($content === null) {

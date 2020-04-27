@@ -18,6 +18,12 @@ class FilterShortCodeToIdUrl implements Filter
         $this->host = \Yii::$app->params['url_address'];
     }
 
+    /**
+     * Ex. {case-10-qwerty} => 10 https://....com/cases/view/qwerty
+     *
+     * @param string|null $content
+     * @return string|null
+     */
     public function filter(?string $content): ?string
     {
         if ($content === null) {
