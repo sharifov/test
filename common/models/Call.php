@@ -953,7 +953,7 @@ class Call extends \yii\db\ActiveRecord
 
 //                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
                             // Notifications::publish('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
-                            $pubChannel = UserConnection::getLastUserChannel($case->cs_user_id);
+                            $pubChannel = UserConnection::getLastUserChannel($this->c_created_user_id);
                             Notifications::pub([$pubChannel], 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid]);
                         } catch (\Throwable $e) {
                             Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
