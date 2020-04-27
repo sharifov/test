@@ -856,16 +856,16 @@ class Call extends \yii\db\ActiveRecord
             }
 
 
-            if ($this->c_case_id && $isChangedStatus && $this->isIn() && $this->isStatusInProgress()) {
-                if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
-                    try {
-                        $casesManageService = Yii::createObject(CasesManageService::class);
-                        $casesManageService->take($this->c_case_id, $this->c_created_user_id, null);
-                    } catch (\Throwable $exception) {
-                        Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
-                    }
-                }
-            }
+//            if ($this->c_case_id && $isChangedStatus && $this->isIn() && $this->isStatusInProgress()) {
+//                if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
+//                    try {
+//                        $casesManageService = Yii::createObject(CasesManageService::class);
+//                        $casesManageService->take($this->c_case_id, $this->c_created_user_id, null);
+//                    } catch (\Throwable $exception) {
+//                        Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
+//                    }
+//                }
+//            }
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
@@ -938,9 +938,13 @@ class Call extends \yii\db\ActiveRecord
 //                        }
 
                         try {
-                            $caseRepo = Yii::createObject(CasesRepository::class);
-                            $case->processing((int)$this->c_created_user_id, null);
-                            $caseRepo->save($case);
+
+                            $casesManageService = Yii::createObject(CasesManageService::class);
+                            $casesManageService->callAutoTake($this->c_case_id, $this->c_created_user_id, null, 'Call auto take');
+
+//                            $caseRepo = Yii::createObject(CasesRepository::class);
+//                            $case->processing((int)$this->c_created_user_id, null);
+//                            $caseRepo->save($case);
 
                             if ($ntf = Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
                                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];

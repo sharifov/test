@@ -939,9 +939,9 @@ class CasesController extends FController
             $this->caseTakeGuard->guard($case);
             $user = $this->userRepository->find($userId);
             if ($isOver) {
-                $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id);
+                $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id, 'Take over');
             } else {
-                $this->casesManageService->take($case->cs_id, $user->id, $user->id);
+                $this->casesManageService->take($case->cs_id, $user->id, $user->id, 'Take');
             }
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
