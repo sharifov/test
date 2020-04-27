@@ -13,6 +13,7 @@ use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Exception;
@@ -111,11 +112,11 @@ class PhoneController extends FController
         }
 
 
-        if(Yii::$app->user->identity->canRole('agent')) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
+//        if(Auth::user()->isAgent()) {
+//            $isAgent = true;
+//        } else {
+//            $isAgent = false;
+//        }
 
         /*$searchModel = new LeadSearch();
         $params = Yii::$app->request->queryParams;
@@ -139,7 +140,6 @@ class PhoneController extends FController
             'lead_id' => $lead_id,
             'case_id' => $case_id,
             //'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
             'fromPhoneNumbers' => $fromPhoneNumbers,
             'selectProjectPhone' => $selectProjectPhone,
             'currentCall' => $currentCall
@@ -363,6 +363,7 @@ class PhoneController extends FController
                     $createdUserId = $lastChild->c_created_user_id;
                     $lastChild->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                     $lastChild->c_created_user_id = null;
+                    $lastChild->c_dep_id = null;
                     $lastChild->c_is_transfer = true;
                     $sid = $lastChild->c_call_sid;
                     $firstTransferToNumber = true;
@@ -370,6 +371,7 @@ class PhoneController extends FController
             } else {
                 $createdUserId = $originalCall->cParent->c_created_user_id;
                 $originalCall->cParent->c_created_user_id = null;
+                $originalCall->cParent->c_dep_id = null;
                 $originalCall->cParent->c_is_transfer = true;
                 $originalCall->cParent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                 if (!$originalCall->cParent->c_group_id) {

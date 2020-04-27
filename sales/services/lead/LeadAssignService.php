@@ -58,7 +58,6 @@ class LeadAssignService
         $user = $this->serviceFinder->userFind($user);
 
         EmployeeAccess::leadAccess($lead, $user);
-        $this->checkAccess($lead, $user);
 
         if ($lead->isCompleted()) {
             throw new \DomainException('Lead is completed!');
@@ -67,6 +66,8 @@ class LeadAssignService
         if (!$lead->isAvailableToTake()) {
             throw new \DomainException('Lead is unavailable to "Take" now!');
         }
+
+        $this->checkTakeAccess($lead, $user);
 
         $lead->processing($user->id, $creatorId, $reason);
 
@@ -91,7 +92,6 @@ class LeadAssignService
         $user = $this->serviceFinder->userFind($user);
 
         EmployeeAccess::leadAccess($lead, $user);
-        $this->checkAccess($lead, $user);
 
         if ($lead->isCompleted()) {
             throw new \DomainException('Lead is completed!');
@@ -111,16 +111,17 @@ class LeadAssignService
         });
     }
 
-    /**
-     * @param Lead $lead
-     * @param Employee $user
-     */
-    private function checkAccess(Lead $lead, Employee $user): void
+    private function checkTakeAccess(Lead $lead, Employee $user): void
     {
-        if ($lead->isPending() && $user->isAgent()) {
-            $this->takeGuard->minPercentGuard($user);
-            $this->takeGuard->frequencyMinutesGuard($user);
+        if ($user->isAgent() && ($lead->isPending() || $lead->isBookFailed())) {
+            if ($lead->isPending()) {
+                $this->takeGuard->minPercentGuard($user);
+            }
+            $fromStatuses = [];
+            if ($lead->isBookFailed()) {
+                $fromStatuses = [Lead::STATUS_BOOK_FAILED];
+            }
+            $this->takeGuard->frequencyMinutesGuard($user, [], $fromStatuses);
         }
     }
-
 }

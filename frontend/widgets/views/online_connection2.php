@@ -104,6 +104,11 @@ $js = <<<JS
                             }
                         }
                         
+                        if(obj.cmd === 'userNotInit') {
+                            window.location.href = '/site/logout';
+                        }
+                        
+                        
                         if(obj.cmd === 'getNewNotification') {
                             //alert(obj.cmd);
                              if (typeof obj.notification !== 'undefined') {

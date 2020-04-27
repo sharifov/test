@@ -819,18 +819,25 @@ class Call extends \yii\db\ActiveRecord
 //                            self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
 //                        }
                         if (!$this->isDeclined()) {
-                            /** @var Call $lastChild */
-                            $lastChild = self::find()->andWhere(['c_parent_id' => $this->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-                            if (
-                                $lastChild === null
-                                || (
-                                    $lastChild
-                                    && $lastChild->c_created_user_id != null
-                                    && (
-                                        $this->c_created_user_id == null || $this->c_created_user_id != $lastChild->c_created_user_id
-                                    )
-                                )
-                            ) {
+//                            /** @var Call $lastChild */
+//                            $lastChild = self::find()->andWhere(['c_parent_id' => $this->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+//                            if (
+//                                $lastChild === null
+//                                || (
+//                                    $lastChild
+//                                    && $lastChild->c_created_user_id != null
+//                                    && (
+//                                        $this->c_created_user_id == null || $this->c_created_user_id != $lastChild->c_created_user_id
+//                                    )
+//                                )
+//                            ) {
+//                                $this->c_status_id = self::STATUS_NO_ANSWER;
+//                                self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
+//                            }
+                            $cuaExists = CallUserAccess::find()->andWhere([
+                                'cua_call_id' => $this->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT
+                            ])->andWhere(['>=', 'cua_created_dt', $this->c_queue_start_dt])->exists();
+                            if (!$cuaExists) {
                                 $this->c_status_id = self::STATUS_NO_ANSWER;
                                 self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
                             }
