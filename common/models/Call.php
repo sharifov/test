@@ -946,9 +946,9 @@ class Call extends \yii\db\ActiveRecord
 //                            $case->processing((int)$this->c_created_user_id, null);
 //                            $caseRepo->save($case);
 
-                            if ($ntf = Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
+                            if ($ntf = Notifications::create($this->c_created_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
                                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                Notifications::publish('getNewNotification', ['user_id' => $case->cs_user_id], $dataNotification);
+                                Notifications::publish('getNewNotification', ['user_id' => $this->c_created_user_id], $dataNotification);
                             }
 
 //                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
