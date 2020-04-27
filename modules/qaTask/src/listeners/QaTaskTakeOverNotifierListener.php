@@ -2,7 +2,7 @@
 
 namespace modules\qaTask\src\listeners;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;

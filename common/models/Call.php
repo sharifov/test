@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use frontend\widgets\notification\NotificationMessage;
 use sales\access\EmployeeDepartmentAccess;

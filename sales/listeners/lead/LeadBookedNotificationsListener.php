@@ -2,7 +2,7 @@
 
 namespace sales\listeners\lead;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\Notifications;
 use common\models\Quote;
 use frontend\widgets\notification\NotificationMessage;

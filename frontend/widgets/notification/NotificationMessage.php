@@ -2,7 +2,8 @@
 
 namespace frontend\widgets\notification;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
+use common\components\purifier\PurifierFilter;
 use common\models\Email;
 use common\models\Notifications;
 use yii\bootstrap4\Html;
@@ -28,7 +29,7 @@ class NotificationMessage
      */
     public static function add(Notifications $ntf): array
     {
-        $message = Purifier::replaceCodesToId($ntf->n_message);
+        $message = Purifier::purify($ntf->n_message, PurifierFilter::shortCodeToId());
         return [
             'notification' => [
                 'command' => self::COMMAND_ADD,
