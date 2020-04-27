@@ -22,8 +22,7 @@ function channelConnector(chName)
     centrifuge.subscribe(chName, function(message) {    
     let messageObj = JSON.parse(message.data.message);
     
-    if(messageObj.count != undefined){
-        
+    if(messageObj.count != undefined){        
         if(messageObj.count != 0) {            
             $(".cent-notification-counter").addClass('badge bg-green');
             $(".cent-notification-counter").text(messageObj.count);
@@ -35,7 +34,7 @@ function channelConnector(chName)
     
     if(messageObj.newMessages != undefined){
         let ids = getOldNotificationsIds()
-         
+                 
         $(".n-list").not(':last').remove();
        
         let msg = messageObj.newMessages        
@@ -44,26 +43,14 @@ function channelConnector(chName)
             $(".n-list:last").before(renderNotificationItems(obj.n_id, obj.n_title, obj.n_msg, obj.n_created_dt, obj.relative_created_dt)) 
         }
         
-        for (index = 0; index < msg.length; ++index) { 
-           
+        for (index = 0; index < msg.length; ++index) {            
             let obj = msg[index];            
             if (!ids.includes(obj.n_id) && ids[0] !== undefined) {
                  console.log(ids)
                 centNotify(obj.n_msg)
             }
         } 
-    }
-    
-    //console.log(messageObj);
-    /*if(messageObj.msg != undefined){
-        console.log(messageObj);
-        let obj = messageObj.msg;
-        if (!getOldNotificationsIds().includes(obj.n_id)){
-            centNotify(obj.n_msg)
-        } 
-        $(".n-list:last").before(renderNotificationItems(obj.n_id, obj.n_title, obj.n_msg, obj.n_created_dt, obj.relative_created_dt))
-    }*/ 
-    
+    } 
 });
 }
 
@@ -102,7 +89,7 @@ function centNotify(message){
     });
 }
 
-setInterval(centRefreshNotifications, 10 * 1000);
+setInterval(centRefreshNotifications, 30 * 1000);
 function centRefreshNotifications(){ 
     let counter = $(".cent-notification-counter").text();
     $.ajax({
@@ -138,7 +125,7 @@ $this->registerJs($js);
     </a>
 
     <ul id="cent-notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
-        <!--<p>Test message</p>-->
+        <!--<p> messages </p>-->
         <li class="n-list">
             <div class="text-center">
                 <?= Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['/notifications/list']) ?>
