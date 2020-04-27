@@ -1232,7 +1232,7 @@ class Call extends \yii\db\ActiveRecord
             }
 
         } catch (\Throwable $e) {
-            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
+            \Yii::error($e, 'Call:applyCallToAgent');
         }
         return false;
     }
@@ -1266,7 +1266,8 @@ class Call extends \yii\db\ActiveRecord
                 }
             }
         } catch (\Throwable $e) {
-            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
+            \Yii::error($e, 'Call:applyCallToAgentAccess');
+//            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgentAccess');
         }
         return false;
     }
