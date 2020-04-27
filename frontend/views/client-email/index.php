@@ -44,6 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             'email:email',
+            'ce_title',
             'comments:text',
             [
                 'attribute' => 'created',

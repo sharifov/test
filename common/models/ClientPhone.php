@@ -26,6 +26,7 @@ use common\components\CheckPhoneNumberJob;
  * @property string $updated
  * @property string $comments
  * @property string $type
+ * @property string $cp_title
  *
  * @property Client $client
  */
@@ -118,7 +119,8 @@ class ClientPhone extends \yii\db\ActiveRecord
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['phone', 'client_id'], 'unique', 'targetAttribute' => ['phone', 'client_id']],
 
-            ['type', 'in', 'range' => array_keys(self::PHONE_TYPE)]
+            ['type', 'in', 'range' => array_keys(self::PHONE_TYPE)],
+            [['cp_title'], 'string', 'max' => 150],
         ];
     }
 
@@ -147,7 +149,8 @@ class ClientPhone extends \yii\db\ActiveRecord
             'validate_dt' => 'Validated at',
             'created' => 'Created',
             'updated' => 'Updated',
-			'type' => 'Phone Type'
+			'type' => 'Phone Type',
+			'cp_title' => 'Title'
         ];
     }
 

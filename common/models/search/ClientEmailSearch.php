@@ -21,6 +21,7 @@ class ClientEmailSearch extends ClientEmail
         return [
             [['id', 'client_id', 'type'], 'integer'],
             [['email', 'created', 'updated', 'comments'], 'safe'],
+            ['ce_title', 'string', 'max' => 150],
         ];
     }
 
@@ -79,7 +80,8 @@ class ClientEmailSearch extends ClientEmail
         ]);
 
         $query->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'comments', $this->comments]);
+            ->andFilterWhere(['like', 'comments', $this->comments])
+            ->andFilterWhere(['like', 'ce_title', $this->ce_title]);
 
         return $dataProvider;
     }
