@@ -7,7 +7,6 @@ use yii\helpers\Html;
 /* @var $project \common\models\Project */
 /* @var $phone_number string */
 /* @var $model common\models\Client */
-/* @var $isAgent bool */
 /* @var $fromPhoneNumbers [] */
 /* @var $lead_id int */
 /* @var $case_id int */

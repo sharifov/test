@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Client;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -7,7 +8,7 @@ use yii\widgets\DetailView;
 /* @var $model common\models\Client */
 
 $this->title = 'Client: ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Clients', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Client', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="client-view">
@@ -35,6 +36,24 @@ $this->params['breadcrumbs'][] = $this->title;
             'first_name',
             'middle_name',
             'last_name',
+            'company_name',
+            'description',
+            'is_company:boolean',
+            'is_public:boolean',
+            'disabled:boolean',
+            'rating',
+            [
+                'attribute' => 'parent_id',
+                'value' => function(\common\models\Client $model) {
+
+                    $out = '<span class="not-set">(not set)</span>';
+                    if ($model->parent_id && $parent = Client::findOne(['id' => $model->parent_id])) {
+                        return '<i class="fa fa-user"></i> ' . $parent->getNameByType();
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+            ],
         ],
     ]) ?>
     </div>

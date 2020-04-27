@@ -7,6 +7,7 @@ use common\models\CallUserAccess;
 use common\models\Lead;
 use sales\entities\cases\Cases;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
@@ -37,11 +38,11 @@ class CallLogTransferService
         if (
             !$call->isGeneralParent()
             && (
-                ($call->isTransfer() && $call->isOut())
+                (($call->isTransfer() || $call->c_group_id == null) && $call->isOut())
                 || ($call->isIn() && (strtotime($call->c_queue_start_dt) > strtotime($call->c_created_dt)))
             )
         ) {
-            $clr_cl_id = $call->c_group_id;
+            $clr_cl_id = $call->c_parent_id;
         } else {
             $clr_cl_id = $call->c_id;
         }
@@ -72,7 +73,7 @@ class CallLogTransferService
         Yii::info($this->call, 'info\DebugCallLog');
 
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
-            //Out Parent Call
+            $this->outParentCall();
             return;
         }
 
@@ -81,13 +82,13 @@ class CallLogTransferService
             return;
         }
 
-        if ($call->isOut() && !$call->isGeneralParent() && !$call->isTransfer()) {
-            $this->outChildCall();
+        if ($call->isOut() && !$call->isGeneralParent() && ($call->c_group_id == null || $call->isTransfer())) {
+//           $this->outChildCall();
             return;
         }
 
-        if ($call->isOut() && !$call->isGeneralParent() && $call->isTransfer()) {
-            //Out Child transfer Call
+        if ($call->isOut() && !$call->isGeneralParent() && $call->c_group_id != null && !$call->isTransfer()) {
+            $this->outChildTransferCall();
             return;
         }
 
@@ -158,8 +159,25 @@ class CallLogTransferService
         $this->createCallLogs();
     }
 
+    private function outParentCall(): void
+    {
+        $this->callLog['cl_group_id'] = $this->call['c_id'];
+
+        $this->createCallLogs();
+    }
+
+    private function outChildTransferCall(): void
+    {
+        $this->createCallLogs();
+    }
+
     private function transferInAcceptedChildCall(): void
     {
+        if ($this->call['c_status_id'] == Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
+            $this->callLog['cl_status_id'] = CallLogStatus::FAILED;
+        } else {
+            $this->callLog['cl_status_id'] = $this->call['c_status_id'];
+        }
         $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
 
         $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
@@ -177,6 +195,11 @@ class CallLogTransferService
 
     private function simpleInAcceptedChildCall(): void
     {
+        if ($this->call['c_status_id'] == Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
+            $this->callLog['cl_status_id'] = CallLogStatus::FAILED;
+        } else {
+            $this->callLog['cl_status_id'] = $this->call['c_status_id'];
+        }
         $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
@@ -195,13 +218,14 @@ class CallLogTransferService
         $this->callLog['cl_call_created_dt'] = $this->call['c_queue_start_dt'];
         $this->callLog['cl_call_finished_dt'] = date('Y-m-d H:i:s', (strtotime($this->call['c_created_dt']) + $this->call['c_call_duration']));
         $this->callLog['cl_duration'] = strtotime($this->callLog['cl_call_finished_dt']) - strtotime($this->callLog['cl_call_created_dt']);
+        $this->callLog['cl_is_transfer'] = false;
 
         $this->queue['clq_queue_time'] = $this->callLog['cl_duration'];
         $this->queue['clq_access_count'] =
             (int)CallUserAccess::find()
-            ->andWhere(['cua_call_id' => $this->call['c_id']])
-            ->andWhere(['>=', 'cua_created_dt', $this->callLog['cl_call_created_dt']])
-            ->count();
+                ->andWhere(['cua_call_id' => $this->call['c_id']])
+                ->andWhere(['>=', 'cua_created_dt', $this->callLog['cl_call_created_dt']])
+                ->count();
         $this->queue['clq_is_transfer'] = true;
 
         $this->createCallLogs();
@@ -212,7 +236,7 @@ class CallLogTransferService
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
         $this->queue['clq_queue_time'] = $this->call['c_call_duration'];
-        $this->queue['clq_access_count'] =  (int)CallUserAccess::find()->andWhere(['cua_call_id' => $this->call['c_id']])->count();
+        $this->queue['clq_access_count'] = (int)CallUserAccess::find()->andWhere(['cua_call_id' => $this->call['c_id']])->count();
 
         $this->createCallLogs();
     }
@@ -259,12 +283,12 @@ class CallLogTransferService
                 $log->cl_category_id = $this->callLog['cl_category_id'];
             } else {
                 if (
-                    in_array(
-                        $this->call['c_source_type_id'],
-                        [
-                            Call::SOURCE_GENERAL_LINE, Call::SOURCE_DIRECT_CALL, Call::SOURCE_REDIRECT_CALL, Call::SOURCE_TRANSFER_CALL, Call::SOURCE_CONFERENCE_CALL, Call::SOURCE_REDIAL_CALL
-                        ], false
-                    )
+                in_array(
+                    $this->call['c_source_type_id'],
+                    [
+                        Call::SOURCE_GENERAL_LINE, Call::SOURCE_DIRECT_CALL, Call::SOURCE_REDIRECT_CALL, Call::SOURCE_TRANSFER_CALL, Call::SOURCE_CONFERENCE_CALL, Call::SOURCE_REDIAL_CALL
+                    ], false
+                )
                 ) {
                     $log->cl_category_id = $this->call['c_source_type_id'];
                 } else {
@@ -353,7 +377,7 @@ class CallLogTransferService
 
         } catch (\Throwable $e) {
             $transaction->rollBack();
-            \Yii::error(VarDumper::dumpAsString(['category' => 'createCallLogs', 'Call' =>  $this->call, 'error' => $e->getMessage()]), 'CallLogTransferService');
+            \Yii::error(VarDumper::dumpAsString(['category' => 'createCallLogs', 'Call' => $this->call, 'error' => $e->getMessage()]), 'CallLogTransferService');
         }
     }
 

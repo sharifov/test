@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Client;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -12,7 +13,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'uuid')->textInput(['maxlength' => true]) ?>
+    <?php /* echo $form->field($model, 'uuid')->textInput(['maxlength' => true]) */?>
 
     <?= $form->field($model, 'first_name')->textInput(['maxlength' => true]) ?>
 
@@ -20,9 +21,16 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'last_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'created')->textInput() ?>
+    <?= $form->field($model, 'company_name')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'description')->textarea() ?>
+    <?= $form->field($model, 'is_company')->checkbox() ?>
+    <?= $form->field($model, 'is_public')->checkbox() ?>
+    <?= $form->field($model, 'disabled')->checkbox() ?>
+    <?= $form->field($model, 'rating')->textInput(['type' => 'number', 'step' => 1]) ?>
+    <?= $form->field($model, 'parent_id')->textInput() ?>
 
-    <?= $form->field($model, 'updated')->textInput() ?>
+    <?php /* echo $form->field($model, 'created')->textInput() */?>
+    <?php /* echo $form->field($model, 'updated')->textInput() */?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

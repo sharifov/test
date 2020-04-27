@@ -751,13 +751,19 @@ $js = <<<JS
 
 
     $('body').on('click', '.chat__details', function () {
-        var id = $(this).data('id');
-                
+        
+        let id = $(this).data('id');        
+        let date = $(this).data('date');
+        let from = $(this).data('from');
+        let to = $(this).data('to');
+        let subject = $(this).data('subject');
+        
         var obj = document.getElementById('object-email-view');
         obj.data = '/email/view?id='+id+'&preview=1';
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
         
         var popup = $('#modal-email-view');
+        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;

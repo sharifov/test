@@ -304,13 +304,13 @@ class EmployeeSearch extends Employee
         $newModels = [];
         $filteredUserIds = [];
         foreach ($data as $key => $model){
-            if (Auth::user()->isSupervision() && $model['item_name'] == 'agent' && !in_array($model['id'], $filteredUserIds)) {
+            if (Auth::user()->isSupervision() && $model['item_name'] == Employee::ROLE_AGENT && !in_array($model['id'], $filteredUserIds)) {
                 $newModels[] = $model;
                 array_push($filteredUserIds, $model['id']);
-            } elseif (Auth::user()->isExSuper() && $model['item_name'] == 'ex_agent' && !in_array($model['id'], $filteredUserIds)) {
+            } elseif (Auth::user()->isExSuper() && $model['item_name'] == Employee::ROLE_EX_AGENT && !in_array($model['id'], $filteredUserIds)) {
                 $newModels[] = $model;
                 array_push($filteredUserIds, $model['id']);
-            } elseif (Auth::user()->isSupSuper() && $model['item_name'] == 'sup_agent' && !in_array($model['id'], $filteredUserIds)) {
+            } elseif (Auth::user()->isSupSuper() && $model['item_name'] == Employee::ROLE_SUP_AGENT && !in_array($model['id'], $filteredUserIds)) {
                 $newModels[] = $model;
                 array_push($filteredUserIds, $model['id']);
             } elseif ($model['id'] == Auth::id() && !in_array($model['id'], $filteredUserIds)) {

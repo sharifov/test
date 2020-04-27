@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'client_id',
             'phone',
+            'cp_title',
             [
                 'attribute' => 'type',
                 'value' => static function (\common\models\ClientPhone $model) {

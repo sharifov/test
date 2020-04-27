@@ -18,6 +18,7 @@ use yii\db\Query;
  * @property string $updated
  * @property string $comments
  * @property int $type
+ * @property string $ce_title
  *
  * @property Client $client
  */
@@ -115,6 +116,7 @@ class ClientEmail extends \yii\db\ActiveRecord
             ['email', 'required'],
             ['email', 'email'],
             ['email', 'string', 'max' => 100],
+            ['ce_title', 'string', 'max' => 150],
 
             [['client_id', 'type'], 'integer'],
 
@@ -141,7 +143,8 @@ class ClientEmail extends \yii\db\ActiveRecord
             'email' => 'Email',
             'created' => 'Created',
             'updated' => 'Updated',
-			'type' => 'Email Type'
+			'type' => 'Email Type',
+			'ce_title' => 'Title'
         ];
     }
 

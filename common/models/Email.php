@@ -231,6 +231,16 @@ class Email extends \yii\db\ActiveRecord
 
     }
 
+    public function isInbox(): bool
+    {
+        return $this->e_type_id === self::TYPE_INBOX;
+    }
+
+    public function isOutbox(): bool
+    {
+        return $this->e_type_id === self::TYPE_OUTBOX;
+    }
+
     /**
      * @return mixed|string
      */

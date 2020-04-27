@@ -2,11 +2,13 @@
 
 namespace modules\email\controllers\frontend;
 
+use frontend\controllers\FController;
 use modules\email\src\protocol\gmail\GmailClient;
 use sales\auth\Auth;
 use Yii;
 use modules\email\src\entity\emailAccount\EmailAccount;
 use modules\email\src\entity\emailAccount\search\EmailAccountSearch;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
@@ -16,14 +18,14 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class EmailAccountController extends Controller
+class EmailAccountController extends FController
 {
     /**
     * @return array
     */
     public function behaviors(): array
     {
-        return [
+        $behaviors =  [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -31,6 +33,7 @@ class EmailAccountController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

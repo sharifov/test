@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use sales\access\EmployeeGroupAccess;
+use sales\auth\Auth;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -78,7 +79,7 @@ class KpiController extends FController
      */
     public function actionDetails($id)
     {
-        $isAgent = Yii::$app->user->identity->canRole('agent');
+        $isAgent = Auth::user()->isAgent();
 
         $kpiHistory = KpiHistory::find()->where(['kh_id' => $id])->one();
         if(!$kpiHistory || ($isAgent && Yii::$app->user->id !== $kpiHistory->kh_user_id) ){

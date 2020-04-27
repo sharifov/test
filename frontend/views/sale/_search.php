@@ -8,7 +8,6 @@ use yii\widgets\ActiveForm;
 /* @var $form yii\widgets\ActiveForm */
 
 
-//$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 ?>
 
 <div class="lead-search">

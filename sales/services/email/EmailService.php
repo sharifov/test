@@ -57,7 +57,7 @@ class EmailService
 //				$lead = $this->getLeadByLastEmail($email->e_email_from);
 			}
 		} catch (NotFoundException $exception) {
-			Yii::error('('.$exception->getCode().') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')' . '; message_id: ' . $email->e_ref_message_id, 'SalesEmailService:detectLeadId:NotFoundException');
+			Yii::info('('.$exception->getCode().') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')' . '; message_id: ' . $email->e_ref_message_id, 'info\SalesEmailService:detectLeadId:NotFoundException');
 		}
 
 		$email->e_lead_id = $lead->id ?? null;
@@ -80,7 +80,7 @@ class EmailService
 //				$case = $this->getCaseByLastEmail($email->e_email_from);
 			}
 		} catch (NotFoundException $exception) {
-			Yii::error('('.$exception->getCode().') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')' . '; message_id: ' . $email->e_ref_message_id, 'SalesEmailService:detectCaseId:NotFoundException');
+			Yii::info('('.$exception->getCode().') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')' . '; message_id: ' . $email->e_ref_message_id, 'info\SalesEmailService:detectCaseId:NotFoundException');
 		}
 
 		$email->e_case_id = $case->cs_id ?? null;

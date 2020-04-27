@@ -128,6 +128,11 @@ class BadgesController extends FController
                         $result['bonus'] = $count;
                     }
                     break;
+                case 'failed-bookings':
+                    if ($count = $this->getFailedBookings()) {
+                        $result['failed-bookings'] = $count;
+                    }
+                    break;
             }
         }
         return $result;
@@ -263,4 +268,16 @@ class BadgesController extends FController
         return (new LeadQcallSearch())->searchByRedial([], $user)->query->count();
     }
 
+    /**
+     * @return int|null
+     */
+    private function getFailedBookings(): ?int
+    {
+        if (!Yii::$app->user->can('/lead/failed-bookings')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->leadBadgesRepository->getFailedBookingsCount($user);
+    }
 }
