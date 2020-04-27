@@ -1,13 +1,13 @@
 <?php
 
-namespace sales\rbac\rules\cases\view;
+namespace sales\rbac\rules\cases\take;
 
 use sales\entities\cases\Cases;
 use yii\rbac\Rule;
 
-class CasesUpdateActiveRule extends Rule
+class CasesTakeFollowUpRule extends Rule
 {
-    public $name = 'CasesUpdateActiveRule';
+    public $name = 'CasesTakeFollowUpRule';
 
     public function execute($userId, $item, $params): bool
     {
@@ -17,6 +17,6 @@ class CasesUpdateActiveRule extends Rule
 
         /** @var Cases $case */
         $case = $params['case'];
-        return $case->isActive();
+        return $case->isFollowUp() && !$case->isOwner($userId);
     }
 }

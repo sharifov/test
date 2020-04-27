@@ -1,11 +1,13 @@
 <?php
 
-use sales\rbac\rules\cases\view\CasesTakeFollowUpRule;
-use sales\rbac\rules\cases\view\CasesTakeOverRule;
-use sales\rbac\rules\cases\view\CasesTakePendingRule;
-use sales\rbac\rules\cases\view\CasesTakeRule;
-use sales\rbac\rules\cases\view\CasesUpdateActiveOwnRule;
-use sales\rbac\rules\cases\view\CasesUpdateActiveRule;
+use sales\rbac\rules\cases\take\CasesTakeFollowUpRule;
+use sales\rbac\rules\cases\take\CasesTakeOverRule;
+use sales\rbac\rules\cases\take\CasesTakePendingRule;
+use sales\rbac\rules\cases\take\CasesTakeRule;
+use sales\rbac\rules\cases\take\CasesTakeTrashOwnRule;
+use sales\rbac\rules\cases\take\CasesTakeTrashRule;
+use sales\rbac\rules\cases\update\CasesUpdateActiveOwnRule;
+use sales\rbac\rules\cases\update\CasesUpdateActiveRule;
 use sales\rbac\rules\cases\view\CasesViewFollowUpRule;
 use sales\rbac\rules\cases\view\CasesViewPendingRule;
 use sales\rbac\rules\cases\view\CasesViewProcessingOwnRule;
@@ -119,6 +121,22 @@ class m200425_173242_add_case_permissions extends Migration
         $auth->add($casesTakeFollowUp);
         $auth->addChild($casesTakeFollowUp, $casesTake);
 
+        $casesTakeTrashRule = new CasesTakeTrashRule();
+        $auth->add($casesTakeTrashRule);
+        $casesTakeTrash = $auth->createPermission('cases/take_Trash');
+        $casesTakeTrash->description = 'Case Take. Status is Trash';
+        $casesTakeTrash->ruleName = $casesTakeTrashRule->name;
+        $auth->add($casesTakeTrash);
+        $auth->addChild($casesTakeTrash, $casesTake);
+
+        $casesTakeTrashOwnRule = new CasesTakeTrashOwnRule();
+        $auth->add($casesTakeTrashOwnRule);
+        $casesTakeTrashOwn = $auth->createPermission('cases/take_Trash_Own');
+        $casesTakeTrashOwn->description = 'Case Take. Status is Trash and User is Owner';
+        $casesTakeTrashOwn->ruleName = $casesTakeTrashOwnRule->name;
+        $auth->add($casesTakeTrashOwn);
+        $auth->addChild($casesTakeTrashOwn, $casesTake);
+
         $casesTakeOverRule = new CasesTakeOverRule();
         $auth->add($casesTakeOverRule);
         $casesTakeOver = $auth->createPermission('cases/takeOver');
@@ -158,6 +176,8 @@ class m200425_173242_add_case_permissions extends Migration
             'CasesUpdateActiveOwnRule',
             'CasesUpdateActiveRule',
             'CasesTakeOverRule',
+            'CasesTakeTrashOwnRule',
+            'CasesTakeTrashRule',
             'CasesTakeFollowUpRule',
             'CasesTakePendingRule',
             'CasesTakeRule',
@@ -175,6 +195,8 @@ class m200425_173242_add_case_permissions extends Migration
             'cases/update_Active',
             'cases/update',
             'cases/takeOver',
+            'cases/take_Trash_Own',
+            'cases/take_Trash',
             'cases/take_FollowUp',
             'cases/take_Pending',
             'cases/take',

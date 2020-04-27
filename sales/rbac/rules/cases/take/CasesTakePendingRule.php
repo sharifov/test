@@ -1,13 +1,13 @@
 <?php
 
-namespace sales\rbac\rules\cases\view;
+namespace sales\rbac\rules\cases\take;
 
 use sales\entities\cases\Cases;
 use yii\rbac\Rule;
 
-class CasesTakeOverRule extends Rule
+class CasesTakePendingRule extends Rule
 {
-    public $name = 'CasesTakeOverRule';
+    public $name = 'CasesTakePendingRule';
 
     public function execute($userId, $item, $params): bool
     {
@@ -17,6 +17,6 @@ class CasesTakeOverRule extends Rule
 
         /** @var Cases $case */
         $case = $params['case'];
-        return $case->isProcessing() && !$case->isOwner($userId);
+        return $case->isPending() && !$case->isOwner($userId);
     }
 }

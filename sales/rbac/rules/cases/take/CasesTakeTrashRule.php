@@ -1,13 +1,13 @@
 <?php
 
-namespace sales\rbac\rules\cases\view;
+namespace sales\rbac\rules\cases\take;
 
 use sales\entities\cases\Cases;
 use yii\rbac\Rule;
 
-class CasesUpdateActiveOwnRule extends Rule
+class CasesTakeTrashRule extends Rule
 {
-    public $name = 'CasesUpdateActiveOwnRule';
+    public $name = 'CasesTakeTrashRule';
 
     public function execute($userId, $item, $params): bool
     {
@@ -17,6 +17,6 @@ class CasesUpdateActiveOwnRule extends Rule
 
         /** @var Cases $case */
         $case = $params['case'];
-        return $case->isActive() && $case->isOwner($userId);
+        return $case->isTrash();
     }
 }
