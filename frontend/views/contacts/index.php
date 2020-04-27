@@ -27,8 +27,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'id',
-            'uuid',
-            [
+            'first_name',
+            'last_name',
+            /*[
                 'header' => 'Name',
                 'attribute' => 'by_name',
                 'value' => function(Client $model) {
@@ -43,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $out;
                 },
                 'format' => 'raw',
-            ],
+            ],*/
             'company_name',
             [
                 'attribute' => 'is_company',
@@ -118,24 +119,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left'],
-            ],
-            [
-                'header' => 'Leads',
-                'value' => function(Client $model) {
-                    $leads = $model->leads;
-                    $data = [];
-                    if($leads) {
-                        foreach ($leads as $lead) {
-                            $data[] = '<i class="fa fa-link"></i> '. Html::a('lead: '.$lead->id, ['/leads/view', 'id' => $lead->id, 'showInPopUp' => 'modal'], ['title' => 'Lead: '. $lead->id, 'class'=>"show-modal", "data-id"=>$lead->id, 'target' => '_blank', 'data-pjax' => 0]).' (IP: '.$lead->request_ip.')';
-                        }
-                    }
-                    $str = '';
-                    if($data) {
-                        $str = ''.implode('<br>', $data).'';
-                    }
-                    return $str;
-                },
-                'format' => 'raw',
             ],
             [
                 'attribute' => 'created',

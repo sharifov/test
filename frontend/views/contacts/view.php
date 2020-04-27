@@ -7,8 +7,8 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\Client */
 
-$this->title = 'Client: ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Clients', 'url' => ['index']];
+$this->title = 'Contact: ' . $model->id;
+$this->params['breadcrumbs'][] = ['label' => 'Contact', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="client-view">
@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $out = '<span class="not-set">(not set)</span>';
                     if ($model->parent_id && $parent = Client::findOne(['id' => $model->parent_id])) {
-                        return '<i class="fa fa-user"></i> ' . $parent->full_name;
+                        return '<i class="fa fa-user"></i> ' . $parent->getNameByType();
                     }
                     return $out;
                 },

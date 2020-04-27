@@ -13,8 +13,8 @@ class m200424_043826_add_columns_to_client extends Migration
     public function safeUp()
     {
         $this->addColumn('{{%clients}}', 'parent_id', $this->integer());
-        $this->addColumn('{{%clients}}', 'is_company', $this->boolean());
-        $this->addColumn('{{%clients}}', 'is_public', $this->boolean());
+        $this->addColumn('{{%clients}}', 'is_company', $this->boolean()->defaultValue(false));
+        $this->addColumn('{{%clients}}', 'is_public', $this->boolean()->defaultValue(false));
         $this->addColumn('{{%clients}}', 'company_name', $this->string(150));
         $this->addColumn('{{%clients}}', 'description', $this->text());
         $this->addColumn('{{%clients}}', 'disabled', $this->boolean()->defaultValue(false));
@@ -33,7 +33,7 @@ class m200424_043826_add_columns_to_client extends Migration
         $this->addColumn('{{%client_phone}}', 'cp_title', $this->string(100));
         $this->addColumn('{{%client_email}}', 'ce_title', $this->string(100));
 
-        $this->createTable('{{%user_contact_list}}',    [
+        $this->createTable('{{%user_contact_list}}', [
             'ucl_user_id' => $this->integer()->notNull(),
             'ucl_client_id' => $this->integer()->notNull(),
             'ucl_title' => $this->string(100),

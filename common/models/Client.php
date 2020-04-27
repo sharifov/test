@@ -295,4 +295,12 @@ class Client extends ActiveRecord
     {
         return new ClientQuery(static::class);
     }
+
+    /**
+     * @return string
+     */
+    public function getNameByType(): string
+    {
+        return $this->is_company ? $this->company_name : trim($this->first_name . ' ' . $this->last_name);
+    }
 }
