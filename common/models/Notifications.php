@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\jobs\TelegramSendMessageJob;
+use common\components\Purifier;
 use common\models\query\NotificationsQuery;
 use frontend\widgets\notification\NotificationCache;
 use sales\helpers\app\AppHelper;
@@ -240,7 +241,7 @@ class Notifications extends ActiveRecord
         if ($insert) {
             $job = new TelegramSendMessageJob();
             $job->user_id = $this->n_user_id;
-            $job->text = $this->n_message;
+            $job->text = Purifier::purify($this->n_message);
 
             $queue = Yii::$app->queue_job;
             $jobId = $queue->push($job);

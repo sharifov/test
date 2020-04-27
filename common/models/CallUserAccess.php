@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\jobs\AgentCallQueueJob;
+use common\components\Purifier;
 use common\models\query\CallUserAccessQuery;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
@@ -166,7 +167,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true)) {
+            $message = 'New incoming Call (' . $this->cua_call_id . ')';
+            if (isset($this->cuaCall->cLead)) {
+                $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cuaCall->cLead) . ')';
+            }
+            if (isset($this->cuaCall->cCase)) {
+                $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cuaCall->cCase) . ')';
+            }
+            if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', $message, Notifications::TYPE_SUCCESS, true)) {
                 //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);

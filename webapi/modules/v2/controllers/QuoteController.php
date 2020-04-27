@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\components\Purifier;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -528,12 +529,11 @@ class QuoteController extends ApiBaseController
                 if (!$excludeIP) {
                     $model->status = Quote::STATUS_OPENED;
                     if ($model->save()) {
-                        $host = Yii::$app->params['url_address'];
                         $lead = $model->lead;
                         if ($lead) {
                             $project_name = $lead->project ? $lead->project->name : '';
                             $subject = 'Quote- ' . $model->uid . ' OPENED';
-                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\n lead: " . $host . '/lead/view/' . $lead->gid;
+                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\n Lead (Id: " . Purifier::createLeadShortLink($lead) . ")";
 
                             if ($lead->employee_id) {
 

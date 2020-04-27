@@ -2,6 +2,7 @@
 
 namespace common\components\i18n;
 
+use common\components\Purifier;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
@@ -52,6 +53,23 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asPurify($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        return Purifier::purify($value);
+    }
+
+    public function asNtextWithPurify($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        $value = $this->asNtext($value);
+        return Purifier::purify($value);
+    }
+
     public function asPhoneList($value): string
     {
         if ($value === null) {
