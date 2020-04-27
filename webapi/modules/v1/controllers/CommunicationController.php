@@ -2,6 +2,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\CallQueueJob;
+use common\components\Purifier;
 use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallUserGroup;
@@ -407,8 +408,15 @@ class CommunicationController extends ApiBaseController
 
                         Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
                             'info\API:Communication:Incoming:Offline');
+                        $message = 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline";
+                        if ($callModel->c_lead_id && $callModel->cLead) {
+                            $message .= "\r\n Lead (Id: " . Purifier::createLeadShortLink($callModel->cLead) . ")";
+                        }
+                        if ($callModel->c_case_id && $callModel->cCase) {
+                            $message .= "\r\n Case (Id: " . Purifier::createCaseShortLink($callModel->cCase) . ")";
+                        }
                         if ($ntf = Notifications::create($user->id, 'Missing Call [Offline]',
-                            'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline",
+                            $message,
                             Notifications::TYPE_WARNING, true)
                         ) {
                             // Notifications::socket($user->id, null, 'getNewNotification', [], true);

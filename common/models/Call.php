@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\Purifier;
 use common\models\query\CallQuery;
 use frontend\widgets\notification\NotificationMessage;
 use sales\access\EmployeeDepartmentAccess;
@@ -10,6 +11,8 @@ use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
 use sales\events\call\CallCreatedEvent;
+use sales\helpers\cases\CasesUrlHelper;
+use sales\helpers\lead\LeadUrlHelper;
 use sales\model\call\entity\call\events\CallEvents;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\repositories\cases\CasesRepository;
@@ -853,16 +856,16 @@ class Call extends \yii\db\ActiveRecord
             }
 
 
-            if ($this->c_case_id && $isChangedStatus && $this->isIn() && $this->isStatusInProgress()) {
-                if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
-                    try {
-                        $casesManageService = Yii::createObject(CasesManageService::class);
-                        $casesManageService->take($this->c_case_id, $this->c_created_user_id, null);
-                    } catch (\Throwable $exception) {
-                        Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
-                    }
-                }
-            }
+//            if ($this->c_case_id && $isChangedStatus && $this->isIn() && $this->isStatusInProgress()) {
+//                if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
+//                    try {
+//                        $casesManageService = Yii::createObject(CasesManageService::class);
+//                        $casesManageService->take($this->c_case_id, $this->c_created_user_id, null);
+//                    } catch (\Throwable $exception) {
+//                        Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
+//                    }
+//                }
+//            }
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
@@ -885,7 +888,7 @@ class Call extends \yii\db\ActiveRecord
 
                             $qCallService->remove($lead->id);
 
-                            if ($ntf = Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
+                            if ($ntf = Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new Lead (Id: ' . Purifier::createLeadShortLink($lead) . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
                                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                                 Notifications::publish('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
                             }
@@ -935,11 +938,15 @@ class Call extends \yii\db\ActiveRecord
 //                        }
 
                         try {
-                            $caseRepo = Yii::createObject(CasesRepository::class);
-                            $case->processing((int)$this->c_created_user_id, null);
-                            $caseRepo->save($case);
 
-                            if ($ntf = Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
+                            $casesManageService = Yii::createObject(CasesManageService::class);
+                            $casesManageService->callAutoTake($this->c_case_id, $this->c_created_user_id, null, 'Call auto take');
+
+//                            $caseRepo = Yii::createObject(CasesRepository::class);
+//                            $case->processing((int)$this->c_created_user_id, null);
+//                            $caseRepo->save($case);
+
+                            if ($ntf = Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
                                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                                 Notifications::publish('getNewNotification', ['user_id' => $case->cs_user_id], $dataNotification);
                             }
@@ -979,12 +986,12 @@ class Call extends \yii\db\ActiveRecord
             if ($userListNotifications) {
                 $title = 'Missed Call (' . $this->getSourceName() . ')';
                 $message = 'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to;
-                if ($this->c_lead_id) {
-                    $message .= ', LeadId: ' . $this->c_lead_id;
+                if ($this->c_lead_id && $this->cLead) {
+                    $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
                 }
 
-                if ($this->c_case_id) {
-                    $message .= ', CaseId: ' . $this->c_case_id;
+                if ($this->c_case_id && $this->cCase) {
+                    $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
                 }
 
                 foreach ($userListNotifications as $userId) {
@@ -1157,10 +1164,18 @@ class Call extends \yii\db\ActiveRecord
 
                     $user = Employee::findOne($user_id);
 
+                    $message = 'Missed Call (' . $call->getSourceName() . ')  from ' . $call->c_from . ' to ' . $call->c_to . '. Taken by Agent: ' . ($user ? Html::encode($user->username) : '-');
+                    if ($call->c_lead_id && $call->cLead) {
+                        $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                    }
+                    if ($call->c_case_id && $call->cCase) {
+                        $message .= ', Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                    }
+
                     if ($ntf = Notifications::create(
                         $call->c_created_user_id,
                         'Missed Call (' . $call->getSourceName() . ')',
-                        'Missed Call (' . $call->getSourceName() . ')  from ' . $call->c_from . ' to ' . $call->c_to . '. Taken by Agent: ' . ($user ? Html::encode($user->username) : '-'),
+                        $message,
                         Notifications::TYPE_WARNING,
                         true)
                     ) {

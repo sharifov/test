@@ -92,6 +92,24 @@ class CasesManageService
      * @param int|null $creatorId
      * @param string|null $description
      */
+    public function callAutoTake(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
+    {
+        $case = $this->finder->caseFind($caseId);
+        $user = $this->finder->userFind($userId);
+
+        if (!($case->isPending() && $case->isFreedOwner())) {
+            throw new \DomainException('Case could not be call auto take now.');
+        }
+
+        $this->processing($case, $user, $creatorId, $description);
+    }
+
+    /**
+     * @param int $caseId
+     * @param int $userId
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
     public function take(int $caseId, int $userId, ?int $creatorId, ?string $description = ''): void
     {
         $case = $this->finder->caseFind($caseId);

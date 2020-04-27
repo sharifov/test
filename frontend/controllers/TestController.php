@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Client;
@@ -37,6 +38,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
+use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
@@ -84,6 +86,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
 use sales\helpers\app\AppHelper;
+use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
@@ -202,6 +205,25 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $lead = Lead::findOne(125556);
+        $lead->employee_id = 295;
+
+        $task = QaTask::findOne(1);
+ $body = Yii::t('email', "You task #{id} has been canceled by {username} ({role}). Reason: {reason}.",
+            [
+                'id' => Purifier::createQaTaskShortLink($task),
+                'username' => '12',
+                'role' => 12,
+                'reason' => 'reas',
+            ]);
+
+        if ($ntf = Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', $body, Notifications::TYPE_SUCCESS, true)) {
+            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+            Notifications::publish('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
+        }
+
+
+        die;
         return $this->render('blank');
     }
 

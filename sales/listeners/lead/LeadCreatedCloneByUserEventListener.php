@@ -2,6 +2,7 @@
 
 namespace sales\listeners\lead;
 
+use common\components\Purifier;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
@@ -54,14 +55,12 @@ class LeadCreatedCloneByUserEventListener
             $agent = 'System';
         }
 
-        $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}. New lead {lead_id} {url}",
+        $body = Yii::t('email', "Agent {agent} cloned lead (Id: {clone_id}) with reason [{reason}]. New lead (Id: {lead_id})",
             [
                 'agent' => $agent,
-                'url' => $host . '/lead/view/' . $lead->gid,
-                'cloned_url' => $host . '/lead/view/' . ($lead->clone ? $lead->clone->gid : $lead->gid),
+                'clone_id' => $lead->clone ? Purifier::createLeadShortLink($lead->clone) : 'not found',
                 'reason' => $lead->description,
-                'lead_id' => $lead->id,
-                'clone_id' => $lead->clone_id
+                'lead_id' => Purifier::createLeadShortLink($lead),
             ]);
 
         if ($ntf = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {

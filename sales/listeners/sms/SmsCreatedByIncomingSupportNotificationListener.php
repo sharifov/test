@@ -2,6 +2,7 @@
 
 namespace sales\listeners\sms;
 
+use common\components\Purifier;
 use common\models\ClientPhone;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
@@ -40,7 +41,7 @@ class SmsCreatedByIncomingSupportNotificationListener
                     $userId,
                     'New SMS ' . $event->clientPhone,
                     'SMS from ' . $event->clientPhone . ' (' . $clientName . ') to ' . $event->userPhone . ' <br> ' . nl2br(Html::encode($event->text))
-                    . ($event->caseId ? '<br>Case ID: ' . $event->caseId : ''),
+                    . ($event->sms->sCase ? '<br>Case (Id: ' . Purifier::createCaseShortLink($event->sms->sCase) . ')' : ''),
                     Notifications::TYPE_INFO,
                     true)
                 ) {

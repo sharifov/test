@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\EmailService;
 use common\components\jobs\UpdateLeadBOJob;
+use common\components\Purifier;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
@@ -2567,13 +2568,11 @@ class Lead extends ActiveRecord implements Objectable
                 if ($type === 'reassigned-lead') {
 
                     $body = Yii::t('email', "Attention!
-Your Lead (ID: {lead_id}) has been reassigned to another agent ({name2}).
-{url}",
+Your Lead ({lead_id}) has been reassigned to another agent ({name2}).",
                         [
                             'name' => $userName,
                             'name2' => $userName2,
-                            'url' => $host . '/lead/view/' . $this->gid,
-                            'lead_id' => $this->id,
+                            'lead_id' => Purifier::createLeadShortLink($this),
                             'br' => "\r\n"
                         ]);
 
@@ -2595,12 +2594,11 @@ Your Lead (ID: {lead_id}) has been reassigned to another agent ({name2}).
 
                     $body = Yii::t('email', "Booked quote with UID : {quote_uid},
 Source: {name},
-Lead ID: {lead_id} ({url})
+Lead: {lead_id}
 {name} made \${profit} on {airline} to {destination}",
                         [
                             'name' => $userName,
-                            'url' => $host . '/lead/view/' . $this->gid,
-                            'lead_id' => $this->id,
+                            'lead_id' => Purifier::createLeadShortLink($this),
                             'quote_uid' => $quote ? $quote->uid : '-',
                             'destination' => $flightSegment ? $flightSegment->destination : '-',
                             'airline' => $airlineName,
@@ -2615,13 +2613,11 @@ Lead ID: {lead_id} ({url})
                     $subject = Yii::t('email', 'Lead-{id} to BOOKED', ['id' => $this->id]);
                     $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
-                    $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to BOOKED!
-Booked quote UID: {quote_uid}
-{url}",
+                    $body = Yii::t('email', "Your Lead ({lead_id}) has been changed status to BOOKED!
+Booked quote UID: {quote_uid}",
                         [
                             'name' => $userName,
-                            'url' => $host . '/lead/view/' . $this->gid,
-                            'lead_id' => $this->id,
+                            'lead_id' => Purifier::createLeadShortLink($this),
                             'quote_uid' => $quote ? $quote->uid : '-',
                             'br' => "\r\n"
                         ]);
@@ -2630,16 +2626,14 @@ Booked quote UID: {quote_uid}
                 } elseif ($type === 'lead-status-snooze') {
 
                     $subject = Yii::t('email', "Lead-{id} to SNOOZE", ['id' => $this->id]);
-                    $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to SNOOZE!
+                    $body = Yii::t('email', "Your Lead ({lead_id}) has been changed status to SNOOZE!
 Snooze for: {datetime}.
-Reason: {reason}
-{url}",
+Reason: {reason}",
                         [
                             'name' => $userName,
-                            'url' => $host . '/lead/view/' . $this->gid,
+                            'lead_id' => Purifier::createLeadShortLink($this),
                             'datetime' => Yii::$app->formatter->asDatetime(strtotime($this->snooze_for)),
                             'reason' => $this->status_description ?: '-',
-                            'lead_id' => $this->id,
                             'br' => "\r\n"
                         ]);
 
@@ -2647,14 +2641,12 @@ Reason: {reason}
                 } elseif ($type === 'lead-status-follow-up') {
 
                     $subject = Yii::t('email', "Lead-{id} to FOLLOW-UP", ['id' => $this->id]);
-                    $body = Yii::t('email', 'Your Lead (ID: {lead_id}) has been changed status to FOLLOW-UP!
-Reason: {reason}
-{url}',
+                    $body = Yii::t('email', 'Your Lead ({lead_id}) has been changed status to FOLLOW-UP!
+Reason: {reason}',
                         [
                             'name' => $userName,
-                            'url' => $host . '/lead/view/' . $this->gid,
                             'reason' => $this->status_description ?: '-',
-                            'lead_id' => $this->id,
+                            'lead_id' => Purifier::createLeadShortLink($this),
                             'br' => "\r\n"
                         ]);
 

@@ -2,6 +2,7 @@
 
 namespace sales\listeners\lead;
 
+use common\components\Purifier;
 use common\models\Airline;
 use common\models\LeadFlightSegment;
 use common\models\Notifications;
@@ -65,15 +66,12 @@ class LeadSoldNotificationsListener
             $profit = number_format(Quote::countProfit($quote->id), 2);
         }
 
-        $host = Yii::$app->params['url_address'];
-
         $subject = Yii::t('email', 'Lead-{id} to SOLD', ['id' => $lead->id]);
 
-        $body = Yii::t('email', "Booked quote with UID : {quote_uid}, Source: {name}, Lead ID: {lead_id} ({url}) {name} made \${profit} on {airline} to {destination}",
+        $body = Yii::t('email', "Booked quote with UID : {quote_uid}, Source: {name}, Lead: (Id: {lead_id}) {name} made \${profit} on {airline} to {destination}",
             [
                 'name' => $owner->username,
-                'url' => $host . '/lead/view/' . $lead->gid,
-                'lead_id' => $lead->id,
+                'lead_id' => Purifier::createLeadShortLink($lead),
                 'quote_uid' => $quote ? $quote->uid : '-',
                 'destination' => $flightSegment ? $flightSegment->destination : '-',
                 'airline' => $airlineName,

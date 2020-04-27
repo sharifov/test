@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\components\Purifier;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -1564,7 +1565,10 @@ class LeadController extends ApiBaseController
 
 
             if($leadCallExpert->lce_agent_user_id) {
-                if ($ntf = Notifications::create($leadCallExpert->lce_agent_user_id, 'Expert Response', 'Expert ('.Html::encode($leadCallExpert->lce_expert_username).') Response ('.$leadCallExpert->getStatusName().'). Lead ID: ' . $leadCallExpert->lce_lead_id, Notifications::TYPE_INFO, true)) {
+                if ($ntf = Notifications::create(
+                    $leadCallExpert->lce_agent_user_id,
+                    'Expert Response',
+                    'Expert (' . Html::encode($leadCallExpert->lce_expert_username) . ') Response (' . $leadCallExpert->getStatusName() . '). Lead (Id: ' . ($leadCallExpert->lceLead ? Purifier::createLeadShortLink($leadCallExpert->lceLead) : 'nof found') . ')', Notifications::TYPE_INFO, true)) {
                     // Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                     Notifications::publish('getNewNotification', ['user_id' => $leadCallExpert->lce_agent_user_id], $dataNotification);

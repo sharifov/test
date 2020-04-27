@@ -3,6 +3,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
+use common\components\Purifier;
 use common\models\EmployeeContactInfo;
 use common\models\GlobalLog;
 use common\models\Lead;
@@ -316,12 +317,11 @@ class QuoteController extends ApiBaseController
                 if (!$excludeIP) {
                     $model->status = Quote::STATUS_OPENED;
                     if ($model->save()) {
-                        $host = Yii::$app->params['url_address'];
                         $lead = $model->lead;
                         if ($lead) {
                             $project_name = $lead->project ? $lead->project->name : '';
                             $subject = 'Quote- ' . $model->uid . ' OPENED';
-                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nlead: " . $host . '/lead/view/' . $lead->gid;
+                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nLead (Id: " . Purifier::createLeadShortLink($lead) . ")";
 
                             if ($lead->employee_id) {
 
@@ -339,8 +339,7 @@ class QuoteController extends ApiBaseController
                 if ($lead = $model->lead) {
                     $project_name = $lead->project ? $lead->project->name : '';
                     $subject = 'Quote- ' . $model->uid . ' OPENED';
-                    $host = Yii::$app->params['url_address'];
-                    $message = 'Your Declined Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nlead: " . $host . '/lead/view/' . $lead->gid;
+                    $message = 'Your Declined Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nLead (Id: " . Purifier::createLeadShortLink($lead) . ")";
 
                     if ($lead->employee_id) {
                         if ($ntf = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true)) {

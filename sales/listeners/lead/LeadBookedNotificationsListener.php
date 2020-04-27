@@ -2,6 +2,7 @@
 
 namespace sales\listeners\lead;
 
+use common\components\Purifier;
 use common\models\Notifications;
 use common\models\Quote;
 use frontend\widgets\notification\NotificationMessage;
@@ -60,11 +61,10 @@ class LeadBookedNotificationsListener
 
         $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
-        $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to BOOKED! Booked quote UID: {quote_uid} {url}",
+        $body = Yii::t('email', "Your Lead (Id: {lead_id}) has been changed status to BOOKED! Booked quote UID: {quote_uid}",
             [
-                'lead_id' => $lead->id,
+                'lead_id' => Purifier::createLeadShortLink($lead),
                 'quote_uid' => $quote ? $quote->uid : '-',
-                'url' => $host . '/lead/view/' . $lead->gid,
             ]);
 
         if ($ntf = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
