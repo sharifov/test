@@ -171,6 +171,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Conference Room', 'url' => ['/conference-room/index'], 'icon' => 'comment'],
                 ['label' => 'Conferences', 'url' => ['/conference/index'], 'icon' => 'comment'],
                 ['label' => 'Conference Participant', 'url' => ['/conference-participant/index'], 'icon' => 'phone'],
+                ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
             ]
         ];
 
