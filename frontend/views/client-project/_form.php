@@ -12,11 +12,8 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'cp_client_id')->textInput() ?>
-
-    <?= $form->field($model, 'cp_project_id')->textInput() ?>
-
-    <?= $form->field($model, 'cp_created_dt')->textInput() ?>
+    <?= $form->field($model, 'cp_client_id')->textInput(['style' => 'width: 320px']) ?>
+    <?= $form->field($model, 'cp_project_id')->dropDownList(\common\models\Project::getList()) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

@@ -3,6 +3,9 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "client_project".
@@ -45,11 +48,25 @@ class ClientProject extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'cp_client_id' => 'Cp Client ID',
-            'cp_project_id' => 'Cp Project ID',
-            'cp_created_dt' => 'Cp Created Dt',
+            'cp_client_id' => 'Client ID',
+            'cp_project_id' => 'Project',
+            'cp_created_dt' => 'Created',
         ];
     }
+
+    public function behaviors(): array
+	{
+		$behaviors = [
+			'timestamp' => [
+				'class' => TimestampBehavior::class,
+				'attributes' => [
+					ActiveRecord::EVENT_BEFORE_INSERT => ['cp_created_dt'],
+				],
+				'value' => date('Y-m-d H:i:s')
+			],
+		];
+		return ArrayHelper::merge(parent::behaviors(), $behaviors);
+	}
 
     /**
      * Gets query for [[CpClient]].
