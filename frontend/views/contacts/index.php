@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'is_company',
                 'value' => function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
-                    if ($model->is_company) {
+                    if (isset($model->is_company)) {
                         $out = $model->is_company ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                     }
                     return $out;
@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'is_public',
                 'value' => function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
-                    if ($model->is_public) {
+                    if (isset($model->is_public)) {
                         $out = $model->is_public ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                     }
                     return $out;
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'disabled',
                 'value' => function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
-                    if ($model->disabled) {
+                    if (isset($model->disabled)) {
                         $out = $model->disabled ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                     }
                     return $out;
