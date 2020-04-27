@@ -18,20 +18,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $form->field($model, 'is_company')->checkbox(['class' => 'is_company']) ?>
     <div class="user_elements">
-        <?= $form->field($model, 'first_name')->textInput(['maxlength' => true]) ?>
-        <?= $form->field($model, 'middle_name')->textInput(['maxlength' => true]) ?>
-        <?= $form->field($model, 'last_name')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'first_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
+        <?= $form->field($model, 'middle_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
+        <?= $form->field($model, 'last_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
     </div>
     
-    <div class="company_elements">
-        <?= $form->field($model, 'company_name')->textInput(['maxlength' => true]) ?>
+    <div class="company_elements" style="display: none;">
+        <?= $form->field($model, 'company_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
     </div>
     
-    <?= $form->field($model, 'description')->textarea() ?>
+    <?= $form->field($model, 'description')->textarea(['rows' => 4, 'style' => 'width: 320px', 'class' => 'form-control']) ?>
     <?= $form->field($model, 'is_public')->checkbox() ?>
     <?= $form->field($model, 'disabled')->checkbox() ?>
-    <?= $form->field($model, 'rating')->textInput(['type' => 'number', 'step' => 1]) ?>
-    <?= $form->field($model, 'parent_id')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
