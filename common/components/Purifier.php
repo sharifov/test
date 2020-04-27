@@ -15,13 +15,16 @@ use yii\bootstrap4\Html;
  * Case Filter: {qa-task-id-gid} => <a href="/qa-task/qa-task/view?gid=gid">id</a>
  *
  * @property string|null $content
+ * @property string $host
  */
 class Purifier
 {
     private $content;
+    private $host;
 
     public function __construct(?string $content)
     {
+        $this->host = \Yii::$app->params['url_address'];
         $this->content = $content;
     }
 
@@ -81,8 +84,8 @@ class Purifier
 
     public function replaceShortCodeToLeadLink(): void
     {
-        $this->content = preg_replace_callback('|{lead-([\d]+)-([a-z0-9]+)}|iU', static function ($matches) {
-            return Html::a($matches[1], ['/lead/view', 'gid' => $matches[2]]);
+        $this->content = preg_replace_callback('|{lead-([\d]+)-([a-z0-9]+)}|iU', function ($matches) {
+            return Html::a($matches[1], $this->host . '/lead/view/' . $matches[2]);
         }, $this->content);
     }
 
@@ -95,8 +98,8 @@ class Purifier
 
     public function replaceShortCodeToCaseLink(): void
     {
-        $this->content = preg_replace_callback('|{case-([\d]+)-([a-z0-9]+)}|iU', static function ($matches) {
-            return Html::a($matches[1], ['/cases/view', 'gid' => $matches[2]]);
+        $this->content = preg_replace_callback('|{case-([\d]+)-([a-z0-9]+)}|iU', function ($matches) {
+            return Html::a($matches[1], $this->host . '/cases/view/' . $matches[2]);
         }, $this->content);
     }
 
@@ -109,8 +112,8 @@ class Purifier
 
     public function replaceShortCodeToQaTaskLink(): void
     {
-        $this->content = preg_replace_callback('|{qa-task-([\d]+)-([a-z0-9]+)}|iU', static function ($matches) {
-            return Html::a($matches[1], ['/qa-task/qa-task/view', 'gid' => $matches[2]]);
+        $this->content = preg_replace_callback('|{qa-task-([\d]+)-([a-z0-9]+)}|iU', function ($matches) {
+            return Html::a($matches[1], $this->host . '/qa-task/qa-task/view?gid=' . $matches[2]);
         }, $this->content);
     }
 
