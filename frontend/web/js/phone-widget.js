@@ -157,14 +157,16 @@ $(document).ready(function() {
             updateAgentStatus(connection, false, 1);
             device.disconnectAll();
 
-            $('.phone-widget-icon').removeClass('is-on-call');
-            $('.phone-widget-icon').removeClass('is-pending');
-            $('.call-pane__call-btns').removeClass('is-on-call');
-            $('.call-pane__call-btns').removeClass('is-pending')
+            newWidgetCancelCall();
 
             clearTimeout(timeout)
         }
     })
 
-
+    window.newWidgetCancelCall = function () {
+        $('.phone-widget-icon').removeClass('is-on-call');
+        $('.phone-widget-icon').removeClass('is-pending');
+        $('.call-pane__call-btns').removeClass('is-on-call');
+        $('.call-pane__call-btns').removeClass('is-pending')
+    }
 });
