@@ -27,8 +27,11 @@ $ajaxCallTransferUrl = Url::to(['phone/ajax-call-transfer']);
 $ajaxCheckUserForCallUrl = Url::to(['phone/ajax-check-user-for-call']);
 $ajaxPhoneDialUrl = Url::to(['phone/ajax-phone-dial']);
 $ajaxBlackList = Url::to(['phone/check-black-phone']);
-$phoneFrom = (Yii::$app->user->identity->getFirstUserProjectParam()->one())->getPhoneList()->one()->pl_phone_number;
-$userProjectId = (Yii::$app->user->identity->getFirstUserProjectParam()->one())->upp_project_id;
+
+$phoneUserProject = (Yii::$app->user->identity->getFirstUserProjectParam()->one());
+
+$phoneFrom = $phoneUserProject ? ($phoneUserProject->getPhoneList()->one())->pl_phone_number ?? null : null;
+$userProjectId = $phoneUserProject ? $phoneUserProject->upp_project_id : null;
 ?>
 
 <script type="text/javascript">
