@@ -3,6 +3,7 @@ namespace frontend\widgets;
 
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\auth\Auth;
 use Yii;
 use yii\bootstrap\Widget;
 
@@ -24,7 +25,7 @@ class NewWebPhoneWidget extends Widget
 
 		$useNewWebPhoneWidget = Yii::$app->params['settings']['use_new_web_phone_widget'] ?? false;
 
-		$phoneUserProject = UserProjectParams::find()->select(['upp_project_id', 'pl_phone_number'])->withExistedPhoneInPhoneList()->asArray()->one();
+		$phoneUserProject = UserProjectParams::find()->select(['upp_project_id', 'pl_phone_number'])->byUserId(Auth::id())->withExistedPhoneInPhoneList()->asArray();
 
 		$phoneFrom = $phoneUserProject['pl_phone_number'] ?? null;
 		$userProjectId = $phoneUserProject['upp_project_id'] ?? null;
