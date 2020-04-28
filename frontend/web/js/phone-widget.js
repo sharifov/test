@@ -1,6 +1,17 @@
 $(document).ready(function() {
     $phoneTabAnchor = $('[data-toggle-tab]');
 
+    function delay(callback, ms) {
+        var timer = 0;
+        return function() {
+            var context = this, args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback.apply(context, args);
+            }, ms || 0);
+        };
+    }
+
     $phoneTabAnchor.on('click', function() {
         $current = '#' + $(this).data('toggle-tab');
 
@@ -26,10 +37,10 @@ $(document).ready(function() {
 
     var contactModal = $('.contact-modal-info');
     var blockSuggestion = $('.suggested-contacts');
-    var suggestions = new SimpleBar(blockSuggestion[0]);
-    var modalScroll = new SimpleBar(contactModal[0])
-    modalScroll.getContentElement()
-    suggestions.getContentElement()
+    // var suggestions = new SimpleBar(blockSuggestion[0]);
+    // var modalScroll = new SimpleBar(contactModal[0])
+    // modalScroll.getContentElement()
+    // suggestions.getContentElement()
 
 
 
@@ -51,18 +62,18 @@ $(document).ready(function() {
         $(this).removeClass('is-shown')
     });
 
-    $('.call-pane__dial-number').on('keyup', function() {
-
-
-
-        if ($(this).val() !== '') {
-            $('.suggested-contacts').addClass('is_active');
-            $('.call-pane__dial-clear-all').addClass('is-shown')
-        } else {
-            $('.suggested-contacts').removeClass('is_active');
-            $('.call-pane__dial-clear-all').removeClass('is-shown')
-        }
-    })
+    // $('.call-pane__dial-number').on('keyup', delay(function() {
+    //     if ($(this).val() !== '') {
+    //
+    //
+    //
+    //         $('.suggested-contacts').addClass('is_active');
+    //         $('.call-pane__dial-clear-all').addClass('is-shown')
+    //     } else {
+    //         $('.suggested-contacts').removeClass('is_active');
+    //         $('.call-pane__dial-clear-all').removeClass('is-shown')
+    //     }
+    // }, 800));
 
     $('.call-pane__correction').on('click', function(e) {
         e.preventDefault();
