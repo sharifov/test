@@ -3,6 +3,7 @@
 use common\models\Client;
 use common\models\Project;
 use sales\access\ContactUpdateAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -135,7 +136,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $str;
                 },
                 'format' => 'raw',
-                'filter' => Project::getList()
+                'filter' => EmployeeProjectAccess::getProjects(Auth::id())
             ],
             [
                 'attribute' => 'created',
