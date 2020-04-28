@@ -76,6 +76,11 @@ class UserProjectParamsQuery extends ActiveQuery
         return $this->with(['phoneList']);
     }
 
+    public function withExistedPhoneInPhoneList(): UserProjectParamsQuery
+	{
+		return $this->innerJoin( 'phone_list', 'upp_phone_list_id = pl_id and pl_enabled = 1 and pl_phone_number is not null');
+	}
+
     public function withEmailList(bool $onyEnabled = false): self
     {
         if ($onyEnabled) {

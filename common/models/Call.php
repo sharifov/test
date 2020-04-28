@@ -1117,7 +1117,12 @@ class Call extends \yii\db\ActiveRecord
         if ($logEnable) {
             $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
             if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
-                (Yii::createObject(CallLogTransferService::class))->transfer($this);
+                if (Yii::$app->id === 'app-webapi') {
+                    Yii::info($this->getAttributes(), 'info\DebugAfterSave_WebApi');
+                    (Yii::createObject(CallLogTransferService::class))->transfer($this);
+                } else {
+                    Yii::info($this->getAttributes(), 'info\DebugAfterSave_Other');
+                }
             }
         }
 

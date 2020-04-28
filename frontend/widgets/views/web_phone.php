@@ -591,6 +591,10 @@ use yii\helpers\Html;
                     $('#btn-group-id-mute').hide();
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
+
+                    if (typeof window.newWidgetCancelCall === "function") {
+                        window.newWidgetCancelCall();
+                    }
                 });
 
                 // device.on('ringing', function (conn) {

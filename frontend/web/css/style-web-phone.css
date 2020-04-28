@@ -84,7 +84,7 @@ div#call-controls input {
   border-radius: 50%;
   text-align: center;
   color: #f0f0f0 !important;
-  margin: 25px auto 0;
+  /*margin: 25px auto 0;*/
   box-shadow: 0 0 4px rgba(0, 0, 0, .14), 0 4px 8px rgba(0, 0, 0, .28);
   cursor: pointer;
   -webkit-transition: all .1s ease-out;
