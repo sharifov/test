@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\ClientProject;
 use common\models\Employee;
 use common\models\UserContactList;
 use yii\base\Model;
@@ -19,12 +20,14 @@ use yii\helpers\ArrayHelper;
  * @property bool $isDisabled
  * @property string $by_name
  * @property Employee $user
+ * @property int $contact_project_id
  */
 class ContactsSearch extends Client
 {
     public $client_email;
     public $client_phone;
     public $by_name;
+    public $contact_project_id;
 
     public $userId;
     public $isPublic = true;
@@ -53,7 +56,7 @@ class ContactsSearch extends Client
     public function rules(): array
     {
         return [
-            [['id'], 'integer'],
+            [['id', 'contact_project_id'], 'integer'],
             [['client_email', 'client_phone'], 'string'],
             [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
             ['uuid', 'string', 'max' => 36],
@@ -117,6 +120,10 @@ class ContactsSearch extends Client
         }
         if ($this->client_phone) {
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'id', $subQuery]);
+        }
+        if ($this->contact_project_id > 0) {
+            $subQuery = ClientProject::find()->select(['DISTINCT(cp_client_id)'])->where(['=', 'cp_project_id', $this->contact_project_id]);
             $query->andWhere(['IN', 'id', $subQuery]);
         }
 

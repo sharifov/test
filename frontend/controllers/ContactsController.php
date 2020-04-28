@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\ClientProject;
 use common\models\UserContactList;
 use sales\access\ListsAccess;
 use sales\auth\Auth;
@@ -69,10 +70,12 @@ class ContactsController extends FController
      * Creates a new Client model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionCreate()
     {
         $model = new Client();
+        $post = Yii::$app->request->post($model->formName());
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
@@ -82,8 +85,22 @@ class ContactsController extends FController
 
             if(!$userContactList->save()) {
                 Yii::error(VarDumper::dumpAsString($userContactList->errors),
-                    'ContactsController:actionCreate:save');
+                    'ContactsController:actionCreate:saveUserContactList');
             }
+
+            if(isset($post['projects'])) {
+                foreach ($post['projects'] as $projectId) {
+                    $clientProject = new ClientProject();
+                    $clientProject->cp_client_id = $model->id;
+                    $clientProject->cp_project_id = (int) $projectId;
+                    $clientProject->save();
+                    if(!$clientProject->save()) {
+                        Yii::error(VarDumper::dumpAsString($clientProject->errors),
+                            'ContactsController:actionCreate:saveClientProject');
+                    }
+                }
+            }
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -98,12 +115,29 @@ class ContactsController extends FController
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $post = Yii::$app->request->post($model->formName());
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            if(isset($post['projects'])) {
+                ClientProject::deleteAll(['cp_client_id' => $model->id]);
+                foreach ($post['projects'] as $projectId) {
+                    $clientProject = new ClientProject();
+                    $clientProject->cp_client_id = $model->id;
+                    $clientProject->cp_project_id = (int) $projectId;
+                    $clientProject->save();
+                    if(!$clientProject->save()) {
+                        Yii::error(VarDumper::dumpAsString($clientProject->errors),
+                            'ContactsController:actionUpdate:saveClientProject');
+                    }
+                }
+            }
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 

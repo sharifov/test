@@ -1,7 +1,9 @@
 <?php
 
 use common\models\Client;
+use common\models\Project;
 use sales\access\ContactUpdateAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -110,7 +112,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Emails',
                 'attribute' => 'client_email',
-                'value' => function(Client $model) {
+                'value' => static function(Client $model) {
                     $emails = $model->clientEmails;
                     $data = [];
                     if($emails) {
@@ -122,6 +124,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left'],
+            ],
+            [
+                'label' => 'Projects',
+                'attribute' => 'contact_project_id',
+                'value' => static function (Client $model) {
+                    $str = '';
+                    foreach ($model->projects as $project) {
+                        $str .= '<div style="margin: 1px;">' . Yii::$app->formatter->asProjectName($project->name) . '</div>';
+                    }
+                    return $str;
+                },
+                'format' => 'raw',
+                'filter' => EmployeeProjectAccess::getProjects(Auth::id())
             ],
             [
                 'attribute' => 'created',

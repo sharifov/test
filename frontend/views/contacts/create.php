@@ -10,7 +10,7 @@ $this->title = 'Create Contact';
 $this->params['breadcrumbs'][] = ['label' => 'Contacts', 'url' => ['index']];
 
 ?>
-<div class="client-create">
+<div class="contact-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
