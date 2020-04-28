@@ -66,7 +66,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
                     ],
-
                     [
                         'label' => 'Emails',
                         'value' => function(\common\models\Client $model) {
@@ -85,7 +84,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
                     ],
-                    [
+                    /*[
                         'label' => 'Projects',
                         'value' => static function (Client $model) {
                             $str = '';
@@ -96,7 +95,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
-                    ],
+                    ],*/
                     [
                         'attribute' => 'created',
                         'value' => function(\common\models\Client $model) {
