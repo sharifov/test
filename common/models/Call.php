@@ -694,6 +694,8 @@ class Call extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
+        Yii::info($this->getAttributes(), 'info\DebugAfterSave');
+
         $leadRepository = Yii::createObject(LeadRepository::class);
         $qCallService = Yii::createObject(QCallService::class);
 
