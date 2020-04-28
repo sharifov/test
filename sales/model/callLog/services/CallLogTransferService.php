@@ -164,7 +164,7 @@ class CallLogTransferService
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
         $firstChild = Call::find()->select(['c_status_id'])->andWhere(['c_parent_id' => $this->call['c_id']])->orderBy(['c_id' => SORT_ASC])->asArray()->limit(1)->one();
-        if ($this->call['c_status_id'] == Call::STATUS_COMPLETED && $firstChild) {
+        if ($this->call['c_status_id'] == Call::STATUS_COMPLETED && $firstChild && array_key_exists((int)$firstChild['c_status_id'], CallLogStatus::getList())) {
             $this->callLog['cl_status_id'] = $firstChild['c_status_id'];
         } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
