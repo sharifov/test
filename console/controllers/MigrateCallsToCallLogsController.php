@@ -116,7 +116,8 @@ class MigrateCallsToCallLogsController extends Controller
                          first_child.c_source_type_id as `first_child_c_source_type_id`,
                          first_child.c_recording_sid as `first_child_c_recording_sid`,
                          first_child.c_recording_duration as `first_child_c_recording_duration`,
-                         first_child.c_created_user_id as `first_child_c_created_user_id`'
+                         first_child.c_created_user_id as `first_child_c_created_user_id`,
+                         first_child.c_status_id as `first_child_c_status_id`'
             )
             ->addSelect(
                 'first_same_child.c_id as `first_same_child_c_id`,
@@ -413,6 +414,12 @@ class MigrateCallsToCallLogsController extends Controller
 
     private function outParentCalls($call, array &$log): void
     {
+        if ($call['first_child_c_id']) {
+            $callData['cl_status_id'] = $call['first_child_c_status_id'];
+        } else {
+            $callData['cl_status_id'] = $call['c_status_id'];
+        }
+
         $callData['cl_group_id'] = $call['c_id'];
 
         $callRecordData['clr_record_sid'] = $call['first_child_c_recording_sid'];
