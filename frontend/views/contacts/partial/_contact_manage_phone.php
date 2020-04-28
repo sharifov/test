@@ -18,7 +18,8 @@ use yii\web\View;
         'data-modal_id' => 'sm',
         'title' => 'Add Phone',
         'data-content-url' => Url::to(['contacts/ajax-add-contact-phone-modal-content', 'client_id' => $client->id]),
-        'class' => 'showModalButton'
+        'class' => 'showModalButton',
+        'style' => 'font-size: 14px;'
     ])?>
     <br />
 
