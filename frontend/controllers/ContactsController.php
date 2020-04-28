@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\UserContactList;
 use sales\access\ClientInfoAccess;
@@ -273,13 +274,12 @@ class ContactsController extends FController
 			$form->required = true;
 
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-				$this->clientManageService->addPhone($client, $form);
+				$phone = $this->clientManageService->addPhone($client, $form);
 
 				$response['error'] = false;
 				$response['message'] = 'New phone was successfully added: ' . $form->phone;
-				$response['html'] = $this->renderAjax('/lead/client-info/_client_manage_phone', [
-					'clientPhones' => $client->clientPhones,
-					'lead' => $client,
+				$response['html'] = $this->renderAjax('partial/_phone_row', [
+					'phone' => $phone,
 				]);
 			} else {
 				$response['error'] = true;
@@ -290,6 +290,109 @@ class ContactsController extends FController
 			return $response;
 		} catch (\Throwable $throwable) {
 			Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionAjaxAddClientPhone:Throwable');
+		}
+
+		throw new BadRequestHttpException();
+	}
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxEditContactPhoneModalContent(): string
+    {
+		if (Yii::$app->request->isAjax) {
+			try {
+				$phoneId = (int)Yii::$app->request->get('phone_id');
+
+				if ($phone = ClientPhone::findOne($phoneId)) {
+
+					$phoneForm = new PhoneCreateForm();
+					$phoneForm->id = $phone->id;
+					$phoneForm->phone = $phone->phone;
+					$phoneForm->type = $phone->type;
+					$phoneForm->client_id = $phone->client_id;
+
+					return $this->renderAjax('partial/_contact_edit_phone_modal_content', [
+						'editPhone' => $phoneForm,
+						'client' => Client::findOne($phone->client_id),
+					]);
+				}
+			} catch (\Throwable $throwable) {
+				Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionAjaxEditContactPhoneModalContent:Throwable');
+			}
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return array
+	 * @throws BadRequestHttpException
+     */
+	public function actionAjaxEditContactPhoneValidation(): array
+	{
+		$clientId = (int)Yii::$app->request->get('client_id');
+
+		try {
+			$form = new PhoneCreateForm();
+			$form->scenario = 'update';
+			$form->required = true;
+
+			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())){
+
+			    if (!$client = Client::findOne($clientId)) {
+                    throw new HttpException(403, 'Client not found');
+                }
+
+				$form->client_id = $client->id;
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return ActiveForm::validate($form);
+			}
+
+		}catch (\Throwable $throwable) {
+			Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionAjaxEditContactPhoneValidation:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	public function actionAjaxEditContactPhone()
+	{
+		try {
+
+            $clientId = (int)Yii::$app->request->get('client_id');
+            $client = Client::findOne($clientId);
+
+            if (!$client) {
+                throw new HttpException(403, 'Client not found');
+            }
+            if (!(new ContactUpdateAccess())->isUserCanUpdateContact($client, Auth::user())) {
+                throw new HttpException(403, 'Access Denied');
+            }
+
+			$form = new PhoneCreateForm();
+			$form->scenario = 'update';
+            $form->required = true;
+
+			$form->load(Yii::$app->request->post());
+
+			if ($form->validate()) {
+
+				$phone = $this->clientManageService->updatePhone($form);
+
+				$response['error'] = false;
+				$response['message'] = 'Phone was successfully updated: ' . $form->phone;
+				$response['html'] = $this->renderAjax('partial/_phone_row', [
+					'phone' => $phone,
+				]);
+			} else {
+				$response['error'] = true;
+				$response['message'] = $this->getParsedErrors($form->getErrors());
+			}
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return $response;
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientPhone:Throwable');
 		}
 
 		throw new BadRequestHttpException();

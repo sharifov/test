@@ -16,13 +16,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="row">
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <?= $this->render('_form', [
                 'model' => $model,
             ]) ?>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
             <?php echo $this->render('partial/_contact_manage_phone', [
                     'clientPhones' => $model->clientPhones,
                     'client' => $model,

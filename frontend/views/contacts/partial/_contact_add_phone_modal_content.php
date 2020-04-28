@@ -76,8 +76,8 @@ $('#client-add-phone-form').on('beforeSubmit', function (e) {
        dataType: 'json',
        success: function(data) {
             if (!data.error) {
-                $('#client-manage-phone').html(data.html);
-                $('#modal-client-manage-info').modal('hide');
+                $('#contact-phones').append(data.html);
+                $('#modal-sm').modal('hide');
                 
                 new PNotify({
                     title: 'Phone successfully added',

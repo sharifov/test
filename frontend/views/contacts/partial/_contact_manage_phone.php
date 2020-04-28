@@ -20,33 +20,13 @@ use yii\web\View;
         'data-content-url' => Url::to(['contacts/ajax-add-contact-phone-modal-content', 'client_id' => $client->id]),
         'class' => 'showModalButton'
     ])?>
+    <br />
 
-<table class="table table-condensed table-bordered" style="margin: 0">
+<table class="table table-condensed table-bordered" style="margin: 15px 0 0 0 ;" id="contact-phones">
     <?php foreach ($clientPhones as $key => $phone): ?>
-        <tr>
-            <td title="<?= $phone::getPhoneType($phone->type) ?>" class="text-center" style="width:35px; background-color: #eef3f9">
-                <?= $phone::getPhoneTypeIcon($phone->type) ?>
-            </td>
-            <td>
-                <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode($phone->phone) ?></span>
-            </td>
-
-            <td class="text-right" style="width: 70px">
-                <?php if($count = $phone->countUsersSamePhone()): ?>
-                    <a class="showModalButton" data-modal_id="client-large" title="The Same users by phone" data-content-url="<?= Url::to([
-                        'lead-view/ajax-get-users-same-phone-info',
-                        'phone' => $phone->phone,
-                        'clientId' => $phone->client_id
-                    ]) ?>" ><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
-                <?php endif; ?>
-
-                <a class="showModalButton" title="Edit Phone" data-content-url="<?= Url::to([
-                    'lead-view/ajax-edit-client-phone-modal-content',
-                    'pid' => $phone->id]) ?>" data-modal_id="client-manage-info">
-                    <i class="fa fa-edit text-warning"></i>
-                </a>
-
-            </td>
-        </tr>
+        <?php echo $this->render('_phone_row', [
+                'phone' => $phone,
+            ]);
+        ?>
     <?php endforeach; ?>
 </table>
