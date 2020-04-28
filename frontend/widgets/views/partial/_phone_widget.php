@@ -1,9 +1,9 @@
 <?php
-/* @var $token string */
+/* @var $phoneFrom string */
 ?>
 
 <div class="phone-widget" style="margin-bottom: 30px">
-	<?php if($token): ?>
+	<?php if($phoneFrom): ?>
     <div class="phone-widget__header">
         <div class="phone-widget__heading">
             <span class="phone-widget__title">Calls</span>
@@ -170,7 +170,7 @@
                         <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
                     </ul>
                     <div class="call-pane__call-btns">
-                        <button class="call-pane__start-call calling-state-block" id="btn-make-call">
+                        <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
                             <div class="call-in-action">
                                 <span class="call-in-action__text">Calling</span>
                                 <span class="call-in-action__time">01:54</span>
