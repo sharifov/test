@@ -36,6 +36,9 @@ use yii\db\ActiveQuery;
  * @property ClientPhone[] $clientPhones
  * @property ClientPhone[] $clientPhonesByType
  * @property Lead[] $leads
+ * @property string $nameByType
+ * @property array $phoneNumbersSms
+ * @property array $emailList
  * @property Project[] $projects
  * @method clientPhonesByType(array $array)
  */
