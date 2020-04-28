@@ -14,7 +14,7 @@ class m200427_131716_add_new_setting_call_widget_switch extends Migration
     {
 		$this->insert('{{%setting}}', [
 			's_key' => 'use_new_web_phone_widget',
-			's_name' => 'Communication Log on Case page',
+			's_name' => 'New WebPhone Widget',
 			's_type' => \common\models\Setting::TYPE_BOOL,
 			's_value' => 0,
 			's_updated_dt' => date('Y-m-d H:i:s'),
