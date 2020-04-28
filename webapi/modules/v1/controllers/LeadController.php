@@ -2,7 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;

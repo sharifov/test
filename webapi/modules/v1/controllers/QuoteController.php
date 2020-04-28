@@ -3,7 +3,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\EmployeeContactInfo;
 use common\models\GlobalLog;
 use common\models\Lead;

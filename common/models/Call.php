@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use frontend\widgets\notification\NotificationMessage;
 use sales\access\EmployeeDepartmentAccess;
@@ -946,14 +946,14 @@ class Call extends \yii\db\ActiveRecord
 //                            $case->processing((int)$this->c_created_user_id, null);
 //                            $caseRepo->save($case);
 
-                            if ($ntf = Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
+                            if ($ntf = Notifications::create($this->c_created_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true)) {
                                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                Notifications::publish('getNewNotification', ['user_id' => $case->cs_user_id], $dataNotification);
+                                Notifications::publish('getNewNotification', ['user_id' => $this->c_created_user_id], $dataNotification);
                             }
 
 //                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
                             // Notifications::publish('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
-                            $pubChannel = UserConnection::getLastUserChannel($case->cs_user_id);
+                            $pubChannel = UserConnection::getLastUserChannel($this->c_created_user_id);
                             Notifications::pub([$pubChannel], 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid]);
                         } catch (\Throwable $e) {
                             Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
@@ -1232,7 +1232,7 @@ class Call extends \yii\db\ActiveRecord
             }
 
         } catch (\Throwable $e) {
-            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
+            \Yii::error($e, 'Call:applyCallToAgent');
         }
         return false;
     }
@@ -1266,7 +1266,8 @@ class Call extends \yii\db\ActiveRecord
                 }
             }
         } catch (\Throwable $e) {
-            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
+            \Yii::error($e, 'Call:applyCallToAgentAccess');
+//            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgentAccess');
         }
         return false;
     }

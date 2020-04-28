@@ -4,7 +4,7 @@ namespace common\models;
 
 use common\components\EmailService;
 use common\components\jobs\UpdateLeadBOJob;
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;

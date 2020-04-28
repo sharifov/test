@@ -3,7 +3,8 @@
 namespace common\models;
 
 use common\components\jobs\TelegramSendMessageJob;
-use common\components\Purifier;
+use common\components\purifier\Purifier;
+use common\components\purifier\PurifierFilter;
 use common\models\query\NotificationsQuery;
 use frontend\widgets\notification\NotificationCache;
 use sales\helpers\app\AppHelper;
@@ -241,7 +242,7 @@ class Notifications extends ActiveRecord
         if ($insert) {
             $job = new TelegramSendMessageJob();
             $job->user_id = $this->n_user_id;
-            $job->text = Purifier::purify($this->n_message);
+            $job->text = Purifier::purify($this->n_message, PurifierFilter::shortCodeToIdUrl());
 
             $queue = Yii::$app->queue_job;
             $jobId = $queue->push($job);
@@ -436,7 +437,7 @@ class Notifications extends ActiveRecord
                 // Notifications::pub([$pubChannel], 'callMapUpdate', ['uc_id' => $uc_id]);
             }
             if ($pubChannelList) {
-                self::pub($pubChannelList, 'callMapUpdate', ['uc_id' => $uc_id]);
+                self::pub($pubChannelList, 'callMapUpdate', ['cnt' => count($pubChannelList)]);
             }
         }
     }

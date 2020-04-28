@@ -2,7 +2,7 @@
 
 namespace sales\listeners\lead;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use frontend\widgets\notification\NotificationMessage;
 use Yii;
 use sales\repositories\NotFoundException;

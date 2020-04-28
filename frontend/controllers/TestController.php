@@ -207,10 +207,10 @@ class TestController extends FController
         $lead->employee_id = 295;
 
         $task = QaTask::findOne(1);
- $body = Yii::t('email', "You task #{id} has been canceled by {username} ({role}). Reason: {reason}.",
+ $body = Yii::t('email', "You task (Id: {id}) has been canceled by {username} ({role}). Reason: {reason}.",
             [
-                'id' => Purifier::createQaTaskShortLink($task),
-                'username' => '12',
+                'id' => \common\components\purifier\Purifier::createQaTaskShortLink($task),
+                'username' => 'user name',
                 'role' => 12,
                 'reason' => 'reas',
             ]);

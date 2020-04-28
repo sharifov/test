@@ -2,7 +2,7 @@
 
 namespace modules\qaTask\src\listeners;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use frontend\widgets\notification\NotificationMessage;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnEvent;

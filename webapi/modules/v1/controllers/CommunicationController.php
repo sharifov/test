@@ -2,7 +2,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\CallQueueJob;
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallUserGroup;

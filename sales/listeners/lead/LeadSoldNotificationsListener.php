@@ -2,7 +2,7 @@
 
 namespace sales\listeners\lead;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\Airline;
 use common\models\LeadFlightSegment;
 use common\models\Notifications;

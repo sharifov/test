@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\components\jobs\AgentCallQueueJob;
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;

@@ -2,7 +2,7 @@
 
 namespace common\components\i18n;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
