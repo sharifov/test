@@ -8,6 +8,7 @@
 
 namespace common\components;
 
+use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -89,7 +90,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
 
         if($options) {
-            $this->request->setOptions($options);
+            $this->request->addOptions($options);
+        }
+        if (isset(Yii::$app->params['additionalCurlOptions'])) {
+            $this->request->addOptions(Yii::$app->params['additionalCurlOptions']);
         }
 
         return $this->request->send();
