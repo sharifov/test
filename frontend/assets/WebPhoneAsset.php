@@ -19,11 +19,15 @@ class WebPhoneAsset extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        'css/style-web-phone.css'
+        'css/style-web-phone.css',
+		'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.css',
+		'css/style-web-phone-new.css',
     ];
 
     public $js = [
         'https://media.twiliocdn.com/sdk/js/client/releases/1.9.7/twilio.min.js',
+        'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js',
+		'/js/phone-widget.js'
         //'/js/quickstart.js',
     ];
 

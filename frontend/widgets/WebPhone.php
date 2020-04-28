@@ -32,18 +32,13 @@ class WebPhone extends \yii\bootstrap\Widget
     {
         $user_id = \Yii::$app->user->id;
 
-
-
         $userProfile = UserProfile::find()->where(['up_user_id' => $user_id])->limit(1)->one();
 
         //$sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
 
-
-
         if(!$userProfile || (int) $userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB) {
             return '';
         }
-
 
         /*if (\Yii::$app->controller->uniqueId != 'phone') {
             return '';
@@ -62,6 +57,17 @@ class WebPhone extends \yii\bootstrap\Widget
         }
         $supportGeneralPhones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
         $use_browser_call_access = \Yii::$app->params['settings']['use_browser_call_access'] ?? \Yii::$app->params['use_browser_call_access'];
+
+        $useNewWebPhoneWidget = \Yii::$app->params['settings']['use_new_web_phone_widget'] ?? false;
+
+
+        if ($useNewWebPhoneWidget) {
+			return $this->render('web_phone_new', [
+				'clientId' => $clientId,
+				'token' => $token,
+				'supportGeneralPhones' => $supportGeneralPhones,
+				'use_browser_call_access' => $use_browser_call_access]);
+		}
 
         return $this->render('web_phone', [
             'clientId' => $clientId,
