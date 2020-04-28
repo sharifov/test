@@ -105,7 +105,7 @@
                 </li>
 
             </ul>
-            <input type="text" class="call-pane__dial-number" id="call-pane__dial-number" value="" placeholder="Add Number">
+            <input type="text" class="call-pane__dial-number" id="call-pane__dial-number" value="" placeholder="Enter Number">
             <a href="#" class="call-pane__dial-clear-all">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
