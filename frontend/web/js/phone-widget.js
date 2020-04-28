@@ -145,25 +145,25 @@ $(document).ready(function() {
             $('.call-in-action__text').text('on call');
         }, 4000)
     }
-    $('.call-pane__start-call').on('click', function(e) {
-        e.preventDefault();
-
-        $('.phone-widget-icon').addClass('is-pending');
-        $('.call-pane__call-btns').addClass('is-pending');
-        $('.suggested-contacts').removeClass('is_active');
-
-        callTimeout()
-    });
+    // $('.call-pane__start-call').on('click', function(e) {
+    //     e.preventDefault();
+    //
+    // });
 
     $('.call-pane__end-call').on('click', function(e) {
         e.preventDefault();
 
-        $('.phone-widget-icon').removeClass('is-on-call');
-        $('.phone-widget-icon').removeClass('is-pending');
-        $('.call-pane__call-btns').removeClass('is-on-call');
-        $('.call-pane__call-btns').removeClass('is-pending')
+        if (device) {
+            updateAgentStatus(connection, false, 1);
+            device.disconnectAll();
 
-        clearTimeout(timeout)
+            $('.phone-widget-icon').removeClass('is-on-call');
+            $('.phone-widget-icon').removeClass('is-pending');
+            $('.call-pane__call-btns').removeClass('is-on-call');
+            $('.call-pane__call-btns').removeClass('is-pending')
+
+            clearTimeout(timeout)
+        }
     })
 
 

@@ -28,7 +28,7 @@ class NewWebPhoneWidget extends Widget
 		$phoneFrom = $phoneUserProject ? ($phoneUserProject->getPhoneList()->one())->pl_phone_number ?? null : null;
 		$userProjectId = $phoneUserProject ? $phoneUserProject->upp_project_id : null;
 
-		if (!$useNewWebPhoneWidget) {
+		if (!$useNewWebPhoneWidget || !$phoneFrom) {
 			return '';
 		}
 
