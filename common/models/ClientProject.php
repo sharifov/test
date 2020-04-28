@@ -75,7 +75,7 @@ class ClientProject extends \yii\db\ActiveRecord
      */
     public function getCpClient()
     {
-        return $this->hasOne(Client::className(), ['id' => 'cp_client_id']);
+        return $this->hasOne(Client::class, ['id' => 'cp_client_id']);
     }
 
     /**
@@ -85,6 +85,6 @@ class ClientProject extends \yii\db\ActiveRecord
      */
     public function getCpProject()
     {
-        return $this->hasOne(Project::className(), ['id' => 'cp_project_id']);
+        return $this->hasOne(Project::class, ['id' => 'cp_project_id']);
     }
 }

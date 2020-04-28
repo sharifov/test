@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Client;
+use common\models\Project;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -10,6 +11,8 @@ use yii\widgets\ActiveForm;
 
 $this->title = 'Create contact';
 $this->params['breadcrumbs'][] = $this->title;
+
+$projectList = Project::getList();
 ?>
 
 <div class="client-form">
@@ -30,6 +33,20 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= $form->field($model, 'description')->textarea(['rows' => 4, 'style' => 'width: 320px', 'class' => 'form-control']) ?>
     <?= $form->field($model, 'is_public')->checkbox() ?>
     <?= $form->field($model, 'disabled')->checkbox() ?>
+
+    <!--<div class="col-md-12">
+        <label class="control-label">Projects:</label>:
+        <?php
+/*            $projectsValueArr = [];
+            if($projects = $model->projects) {
+                foreach ($projects as $project) {
+                    $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-info']);
+                }
+            }
+            $projectsValue = implode(' ', $projectsValueArr);
+            echo $projectsValue;
+        */?>
+    </div>-->
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
