@@ -70,7 +70,7 @@ class CallLogTransferService
     {
         $this->call = $call->getAttributes();
 
-        Yii::info($this->call, 'info\DebugCallLog');
+//        Yii::info($this->call, 'info\DebugCallLog');
 
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
             $this->outParentCall();
