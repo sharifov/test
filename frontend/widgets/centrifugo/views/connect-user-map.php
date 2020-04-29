@@ -27,7 +27,7 @@ function channelConnector(chName)
         $("#card-sales-header-count").append(messageObj.onlineDepSales.length);
             messageObj.onlineDepSales.forEach(function (obj, index) {
                 index++;
-                $("#card-sales").append(renderUsersOnline(index, obj.uc_user_id, obj.username));
+                $("#card-sales").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
         console.log(messageObj.onlineDepExchange)
@@ -35,7 +35,7 @@ function channelConnector(chName)
          $("#card-exchange-header-count").append(messageObj.onlineDepExchange.length);
             messageObj.onlineDepExchange.forEach(function (obj, index) {
                 index++;
-                $("#card-exchange").append(renderUsersOnline(index, obj.uc_user_id, obj.username));
+                $("#card-exchange").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
         console.log(messageObj.onlineDepSupport)
@@ -43,14 +43,14 @@ function channelConnector(chName)
         $("#card-support-header-count").append(messageObj.onlineDepSupport.length);
             messageObj.onlineDepSupport.forEach(function (obj, index) {
                 index++;
-                $("#card-support").append(renderUsersOnline(index, obj.uc_user_id, obj.username));
+                $("#card-support").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
         console.log(messageObj.usersOnline)
         $("#card-other").text('');        
             messageObj.usersOnline.forEach(function (obj, index) {
                 index++;
-                $("#card-other").append(renderUsersOnline(index, obj.uc_user_id, obj.username));
+                $("#card-other").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });               
         
         //console.log(messageObj.realtimeCalls)
@@ -69,11 +69,29 @@ centrifuge.on('connect', function(context) {
      });
 });
 
-function renderUsersOnline(index, userID, username)
+function renderUsersOnline(index, userID, username, userRoles, isCallStatusReady, isCallFree)
 {
+    let roles = userRoles.split('-');
+    let iconClass = 'fa-user';
+    let textClass = 'text-danger';
+    
+    if (roles.includes('admin')){
+        iconClass = 'fa-android'
+    } else if (roles.includes('qa')){
+        iconClass = 'fa-linux'
+    } else if (roles.includes('supervision') || roles.includes('sup_super') || roles.includes('ex_super')){
+        iconClass = 'fa-user-md'
+    }
+    
+    if (Boolean(Number(isCallStatusReady)) && !Boolean(Number(isCallFree))) {
+        textClass = 'text-success'
+    } else if (Boolean(Number(isCallStatusReady))){
+        textClass = 'text-warning'
+    }
+    
     return '<div class="col-md-6" style="margin-bottom: 5px">' + 
         index + '. '+
-        '<i class="fa fa-user fa-lg text-danger" title="'+ userID +'"></i> ' + username
+        '<i class="fa '+ iconClass +' fa-lg '+ textClass +'" title="'+ userID +'"></i> ' + username
     '</div>';    
 }
 

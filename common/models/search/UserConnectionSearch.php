@@ -10,6 +10,7 @@ use yii\data\ActiveDataProvider;
 use common\models\UserConnection;
 use common\models\UserGroupAssign;
 use Yii;
+use yii\db\Query;
 
 /**
  * UserConnectionSearch represents the model behind the search form of `common\models\UserConnection`.
@@ -160,8 +161,14 @@ class UserConnectionSearch extends UserConnection
     {
         $this->load($params);
 
-        $query = UserConnection::find()->joinWith('ucUser');
-        $query->select(['uc_user_id', 'username']);
+        $query = UserConnection::find()->joinWith(['ucUser', 'ucUser.userStatus']);
+        $query->select(['uc_user_id', 'username', 'us_call_phone_status', 'us_is_on_call']);
+        $query->addSelect([
+            'user_roles' => (new Query())
+                ->select(['group_concat(auth_assignment.item_name SEPARATOR "-")'])
+                ->from('auth_assignment')
+                ->where('auth_assignment.user_id = uc_user_id')
+        ]);
         $query->groupBy(['uc_user_id']);
 
         if ($this->dep_id > 0) {
