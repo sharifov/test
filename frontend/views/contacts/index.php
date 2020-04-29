@@ -5,6 +5,7 @@ use common\models\Project;
 use sales\access\ContactUpdateAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -85,7 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     if($phones) {
                         foreach ($phones as $k => $phone) {
                             $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
-                            $data[] = $sms . '<i class="fa fa-phone"></i> <code style="cursor: pointer;" class="my-contact-phone-number">' . Html::encode($phone->phone) . '</code>';
+                            $data[] = $sms . CallHelper::callNumber($phone->phone, '', [], 'code');
                         }
                     }
                     return implode('<br>', $data);
@@ -198,19 +199,6 @@ $jsCode = <<<JS
        return false;
     });
     
-    $(document).on('click', '.my-contact-phone-number', function () {
-        let phone = $(this).text();
-        
-        let widgetBtn = $('.js-toggle-phone-widget');
-        
-        if (widgetBtn.length) {
-            $('.phone-widget').addClass('is_active')
-            $('.js-toggle-phone-widget').addClass('is-mirror');
-            $('#call-pane__dial-number').val(phone);
-        }
-    });
-
-
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);

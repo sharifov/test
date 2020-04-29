@@ -22,10 +22,10 @@ $(document).ready(function() {
 
     })
 
-    $('.phone-widget__tab').each(function(i, el) {
-        var simpleBar = new SimpleBar(el);
-        simpleBar.getContentElement();
-    })
+    // $('.phone-widget__tab').each(function(i, el) {
+    //     var simpleBar = new SimpleBar(el);
+    //     simpleBar.getContentElement();
+    // })
 
     $('.contact-modal-info__close').on('click', function() {
         $('.contact-modal-info').hide()

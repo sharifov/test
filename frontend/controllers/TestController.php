@@ -86,6 +86,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
 use sales\helpers\app\AppHelper;
+use sales\helpers\call\CallHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
@@ -138,6 +139,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -1168,4 +1170,29 @@ class TestController extends FController
         return $this->render('websocket');
     }
 
+    public function actionTestCallHelper(): void
+	{
+		$test1 = CallHelper::callNumber('+123456789');
+		$test2 = CallHelper::callNumber('+123456789', 'call phone');
+		$test3 = CallHelper::callNumber('+123456789', 'call phone', [
+			'confirm' => 1,
+			'call' => 1,
+			'phone-from-id' => 34,
+			'icon-class' => 'fa fa-phone valid'
+		]);
+		$test4 = CallHelper::callNumber('+123456789', 'call phone', [
+			'confirm' => 1,
+			'call' => 1,
+			'phone-from-id' => 34,
+			'icon-class' => 'fa fa-phone valid',
+		], 'a');
+
+		echo Html::encode($test1);
+		echo '<br>';
+		echo Html::encode($test2);
+		echo '<br>';
+		echo Html::encode($test3);
+		echo '<br>';
+		echo Html::encode($test4);
+	}
 }
