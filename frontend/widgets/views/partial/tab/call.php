@@ -34,77 +34,77 @@
 
                 </div>
             </div>
-<!--            <ul class="phone-widget__list-item calls-history suggested-contacts">-->
-<!--                <li class="calls-history__item contact-info-card ">-->
-<!--                    <div class="collapsible-toggler">-->
-<!--                        <div class="contact-info-card__status">-->
-<!--                            <i class="far fa-user"></i>-->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                        <div class="contact-info-card__details">-->
-<!--                            <div class="contact-info-card__line history-details">-->
-<!--                                <strong class="contact-info-card__name">Geordan Reyney</strong>-->
-<!--                            </div>-->
-<!---->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!--                <li class="calls-history__item contact-info-card ">-->
-<!--                    <div class="collapsible-toggler">-->
-<!--                        <div class="contact-info-card__status">-->
-<!--                            <i class="far fa-user"></i>-->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                        <div class="contact-info-card__details">-->
-<!--                            <div class="contact-info-card__line history-details">-->
-<!--                                <strong class="contact-info-card__name">Geordan Reyney</strong>-->
-<!--                            </div>-->
-<!---->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!--                <li class="calls-history__item contact-info-card ">-->
-<!--                    <div class="collapsible-toggler">-->
-<!--                        <div class="contact-info-card__status">-->
-<!--                            <i class="far fa-user"></i>-->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                        <div class="contact-info-card__details">-->
-<!--                            <div class="contact-info-card__line history-details">-->
-<!--                                <strong class="contact-info-card__name">Geordan Reyney</strong>-->
-<!--                            </div>-->
-<!---->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!--                <li class="calls-history__item contact-info-card">-->
-<!--                    <div class="collapsible-toggler">-->
-<!--                        <div class="contact-info-card__status">-->
-<!--                            <i class="far fa-user"></i>-->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                        <div class="contact-info-card__details">-->
-<!--                            <div class="contact-info-card__line history-details">-->
-<!--                                <strong class="contact-info-card__name">Geordan Reyney</strong>-->
-<!--                            </div>-->
-<!---->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!---->
-<!--            </ul>-->
+            <ul class="phone-widget__list-item calls-history suggested-contacts">
+                <li class="calls-history__item contact-info-card ">
+                    <div class="collapsible-toggler">
+                        <div class="contact-info-card__status">
+                            <i class="far fa-user"></i>
+
+
+                        </div>
+                        <div class="contact-info-card__details">
+                            <div class="contact-info-card__line history-details">
+                                <strong class="contact-info-card__name">Geordan Reyney</strong>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </li>
+                <li class="calls-history__item contact-info-card ">
+                    <div class="collapsible-toggler">
+                        <div class="contact-info-card__status">
+                            <i class="far fa-user"></i>
+
+
+                        </div>
+                        <div class="contact-info-card__details">
+                            <div class="contact-info-card__line history-details">
+                                <strong class="contact-info-card__name">Geordan Reyney</strong>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </li>
+                <li class="calls-history__item contact-info-card ">
+                    <div class="collapsible-toggler">
+                        <div class="contact-info-card__status">
+                            <i class="far fa-user"></i>
+
+
+                        </div>
+                        <div class="contact-info-card__details">
+                            <div class="contact-info-card__line history-details">
+                                <strong class="contact-info-card__name">Geordan Reyney</strong>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </li>
+                <li class="calls-history__item contact-info-card">
+                    <div class="collapsible-toggler">
+                        <div class="contact-info-card__status">
+                            <i class="far fa-user"></i>
+
+
+                        </div>
+                        <div class="contact-info-card__details">
+                            <div class="contact-info-card__line history-details">
+                                <strong class="contact-info-card__name">Geordan Reyney</strong>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </li>
+
+            </ul>
             <input type="text" class="call-pane__dial-number" id="call-pane__dial-number" value="" placeholder="Enter Number">
             <a href="#" class="call-pane__dial-clear-all">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
