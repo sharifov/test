@@ -425,10 +425,10 @@ class ContactsController extends FController
             if ($contacts) {
                 foreach ($contacts as $n => $contact) {
                     $contactData = [];
-                    $text = $contact->first_name . ' ' . $contact->last_name;
-                    $group = strtoupper($text[0] ?? '');
+                    $name = $contact->is_company ? $contact->company_name : $contact->first_name . ' ' . $contact->last_name;
+                    $group = strtoupper($name[0] ?? '');
                     $contactData['id'] = $contact->id;
-                    $contactData['name'] = $contact->is_company ? $contact->company_name : $text;
+                    $contactData['name'] = $name;
                     $contactData['description'] = $contact->description;
                     $contactData['avatar'] = $group;
                     $contactData['is_company'] = $contact->is_company;
