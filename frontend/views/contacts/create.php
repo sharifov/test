@@ -46,13 +46,6 @@ $this->params['breadcrumbs'][] = ['label' => 'Contacts', 'url' => ['index']];
                 <?= $form->field($contactForm, 'is_public')->checkbox() ?>
                 <?= $form->field($contactForm, 'disabled')->checkbox() ?>
 
-                <?php
-                    /*$favorite = false;
-                    if ($contactForm->id !== null && $contact = UserContactList::getUserContact(Auth::id(), $contactForm->id)) {
-                        $favorite = $contact->ucl_favorite;
-                    }*/
-                ?>
-
                 <?php echo Html::checkbox('ucl_favorite', 0,
                     ['id' => 'ucl_favorite', ]) ?> Favorite
 

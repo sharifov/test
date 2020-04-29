@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'is_company:booleanByLabel',
             'is_public:booleanByLabel',
             'disabled:booleanByLabel',
-            [
+            /*[
                 'attribute' => 'ucl_favorite',
                 'value' => function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $out;
                 },
                 'format' => 'raw',
-            ],
+            ],*/
         ],
     ]) ?>
     </div>
