@@ -21,7 +21,12 @@
             'method' => 'get',
         ]);
 
-        echo Html::input('text', 'q', null, ['class' => 'contacts__search-input', 'placeholder' => 'Search Contacts', 'autocomplete' => 'off']);
+        echo Html::input('text', 'q', null, [
+            'id' => 'contact-list-ajax-q',
+            'class' => 'contacts__search-input',
+            'placeholder' => 'Name, company, phone or email',
+            'autocomplete' => 'off',
+        ]);
 
         ActiveForm::end()
 
@@ -39,18 +44,26 @@ function showSearchContactPreloader() {
 function hideSearchContactPreloader() {
     $("#list-of-contacts").html("");
 }
-
+$( "#contact-list-ajax-q").keyup(function() {
+    let q = $("#contact-list-ajax").find("input[name=q]").val();
+    if (q.length < 2) {
+        return false;
+    }
+    setTimeout( function () { 
+        $("#contact-list-ajax").submit();
+    }, 300);
+});
 $('#contact-list-ajax').on('beforeSubmit', function (e) {
     e.preventDefault();
     let yiiform = $(this);
     let q = yiiform.find("input[name=q]").val();
     if (q.length < 2) {
-         new PNotify({
-            title: "Search contacts",
-            type: "warning",
-            text: 'Minimum 2 symbols',
-            hide: true
-        });
+        //  new PNotify({
+        //     title: "Search contacts",
+        //     type: "warning",
+        //     text: 'Minimum 2 symbols',
+        //     hide: true
+        // });
         return false;
     }
     showSearchContactPreloader();
@@ -64,7 +77,7 @@ $('#contact-list-ajax').on('beforeSubmit', function (e) {
     .done(function(data) {
         hideSearchContactPreloader();
         if (data.results.length < 1) {
-            $("#list-of-contacts").html('<div style="width:100%;text-align:center;margin-top:20px">Not found</div>');
+            $("#list-of-contacts").html('<div style="width:100%;text-align:center;margin-top:20px">No results found</div>');
             return;
         }
         $.each(data.results, function(i, item) {
