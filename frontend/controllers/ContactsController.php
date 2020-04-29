@@ -15,6 +15,7 @@ use Yii;
 use common\models\Client;
 use common\models\search\ContactsSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
@@ -444,6 +445,44 @@ class ContactsController extends FController
                     }
                     //$data[$n]['selection'] = $item['text'];
                     $data[$group][$n] = $contactData;
+                }
+            }
+
+            $out['results'] = $data;
+        }
+
+        return $this->asJson($out);
+    }
+
+    public function actionListCallsAjax(?string $q = null): Response
+    {
+        $out = ['results' => []];
+
+        if ($q !== null) {
+
+            if (strlen($q) < 3) {
+                return $this->asJson($out);
+            }
+
+            /** @var ContactsSearch[] $contacts */
+            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q, $limit = 3)->getModels();
+//sleep(4);
+            $data = [];
+            if ($contacts) {
+                foreach ($contacts as $n => $contact) {
+                    $name = $contact->is_company ? $contact->company_name : $contact->first_name . ' ' . $contact->last_name;
+                    if ($contact->clientPhones) {
+                        foreach ($contact->clientPhones as $phone) {
+                            $contactData = [];
+                            $contactData['id'] = $contact->id;
+                            $contactData['name'] = StringHelper::truncate($name, 18, '...') . ' ' . $phone->phone;
+                            $contactData['phone'] = $phone->phone;
+                            $data[] = $contactData;
+                            if (count($data) === 3) {
+                                break 2;
+                            }
+                        }
+                    }
                 }
             }
 

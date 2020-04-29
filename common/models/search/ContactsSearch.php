@@ -162,9 +162,13 @@ class ContactsSearch extends Client
     }
 
 
-    public function searchByWidget(string $q): ActiveDataProvider
+    public function searchByWidget(string $q, ?int $limit = null): ActiveDataProvider
     {
         $query = Client::find();
+
+        if ($limit) {
+            $query->limit($limit);
+        }
 
         $query->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
             'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id');
