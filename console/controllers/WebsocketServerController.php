@@ -2,6 +2,7 @@
 namespace console\controllers;
 
 use common\models\UserConnection;
+use Swoole\Redis;
 use Swoole\Table;
 use Swoole\WebSocket\Server;
 use yii\console\Controller;
@@ -37,11 +38,14 @@ class WebsocketServerController extends Controller
             $redisConfig = ['host' => '127.0.0.1', 'port' => 6379];
         }
 
+        $redisList = [];
+
 //        $redis2 = new \Swoole\Coroutine\Redis();
 //        $redis2->connect("localhost", 6379);
 
-        $tblConnections = new Table(2048);
+        $tblConnections = new Table(4000);
         $tblConnections->column('fd', Table::TYPE_INT);
+        $tblConnections->column('uc_id', Table::TYPE_INT);
         $tblConnections->column('uid', Table::TYPE_STRING, 30);
         $tblConnections->column('user_id', Table::TYPE_INT);
         $tblConnections->column('name', Table::TYPE_STRING, 64);
@@ -61,6 +65,8 @@ class WebsocketServerController extends Controller
             $server->set($wsConfig['settings']);
         }
         $server->tblConnections = $tblConnections;
+
+        $server->redis = $tblConnections;
 
         $server->on('start', static function (Server $server) {
             echo ' Swoole WebSocket Server is started at ' . $server->host.':'.$server->port . PHP_EOL;
@@ -94,7 +100,7 @@ class WebsocketServerController extends Controller
 
         });
 
-        $server->on('open', static function(Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig) {
+        $server->on('open', static function(Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig, $redisList) {
 
             echo '+ ' . date('m-d H:i:s'). " op: {$request->fd}";
             $user = $thisClass->getIdentityByCookie($request, $frontendConfig);
@@ -122,13 +128,7 @@ class WebsocketServerController extends Controller
 
                 $uid = uniqid('', false);
 
-                $server->tblConnections->set($request->fd,[
-                    'fd' => $request->fd,
-                    'uid' => $uid,
-                    'user_id' => $userId,
-                    'name' => $user->username,
-                    'dt' => date('Y-m-d H:i:s'),
-                ]);
+
 
                 $userConnection = new UserConnection();
                 $userConnection->uc_connection_uid = $uid;
@@ -147,6 +147,15 @@ class WebsocketServerController extends Controller
                 if (!$userConnection->save()) {
                     \Yii::error(VarDumper::dumpAsString($userConnection->errors), 'WS:UserConnection:save');
                 }
+
+                $server->tblConnections->set($request->fd,[
+                    'fd' => $request->fd,
+                    'uc_id' => $userConnection->uc_id,
+                    'uid' => $uid,
+                    'user_id' => $userId,
+                    'name' => $user->username,
+                    'dt' => date('Y-m-d H:i:s'),
+                ]);
 
 //                foreach($server->tblConnections as $row)
 //                {
@@ -217,6 +226,10 @@ class WebsocketServerController extends Controller
 
                 $msg = $redis->subscribe($subList);
 
+                $redisList[$request->fd] = $redis;
+
+//                $redis->discard();
+
                 while ($msg = $redis->recv())
                 {
                     //VarDumper::dump($msg);
@@ -225,6 +238,8 @@ class WebsocketServerController extends Controller
                         $server->push($request->fd, $msg[2]); //WEBSOCKET_OPCODE_PING
                     }
                 }
+
+                //$redis->discard();
 
             } else {
                 echo ' : not init user' . PHP_EOL;
@@ -245,7 +260,7 @@ class WebsocketServerController extends Controller
             $server->push($frame->fd, json_encode($data));
         });
 
-        $server->on('close', static function(Server $server, int $fd) {
+        $server->on('close', static function(Server $server, int $fd) use ($redisList) {
             echo '- ' . date('m-d H:i:s'). " cl: {$fd}\n";
             $row = $server->tblConnections->get($fd);
             $server->tblConnections->del($fd);
@@ -254,9 +269,22 @@ class WebsocketServerController extends Controller
                 $uc = UserConnection::find()->where(['uc_connection_uid' => $row['uid']])->limit(1)->one();
                 if ($uc) {
                     $uc->delete();
+                    unset($uc);
                 }
-                unset($uc);
             }
+
+            if (!empty($redisList[$fd])) {
+
+                //$subList[] = 'user-' . $userId;
+                $subList[] = 'con-' . $row['uc_id'];
+
+                $redisList[$fd]->unsubscribe($subList);
+
+                $redisList[$fd]->discard();
+                unset($redisList[$fd]);
+            }
+
+
 
         });
 
@@ -300,6 +328,31 @@ class WebsocketServerController extends Controller
         } else {
             printf("- OK: %s\n", $this->ansiFormat('Class \Swoole\Coroutine\Redis', Console::FG_BLUE));
         }
+
+        if (!class_exists('\Swoole\Redis')) {
+            printf("- Error: %s\n", $this->ansiFormat('Class \Swoole\Redis - NO', Console::FG_RED));
+        } else {
+            printf("- OK: %s\n", $this->ansiFormat('Class \Swoole\Redis', Console::FG_BLUE));
+        }
+
+    }
+
+    public function actionRedis (): void
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        $client = new Redis();
+        $client->on("message", function (\swoole_redis $client, $data) use ($server) {
+            // process data, broadcast to websocket clients
+//            if ($result[0] == 'message') {
+//                foreach($server->connections as $fd) {
+//                    $server->push($fd, $result[1]);
+//                }
+//            }
+        });
+        $client->connect("127.0.0.1", 6379, function (swoole_redis $client, $result) {
+            $client->subscribe("msg_queue");
+        });
     }
 
 
