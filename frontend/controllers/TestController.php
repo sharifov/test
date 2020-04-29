@@ -63,6 +63,7 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
+use sales\access\CallAccess;
 use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
@@ -1172,15 +1173,17 @@ class TestController extends FController
 
     public function actionTestCallHelper(): void
 	{
-		$test1 = CallHelper::callNumber('+123456789');
-		$test2 = CallHelper::callNumber('+123456789', 'call phone');
-		$test3 = CallHelper::callNumber('+123456789', 'call phone', [
+		$callAccess = CallAccess::isUserCanDial(464, UserProfile::CALL_TYPE_WEB);
+
+		$test1 = CallHelper::callNumber('+123456789', false);
+		$test2 = CallHelper::callNumber('+123456789', $callAccess, 'call phone');
+		$test3 = CallHelper::callNumber('+123456789', $callAccess, 'call phone', [
 			'confirm' => 1,
 			'call' => 1,
 			'phone-from-id' => 34,
 			'icon-class' => 'fa fa-phone valid'
 		]);
-		$test4 = CallHelper::callNumber('+123456789', 'call phone', [
+		$test4 = CallHelper::callNumber('+123456789', $callAccess,'call phone', [
 			'confirm' => 1,
 			'call' => 1,
 			'phone-from-id' => 34,
