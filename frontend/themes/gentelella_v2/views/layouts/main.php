@@ -136,13 +136,13 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                                     echo NotificationWidget::widget(['userId' => Auth::id()]);
                                 }
                             ?>
-                        <?= CentrifugoNotificationWidget::widget([
+                        <?php /*= CentrifugoNotificationWidget::widget([
                             'userId' => Auth::id(),
                             'userAllowedChannels' => [
                                 'ownUserChannel#' . Auth::id(),
                                 'multipleUsersChannel#658,659'
                             ]
-                        ]) ?>
+                        ]) */ ?>
 
                         <li class="nav-item">
                             <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>

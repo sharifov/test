@@ -376,6 +376,64 @@ class CallSearch extends Call
         return $dataProvider;
     }
 
+    public function searchRealtimeUserCallMap($params)
+    {
+        $this->load($params);
+
+        $query = Call::find();
+        $query->select(['c_id', 'c_source_type_id', 'c_from', 'c_to', 'c_status_id', 'c_call_duration', 'c_lead_id', 'c_created_dt', 'c_updated_dt', 'name', 'username', 'dep_name', 'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids']);
+        $query->groupBy(['c_id']);
+        $query->orderBy(['c_id' => SORT_DESC]);
+
+
+        //$query->limit(5);
+
+        /*if($this->limit > 0) {
+            $query->limit($this->limit);
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'pagination' => $this->limit > 0 ? false : [
+                'pageSize' => 100,
+            ]
+        ]);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }*/
+
+        $query->andWhere(['or',
+            ['c_parent_id' => null],
+            ['c_status_id' => [Call::STATUS_DELAY, Call::STATUS_QUEUE]]
+        ]);
+
+        if ($this->status_ids) {
+            $query->andWhere(['c_status_id' => $this->status_ids]);
+        }
+
+        if ($this->dep_ids) {
+            $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
+                //->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => 'ud_dep_id'])
+                ->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
+
+        //$query->joinWith(['cProject', 'cLead', 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
+        $query->joinWith(['cProject', 'cLead', 'cCreatedUser', 'cDep', 'callUserAccesses', /*'cuaUsers', 'cugUgs', 'calls'*/]);
+
+        $command = $query->createCommand();
+
+        return $command->queryAll();
+    }
+
     /**
      * @param $params
      * @param $user Employee
