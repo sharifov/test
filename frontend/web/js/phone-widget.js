@@ -30,9 +30,10 @@ $(document).ready(function() {
         simpleBar.getContentElement();
     })
 
-    $(".widget-modal__close").on("click", function () {
+    $(document).on("click", ".widget-modal__close", function () {
         $(".widget-modal").hide();
         $(".phone-widget__tab").removeClass('ovf-hidden');
+        $('.collapsible-container').collapse('hide');
         clearEmailTab()
     });
 
@@ -79,20 +80,20 @@ $(document).ready(function() {
         $(this).addClass('added')
     })
 
-    var messagesModal = $(".messages-modal__messages-scroll");
-    var emailModal = $(".email-modal__messages-scroll");
+    // var messagesModal = $(".messages-modal__messages-scroll");
+    // var emailModal = $(".email-modal__messages-scroll");
 
     var contactModal = $(".contact-modal-info");
     var blockSuggestion = $(".suggested-contacts");
-    var msgModalScroll = new SimpleBar(messagesModal[0]);
-    var emailModalScroll = new SimpleBar(emailModal[0]);
+    // var msgModalScroll = new SimpleBar(messagesModal[0]);
+    // var emailModalScroll = new SimpleBar(emailModal[0]);
     var suggestions = new SimpleBar(blockSuggestion[0]);
     var modalScroll = new SimpleBar(contactModal[0]);
     modalScroll.getContentElement();
     suggestions.getContentElement();
-    msgModalScroll.getContentElement();
-    emailModalScroll.getContentElement();
-    msgModalScroll.recalculate();
+    // msgModalScroll.getContentElement();
+    // emailModalScroll.getContentElement();
+    // msgModalScroll.recalculate();
 
     $('.dial__btn').on('click', function(e) {
         e.preventDefault();

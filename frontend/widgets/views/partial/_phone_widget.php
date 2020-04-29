@@ -45,7 +45,9 @@ use yii\web\View;
         <?= $this->render('tab/call'); ?>
         <?= $this->render('tab/contacts'); ?>
         <?= $this->render('tab/history'); ?>
+        <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
 
+        <?php /*
         <div class="widget-phone__contact-info-modal widget-modal contact-modal-info">
             <a href="#" class="widget-modal__close">
                 <i class="fa fa-arrow-left"></i>
@@ -339,6 +341,8 @@ use yii\web\View;
 
             </div>
         </div>
+        */ ?>
+
     </div>
 	<?php else: ?>
         <div class="alert alert-danger alert-dismissible" role="alert">

@@ -407,4 +407,49 @@ class ContactsController extends FController
 
 		throw new BadRequestHttpException();
 	}
+
+    public function actionListAjax(?string $q = null): Response
+    {
+        $out = ['results' => []];
+
+        if ($q !== null) {
+
+            if (strlen($q) < 2) {
+                return $this->asJson($out);
+            }
+
+            /** @var ContactsSearch[] $contacts */
+            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q)->getModels();
+//sleep(4);
+            $data = [];
+            if ($contacts) {
+                foreach ($contacts as $n => $contact) {
+                    $contactData = [];
+                    $text = $contact->first_name . ' ' . $contact->last_name;
+                    $group = strtoupper($text[0] ?? '');
+                    $contactData['id'] = $contact->id;
+                    $contactData['name'] = $text;
+                    $contactData['description'] = $contact->description;
+                    $contactData['avatar'] = $group;
+                    $contactData['is_company'] = $contact->is_company;
+                    if ($contact->clientPhones) {
+                        foreach ($contact->clientPhones as $phone) {
+                            $contactData['phones'][] = $phone->phone;
+                        }
+                    }
+                    if ($contact->clientEmails) {
+                        foreach ($contact->clientEmails as $email) {
+                            $contactData['emails'][] = $email->email;
+                        }
+                    }
+                    //$data[$n]['selection'] = $item['text'];
+                    $data[$group][$n] = $contactData;
+                }
+            }
+
+            $out['results'] = $data;
+        }
+
+        return $this->asJson($out);
+    }
 }
