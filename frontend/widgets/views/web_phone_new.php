@@ -34,9 +34,9 @@ $js = <<<JS
 			return false;
 		}
 		
-		var reg = new RegExp('^[0-9]+$');
+		var reg = new RegExp('^[+]?[0-9]+$');
 		if (!reg.test(phone_to)) {
-		    new PNotify({title: "Phone Widget", type: "error", text: 'Entered phone number is not correct. Phone number should contain only numbers', hide: true});
+		    new PNotify({title: "Phone Widget", type: "error", text: 'Entered phone number is not correct. Phone number should contain only numbers and +', hide: true});
 			return false;	
 		}
 		

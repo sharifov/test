@@ -6,6 +6,7 @@ use common\models\UserContactList;
 use sales\access\ContactUpdateAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -99,7 +100,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     if($phones) {
                         foreach ($phones as $k => $phone) {
                             $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
-                            $data[] = $sms . '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
+                            $data[] = $sms . CallHelper::callNumber($phone->phone, '', [], 'code');
                         }
                     }
                     return implode('<br>', $data);
@@ -211,8 +212,7 @@ $jsCode = <<<JS
         });
        return false;
     });
-
-
+    
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);

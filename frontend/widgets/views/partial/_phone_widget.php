@@ -27,18 +27,18 @@ use yii\web\View;
                     <span>Call</span>
                 </a>
             </li>
-            <li>
-                <a href="#" data-toggle-tab="tab-contacts" >
-                    <i class="far fa-address-book"></i>
-                    <span>Contacts</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-toggle-tab="tab-history">
-                    <i class="fas fa-file-invoice"></i>
-                    <span>history</span>
-                </a>
-            </li>
+<!--            <li>-->
+<!--                <a href="#" data-toggle-tab="tab-contacts" >-->
+<!--                    <i class="far fa-address-book"></i>-->
+<!--                    <span>Contacts</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="#" data-toggle-tab="tab-history">-->
+<!--                    <i class="fas fa-file-invoice"></i>-->
+<!--                    <span>history</span>-->
+<!--                </a>-->
+<!--            </li>-->
         </ul>
     </div>
     <div class="phone-widget__body">
