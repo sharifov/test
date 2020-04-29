@@ -1,6 +1,11 @@
 <?php
 
 use common\models\Client;
+use common\models\Project;
+use sales\access\ContactUpdateAccess;
+use sales\access\EmployeeProjectAccess;
+use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -29,22 +34,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'first_name',
             'last_name',
-            /*[
-                'header' => 'Name',
-                'attribute' => 'by_name',
-                'value' => function(Client $model) {
-                    $out = '';
-                    $first_name = $model->first_name ? Html::encode($model->first_name) : '<span class="not-set">(not set)</span>';
-                    $out .= '<i class="fa fa-check"></i> <em>First name:</em> ' . $first_name . '<br />';
-                    $middle_name = $model->middle_name ? Html::encode($model->middle_name) : '<span class="not-set">(not set)</span>';
-                    $out .= '<i class="fa fa-check"></i> <em>Middle name:</em> ' . $middle_name . '<br />';
-                    $last_name = $model->last_name ? Html::encode($model->last_name) : '<span class="not-set">(not set)</span>';
-                    $out .= '<i class="fa fa-check"></i> <em>Last name:</em> ' . $last_name . '<br />';
-
-                    return $out;
-                },
-                'format' => 'raw',
-            ],*/
             'company_name',
             [
                 'attribute' => 'is_company',
@@ -96,7 +85,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = [];
                     if($phones) {
                         foreach ($phones as $k => $phone) {
-                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone).'</code>';
+                            $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
+                            $data[] = $sms . CallHelper::callNumber($phone->phone, '', [], 'code');
                         }
                     }
                     return implode('<br>', $data);
@@ -107,12 +97,12 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Emails',
                 'attribute' => 'client_email',
-                'value' => function(Client $model) {
+                'value' => static function(Client $model) {
                     $emails = $model->clientEmails;
                     $data = [];
                     if($emails) {
                         foreach ($emails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
                         }
                     }
                     return implode('<br>', $data);
@@ -120,10 +110,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left'],
             ],
+            /*[
+                'label' => 'Projects',
+                'attribute' => 'contact_project_id',
+                'value' => static function (Client $model) {
+                    $str = '';
+                    foreach ($model->projects as $project) {
+                        $str .= '<div style="margin: 1px;">' . Yii::$app->formatter->asProjectName($project->name) . '</div>';
+                    }
+                    return $str;
+                },
+                'format' => 'raw',
+                'filter' => EmployeeProjectAccess::getProjects(Auth::id())
+            ],*/
             [
                 'attribute' => 'created',
                 'value' => function(Client $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([
@@ -139,8 +142,17 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
-
-            ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{update}{view}',
+                'visibleButtons'=>
+                [
+                     'update' => static function (Client $model) {
+                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
+                     },
+                    'view' => true,
+                ],
+            ],
         ],
     ]); ?>
     <?php Pjax::end(); ?>
@@ -186,8 +198,7 @@ $jsCode = <<<JS
         });
        return false;
     });
-
-
+    
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);

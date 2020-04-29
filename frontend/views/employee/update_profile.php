@@ -215,7 +215,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 </div>
 
-<div class="col-sm-2">
-    <h3>Telegram Auth</h3>
-    <?php echo '<img src="' . $qrcodeData . '">'; ?>
-</div>
+<?php if ($qrcodeData): ?>
+    <div class="col-sm-2">
+        <h3>Telegram Auth</h3>
+        <?php echo '<img src="' . $qrcodeData . '" title="Scan">'; ?>
+    </div>
+<?php endif; ?>

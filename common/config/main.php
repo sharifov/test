@@ -88,6 +88,7 @@ return [
         ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
+            'botUsername' => 'CrmKivorkBot',
             'botToken' => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
         ]
 

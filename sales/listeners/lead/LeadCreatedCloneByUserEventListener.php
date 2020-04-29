@@ -2,7 +2,7 @@
 
 namespace sales\listeners\lead;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
@@ -34,16 +34,16 @@ class LeadCreatedCloneByUserEventListener
      */
     public function handle(LeadCreatedCloneByUserEvent $event): void
     {
+        if (!$event->ownerOfOriginalLead) {
+            return;
+        }
 
         $lead = $event->lead;
 
-        $host = \Yii::$app->params['url_address'];
-
         try {
-            $owner = $this->userRepository->find($event->ownerId);
+            $owner = $this->userRepository->find($event->owner);
         } catch (NotFoundException $e) {
-            Yii::$app->errorHandler->logException($e);
-            Yii::warning('Not found employee (' . $event->ownerId . ')', 'LeadCreatedCloneByUserEventListener:notFoundOwner');
+            Yii::warning('Not found employee (' . $event->owner . ')', 'LeadCreatedCloneByUserEventListener:notFoundOwner');
             return;
         }
 
@@ -63,17 +63,15 @@ class LeadCreatedCloneByUserEventListener
                 'lead_id' => Purifier::createLeadShortLink($lead),
             ]);
 
-        if ($ntf = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+        if ($ntf = Notifications::create($event->ownerOfOriginalLead, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($owner->id, null, 'getNewNotification', [], true);
             $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-            Notifications::publish('getNewNotification', ['user_id' => $owner->id], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $event->ownerOfOriginalLead], $dataNotification);
         } else {
             Yii::warning(
-                'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
+                'Not created Email notification to employee_id: ' . $event->ownerOfOriginalLead . ', lead: ' . $lead->id,
                 self::class . ':createNotification:Lead:Clone'
             );
         }
-
     }
-
 }

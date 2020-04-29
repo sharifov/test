@@ -51,4 +51,14 @@ class FController extends Controller
         return parent::beforeAction($action);
     }
 
+    /**
+	 * @param array $errors
+	 * @return string
+	 */
+    public function getParsedErrors(array $errors): string
+	{
+		return implode('<br>', array_map(static function ($errors) {
+			return implode('<br>', $errors);
+		}, $errors));
+	}
 }

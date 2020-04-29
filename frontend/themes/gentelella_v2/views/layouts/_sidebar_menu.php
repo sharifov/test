@@ -148,6 +148,12 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
 
         $menuItems[] = [
+            'label' => 'My Contacts <span id="call-inbox-queue" class="label-info label pull-right"></span>',
+            'url' => ['/contacts/index'],
+            'icon' => 'user'
+        ];
+
+        $menuItems[] = [
             'label' => 'Data Lists',
             'url' => 'javascript:',
             'icon' => 'th-list',
@@ -247,9 +253,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
                 ['label' => 'Clients emails', 'url' => ['/client-email/index'], 'icon' => 'envelope '],
                 ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
-                ['label' => 'Contacts', 'url' => ['/contacts/index'], 'icon' => 'user'],
-                ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'sitemap'],
-                ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'bars'],
+                ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'list'],
+                ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'list'],
             ]
         ];
 

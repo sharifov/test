@@ -83,11 +83,12 @@ class ClientManageService
     /**
      * @param Client $client
      * @param PhoneCreateForm $phoneForm
+     * @return ClientPhone|null
      */
-    public function addPhone(Client $client, PhoneCreateForm $phoneForm): void
+    public function addPhone(Client $client, PhoneCreateForm $phoneForm): ?ClientPhone
     {
         if (!$phoneForm->phone) {
-            return;
+            return null;
         }
 
         $this->internalPhoneGuard->guard($phoneForm->phone);
@@ -100,16 +101,19 @@ class ClientManageService
                 $phoneForm->comments ?? null
             );
             $this->clientPhoneRepository->save($phone);
+            return $phone;
         }
+        return null;
     }
 
-	/**
-	 * @param PhoneCreateForm $form
-	 */
-    public function updatePhone(PhoneCreateForm $form): void
-	{
+    /**
+     * @param PhoneCreateForm $form
+     * @return ClientPhone
+     */
+    public function updatePhone(PhoneCreateForm $form): ClientPhone
+    {
 		$phone = $this->clientPhoneRepository->find($form->id);
-//		$phone->edit($form->phone, $form->type);
+
 		if ($form->phone !== null) {
 			$phone->phone = $form->phone;
 		}
@@ -118,6 +122,7 @@ class ClientManageService
 			$phone->type = $form->type;
 		}
 		$this->clientPhoneRepository->save($phone);
+		return $phone;
 	}
 
     /**

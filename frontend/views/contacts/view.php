@@ -11,7 +11,7 @@ $this->title = 'Contact: ' . $model->id;
 $this->params['breadcrumbs'][] = ['label' => 'Contact', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="client-view">
+<div class="contact-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -38,9 +38,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'last_name',
             'company_name',
             'description',
-            'is_company:boolean',
-            'is_public:boolean',
-            'disabled:boolean',
+            'is_company:booleanByLabel',
+            'is_public:booleanByLabel',
+            'disabled:booleanByLabel',
         ],
     ]) ?>
     </div>
@@ -66,7 +66,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
                     ],
-
                     [
                         'label' => 'Emails',
                         'value' => function(\common\models\Client $model) {
@@ -85,10 +84,18 @@ $this->params['breadcrumbs'][] = $this->title;
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
                     ],
-
-                    //'created',
-                    //'updated',
-
+                    /*[
+                        'label' => 'Projects',
+                        'value' => static function (Client $model) {
+                            $str = '';
+                            foreach ($model->projects as $project) {
+                                $str .= '<div style="margin: 1px;">' . Yii::$app->formatter->asProjectName($project->name) . '</div>';
+                            }
+                            return $str;
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-left'],
+                    ],*/
                     [
                         'attribute' => 'created',
                         'value' => function(\common\models\Client $model) {

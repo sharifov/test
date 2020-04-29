@@ -73,6 +73,18 @@
         $.pjax.reload(options);
     };
 
+    $(document).on('click', '.wg-call', function (e) {
+        e.preventDefault();
+
+        let phone = $(this).data('phone-number');
+        let widgetBtn = $('.js-toggle-phone-widget');
+        if (widgetBtn.length) {
+            $('.phone-widget').addClass('is_active')
+            $('.js-toggle-phone-widget').addClass('is-mirror');
+            $('#call-pane__dial-number').val(phone);
+        }
+    });
+
 })(window, $);
 
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {

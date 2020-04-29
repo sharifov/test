@@ -987,6 +987,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $this->auth_key = Yii::$app->security->generateRandomString();
     }
 
+    public function getFirstUserProjectParam(): ActiveQuery
+	{
+		return $this->hasOne(UserProjectParams::class, ['upp_user_id' => 'id']);
+	}
+
     /**
      * @param bool $onlyNames
      * @return array

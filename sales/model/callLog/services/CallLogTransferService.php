@@ -70,7 +70,7 @@ class CallLogTransferService
     {
         $this->call = $call->getAttributes();
 
-        Yii::info($this->call, 'info\DebugCallLog');
+//        Yii::info($this->call, 'info\DebugCallLog');
 
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
             $this->outParentCall();
@@ -83,7 +83,7 @@ class CallLogTransferService
         }
 
         if ($call->isOut() && !$call->isGeneralParent() && ($call->c_group_id == null || $call->isTransfer())) {
-//           $this->outChildCall();
+            $this->outChildCall();
             return;
         }
 
@@ -162,6 +162,13 @@ class CallLogTransferService
     private function outParentCall(): void
     {
         $this->callLog['cl_group_id'] = $this->call['c_id'];
+
+        $firstChild = Call::find()->select(['c_status_id'])->andWhere(['c_parent_id' => $this->call['c_id']])->orderBy(['c_id' => SORT_ASC])->asArray()->limit(1)->one();
+        if ($this->call['c_status_id'] == Call::STATUS_COMPLETED && $firstChild && array_key_exists((int)$firstChild['c_status_id'], CallLogStatus::getList())) {
+            $this->callLog['cl_status_id'] = $firstChild['c_status_id'];
+        } else {
+            $this->callLog['cl_status_id'] = $this->call['c_status_id'];
+        }
 
         $this->createCallLogs();
     }
@@ -243,13 +250,13 @@ class CallLogTransferService
 
     private function outChildCall(): void
     {
-        if ($this->call['c_group_id'] == null) {
-            $this->callLog['cl_group_id'] = $this->call['c_id'];
-        } else {
-            $this->callLog['cl_group_id'] = $this->call['c_group_id'];
+        if (!$this->call['c_is_transfer'] && $this->call['c_status_id'] != Call::STATUS_COMPLETED) {
+            try {
+                CallLog::updateAll(['cl_status_id' => $this->call['c_status_id']], 'cl_id = ' . (int)$this->call['c_parent_id']);
+            } catch (\Throwable $e) {
+                Yii::error(VarDumper::dumpAsString(['category' => 'outChildCall', 'error' => $e->getMessage()]), 'CallLogTransferService');
+            }
         }
-
-        $this->createCallLogs();
     }
 
     private function outTransferParentCall(): void

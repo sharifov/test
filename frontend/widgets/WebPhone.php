@@ -32,18 +32,13 @@ class WebPhone extends \yii\bootstrap\Widget
     {
         $user_id = \Yii::$app->user->id;
 
-
-
         $userProfile = UserProfile::find()->where(['up_user_id' => $user_id])->limit(1)->one();
 
         //$sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
 
-
-
         if(!$userProfile || (int) $userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB) {
             return '';
         }
-
 
         /*if (\Yii::$app->controller->uniqueId != 'phone') {
             return '';

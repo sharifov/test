@@ -36,6 +36,10 @@ use yii\db\ActiveQuery;
  * @property ClientPhone[] $clientPhones
  * @property ClientPhone[] $clientPhonesByType
  * @property Lead[] $leads
+ * @property string $nameByType
+ * @property array $phoneNumbersSms
+ * @property array $emailList
+ * @property Project[] $projects
  * @method clientPhonesByType(array $array)
  */
 class Client extends ActiveRecord
@@ -166,6 +170,14 @@ class Client extends ActiveRecord
     public function getLeads(): ActiveQuery
     {
         return $this->hasMany(Lead::class, ['client_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProjects(): ActiveQuery
+    {
+         return $this->hasMany(Project::class, ['id' => 'cp_project_id'])->viaTable('client_project', ['cp_client_id' => 'id']);
     }
 
     public function beforeSave($insert): bool
@@ -302,5 +314,20 @@ class Client extends ActiveRecord
     public function getNameByType(): string
     {
         return $this->is_company ? $this->company_name : trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    /**
+     * @param int $userId
+     * @return bool
+     */
+    public function isContactPublicOwner(int $userId): bool
+    {
+        return self::find()
+            ->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
+                'user_contact_list.ucl_client_id = ' . self::tableName() . '.id')
+            ->where(['ucl_user_id' => $userId])
+            ->andWhere(['ucl_client_id' => $this->id])
+            ->andWhere(['is_public' => true])
+            ->exists();
     }
 }

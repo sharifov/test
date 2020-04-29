@@ -2,24 +2,57 @@
 
 namespace frontend\controllers;
 
+use common\models\ClientPhone;
+use common\models\Employee;
 use common\models\UserContactList;
-use sales\access\ListsAccess;
+use sales\access\ClientInfoAccess;
+use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
-use sales\model\user\entity\Access;
+use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\app\AppHelper;
+use sales\services\client\ClientManageService;
 use Yii;
 use common\models\Client;
 use common\models\search\ContactsSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use yii\web\Controller;
+use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * ContactsController implements the CRUD actions for Client model.
+ * @property  ClientManageService $clientManageService
  */
 class ContactsController extends FController
 {
+    /* TODO:: add access to actions - ContactUpdateAccess */
+
+    /**
+	 * @var ClientManageService
+	 */
+	private $clientManageService;
+
+	/**
+	 * LeadViewController constructor.
+	 * @param $id
+	 * @param $module
+	 * @param ClientManageService $clientManageService
+	 * @param array $config
+	 */
+	public function __construct(
+		$id,
+		$module,
+		ClientManageService $clientManageService,
+		$config = [])
+	{
+		$this->clientManageService = $clientManageService;
+		parent::__construct($id, $module, $config);
+	}
+
     /**
      * @return array
      */
@@ -69,10 +102,12 @@ class ContactsController extends FController
      * Creates a new Client model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionCreate()
     {
         $model = new Client();
+        $post = Yii::$app->request->post($model->formName());
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
@@ -82,8 +117,22 @@ class ContactsController extends FController
 
             if(!$userContactList->save()) {
                 Yii::error(VarDumper::dumpAsString($userContactList->errors),
-                    'ContactsController:actionCreate:save');
+                    'ContactsController:actionCreate:saveUserContactList');
             }
+
+            /*if(isset($post['projects'])) {
+                foreach ($post['projects'] as $projectId) {
+                    $clientProject = new ClientProject();
+                    $clientProject->cp_client_id = $model->id;
+                    $clientProject->cp_project_id = (int) $projectId;
+                    $clientProject->save();
+                    if(!$clientProject->save()) {
+                        Yii::error(VarDumper::dumpAsString($clientProject->errors),
+                            'ContactsController:actionCreate:saveClientProject');
+                    }
+                }
+            }*/
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -98,12 +147,29 @@ class ContactsController extends FController
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $post = Yii::$app->request->post($model->formName());
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            /*if(isset($post['projects'])) {
+                ClientProject::deleteAll(['cp_client_id' => $model->id]);
+                foreach ($post['projects'] as $projectId) {
+                    $clientProject = new ClientProject();
+                    $clientProject->cp_client_id = $model->id;
+                    $clientProject->cp_project_id = (int) $projectId;
+                    $clientProject->save();
+                    if(!$clientProject->save()) {
+                        Yii::error(VarDumper::dumpAsString($clientProject->errors),
+                            'ContactsController:actionUpdate:saveClientProject');
+                    }
+                }
+            }*/
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -141,4 +207,194 @@ class ContactsController extends FController
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxAddContactPhoneModalContent():string
+	{
+		try {
+			$clientId = (int)Yii::$app->request->get('client_id');
+
+			return $this->renderAjax('partial/_contact_add_phone_modal_content', [
+				'addPhone' => new PhoneCreateForm(),
+				'client' => Client::findOne($clientId),
+			]);
+		} catch (\Throwable $throwable) {
+			Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionAjaxAddClientPhoneModalContent:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxAddContactPhoneValidation(): array
+	{
+		$clientId = (int)Yii::$app->request->get('client_id');
+
+		try {
+			$form = new PhoneCreateForm();
+			$form->required = true;
+
+			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+				$form->client_id = $clientId;
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return ActiveForm::validate($form);
+			}
+
+		}catch (\Throwable $throwable) {
+			Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionAjaxAddContactPhoneValidation:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+    /**
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws HttpException
+     */
+    public function actionAjaxAddContactPhone()
+	{
+		$clientId = (int)Yii::$app->request->get('client_id');
+        $client = Client::findOne($clientId);
+
+        if (!$client) {
+			throw new HttpException(403, 'Client not found');
+		}
+		if (!(new ContactUpdateAccess())->isUserCanUpdateContact($client, Auth::user())) {
+			throw new HttpException(403, 'Access Denied');
+		}
+
+		try {
+			$form = new PhoneCreateForm();
+			$form->client_id = $clientId;
+			$form->required = true;
+
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+				$phone = $this->clientManageService->addPhone($client, $form);
+
+				$response['error'] = false;
+				$response['message'] = 'New phone was successfully added: ' . $form->phone;
+				$response['html'] = $this->renderAjax('partial/_phone_row', [
+					'phone' => $phone,
+				]);
+			} else {
+				$response['error'] = true;
+				$response['message'] = $this->getParsedErrors($form->getErrors());
+			}
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return $response;
+		} catch (\Throwable $throwable) {
+			Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionAjaxAddClientPhone:Throwable');
+		}
+
+		throw new BadRequestHttpException();
+	}
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxEditContactPhoneModalContent(): string
+    {
+		if (Yii::$app->request->isAjax) {
+			try {
+				$phoneId = (int)Yii::$app->request->get('phone_id');
+
+				if ($phone = ClientPhone::findOne($phoneId)) {
+
+					$phoneForm = new PhoneCreateForm();
+					$phoneForm->id = $phone->id;
+					$phoneForm->phone = $phone->phone;
+					$phoneForm->type = $phone->type;
+					$phoneForm->client_id = $phone->client_id;
+
+					return $this->renderAjax('partial/_contact_edit_phone_modal_content', [
+						'editPhone' => $phoneForm,
+						'client' => Client::findOne($phone->client_id),
+					]);
+				}
+			} catch (\Throwable $throwable) {
+				Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionAjaxEditContactPhoneModalContent:Throwable');
+			}
+		}
+		throw new BadRequestHttpException();
+	}
+
+	/**
+	 * @return array
+	 * @throws BadRequestHttpException
+     */
+	public function actionAjaxEditContactPhoneValidation(): array
+	{
+		$clientId = (int)Yii::$app->request->get('client_id');
+
+		try {
+			$form = new PhoneCreateForm();
+			$form->scenario = 'update';
+			$form->required = true;
+
+			if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())){
+
+			    if (!$client = Client::findOne($clientId)) {
+                    throw new HttpException(403, 'Client not found');
+                }
+
+				$form->client_id = $client->id;
+				Yii::$app->response->format = Response::FORMAT_JSON;
+				return ActiveForm::validate($form);
+			}
+
+		}catch (\Throwable $throwable) {
+			Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionAjaxEditContactPhoneValidation:Throwable');
+		}
+		throw new BadRequestHttpException();
+	}
+
+	public function actionAjaxEditContactPhone()
+	{
+		try {
+
+            $clientId = (int)Yii::$app->request->get('client_id');
+            $client = Client::findOne($clientId);
+
+            if (!$client) {
+                throw new HttpException(403, 'Client not found');
+            }
+            if (!(new ContactUpdateAccess())->isUserCanUpdateContact($client, Auth::user())) {
+                throw new HttpException(403, 'Access Denied');
+            }
+
+			$form = new PhoneCreateForm();
+			$form->scenario = 'update';
+            $form->required = true;
+
+			$form->load(Yii::$app->request->post());
+
+			if ($form->validate()) {
+
+				$phone = $this->clientManageService->updatePhone($form);
+
+				$response['error'] = false;
+				$response['message'] = 'Phone was successfully updated: ' . $form->phone;
+				$response['html'] = $this->renderAjax('partial/_phone_row', [
+					'phone' => $phone,
+				]);
+			} else {
+				$response['error'] = true;
+				$response['message'] = $this->getParsedErrors($form->getErrors());
+			}
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			return $response;
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'LeadViewController:actionAjaxEditClientPhone:Throwable');
+		}
+
+		throw new BadRequestHttpException();
+	}
 }

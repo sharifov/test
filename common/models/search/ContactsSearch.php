@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\ClientProject;
 use common\models\Employee;
 use common\models\UserContactList;
 use yii\base\Model;
@@ -18,16 +19,21 @@ use yii\helpers\ArrayHelper;
  * @property bool $isPublic
  * @property bool $isDisabled
  * @property string $by_name
+ * @property Employee $user
+ * @property int $contact_project_id
  */
 class ContactsSearch extends Client
 {
     public $client_email;
     public $client_phone;
     public $by_name;
+    public $contact_project_id;
 
     public $userId;
     public $isPublic = true;
     public $isDisabled = false;
+
+    private $user;
 
     /**
      * @param int $userId
@@ -40,6 +46,7 @@ class ContactsSearch extends Client
         $this->userId = $userId;
         $this->isPublic = $isPublic;
         $this->isDisabled = $isDisabled;
+        $this->user = Employee::findIdentity($this->userId);
         parent::__construct($config);
     }
 
@@ -49,7 +56,7 @@ class ContactsSearch extends Client
     public function rules(): array
     {
         return [
-            [['id'], 'integer'],
+            [['id', 'contact_project_id'], 'integer'],
             [['client_email', 'client_phone'], 'string'],
             [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
             ['uuid', 'string', 'max' => 36],
@@ -72,9 +79,14 @@ class ContactsSearch extends Client
         $query->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
             'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id');
 
-        $query->andWhere(['user_contact_list.ucl_user_id' => $this->userId])
-            ->andWhere(['is_public' => $this->isPublic])
-            ->andWhere(['disabled' => $this->isDisabled]);
+        if (!$this->isRoleAdmin()) {
+            $query->andWhere(['user_contact_list.ucl_user_id' => $this->userId]);
+            $query->orWhere(['AND',
+               ['!=', 'user_contact_list.ucl_user_id', $this->userId],
+               ['disabled' => $this->isDisabled],
+               ['is_public' => $this->isPublic],
+            ]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -110,6 +122,10 @@ class ContactsSearch extends Client
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
             $query->andWhere(['IN', 'id', $subQuery]);
         }
+        if ($this->contact_project_id > 0) {
+            $subQuery = ClientProject::find()->select(['DISTINCT(cp_client_id)'])->where(['=', 'cp_project_id', $this->contact_project_id]);
+            $query->andWhere(['IN', 'id', $subQuery]);
+        }
 
         $query->andFilterWhere([
             'id' => $this->id,
@@ -140,5 +156,10 @@ class ContactsSearch extends Client
             ->andFilterWhere(['like', 'description', $this->description]);
 
         return $dataProvider;
+    }
+
+    private function isRoleAdmin()
+    {
+        return ($this->user->isAdmin() || $this->user->isSuperAdmin());
     }
 }

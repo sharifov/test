@@ -8,22 +8,19 @@ use common\models\Lead;
  * Class LeadCreatedCloneByUserEvent
  *
  * @property Lead $lead
- * @property int $ownerId
+ * @property int|null $owner
+ * @property int|null $ownerOfOriginalLead
  */
 class LeadCreatedCloneByUserEvent
 {
-
     public $lead;
-    public $ownerId;
+    public $owner;
+    public $ownerOfOriginalLead;
 
-    /**
-     * @param Lead $lead
-     * @param int $ownerId
-     */
-    public function __construct(Lead $lead, int $ownerId)
+    public function __construct(Lead $lead, ?int $owner, ?int $ownerOfOriginalLead)
     {
         $this->lead = $lead;
-        $this->ownerId = $ownerId;
+        $this->owner = $owner;
+        $this->ownerOfOriginalLead = $ownerOfOriginalLead;
     }
-
 }

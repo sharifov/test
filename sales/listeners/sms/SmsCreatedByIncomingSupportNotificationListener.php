@@ -2,7 +2,7 @@
 
 namespace sales\listeners\sms;
 
-use common\components\Purifier;
+use common\components\purifier\Purifier;
 use common\models\ClientPhone;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
