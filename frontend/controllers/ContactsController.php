@@ -20,6 +20,7 @@ use Yii;
 use common\models\Client;
 use common\models\search\ContactsSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
@@ -495,4 +496,87 @@ class ContactsController extends FController
 
 		throw new BadRequestHttpException();
 	}
+
+    public function actionListAjax(?string $q = null): Response
+    {
+        $out = ['results' => []];
+
+        if ($q !== null) {
+
+            if (strlen($q) < 2) {
+                return $this->asJson($out);
+            }
+
+            /** @var ContactsSearch[] $contacts */
+            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q)->getModels();
+//sleep(4);
+            $data = [];
+            if ($contacts) {
+                foreach ($contacts as $n => $contact) {
+                    $contactData = [];
+                    $name = $contact->is_company ? $contact->company_name : $contact->first_name . ' ' . $contact->last_name;
+                    $group = strtoupper($name[0] ?? '');
+                    $contactData['id'] = $contact->id;
+                    $contactData['name'] = $name;
+                    $contactData['description'] = $contact->description;
+                    $contactData['avatar'] = $group;
+                    $contactData['is_company'] = $contact->is_company;
+                    if ($contact->clientPhones) {
+                        foreach ($contact->clientPhones as $phone) {
+                            $contactData['phones'][] = $phone->phone;
+                        }
+                    }
+                    if ($contact->clientEmails) {
+                        foreach ($contact->clientEmails as $email) {
+                            $contactData['emails'][] = $email->email;
+                        }
+                    }
+                    //$data[$n]['selection'] = $item['text'];
+                    $data[$group][$n] = $contactData;
+                }
+            }
+
+            $out['results'] = $data;
+        }
+
+        return $this->asJson($out);
+    }
+
+    public function actionListCallsAjax(?string $q = null): Response
+    {
+        $out = ['results' => []];
+
+        if ($q !== null) {
+
+            if (strlen($q) < 3) {
+                return $this->asJson($out);
+            }
+
+            /** @var ContactsSearch[] $contacts */
+            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q, $limit = 3)->getModels();
+//sleep(4);
+            $data = [];
+            if ($contacts) {
+                foreach ($contacts as $n => $contact) {
+                    $name = $contact->is_company ? $contact->company_name : $contact->first_name . ' ' . $contact->last_name;
+                    if ($contact->clientPhones) {
+                        foreach ($contact->clientPhones as $phone) {
+                            $contactData = [];
+                            $contactData['id'] = $contact->id;
+                            $contactData['name'] = StringHelper::truncate($name, 18, '...') . ' ' . $phone->phone;
+                            $contactData['phone'] = $phone->phone;
+                            $data[] = $contactData;
+                            if (count($data) === 3) {
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $out['results'] = $data;
+        }
+
+        return $this->asJson($out);
+    }
 }

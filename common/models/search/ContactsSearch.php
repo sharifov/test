@@ -161,6 +161,47 @@ class ContactsSearch extends Client
         return $dataProvider;
     }
 
+
+    public function searchByWidget(string $q, ?int $limit = null): ActiveDataProvider
+    {
+        $query = Client::find();
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        $query->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
+            'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id');
+
+        if (!$this->isRoleAdmin()) {
+            $query->andWhere(['user_contact_list.ucl_user_id' => $this->userId]);
+            $query->orWhere(['AND',
+                ['!=', 'user_contact_list.ucl_user_id', $this->userId],
+                ['disabled' => $this->isDisabled],
+                ['is_public' => $this->isPublic],
+            ]);
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['first_name' => SORT_ASC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $query->andWhere([
+            'OR',
+            ['IN', 'id', ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $q])],
+            ['IN', 'id', ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $q])],
+            ['like', 'first_name', $q],
+            ['like', 'last_name', $q],
+            ['like', 'company_name', $q],
+        ]);
+
+        return $dataProvider;
+    }
+
     private function isRoleAdmin()
     {
         return ($this->user->isAdmin() || $this->user->isSuperAdmin());

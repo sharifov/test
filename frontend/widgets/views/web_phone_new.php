@@ -17,8 +17,8 @@ NewWebPhoneAsset::register($this);
 <?= $this->render('partial/_phone_widget_icon') ?>
 
 <?php
-$ajaxCheckUserForCallUrl = Url::to(['phone/ajax-check-user-for-call']);
-$ajaxBlackList = Url::to(['phone/check-black-phone']);
+$ajaxCheckUserForCallUrl = Url::to(['/phone/ajax-check-user-for-call']);
+$ajaxBlackList = Url::to(['/phone/check-black-phone']);
 ?>
 
 <?php

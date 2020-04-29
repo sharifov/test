@@ -2,6 +2,8 @@
 
 use common\models\Client;
 use common\models\Project;
+use common\models\UserProfile;
+use sales\access\CallAccess;
 use common\models\UserContactList;
 use sales\access\ContactUpdateAccess;
 use sales\access\EmployeeProjectAccess;
@@ -100,7 +102,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     if($phones) {
                         foreach ($phones as $k => $phone) {
                             $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
-                            $data[] = $sms . CallHelper::callNumber($phone->phone, '', [], 'code');
+                            $data[] = $sms . CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(), UserProfile::CALL_TYPE_WEB), '', [], 'code');
                         }
                     }
                     return implode('<br>', $data);
