@@ -44,12 +44,14 @@ function showSearchContactPreloader() {
 function hideSearchContactPreloader() {
     $("#list-of-contacts").html("");
 }
+var timerPhoneWidget;
 $( "#contact-list-ajax-q").keyup(function() {
     let q = $("#contact-list-ajax").find("input[name=q]").val();
     if (q.length < 2) {
         return false;
     }
-    setTimeout( function () { 
+    clearTimeout(timerPhoneWidget);
+    timerPhoneWidget = setTimeout(function() {
         $("#contact-list-ajax").submit();
     }, 300);
 });
@@ -203,22 +205,22 @@ function viewContact(contact) {
                     '<span>' + contact['avatar'] + '</span>' +
                 '</div>' +
                 '<h3 class="contact-modal-info__name">' + contact['name'] + '</h3>' +
-                '<div class="contact-modal-info__actions">' +
-                    '<ul class="contact-options-list">' +
-                        '<li class="contact-options-list__option js-edit-mode">' +
-                            '<i class="fa fa-user"></i>' +
-                            '<span>EDIT</span>' +
-                        '</li>' +
-                        '<li class="contact-options-list__option js-trigger-messages-modal">' +
-                            '<i class="fa fa-comment-alt"></i>' +
-                            '<span>SMS</span>' +
-                        '</li>' +
-                        '<li class="contact-options-list__option contact-options-list__option--call js-call-tab-trigger">' +
-                            '<i class="fa fa-phone"></i>' +
-                            '<span>Call</span>' +
-                        '</li>' +
-                    '</ul>' +
-                '</div>' +
+//                '<div class="contact-modal-info__actions">' +
+//                    '<ul class="contact-options-list">' +
+//                        '<li class="contact-options-list__option js-edit-mode">' +
+//                            '<i class="fa fa-user"></i>' +
+//                            '<span>EDIT</span>' +
+//                        '</li>' +
+//                        '<li class="contact-options-list__option js-trigger-messages-modal">' +
+//                            '<i class="fa fa-comment-alt"></i>' +
+//                            '<span>SMS</span>' +
+//                        '</li>' +
+//                        '<li class="contact-options-list__option contact-options-list__option--call js-call-tab-trigger">' +
+//                            '<i class="fa fa-phone"></i>' +
+//                            '<span>Call</span>' +
+//                        '</li>' +
+//                    '</ul>' +
+//                '</div>' +
             '</div>' +
             '<div class="contact-modal-info__body">' +
                 '<ul class="contact-modal-info__contacts contact-full-info">' +
