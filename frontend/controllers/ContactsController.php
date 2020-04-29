@@ -514,8 +514,12 @@ class ContactsController extends FController
             if ($contacts) {
                 foreach ($contacts as $n => $contact) {
                     $contactData = [];
-                    $name = $contact->is_company ? $contact->company_name : $contact->first_name . ' ' . $contact->last_name;
-                    $group = strtoupper($name[0] ?? '');
+                    if ($contact->is_company) {
+                        $name = $contact->company_name ?: $contact->first_name . ' ' . $contact->last_name;
+                    } else {
+                        $name = $contact->first_name . ' ' . $contact->last_name;
+                    }
+                    $group = strtoupper($name[0] ?? 'A');
                     $contactData['id'] = $contact->id;
                     $contactData['name'] = $name;
                     $contactData['description'] = $contact->description;
@@ -558,7 +562,11 @@ class ContactsController extends FController
             $data = [];
             if ($contacts) {
                 foreach ($contacts as $n => $contact) {
-                    $name = $contact->is_company ? $contact->company_name : $contact->first_name . ' ' . $contact->last_name;
+                    if ($contact->is_company) {
+                        $name = $contact->company_name ?: $contact->first_name . ' ' . $contact->last_name;
+                    } else {
+                        $name = $contact->first_name . ' ' . $contact->last_name;
+                    }
                     if ($contact->clientPhones) {
                         foreach ($contact->clientPhones as $phone) {
                             $contactData = [];
