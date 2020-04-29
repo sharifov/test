@@ -57,6 +57,8 @@ class ClientEmail extends \yii\db\ActiveRecord
 		self::EMAIL_INVALID => 'text-line-through'
 	];
 
+	public $emails;
+
     /**
      * {@inheritdoc}
      */
