@@ -106,7 +106,7 @@ class ContactsController extends FController
     {
         $model = new Client();
         $model->cl_type_id = Client::TYPE_CONTACT;
-        $post = Yii::$app->request->post($model->formName());
+        $post = Yii::$app->request->post();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
@@ -119,7 +119,6 @@ class ContactsController extends FController
                 Yii::error(VarDumper::dumpAsString($userContactList->errors),
                     'ContactsController:actionCreate:saveUserContactList');
             }
-
 
             /*
              $post = Yii::$app->request->post($model->formName());
@@ -155,12 +154,9 @@ class ContactsController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $post = Yii::$app->request->post($model->formName());
+        $post = Yii::$app->request->post();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
-
-             \yii\helpers\VarDumper::dump($post, 10, true); exit();  /* FOR DEBUG:: must by remove */
 
             if ($userContactList = UserContactList::getUserContact(Auth::id(), $model->id)) {
                 $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
