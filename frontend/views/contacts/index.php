@@ -2,6 +2,7 @@
 
 use common\models\Client;
 use common\models\Project;
+use common\models\UserContactList;
 use sales\access\ContactUpdateAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
@@ -71,6 +72,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     $out = '<span class="not-set">(not set)</span>';
                     if (isset($model->disabled)) {
                         $out = $model->disabled ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+                'filter' => [1 => 'Yes', 0 => 'No']
+            ],
+            [
+                'attribute' => 'ucl_favorite',
+                'value' => function(Client $model) {
+                    $out = '<span class="not-set">(not set)</span>';
+                    $contact = UserContactList::getUserContact(Auth::id(), $model->id);
+                    if ($contact) {
+                        $out = $contact->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                     }
                     return $out;
                 },

@@ -20,7 +20,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ucl_description')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'ucl_created_dt')->textInput() ?>
+    <?= $form->field($model, 'ucl_favorite')->dropDownList([0 => 'No', 1 => 'Yes']) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

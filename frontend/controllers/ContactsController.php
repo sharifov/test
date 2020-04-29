@@ -29,8 +29,6 @@ use yii\widgets\ActiveForm;
  */
 class ContactsController extends FController
 {
-    /* TODO:: add access to actions - ContactUpdateAccess */
-
     /**
 	 * @var ClientManageService
 	 */
@@ -107,20 +105,24 @@ class ContactsController extends FController
     public function actionCreate()
     {
         $model = new Client();
-        $post = Yii::$app->request->post($model->formName());
+        $model->cl_type_id = Client::TYPE_CONTACT;
+        $post = Yii::$app->request->post();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
             $userContactList = new UserContactList();
             $userContactList->ucl_client_id = $model->id;
             $userContactList->ucl_user_id = Auth::id();
+            $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
 
             if(!$userContactList->save()) {
                 Yii::error(VarDumper::dumpAsString($userContactList->errors),
                     'ContactsController:actionCreate:saveUserContactList');
             }
 
-            /*if(isset($post['projects'])) {
+            /*
+             $post = Yii::$app->request->post($model->formName());
+             if(isset($post['projects'])) {
                 foreach ($post['projects'] as $projectId) {
                     $clientProject = new ClientProject();
                     $clientProject->cp_client_id = $model->id;
@@ -152,9 +154,17 @@ class ContactsController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $post = Yii::$app->request->post($model->formName());
+        $post = Yii::$app->request->post();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            if ($userContactList = UserContactList::getUserContact(Auth::id(), $model->id)) {
+                $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
+                if(!$userContactList->save()) {
+                    Yii::error(VarDumper::dumpAsString($userContactList->errors),
+                        'ContactsController:actionUpdate:saveUserContactList');
+                }
+            }
 
             /*if(isset($post['projects'])) {
                 ClientProject::deleteAll(['cp_client_id' => $model->id]);

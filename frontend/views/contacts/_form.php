@@ -2,6 +2,7 @@
 
 use common\models\Client;
 use common\models\Project;
+use common\models\UserContactList;
 use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
 use yii\helpers\Html;
@@ -34,6 +35,25 @@ $projectList = EmployeeProjectAccess::getProjects(Auth::id());
         <?= $form->field($model, 'description')->textarea(['rows' => 4, 'style' => 'width: 320px', 'class' => 'form-control']) ?>
         <?= $form->field($model, 'is_public')->checkbox() ?>
         <?= $form->field($model, 'disabled')->checkbox() ?>
+
+        <?php
+/*            $favorite = false;
+            if (isset($model->id) && $contact = UserContactList::getUserContact(Auth::id(), $model->id)) {
+                $favorite = $contact->ucl_favorite;
+            }
+        */?><!--
+        --><?php /*echo Html::dropDownList('ucl_favorite', $favorite, [0 => 'No', 1 => 'Yes'],
+            ['id' => 'ucl_favorite', 'class' => 'form-control', 'style' => 'width: 320px']) */?>
+        <?php
+            $favorite = false;
+            if ($model->id !== null && $contact = UserContactList::getUserContact(Auth::id(), $model->id)) {
+                $favorite = $contact->ucl_favorite;
+            }
+        ?>
+
+        <?php echo Html::checkbox('ucl_favorite', 0,
+            ['id' => 'ucl_favorite', ]) ?> Favorite
+
         <!--<div style="width: 320px;">
             <?php
             /*  echo $form->field($model, 'projects')->widget(\kartik\select2\Select2::class, [
@@ -44,7 +64,8 @@ $projectList = EmployeeProjectAccess::getProjects(Auth::id());
                 ]);
             */?>
         </div>-->
-        <div class="form-group">
+
+        <div class="form-group" style="margin-top: 12px;">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
         <?php ActiveForm::end(); ?>
