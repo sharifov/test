@@ -2,6 +2,7 @@
 namespace sales\helpers\call;
 
 
+use yii\bootstrap4\Dropdown;
 use yii\helpers\Html;
 
 class CallHelper
@@ -32,5 +33,46 @@ class CallHelper
 		]);
 
 		return $iconTag . ' ' . Html::tag($tag, $title, $options);
+	}
+
+	/**
+	 * @param array $phoneNumbers
+	 * @param string|null $dropdownBtnContent
+	 * @param bool $access
+	 * @param array $buttonOptions
+	 * @return string
+	 * @throws \Exception
+	 */
+	public static function callNumbersDropdownList(array $phoneNumbers, ?string $dropdownBtnContent, bool $access, $buttonOptions = []): string
+	{
+		$dropdownBtnContent = $dropdownBtnContent ?? '<i class="fa fa-phone"></i> Phone List';
+		$dropdownBtn = Html::tag('button', $dropdownBtnContent, [
+			'class' => 'btn dropdown-toggle ' . ($buttonOptions['class'] ?? 'btn-secondary'),
+			'type' => 'button',
+			'data-toggle' => 'dropdown',
+			'aria-haspopup' => 'true',
+			'aria-expanded' => 'false'
+		]);
+
+		$numbers = [];
+		foreach ($phoneNumbers as $phoneNumber) {
+			$numbers = [
+				'label' => self::callNumber(
+					$phoneNumber['phone'] ?? '',
+					$access,
+					$phoneNumber['title'] ?? '',
+					$phoneNumbers['dataParams'] ?? []
+				),
+				'encode' => false
+			];
+		}
+
+		$widget = Dropdown::widget([
+			'items' => [
+				$numbers
+			],
+		]);
+
+		return Html::tag('div', $dropdownBtn . $widget, ['class' => 'dropdown']);
 	}
 }
