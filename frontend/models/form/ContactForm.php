@@ -7,6 +7,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 
 /**
+ * @property int $id
  * @property string $first_name
  * @property string $middle_name
  * @property string $last_name
@@ -34,6 +35,7 @@ class ContactForm extends CompositeForm
 
     private $userId;
 
+    public $id;
     public $first_name;
     public $middle_name;
     public $last_name;
@@ -45,6 +47,9 @@ class ContactForm extends CompositeForm
     public $parent_id;
     public $rating;
     public $cl_type_id;
+    public $created;
+    public $updated;
+    public $uuid;
 
     /**
      * ContactForm constructor.
@@ -74,12 +79,12 @@ class ContactForm extends CompositeForm
     public function rules(): array
     {
         return [
-            [['created', 'updated', 'ucl_favorite', 'emails', 'phones',], 'safe'],
+            [['created', 'updated', 'ucl_favorite', 'emails', 'phones', 'created', 'updated', 'uuid',], 'safe'],
             [['first_name', 'middle_name', 'last_name'], 'string', 'max' => 100],
             [['company_name'], 'string', 'max' => 150],
             [['description'], 'string'],
             [['is_company', 'is_public', 'disabled'], 'boolean'],
-            [['parent_id', 'rating', 'cl_type_id'], 'integer'],
+            [['parent_id', 'rating', 'cl_type_id', 'id'], 'integer'],
         ];
     }
 
