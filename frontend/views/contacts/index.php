@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No']
             ],
-            [
+            /*[
                 'attribute' => 'ucl_favorite',
                 'value' => function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
@@ -92,7 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No']
-            ],
+            ],*/
             [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
