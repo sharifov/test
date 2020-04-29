@@ -160,7 +160,7 @@ class WebsocketServerController extends Controller
                 //VarDumper::dump($request->get);
 
                 $ua = !empty($request->header['user-agent']) ? substr($request->header['user-agent'], 0, 255) : null;
-                $ip = empty($request->get['ip']) ? null : (int) $request->get['ip']; //!empty($request->server['remote_addr']) ? substr($request->server['remote_addr'], 0, 40) : null;
+                $ip = empty($request->get['ip']) ? null : substr($request->get['ip'], 0, 40); //!empty($request->server['remote_addr']) ? substr($request->server['remote_addr'], 0, 40) : null;
                 $subList = empty($request->get['sub_list']) || !is_array($request->get['sub_list']) ? [] : $request->get['sub_list'];
 
                 $uid = uniqid('', false);
