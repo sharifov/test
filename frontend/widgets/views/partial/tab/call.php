@@ -203,7 +203,7 @@ $js = <<<JS
     })
     
     function loadContact(contact) {
-        let content = '<li class="calls-history__item contact-info-card" data-phone="' + contact['phone'] + '">' +
+        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '">' +
                     '<div class="collapsible-toggler">' +
                         '<div class="contact-info-card__status">' +
                             '<i class="far fa-user"></i>' +
@@ -231,7 +231,7 @@ $js = <<<JS
         return content;
     }
     
-     $(document).on('click', "li.contact-info-card", function () {
+      $(document).on('click', "li.call-contact-card", function () {
          let phone = $(this).data('phone');
          $("#call-pane__dial-number").val(phone);
          $('.suggested-contacts').removeClass('is_active');

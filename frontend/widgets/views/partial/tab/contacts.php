@@ -193,6 +193,7 @@
        $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
        $('#tab-phone').addClass('is_active');
        $("#call-pane__dial-number").val(phone);
+       $('.suggested-contacts').removeClass('is_active');
      });
     
     function encodeContact(contact) {
