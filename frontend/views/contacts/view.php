@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Client;
+use common\models\UserContactList;
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -41,6 +43,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'is_company:booleanByLabel',
             'is_public:booleanByLabel',
             'disabled:booleanByLabel',
+            [
+                'attribute' => 'ucl_favorite',
+                'value' => function(Client $model) {
+                    $out = '<span class="not-set">(not set)</span>';
+                    $contact = UserContactList::getUserContact(Auth::id(), $model->id);
+                    if ($contact) {
+                        $out = $contact->ucl_favorite ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-danger">No</span>';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+            ],
         ],
     ]) ?>
     </div>

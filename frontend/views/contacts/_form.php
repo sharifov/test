@@ -2,6 +2,7 @@
 
 use common\models\Client;
 use common\models\Project;
+use common\models\UserContactList;
 use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
 use yii\helpers\Html;
@@ -34,17 +35,10 @@ $projectList = EmployeeProjectAccess::getProjects(Auth::id());
         <?= $form->field($model, 'description')->textarea(['rows' => 4, 'style' => 'width: 320px', 'class' => 'form-control']) ?>
         <?= $form->field($model, 'is_public')->checkbox() ?>
         <?= $form->field($model, 'disabled')->checkbox() ?>
-        <!--<div style="width: 320px;">
-            <?php
-            /*  echo $form->field($model, 'projects')->widget(\kartik\select2\Select2::class, [
-                    'data' => $projectList,
-                    'size' => \kartik\select2\Select2::SMALL,
-                    'options' => ['placeholder' => 'Select projects', 'multiple' => true,],
-                    'pluginOptions' => ['allowClear' => true, ],
-                ]);
-            */?>
-        </div>-->
-        <div class="form-group">
+
+        
+
+        <div class="form-group" style="margin-top: 12px;">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
         <?php ActiveForm::end(); ?>
