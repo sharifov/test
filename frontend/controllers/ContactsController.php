@@ -428,7 +428,7 @@ class ContactsController extends FController
                     $text = $contact->first_name . ' ' . $contact->last_name;
                     $group = strtoupper($text[0] ?? '');
                     $contactData['id'] = $contact->id;
-                    $contactData['name'] = $text;
+                    $contactData['name'] = $contact->is_company ? $contact->company_name : $text;
                     $contactData['description'] = $contact->description;
                     $contactData['avatar'] = $group;
                     $contactData['is_company'] = $contact->is_company;
