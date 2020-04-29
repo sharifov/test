@@ -2,12 +2,17 @@
 
 namespace frontend\controllers;
 
+use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\UserContactList;
+use frontend\models\form\ContactForm;
 use sales\access\ClientInfoAccess;
 use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
+use sales\forms\CompositeFormHelper;
+use sales\forms\lead\EmailCreateForm;
+use sales\forms\lead\LeadCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\services\client\ClientManageService;
@@ -97,51 +102,77 @@ class ContactsController extends FController
     }
 
     /**
-     * Creates a new Client model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     * @throws \yii\base\InvalidConfigException
+     * @return string|Response
      */
     public function actionCreate()
     {
-        $model = new Client();
-        $model->cl_type_id = Client::TYPE_CONTACT;
+        $client = new Client();
+        $client->cl_type_id = Client::TYPE_CONTACT;
+        $contactForm = new ContactForm();
         $post = Yii::$app->request->post();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'ContactForm',
+            ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm',]
+        );
+        $form = new ContactForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']));
 
-            $userContactList = new UserContactList();
-            $userContactList->ucl_client_id = $model->id;
-            $userContactList->ucl_user_id = Auth::id();
-            $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
+        if ($form->load($data['post']) && $form->validate()) {
 
-            if(!$userContactList->save()) {
-                Yii::error(VarDumper::dumpAsString($userContactList->errors),
-                    'ContactsController:actionCreate:saveUserContactList');
-            }
+            try {
 
-            /*
-             $post = Yii::$app->request->post($model->formName());
-             if(isset($post['projects'])) {
-                foreach ($post['projects'] as $projectId) {
-                    $clientProject = new ClientProject();
-                    $clientProject->cp_client_id = $model->id;
-                    $clientProject->cp_project_id = (int) $projectId;
-                    $clientProject->save();
-                    if(!$clientProject->save()) {
-                        Yii::error(VarDumper::dumpAsString($clientProject->errors),
-                            'ContactsController:actionCreate:saveClientProject');
+                if ($client->load(Yii::$app->request->post(), $contactForm->formName()) && $client->save()) {
+
+                    $userContactList = new UserContactList();
+                    $userContactList->ucl_client_id = $client->id;
+                    $userContactList->ucl_user_id = Auth::id();
+                    $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
+
+                    if(!$userContactList->save()) {
+                        Yii::error(VarDumper::dumpAsString($userContactList->errors),
+                            'ContactsController:actionCreate:saveUserContactList');
                     }
+
+                    $this->clientManageService->addEmails($client, $form->emails);
+                    $this->clientManageService->addPhones($client, $form->phones);
+
+                    Yii::$app->session->setFlash('success', 'Contact save');
+                    return $this->redirect(['view', 'id' => $client->id]);
                 }
-            }*/
 
-            return $this->redirect(['view', 'id' => $model->id]);
+                Yii::error(VarDumper::dumpAsString($client->errors),
+                'ContactsController:actionCreate:saveClient');
+
+                //throw new \DomainException('Client not saved');
+            } catch (\Throwable $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('error', $e->getMessage());
+                return $this->redirect(['/contacts/create']);
+            }
         }
-
         return $this->render('create', [
-            'model' => $model,
+            'contactForm' => $form,
+            'model' => $client,
         ]);
     }
+
+    /**
+     * @return array
+     */
+    public function actionValidateContact(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'ContactForm',
+            ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm',]
+        );
+        $form = new ContactForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']));
+        $form->load($data['post']);
+        return CompositeFormHelper::ajaxValidate($form, $data['keys']);
+    }
+
 
     /**
      * Updates an existing Client model.
@@ -186,6 +217,17 @@ class ContactsController extends FController
         return $this->render('update', [
             'model' => $model,
         ]);
+    }
+
+    public function validateEmails($attribute)
+    {
+        $items = $this->$attribute;
+
+        if (!is_array($items)) {
+            $items = [];
+        }
+
+
     }
 
     /**

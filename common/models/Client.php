@@ -100,7 +100,7 @@ class Client extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['created', 'updated', 'ucl_favorite'], 'safe'],
+            [['created', 'updated', 'ucl_favorite',], 'safe'],
             [['first_name', 'middle_name', 'last_name'], 'string', 'max' => 100],
             [['company_name'], 'string', 'max' => 150],
             [['description'], 'string'],
