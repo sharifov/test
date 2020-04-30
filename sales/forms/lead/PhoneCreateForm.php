@@ -15,7 +15,7 @@ use yii\base\Model;
  * @property string $help - only for View for multiInput Widget
  * @property boolean $required
  * @property string $message
- * @property string $comments *
+ * @property string $comments
  * @property string $cp_title
  * @property $type
  */

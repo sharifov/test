@@ -13,6 +13,7 @@ use yii\base\Model;
  * @property boolean $required
  * @property string $message
  * @property string $ce_title
+ * @property int $client_id
  * @property $type
  */
 class EmailCreateForm extends Model

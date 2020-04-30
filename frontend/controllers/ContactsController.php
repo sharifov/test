@@ -210,7 +210,7 @@ class ContactsController extends FController
                         }
                     }
 
-                    ClientEmail::deleteAll(['client_id' => $client->id]);
+                    /*ClientEmail::deleteAll(['client_id' => $client->id]);
                     ClientPhone::deleteAll(['client_id' => $client->id]);
 
                     if (isset($post[$form->formName()]['emails']['email'])) {
@@ -235,7 +235,7 @@ class ContactsController extends FController
 
                             $this->clientManageService->addPhone($client, $phoneCreateForm);
                         }
-                    }
+                    }*/
 
                     Yii::$app->session->setFlash('success', 'Contact save');
                     return $this->redirect(['view', 'id' => $client->id]);
