@@ -41,7 +41,7 @@ use yii\db\ActiveQuery;
  * @property array $phoneNumbersSms
  * @property array $emailList
  * @property Project[] $projects
- * @property UserContactList[] $userContactList
+ * @property UserContactList $contact
  * @method clientPhonesByType(array $array)
  */
 class Client extends ActiveRecord
@@ -195,9 +195,9 @@ class Client extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getUserContactList(): ActiveQuery
+    public function getContact(): ActiveQuery
     {
-         return $this->hasMany(UserContactList::class, ['ucl_client_id' => 'id']);
+         return $this->hasOne(UserContactList::class, ['ucl_client_id' => 'id']);
     }
 
     public function beforeSave($insert): bool

@@ -85,6 +85,13 @@ class ContactForm extends CompositeForm
             [['description'], 'string'],
             [['is_company', 'is_public', 'disabled'], 'boolean'],
             [['parent_id', 'rating', 'cl_type_id', 'id'], 'integer'],
+
+            [['company_name'], 'required', 'when' => static function (self $model) {
+                return (bool) $model->is_company;
+            }],
+            [['first_name'], 'required', 'when' => static function (self $model) {
+                return (bool)$model->is_company === false;
+            }],
         ];
     }
 

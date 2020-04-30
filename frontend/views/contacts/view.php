@@ -6,8 +6,8 @@ use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
-/* @var $this yii\web\View */
-/* @var $model common\models\Client */
+/* @var yii\web\View $this */
+/* @var common\models\Client $model */
 
 $this->title = 'Contact: ' . $model->id;
 $this->params['breadcrumbs'][] = ['label' => 'Contact', 'url' => ['index']];
@@ -43,18 +43,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'is_company:booleanByLabel',
             'is_public:booleanByLabel',
             'disabled:booleanByLabel',
-            /*[
+            [
                 'attribute' => 'ucl_favorite',
-                'value' => function(Client $model) {
+                'value' => static function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
-                    $contact = UserContactList::getUserContact(Auth::id(), $model->id);
-                    if ($contact) {
-                        $out = $contact->ucl_favorite ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-danger">No</span>';
+                    if ($model->contact) {
+                        $out = $model->contact->ucl_favorite ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-danger">No</span>';
                     }
                     return $out;
                 },
                 'format' => 'raw',
-            ],*/
+            ],
         ],
     ]) ?>
     </div>
