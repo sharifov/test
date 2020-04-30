@@ -873,7 +873,7 @@ class CallController extends FController
 			$userPhoneList = ArrayHelper::getColumn($userPhoneList, 'pl_phone_number');
 
 			$callSearch = new CallSearch();
-			$page = Yii::$app->request->post('page', 0)+1;
+			$page = Yii::$app->request->post('page', 0);
 
 			$params['CallSearch']['phoneList'] = $userPhoneList;
 			$callHistory = $callSearch->getCallHistory($params);
@@ -885,7 +885,7 @@ class CallController extends FController
 				'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
 					'callHistory' => CallHelper::formatCallHistoryByDate($rows),
 				]),
-				'page' => $page,
+				'page' => $page+1,
 				'rows' => empty($rows)
 			];
 

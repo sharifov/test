@@ -781,11 +781,13 @@ class CallSearch extends Call
 			return $dataProvider;
 		}
 
-		$query->select(['c_call_type_id', 'c_from', 'c_to', 'c_caller_name', 'c_created_dt', 'c_call_status', 'c_call_duration']);
+		$query->select(['c_call_type_id', 'c_from', 'c_to', 'c_caller_name', 'c_created_dt', 'c_status_id', 'c_call_duration']);
 		$query->from('call');
 		$query->where(['IN', 'c_from', $this->phoneList]);
 		$query->orWhere(['IN', 'c_to', $this->phoneList]);
 		$query->orderBy(['c_created_dt' => SORT_DESC]);
+
+//		print_r($query->createCommand()->rawSql);die;
 
 		return $dataProvider;
 	}
