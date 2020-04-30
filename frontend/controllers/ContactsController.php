@@ -109,6 +109,14 @@ class ContactsController extends FController
         $contactForm = new ContactForm();
         $post = Yii::$app->request->post();
 
+        if ($post) {
+            /*\Yii::info(
+                \yii\helpers\VarDumper::dumpAsString($post, 10, true),
+                'info\Debug:' . self::class . ':' . __FUNCTION__
+            );*/
+            /* TODO: to remove */
+        }
+
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'ContactForm',
@@ -138,9 +146,6 @@ class ContactsController extends FController
                     Yii::$app->session->setFlash('success', 'Contact save');
                     return $this->redirect(['view', 'id' => $client->id]);
                 }
-
-                Yii::error(VarDumper::dumpAsString($client->errors),
-                'ContactsController:actionCreate:saveClient');
 
                 if ($client->errors) {
                     Yii::error( VarDumper::dumpAsString($client->errors),
@@ -176,6 +181,14 @@ class ContactsController extends FController
 
         $post = Yii::$app->request->post();
 
+        if ($post) {
+            /*\Yii::info(
+                \yii\helpers\VarDumper::dumpAsString($post, 10, true),
+                'info\Debug:' . self::class . ':' . __FUNCTION__
+            );*/
+            /* TODO: to remove */
+        }
+
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'ContactForm',
@@ -197,7 +210,7 @@ class ContactsController extends FController
                         }
                     }
 
-                    ClientEmail::deleteAll(['client_id' => $client->id]);
+                    /*ClientEmail::deleteAll(['client_id' => $client->id]);
                     ClientPhone::deleteAll(['client_id' => $client->id]);
 
                     if (isset($post[$form->formName()]['emails']['email'])) {
@@ -222,7 +235,7 @@ class ContactsController extends FController
 
                             $this->clientManageService->addPhone($client, $phoneCreateForm);
                         }
-                    }
+                    }*/
 
                     Yii::$app->session->setFlash('success', 'Contact save');
                     return $this->redirect(['view', 'id' => $client->id]);
@@ -263,6 +276,15 @@ class ContactsController extends FController
      */
     public function actionValidateContact(): array
     {
+        $post = Yii::$app->request->post();
+        if ($post) {
+            /*\Yii::info(
+                \yii\helpers\VarDumper::dumpAsString($post, 10, true),
+                'info\Debug:' . self::class . ':' . __FUNCTION__
+            );*/
+            /* TODO: to remove */
+        }
+
         Yii::$app->response->format = Response::FORMAT_JSON;
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),

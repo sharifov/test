@@ -48,7 +48,7 @@ use borales\extensions\phoneInput\PhoneInput;
         </div>
     </div>
     <div class="col-md-4 col-sm-12">
-		<?php /* TODO::  */
+		<?php
 		$js = <<<JS
             document.validationField = {
                 isNumeric: function(event) {
