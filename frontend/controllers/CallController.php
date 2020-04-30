@@ -332,6 +332,7 @@ class CallController extends FController
 
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
+        //var_dump($dataProvider3->getModels()); die();
 
         return $this->render('user-map/user-map', [
             'dataProviderOnlineDep1' => $dataProviderOnlineDep1,

@@ -22,7 +22,7 @@ function channelConnector(chName)
         let messageObj = JSON.parse(message.data.message);        
         //console.log(messageObj)
         
-        console.log(messageObj.onlineDepSales)
+        //console.log(messageObj.onlineDepSales)
         $("#card-sales-header-count, #card-sales").text('');        
         $("#card-sales-header-count").append(messageObj.onlineDepSales.length);
             messageObj.onlineDepSales.forEach(function (obj, index) {
@@ -30,7 +30,7 @@ function channelConnector(chName)
                 $("#card-sales").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
-        console.log(messageObj.onlineDepExchange)
+        //console.log(messageObj.onlineDepExchange)
         $("#card-exchange-header-count, #card-exchange").text('');        
          $("#card-exchange-header-count").append(messageObj.onlineDepExchange.length);
             messageObj.onlineDepExchange.forEach(function (obj, index) {
@@ -38,7 +38,7 @@ function channelConnector(chName)
                 $("#card-exchange").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
-        console.log(messageObj.onlineDepSupport)
+        //console.log(messageObj.onlineDepSupport)
         $("#card-support-header-count, #card-support").text('');        
         $("#card-support-header-count").append(messageObj.onlineDepSupport.length);
             messageObj.onlineDepSupport.forEach(function (obj, index) {
@@ -46,14 +46,26 @@ function channelConnector(chName)
                 $("#card-support").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
-        console.log(messageObj.usersOnline)
+        //console.log(messageObj.usersOnline)
         $("#card-other").text('');        
             messageObj.usersOnline.forEach(function (obj, index) {
                 index++;
                 $("#card-other").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });               
         
-        //console.log(messageObj.realtimeCalls)
+        console.log(messageObj.realtimeCalls)
+        $("#card-live-calls").text('');
+            messageObj.realtimeCalls.forEach(function (parentObj, index) {
+                if(!parentObj.c_parent_id){
+                    $("#card-live-calls").append(renderRealtimeCalls(parentObj));
+                    messageObj.realtimeCalls.forEach(function (childObj, childIndex) {
+                        if (parentObj.c_id == childObj.c_parent_id){
+                            console.log(childObj.c_id)
+                            $('#parent-' + parentObj.c_id).append(renderChildCalls(childObj));
+                        }
+                    });
+                }                
+            }); 
     });
 }
 centrifuge.connect();
@@ -68,6 +80,34 @@ centrifuge.on('connect', function(context) {
         }
      });
 });
+
+function renderRealtimeCalls(parentObj)
+{
+    return '<div class="col-md-12" style="margin-bottom:2px">' +
+        '<table class="table table-condensed">' +
+            '<tbody id=parent-'+ parentObj.c_id +'>' +
+                '<tr class="warning">' +
+                    '<td>' + 
+                        '<u>'+
+                            '<a href="/call/view?id='+ parentObj.c_id +'" target="_blank">'+ parentObj.c_id +'</a>' +
+                        '</u>' +                  
+                    '</td>' +
+                '</tr>' +
+            '</tbody>' +
+        '</table>' +
+    '</div>';
+}
+
+function renderChildCalls(childObj)
+{
+    return '<tr class="warning">' +
+        '<td>' + 
+             '<u>'+
+                  '<a href="/call/view?id='+ childObj.c_id +'" target="_blank">'+ childObj.c_id +'</a>' +
+              '</u>' +                  
+        '</td>' +
+    '</tr>';
+}
 
 function renderUsersOnline(index, userID, username, userRoles, isCallStatusReady, isCallFree)
 {
@@ -145,8 +185,8 @@ $this->registerJs($js);
         <div class="col-md-5">
             <div class="card card-default">
                 <div class="card-header"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS (Updated: <i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>)</div>
-                <div class="card-body">
-                    Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS
+                <div id="card-live-calls" class="card-body">
+                   <!-- Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS -->
                 </div>
             </div>
         </div>

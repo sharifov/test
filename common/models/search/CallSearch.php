@@ -380,10 +380,10 @@ class CallSearch extends Call
     {
         $this->load($params);
 
-        $query = Call::find();
-        $query->select(['c_id', 'c_source_type_id', 'c_from', 'c_to', 'c_status_id', 'c_call_duration', 'c_lead_id', 'c_created_dt', 'c_updated_dt', 'name', 'username', 'dep_name', 'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids']);
-        $query->groupBy(['c_id']);
-        $query->orderBy(['c_id' => SORT_DESC]);
+        $query = Call::find()->alias('c');
+        $query->select(['c.c_id', 'c.c_source_type_id', 'c.c_from', 'c.c_to', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_duration', 'c.c_lead_id', 'c.c_created_dt', 'c.c_updated_dt', 'name', 'ce.username', 'dep_name', 'group_concat(cau.username SEPARATOR "-") as cua_user_names']);
+        $query->groupBy(['c.c_id']);
+        $query->orderBy(['c.c_id' => SORT_DESC]);
 
 
         //$query->limit(5);
@@ -407,12 +407,12 @@ class CallSearch extends Call
         }*/
 
         $query->andWhere(['or',
-            ['c_parent_id' => null],
-            ['c_status_id' => [Call::STATUS_DELAY, Call::STATUS_QUEUE]]
+            ['c.c_parent_id' => null],
+            ['c.c_status_id' => [Call::STATUS_DELAY, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS]]
         ]);
 
         if ($this->status_ids) {
-            $query->andWhere(['c_status_id' => $this->status_ids]);
+            $query->andWhere(['c.c_status_id' => $this->status_ids]);
         }
 
         if ($this->dep_ids) {
@@ -427,7 +427,7 @@ class CallSearch extends Call
         }
 
         //$query->joinWith(['cProject', 'cLead', 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
-        $query->joinWith(['cProject', 'cLead', 'cCreatedUser', 'cDep', 'callUserAccesses', /*'cuaUsers', 'cugUgs', 'calls'*/]);
+        $query->joinWith(['cProject', 'cLead', 'cCreatedUser as ce', 'cDep', /*'callUserAccesses as cua',*/ 'callUserAccesses.cuaUser as cau', /*`'cuaUsers as t',*/ 'cugUgs', 'calls']);
 
         $command = $query->createCommand();
 
