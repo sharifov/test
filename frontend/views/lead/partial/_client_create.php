@@ -34,7 +34,6 @@ use borales\extensions\phoneInput\PhoneInput;
             <?= $form->field($leadForm, 'emails')->widget(MultipleInput::class, [
                 'max' => 10,
                 'enableError' => true,
-                'allowEmptyList' => true,
                 'columns' => [
                     [
                         'name' => 'email',
@@ -90,7 +89,6 @@ JS;
             <?= $form->field($leadForm, 'phones')->widget(MultipleInput::class, [
                 'max' => 10,
                 'enableError' => true,
-                'allowEmptyList' => true,
                 'columns' => [
                     [
                         'name' => 'phone',
