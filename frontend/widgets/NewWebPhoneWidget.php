@@ -25,7 +25,7 @@ class NewWebPhoneWidget extends Widget
 
 		$useNewWebPhoneWidget = Yii::$app->params['settings']['use_new_web_phone_widget'] ?? false;
 
-		$phoneUserProject = UserProjectParams::find()->select(['upp_project_id', 'pl_phone_number'])->byUserId(Auth::id())->withExistedPhoneInPhoneList()->asArray()->one();
+		$phoneUserProject = UserProjectParams::find()->select(['upp_project_id', 'pl_phone_number'])->byUserId(Auth::id())->withExistingPhoneInPhoneList()->asArray()->one();
 
 		$phoneFrom = $phoneUserProject['pl_phone_number'] ?? null;
 		$userProjectId = $phoneUserProject['upp_project_id'] ?? null;

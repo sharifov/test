@@ -2,6 +2,10 @@
 
 use common\models\Client;
 use common\models\Project;
+use common\models\search\ContactsSearch;
+use common\models\UserProfile;
+use sales\access\CallAccess;
+use common\models\UserContactList;
 use sales\access\ContactUpdateAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
@@ -12,7 +16,7 @@ use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
 
 /* @var yii\web\View $this */
-/* @var common\models\search\ClientSearch $searchModel */
+/* @var common\models\search\ContactsSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Contacts';
@@ -37,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'company_name',
             [
                 'attribute' => 'is_company',
-                'value' => function(Client $model) {
+                'value' => static function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if (isset($model->is_company)) {
                         $out = $model->is_company ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
@@ -67,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'disabled',
-                'value' => function(Client $model) {
+                'value' => static function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if (isset($model->disabled)) {
                         $out = $model->disabled ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
@@ -78,15 +82,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => [1 => 'Yes', 0 => 'No']
             ],
             [
+                'attribute' => 'ucl_favorite',
+                'value' => static function(Client $model) {
+                    $out = '<span class="not-set">(not set)</span>';
+                    if ($model->contact) {
+                        $out = $model->contact->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+                'filter' => [1 => 'Yes', 0 => 'No']
+            ],
+            [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
-                'value' => function(Client $model) {
+                'value' => static function(Client $model) {
                     $phones = $model->clientPhones;
                     $data = [];
                     if($phones) {
                         foreach ($phones as $k => $phone) {
                             $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
-                            $data[] = $sms . CallHelper::callNumber($phone->phone, '', [], 'code');
+                            $data[] = $sms . CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(), UserProfile::CALL_TYPE_WEB), '', [], 'code');
                         }
                     }
                     return implode('<br>', $data);
@@ -144,10 +160,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => 'yii\grid\ActionColumn',
-                'template' => '{update}{view}',
+                'template' => '{view}<br />{update}<br />{delete}',
                 'visibleButtons'=>
                 [
                      'update' => static function (Client $model) {
+                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
+                     },
+                     'delete' => static function (Client $model) {
                         return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
                      },
                     'view' => true,

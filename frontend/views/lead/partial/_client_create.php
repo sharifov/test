@@ -34,6 +34,7 @@ use borales\extensions\phoneInput\PhoneInput;
             <?= $form->field($leadForm, 'emails')->widget(MultipleInput::class, [
                 'max' => 10,
                 'enableError' => true,
+                'allowEmptyList' => true,
                 'columns' => [
                     [
                         'name' => 'email',
@@ -48,7 +49,7 @@ use borales\extensions\phoneInput\PhoneInput;
         </div>
     </div>
     <div class="col-md-4 col-sm-12">
-		<?php
+		<?php /* TODO::  */
 		$js = <<<JS
             document.validationField = {
                 isNumeric: function(event) {
@@ -89,6 +90,7 @@ JS;
             <?= $form->field($leadForm, 'phones')->widget(MultipleInput::class, [
                 'max' => 10,
                 'enableError' => true,
+                'allowEmptyList' => true,
                 'columns' => [
                     [
                         'name' => 'phone',

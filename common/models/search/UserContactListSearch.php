@@ -18,6 +18,7 @@ class UserContactListSearch extends UserContactList
     {
         return [
             [['ucl_user_id', 'ucl_client_id'], 'integer'],
+            [['ucl_favorite'], 'boolean'],
             [['ucl_title', 'ucl_description', 'ucl_created_dt'], 'safe'],
         ];
     }
@@ -61,6 +62,7 @@ class UserContactListSearch extends UserContactList
             'ucl_user_id' => $this->ucl_user_id,
             'ucl_client_id' => $this->ucl_client_id,
             'ucl_created_dt' => $this->ucl_created_dt,
+            'ucl_favorite' => $this->ucl_favorite,
         ]);
 
         $query->andFilterWhere(['like', 'ucl_title', $this->ucl_title])

@@ -1,3 +1,8 @@
+<?php
+
+/** @var View $this */
+
+?>
 <div class="phone-widget__tab is_active" id="tab-phone">
     <div class="call-pane">
         <div class="call-pane__number">
@@ -34,79 +39,32 @@
 
                 </div>
             </div>
-<!--            <ul class="phone-widget__list-item calls-history suggested-contacts">-->
-<!--                <li class="calls-history__item contact-info-card ">-->
-<!--                    <div class="collapsible-toggler">-->
-<!--                        <div class="contact-info-card__status">-->
-<!--                            <i class="far fa-user"></i>-->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                        <div class="contact-info-card__details">-->
-<!--                            <div class="contact-info-card__line history-details">-->
-<!--                                <strong class="contact-info-card__name">Geordan Reyney</strong>-->
-<!--                            </div>-->
-<!---->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!--                <li class="calls-history__item contact-info-card ">-->
-<!--                    <div class="collapsible-toggler">-->
-<!--                        <div class="contact-info-card__status">-->
-<!--                            <i class="far fa-user"></i>-->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                        <div class="contact-info-card__details">-->
-<!--                            <div class="contact-info-card__line history-details">-->
-<!--                                <strong class="contact-info-card__name">Geordan Reyney</strong>-->
-<!--                            </div>-->
-<!---->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!--                <li class="calls-history__item contact-info-card ">-->
-<!--                    <div class="collapsible-toggler">-->
-<!--                        <div class="contact-info-card__status">-->
-<!--                            <i class="far fa-user"></i>-->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                        <div class="contact-info-card__details">-->
-<!--                            <div class="contact-info-card__line history-details">-->
-<!--                                <strong class="contact-info-card__name">Geordan Reyney</strong>-->
-<!--                            </div>-->
-<!---->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!--                <li class="calls-history__item contact-info-card">-->
-<!--                    <div class="collapsible-toggler">-->
-<!--                        <div class="contact-info-card__status">-->
-<!--                            <i class="far fa-user"></i>-->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                        <div class="contact-info-card__details">-->
-<!--                            <div class="contact-info-card__line history-details">-->
-<!--                                <strong class="contact-info-card__name">Geordan Reyney</strong>-->
-<!--                            </div>-->
-<!---->
-<!---->
-<!---->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </li>-->
-<!---->
-<!--            </ul>-->
-            <input type="text" class="call-pane__dial-number" id="call-pane__dial-number" value="" placeholder="Enter Number">
-            <a href="#" class="call-pane__dial-clear-all">
+            <ul class="phone-widget__list-item calls-history suggested-contacts"></ul>
+
+            <?php
+
+            use yii\bootstrap4\Html;
+            use yii\web\View;
+            use yii\widgets\ActiveForm;
+
+            $form = ActiveForm::begin([
+                'id' => 'contact-list-calls-ajax',
+                'action' => ['/contacts/list-calls-ajax'],
+                'method' => 'get',
+            ]);
+
+            echo Html::input('text', 'q', null, [
+                'id' => 'call-pane__dial-number',
+                'class' => 'call-pane__dial-number',
+                'placeholder' => 'Name, company, phone...',
+                'autocomplete' => 'off',
+            ]);
+
+            ActiveForm::end()
+
+            ?>
+
+            <a href="#" class="call-pane__dial-clear-all is-shown">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
@@ -170,3 +128,116 @@
 <!--        </div>-->
     </div>
 </div>
+
+<?php
+$js = <<<JS
+
+(function() {
+    
+    function delay(callback, ms) {
+        var timer = 0;
+        return function() {
+            var context = this, args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback.apply(context, args);
+            }, ms || 0);
+        };
+    }
+    
+    $("#call-pane__dial-number").on('keyup', delay(function() {
+        $('.suggested-contacts').removeClass('is_active');
+        let contactList = $("#contact-list-calls-ajax"); 
+        let q = contactList.find("input[name=q]").val();
+        if (q.length < 3) {
+            return false;
+        }
+        contactList.submit();
+    }, 300));
+     
+    $('#contact-list-calls-ajax').on('beforeSubmit', function (e) {
+        e.preventDefault();
+        let yiiform = $(this);
+        let q = yiiform.find("input[name=q]").val();
+        if (q.length < 3) {
+            //  new PNotify({
+            //     title: "Search contacts",
+            //     type: "warning",
+            //     text: 'Minimum 2 symbols',
+            //     hide: true
+            // });
+            return false;
+        }
+        $.ajax({
+                type: yiiform.attr('method'),
+                url: yiiform.attr('action'),
+                data: yiiform.serializeArray(),
+                dataType: 'json',
+            }
+        )
+        .done(function(data) {
+            let content = '';
+             if (data.results.length < 1) {
+                 content += loadNotFound();
+            } else {
+                $.each(data.results, function(i, item) {
+                    content += loadContact(item);     
+                });
+                $('.suggested-contacts').html(content);
+                $('.suggested-contacts').addClass('is_active');
+                $('.call-pane__dial-clear-all').addClass('is-shown')
+            }
+            $('.suggested-contacts').html(content);
+            $('.suggested-contacts').addClass('is_active');
+            $('.call-pane__dial-clear-all').addClass('is-shown')
+        })
+        .fail(function () {
+            new PNotify({
+                title: "Search contacts",
+                type: "error",
+                text: 'Server Error. Try again later',
+                hide: true
+            });
+        })
+        return false;
+    })
+    
+    function loadContact(contact) {
+        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '">' +
+                    '<div class="collapsible-toggler">' +
+                        '<div class="contact-info-card__status">' +
+                            '<i class="far fa-user"></i>' +
+                        '</div>' +
+                        '<div class="contact-info-card__details">' +
+                            '<div class="contact-info-card__line history-details">' +
+                                '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</li>';
+        return content;
+    }
+    
+    function loadNotFound() {
+        let content = '<li class="calls-history__item contact-info-card">' +
+                    '<div class="collapsible-toggler">' +
+                        '<div class="contact-info-card__details">' +
+                            '<div class="contact-info-card__line history-details">' +
+                                '<strong class="contact-info-card__name">No results found</strong>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</li>';
+        return content;
+    }
+    
+      $(document).on('click', "li.call-contact-card", function () {
+         let phone = $(this).data('phone');
+         $("#call-pane__dial-number").val(phone);
+         $('.suggested-contacts').removeClass('is_active');
+     });
+    
+})();
+
+JS;
+$this->registerJs($js);

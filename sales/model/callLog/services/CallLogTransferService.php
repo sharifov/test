@@ -70,7 +70,7 @@ class CallLogTransferService
     {
         $this->call = $call->getAttributes();
 
-//        Yii::info($this->call, 'info\DebugCallLog');
+        Yii::info($this->call, 'info\DebugCallLog');
 
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
             $this->outParentCall();
@@ -191,7 +191,7 @@ class CallLogTransferService
         $this->queue['clq_access_count'] =
             (int)CallUserAccess::find()
                 ->andWhere(['cua_call_id' => $this->call['c_parent_id']])
-                ->andWhere(['>=', 'cua_created_dt', $this->call['c_queue_start_dt']])
+                ->andWhere(['>=', 'cua_updated_dt', $this->call['c_queue_start_dt']])
                 ->andWhere(['<=', 'cua_created_dt', $this->call['c_created_dt']])
                 ->count();
 

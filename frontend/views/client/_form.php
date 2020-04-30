@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Client;
+use common\models\UserContactList;
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -29,8 +31,7 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'rating')->textInput(['type' => 'number', 'step' => 1]) ?>
     <?= $form->field($model, 'parent_id')->textInput() ?>
 
-    <?php /* echo $form->field($model, 'created')->textInput() */?>
-    <?php /* echo $form->field($model, 'updated')->textInput() */?>
+    <?php echo $form->field($model, 'cl_type_id')->dropDownList($model::TYPE_LIST) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

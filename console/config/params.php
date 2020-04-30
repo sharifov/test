@@ -11,6 +11,7 @@ return [
             // https://www.swoole.co.uk/docs/modules/swoole-server/configuration
             'pid_file' => __DIR__ . '/../runtime/swoole.pid',
             'worker_num' => 1,
+            'websocket_compression' => true,
             //'daemonize' => 0,
             //'task_worker_num' => 2,
             'group' => 'www-data'

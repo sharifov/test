@@ -2,12 +2,14 @@
 
 namespace frontend\controllers;
 
+use common\models\ClientEmail;
 use common\models\ClientPhone;
-use common\models\Employee;
 use common\models\UserContactList;
-use sales\access\ClientInfoAccess;
+use frontend\models\form\ContactForm;
 use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
+use sales\forms\CompositeFormHelper;
+use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\services\client\ClientManageService;
@@ -15,6 +17,7 @@ use Yii;
 use common\models\Client;
 use common\models\search\ContactsSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
@@ -29,8 +32,6 @@ use yii\widgets\ActiveForm;
  */
 class ContactsController extends FController
 {
-    /* TODO:: add access to actions - ContactUpdateAccess */
-
     /**
 	 * @var ClientManageService
 	 */
@@ -99,45 +100,61 @@ class ContactsController extends FController
     }
 
     /**
-     * Creates a new Client model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     * @throws \yii\base\InvalidConfigException
+     * @return string|Response
      */
     public function actionCreate()
     {
-        $model = new Client();
-        $post = Yii::$app->request->post($model->formName());
+        $client = new Client();
+        $client->cl_type_id = Client::TYPE_CONTACT;
+        $contactForm = new ContactForm();
+        $post = Yii::$app->request->post();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'ContactForm',
+            ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm',]
+        );
+        $form = new ContactForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']));
 
-            $userContactList = new UserContactList();
-            $userContactList->ucl_client_id = $model->id;
-            $userContactList->ucl_user_id = Auth::id();
+        if ($form->load($data['post']) && $form->validate()) {
 
-            if(!$userContactList->save()) {
-                Yii::error(VarDumper::dumpAsString($userContactList->errors),
-                    'ContactsController:actionCreate:saveUserContactList');
-            }
+            try {
 
-            /*if(isset($post['projects'])) {
-                foreach ($post['projects'] as $projectId) {
-                    $clientProject = new ClientProject();
-                    $clientProject->cp_client_id = $model->id;
-                    $clientProject->cp_project_id = (int) $projectId;
-                    $clientProject->save();
-                    if(!$clientProject->save()) {
-                        Yii::error(VarDumper::dumpAsString($clientProject->errors),
-                            'ContactsController:actionCreate:saveClientProject');
+                if ($client->load(Yii::$app->request->post(), $contactForm->formName()) && $client->save()) {
+
+                    $userContactList = new UserContactList();
+                    $userContactList->ucl_client_id = $client->id;
+                    $userContactList->ucl_user_id = Auth::id();
+                    $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
+
+                    if(!$userContactList->save()) {
+                        Yii::error(VarDumper::dumpAsString($userContactList->errors),
+                            'ContactsController:actionCreate:saveUserContactList');
                     }
+
+                    $this->clientManageService->addEmails($client, $form->emails);
+                    $this->clientManageService->addPhones($client, $form->phones);
+
+                    Yii::$app->session->setFlash('success', 'Contact save');
+                    return $this->redirect(['view', 'id' => $client->id]);
                 }
-            }*/
 
-            return $this->redirect(['view', 'id' => $model->id]);
+                Yii::error(VarDumper::dumpAsString($client->errors),
+                'ContactsController:actionCreate:saveClient');
+
+                if ($client->errors) {
+                    Yii::error( VarDumper::dumpAsString($client->errors),
+                        'ContactsController:actionCreate:updateClient');
+                }
+            } catch (\Throwable $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('error', $e->getMessage());
+                return $this->redirect(['/contacts/create']);
+            }
         }
-
         return $this->render('create', [
-            'model' => $model,
+            'contactForm' => $form,
+            'model' => $client,
         ]);
     }
 
@@ -151,31 +168,110 @@ class ContactsController extends FController
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
-        $post = Yii::$app->request->post($model->formName());
+        $client = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if (!(new ContactUpdateAccess())->isUserCanUpdateContact($client, Auth::user())) {
+			throw new HttpException(403, 'Access Denied');
+		}
 
-            /*if(isset($post['projects'])) {
-                ClientProject::deleteAll(['cp_client_id' => $model->id]);
-                foreach ($post['projects'] as $projectId) {
-                    $clientProject = new ClientProject();
-                    $clientProject->cp_client_id = $model->id;
-                    $clientProject->cp_project_id = (int) $projectId;
-                    $clientProject->save();
-                    if(!$clientProject->save()) {
-                        Yii::error(VarDumper::dumpAsString($clientProject->errors),
-                            'ContactsController:actionUpdate:saveClientProject');
+        $post = Yii::$app->request->post();
+
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'ContactForm',
+            ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm',]
+        );
+        $form = new ContactForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']));
+
+        if ($form->load($data['post']) && $form->validate()) {
+
+            try {
+
+                if ($client->load(Yii::$app->request->post(), (new ContactForm())->formName()) && $client->save()) {
+
+                    if ($userContactList = UserContactList::getUserContact(Auth::id(), $client->id)) {
+                        $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
+                        if(!$userContactList->save()) {
+                            Yii::error(VarDumper::dumpAsString($userContactList->errors),
+                                'ContactsController:actionUpdate:saveUserContactList');
+                        }
                     }
-                }
-            }*/
 
-            return $this->redirect(['view', 'id' => $model->id]);
+                    ClientEmail::deleteAll(['client_id' => $client->id]);
+                    ClientPhone::deleteAll(['client_id' => $client->id]);
+
+                    if (isset($post[$form->formName()]['emails']['email'])) {
+                        foreach ($post[$form->formName()]['emails']['email'] as $key => $value) {
+                            $emailCreateForm = new EmailCreateForm();
+                            $emailCreateForm->scenario = 'update';
+			                $emailCreateForm->required = true;
+			                $emailCreateForm->email = $value;
+			                $emailCreateForm->client_id = $client->id;
+
+                            $this->clientManageService->addEmail($client, $emailCreateForm);
+                        }
+                    }
+
+                    if (isset($post[$form->formName()]['phones']['phone'])) {
+                        foreach ($post[$form->formName()]['phones']['phone'] as $key => $value) {
+                            $phoneCreateForm = new PhoneCreateForm();
+                            $phoneCreateForm->scenario = 'update';
+			                $phoneCreateForm->required = true;
+			                $phoneCreateForm->phone = $value;
+			                $phoneCreateForm->client_id = $client->id;
+
+                            $this->clientManageService->addPhone($client, $phoneCreateForm);
+                        }
+                    }
+
+                    Yii::$app->session->setFlash('success', 'Contact save');
+                    return $this->redirect(['view', 'id' => $client->id]);
+                }
+
+                if ($client->errors) {
+                    Yii::error( VarDumper::dumpAsString($client->errors),
+                        'ContactsController:actionCreate:updateClient');
+                }
+            } catch (\Throwable $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+        }
+
+        foreach ($client->getAttributes() AS $name => $value) {
+            $form->{$name} = $value;
+        }
+
+        $form->emails = $client->clientEmails;
+        $form->phones = $client->clientPhones;
+
+        $favorite = false;
+        if ($contact = UserContactList::getUserContact(Auth::id(), $client->id)) {
+            $favorite = $contact->ucl_favorite;
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model' => $client,
+            'contactForm' => $form,
+            'favorite' => $favorite,
         ]);
+    }
+
+
+    /**
+     * @return array
+     */
+    public function actionValidateContact(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'ContactForm',
+            ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm',]
+        );
+        $form = new ContactForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']));
+        $form->load($data['post']);
+        return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 
     /**
@@ -397,4 +493,95 @@ class ContactsController extends FController
 
 		throw new BadRequestHttpException();
 	}
+
+    public function actionListAjax(?string $q = null): Response
+    {
+        $out = ['results' => []];
+
+        if ($q !== null) {
+
+            if (strlen($q) < 2) {
+                return $this->asJson($out);
+            }
+
+            /** @var ContactsSearch[] $contacts */
+            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q)->getModels();
+//sleep(4);
+            $data = [];
+            if ($contacts) {
+                foreach ($contacts as $n => $contact) {
+                    $contactData = [];
+                    if ($contact->is_company) {
+                        $name = $contact->company_name ?: $contact->first_name . ' ' . $contact->last_name;
+                    } else {
+                        $name = $contact->first_name . ' ' . $contact->last_name;
+                    }
+                    $group = strtoupper($name[0] ?? 'A');
+                    $contactData['id'] = $contact->id;
+                    $contactData['name'] = $name;
+                    $contactData['description'] = $contact->description;
+                    $contactData['avatar'] = $group;
+                    $contactData['is_company'] = $contact->is_company;
+                    if ($contact->clientPhones) {
+                        foreach ($contact->clientPhones as $phone) {
+                            $contactData['phones'][] = $phone->phone;
+                        }
+                    }
+                    if ($contact->clientEmails) {
+                        foreach ($contact->clientEmails as $email) {
+                            $contactData['emails'][] = $email->email;
+                        }
+                    }
+                    //$data[$n]['selection'] = $item['text'];
+                    $data[$group][$n] = $contactData;
+                }
+            }
+
+            $out['results'] = $data;
+        }
+
+        return $this->asJson($out);
+    }
+
+    public function actionListCallsAjax(?string $q = null): Response
+    {
+        $out = ['results' => []];
+
+        if ($q !== null) {
+
+            if (strlen($q) < 3) {
+                return $this->asJson($out);
+            }
+
+            /** @var ContactsSearch[] $contacts */
+            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q, $limit = 3)->getModels();
+//sleep(4);
+            $data = [];
+            if ($contacts) {
+                foreach ($contacts as $n => $contact) {
+                    if ($contact->is_company) {
+                        $name = $contact->company_name ?: $contact->first_name . ' ' . $contact->last_name;
+                    } else {
+                        $name = $contact->first_name . ' ' . $contact->last_name;
+                    }
+                    if ($contact->clientPhones) {
+                        foreach ($contact->clientPhones as $phone) {
+                            $contactData = [];
+                            $contactData['id'] = $contact->id;
+                            $contactData['name'] = StringHelper::truncate($name, 18, '...') . ' ' . $phone->phone;
+                            $contactData['phone'] = $phone->phone;
+                            $data[] = $contactData;
+                            if (count($data) === 3) {
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $out['results'] = $data;
+        }
+
+        return $this->asJson($out);
+    }
 }

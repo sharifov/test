@@ -1,52 +1,129 @@
 <?php
 
+use common\models\UserContactList;
+use frontend\models\form\ContactForm;
+use sales\auth\Auth;
+use unclead\multipleinput\MultipleInput;
+use unclead\multipleinput\MultipleInputColumn;
 use yii\helpers\Html;
+use \yii\widgets\ActiveForm;
+use borales\extensions\phoneInput\PhoneInput;
 
 /* @var yii\web\View $this */
 /* @var common\models\Client $model */
+/* @var ContactForm $contactForm */
+/* @var bool $favorite */
 
 $this->title = 'Update Contact: ' . $model->id;
 $this->params['breadcrumbs'][] = ['label' => 'Contacts', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
-<div class="contact-update">
-
+<div class="contact-create">
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="row">
+    <div class="col-md-12 col-sm-12">
 
-        <div class="col-md-3">
-            <?= $this->render('_form', [
-                'model' => $model,
-            ]) ?>
+        <?php $form = ActiveForm::begin([
+            'id' => $contactForm->formName() . '-form',
+            'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'validationUrl' =>['/contacts/validate-contact'],
+            'action' => ['/contacts/update?id=' . $model->id]
+        ]) ?>
+
+        <div class="x_panel">
+            <div class="col-md-3">
+
+                    <?= $form->field($contactForm, 'is_company')->checkbox(['class' => 'is_company']) ?>
+                <div class="user_elements" <?php echo $contactForm->is_company === 1 ? 'style="display: none;"' : '' ?> >
+                    <?= $form->field($contactForm, 'first_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
+                    <?= $form->field($contactForm, 'middle_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
+                    <?= $form->field($contactForm, 'last_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
+                </div>
+
+                <div class="company_elements" <?php echo $contactForm->is_company !== 1 ? 'style="display: none;"' : '' ?> >
+                    <?= $form->field($contactForm, 'company_name')->textInput(['maxlength' => true, 'style' => 'width: 320px']) ?>
+                </div>
+
+                <?= $form->field($contactForm, 'description')->textarea(['rows' => 4, 'style' => 'width: 320px', 'class' => 'form-control']) ?>
+                <?= $form->field($contactForm, 'is_public')->checkbox() ?>
+                <?= $form->field($contactForm, 'disabled')->checkbox() ?>
+
+                <?php echo Html::checkbox('ucl_favorite', $favorite,
+                    ['id' => 'ucl_favorite', ]) ?> Favorite
+
+            </div>
+
+           <div class="col-md-3" id="create-lead-phone">
+                <?= $form->field($contactForm, 'emails')->widget(MultipleInput::class, [
+                    'max' => 10,
+                    'enableError' => true,
+                    'columns' => [
+                        [
+                            'name' => 'email',
+                            'title' => 'Email',
+                        ],
+                    ],
+                ])->label(false) ?>
+           </div>
+
+            <div class="col-md-3" id="create-lead-phone">
+                <?= $form->field($contactForm, 'phones')->widget(MultipleInput::class, [
+                    'max' => 10,
+                    'enableError' => true,
+                    'columns' => [
+                        [
+                            'name' => 'phone',
+                            'title' => 'Phone',
+                            'type' => PhoneInput::class,
+                            'options' => [
+                                'jsOptions' => [
+                                    'nationalMode' => false,
+                                    'preferredCountries' => ['us'],
+                                    'customContainer' => 'intl-tel-input'
+                                ],
+                                'options' => [
+                                    'onkeydown' => '
+                                            return !validationField.validate(event);
+                                        ',
+                                    'onkeyup' => '
+                                            var value = $(this).val();
+                                            $(this).val(value.replace(/[^0-9\+]+/g, ""));
+                                        '
+                                ]
+                            ]
+                        ],
+                    ]
+                ])->label(false) ?>
+            </div>
+
         </div>
 
-        <div class="col-md-2">
-            <?php echo $this->render('partial/_contact_manage_phone', [
-                    'clientPhones' => $model->clientPhones,
-                    'client' => $model,
-                ]);
-            ?>
+        <div class="form-group" style="margin-top: 12px;">
+            <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
+
+        <?php ActiveForm::end(); ?>
+
     </div>
 </div>
 
 <?php
-$jsCode = <<<JS
-    $(document).on('click', '.showModalButton', function() {
-        let id = $(this).data('modal_id');
-        let url = $(this).data('content-url');
-        
-        $('#modal-' + id + '-label').html($(this).attr('title'));
-        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+$js =<<<JS
 
-        $.post(url, function(data) {
-            $('#modal-' + id).find('.modal-body').html(data);
-        });
-       return false;
+    $(document).on('click', '.is_company', function(e) {                
+        let isCompany = $(this).prop("checked") ? 1 : 0;
+        
+        if (isCompany === 1) {
+            $('.user_elements').hide();
+            $('.company_elements').show();
+        } else {
+            $('.user_elements').show();
+            $('.company_elements').hide();
+        }
     });    
 JS;
-
-$this->registerJs($jsCode);
+$this->registerJs($js);
+?>
 

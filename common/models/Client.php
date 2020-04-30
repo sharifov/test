@@ -31,6 +31,7 @@ use yii\db\ActiveQuery;
  * @property string $description
  * @property bool $disabled
  * @property int $rating
+ * @property int $cl_type_id // 1 - Client, 2 - Contact
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -40,6 +41,7 @@ use yii\db\ActiveQuery;
  * @property array $phoneNumbersSms
  * @property array $emailList
  * @property Project[] $projects
+ * @property UserContactList $contact
  * @method clientPhonesByType(array $array)
  */
 class Client extends ActiveRecord
@@ -47,6 +49,14 @@ class Client extends ActiveRecord
     use EventTrait;
 
     public $full_name;
+
+    public const TYPE_CLIENT  = 1;
+    public const TYPE_CONTACT = 2;
+
+    public const TYPE_LIST = [
+        self::TYPE_CLIENT  => 'Client',
+        self::TYPE_CONTACT => 'Contact',
+    ];
 
     /**
      * @return string
@@ -90,12 +100,12 @@ class Client extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['created', 'updated'], 'safe'],
+            [['created', 'updated', 'ucl_favorite',], 'safe'],
             [['first_name', 'middle_name', 'last_name'], 'string', 'max' => 100],
             [['company_name'], 'string', 'max' => 150],
             [['description'], 'string'],
             [['is_company', 'is_public', 'disabled'], 'boolean'],
-            [['parent_id', 'rating'], 'integer'],
+            [['parent_id', 'rating', 'cl_type_id'], 'integer'],
             ['uuid', 'unique'],
             ['uuid', UuidValidator::class],
         ];
@@ -121,6 +131,8 @@ class Client extends ActiveRecord
             'description' => 'Description',
             'disabled' => 'Disabled',
             'rating' => 'Rating',
+            'cl_type_id' => 'Type',
+            'ucl_favorite' => 'Favorite'
         ];
     }
 
@@ -178,6 +190,14 @@ class Client extends ActiveRecord
     public function getProjects(): ActiveQuery
     {
          return $this->hasMany(Project::class, ['id' => 'cp_project_id'])->viaTable('client_project', ['cp_client_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getContact(): ActiveQuery
+    {
+         return $this->hasOne(UserContactList::class, ['ucl_client_id' => 'id']);
     }
 
     public function beforeSave($insert): bool
@@ -314,20 +334,5 @@ class Client extends ActiveRecord
     public function getNameByType(): string
     {
         return $this->is_company ? $this->company_name : trim($this->first_name . ' ' . $this->last_name);
-    }
-
-    /**
-     * @param int $userId
-     * @return bool
-     */
-    public function isContactPublicOwner(int $userId): bool
-    {
-        return self::find()
-            ->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
-                'user_contact_list.ucl_client_id = ' . self::tableName() . '.id')
-            ->where(['ucl_user_id' => $userId])
-            ->andWhere(['ucl_client_id' => $this->id])
-            ->andWhere(['is_public' => true])
-            ->exists();
     }
 }
