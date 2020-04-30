@@ -117,18 +117,18 @@ if($is_admin || $is_supervision) {
         <div class="col-md-12">
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
-                <?= $this->render('checklist/lead_checklist', [
+                <?php /* $this->render('checklist/lead_checklist', [
                     'lead' => $leadForm->getLead(),
                     'comForm'       => $comForm,
                     'leadId'        => $lead->id,
                     'dataProvider'  => $dataProviderChecklist,
                     'isAdmin'       => $is_admin,
                     'modelLeadChecklist'       => $modelLeadChecklist,
-                ]) ?>
+                ]) */ ?>
 
-                <?= $this->render('partial/_task_list', [
+                <?php /* $this->render('partial/_task_list', [
                     'lead' => $leadForm->getLead()
-                ]); ?>
+                ]); */ ?>
 
                 <?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
                     <?= $this->render('communication/lead_communication', [
