@@ -1,6 +1,19 @@
 $(document).ready(function() {
     $phoneTabAnchor = $('[data-toggle-tab]');
+    var historySimpleBar;
 
+    function delay(callback, ms) {
+        var timer = 0;
+        return function() {
+            var context = this, args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                callback.apply(context, args);
+            }, ms || 0);
+        };
+    }
+
+    var tabHistoryLoaded = false;
     $phoneTabAnchor.on("click", function () {
         $current = "#" + $(this).data("toggle-tab");
 
@@ -12,11 +25,77 @@ $(document).ready(function() {
         $('.widget-modal').hide();
 
         $('.collapsible-container').collapse('hide');
+
+        if ($(this).data("toggle-tab") === 'tab-history') {
+            if (!tabHistoryLoaded) {
+                tabHistoryLoaded = true;
+                $.ajax({
+                    url: '/call/ajax-get-call-history',
+                    type: 'post',
+                    data: {},
+                    dataType: 'json',
+                    beforeSend: function() {
+                        $($current).append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+                    },
+                    success: function (data) {
+                        $('#tab-history .simplebar-content').append(data.html);
+                        historySimpleBar.recalculate();
+                        $('#tab-history').attr('data-page', data.page);
+                    },
+                    complete: function (data) {
+                        $($current).find('.wg-history-load').remove();
+                    },
+                    error: function (xhr, error) {
+                    }
+                });
+            }
+        }
     });
+
+    function initLazyLoadHistory(simpleBar) {
+
+        var ajax = false;
+        simpleBar.getScrollElement().addEventListener('scroll', function(e) {
+            if(e.target.scrollTop === e.target.scrollTopMax && !ajax) {
+                // ajax call get data from server and append to the div
+                var page = $('#tab-history').attr('data-page');
+                $.ajax({
+                    url: '/call/ajax-get-call-history',
+                    type: 'post',
+                    data: {page: page},
+                    dataType: 'json',
+                    beforeSend: function() {
+                        $($current).append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+                        ajax = true;
+                    },
+                    success: function (data) {
+                        $('#tab-history .simplebar-content').append(data.html);
+                        historySimpleBar.recalculate();
+                        $('#tab-history').attr('data-page', data.page);
+                        if (!data.rows) {
+                            ajax = false;
+                        }
+                    },
+                    complete: function () {
+                        $($current).find('.wg-history-load').remove();
+                    },
+                    error: function (xhr, error) {
+                    }
+                });
+            }
+        });
+    }
+
+
 
     $('.phone-widget__tab').each(function(i, el) {
         var simpleBar = new SimpleBar(el);
         simpleBar.getContentElement();
+
+        if ($(el).attr('id') === 'tab-history') {
+            initLazyLoadHistory(simpleBar);
+            historySimpleBar = simpleBar;
+        }
     })
 
     $(document).on("click", ".widget-modal__close", function () {
