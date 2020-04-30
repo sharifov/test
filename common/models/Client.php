@@ -333,6 +333,8 @@ class Client extends ActiveRecord
      */
     public function getNameByType(): string
     {
-        return $this->is_company ? $this->company_name : trim($this->first_name . ' ' . $this->last_name);
+        return $this->is_company ?
+            $this->company_name :
+            trim($this->first_name . ' ' . $this->first_name . ' ' . $this->last_name);
     }
 }
