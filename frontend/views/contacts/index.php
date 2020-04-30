@@ -122,7 +122,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = [];
                     if($emails) {
                         foreach ($emails as $k => $email) {
-                            $ico = ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '';
+                            $ico = ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '<i class="fa fa-envelope"></i> ';
                             $data[] = $ico . ' <code>' . Html::encode($email->email) . '</code>';
                         }
                     }

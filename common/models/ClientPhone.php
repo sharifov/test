@@ -83,31 +83,35 @@ class ClientPhone extends \yii\db\ActiveRecord
         return 'client_phone';
     }
 
-	/**
-	 * @param string $phone
-	 * @param int $clientId
-	 * @param int|null $phoneType
-	 * @param string|null $comments
-	 * @return ClientPhone
-	 */
-    public static function create(string $phone, int $clientId, int $phoneType = null, string $comments = null): self
+    /**
+     * @param string $phone
+     * @param int $clientId
+     * @param int|null $phoneType
+     * @param string|null $comments
+     * @param string|null $cpTitle
+     * @return ClientPhone
+     */
+    public static function create(string $phone, int $clientId, int $phoneType = null, string $comments = null, string $cpTitle = null): self
     {
         $clientPhone = new static();
         $clientPhone->phone = $phone;
         $clientPhone->client_id = $clientId;
         $clientPhone->type = $phoneType;
         $clientPhone->comments = $comments;
+        $clientPhone->cp_title = $cpTitle;
         return $clientPhone;
     }
 
-	/**
-	 * @param string $phone
-	 * @param int|null $phoneType
-	 */
-    public function edit(string $phone, int $phoneType = null): void
+    /**
+     * @param string $phone
+     * @param int|null $phoneType
+     * @param string|null $cpTitle
+     */
+    public function edit(string $phone, int $phoneType = null, string $cpTitle = null): void
 	{
 		$this->phone = $phone;
 		$this->type = $phoneType;
+		$this->cp_title = $cpTitle;
 	}
 
     /**

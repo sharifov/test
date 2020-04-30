@@ -67,19 +67,24 @@ $this->registerCss('
 
             </div>
 
-           <div class="col-md-3 multiple-input-box" id="create-contact-email">
+            <div class="col-md-4 multiple-input-box" id="create-contact-email">
                 <?= $form->field($contactForm, 'emails')->widget(MultipleInput::class, [
                     'max' => 10,
                     'enableError' => true,
                     'columns' => [
                         [
-                            'title' => 'Email',
+                            'title' => 'Type',
                             'name' => 'type',
                             'type' => 'dropDownList',
                             'items' => ClientEmail::getEmailTypeList()
                         ],
                         [
+                            'title' => 'Email',
                             'name' => 'email',
+                        ],
+                        [
+                            'title' => 'Title',
+                            'name' => 'ce_title',
                         ],
                         [
                             'name' => 'help',
@@ -87,20 +92,21 @@ $this->registerCss('
                         ],
                     ]
                 ])->label(false) ?>
-           </div>
+            </div>
 
-            <div class="col-md-3 multiple-input-box" id="create-contact-phone">
+            <div class="col-md-4 multiple-input-box" id="create-contact-phone">
                 <?= $form->field($contactForm, 'phones')->widget(MultipleInput::class, [
                     'max' => 10,
                     'enableError' => true,
                     'columns' => [
                         [
-                            'title' => 'Phone',
+                            'title' => 'Type',
                             'name' => 'type',
                             'type' => 'dropDownList',
                             'items' => ClientPhone::getPhoneTypeList()
                         ],
                         [
+                            'title' => 'Phone',
                             'name' => 'phone',
                             'type' => PhoneInput::class,
                             'options' => [
@@ -119,6 +125,10 @@ $this->registerCss('
                                         '
                                 ]
                             ]
+                        ],
+                        [
+                            'title' => 'Title',
+                            'name' => 'cp_title',
                         ],
                         [
                             'name' => 'help',

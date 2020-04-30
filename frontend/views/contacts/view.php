@@ -76,8 +76,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 foreach ($phones as $k => $phone) {
                                     $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
                                     $iconClass = ClientPhone::PHONE_TYPE_ICO_CLASS[$phone->type] ?? 'fa fa-phone';
-                                    $data[] = $sms . CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
-                                        UserProfile::CALL_TYPE_WEB), '', ['icon-class' => $iconClass], 'code');
+                                    $title = $phone->cp_title ? ' <em>(' . $phone->cp_title . ')</em>' : '' ;
+                                    $data[] = $sms .
+                                        CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
+                                        UserProfile::CALL_TYPE_WEB), '', ['icon-class' => $iconClass], 'code') .
+                                        $title;
                                 }
                             }
 
@@ -95,8 +98,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             $data = [];
                             if($emails) {
                                 foreach ($emails as $k => $email) {
-                                    $ico = ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '';
-                                    $data[] = $ico . ' <code>' . Html::encode($email->email) . '</code>';
+                                    $ico = ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '<i class="fa fa-envelope"></i> ';
+                                    $title = $email->ce_title ? ' <em>(' . $email->ce_title . ')</em>' : '' ;
+                                    $data[] = $ico . ' <code>' . Html::encode($email->email) . '</code>' . $title ;
                                 }
                             }
 

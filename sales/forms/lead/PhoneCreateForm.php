@@ -15,7 +15,8 @@ use yii\base\Model;
  * @property string $help - only for View for multiInput Widget
  * @property boolean $required
  * @property string $message
- * @property string $comments
+ * @property string $comments *
+ * @property string $cp_title
  * @property $type
  */
 class PhoneCreateForm extends Model
@@ -48,6 +49,7 @@ class PhoneCreateForm extends Model
     public $message = 'Phone cannot be blank.';
 
     public $comments;
+    public $cp_title;
 
 
 	/**
@@ -58,7 +60,7 @@ class PhoneCreateForm extends Model
         return [
             ['phone', 'validateRequired', 'skipOnEmpty' => false],
 			['phone', 'default', 'value' => null],
-			['phone', 'string', 'max' => 100],
+			[['phone', 'cp_title'], 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],
             ['phone', 'filter', 'filter' => static function($value) {
 				return $value === null ? null : str_replace(['-', ' '], '', trim($value));
