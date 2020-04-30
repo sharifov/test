@@ -68,9 +68,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'style' => 'width:70px'
                 ],
             ],
-            'first_name',
-            'last_name',
-            'company_name',
             [
                 'attribute' => 'is_company',
                 'value' => static function(Client $model) {
@@ -85,6 +82,63 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => [
                     'style' => 'width:100px'
                 ],
+            ],
+            [
+                'attribute' => 'ucl_favorite',
+                'value' => static function(Client $model) {
+                    $out = '<span class="not-set">(not set)</span>';
+                    if ($model->contact) {
+                        $out = $model->contact->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+                'filter' => [1 => 'Yes', 0 => 'No']
+            ],
+            'first_name',
+            'last_name',
+            'company_name',
+            [
+                'header' => 'Phones',
+                'attribute' => 'client_phone',
+                'value' => static function(Client $model) {
+                    $phones = $model->clientPhones;
+                    $data = [];
+                    if($phones) {
+                        foreach ($phones as $k => $phone) {
+                            $out = '<span data-toggle="tooltip" 
+                                            title="'. Html::encode($phone->cp_title) . '"
+                                            data-original-title="' . Html::encode($phone->cp_title) . '">';
+                            $out .= CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
+                                UserProfile::CALL_TYPE_WEB), '', ['disable-icon' => true], 'code');
+                            $out .= '</span>';
+
+                            $data[] = $out;
+                        }
+                    }
+                    return implode('<br>', $data);
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-left'],
+            ],
+            [
+                'header' => 'Emails',
+                'attribute' => 'client_email',
+                'value' => static function(Client $model) {
+                    $emails = $model->clientEmails;
+                    $data = [];
+                    if($emails) {
+                        foreach ($emails as $k => $email) {
+                            $data[] = ' <code data-toggle="tooltip" 
+                                            title="'. Html::encode($email->ce_title) . '"
+                                            data-original-title="'. Html::encode($email->ce_title) . '">' .
+                                Html::encode($email->email) . '</code>';
+                        }
+                    }
+                    return implode('<br>', $data);
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-left'],
             ],
             [
                 'attribute' => 'is_public',
@@ -113,54 +167,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No']
             ],
-            [
-                'attribute' => 'ucl_favorite',
-                'value' => static function(Client $model) {
-                    $out = '<span class="not-set">(not set)</span>';
-                    if ($model->contact) {
-                        $out = $model->contact->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
-                    }
-                    return $out;
-                },
-                'format' => 'raw',
-                'filter' => [1 => 'Yes', 0 => 'No']
-            ],
-            [
-                'header' => 'Phones',
-                'attribute' => 'client_phone',
-                'value' => static function(Client $model) {
-                    $phones = $model->clientPhones;
-                    $data = [];
-                    if($phones) {
-                        foreach ($phones as $k => $phone) {
-                            $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
-                            $iconClass = ClientPhone::PHONE_TYPE_ICO_CLASS[$phone->type] ?? 'fa fa-phone';
-                            $data[] = $sms . CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
-                                UserProfile::CALL_TYPE_WEB), '', ['icon-class' => $iconClass], 'code');
-                        }
-                    }
-                    return implode('<br>', $data);
-                },
-                'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left'],
-            ],
-            [
-                'header' => 'Emails',
-                'attribute' => 'client_email',
-                'value' => static function(Client $model) {
-                    $emails = $model->clientEmails;
-                    $data = [];
-                    if($emails) {
-                        foreach ($emails as $k => $email) {
-                            $ico = ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '<i class="fa fa-envelope"></i> ';
-                            $data[] = $ico . ' <code>' . Html::encode($email->email) . '</code>';
-                        }
-                    }
-                    return implode('<br>', $data);
-                },
-                'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left'],
-            ],
             /*[
                 'label' => 'Projects',
                 'attribute' => 'contact_project_id',
@@ -174,25 +180,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => EmployeeProjectAccess::getProjects(Auth::id())
             ],*/
-            [
-                'attribute' => 'created',
-                'value' => function(Client $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'created',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
-            ],
         ],
     ]); ?>
     <?php Pjax::end(); ?>

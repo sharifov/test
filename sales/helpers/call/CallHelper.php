@@ -28,6 +28,11 @@ class CallHelper
 			'class' => $access ? 'wg-call' : ''
 		];
 
+        $disableIcon = $dataParams['disable-icon'] ?? false;
+        if ($disableIcon) {
+            return Html::tag($tag, $title, $options);
+        }
+
 		$iconClass = $dataParams['icon-class'] ?? 'fa fa-phone';
 		$iconTag = Html::tag('i', '', [
 			'class' => $iconClass

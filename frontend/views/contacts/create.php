@@ -73,12 +73,6 @@ $this->registerCss('
                     'enableError' => true,
                     'columns' => [
                         [
-                            'title' => 'Type',
-                            'name' => 'type',
-                            'type' => 'dropDownList',
-                            'items' => ClientEmail::getEmailTypeList()
-                        ],
-                        [
                             'title' => 'Email',
                             'name' => 'email',
                         ],
@@ -99,12 +93,6 @@ $this->registerCss('
                     'max' => 10,
                     'enableError' => true,
                     'columns' => [
-                        [
-                            'title' => 'Type',
-                            'name' => 'type',
-                            'type' => 'dropDownList',
-                            'items' => ClientPhone::getPhoneTypeList()
-                        ],
                         [
                             'title' => 'Phone',
                             'name' => 'phone',

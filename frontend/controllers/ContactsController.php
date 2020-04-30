@@ -201,7 +201,7 @@ class ContactsController extends FController
                             $emailCreateForm = new EmailCreateForm();
 			                $emailCreateForm->required = true;
 			                $emailCreateForm->email = $value['email'];
-			                $emailCreateForm->type = $value['type'];
+			                $emailCreateForm->type = $value['type'] ?? null;
 			                $emailCreateForm->ce_title = $value['ce_title'];
 			                $emailCreateForm->client_id = $client->id;
 
@@ -213,7 +213,7 @@ class ContactsController extends FController
                             $phoneCreateForm = new PhoneCreateForm();
 			                $phoneCreateForm->required = true;
 			                $phoneCreateForm->phone = $value['phone'];
-			                $phoneCreateForm->type = $value['type'];
+			                $phoneCreateForm->type = $value['type'] ?? null;
 			                $phoneCreateForm->cp_title = $value['cp_title'];
 			                $phoneCreateForm->client_id = $client->id;
 
