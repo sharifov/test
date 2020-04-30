@@ -1,5 +1,6 @@
 <?php
 
+use yii\grid\SerialColumn;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -37,7 +38,36 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'id',
+            ['class' => SerialColumn::class],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'header' => 'Actions',
+                'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'delete' => function($url, Client $model){
+                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+                            'class' => '',
+                            'data' => [
+                                'confirm' => 'Are you sure you want to delete this item?',
+                                'method' => 'post',
+                            ],
+                        ]);
+                    }
+                ],
+                'visibleButtons'=>
+                [
+                     'update' => static function (Client $model) {
+                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
+                     },
+                     'delete' => static function (Client $model) {
+                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
+                     },
+                    'view' => true,
+                ],
+                'options' => [
+                    'style' => 'width:70px'
+                ],
+            ],
             'first_name',
             'last_name',
             'company_name',
@@ -162,34 +192,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
-            [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {delete}',
-                'buttons' => [
-                    'delete' => function($url, Client $model){
-                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
-                            'class' => '',
-                            'data' => [
-                                'confirm' => 'Are you sure you want to delete this item?',
-                                'method' => 'post',
-                            ],
-                        ]);
-                    }
-                ],
-                'visibleButtons'=>
-                [
-                     'update' => static function (Client $model) {
-                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
-                     },
-                     'delete' => static function (Client $model) {
-                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
-                     },
-                    'view' => true,
-                ],
-                'options' => [
-                    'style' => 'width:70px'
-                ],
             ],
         ],
     ]); ?>

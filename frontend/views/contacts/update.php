@@ -88,6 +88,10 @@ $this->registerCss('
                             'title' => 'Title',
                             'name' => 'ce_title',
                         ],
+                        [
+                            'name' => 'id',
+                            'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT
+                        ],
                     ],
                 ])->label(false) ?>
            </div>
@@ -127,6 +131,10 @@ $this->registerCss('
                         [
                             'title' => 'Title',
                             'name' => 'cp_title',
+                        ],
+                        [
+                            'name' => 'id',
+                            'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT
                         ],
                     ]
                 ])->label(false) ?>
