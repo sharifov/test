@@ -1,8 +1,13 @@
 <?php
 
 use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\UserContactList;
+use common\models\UserProfile;
+use sales\access\CallAccess;
 use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -69,7 +74,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             $data = [];
                             if($phones) {
                                 foreach ($phones as $k => $phone) {
-                                    $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                                    $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
+                                    $iconClass = ClientPhone::PHONE_TYPE_ICO_CLASS[$phone->type] ?? 'fa fa-phone';
+                                    $data[] = $sms . CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
+                                        UserProfile::CALL_TYPE_WEB), '', ['icon-class' => $iconClass], 'code');
                                 }
                             }
 
@@ -87,7 +95,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             $data = [];
                             if($emails) {
                                 foreach ($emails as $k => $email) {
-                                    $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                                    $ico = ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '';
+                                    $data[] = $ico . ' <code>' . Html::encode($email->email) . '</code>';
                                 }
                             }
 

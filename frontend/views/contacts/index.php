@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\Project;
 use common\models\search\ContactsSearch;
 use common\models\UserProfile;
@@ -19,7 +21,7 @@ use dosamigos\datepicker\DatePicker;
 /* @var common\models\search\ContactsSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Contacts';
+$this->title = 'My Contacts';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="client-index">
@@ -102,7 +104,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     if($phones) {
                         foreach ($phones as $k => $phone) {
                             $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
-                            $data[] = $sms . CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(), UserProfile::CALL_TYPE_WEB), '', [], 'code');
+                            $iconClass = ClientPhone::PHONE_TYPE_ICO_CLASS[$phone->type] ?? 'fa fa-phone';
+                            $data[] = $sms . CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
+                                UserProfile::CALL_TYPE_WEB), '', ['icon-class' => $iconClass], 'code');
                         }
                     }
                     return implode('<br>', $data);
@@ -118,7 +122,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = [];
                     if($emails) {
                         foreach ($emails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
+                            $ico = ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '';
+                            $data[] = $ico . ' <code>' . Html::encode($email->email) . '</code>';
                         }
                     }
                     return implode('<br>', $data);
@@ -160,7 +165,18 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => 'yii\grid\ActionColumn',
-                'template' => '{view}<br />{update}<br />{delete}',
+                'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'delete' => function($url, Client $model){
+                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+                            'class' => '',
+                            'data' => [
+                                'confirm' => 'Are you sure you want to delete this item?',
+                                'method' => 'post',
+                            ],
+                        ]);
+                    }
+                ],
                 'visibleButtons'=>
                 [
                      'update' => static function (Client $model) {
@@ -170,6 +186,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
                      },
                     'view' => true,
+                ],
+                'options' => [
+                    'style' => 'width:70px'
                 ],
             ],
         ],

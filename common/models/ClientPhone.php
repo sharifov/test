@@ -47,6 +47,13 @@ class ClientPhone extends \yii\db\ActiveRecord
 		self::PHONE_INVALID => 'Invalid',
 	];
 
+	public const PHONE_TYPE_ICO_CLASS = [
+		self::PHONE_VALID => 'fa fa-phone success',
+		self::PHONE_FAVORITE => 'fa fa-phone warning',
+		self::PHONE_INVALID => 'fa fa-phone danger',
+		self::PHONE_NOT_SET => 'fa fa-phone'
+	];
+
     public const PHONE_TYPE_ICONS = [
 		self::PHONE_VALID => '<i class="fa fa-phone success"></i> ',
 		self::PHONE_FAVORITE => '<i class="fa fa-phone warning"></i> ',

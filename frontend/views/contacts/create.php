@@ -1,5 +1,7 @@
 <?php
 
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use frontend\models\form\ContactForm;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
@@ -14,7 +16,21 @@ use borales\extensions\phoneInput\PhoneInput;
 $this->title = 'Create Contact';
 $this->params['breadcrumbs'][] = ['label' => 'Contacts', 'url' => ['index']];
 
+$this->registerCss('
+    .multiple-input-box .table th, .table td {
+       padding: 0 2px 5px 0;       
+    }
+    .multiple-input-box .multiple-input-list__btn {
+        margin-left: 5px;
+    }
+    .multiple-input-box .table.multiple-input-list tr > th {
+        border: 0;
+    }   
+'
+);
+
 ?>
+
 <div class="contact-create">
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -51,14 +67,19 @@ $this->params['breadcrumbs'][] = ['label' => 'Contacts', 'url' => ['index']];
 
             </div>
 
-           <div class="col-md-3" id="create-lead-phone">
+           <div class="col-md-3 multiple-input-box" id="create-contact-email">
                 <?= $form->field($contactForm, 'emails')->widget(MultipleInput::class, [
                     'max' => 10,
                     'enableError' => true,
                     'columns' => [
                         [
-                            'name' => 'email',
                             'title' => 'Email',
+                            'name' => 'type',
+                            'type' => 'dropDownList',
+                            'items' => ClientEmail::getEmailTypeList()
+                        ],
+                        [
+                            'name' => 'email',
                         ],
                         [
                             'name' => 'help',
@@ -68,14 +89,19 @@ $this->params['breadcrumbs'][] = ['label' => 'Contacts', 'url' => ['index']];
                 ])->label(false) ?>
            </div>
 
-            <div class="col-md-3" id="create-lead-phone">
+            <div class="col-md-3 multiple-input-box" id="create-contact-phone">
                 <?= $form->field($contactForm, 'phones')->widget(MultipleInput::class, [
                     'max' => 10,
                     'enableError' => true,
                     'columns' => [
                         [
-                            'name' => 'phone',
                             'title' => 'Phone',
+                            'name' => 'type',
+                            'type' => 'dropDownList',
+                            'items' => ClientPhone::getPhoneTypeList()
+                        ],
+                        [
+                            'name' => 'phone',
                             'type' => PhoneInput::class,
                             'options' => [
                                 'jsOptions' => [
