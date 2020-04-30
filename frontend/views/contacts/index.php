@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Actions',
                 'template' => '{view} {update} {delete}',
                 'buttons' => [
-                    'delete' => function($url, Client $model){
+                    'delete' => static function($url, Client $model){
                         return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
                             'class' => '',
                             'data' => [
@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'is_public',
-                'value' => function(Client $model) {
+                'value' => static function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if (isset($model->is_public)) {
                         $out = $model->is_public ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
