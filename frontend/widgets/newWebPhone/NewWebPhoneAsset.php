@@ -1,6 +1,7 @@
 <?php
-namespace frontend\assets;
+namespace frontend\widgets\newWebPhone;
 
+use frontend\assets\WebPhoneAsset;
 use yii\web\AssetBundle;
 
 class NewWebPhoneAsset extends AssetBundle
@@ -11,11 +12,13 @@ class NewWebPhoneAsset extends AssetBundle
 	public $css = [
 		'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.css',
 		'css/style-web-phone-new.css',
+        '/web_phone/css/sms.css',
 	];
 
 	public $js = [
 		'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js',
-		'/js/phone-widget.js'
+		'/js/phone-widget.js',
+		'/web_phone/js/sms.js',
 	];
 
 	public $depends = [

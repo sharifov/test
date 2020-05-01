@@ -2289,6 +2289,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $users;
     }
 
+    public static function convertTimeFromUtcToUserTime(Employee $user, int $time): string
+    {
+        $timezone = $user->timezone;
+        $format = 'Y-m-d H:i:s';
+        try {
+            return (new \DateTimeImmutable(date($format, $time), new \DateTimeZone('UTC')))
+                ->setTimezone(new \DateTimeZone($timezone))
+                ->format($format);
+        } catch (\Throwable $e) {
+            return '';
+        }
+    }
+
     /**
      * @param int $time
      * @return string
@@ -2390,6 +2403,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $url = '//www.gravatar.com/avatar/?d=' . $default . '&s=60';
         }
         return $url;
+    }
+
+    public function getAvatar(): string
+    {
+        return strtoupper($this->username[0] ?? '');
     }
 
     public function getProjectsToArray(): array

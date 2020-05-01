@@ -226,7 +226,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
 <?= frontend\widgets\CallBox::widget() ?>
 <?= frontend\widgets\WebPhone::widget() ?>
-<?= frontend\widgets\NewWebPhoneWidget::widget() ?>
+<?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 
 <?php $this->endBody(); ?>
 </body>

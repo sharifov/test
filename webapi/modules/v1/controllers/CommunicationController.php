@@ -20,6 +20,7 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
@@ -27,6 +28,7 @@ use sales\model\callLog\services\CallLogTransferService;
 use sales\model\emailList\entity\EmailList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\repositories\lead\LeadRepository;
+use sales\repositories\user\UserProjectParamsRepository;
 use sales\services\call\CallDeclinedException;
 use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
@@ -1650,8 +1652,10 @@ class CommunicationController extends ApiBaseController
 
                     }
 
-                    if(!$sms->save()) {
+                    if (!$sms->save()) {
                         Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:updateSmsStatus:Sms:save');
+                    } else {
+                        $this->sendNotificationUpdateSmsStatus($sms);
                     }
                 }
                 $response['SmsId'] = $sms->s_id;
@@ -1789,17 +1793,24 @@ class CommunicationController extends ApiBaseController
                 }
 
 
+                Yii::error($smsData);
+                $smsStatusChanged = false;
                 if(isset($smsData['status'])) {
 
                     $sms->s_error_message = 'status: ' . $smsData['status'];
 
                     if($smsData['status'] === 'delivered') {
                         $sms->s_status_id = SMS::STATUS_DONE;
+                        $smsStatusChanged = true;
                     }
                 }
 
                 if(!$sms->save()) {
                     Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:smsFinish:Sms:save');
+                } else {
+                    if ($smsStatusChanged) {
+                        $this->sendNotificationUpdateSmsStatus($sms);
+                    }
                 }
                 $response['sms'] = $sms->attributes;
 
@@ -2388,6 +2399,20 @@ class CommunicationController extends ApiBaseController
         ];
 
         return $responseData;
+    }
+
+    private function sendNotificationUpdateSmsStatus(Sms $sms): void
+    {
+        $usersForNotify = [];
+        $repo = Yii::createObject(UserProjectParamsRepository::class);
+        if ($sms->isOut()) {
+            $usersForNotify = $repo->findUsersIdByPhone($sms->s_phone_from);
+        } elseif ($sms->isIn()) {
+            $usersForNotify = $repo->findUsersIdByPhone($sms->s_phone_to);
+        }
+        foreach ($usersForNotify as $userForNotify) {
+            Notifications::publish('phoneWidgetSmsStatusUpdate', ['user_id' => $userForNotify], Message::updateStatus($sms));
+        }
     }
 
 }

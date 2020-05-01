@@ -1,18 +1,20 @@
 <?php
 
-use frontend\assets\NewWebPhoneAsset;
+use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use yii\helpers\Url;
 use yii\web\View;
 
 /* @var $phoneFrom string */
 /* @var $projectId int */
 /* @var $this View */
+/** @var array $userPhones */
 
 NewWebPhoneAsset::register($this);
 ?>
 
 <?= $this->render('partial/_phone_widget', [
-	'phoneFrom' => $phoneFrom
+	'phoneFrom' => $phoneFrom,
+	'userPhones' => $userPhones,
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 

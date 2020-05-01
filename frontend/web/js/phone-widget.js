@@ -109,11 +109,6 @@ $(document).ready(function() {
         $('.contact-modal-info').show()
     })
 
-    $(".js-trigger-messages-modal").on("click", function () {
-        $(".messages-modal").show();
-        $(".phone-widget__tab").addClass('ovf-hidden');
-    });
-
     $(".js-trigger-email-modal").on("click", function () {
         $(".email-modal").show();
         $(".phone-widget__tab").addClass('ovf-hidden');
@@ -276,37 +271,37 @@ $(document).ready(function() {
         }
     })
 
-    $('.messages-modal__send-btn').on('click', function() {
-        // var scroll = $(msgModalScroll.getContentElement());
-        var scroll = $('.messages-modal__messages-scroll').find($('.simplebar-content-wrapper'))[0];
+    // $('.messages-modal__send-btn').on('click', function() {
+    //     // var scroll = $(msgModalScroll.getContentElement());
+    //     var scroll = $('.messages-modal__messages-scroll').find($('.simplebar-content-wrapper'))[0];
+    //
+    //     $('.messages-modal__msg-list').append(appendMsg($('.messages-modal__msg-input').val()))
+    //     $(scroll).scrollTop($(scroll)[0].scrollHeight)
+    //
+    //     $('.messages-modal__msg-input').val('')
+    // });
 
-        $('.messages-modal__msg-list').append(appendMsg($('.messages-modal__msg-input').val()))
-        $(scroll).scrollTop($(scroll)[0].scrollHeight)
-
-        $('.messages-modal__msg-input').val('')
-    });
-
-    function appendMsg(msg) {
-        var time = new Date();
-
-        var node = '<li class="messages-modal__msg-item pw-msg-item pw-msg-item--user">'+
-            '<div class="pw-msg-item__avatar">'+
-            '<div class="agent-text-avatar">'+
-            '<span>B</span>'+
-            '</div>'+
-            '</div>'+
-            '<div class="pw-msg-item__msg-main">'+
-            '<div class="pw-msg-item__data">'+
-            '<span class="pw-msg-item__name">Me</span>'+
-            '<span class="pw-msg-item__timestamp">' + time.getHours() + ':'+ time.getMinutes() +' PM</span>'+
-            '</div>'+
-            '<div class="pw-msg-item__msg-wrap">'+
-            '<p class="pw-msg-item__msg">' + msg + '</p>'+
-            '</div>'+
-            '</div>'+
-            '</li>';
-        return node;
-    }
+    // function appendMsg(msg) {
+    //     var time = new Date();
+    //
+    //     var node = '<li class="messages-modal__msg-item pw-msg-item pw-msg-item--user">'+
+    //         '<div class="pw-msg-item__avatar">'+
+    //         '<div class="agent-text-avatar">'+
+    //         '<span>B</span>'+
+    //         '</div>'+
+    //         '</div>'+
+    //         '<div class="pw-msg-item__msg-main">'+
+    //         '<div class="pw-msg-item__data">'+
+    //         '<span class="pw-msg-item__name">Me</span>'+
+    //         '<span class="pw-msg-item__timestamp">' + time.getHours() + ':'+ time.getMinutes() +' PM</span>'+
+    //         '</div>'+
+    //         '<div class="pw-msg-item__msg-wrap">'+
+    //         '<p class="pw-msg-item__msg">' + msg + '</p>'+
+    //         '</div>'+
+    //         '</div>'+
+    //         '</li>';
+    //     return node;
+    // }
 
     window.newWidgetCancelCall = function () {
         $('.phone-widget-icon').removeClass('is-on-call');

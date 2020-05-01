@@ -337,4 +337,9 @@ class Client extends ActiveRecord
             $this->company_name :
             trim($this->first_name . ' ' . $this->first_name . ' ' . $this->last_name);
     }
+
+    public function getAvatar(): string
+    {
+        return strtoupper($this->getNameByType()[0] ?? '');
+    }
 }
