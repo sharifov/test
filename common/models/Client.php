@@ -335,7 +335,7 @@ class Client extends ActiveRecord
     {
         return $this->is_company ?
             $this->company_name :
-            trim($this->first_name . ' ' . $this->first_name . ' ' . $this->last_name);
+            trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
     }
 
     public function getAvatar(): string
