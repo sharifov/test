@@ -38,6 +38,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
+use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
 use modules\email\src\helpers\MailHelper;
@@ -206,26 +207,32 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $lead = Lead::findOne(125556);
-        $lead->employee_id = 295;
 
-        $task = QaTask::findOne(1);
- $body = Yii::t('email', "You task (Id: {id}) has been canceled by {username} ({role}). Reason: {reason}.",
-            [
-                'id' => \common\components\purifier\Purifier::createQaTaskShortLink($task),
-                'username' => 'user name',
-                'role' => 12,
-                'reason' => 'reas',
-            ]);
+        $phoneList = UserProjectParams::find()
+            ->select(['pl_phone_number', 'upp_phone_list_id', 'upp_project_id'])
+            ->byUserId(295)
+            ->byPhone('+373693057g7', false)
+            ->all();
+        VarDumper::dump($phoneList);
+//        $sms = Sms::findOne(398748);
+//        $sms->s_status_id = 7;
+//        $sms->save();
+//        Notifications::publish('phoneWidgetSmsStatusUpdate', ['user_id' => 295], Message::updateStatus($sms));
 
-        if ($ntf = Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', $body, Notifications::TYPE_SUCCESS, true)) {
-            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-            Notifications::publish('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
-        }
+//        $sms = new Sms();
+//        $sms->s_type_id = Sms::TYPE_INBOX;
+//        $sms->s_status_id = Sms::STATUS_DONE;
+//        $sms->s_sms_text = 'qaiurfwueifohs';
+//        $sms->s_phone_from = '+13136803700';
+//        $sms->s_phone_to = '+37369305727';
+//        $sms->s_created_dt = date('Y-m-d H:i:s');
+//        $sms->s_created_user_id = Yii::$app->user->id;
+//        $sms->s_client_id = 458921;
+//        $sms->save();
+//        Notifications::publish('phoneWidgetSmsAdd', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
 
 
-        die;
-        return $this->render('blank');
+//        return $this->render('blank');
     }
 
     public function actionTestNew()

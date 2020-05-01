@@ -1,6 +1,9 @@
 <?php
 
 /** @var View $this */
+/** @var array $userPhones */
+
+echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $userPhones]);
 
 ?>
 
@@ -147,20 +150,7 @@
                     '<ul class="contact-full-info">';
         if (contact['phones']) {
             contact['phones'].forEach(function(phone, index) {
-                content += '<li>' +
-                            '<div class="form-group">' +
-                                '<label for="">Phone ' + (index + 1) + '</label>' +
-                                '<input readonly type="text" class="form-control" value="' + phone + '" autocomplete="off">' +
-                            '</div>' +
-                            '<ul class="actions-list">' +
-                                '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
-                                    '<i class="fa fa-phone phone-dial" data-phone="' + phone + '"></i>' +
-                                '</li>' +
-                                // '<li class="actions-list__option js-trigger-messages-modal">' +
-                                //     '<i class="fa fa-comment-alt"></i>' +
-                                // '</li>' +
-                            '</ul>' +
-                        '</li>'; 
+                content += getPhoneItem(phone, index, contact);
             })
         }
         if (contact['emails']) {
@@ -183,17 +173,17 @@
             '</li>';
         return content;
     }
-    
+        
      $(document).on('click', '.phone-dial', function(e) {
-      e.preventDefault();
-      let phone = $(this).data('phone');
-       $(".widget-phone__contact-info-modal").hide();
-       $('.phone-widget__header-actions a[data-toggle-tab="tab-contacts"]').removeClass('is_active');
-       $('#tab-contacts').removeClass('is_active');
-       $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
-       $('#tab-phone').addClass('is_active');
-       $("#call-pane__dial-number").val(phone);
-       $('.suggested-contacts').removeClass('is_active');
+        e.preventDefault();
+        let phone = $(this).data('phone');
+        $(".widget-phone__contact-info-modal").hide();
+        $('.phone-widget__header-actions a[data-toggle-tab="tab-contacts"]').removeClass('is_active');
+        $('#tab-contacts').removeClass('is_active');
+        $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+        $('#tab-phone').addClass('is_active');
+        $("#call-pane__dial-number").val(phone);
+        $('.suggested-contacts').removeClass('is_active');
      });
     
     function encodeContact(contact) {
@@ -257,20 +247,7 @@
                         '</li>';
         if (contact['phones']) {
             contact['phones'].forEach(function(phone, index) {
-                content += '<li>' +
-                            '<div class="form-group">' +
-                                '<label for="">Phone ' + (index + 1) + '</label>' +
-                                '<input readonly type="text" class="form-control" value="' + phone + '" autocomplete="off">' +
-                            '</div>' +
-                            '<ul class="actions-list">' +
-                                '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
-                                    '<i class="fa fa-phone phone-dial" data-phone="' + phone + '"></i>' +
-                                '</li>' +
-                                // '<li class="actions-list__option js-trigger-messages-modal">' +
-                                //     '<i class="fa fa-comment-alt"></i>' +
-                                // '</li>' +
-                            '</ul>' +
-                        '</li>'; 
+                content += getPhoneItem(phone, index, contact);
             })
         }
         if (contact['emails']) {
@@ -293,6 +270,24 @@
                    // '<a href="#" class="contact-modal-info__remove-contact">DELETE CONTACT</a>' +
                 '</div>' +
             '</div>';
+        return content;
+    }
+        
+    function getPhoneItem(phone, index, contact) {
+        let content = '<li>' +
+                            '<div class="form-group">' +
+                                '<label for="">Phone ' + (index + 1) + '</label>' +
+                                '<input readonly type="text" class="form-control" value="' + phone + '" autocomplete="off">' +
+                            '</div>' +
+                            '<ul class="actions-list">' +
+                                '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
+                                    '<i class="fa fa-phone phone-dial" data-phone="' + phone + '"></i>' +
+                                '</li>' +
+                                '<li class="actions-list__option js-trigger-messages-modal" data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '">' +
+                                    '<i class="fa fa-comment-alt"></i>' +
+                                '</li>' +
+                            '</ul>' +
+                        '</li>'; 
         return content;
     }
     

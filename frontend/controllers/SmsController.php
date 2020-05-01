@@ -5,24 +5,38 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\UserProjectParams;
 use frontend\models\SmsInboxForm;
-use phpDocumentor\Reflection\Types\This;
+use frontend\widgets\newWebPhone\sms\dto\SmsDto;
+use frontend\widgets\newWebPhone\sms\form\SmsListForm;
+use frontend\widgets\newWebPhone\sms\form\SmsSendForm;
+use frontend\widgets\newWebPhone\sms\job\SmsSendJob;
+use Mpdf\Tag\P;
+use sales\auth\Auth;
+use sales\services\TransactionManager;
 use Yii;
 use common\models\Sms;
 use common\models\search\SmsSearch;
-use frontend\controllers\FController;
-use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\CommunicationService;
+use yii\web\Response;
 
 /**
  * SmsController implements the CRUD actions for Sms model.
+ *
+ * @property TransactionManager $transactionManager
  */
 class SmsController extends FController
 {
+    private $transactionManager;
+
+    public function __construct($id, $module, TransactionManager $transactionManager, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->transactionManager = $transactionManager;
+    }
 
     public function behaviors()
     {
@@ -396,5 +410,120 @@ class SmsController extends FController
         }
 
         return $this->redirect(['index']);
+    }
+
+    public function actionListAjax(): Response
+    {
+        $user = Auth::user();
+
+        $form = new SmsListForm($user);
+
+        $result = [
+            'success' => false,
+            'errors' => [],
+            'contact' => [],
+            'userPhone' => '',
+            'sms' => [],
+        ];
+
+        if ($form->load(Yii::$app->request->post())) {
+
+            if ($form->validate()) {
+
+                $result['success'] = true;
+                $result['contact'] = [
+                    'id' => $form->contact->id,
+                    'name' => $form->contact->getNameByType(),
+                    'phone' => $form->getContactPhone(),
+                ];
+                $result['userPhone'] = $form->userPhone;
+
+                $smsList = Sms::find()
+                    ->andWhere(['s_client_id' => $form->contactId])
+                    ->andWhere([
+                        'OR',
+                        ['s_phone_from' => $form->userPhone, 's_phone_to' => $form->contactPhone],
+                        ['s_phone_from' => $form->contactPhone, 's_phone_to' => $form->userPhone],
+                    ])
+                    ->orderBy(['s_created_dt' => SORT_ASC])->asArray()->all();
+
+                foreach ($smsList as $sms) {
+                    $dto = new SmsDto($sms, $user, $form->contact);
+                    $result['sms'][$dto->getGroup()][] = $dto->toArray();
+                }
+
+            } else {
+                $result['errors'] = $form->getErrors();
+            }
+
+        } else {
+            $result['errors'] = ['data' => ['Not found post data']];
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionSend(): Response
+    {
+        $user = Auth::user();
+
+        $form = new SmsSendForm($user);
+
+        $result = [
+            'success' => false,
+            'errors' => [],
+            'contact' => [],
+            'userPhone' => '',
+            'sms' => [],
+        ];
+
+        if ($form->load(Yii::$app->request->post())) {
+
+            if ($form->validate()) {
+
+                $sms = new Sms();
+                $sms->s_type_id = Sms::TYPE_OUTBOX;
+                $sms->s_status_id = Sms::STATUS_PENDING;
+                $sms->s_sms_text = $form->text;
+                $sms->s_phone_from = $form->userPhone;
+                $sms->s_phone_to = $form->contactPhone;
+                $sms->s_created_dt = date('Y-m-d H:i:s');
+                $sms->s_created_user_id = Yii::$app->user->id;
+                $sms->s_client_id = $form->contactId;
+                $sms->s_project_id = $form->projectId;
+
+                $transaction = \Yii::$app->db->beginTransaction();
+                if ($sms->save()) {
+                    $job = new SmsSendJob();
+                    $job->smsId = $sms->s_id;
+                    if ($jobId = Yii::$app->queue_sms_job->priority(100)->push($job)) {
+                        $transaction->commit();
+                        $result['contact'] = [
+                            'id' => $form->contact->id,
+                            'name' => $form->contact->getNameByType(),
+                            'phone' => $form->getContactPhone(),
+                        ];
+                        $result['userPhone'] = $form->userPhone;
+                        $result['success'] = true;
+                        $result['sms'] = (new SmsDto($sms, $user, $form->contact))->toArray();
+                    } else {
+                        $transaction->rollBack();
+                        $result['success'] = false;
+                        $result['errors'] = ['job' => ['Cant create Job']];
+                    }
+                } else {
+                    $transaction->rollBack();
+                    $result['errors'] = $sms->getErrors();
+                }
+
+            } else {
+                $result['errors'] = $form->getErrors();
+            }
+
+        } else {
+            $result['errors'] = ['data' => ['Not found post data']];
+        }
+
+        return $this->asJson($result);
     }
 }

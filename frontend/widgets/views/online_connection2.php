@@ -193,6 +193,18 @@ $js = <<<JS
                             hiddenLink.attr("data-pjax", "0");
                             hiddenLink[0].click();*/
                         }
+                        
+                        if(obj.cmd === 'phoneWidgetSmsStatusUpdate') {
+                            if (typeof obj.sms !== 'undefined') {
+                                PhoneWidgetSms.updateStatus(obj.sms);
+                             }
+                        }
+                        
+                        if(obj.cmd === 'phoneWidgetSmsAdd') {
+                            if (typeof obj.sms !== 'undefined') {
+                                PhoneWidgetSms.addSms(obj);
+                             }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
