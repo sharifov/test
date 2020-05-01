@@ -12,6 +12,8 @@ use yii\base\Model;
  * @property string $help - only for View for multiInput Widget
  * @property boolean $required
  * @property string $message
+ * @property string $ce_title
+ * @property int $client_id
  * @property $type
  */
 class EmailCreateForm extends Model
@@ -40,6 +42,7 @@ class EmailCreateForm extends Model
 
     public $required = false;
     public $message = 'Email cannot be blank.';
+    public $ce_title;
 
     /**
      * @return array
@@ -49,7 +52,7 @@ class EmailCreateForm extends Model
         return [
             ['email', 'validateRequired', 'skipOnEmpty' => false],
 			['email', 'default', 'value' => null],
-            ['email', 'string', 'max' => 100],
+            [['email', 'ce_title'], 'string', 'max' => 100],
             ['email', 'email'],
 			[['type', 'client_id', 'id'], 'integer'],
 			['email', 'filter', 'filter' => static function($value) {

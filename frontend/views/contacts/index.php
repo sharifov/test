@@ -1,6 +1,9 @@
 <?php
 
+use yii\grid\SerialColumn;
 use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\Project;
 use common\models\search\ContactsSearch;
 use common\models\UserProfile;
@@ -19,7 +22,7 @@ use dosamigos\datepicker\DatePicker;
 /* @var common\models\search\ContactsSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Contacts';
+$this->title = 'My Contacts';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="client-index">
@@ -35,10 +38,36 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'id',
-            'first_name',
-            'last_name',
-            'company_name',
+            ['class' => SerialColumn::class],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'header' => 'Actions',
+                'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'delete' => static function($url, Client $model){
+                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+                            'class' => '',
+                            'data' => [
+                                'confirm' => 'Are you sure you want to delete this item?',
+                                'method' => 'post',
+                            ],
+                        ]);
+                    }
+                ],
+                'visibleButtons'=>
+                [
+                     'update' => static function (Client $model) {
+                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
+                     },
+                     'delete' => static function (Client $model) {
+                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
+                     },
+                    'view' => true,
+                ],
+                'options' => [
+                    'style' => 'width:70px'
+                ],
+            ],
             [
                 'attribute' => 'is_company',
                 'value' => static function(Client $model) {
@@ -55,8 +84,65 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             [
+                'attribute' => 'ucl_favorite',
+                'value' => static function(Client $model) {
+                    $out = '<span class="not-set">(not set)</span>';
+                    if ($model->contact) {
+                        $out = $model->contact->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+                'filter' => [1 => 'Yes', 0 => 'No']
+            ],
+            'first_name',
+            'last_name',
+            'company_name',
+            [
+                'header' => 'Phones',
+                'attribute' => 'client_phone',
+                'value' => static function(Client $model) {
+                    $phones = $model->clientPhones;
+                    $data = [];
+                    if($phones) {
+                        foreach ($phones as $k => $phone) {
+                            $out = '<span data-toggle="tooltip" 
+                                            title="'. Html::encode($phone->cp_title) . '"
+                                            data-original-title="' . Html::encode($phone->cp_title) . '">';
+                            $out .= CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
+                                UserProfile::CALL_TYPE_WEB), '', ['disable-icon' => true], 'code');
+                            $out .= '</span>';
+
+                            $data[] = $out;
+                        }
+                    }
+                    return implode('<br>', $data);
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-left'],
+            ],
+            [
+                'header' => 'Emails',
+                'attribute' => 'client_email',
+                'value' => static function(Client $model) {
+                    $emails = $model->clientEmails;
+                    $data = [];
+                    if($emails) {
+                        foreach ($emails as $k => $email) {
+                            $data[] = ' <code data-toggle="tooltip" 
+                                            title="'. Html::encode($email->ce_title) . '"
+                                            data-original-title="'. Html::encode($email->ce_title) . '">' .
+                                Html::encode($email->email) . '</code>';
+                        }
+                    }
+                    return implode('<br>', $data);
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-left'],
+            ],
+            [
                 'attribute' => 'is_public',
-                'value' => function(Client $model) {
+                'value' => static function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if (isset($model->is_public)) {
                         $out = $model->is_public ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
@@ -81,51 +167,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No']
             ],
-            [
-                'attribute' => 'ucl_favorite',
-                'value' => static function(Client $model) {
-                    $out = '<span class="not-set">(not set)</span>';
-                    if ($model->contact) {
-                        $out = $model->contact->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
-                    }
-                    return $out;
-                },
-                'format' => 'raw',
-                'filter' => [1 => 'Yes', 0 => 'No']
-            ],
-            [
-                'header' => 'Phones',
-                'attribute' => 'client_phone',
-                'value' => static function(Client $model) {
-                    $phones = $model->clientPhones;
-                    $data = [];
-                    if($phones) {
-                        foreach ($phones as $k => $phone) {
-                            $sms = $phone->is_sms ? '<i class="fa fa-comments-o"></i>  ' : '';
-                            $data[] = $sms . CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(), UserProfile::CALL_TYPE_WEB), '', [], 'code');
-                        }
-                    }
-                    return implode('<br>', $data);
-                },
-                'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left'],
-            ],
-            [
-                'header' => 'Emails',
-                'attribute' => 'client_email',
-                'value' => static function(Client $model) {
-                    $emails = $model->clientEmails;
-                    $data = [];
-                    if($emails) {
-                        foreach ($emails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
-                        }
-                    }
-                    return implode('<br>', $data);
-                },
-                'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left'],
-            ],
             /*[
                 'label' => 'Projects',
                 'attribute' => 'contact_project_id',
@@ -139,39 +180,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => EmployeeProjectAccess::getProjects(Auth::id())
             ],*/
-            [
-                'attribute' => 'created',
-                'value' => function(Client $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'created',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
-            ],
-            [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{view}<br />{update}<br />{delete}',
-                'visibleButtons'=>
-                [
-                     'update' => static function (Client $model) {
-                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
-                     },
-                     'delete' => static function (Client $model) {
-                        return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
-                     },
-                    'view' => true,
-                ],
-            ],
         ],
     ]); ?>
     <?php Pjax::end(); ?>

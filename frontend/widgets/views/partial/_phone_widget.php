@@ -34,18 +34,18 @@ use yii\web\View;
                     <span>Contacts</span>
                 </a>
             </li>
-<!--            <li>-->
-<!--                <a href="#" data-toggle-tab="tab-history">-->
-<!--                    <i class="fas fa-file-invoice"></i>-->
-<!--                    <span>history</span>-->
-<!--                </a>-->
-<!--            </li>-->
+            <li>
+                <a href="#" data-toggle-tab="tab-history">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>history</span>
+                </a>
+            </li>
         </ul>
     </div>
     <div class="phone-widget__body">
         <?= $this->render('tab/call'); ?>
         <?= $this->render('tab/contacts', ['userPhones' => $userPhones]); ?>
-        <?php //= $this->render('tab/history'); ?>
+        <?= $this->render('tab/history'); ?>
         <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
         <div class="widget-phone__messages-modal widget-modal messages-modal"></div>
 

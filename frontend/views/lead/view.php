@@ -142,18 +142,18 @@ $lead = $leadForm->getLead();
             <?php endif; ?>
 
 
-            <?= $this->render('checklist/lead_checklist', [
+            <?php /* $this->render('checklist/lead_checklist', [
                 'lead' => $lead,
                 'comForm'       => $comForm,
                 'leadId'        => $lead->id,
                 'dataProvider'  => $dataProviderChecklist,
                 'isAdmin'       => $is_admin,
                 'modelLeadChecklist'       => $modelLeadChecklist,
-            ]) ?>
+            ]) */ ?>
 
-            <?= $this->render('partial/_task_list', [
+            <?php /* $this->render('partial/_task_list', [
                 'lead' => $lead
-            ]); ?>
+            ]); */ ?>
 
             <?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
                 <?= $this->render('communication/lead_communication', [
@@ -194,7 +194,7 @@ $lead = $leadForm->getLead();
 
 
 
-            <?php if(Yii::$app->user->identity->isAllowCallExpert): ?>
+            <?php /* if(Yii::$app->user->identity->isAllowCallExpert): ?>
                 <?= $this->render('call-expert/lead_call_expert', [
                     'lead' => $lead,
                     'comForm'       => $comForm,
@@ -203,7 +203,7 @@ $lead = $leadForm->getLead();
                     'isAdmin'       => $is_admin,
                     'modelLeadCallExpert'       => $modelLeadCallExpert,
                 ]) ?>
-            <?php endif;?>
+            <?php endif; */?>
 
 
 

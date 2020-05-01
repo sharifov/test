@@ -185,9 +185,19 @@ class CallLogTransferService
         } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
         }
-        $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
 
-        $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
+        if ($this->call['c_queue_start_dt'] !== null) {
+            $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+        } else {
+            $this->callLog['cl_duration'] = $this->call['c_call_duration'];
+        }
+
+        if ($this->call['c_queue_start_dt'] !== null) {
+            $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
+        } else {
+            $this->queue['clq_queue_time'] = null;
+        }
+
         $this->queue['clq_access_count'] =
             (int)CallUserAccess::find()
                 ->andWhere(['cua_call_id' => $this->call['c_parent_id']])
@@ -207,10 +217,21 @@ class CallLogTransferService
         } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
         }
-        $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+
+        if ($this->call['c_queue_start_dt'] !== null) {
+            $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+        } else {
+            $this->callLog['cl_duration'] = $this->call['c_call_duration'];
+        }
+
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
-        $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
+        if ($this->call['c_queue_start_dt'] !== null) {
+            $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
+        } else {
+            $this->queue['clq_queue_time'] = null;
+        }
+
         $this->queue['clq_access_count'] =
             (int)CallUserAccess::find()
                 ->andWhere(['cua_call_id' => $this->call['c_parent_id']])

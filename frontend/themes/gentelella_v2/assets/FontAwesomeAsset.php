@@ -8,7 +8,7 @@
 namespace frontend\themes\gentelella_v2\assets;
 
 use rmrevin\yii\fontawesome\NpmFreeAssetBundle;
-use xtetis\bootstrap4glyphicons\assets\GlyphiconAsset;
+use kivork\bootstrap4glyphicons\assets\GlyphiconAsset;
 use yii\web\AssetBundle;
 class FontAwesomeAsset extends AssetBundle
 {

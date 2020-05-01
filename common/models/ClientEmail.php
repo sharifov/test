@@ -84,29 +84,33 @@ class ClientEmail extends \yii\db\ActiveRecord
         ];
     }
 
-	/**
-	 * @param string $email
-	 * @param int $clientId
-	 * @param int $emailType
-	 * @return static
-	 */
-    public static function create(string $email, int $clientId, int $emailType = null): self
+    /**
+     * @param string $email
+     * @param int $clientId
+     * @param int $emailType
+     * @param string|null $ceTitle
+     * @return static
+     */
+    public static function create(string $email, int $clientId, int $emailType = null, string $ceTitle = null): self
     {
         $clientEmail = new static();
         $clientEmail->email = $email;
         $clientEmail->client_id = $clientId;
         $clientEmail->type = $emailType;
+        $clientEmail->ce_title = $ceTitle;
         return $clientEmail;
     }
 
-	/**
-	 * @param string $email
-	 * @param int|null $emailType
-	 */
-	public function edit(string $email, int $emailType = null): void
+    /**
+     * @param string $email
+     * @param int|null $emailType
+     * @param string|null $ceTitle
+     */
+	public function edit(string $email, int $emailType = null, string $ceTitle = null): void
 	{
 		$this->email = $email;
 		$this->type = $emailType;
+		$this->ce_title = $ceTitle;
 	}
 
     /**

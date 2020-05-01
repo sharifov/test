@@ -1,8 +1,14 @@
 <?php
 
 use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\UserContactList;
+use common\models\UserProfile;
+use sales\access\CallAccess;
+use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -18,14 +24,16 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?php //= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?php /*= Html::a('Delete', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ])*/ ?>
+        <?php if ((new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user())): ?>
+            <?php echo Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+            <?php echo Html::a('Delete', ['delete', 'id' => $model->id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+        <?php endif ?>
     </p>
 
     <div class="row">
@@ -63,36 +71,37 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     [
                         'label' => 'Phones',
-                        'value' => function(\common\models\Client $model) {
-
+                        'value' => static function(Client $model) {
                             $phones = $model->clientPhones;
                             $data = [];
                             if($phones) {
                                 foreach ($phones as $k => $phone) {
-                                    $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                                    $title = $phone->cp_title ? ' <em>(' . $phone->cp_title . ')</em>' : '' ;
+                                    $data[] =
+                                        CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
+                                        UserProfile::CALL_TYPE_WEB), '',  ['disable-icon' => true], 'code') .
+                                        $title;
                                 }
                             }
 
-                            $str = implode('<br>', $data);
-                            return ''.$str.'';
+                            return implode('<br>', $data);
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
                     ],
                     [
                         'label' => 'Emails',
-                        'value' => function(\common\models\Client $model) {
-
+                        'value' => static function(Client $model) {
                             $emails = $model->clientEmails;
                             $data = [];
                             if($emails) {
                                 foreach ($emails as $k => $email) {
-                                    $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                                    $title = $email->ce_title ? ' <em>(' . $email->ce_title . ')</em>' : '' ;
+                                    $data[] = ' <code>' . Html::encode($email->email) . '</code>' . $title ;
                                 }
                             }
 
-                            $str = implode('<br>', $data);
-                            return ''.$str.'';
+                            return implode('<br>', $data);
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
@@ -111,14 +120,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],*/
                     [
                         'attribute' => 'created',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function(Client $model) {
                             return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
                     [
                         'attribute' => 'updated',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function(Client $model) {
                             return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'html',
