@@ -2411,7 +2411,7 @@ class CommunicationController extends ApiBaseController
             $usersForNotify = $repo->findUsersIdByPhone($sms->s_phone_to);
         }
         foreach ($usersForNotify as $userForNotify) {
-            Notifications::publish('phoneWidgetSmsStatusUpdate', ['user_id' => $userForNotify], Message::updateStatus($sms));
+            Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $userForNotify], Message::updateStatus($sms));
         }
     }
 

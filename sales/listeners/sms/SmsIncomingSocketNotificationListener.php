@@ -35,7 +35,7 @@ class SmsIncomingSocketNotificationListener
         if ($usersId = $this->projectParamsRepository->findUsersIdByPhone($event->sms->s_phone_to)) {
             foreach ($usersId as $userId) {
                 if ($user = Employee::findOne($userId)) {
-                    Notifications::publish('phoneWidgetSmsAdd', ['user_id' => $user->id], Message::add($sms, $user, $event->sms->client));
+                    Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $user->id], Message::add($sms, $user, $event->sms->client));
                 }
             }
         }

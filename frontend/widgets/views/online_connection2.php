@@ -194,15 +194,9 @@ $js = <<<JS
                             hiddenLink[0].click();*/
                         }
                         
-                        if(obj.cmd === 'phoneWidgetSmsStatusUpdate') {
-                            if (typeof obj.sms !== 'undefined') {
-                                PhoneWidgetSms.updateStatus(obj.sms);
-                             }
-                        }
-                        
-                        if(obj.cmd === 'phoneWidgetSmsAdd') {
-                            if (typeof obj.sms !== 'undefined') {
-                                PhoneWidgetSms.addSms(obj);
+                        if(obj.cmd === 'phoneWidgetSmsSocketMessage') {
+                            if (typeof obj.data !== 'undefined') {
+                                PhoneWidgetSms.socket(obj.data);
                              }
                         }
                     }

@@ -78,11 +78,6 @@ class SmsDto
         ];
     }
 
-    public function getGroup(): string
-    {
-        return $this->group;
-    }
-
     private function isOut(): bool
     {
         return $this->type === Sms::TYPE_OUTBOX;

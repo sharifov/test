@@ -25,6 +25,6 @@ class SmsSendJob implements JobInterface
         }
 
         $smsResponse = $sms->sendSms();
-        Notifications::publish('phoneWidgetSmsStatusUpdate', ['user_id' => $sms->s_created_user_id], Message::updateStatus($sms));
+        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $sms->s_created_user_id], Message::updateStatus($sms));
     }
 }

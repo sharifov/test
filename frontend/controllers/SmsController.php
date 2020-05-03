@@ -9,7 +9,6 @@ use frontend\widgets\newWebPhone\sms\dto\SmsDto;
 use frontend\widgets\newWebPhone\sms\form\SmsListForm;
 use frontend\widgets\newWebPhone\sms\form\SmsSendForm;
 use frontend\widgets\newWebPhone\sms\job\SmsSendJob;
-use Mpdf\Tag\P;
 use sales\auth\Auth;
 use sales\services\TransactionManager;
 use Yii;
@@ -422,8 +421,8 @@ class SmsController extends FController
             'success' => false,
             'errors' => [],
             'contact' => [],
-            'userPhone' => '',
-            'sms' => [],
+            'user' => [],
+            'smses' => [],
         ];
 
         if ($form->load(Yii::$app->request->post())) {
@@ -436,7 +435,9 @@ class SmsController extends FController
                     'name' => $form->contact->getNameByType(),
                     'phone' => $form->getContactPhone(),
                 ];
-                $result['userPhone'] = $form->userPhone;
+                $result['user'] = [
+                    'phone' => $form->userPhone,
+                ];
 
                 $smsList = Sms::find()
                     ->andWhere(['s_client_id' => $form->contactId])
@@ -448,8 +449,7 @@ class SmsController extends FController
                     ->orderBy(['s_created_dt' => SORT_ASC])->asArray()->all();
 
                 foreach ($smsList as $sms) {
-                    $dto = new SmsDto($sms, $user, $form->contact);
-                    $result['sms'][$dto->getGroup()][] = $dto->toArray();
+                    $result['smses'][] = (new SmsDto($sms, $user, $form->contact))->toArray();
                 }
 
             } else {
@@ -473,13 +473,22 @@ class SmsController extends FController
             'success' => false,
             'errors' => [],
             'contact' => [],
-            'userPhone' => '',
+            'user' => [],
             'sms' => [],
         ];
 
         if ($form->load(Yii::$app->request->post())) {
 
             if ($form->validate()) {
+
+                $result['contact'] = [
+                    'id' => $form->contact->id,
+                    'name' => $form->contact->getNameByType(),
+                    'phone' => $form->getContactPhone(),
+                ];
+                $result['user'] = [
+                    'phone' => $form->userPhone,
+                ];
 
                 $sms = new Sms();
                 $sms->s_type_id = Sms::TYPE_OUTBOX;
@@ -490,7 +499,7 @@ class SmsController extends FController
                 $sms->s_created_dt = date('Y-m-d H:i:s');
                 $sms->s_created_user_id = Yii::$app->user->id;
                 $sms->s_client_id = $form->contactId;
-                $sms->s_project_id = $form->projectId;
+                $sms->s_project_id = $form->getProjectId();
 
                 $transaction = \Yii::$app->db->beginTransaction();
                 if ($sms->save()) {
@@ -498,17 +507,10 @@ class SmsController extends FController
                     $job->smsId = $sms->s_id;
                     if ($jobId = Yii::$app->queue_sms_job->priority(100)->push($job)) {
                         $transaction->commit();
-                        $result['contact'] = [
-                            'id' => $form->contact->id,
-                            'name' => $form->contact->getNameByType(),
-                            'phone' => $form->getContactPhone(),
-                        ];
-                        $result['userPhone'] = $form->userPhone;
                         $result['success'] = true;
                         $result['sms'] = (new SmsDto($sms, $user, $form->contact))->toArray();
                     } else {
                         $transaction->rollBack();
-                        $result['success'] = false;
                         $result['errors'] = ['job' => ['Cant create Job']];
                     }
                 } else {
