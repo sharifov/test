@@ -9,9 +9,6 @@ use frontend\models\form\ContactForm;
 use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
-use sales\forms\lead\EmailCreateForm;
-use sales\forms\lead\PhoneCreateForm;
-use sales\helpers\app\AppHelper;
 use sales\services\client\ClientManageService;
 use Yii;
 use common\models\Client;
@@ -19,12 +16,10 @@ use common\models\search\ContactsSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
-use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
-use yii\widgets\ActiveForm;
 
 /**
  * ContactsController implements the CRUD actions for Client model.
@@ -182,7 +177,6 @@ class ContactsController extends FController
         if ($form->load($data['post']) && $form->validate()) {
 
             try {
-
                 if ($client->load(Yii::$app->request->post(), (new ContactForm())->formName()) && $client->save()) {
 
                     if ($userContactList = UserContactList::getUserContact(Auth::id(), $client->id)) {
@@ -196,30 +190,8 @@ class ContactsController extends FController
                     ClientEmail::deleteAll(['client_id' => $client->id]);
                     ClientPhone::deleteAll(['client_id' => $client->id]);
 
-                    if (isset($data['post']['EmailCreateForm'])) {
-                        foreach ($data['post']['EmailCreateForm'] as $key => $value) {
-                            $emailCreateForm = new EmailCreateForm();
-			                $emailCreateForm->required = true;
-			                $emailCreateForm->email = $value['email'];
-			                $emailCreateForm->type = $value['type'] ?? null;
-			                $emailCreateForm->ce_title = $value['ce_title'];
-			                $emailCreateForm->client_id = $client->id;
-
-                            $this->clientManageService->addEmail($client, $emailCreateForm);
-                        }
-                    }
-                    if (isset($data['post']['PhoneCreateForm'])) {
-                        foreach ($data['post']['PhoneCreateForm'] as $key => $value) {
-                            $phoneCreateForm = new PhoneCreateForm();
-			                $phoneCreateForm->required = true;
-			                $phoneCreateForm->phone = $value['phone'];
-			                $phoneCreateForm->type = $value['type'] ?? null;
-			                $phoneCreateForm->cp_title = $value['cp_title'];
-			                $phoneCreateForm->client_id = $client->id;
-
-                            $this->clientManageService->addPhone($client, $phoneCreateForm);
-                        }
-                    }
+                    $this->clientManageService->addEmails($client, $form->emails);
+                    $this->clientManageService->addPhones($client, $form->phones);
 
                     Yii::$app->session->setFlash('success', 'Contact ' . $client->getNameByType() . ' updated');
                     return $this->redirect(['view', 'id' => $client->id]);
