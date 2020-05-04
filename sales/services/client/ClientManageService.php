@@ -91,8 +91,6 @@ class ClientManageService
             return null;
         }
 
-        $this->internalPhoneGuard->guard($phoneForm->phone);
-
         if (!$this->clientPhoneRepository->exists($client->id, $phoneForm->phone)) {
             $phone = ClientPhone::create(
                 $phoneForm->phone,

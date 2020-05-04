@@ -65,7 +65,7 @@ class PhoneCreateForm extends Model
             ['phone', 'filter', 'filter' => static function($value) {
 				return $value === null ? null : str_replace(['-', ' '], '', trim($value));
             }],
-            ['phone', InternalPhoneValidator::class],
+            ['phone', InternalPhoneValidator::class, 'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']],
 			[['type', 'client_id', 'id'], 'integer'],
 			['type', 'checkTypeForExistence'],
 			[['phone', 'client_id'], 'unique', 'targetClass' => ClientPhone::class,  'targetAttribute' => ['phone', 'client_id'], 'message' => 'Client already has this phone number', 'except' => 'update'],
