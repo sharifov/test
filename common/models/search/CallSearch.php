@@ -381,30 +381,13 @@ class CallSearch extends Call
         $this->load($params);
 
         $query = Call::find()->alias('c');
-        $query->select(['c.c_id', 'c.c_source_type_id', 'c.c_from', 'c.c_to', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_duration', 'c.c_lead_id', 'c.c_created_dt', 'c.c_updated_dt', 'name', 'ce.username', 'dep_name', 'group_concat(cau.username SEPARATOR "-") as cua_user_names']);
+        $query->select(['c.c_id', 'c.c_call_type_id', 'c.c_source_type_id', 'c.c_from', 'c.c_to', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_duration',
+            'c.c_lead_id', 'c.c_case_id', 'c.c_created_dt', 'c.c_updated_dt', 'c.c_created_user_id', 'name as project_name', 'ce.username', 'dep_name',
+            'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'dep_name', 'l.gid', 'cs_gid'
+        ]);
         $query->groupBy(['c.c_id']);
         $query->orderBy(['c.c_id' => SORT_DESC]);
 
-
-        //$query->limit(5);
-
-        /*if($this->limit > 0) {
-            $query->limit($this->limit);
-        }
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
-            'pagination' => $this->limit > 0 ? false : [
-                'pageSize' => 100,
-            ]
-        ]);
-
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            $query->where('0=1');
-            return $dataProvider;
-        }*/
 
         $query->andWhere(['or',
             ['c.c_parent_id' => null],
@@ -427,11 +410,18 @@ class CallSearch extends Call
         }
 
         //$query->joinWith(['cProject', 'cLead', 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
-        $query->joinWith(['cProject', 'cLead', 'cCreatedUser as ce', 'cDep', /*'callUserAccesses as cua',*/ 'callUserAccesses.cuaUser as cau', /*`'cuaUsers as t',*/ 'cugUgs', 'calls']);
+        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cCreatedUser as ce', 'cDep', 'cClient as cls', 'callUserAccesses.cuaUser as cau', /*`'cuaUsers as t',*/ 'cugUgs', 'calls']);
 
         $command = $query->createCommand();
+        $data = $command->queryAll();
 
-        return $command->queryAll();
+        foreach ($data as $key => $row) {
+            if ($row['c_created_dt']) {
+                $data[$key]['c_created_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_created_dt']), 'php: Y-m-d H:i:s');
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -811,5 +801,54 @@ class CallSearch extends Call
         $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
 
         return $dataProvider;
+    }
+
+    public function searchRealtimeUserCallMapHistory($params)
+    {
+        $this->load($params);
+        $query = Call::find()->alias('c')->limit(10);
+        $query->select(['c.c_id', 'c.c_parent_id', 'c_call_type_id']);
+        $query->groupBy(['c.c_id']);
+        $query->orderBy(['c.c_id' => SORT_DESC]);
+
+
+        /*$query->andWhere(['c_call_status' => [Call::CALL_STATUS_RINGING]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_QUEUE]]);*/
+
+        $query->andWhere(['c.c_parent_id' => null]);
+
+        if ($this->status_ids) {
+            $query->andWhere(['c_status_id' => $this->status_ids]);
+        }
+
+        if ($this->dep_ids) {
+            $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
+                //->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => 'ud_dep_id'])
+                ->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
+
+        $query->joinWith(['cProject', 'cLead as l', /*'cLead.leadFlightSegments',*/ 'cCreatedUser as ce', 'cDep', /*'callUserAccesses',*/ 'cuaUsers', 'cugUgs', /*'calls'*/]);
+
+        $command = $query->createCommand();
+        $data = $command->queryAll();
+
+        foreach ($data as $row){
+            $queryChild = Call::find()->alias('ch');
+            $queryChild->select(['ch.c_id', 'ch.c_parent_id', 'ch.c_call_type_id']);
+            $queryChild->andWhere(['ch.c_parent_id' => $row['c_id']]);
+            $command = $queryChild->createCommand();
+            $childData = $command->queryAll();
+            foreach ($childData as $row){
+                array_push($data, $row);
+            }
+        }
+
+        return $data;
     }
 }

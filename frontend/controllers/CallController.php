@@ -411,12 +411,19 @@ class CallController extends FController
             $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
             $realtimeCalls = $searchUserCallModel->searchRealtimeUserCallMap($params);
 
+            $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
+            //$params['CallSearch']['limit'] = 10;
+            $callsHistory = $searchUserCallModel->searchRealtimeUserCallMapHistory($params);
+
+            //var_dump($callsHistory); die();
+
             CentrifugoService::sendMsg(json_encode([
                 'onlineDepSales' => $usersOnlineDepSales,
                 'onlineDepExchange' => $usersOnlineDepExchange,
                 'onlineDepSupport' => $usersOnlineDepSupport,
                 'usersOnline' => $usersOnline,
-                'realtimeCalls' => $realtimeCalls
+                'realtimeCalls' => $realtimeCalls,
+                'callsHistory' => $callsHistory
             ]), 'realtimeUserMapChannel#' . Auth::id());
 
             /*CentrifugoService::sendMsg(json_encode($usersOnlineDepSales), 'realtimeUserMapChannel#' . Auth::id());
