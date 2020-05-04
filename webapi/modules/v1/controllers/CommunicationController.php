@@ -662,11 +662,11 @@ class CommunicationController extends ApiBaseController
                 // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
             }
 
-            if (isset($callOriginalData['lead_id']) && $callOriginalData['lead_id']) {
+            if (isset($callOriginalData['lead_id']) && $callOriginalData['lead_id'] && $callOriginalData['lead_id'] !== 'null') {
                 $call->c_lead_id = (int) $callOriginalData['lead_id'];
             }
 
-            if (isset($callOriginalData['case_id']) && $callOriginalData['case_id']) {
+            if (isset($callOriginalData['case_id']) && $callOriginalData['case_id'] && $callOriginalData['case_id'] !== 'null') {
                 $call->c_case_id = (int) $callOriginalData['case_id'];
 //                if ($call->c_case_id && ($case = Cases::findOne($call->c_case_id))) {
 //                    (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_CALL);
