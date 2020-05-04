@@ -10,7 +10,8 @@ let PhoneWidgetSms = function () {
         4: "status-cancel",
         5: "status-done",
         6: "status-error",
-        7: "status-sent"
+        7: "status-sent",
+        8: "status-queued",
     };
 
     function init(listUrlInit, sendUrlInit, userPhonesInit) {
@@ -89,9 +90,13 @@ let PhoneWidgetSms = function () {
                 addSmses(data.smses, getSmsesContainer(data.contact, data.user));
                 simpleBarInit();
             })
-            .fail(function () {
+            .fail(function (data) {
                 container.html("");
-                new PNotify({title: "Get sms", type: "error", text: 'Server Error. Try again later', hide: true});
+                let text = 'Server Error. Try again later';
+                if (data.status && data.status === 403) {
+                    text = 'Access denied'
+                }
+                new PNotify({title: "Get sms", type: "error", text: text, hide: true});
             });
     }
 

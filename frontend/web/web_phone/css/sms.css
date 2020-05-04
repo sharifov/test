@@ -19,3 +19,6 @@
 .phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-sent {
     background-color: #f7cbdf!important;
 }
+.phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-queued {
+    background-color: #8c8c8c!important;
+}

@@ -1,9 +1,21 @@
 <?php
 
+use sales\auth\Auth;
+use yii\bootstrap4\Html;
+use yii\web\View;
+use yii\widgets\ActiveForm;
+
+
 /** @var View $this */
 /** @var array $userPhones */
 
 echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $userPhones]);
+
+$titleAccessGetMessages = '';
+$accessGetSms = Auth::can('/sms/list-ajax');
+if (!$accessGetSms) {
+    $titleAccessGetMessages = 'Access denied';
+}
 
 ?>
 
@@ -13,10 +25,6 @@ echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $u
             <i class="fa fa-search"></i>
         </label>
         <?php
-
-        use yii\bootstrap4\Html;
-        use yii\web\View;
-        use yii\widgets\ActiveForm;
 
         $form = ActiveForm::begin([
             'id' => 'contact-list-ajax',
@@ -283,7 +291,7 @@ echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $u
                                 '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
                                     '<i class="fa fa-phone phone-dial" data-phone="' + phone + '"></i>' +
                                 '</li>' +
-                                '<li class="actions-list__option js-trigger-messages-modal" data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '">' +
+                                '<li title="{$titleAccessGetMessages}" class="actions-list__option js-trigger-messages-modal" data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '">' +
                                     '<i class="fa fa-comment-alt"></i>' +
                                 '</li>' +
                             '</ul>' +
