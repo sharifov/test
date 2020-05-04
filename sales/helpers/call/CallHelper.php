@@ -2,6 +2,7 @@
 namespace sales\helpers\call;
 
 
+use DateTime;
 use yii\bootstrap4\Dropdown;
 use yii\helpers\Html;
 
@@ -26,6 +27,11 @@ class CallHelper
 			'data-phone-from-id' => $dataParams['phone-from-id'] ?? '',
 			'class' => $access ? 'wg-call' : ''
 		];
+
+        $disableIcon = $dataParams['disable-icon'] ?? false;
+        if ($disableIcon) {
+            return Html::tag($tag, $title, $options);
+        }
 
 		$iconClass = $dataParams['icon-class'] ?? 'fa fa-phone';
 		$iconTag = Html::tag('i', '', [
@@ -74,5 +80,29 @@ class CallHelper
 		]);
 
 		return Html::tag('div', $dropdownBtn . $widget, ['class' => 'dropdown']);
+	}
+
+	public static function formatCallHistoryByDate(array $callHistory): array
+	{
+		$result = [
+			'Today' => [],
+			'Yesterday' => [],
+		];
+
+		foreach ($callHistory as $call) {
+			$currentDate = new DateTime();
+			$callDate = new DateTime($call['c_created_dt']);
+			$dDiff = $currentDate->diff($callDate);
+
+			if ($dDiff->d === 0) {
+				$result['Today'][] = $call;
+			} elseif ($dDiff->d === 1) {
+				$result['Yesterday'][] = $call;
+			} else {
+				$result[date('Y-m-d', strtotime($call['c_created_dt']))][] = $call;
+			}
+		}
+
+		return $result;
 	}
 }

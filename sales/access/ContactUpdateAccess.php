@@ -32,7 +32,7 @@ class ContactUpdateAccess
                 'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id')
             ->where(['ucl_user_id' => $userId])
             ->andWhere(['ucl_client_id' => $clientId])
-            ->andWhere(['is_public' => true])
+            ->andWhere(['is_public' => false])
             ->exists();
     }
 }

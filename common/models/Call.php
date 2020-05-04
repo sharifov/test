@@ -622,6 +622,11 @@ class Call extends \yii\db\ActiveRecord
         return self::CALL_TYPE_LIST[$this->c_call_type_id] ?? '-';
     }
 
+    public static function getCallTypeNameById(int $type)
+	{
+		return self::CALL_TYPE_LIST[$type] ?? '-';
+	}
+
     /**
      * @return mixed|string
      */

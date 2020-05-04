@@ -1,0 +1,8 @@
+[program:QueueSmsJob]
+command=/usr/bin/php /var/www/sales/www/yii queue-sms-job/listen
+stdout_logfile=/var/www/sales/www/console/runtime/queue-sms-job.log
+autostart=true
+autorestart=true
+user=root
+stopsignal=KILL
+numprocs=1

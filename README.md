@@ -33,13 +33,51 @@ OR:
 
 1). PHP 7.3, 7.4 Install:
 ```
-#sudo apt-get install php7.2 php-pear php7.2-zip php7.2-curl php7.2-gd php7.2-mysql php7.2-mcrypt php7.2-xml php7.2-mbstring php7.2-pgsql php7.2-imagick php7.2-xmlrpc php7.2-sqlite3 php7.2-soap php7.2-tidy php7.2-recode php7.2-pspell php7.2-imap
 sudo apt-get install php7.3 php7.3-fpm php-pear php-imagick php7.3-intl php7.3-zip php7.3-curl php7.3-gd php7.3-mysql php7.3-xml php7.3-mbstring php7.3-pgsql php7.3-xmlrpc php7.3-sqlite3 php7.3-soap php7.3-tidy php7.3-recode php7.3-pspell php7.3-imap
-
-
 sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-zip php7.4-curl php7.4-gd php7.4-mysql php7.4-xml php7.4-mbstring php7.4-pgsql php7.4-xmlrpc php7.4-sqlite3 php7.4-soap php7.4-tidy php7.4-pspell php7.4-imap php7.4-bcmath
-sudo update-alternatives --config php
 
+sudo update-alternatives --config php
+```
+
+1.1) INSTALL swoole 4.4.16 & ext-async v4.4.16 for swoole_redis
+```
+cd ~
+wget https://github.com/redis/hiredis/archive/v0.14.1.tar.gz && tar zxvf v0.14.1.tar.gz
+cd hiredis-0.14.1/
+make -j & sudo make install
+sudo ldconfig
+cd ..
+ 
+git clone https://github.com/swoole/swoole-src
+cd swoole-src/
+git checkout tags/v4.4.16
+phpize && ./configure
+make -j 4 && sudo make install
+ 
+git clone https://github.com/swoole/ext-async
+cd ext-async/
+git checkout tags/v4.4.16
+phpize && ./configure
+make -j 4 && sudo make install
+``` 
+ 
+Update php-cli php.ini
+```
+extension=swoole
+extension=swoole_async
+```
+
+1.2) Install Redis server
+```
+sudo apt update
+sudo apt install redis-server
+
+# commands
+redis-cli
+127.0.0.1:6379> MONITOR
+127.0.0.1:6379> PUBSUB CHANNELS
+127.0.0.1:6379> PUBSUB NUMSUB user*
+127.0.0.1:6379> SUBSCRIBE "user-167"
 ```
 
 2). Composer INSTALL:

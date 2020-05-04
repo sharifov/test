@@ -1,18 +1,20 @@
 <?php
 
-use frontend\assets\NewWebPhoneAsset;
+use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use yii\helpers\Url;
 use yii\web\View;
 
 /* @var $phoneFrom string */
 /* @var $projectId int */
 /* @var $this View */
+/** @var array $userPhones */
 
 NewWebPhoneAsset::register($this);
 ?>
 
 <?= $this->render('partial/_phone_widget', [
-	'phoneFrom' => $phoneFrom
+	'phoneFrom' => $phoneFrom,
+	'userPhones' => $userPhones,
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 
@@ -53,6 +55,7 @@ $js = <<<JS
 						if (device) {
 							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'call-web', 'c_user_id': userId};
 							webPhoneParams = params;
+							console.log(params);
 							$('.phone-widget-icon').addClass('is-pending');
 							$('.call-pane__call-btns').addClass('is-pending');
 							$('.suggested-contacts').removeClass('is_active');

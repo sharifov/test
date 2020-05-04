@@ -1,0 +1,21 @@
+.phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-new {
+    background-color: #c1e5f5!important;
+}
+.phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-pending {
+    background-color: #dae8e1!important;
+}
+.phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-process {
+    background-color: #a0dba8!important;
+}
+.phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-cancel {
+    background-color: #e0929a!important;
+}
+.phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-done {
+    background-color: #cae2ff!important;
+}
+.phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-error {
+    background-color: #f26d63!important;
+}
+.phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap.status-sent {
+    background-color: #f7cbdf!important;
+}

@@ -1,24 +1,25 @@
 <?php
 namespace frontend\widgets;
 
+use common\models\Employee;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
 use Yii;
 use yii\bootstrap\Widget;
 
+/**
+ * Class NewWebPhoneWidget
+ *
+ * @property int $userId
+ */
 class NewWebPhoneWidget extends Widget
 {
-	public function init()
-	{
-		parent::init();
-	}
+    public $userId;
 
-	public function run()
+    public function run(): string
 	{
-		$user_id = Yii::$app->user->id;
-
-		$userProfile = UserProfile::find()->where(['up_user_id' => $user_id])->limit(1)->one();
+		$userProfile = UserProfile::find()->where(['up_user_id' => $this->userId])->limit(1)->one();
 		if(!$userProfile || (int) $userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB) {
 			return '';
 		}
@@ -36,7 +37,13 @@ class NewWebPhoneWidget extends Widget
 
 		return $this->render('web_phone_new', [
 			'phoneFrom' => $phoneFrom,
-			'projectId' => $userProjectId
+			'projectId' => $userProjectId,
+            'userPhones' => array_keys($this->getUserPhones()),
 		]);
 	}
+
+	private function getUserPhones(): array
+    {
+        return Employee::getPhoneList($this->userId);
+    }
 }

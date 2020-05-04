@@ -68,6 +68,12 @@ return [
             'password' => '',
         ],
 
+        'queue_sms_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_sms_job',
+        ],
         'queue_email_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
             'host' => 'localhost',
@@ -94,6 +100,7 @@ return [
 
     ],
     'bootstrap' => [
+        'queue_sms_job',
         'queue_email_job',
         'queue_phone_check',
         'queue_job',

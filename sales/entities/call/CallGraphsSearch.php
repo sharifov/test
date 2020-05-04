@@ -501,7 +501,7 @@ class CallGraphsSearch extends CallSearch
 
 	public static function getChartTotalCallsVaxisText($vaxisId): string
 	{
-		return self::getChartTotalCallsVaxisTextList()[$vaxisId] ?? null;
+		return self::getChartTotalCallsVaxisTextList()[$vaxisId] ?? '';
 	}
 
 	/**
