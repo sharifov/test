@@ -178,8 +178,8 @@ echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $u
         e.preventDefault();
         let phone = $(this).data('phone');
         $(".widget-phone__contact-info-modal").hide();
-        $('.phone-widget__header-actions a[data-toggle-tab="tab-contacts"]').removeClass('is_active');
-        $('#tab-contacts').removeClass('is_active');
+        $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+        $('.phone-widget__tab').removeClass('is_active');
         $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
         $('#tab-phone').addClass('is_active');
         $("#call-pane__dial-number").val(phone);

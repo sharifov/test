@@ -56,7 +56,7 @@ $(document).ready(function() {
 
         var ajax = false;
         simpleBar.getScrollElement().addEventListener('scroll', function(e) {
-            if(e.target.scrollTop === e.target.scrollTopMax && !ajax) {
+            if((e.target.scrollTop + e.target.clientHeight) === e.target.scrollHeight && !ajax) {
                 // ajax call get data from server and append to the div
                 var page = $('#tab-history').attr('data-page');
                 $.ajax({

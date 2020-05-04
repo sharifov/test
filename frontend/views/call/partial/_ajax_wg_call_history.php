@@ -61,7 +61,7 @@ use yii\helpers\Html;
                 </div>
                 <div class="contact-info-card__details">
                     <div class="contact-info-card__line history-details">
-                        <strong class="contact-info-card__name" ><?= Html::encode($call['c_caller_name'] ?? ($callType === Call::CALL_TYPE_IN ? $call['c_from'] : $call['c_to'])) ?></strong>
+                        <strong class="contact-info-card__name phone-dial" style="cursor:pointer;" data-phone="<?= Html::encode(($callType === Call::CALL_TYPE_IN ? $call['c_from'] : $call['c_to'])) ?>"><?= Html::encode($call['c_caller_name'] ?? ($callType === Call::CALL_TYPE_IN ? $call['c_from'] : $call['c_to'])) ?></strong>
                         <small class="contact-info-card__timestamp"><?= Yii::$app->formatter->asDate(strtotime($call['c_created_dt']), 'php:h:i A') ?></small>
                     </div>
                     <div class="contact-info-card__line history-details">
