@@ -12,9 +12,11 @@ use yii\widgets\ActiveForm;
 echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $userPhones]);
 
 $titleAccessGetMessages = '';
+$disabledClass = '';
 $accessGetSms = Auth::can('/sms/list-ajax');
 if (!$accessGetSms) {
     $titleAccessGetMessages = 'Access denied';
+    $disabledClass = '-disabled';
 }
 
 ?>
@@ -291,7 +293,7 @@ if (!$accessGetSms) {
                                 '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
                                     '<i class="fa fa-phone phone-dial" data-phone="' + phone + '"></i>' +
                                 '</li>' +
-                                '<li title="{$titleAccessGetMessages}" class="actions-list__option js-trigger-messages-modal" data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '">' +
+                                '<li title="{$titleAccessGetMessages}" class="actions-list__option js-trigger-messages-modal{$disabledClass}" data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '">' +
                                     '<i class="fa fa-comment-alt"></i>' +
                                 '</li>' +
                             '</ul>' +
