@@ -57,7 +57,7 @@ class CasePreviewSmsForm extends Model
             [['s_quote_list'], 'string'],
 
             [['s_phone_to', 's_phone_from'], 'string', 'max' => 30],
-            [['s_phone_to', 's_phone_from'], PhoneInputValidator::class],
+            [['s_phone_to', 's_phone_from'], PhoneInputValidator::class, 'enableClientValidation' => false],
 
             [['s_language_id'], 'string', 'max' => 5],
             [['s_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['s_user_id' => 'id']],
