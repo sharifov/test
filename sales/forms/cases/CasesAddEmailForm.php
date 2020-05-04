@@ -3,6 +3,7 @@
 namespace sales\forms\cases;
 
 use sales\entities\cases\Cases;
+use sales\services\client\InternalEmailValidator;
 use yii\base\Model;
 
 /**
@@ -36,6 +37,7 @@ class CasesAddEmailForm extends Model
             ['email', 'required'],
             ['email', 'string', 'max' => 160],
             ['email', 'email'],
+            ['email', InternalEmailValidator::class, 'allowInternalEmail' => \Yii::$app->params['settings']['allow_contact_internal_email']],
         ];
     }
 
