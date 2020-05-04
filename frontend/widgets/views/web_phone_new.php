@@ -53,7 +53,7 @@ $js = <<<JS
                 $.post('{$ajaxBlackList}', {phone: phone_to}, function(data) {
                     if (data.success) {
 						if (device) {
-							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'call-web', 'c_user_id': userId};
+							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'web-call', 'c_user_id': userId};
 							webPhoneParams = params;
 							$('.phone-widget-icon').addClass('is-pending');
 							$('.call-pane__call-btns').addClass('is-pending');
