@@ -126,16 +126,10 @@ class CommunicationForm extends Model
             ],
 
 
-            [['c_sms_tpl_key'], 'required', 'when' => static function (CommunicationForm $model) {
+            [['c_phone_number', 'c_sms_tpl_key'], 'required', 'when' => static function (CommunicationForm $model) {
                 return (int) $model->c_type_id === self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
-            ],
-
-            [['c_phone_number'], 'required', 'when' => static function (CommunicationForm $model) {
-                return (int) $model->c_type_id === self::TYPE_SMS;
-            },
-//                'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
             ],
 
 
@@ -184,7 +178,7 @@ class CommunicationForm extends Model
             [['c_email_subject', 'c_email_message', 'c_sms_message'], 'trim'],
 
             [['c_phone_number'], 'string', 'max' => 30],
-            [['c_phone_number'], PhoneInputValidator::class],
+            [['c_phone_number'], PhoneInputValidator::class, 'enableClientValidation' => false],
 
             [['c_voice_sid'], 'string', 'max' => 40],
 
