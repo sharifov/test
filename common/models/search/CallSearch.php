@@ -386,7 +386,7 @@ class CallSearch extends Call
         $query = Call::find()->alias('c');
         $query->select(['c.c_id', 'c.c_call_type_id', 'c.c_source_type_id', 'c.c_from', 'c.c_to', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_duration',
             'c.c_lead_id', 'c.c_case_id', 'c.c_created_dt', 'c.c_updated_dt', 'c.c_created_user_id', 'name as project_name', 'ce.username', 'dep_name',
-            'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'dep_name', 'l.gid', 'cs_gid'
+            'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'l.gid', 'cs_gid'
         ]);
         $query->groupBy(['c.c_id']);
         $query->orderBy(['c.c_id' => SORT_DESC]);
@@ -811,7 +811,9 @@ class CallSearch extends Call
     {
         $this->load($params);
         $query = Call::find()->alias('c')->limit(10);
-        $query->select(['c.c_id', 'c.c_parent_id', 'c_call_type_id']);
+        $query->select(['c.c_id', 'c.c_source_type_id', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_type_id', 'c.c_created_user_id', 'c.c_lead_id', 'c.c_case_id',
+            'c.c_created_dt', 'c.c_to', 'c.c_from', 'ce.username', 'name as project_name', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'dep_name', 'l.gid', 'cs_gid'
+        ]);
         $query->groupBy(['c.c_id']);
         $query->orderBy(['c.c_id' => SORT_DESC]);
 
@@ -837,19 +839,28 @@ class CallSearch extends Call
             $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
         }
 
-        $query->joinWith(['cProject', 'cLead as l', /*'cLead.leadFlightSegments',*/ 'cCreatedUser as ce', 'cDep', /*'callUserAccesses',*/ 'cuaUsers', 'cugUgs', /*'calls'*/]);
+        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cClient as cls', 'cCreatedUser as ce', 'cDep', /*'callUserAccesses',*/ 'cuaUsers', 'cugUgs']);
 
         $command = $query->createCommand();
         $data = $command->queryAll();
 
         foreach ($data as $row){
             $queryChild = Call::find()->alias('ch');
-            $queryChild->select(['ch.c_id', 'ch.c_parent_id', 'ch.c_call_type_id']);
+            $queryChild->select(['ch.c_id', 'ch.c_parent_id', 'ch.c_call_type_id', 'ch.c_created_dt']);
             $queryChild->andWhere(['ch.c_parent_id' => $row['c_id']]);
+
+            $query->joinWith(['cCreatedUser as ce']);
+
             $command = $queryChild->createCommand();
             $childData = $command->queryAll();
             foreach ($childData as $row){
                 array_push($data, $row);
+            }
+        }
+
+        foreach ($data as $key => $row) {
+            if ($row['c_created_dt']) {
+                $data[$key]['c_created_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_created_dt']), 'php: Y-m-d H:i:s');
             }
         }
 

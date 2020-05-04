@@ -13,6 +13,13 @@ $cOut = Call::CALL_TYPE_OUT;
 $sourceGeneralLine = Call::SOURCE_GENERAL_LINE;
 $shotSourceList = json_encode(Call::SHORT_SOURCE_LIST);
 $statusList = json_encode(Call::STATUS_LIST);
+$callIsEnded = json_encode([
+        Call::STATUS_COMPLETED,
+        Call::STATUS_BUSY,
+        Call::STATUS_NO_ANSWER,
+        Call::STATUS_CANCELED,
+        Call::STATUS_FAILED,
+]);
 
 $passChannelsToJs ='["' . implode('", "', $channels) . '"]';
 
@@ -113,13 +120,8 @@ function renderRealtimeCalls(parent)
                             '<a href="/call/view?id='+ parent.c_id +'" target="_blank">'+ parent.c_id +'</a>' +
                         '</u>' + isCallInOrOut(parent.c_call_type_id, parent.c_parent_id) +                  
                     '</td>' +
-                    '<td class="text-left" style="width:180px">' +
-                        '<div class="col-md-3">' +
-                            '<i class="fa fa-male text-info fa-2x fa-border"></i>'+
-                        '</div>' +
-                        '<div class="col-md-9">' + 
-                            showAgentClientDitails(parent.full_name) + '<br>'+ parent.c_from +
-                        '</div>' +
+                    '<td class="text-left" style="width:180px">' +                        
+                        showAgentClientDetails(parent.full_name, parent.c_call_type_id, parent.c_from, parent.c_created_user_id, parent.username) + 
                     '</td>' + 
                     '<td class="text-center" style="width:130px">' +
                         '<span class="badge badge-info">'+ parent.project_name +'</span><br>' +
@@ -133,10 +135,10 @@ function renderRealtimeCalls(parent)
                         showCurrentStatus(parent.c_status_id) +    
                     '</td>' + 
                     '<td class="text-center" style="width:160px">' + 
-                        callCreatedTime(parent.c_created_dt) +
+                        callCreatedTime(parent.c_created_dt, parent.c_status_id) +
                     '</td>' +    
                     '<td class="text-left" style="width:160px">' + 
-                        showAgentClientInfo(parent.c_call_type_id, parent.c_source_type_id, parent.c_to, parent.c_created_user_id, parent.username) +
+                        showAgentClientInfo(parent.c_call_type_id, parent.c_source_type_id, parent.c_to, parent.c_created_user_id, parent.username, parent.full_name) +
                     '</td>' +    
                 '</tr>' +
             '</tbody>' +
@@ -163,8 +165,9 @@ function renderChildCalls(childObj)
     '</tr>';
 }
 
-function showAgentClientInfo(callTypeId, callSourceTypeId, callTo, callCreatedUserId, callCreatedUsername) {
+function showAgentClientInfo(callTypeId, callSourceTypeId, callTo, callCreatedUserId, callCreatedUsername, fullName) {
     let html = '';
+    let clientName;
     if (callTypeId == '$cIn'){
         if (callSourceTypeId == '$sourceGeneralLine'){
             html+= '<i class="fa fa-fax fa-1x fa-border"></i> ' + callTo
@@ -172,27 +175,75 @@ function showAgentClientInfo(callTypeId, callSourceTypeId, callTo, callCreatedUs
         if (callCreatedUserId){
              html+= '<i class="fa fa-user fa-1x fa-border"></i> ' + callCreatedUsername
         } else {
-            html+= '<i class="fa fa-fax fa-1x fa-border"></i> ' + callTo
+            html+= '<i class="fa fa-phone fa-1x fa-border"></i> ' + callTo
         }
         
     } else {
-        html+= 'test'
+        if (fullName){
+            if(fullName.toString().trim() === 'ClientName'){
+                clientName = "...";
+            } else {
+                clientName = fullName
+            }               
+        } else {
+            clientName = "...";
+        }
+        
+        html+= '<div class="col-md-3">' +
+                    '<i class="fa fa-male text-info fa-2x fa-border"></i>' +
+               '</div>' +
+               '<div class="col-md-9">' + clientName + '<br><small>' + callTo + '</small>' +
+               '</div>';
     }
     return html;
 }
 
-function callCreatedTime(callCreatedDate) {
+function callCreatedTime(callCreatedDate, cStatusID) {
+    let html = '';
     let date = new Date(callCreatedDate);
     let timeStamp = date.getTime();
     let formattedTime = formatTime(new Date(timeStamp));
+    let considerCallEnded =  '$callIsEnded';    
     
-    return '<i class="fa fa-clock-o"></i>'+ formattedTime +'<br>';
+    html+= '<i class="fa fa-clock-o"></i> '+ formattedTime +'<br>'
+    
+    if (Object.values(considerCallEnded).includes(cStatusID)){
+        html+= calculateRelativeTime(callCreatedDate)
+    }    
+    
+    return html;
 }
 
 function formatTime(date) {
   return (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' + 
     (date.getMinutes() < 10 ? '0' : '') + date.getMinutes() + ':' +
     (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
+}
+
+function calculateRelativeTime(date) {
+    let current = new Date();
+    let previous = new Date(date).getTime();
+    let msPerMinute = 60 * 1000;
+    let msPerHour = msPerMinute * 60;
+    let msPerDay = msPerHour * 24;
+    let msPerMonth = msPerDay * 30;
+    let msPerYear = msPerDay * 365;
+
+    let elapsed = current - previous;
+
+    if (elapsed < msPerMinute) {
+        return Math.round(elapsed/1000) + ' seconds ago';
+    } else if (elapsed < msPerHour) {
+        return Math.round(elapsed/msPerMinute) + ' minutes ago';
+    } else if (elapsed < msPerDay ) {
+        return Math.round(elapsed/msPerHour ) + ' hours ago';
+    } else if (elapsed < msPerMonth) {
+        return Math.round(elapsed/msPerDay) + ' days ago';
+    } else if (elapsed < msPerYear) {
+        return Math.round(elapsed/msPerMonth) + ' months ago';
+    } else {
+        return Math.round(elapsed/msPerYear ) + ' years ago';
+    }
 }
 
 function showCurrentStatus(cStatusID) {
@@ -222,11 +273,11 @@ function showLeadCaseLinks(cLeadID, leadGid, cCaseID, caseGid) {
     let html = '';
     
     if (cLeadID && leadGid){
-        html += '<i>l:<a href="/cases/view/'+ leadGid +'" target="_blank">'+ cLeadID +'</a></i><br>'
+        html += '<i>l:<a href="/lead/view/'+ leadGid +'" target="_blank">'+ cLeadID +'</a></i><br>'
     }
     
     if (cCaseID && caseGid){
-        html += '<i>c:<a href="/lead/view/'+ caseGid +'" target="_blank">'+ cCaseID +'</a></i><br>'
+        html += '<i>c:<a href="/cases/view/'+ caseGid +'" target="_blank">'+ cCaseID +'</a></i><br>'
     }
     
     return html
@@ -240,8 +291,7 @@ function showShortSource(callSourceTypeId) {
 }
 
 function isCallInOrOut(callTypeId, callparentID) {   
-    if(callTypeId == '$cOut'){
-        console.log(callparentID)
+    if(callTypeId == '$cOut'){        
         if(callparentID){
             return '<br><span class="badge badge-danger">Out</span>'
         } else {
@@ -252,15 +302,43 @@ function isCallInOrOut(callTypeId, callparentID) {
     }
 }
 
-function showAgentClientDitails(fullName)
-{    
-    if (fullName){
+function showAgentClientDetails(fullName, callTypeId, callFrom, callCreatedUserId, callCreatedUsername)
+{  
+    let html = '';
+    let clientName;
+    if (callTypeId == '$cIn'){
+        if (fullName){
+            if(fullName.toString().trim() === 'ClientName'){
+                clientName = "...";
+            } else {
+                clientName = fullName
+            }               
+        } else {
+            clientName = "...";
+        }
+        
+        html+= '<div class="col-md-3">' +
+                    '<i class="fa fa-male text-info fa-2x fa-border"></i>' +
+               '</div>' +
+               '<div class="col-md-9">' + clientName + '<br>' + callFrom +
+               '</div>';
+    } else {
+        if (callCreatedUserId) {
+            html+= '<i class="fa fa-user fa-2x fa-border"></i>' + callCreatedUsername
+        } else {
+            html+= '<i class="fa fa-phone fa-2x fa-border"></i>' + callFrom
+        }
+    }
+    
+    return html
+    
+    /*if (fullName){
         if(fullName.toString().trim() === 'ClientName'){
             return '...';
         }    
         return fullName
     }
-    return '...';
+    return '...';*/
 }
 
 function renderUsersOnline(index, userID, username, userRoles, isCallStatusReady, isCallFree)
@@ -303,7 +381,9 @@ JS;
 
 $this->registerJs($js);
 ?>
-
+<style>
+    #call-map-page table {margin-bottom: 5px}
+</style>
 <div id="call-map-page" class="col-md-12">
     <div class="row">
         <div class="col-md-2">
