@@ -4,6 +4,7 @@ namespace sales\forms\lead;
 
 use common\models\Client;
 use common\models\ClientEmail;
+use sales\services\client\InternalEmailValidator;
 use yii\base\Model;
 
 /**
@@ -62,6 +63,7 @@ class EmailCreateForm extends Model
 			[['email', 'client_id'], 'unique', 'targetClass' => ClientEmail::class, 'targetAttribute' => ['email', 'client_id'], 'except' => 'update', 'message' => 'Client already has this email',],
 			['email', 'checkUniqueClientEmail', 'on' => 'update'],
 			['type', 'checkTypeForExistence'],
+			['email', InternalEmailValidator::class, 'allowInternalEmail' => \Yii::$app->params['settings']['allow_contact_internal_email']],
 		];
     }
 
