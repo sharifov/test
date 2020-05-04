@@ -10,9 +10,11 @@ use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
 use sales\services\client\ClientManageService;
+use Throwable;
 use Yii;
 use common\models\Client;
 use common\models\search\ContactsSearch;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
@@ -246,14 +248,16 @@ class ContactsController extends FController
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 
+
     /**
-     * Deletes an existing Client model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param int $id
+     * @return Response
+     * @throws HttpException
+     * @throws NotFoundHttpException
+     * @throws StaleObjectException
+     * @throws Throwable
      */
-    public function actionDelete($id)
+    public function actionDelete(int $id): Response
     {
         $client = $this->findModel($id);
 
@@ -269,11 +273,11 @@ class ContactsController extends FController
     /**
      * Finds the Client model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
+     * @param int $id
      * @return Client the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel(int $id): Client
     {
         if (($model = Client::findOne($id)) !== null) {
             return $model;
