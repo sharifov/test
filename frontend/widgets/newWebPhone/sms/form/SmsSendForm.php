@@ -17,7 +17,7 @@ class SmsSendForm extends SmsAuthorizationForm
     {
         $rules =  [
             ['text', 'required'],
-            ['text', 'string', 'max' => 255],
+            ['text', 'string', 'max' => 140],
         ];
         return ArrayHelper::merge(parent::rules(), $rules);
     }
