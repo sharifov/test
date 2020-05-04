@@ -27,6 +27,7 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use sales\auth\Auth;
 use yii\data\ActiveDataProvider;
 
 \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
@@ -142,18 +143,22 @@ $lead = $leadForm->getLead();
             <?php endif; ?>
 
 
-            <?php /* $this->render('checklist/lead_checklist', [
-                'lead' => $lead,
-                'comForm'       => $comForm,
-                'leadId'        => $lead->id,
-                'dataProvider'  => $dataProviderChecklist,
-                'isAdmin'       => $is_admin,
-                'modelLeadChecklist'       => $modelLeadChecklist,
-            ]) */ ?>
+            <?php if (Auth::can('lead/view_Check_List')): ?>
+                <?= $this->render('checklist/lead_checklist', [
+                    'lead' => $lead,
+                    'comForm'       => $comForm,
+                    'leadId'        => $lead->id,
+                    'dataProvider'  => $dataProviderChecklist,
+                    'isAdmin'       => $is_admin,
+                    'modelLeadChecklist'       => $modelLeadChecklist,
+                ]) ?>
+            <?php endif; ?>
 
-            <?php /* $this->render('partial/_task_list', [
-                'lead' => $lead
-            ]); */ ?>
+            <?php if (Auth::can('lead/view_Task_List')): ?>
+                <?= $this->render('partial/_task_list', [
+                    'lead' => $lead
+                ]) ?>
+            <?php endif; ?>
 
             <?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
                 <?= $this->render('communication/lead_communication', [
@@ -194,16 +199,18 @@ $lead = $leadForm->getLead();
 
 
 
-            <?php /* if(Yii::$app->user->identity->isAllowCallExpert): ?>
-                <?= $this->render('call-expert/lead_call_expert', [
-                    'lead' => $lead,
-                    'comForm'       => $comForm,
-                    'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderCallExpert,
-                    'isAdmin'       => $is_admin,
-                    'modelLeadCallExpert'       => $modelLeadCallExpert,
-                ]) ?>
-            <?php endif; */?>
+            <?php if (Auth::can('lead/view_BO_Expert')): ?>
+                <?php  if(Yii::$app->user->identity->isAllowCallExpert): ?>
+                    <?= $this->render('call-expert/lead_call_expert', [
+                        'lead' => $lead,
+                        'comForm'       => $comForm,
+                        'leadId'        => $lead->id,
+                        'dataProvider'  => $dataProviderCallExpert,
+                        'isAdmin'       => $is_admin,
+                        'modelLeadCallExpert'       => $modelLeadCallExpert,
+                    ]) ?>
+                <?php endif; ?>
+            <?php endif; ?>
 
 
 
