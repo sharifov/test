@@ -859,43 +859,6 @@ class CallController extends FController
         return $this->redirect(['index']);
     }
 
-    public function actionAjaxGetCallHistory()
-	{
-		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-
-			$userPhoneList = UserProjectParams::find()
-				->select(['pl_phone_number'])
-				->byUserId(Auth::id())
-				->withExistingPhoneInPhoneList()
-				->asArray()
-				->all();
-
-			$userPhoneList = ArrayHelper::getColumn($userPhoneList, 'pl_phone_number');
-
-			$callSearch = new CallSearch();
-			$page = Yii::$app->request->post('page', 0);
-
-			$params['CallSearch']['phoneList'] = $userPhoneList;
-			$callHistory = $callSearch->getCallHistory($params);
-			$callHistory->pagination->setPage($page);
-
-			$rows = $callHistory->getModels();
-
-			$result = [
-				'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
-					'callHistory' => CallHelper::formatCallHistoryByDate($rows),
-				]),
-				'page' => $page+1,
-				'rows' => empty($rows)
-			];
-
-			return $this->asJson($result);
-
-		}
-
-		throw new BadRequestHttpException();
-	}
-
     /**
      * @param string $sid
      * @param bool $cfRecord

@@ -14,6 +14,7 @@ $(document).ready(function() {
     }
 
     var tabHistoryLoaded = false;
+    var userId = $('#tab-history').attr('data-user-id');
     $phoneTabAnchor.on("click", function () {
         $current = "#" + $(this).data("toggle-tab");
 
@@ -30,9 +31,9 @@ $(document).ready(function() {
             if (!tabHistoryLoaded) {
                 tabHistoryLoaded = true;
                 $.ajax({
-                    url: '/call/ajax-get-call-history',
+                    url: '/call-log/ajax-get-call-history',
                     type: 'post',
-                    data: {},
+                    data: {uid: userId},
                     dataType: 'json',
                     beforeSend: function() {
                         $($current).append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
@@ -60,9 +61,9 @@ $(document).ready(function() {
                 // ajax call get data from server and append to the div
                 var page = $('#tab-history').attr('data-page');
                 $.ajax({
-                    url: '/call/ajax-get-call-history',
+                    url: '/call-log/ajax-get-call-history',
                     type: 'post',
-                    data: {page: page},
+                    data: {page: page, uid: userId},
                     dataType: 'json',
                     beforeSend: function() {
                         $($current).append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
