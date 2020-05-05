@@ -92,6 +92,8 @@ class Sms extends \yii\db\ActiveRecord
     public const STATUS_CANCEL  = 4;
     public const STATUS_DONE    = 5;
     public const STATUS_ERROR   = 6;
+    public const STATUS_SENT 	= 7;
+    public const STATUS_QUEUED 	= 8;
 
     public const STATUS_LIST = [
         self::STATUS_NEW        => 'New',
@@ -100,6 +102,8 @@ class Sms extends \yii\db\ActiveRecord
         self::STATUS_CANCEL     => 'Cancel',
         self::STATUS_DONE       => 'Done',
         self::STATUS_ERROR      => 'Error',
+        self::STATUS_SENT       => 'Sent',
+        self::STATUS_QUEUED     => 'Queued',
     ];
 
     public const PRIORITY_LOW       = 1;
