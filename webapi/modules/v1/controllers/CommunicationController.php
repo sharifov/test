@@ -1128,6 +1128,7 @@ class CommunicationController extends ApiBaseController
 
         $responseTwml = new VoiceResponse();
 		$callInfo = [];
+		$response = [];
 
 		if ($project && $project->custom_data && !$callFromInternalPhone) {
             $customData = @json_decode($project->custom_data, true);
@@ -1161,7 +1162,7 @@ class CommunicationController extends ApiBaseController
 //				'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
 //			]);
 //			$dial->client('seller'.$user->id);
-			$callInfo['agent_username'][] = 'seller'.$user->id;
+			$response['agent_username'][] = 'seller'.$user->id;
 		}
 
         $callInfo['id'] = $callModel->c_id;
@@ -1173,7 +1174,6 @@ class CommunicationController extends ApiBaseController
 
 
 
-        $response = [];
         $response['jobId'] = $jobId;
         $response['call'] = $callInfo;
         $response['twml'] = (string) $responseTwml;
