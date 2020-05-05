@@ -270,6 +270,37 @@ class ContactsController extends FController
     }
 
     /**
+     * @return array
+     */
+    public function actionSetFavoriteAjax(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['message' => '', 'status' => 0, 'favorite' => 0];
+
+        if (Yii::$app->request->isAjax) {
+            $clientId = (int) Yii::$app->request->post('client_id');
+            $isFavorite = (bool) Yii::$app->request->post('is_favorite');
+            $ucl_favorite = $isFavorite ? false : true;
+
+            if ($userContactList = UserContactList::findOne(['ucl_client_id' => $clientId])) {
+                $userContactList->ucl_favorite = $ucl_favorite;
+
+                if ($userContactList->save()) {
+                    $result['status'] = 1;
+                    $result['favorite'] = (int)$ucl_favorite;
+                }  else {
+                    $result['message'] = $userContactList->getErrorSummary(false)[0];
+                    Yii::error(VarDumper::dumpAsString($userContactList->errors),
+                        'ContactsController:actionSetFavoriteAjax:saveUserContactList');
+                }
+            } else {
+                $result['message'] = 'Client not found';
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Finds the Client model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id

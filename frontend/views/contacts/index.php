@@ -88,15 +88,33 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if ($model->contact) {
-                        $out = $model->contact->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                        $class = $model->contact->ucl_favorite ? 'fa fa-star text-warning' : 'fa fa-star-o';
+                        $out = Html::a('<i class="' . $class . '"></i>', null, [
+                            'class' => 'btn-favorite',
+                            'data' => [
+                                'client-id' => $model->id,
+                                'is-favorite' => $model->contact->ucl_favorite,
+                            ],
+                        ]);
                     }
                     return $out;
                 },
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No']
             ],
-            'first_name',
-            'last_name',
+            [
+                'header' => 'Name',
+                'attribute' => 'by_name',
+                'value' => static function(Client $model) {
+                    $out = '';
+                    $out .= $model->first_name ? '<em>First name:</em> ' . Html::encode($model->first_name) . '<br />' : '';
+                    $out .= $model->middle_name ? '<em>Middle name:</em> ' . Html::encode($model->middle_name) . '<br />' : '';
+                    $out .= $model->last_name ? '<em>Last name:</em> ' . Html::encode($model->last_name) . '<br />' : '';
+
+                    return $out;
+                },
+                'format' => 'raw',
+            ],
             'company_name',
             [
                 'header' => 'Phones',
@@ -211,12 +229,66 @@ yii\bootstrap4\Modal::begin([
 echo "<div id='modalClientContent'></div>";
 yii\bootstrap4\Modal::end();
 
-
+$js = <<<JS
+    $(document).ready( function () {
+        $(document).on('click', '.btn-favorite', function(e) {
+            e.preventDefault();
+            
+            let objBtn = $(this),
+                clientId = objBtn.data('client-id'),
+                isFavorite = objBtn.data('is-favorite');
+            
+            $.ajax({
+                type: 'post',
+                url: '/contacts/set-favorite-ajax',
+                dataType: 'json',
+                data: {client_id:clientId, is_favorite:isFavorite},                
+                beforeSend: function () {                    
+                    objBtn.html('<span class="spinner-border spinner-border-sm"></span>');
+                    objBtn.prop('disabled', true);    
+                },
+                success: function (dataResponse) {
+                
+                    objBtn.prop('disabled', false);    
+                    if (dataResponse.status === 1) {                        
+                        if (dataResponse.favorite === 1) {                            
+                            objBtn.html('<i class="fa fa-star text-warning"></i>');                            
+                        } else {                            
+                            objBtn.html('<i class="fa fa-star-o"></i>');
+                        }     
+                        objBtn.data('is-favorite', dataResponse.favorite);                     
+                    } else {                        
+                        new PNotify({
+                            title: "Error:",
+                            type: "error",
+                            text: dataResponse.message,
+                            hide: true
+                        });
+                        if (isFavorite) {                            
+                            objBtn.html('<i class="fa fa-star text-warning"></i>');
+                        } else {                            
+                            objBtn.html('<i class="fa fa-star-o"></i>');
+                        }
+                    }                          
+                },
+                error: function () {
+                    objBtn.prop('disabled', false); 
+                    if (isFavorite) {                        
+                        objBtn.html('<i class="fa fa-star text-warning"></i>'); 
+                    } else {                       
+                        objBtn.html('<i class="fa fa-star-o"></i>'); 
+                    } 
+                }
+            });                         
+        });
+    });
+JS;
+$this->registerJs($js);
 
 $jsCode = <<<JS
 
     $(document).on('click', '.show-modal', function(){
-        //e.preventDefault();
+        
         $('#modalClient').modal('show').find('#modalClientContent').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
 
         $('#modalClient-label').html($(this).attr('title'));
