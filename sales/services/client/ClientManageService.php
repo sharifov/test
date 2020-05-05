@@ -5,6 +5,7 @@ namespace sales\services\client;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\UserContactList;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
@@ -323,4 +324,20 @@ class ClientManageService
 
         return $emails;
     }
+
+    /**
+     * @param Client $client
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function removeContact(Client $client): void
+	{
+		$client = $this->finder->clientFind($client);
+		$client->cl_type_id = Client::TYPE_CLIENT;
+		$clientId = $this->clientRepository->save($client);
+
+        if ($userContactList = UserContactList::findOne(['ucl_client_id' => $clientId])) {
+            $userContactList->delete();
+        }
+	}
 }

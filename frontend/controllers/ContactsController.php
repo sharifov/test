@@ -248,7 +248,6 @@ class ContactsController extends FController
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 
-
     /**
      * @param int $id
      * @return Response
@@ -265,7 +264,7 @@ class ContactsController extends FController
 			throw new HttpException(403, 'Access Denied');
 		}
 
-        $client->delete();
+		$this->clientManageService->removeContact($client);
 
         return $this->redirect(['index']);
     }
