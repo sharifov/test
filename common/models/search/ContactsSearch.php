@@ -18,6 +18,7 @@ use yii\helpers\ArrayHelper;
  * @property int $userId
  * @property bool $isPublic
  * @property bool $isDisabled
+ * @property bool $ucl_favorite
  * @property string $by_name
  * @property Employee $user
  * @property int $contact_project_id
@@ -28,6 +29,7 @@ class ContactsSearch extends Client
     public $client_phone;
     public $by_name;
     public $contact_project_id;
+    public $ucl_favorite;
 
     public $userId;
     public $isPublic = true;
@@ -61,7 +63,7 @@ class ContactsSearch extends Client
             [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
             ['uuid', 'string', 'max' => 36],
             [['company_name', 'by_name'], 'string', 'max' => 150],
-            [['is_company', 'is_public', 'disabled'], 'boolean'],
+            [['is_company', 'is_public', 'disabled', 'ucl_favorite'], 'boolean'],
         ];
     }
 
@@ -136,6 +138,7 @@ class ContactsSearch extends Client
             'is_public' => $this->is_public,
             'disabled' => $this->disabled,
             'rating' => $this->rating,
+            'ucl_favorite' => $this->ucl_favorite,
         ]);
 
         if ($this->by_name)  {
@@ -154,6 +157,47 @@ class ContactsSearch extends Client
             ->andFilterWhere(['like', 'uuid', $this->uuid])
             ->andFilterWhere(['like', 'company_name', $this->company_name])
             ->andFilterWhere(['like', 'description', $this->description]);
+
+        return $dataProvider;
+    }
+
+
+    public function searchByWidget(string $q, ?int $limit = null): ActiveDataProvider
+    {
+        $query = Client::find();
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        $query->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
+            'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id');
+
+        if (!$this->isRoleAdmin()) {
+            $query->andWhere(['user_contact_list.ucl_user_id' => $this->userId]);
+            $query->orWhere(['AND',
+                ['!=', 'user_contact_list.ucl_user_id', $this->userId],
+                ['disabled' => $this->isDisabled],
+                ['is_public' => $this->isPublic],
+            ]);
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['first_name' => SORT_ASC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $query->andWhere([
+            'OR',
+            ['IN', 'id', ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $q])],
+            ['IN', 'id', ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $q])],
+            ['like', 'first_name', $q],
+            ['like', 'last_name', $q],
+            ['like', 'company_name', $q],
+        ]);
 
         return $dataProvider;
     }

@@ -68,6 +68,12 @@ return [
             'password' => '',
         ],
 
+        'queue_sms_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_sms_job',
+        ],
         'queue_email_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
             'host' => 'localhost',
@@ -88,11 +94,13 @@ return [
         ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
+            'botUsername' => 'CrmKivorkBot',
             'botToken' => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
         ]
 
     ],
     'bootstrap' => [
+        'queue_sms_job',
         'queue_email_job',
         'queue_phone_check',
         'queue_job',

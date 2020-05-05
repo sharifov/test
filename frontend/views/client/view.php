@@ -45,12 +45,18 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'parent_id',
                 'value' => function(\common\models\Client $model) {
-
                     $out = '<span class="not-set">(not set)</span>';
                     if ($model->parent_id && $parent = Client::findOne(['id' => $model->parent_id])) {
                         return '<i class="fa fa-user"></i> ' . $parent->getNameByType();
                     }
                     return $out;
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'cl_type_id',
+                'value' => function(\common\models\Client $model) {
+                    return $model::TYPE_LIST[$model->cl_type_id];
                 },
                 'format' => 'raw',
             ],

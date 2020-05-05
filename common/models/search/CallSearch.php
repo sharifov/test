@@ -60,6 +60,7 @@ class CallSearch extends Call
     public $timeTo;
 
     public $dep_ids = [];
+    public $phoneList = [];
 
     private $callSearchRepository;
 
@@ -99,6 +100,8 @@ class CallSearch extends Call
             ['c_is_transfer', 'boolean'],
             ['c_queue_start_dt', 'date', 'format' => 'php:Y-m-d'],
             ['c_group_id', 'integer'],
+
+			['phoneList', 'safe']
         ];
     }
 

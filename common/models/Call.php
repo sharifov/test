@@ -626,6 +626,11 @@ class Call extends \yii\db\ActiveRecord
         return self::CALL_TYPE_LIST[$this->c_call_type_id] ?? '-';
     }
 
+    public static function getCallTypeNameById(int $type)
+	{
+		return self::CALL_TYPE_LIST[$type] ?? '-';
+	}
+
     /**
      * @return mixed|string
      */
@@ -843,7 +848,7 @@ class Call extends \yii\db\ActiveRecord
 //                            }
                             $cuaExists = CallUserAccess::find()->andWhere([
                                 'cua_call_id' => $this->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT
-                            ])->andWhere(['>=', 'cua_created_dt', $this->c_queue_start_dt])->exists();
+                            ])->andWhere(['>=', 'cua_updated_dt', $this->c_queue_start_dt])->exists();
                             if (!$cuaExists) {
                                 $this->c_status_id = self::STATUS_NO_ANSWER;
                                 self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
@@ -1120,9 +1125,22 @@ class Call extends \yii\db\ActiveRecord
         $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
         if ($logEnable) {
             $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
-            if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
+            $isChangedDuration = array_key_exists('c_call_duration', $changedAttributes);
+            if (
+                Yii::$app->id === 'app-webapi'
+                && $this->isTwFinishStatus()
+                && ($insert || $isChangedTwStatus || $isChangedDuration)
+            ) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
             }
+//            if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
+//                if (Yii::$app->id === 'app-webapi') {
+//                    Yii::info($this->getAttributes(), 'info\DebugAfterSave_WebApi');
+//                    (Yii::createObject(CallLogTransferService::class))->transfer($this);
+//                } else {
+//                    Yii::info($this->getAttributes(), 'info\DebugAfterSave_Other');
+//                }
+//            }
         }
 
     }

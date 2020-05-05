@@ -3,10 +3,12 @@
 namespace frontend\controllers;
 
 use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use Yii;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\search\CallLogSearch;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -85,6 +87,35 @@ class CallLogController extends FController
             'model' => $model,
         ]);
     }
+
+	public function actionAjaxGetCallHistory()
+	{
+		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+
+			$userId = Yii::$app->request->post('uid');
+
+			$callSearch = new CallLogSearch();
+			$page = Yii::$app->request->post('page', 0);
+
+			$params['CallLogSearch']['cl_user_id'] = $userId;
+			$callHistory = $callSearch->getCallHistory($params);
+			$callHistory->pagination->setPage($page);
+
+			$rows = $callHistory->getModels();
+
+			$result = [
+				'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
+					'callHistory' => CallHelper::formatCallHistoryByDate($rows),
+				]),
+				'page' => $page+1,
+				'rows' => empty($rows)
+			];
+
+			return $this->asJson($result);
+		}
+
+		throw new BadRequestHttpException();
+	}
 
     /**
      * @param $id

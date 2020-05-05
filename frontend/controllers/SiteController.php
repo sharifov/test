@@ -249,11 +249,20 @@ class SiteController extends FController
         //echo $host.$url; exit;
         $code = base64_encode(Yii::$app->user->id . '|' . $secureCode);
 
-        $url = 'https://telegram.me/CrmKivorkBot?start='.$code;
 
-        $qrCode = (new QrCode($url))
-            ->setSize(160)
-            ->setMargin(5);
+        if (Yii::$app->telegram && !empty(Yii::$app->telegram->botUsername)) {
+            $url = 'https://telegram.me/' . trim(Yii::$app->telegram->botUsername) . '?start='.$code;
+
+            $qrCode = (new QrCode($url))
+                ->setSize(160)
+                ->setMargin(5);
+            $qrCodeData = $qrCode->writeDataUri();
+        } else {
+            $qrCodeData = null;
+        }
+
+
+
 
 		$expMonth = $modelUserParams->upUser->userProfile->getExperienceMonth();
 		$userCommissionRulesValue = UserCommissionRules::find()->getCommissionValueByExpMonth($expMonth);
@@ -288,7 +297,7 @@ class SiteController extends FController
         return $this->render('/employee/update_profile', [
             'model' => $model,
             'modelUserParams' => $modelUserParams,
-            'qrcodeData' => $qrCode->writeDataUri(),
+            'qrcodeData' => $qrCodeData,
 			'userCommissionRuleValue' => $userCommissionRulesValue,
 			'userBonusRuleValue' => $userBonusRulesValue,
             'userProfileForm' => $userProfileForm,

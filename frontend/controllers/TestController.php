@@ -38,6 +38,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
+use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
 use modules\email\src\helpers\MailHelper;
@@ -63,6 +64,7 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
+use sales\access\CallAccess;
 use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
@@ -86,6 +88,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
 use sales\helpers\app\AppHelper;
+use sales\helpers\call\CallHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
@@ -138,6 +141,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -203,26 +207,41 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $lead = Lead::findOne(125556);
-        $lead->employee_id = 295;
 
-        $task = QaTask::findOne(1);
- $body = Yii::t('email', "You task (Id: {id}) has been canceled by {username} ({role}). Reason: {reason}.",
-            [
-                'id' => \common\components\purifier\Purifier::createQaTaskShortLink($task),
-                'username' => 'user name',
-                'role' => 12,
-                'reason' => 'reas',
-            ]);
+//        $phoneList = UserProjectParams::find()
+//            ->select(['pl_phone_number', 'upp_phone_list_id', 'upp_project_id'])
+//            ->byUserId(295)
+//            ->byPhone('+373693057g7', false)
+//            ->all();
+//        VarDumper::dump($phoneList);
+//        $sms = Sms::findOne(398748);
+//        $sms->s_status_id = 7;
+//        $sms->save();
+//        Notifications::publish('phoneWidgetSmsStatusUpdate', ['user_id' => 295], Message::updateStatus($sms));
 
-        if ($ntf = Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', $body, Notifications::TYPE_SUCCESS, true)) {
-            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-            Notifications::publish('getNewNotification', ['user_id' => $lead->employee_id], $dataNotification);
-        }
+        $sms = new Sms();
+        $sms->s_type_id = Sms::TYPE_INBOX;
+        $sms->s_status_id = Sms::STATUS_DONE;
+        $sms->s_sms_text = '000';
+        $sms->s_phone_from = '+37366666666';
+        $sms->s_phone_to = '+37369305728';
+        $sms->s_created_dt = '2022-03-26 12:00:12';
+        $sms->s_created_user_id = Yii::$app->user->id;
+        $sms->s_client_id = 458921;
+//        $sms->save();
+        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
+        $sms->s_sms_text = '111';
+        $sms->s_created_dt = '2022-03-26 12:00:12';
+        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
+        $sms->s_sms_text = '222';
+        $sms->s_created_dt = '2024-10-12 12:00:12';
+        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
+        $sms->s_sms_text = '333';
+        $sms->s_created_dt = '2022-03-26 12:00:12';
+        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
 
 
-        die;
-        return $this->render('blank');
+//        return $this->render('blank');
     }
 
     public function actionTestNew()
@@ -1168,4 +1187,31 @@ class TestController extends FController
         return $this->render('websocket');
     }
 
+    public function actionTestCallHelper(): void
+	{
+		$callAccess = CallAccess::isUserCanDial(464, UserProfile::CALL_TYPE_WEB);
+
+		$test1 = CallHelper::callNumber('+123456789', false);
+		$test2 = CallHelper::callNumber('+123456789', $callAccess, 'call phone');
+		$test3 = CallHelper::callNumber('+123456789', $callAccess, 'call phone', [
+			'confirm' => 1,
+			'call' => 1,
+			'phone-from-id' => 34,
+			'icon-class' => 'fa fa-phone valid'
+		]);
+		$test4 = CallHelper::callNumber('+123456789', $callAccess,'call phone', [
+			'confirm' => 1,
+			'call' => 1,
+			'phone-from-id' => 34,
+			'icon-class' => 'fa fa-phone valid',
+		], 'a');
+
+		echo Html::encode($test1);
+		echo '<br>';
+		echo Html::encode($test2);
+		echo '<br>';
+		echo Html::encode($test3);
+		echo '<br>';
+		echo Html::encode($test4);
+	}
 }

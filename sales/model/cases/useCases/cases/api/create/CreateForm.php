@@ -55,7 +55,8 @@ class CreateForm extends Model
             ['contact_phone', 'filter', 'filter' => static function ($value) {
                 return str_replace(['-', ' '], '', trim($value));
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
-            ['contact_phone', InternalPhoneValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['contact_phone', InternalPhoneValidator::class,
+                'skipOnError' => true, 'skipOnEmpty' => true, 'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']],
 
             ['category_id', 'required'],
             ['category_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],

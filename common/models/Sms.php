@@ -15,6 +15,7 @@ use sales\events\sms\SmsCreatedEvent;
 use sales\services\sms\incoming\SmsIncomingForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
@@ -68,6 +69,7 @@ use yii\helpers\VarDumper;
  * @property Project $sProject
  * @property SmsTemplateType $sTemplateType
  * @property Employee $sUpdatedUser
+ * @property Client $client
  */
 class Sms extends \yii\db\ActiveRecord
 {
@@ -94,6 +96,7 @@ class Sms extends \yii\db\ActiveRecord
     public const STATUS_DONE    = 5;
     public const STATUS_ERROR   = 6;
     public const STATUS_SENT 	= 7;
+    public const STATUS_QUEUED 	= 8;
 
     public const STATUS_LIST = [
         self::STATUS_NEW        => 'New',
@@ -103,6 +106,7 @@ class Sms extends \yii\db\ActiveRecord
         self::STATUS_DONE       => 'Done',
         self::STATUS_ERROR      => 'Error',
         self::STATUS_SENT       => 'Sent',
+        self::STATUS_QUEUED     => 'Queued',
     ];
 
     public const PRIORITY_LOW       = 1;
@@ -439,6 +443,11 @@ class Sms extends \yii\db\ActiveRecord
         return $this->hasOne(SmsTemplateType::class, ['stp_id' => 's_template_type_id']);
     }
 
+    public function getClient(): ActiveQuery
+    {
+        return $this->hasOne(Client::class, ['id' => 's_client_id']);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -737,5 +746,20 @@ class Sms extends \yii\db\ActiveRecord
         if ($this->s_case_id && $this->sCase) {
             $this->sCase->updateLastAction();
         }
+    }
+
+    public function isOut(): bool
+    {
+        return $this->s_type_id === self::TYPE_OUTBOX;
+    }
+
+    public function isIn(): bool
+    {
+        return $this->s_type_id === self::TYPE_INBOX;
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->s_type_id === self::TYPE_DRAFT;
     }
 }

@@ -591,6 +591,10 @@ use yii\helpers\Html;
                     $('#btn-group-id-mute').hide();
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
+
+                    if (typeof window.newWidgetCancelCall === "function") {
+                        window.newWidgetCancelCall();
+                    }
                 });
 
                 // device.on('ringing', function (conn) {
@@ -696,6 +700,7 @@ use yii\helpers\Html;
         }*/
 
         let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': userId};
+        console.log(params);
         webPhoneParams = params;
 
         if (device) {
