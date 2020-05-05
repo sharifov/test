@@ -296,10 +296,9 @@ class ContactsController extends FController
             if (strlen($q) < 2) {
                 return $this->asJson($out);
             }
-
-            /** @var ContactsSearch[] $contacts */
+            
             $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q)->getModels();
-//sleep(4);
+
             $data = [];
             if ($contacts) {
                 foreach ($contacts as $n => $contact) {
@@ -346,7 +345,7 @@ class ContactsController extends FController
                 return $this->asJson($out);
             }
 
-            /** @var ContactsSearch[] $contacts */
+
             $contacts = (new ContactsSearch(Auth::id()))->searchByWidgetCallSection($q, $limit = 3);
 
 //            VarDumper::dump($contacts);die;
