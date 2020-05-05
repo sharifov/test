@@ -198,17 +198,22 @@ $js = <<<JS
                 text: 'Server Error. Try again later',
                 hide: true
             });
-        })
+        });
         return false;
-    })
+    });
     
     function loadContact(contact) {
+        //  type = 3 = Internal contact
+        let contactIcon = '';
+        if (contact['type'] === 3) {
+            contactIcon = '<div class="contact-info-card__status">' +
+                            '<i class="far fa-user ' + contact['user_status_class'] + ' "></i>' +
+                        '</div>'; 
+        }
         let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '">' +
                     '<div class="collapsible-toggler">' +
-                        '<div class="contact-info-card__status">' +
-                            '<i class="far fa-user"></i>' +
-                        '</div>' +
-                        '<div class="contact-info-card__details">' +
+                        contactIcon
+                        + '<div class="contact-info-card__details">' +
                             '<div class="contact-info-card__line history-details">' +
                                 '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' +
                             '</div>' +

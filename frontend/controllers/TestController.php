@@ -211,7 +211,7 @@ class TestController extends FController
 
 
         $search = new ContactsSearch(295);
-        $search->searchByWidget('373');
+        $search->searchByWidgetCallSection('373');
 
 
 //        return $this->render('blank');
