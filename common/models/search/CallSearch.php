@@ -806,7 +806,6 @@ class CallSearch extends Call
         return $dataProvider;
     }
 
-
     public function searchRealtimeUserCallMapHistory($params)
     {
         $this->load($params);
@@ -900,5 +899,4 @@ class CallSearch extends Call
 
 		return $dataProvider;
 	}
-
 }

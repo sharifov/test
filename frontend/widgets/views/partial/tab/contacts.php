@@ -1,9 +1,23 @@
 <?php
 
+use sales\auth\Auth;
+use yii\bootstrap4\Html;
+use yii\web\View;
+use yii\widgets\ActiveForm;
+
+
 /** @var View $this */
 /** @var array $userPhones */
 
 echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $userPhones]);
+
+$titleAccessGetMessages = '';
+$disabledClass = '';
+$accessGetSms = Auth::can('/sms/list-ajax');
+if (!$accessGetSms) {
+    $titleAccessGetMessages = 'Access denied';
+    $disabledClass = '-disabled';
+}
 
 ?>
 
@@ -13,10 +27,6 @@ echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $u
             <i class="fa fa-search"></i>
         </label>
         <?php
-
-        use yii\bootstrap4\Html;
-        use yii\web\View;
-        use yii\widgets\ActiveForm;
 
         $form = ActiveForm::begin([
             'id' => 'contact-list-ajax',
@@ -178,8 +188,8 @@ echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $u
         e.preventDefault();
         let phone = $(this).data('phone');
         $(".widget-phone__contact-info-modal").hide();
-        $('.phone-widget__header-actions a[data-toggle-tab="tab-contacts"]').removeClass('is_active');
-        $('#tab-contacts').removeClass('is_active');
+        $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+        $('.phone-widget__tab').removeClass('is_active');
         $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
         $('#tab-phone').addClass('is_active');
         $("#call-pane__dial-number").val(phone);
@@ -283,7 +293,7 @@ echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $u
                                 '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
                                     '<i class="fa fa-phone phone-dial" data-phone="' + phone + '"></i>' +
                                 '</li>' +
-                                '<li class="actions-list__option js-trigger-messages-modal" data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '">' +
+                                '<li title="{$titleAccessGetMessages}" class="actions-list__option js-trigger-messages-modal{$disabledClass}" data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '">' +
                                     '<i class="fa fa-comment-alt"></i>' +
                                 '</li>' +
                             '</ul>' +

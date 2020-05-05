@@ -91,7 +91,7 @@ class CallHelper
 
 		foreach ($callHistory as $call) {
 			$currentDate = new DateTime();
-			$callDate = new DateTime($call['c_created_dt']);
+			$callDate = new DateTime($call['cl_call_created_dt']);
 			$dDiff = $currentDate->diff($callDate);
 
 			if ($dDiff->d === 0) {
@@ -99,7 +99,7 @@ class CallHelper
 			} elseif ($dDiff->d === 1) {
 				$result['Yesterday'][] = $call;
 			} else {
-				$result[date('Y-m-d', strtotime($call['c_created_dt']))][] = $call;
+				$result[date('Y-m-d', strtotime($call['cl_call_created_dt']))][] = $call;
 			}
 		}
 
