@@ -405,16 +405,21 @@ class CommunicationController extends ApiBaseController
 
                    // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
 
+					/** @var Employee $user */
                     $user = $upp->uppUser;
 
                     if ($user) {
                         if ($user->isOnline()) {
                             // Yii::info('DIRECT CALL - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:DirectCall');
+							if ($callFromInternalPhone && $user->userStatus->us_is_on_call) {
+								return $this->createExceptionCall($incoming_phone_number, 'User is on call');
+							}
+
                             return $this->createDirectCall($callModel, $user, $callFromInternalPhone);
                         }
 
 						if ($callFromInternalPhone) {
-							return $this->createExceptionCall($incoming_phone_number, 'Agent is offline');
+							return $this->createExceptionCall($incoming_phone_number, 'User is offline');
 						}
 
 						Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
