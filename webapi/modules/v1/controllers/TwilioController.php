@@ -1,7 +1,6 @@
 <?php
 namespace webapi\modules\v1\controllers;
 
-use common\components\CommunicationService;
 use common\components\jobs\CallQueueJob;
 use common\components\TwilioClient;
 use common\models\Call;
@@ -275,9 +274,6 @@ class TwilioController extends ApiBaseNoAuthController
      */
     public function actionRedirectCall()
     {
-        /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
-
         //$this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
