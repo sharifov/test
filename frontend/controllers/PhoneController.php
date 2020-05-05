@@ -414,8 +414,6 @@ class PhoneController extends FController
             $communication = \Yii::$app->communication;
             $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
 
-            //$communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
-
             if ($resultApi && isset($resultApi['data']['result']['sid'])) {
 
                 $result = [
