@@ -361,10 +361,9 @@ class ContactsController extends FController
             if (strlen($q) < 2) {
                 return $this->asJson($out);
             }
-
-            /** @var ContactsSearch[] $contacts */
+            
             $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q)->getModels();
-//sleep(4);
+
             $data = [];
             if ($contacts) {
                 foreach ($contacts as $n => $contact) {
@@ -411,29 +410,39 @@ class ContactsController extends FController
                 return $this->asJson($out);
             }
 
-            /** @var ContactsSearch[] $contacts */
-            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q, $limit = 3)->getModels();
-//sleep(4);
+
+            $contacts = (new ContactsSearch(Auth::id()))->searchByWidgetCallSection($q, $limit = 3);
+
+//            VarDumper::dump($contacts);die;
+
             $data = [];
             if ($contacts) {
                 foreach ($contacts as $n => $contact) {
-                    if ($contact->is_company) {
-                        $name = $contact->company_name ?: $contact->first_name . ' ' . $contact->last_name;
+                    if ($contact['is_company']) {
+                        $name = $contact['company_name'] ?: $contact['full_name'];
                     } else {
-                        $name = $contact->first_name . ' ' . $contact->last_name;
+                        $name = $contact['full_name'];
                     }
-                    if ($contact->clientPhones) {
-                        foreach ($contact->clientPhones as $phone) {
-                            $contactData = [];
-                            $contactData['id'] = $contact->id;
-                            $contactData['name'] = StringHelper::truncate($name, 18, '...') . ' ' . $phone->phone;
-                            $contactData['phone'] = $phone->phone;
-                            $data[] = $contactData;
-                            if (count($data) === 3) {
-                                break 2;
-                            }
+                    $contactData = [];
+                    $contactData['id'] = $contact['id'];
+                    $contactData['name'] = StringHelper::truncate($name, 18, '...') . ' ' . $contact['phone'];
+                    $contactData['phone'] = $contact['phone'];
+                    $contactData['type'] = (int)$contact['type'];
+
+                    if ($contactData['type'] === Client::TYPE_INTERNAL) {
+                        $isCallFree = (int)$contact['user_is_on_call'] ? false : true;
+                        $isCallStatusReady = (int)$contact['user_call_phone_status'] ? true : false;
+                        if ($isCallFree && $isCallStatusReady) {
+                            $class = 'text-success';
+                        } elseif ($isCallStatusReady) {
+                            $class = 'text-warning';
+                        } else {
+                            $class = 'text-danger';
                         }
+                        $contactData['user_status_class'] = $class;
                     }
+
+                    $data[] = $contactData;
                 }
             }
 

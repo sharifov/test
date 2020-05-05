@@ -24,6 +24,7 @@ use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
+use common\models\search\ContactsSearch;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserConnection;
@@ -208,37 +209,9 @@ class TestController extends FController
     public function actionTest()
     {
 
-//        $phoneList = UserProjectParams::find()
-//            ->select(['pl_phone_number', 'upp_phone_list_id', 'upp_project_id'])
-//            ->byUserId(295)
-//            ->byPhone('+373693057g7', false)
-//            ->all();
-//        VarDumper::dump($phoneList);
-//        $sms = Sms::findOne(398748);
-//        $sms->s_status_id = 7;
-//        $sms->save();
-//        Notifications::publish('phoneWidgetSmsStatusUpdate', ['user_id' => 295], Message::updateStatus($sms));
 
-        $sms = new Sms();
-        $sms->s_type_id = Sms::TYPE_INBOX;
-        $sms->s_status_id = Sms::STATUS_DONE;
-        $sms->s_sms_text = '000';
-        $sms->s_phone_from = '+37366666666';
-        $sms->s_phone_to = '+37369305728';
-        $sms->s_created_dt = '2022-03-26 12:00:12';
-        $sms->s_created_user_id = Yii::$app->user->id;
-        $sms->s_client_id = 458921;
-//        $sms->save();
-        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
-        $sms->s_sms_text = '111';
-        $sms->s_created_dt = '2022-03-26 12:00:12';
-        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
-        $sms->s_sms_text = '222';
-        $sms->s_created_dt = '2024-10-12 12:00:12';
-        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
-        $sms->s_sms_text = '333';
-        $sms->s_created_dt = '2022-03-26 12:00:12';
-        Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => 295], Message::add($sms, Auth::user(), $sms->client));
+        $search = new ContactsSearch(295);
+        $search->searchByWidgetCallSection('373');
 
 
 //        return $this->render('blank');

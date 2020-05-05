@@ -7,10 +7,19 @@ use common\models\ClientPhone;
 use common\models\ClientProject;
 use common\models\Employee;
 use common\models\UserContactList;
+use common\models\UserProfile;
+use common\models\UserProjectParams;
+use sales\model\emailList\entity\EmailList;
+use sales\model\phoneList\entity\PhoneList;
+use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Client;
+use yii\data\ArrayDataProvider;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * ContactsSearch represents the model behind the search form of `common\models\Client`.
@@ -161,6 +170,70 @@ class ContactsSearch extends Client
         return $dataProvider;
     }
 
+//    public function searchByWidget(string $q, ?int $limit = null): ActiveDataProvider
+//    {
+//        $queryClient = Client::find()->alias('c')->select([
+//            'c.id as id',
+//            'concat(c.first_name, \' \', c.middle_name, \' \', c.last_name) as full_name',
+//            'c.company_name as company_name',
+//            'c.cl_type_id as type',
+//            'cp.phone as phone',
+//            'c.is_company as is_company',
+//            'ce.email as email',
+//        ]);
+//
+//        $queryClient->innerJoin(UserContactList::tableName(), 'ucl_client_id = c.id');
+//        $queryClient->innerJoin(ClientPhone::tableName() . ' as cp', 'cp.client_id = c.id');
+//        $queryClient->leftJoin(ClientEmail::tableName() . ' as ce', 'ce.client_id = c.id');
+//
+//        if (!$this->isRoleAdmin()) {
+//            $queryClient->andWhere(['ucl_user_id' => $this->userId]);
+//            $queryClient->orWhere(['AND',
+//                ['!=', 'ucl_user_id', $this->userId],
+//                ['c.disabled' => $this->isDisabled],
+//                ['c.is_public' => $this->isPublic],
+//            ]);
+//        }
+//
+//        $queryUser = Employee::find()->alias('u')->select([
+//            'u.id as id',
+//            'u.full_name as full_name',
+//            'company_name' => new Expression('null'),
+//            'type' => new Expression(Client::TYPE_INTERNAL),
+//            'pl_phone_number as phone',
+//            'is_company' => new Expression('null'),
+//            'el_email as email',
+//        ]);
+//
+//        $queryUser->innerJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
+//        $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
+//        $queryUser->leftJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');
+//        $queryUser->leftJoin(EmailList::tableName(), 'el_id = upp_email_list_id');
+//
+//        $union = $queryClient->union($queryUser);
+//
+//        $query = (new Query())
+//            ->select('*')
+//            ->from($union)
+//            ->andWhere([
+//                'OR',
+//                ['like', 'full_name', $q],
+//                ['like', 'company_name', $q],
+//                ['like', 'phone', $q],
+//                ['like', 'email', $q],
+//            ])
+//            ->orderBy(['full_name' => SORT_ASC, 'company_name' => SORT_ASC])
+//        //    ->groupBy(['id', 'full_name', 'company_name', 'phone', 'type', 'is_company', 'user_call_phone_status', 'user_is_on_call'])
+//        ;
+//
+//        if ($limit) {
+//            $query->limit($limit);
+//        }
+//
+////        VarDumper::dump($query->createCommand()->getRawSql());die;
+//
+//        return $query->all();
+//    }
 
     public function searchByWidget(string $q, ?int $limit = null): ActiveDataProvider
     {
@@ -200,6 +273,75 @@ class ContactsSearch extends Client
         ]);
 
         return $dataProvider;
+    }
+
+    public function searchByWidgetCallSection(string $q, ?int $limit = null): array
+    {
+        $queryClient = Client::find()->alias('c')->select([
+            'c.id as id',
+            'concat(c.first_name, \' \', c.middle_name, \' \', c.last_name) as full_name',
+            'c.company_name as company_name',
+            'c.cl_type_id as type',
+            'cp.phone as phone',
+            'c.is_company as is_company',
+            'user_call_phone_status' => new Expression('null'),
+            'user_is_on_call' => new Expression('null'),
+            'ce.email as email',
+        ]);
+
+        $queryClient->innerJoin(UserContactList::tableName(), 'ucl_client_id = c.id');
+        $queryClient->innerJoin(ClientPhone::tableName() . ' as cp', 'cp.client_id = c.id');
+        $queryClient->leftJoin(ClientEmail::tableName() . ' as ce', 'ce.client_id = c.id');
+
+        if (!$this->isRoleAdmin()) {
+            $queryClient->andWhere(['ucl_user_id' => $this->userId]);
+            $queryClient->orWhere(['AND',
+                ['!=', 'ucl_user_id', $this->userId],
+                ['c.disabled' => $this->isDisabled],
+                ['c.is_public' => $this->isPublic],
+            ]);
+        }
+
+        $queryUser = Employee::find()->alias('u')->select([
+            'u.id as id',
+            'u.full_name as full_name',
+            'company_name' => new Expression('null'),
+            'type' => new Expression(Client::TYPE_INTERNAL),
+            'pl_phone_number as phone',
+            'is_company' => new Expression('null'),
+            'us_call_phone_status as user_call_phone_status',
+            'us_is_on_call as user_is_on_call',
+            'el_email as email',
+        ]);
+
+        $queryUser->innerJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
+        $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
+        $queryUser->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');
+        $queryUser->leftJoin(EmailList::tableName(), 'el_id = upp_email_list_id');
+        $queryUser->leftJoin(UserStatus::tableName(), 'us_user_id = u.id');
+
+        $union = $queryClient->union($queryUser);
+
+        $query = (new Query())
+            ->select(['id', 'full_name', 'company_name', 'phone', 'type', 'is_company', 'user_call_phone_status', 'user_is_on_call'])
+            ->from($union)
+            ->andWhere([
+                'OR',
+                ['like', 'full_name', $q],
+                ['like', 'company_name', $q],
+                ['like', 'phone', $q],
+                ['like', 'email', $q],
+            ])
+            ->orderBy(['full_name' => SORT_ASC, 'company_name' => SORT_ASC])
+            ->groupBy(['id', 'full_name', 'company_name', 'phone', 'type', 'is_company', 'user_call_phone_status', 'user_is_on_call']);
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+//        VarDumper::dump($query->createCommand()->getRawSql());die;
+
+        return $query->all();
     }
 
     private function isRoleAdmin()
