@@ -197,6 +197,10 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_REDIAL_CALL  => 'Redial',
     ];
 
+    public const TW_RECORDING_STATUS_PAUSED = 'paused';
+    public const TW_RECORDING_STATUS_IN_PROGRESS = 'in-progress';
+    public const TW_RECORDING_STATUS_STOPPED = 'stopped';
+
     //public $c_recording_url = '';
 
     /**
