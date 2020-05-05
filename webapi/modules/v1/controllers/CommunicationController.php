@@ -1127,8 +1127,9 @@ class CommunicationController extends ApiBaseController
 //        $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
 
         $responseTwml = new VoiceResponse();
+		$callInfo = [];
 
-        if ($project && $project->custom_data && !$callFromInternalPhone) {
+		if ($project && $project->custom_data && !$callFromInternalPhone) {
             $customData = @json_decode($project->custom_data, true);
             if ($customData) {
 //                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
@@ -1154,15 +1155,14 @@ class CommunicationController extends ApiBaseController
 
             }
         } else if ($callFromInternalPhone) {
-			$dial = $responseTwml->dial('', [
-				'recordingStatusCallbackMethod' => 'POST',
-				'record' => 'record-from-answer-dual',
-				'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
-			]);
-			$dial->client('seller'.$user->id);
+//			$dial = $responseTwml->dial('', [
+//				'recordingStatusCallbackMethod' => 'POST',
+//				'record' => 'record-from-answer-dual',
+//				'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
+//			]);
+//			$dial->client('seller'.$user->id);
+			$callInfo['agent_username'][] = 'seller'.$user->id;
 		}
-
-        $callInfo = [];
 
         $callInfo['id'] = $callModel->c_id;
         $callInfo['project_id'] = $callModel->c_project_id;
