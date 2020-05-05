@@ -23,6 +23,7 @@ use yii\caching\TagDependency;
  * @property string|null $up_2fa_secret
  * @property mixed|null $up_2fa_timestamp
  * @property int $up_skill
+ * @property boolean $up_show_in_contact_list
  *
  * @property string $up_join_date
  *
@@ -81,6 +82,9 @@ class UserProfile extends \yii\db\ActiveRecord
             [['up_telegram'], 'string', 'max' => 20],
             [['up_2fa_secret'], 'string', 'max' => 50],
             [['up_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_user_id' => 'id']],
+
+            ['up_show_in_contact_list', 'default', 'value' => false],
+            ['up_show_in_contact_list', 'boolean'],
         ];
     }
 
@@ -111,7 +115,8 @@ class UserProfile extends \yii\db\ActiveRecord
             'up_skill'          => 'Skill',
             'up_2fa_enable'     => '2fa enable',
             'up_2fa_secret'     => '2fa secret',
-			'up_join_date'		=> 'Join Date'
+			'up_join_date'		=> 'Join Date',
+			'up_show_in_contact_list' => 'Show in contact list',
         ];
     }
 
