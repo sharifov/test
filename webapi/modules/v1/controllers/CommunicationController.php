@@ -1163,6 +1163,7 @@ class CommunicationController extends ApiBaseController
 //			]);
 //			$dial->client('seller'.$user->id);
 			$response['agent_username'][] = 'seller'.$user->id;
+			$responseTwml = null;
 		}
 
         $callInfo['id'] = $callModel->c_id;
