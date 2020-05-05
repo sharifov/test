@@ -178,7 +178,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function(Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if (isset($model->disabled)) {
-                        $out = $model->disabled ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                        $innerBtn = $model->disabled ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                        $out = Html::a($innerBtn, null, [
+                            'class' => 'btn-disabled',
+                            'data' => [
+                                'client-id' => $model->id,
+                                'is-disabled' => $model->disabled,
+                            ],
+                        ]);
                     }
                     return $out;
                 },
@@ -231,8 +238,65 @@ yii\bootstrap4\Modal::end();
 
 $js = <<<JS
     $(document).ready( function () {
+        $(document).on('click', '.btn-disabled', function(e) {
+            e.preventDefault();
+            
+            let yesHtml = '<span class="label label-success">Yes</span>';
+            let noHtml = '<span class="label label-danger">No</span>';
+            
+            let objBtn = $(this),
+                clientId = objBtn.data('client-id'),
+                isDisabled = objBtn.data('is-disabled');
+            
+            $.ajax({
+                type: 'post',
+                url: '/contacts/set-disabled-ajax',
+                dataType: 'json',
+                data: {client_id:clientId, is_disabled:isDisabled},                
+                beforeSend: function () {                    
+                    objBtn.html('<span class="spinner-border spinner-border-sm"></span>');
+                    objBtn.prop('disabled', true);    
+                },
+                success: function (dataResponse) {
+                
+                    objBtn.prop('disabled', false);    
+                    if (dataResponse.status === 1) {                        
+                        if (dataResponse.disabled === 1) {                            
+                            objBtn.html(yesHtml);                            
+                        } else {                            
+                            objBtn.html(noHtml);
+                        }     
+                        objBtn.data('is-disabled', dataResponse.disabled);                     
+                    } else {                        
+                        new PNotify({
+                            title: "Error:",
+                            type: "error",
+                            text: dataResponse.message,
+                            hide: true
+                        });
+                        if (isDisabled) {                            
+                            objBtn.html(yesHtml);
+                        } else {                            
+                            objBtn.html(noHtml);
+                        }
+                    }                          
+                },
+                error: function () {
+                    objBtn.prop('disabled', false); 
+                    if (isDisabled) {                        
+                        objBtn.html(yesHtml); 
+                    } else {                       
+                        objBtn.html(noHtml); 
+                    } 
+                }
+            });                         
+        });
+    
         $(document).on('click', '.btn-favorite', function(e) {
             e.preventDefault();
+            
+            let enableHtml = '<i class="fa fa-star text-warning"></i>';
+            let disableHtml = '<i class="fa fa-star-o"></i>';
             
             let objBtn = $(this),
                 clientId = objBtn.data('client-id'),
@@ -252,9 +316,9 @@ $js = <<<JS
                     objBtn.prop('disabled', false);    
                     if (dataResponse.status === 1) {                        
                         if (dataResponse.favorite === 1) {                            
-                            objBtn.html('<i class="fa fa-star text-warning"></i>');                            
+                            objBtn.html(enableHtml);                            
                         } else {                            
-                            objBtn.html('<i class="fa fa-star-o"></i>');
+                            objBtn.html(disableHtml);
                         }     
                         objBtn.data('is-favorite', dataResponse.favorite);                     
                     } else {                        
@@ -265,18 +329,18 @@ $js = <<<JS
                             hide: true
                         });
                         if (isFavorite) {                            
-                            objBtn.html('<i class="fa fa-star text-warning"></i>');
+                            objBtn.html(enableHtml);
                         } else {                            
-                            objBtn.html('<i class="fa fa-star-o"></i>');
+                            objBtn.html(disableHtml);
                         }
                     }                          
                 },
                 error: function () {
                     objBtn.prop('disabled', false); 
                     if (isFavorite) {                        
-                        objBtn.html('<i class="fa fa-star text-warning"></i>'); 
+                        objBtn.html(enableHtml); 
                     } else {                       
-                        objBtn.html('<i class="fa fa-star-o"></i>'); 
+                        objBtn.html(disableHtml); 
                     } 
                 }
             });                         
