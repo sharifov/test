@@ -403,6 +403,8 @@ class CommunicationController extends ApiBaseController
                         $call_dep_id, null, $callFromInternalPhone);
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
+                   // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
+
                     $user = $upp->uppUser;
 
                     if ($user) {
@@ -1126,7 +1128,7 @@ class CommunicationController extends ApiBaseController
 
         $responseTwml = new VoiceResponse();
 
-        if ($project && $project->custom_data) {
+        if ($project && $project->custom_data && !$callFromInternalPhone) {
             $customData = @json_decode($project->custom_data, true);
             if ($customData) {
 //                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
@@ -1151,7 +1153,9 @@ class CommunicationController extends ApiBaseController
                 }
 
             }
-        }
+        } else {
+//			$responseTwml->dial('')->number($callModel->c_to);
+		}
 
         $callInfo = [];
 

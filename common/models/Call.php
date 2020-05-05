@@ -15,6 +15,7 @@ use sales\helpers\cases\CasesUrlHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\model\call\entity\call\events\CallEvents;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -1165,6 +1166,8 @@ class Call extends \yii\db\ActiveRecord
                 /*if ($call->c_created_user_id) {
                     return false;
                 }*/
+
+//				$callFromInternalPhone = PhoneList::find()->byPhone($call->c_from)->exists();
 
                 if ($call->isStatusQueue()) {
 
