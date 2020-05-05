@@ -26,6 +26,7 @@ use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\model\emailList\entity\EmailList;
+use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserProjectParamsRepository;
@@ -396,8 +397,10 @@ class CommunicationController extends ApiBaseController
                         $call_dep_id = null;
                     }
 
+                    $callFromInternalPhone = PhoneList::find()->byPhone($client_phone_number)->exists();
+
                     $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $upp->upp_project_id,
-                        $call_dep_id);
+                        $call_dep_id, null, $callFromInternalPhone);
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
                     $user = $upp->uppUser;
@@ -405,7 +408,7 @@ class CommunicationController extends ApiBaseController
                     if ($user) {
                         if ($user->isOnline()) {
                             // Yii::info('DIRECT CALL - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:DirectCall');
-                            return $this->createDirectCall($callModel, $user);
+                            return $this->createDirectCall($callModel, $user, $callFromInternalPhone);
                         }
 
                         Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
@@ -426,7 +429,7 @@ class CommunicationController extends ApiBaseController
                             Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
                         }
                         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
-                        return $this->createHoldCall($callModel, $user);
+                        return $this->createHoldCall($callModel, $user, $callFromInternalPhone);
                     }
 
                     $response['error'] = 'Not found "user" for Call';
@@ -829,7 +832,7 @@ class CommunicationController extends ApiBaseController
 	 * @return Call
 	 * @throws \Exception
 	 */
-    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id, ?int $call_source_id = null): Call
+    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id, ?int $call_source_id = null, bool $callFromInternalPhone = false): Call
     {
         $call = null;
         $parentCall = null;
@@ -859,7 +862,9 @@ class CommunicationController extends ApiBaseController
             $call->c_call_sid = $calData['CallSid'] ?? null;
             $call->c_call_type_id = Call::CALL_TYPE_IN;
             // $call->c_call_status = Call::TW_STATUS_IVR; //$calData['CallStatus'] ?? Call::CALL_STATUS_QUEUE;
-            $call->setStatusIvr();
+			if (!$callFromInternalPhone) {
+            	$call->setStatusIvr();
+			}
 
             $call->c_com_call_id = $calData['c_com_call_id'] ?? null;
             $call->c_parent_call_sid = $calData['ParentCallSid'] ?? null;
@@ -1091,15 +1096,15 @@ class CommunicationController extends ApiBaseController
     }
 
 
-    /**
-     * @param Call $callModel
-     * @param Employee $user
-     * @param array $stepParams
-     * @return array
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
-     */
-    protected function createDirectCall(Call $callModel, Employee $user): array
+	/**
+	 * @param Call $callModel
+	 * @param Employee $user
+	 * @param bool $callFromInternalPhone
+	 * @return array
+	 * @throws \Throwable
+	 * @throws \yii\db\StaleObjectException
+	 */
+    protected function createDirectCall(Call $callModel, Employee $user, bool $callFromInternalPhone = false): array
     {
         $jobId = null;
         $callModel->c_created_user_id = $user->id;
@@ -1111,6 +1116,7 @@ class CommunicationController extends ApiBaseController
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
+            $job->callFromInternalPhone = $callFromInternalPhone;
             $jobId = Yii::$app->queue_job->delay(7)->priority(90)->push($job);
         }
 
@@ -1172,14 +1178,15 @@ class CommunicationController extends ApiBaseController
         return $responseData;
     }
 
-    /**
-     * @param Call $callModel
-     * @param Employee $user
-     * @return array
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
-     */
-    protected function createHoldCall(Call $callModel, Employee $user): array
+	/**
+	 * @param Call $callModel
+	 * @param Employee $user
+	 * @param bool $callFromInternalPhone
+	 * @return array
+	 * @throws \Throwable
+	 * @throws \yii\db\StaleObjectException
+	 */
+    protected function createHoldCall(Call $callModel, Employee $user, bool $callFromInternalPhone = false): array
     {
         $callModel->c_created_user_id = null;
         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
@@ -1190,6 +1197,7 @@ class CommunicationController extends ApiBaseController
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
+            $job->callFromInternalPhone = $callFromInternalPhone;
             $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
         }
 

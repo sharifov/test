@@ -34,6 +34,7 @@ use yii\queue\Queue;
  * @property int $call_id
  * @property int $delay
  * @property int $source_id
+ * @property bool $callFromInternalPhone
  *
  * @property CasesCreateService $casesCreateService
  * @property ClientManageService $clientManageService
@@ -47,6 +48,7 @@ class CallQueueJob extends BaseObject implements JobInterface
     public $call_id;
     public $source_id = 0;
     public $delay;
+    public $callFromInternalPhone = false;
 
     private $casesCreateService;
     private $casesRepository;
@@ -75,6 +77,9 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->casesRepository = Yii::createObject(CasesRepository::class);
             $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
+            $createLeadOnIncoming = $this->callFromInternalPhone ?: (bool)(Yii::$app->params['create_lead_on_incoming_call'] ?? true);
+            $createCaseOnIncoming = $this->callFromInternalPhone ?: (bool)(Yii::$app->params['create_case_on_incoming_call'] ?? true);
+
             // Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
 
             if ($this->delay) {
@@ -99,8 +104,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                     $call->setStatusQueue();
                 }
 
-
-                if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
+                if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES && $createLeadOnIncoming) {
                     if ($call->c_from) {
 //                        $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
 //                        if (!$lead) {
@@ -148,7 +152,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     }
 
-                } elseif((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
+                } elseif(((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT) && $createCaseOnIncoming) {
 
                     try {
                         $case = $this->casesCreateService->getOrCreateByCall(
