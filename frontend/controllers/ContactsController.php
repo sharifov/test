@@ -9,6 +9,7 @@ use frontend\models\form\ContactForm;
 use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
+use sales\helpers\app\AppHelper;
 use sales\services\client\ClientManageService;
 use Throwable;
 use Yii;
@@ -295,6 +296,40 @@ class ContactsController extends FController
                 }
             } else {
                 $result['message'] = 'Client not found';
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public function actionSetDisabledAjax(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['message' => '', 'status' => 0, 'disabled' => 0];
+
+        if (Yii::$app->request->isAjax) {
+            try {
+                $clientId = (int) Yii::$app->request->post('client_id');
+                $isDisabled = (bool) Yii::$app->request->post('is_disabled');
+                $disabled = $isDisabled ? false : true;
+
+                if ($client = $this->findModel($clientId)) {
+                    $client->disabled = $disabled;
+
+                    if ($client->save()) {
+                        $result['status'] = 1;
+                        $result['disabled'] = (int)$disabled;
+                    }  else {
+                        throw new \DomainException($client->getErrorSummary(false)[0]);
+                    }
+                } else {
+                    throw new \DomainException('Client not found');
+                }
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionSetDisabledAjax:save');
+                $result['message'] = $throwable->getMessage();
             }
         }
         return $result;
