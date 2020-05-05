@@ -9,7 +9,7 @@ use common\models\CallUserAccess;
  * @var $channels
  */
 $this->title = 'Real-time User Call Map';
-
+$bundle = \frontend\assets\TimerAsset::register($this);
 $cIn = Call::CALL_TYPE_IN;
 $cOut = Call::CALL_TYPE_OUT;
 $sourceGeneralLine = Call::SOURCE_GENERAL_LINE;
@@ -86,7 +86,7 @@ function channelConnector(chName)
                 }                
             });
             
-        console.log(messageObj.callsHistory)
+        //console.log(messageObj.callsHistory)
         $("#card-history-calls").text('');
             messageObj.callsHistory.forEach(function (parent, index) {
                 if(!parent.c_parent_id){
@@ -108,7 +108,8 @@ centrifuge.on('connect', function(context) {
         url: '/call/realtime-user-map',
         type: 'POST',
         success: function(data) { 
-            //console.info('Request data on connect');                 
+            //console.info('Request data on connect'); 
+            startTimers();                
         }
      });
 });
@@ -136,10 +137,10 @@ function renderRealtimeCalls(parent)
                         showLeadCaseLinks(parent.c_lead_id, parent.gid, parent.c_case_id, parent.cs_gid) +      
                     '</td>' + 
                     '<td class="text-center">' + 
-                        showCurrentStatus(parent.c_status_id) +    
+                        parentCallStatusDetails(parent.c_status_id, parent.c_created_dt, parent.c_updated_dt, parent.c_call_duration, parent.c_recording_sid) +    
                     '</td>' + 
                     '<td class="text-center" style="width:160px">' + 
-                        callCreatedTime(parent.c_created_dt, parent.c_status_id, true) +
+                        callCreatedTime(parent.c_created_dt, parent.c_status_id, true, true) +
                     '</td>' +    
                     '<td class="text-left" style="width:160px">' + 
                         showAgentClientInfo(parent.c_call_type_id, parent.c_source_type_id, parent.c_to, parent.c_created_user_id, parent.username, parent.full_name) +
@@ -169,13 +170,14 @@ function renderChildCalls(child)
                         '<td style="width: 120px">' +
                             showCurrentStatus(child.c_status_id) +
                         '</td>' +
-                        '<td style="width: 80px" class="text-left"> TIMER' +
+                        '<td class="text-left" style="width:80px">' +
+                            showChildCallTimer(child.c_status_id, child.c_created_dt, child.c_updated_dt, child.c_call_duration, child.c_recording_sid) +
                         '</td>' +
                         '<td class="text-left">' +
                             renderChildCallUserAccesses(child.cua_status_ids, child.cua_user_ids, child.cua_user_names) +
                         '</td>' +
                         '<td class="text-center" style="width:90px">' +
-                            callCreatedTime(child.c_created_dt, false, false) +
+                            callCreatedTime(child.c_created_dt, false, false, true) +
                         '</td>' +
                         '<td class="text-center" style="width:180px">' +
                             childCallRelativeTime(child.c_updated_dt, child.c_status_id) +
@@ -309,7 +311,7 @@ function showAgentClientInfo(callTypeId, callSourceTypeId, callTo, callCreatedUs
             html+= '<i class="fa fa-fax fa-1x fa-border"></i> ' + callTo
         }
         if (callCreatedUserId){
-             html+= '<i class="fa fa-user fa-1x fa-border"></i> ' + callCreatedUsername
+            html+= '<i class="fa fa-user fa-1x fa-border"></i> ' + callCreatedUsername
         } else {
             html+= '<i class="fa fa-phone fa-1x fa-border"></i> ' + callTo
         }
@@ -334,11 +336,11 @@ function showAgentClientInfo(callTypeId, callSourceTypeId, callTo, callCreatedUs
     return html;
 }
 
-function callCreatedTime(callCreatedDate, cStatusID, enableSeconds) {
+function callCreatedTime(callCreatedDate, cStatusID, enableSeconds, enableHours) {
     let html = '';
     let date = new Date(callCreatedDate);
     let timeStamp = date.getTime();
-    let formattedTime = formatTime(new Date(timeStamp), enableSeconds);
+    let formattedTime = formatTime(new Date(timeStamp), enableSeconds, enableHours);
     let considerCallEnded = '$callIsEnded';    
     
     html+= '<i class="fa fa-clock-o"></i> '+ formattedTime +'<br>'
@@ -350,14 +352,28 @@ function callCreatedTime(callCreatedDate, cStatusID, enableSeconds) {
     return html;
 }
 
-function formatTime(date, includeSeconds) {
-    let time;
-    time = (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' + 
-            (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+function startTimers() {    
+    $(".timer").each(function( index ) {
+        var sec = $( this ).data('sec');
+        var control = $( this ).data('control');
+        var format = $( this ).data('format');            
+        $(this).timer({format: format, seconds: sec}).timer(control);            
+    });   
+}
+
+function formatTime(date, includeSeconds, includeHours) {
+    let time = '';
+    if (includeHours){
+        time+= (date.getHours() < 10 ? '0' : '') + date.getHours() + ':';
+    }
+    
+    time+=(date.getMinutes() < 10 ? '0' : '') + date.getMinutes();    
+    
     if (includeSeconds){
         time+= ':' + (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
     }
-    return  time;
+    
+    return time;
 }
 
 function calculateRelativeTime(date) {
@@ -404,9 +420,63 @@ function showCurrentStatus(cStatusID) {
         } else if (statusNames[cStatusID] === 'Canceled' || statusNames[cStatusID] === 'No answer' || statusNames[cStatusID] === 'Busy' || statusNames[cStatusID] === 'Failed') {
             icon = 'fa fa-times-circle text-danger';
         }
-
         return '<i class="'+ icon +'"></i> '+ statusNames[cStatusID] +'<br>';
     }
+}
+
+function showChildCallTimer(cStatusID, callCreatedDate, callUpdatedDate, callDuration, callSid) {
+    let html = '';
+    let sec = '';
+    let considerCallEnded = '$callIsEnded';    
+    let currentDate = Math.floor(new Date().getTime() / 1000);
+    let createdDate = Math.floor(new Date(callCreatedDate).getTime() / 1000);
+    let updatedDate = Math.floor(new Date(callUpdatedDate).getTime() / 1000);
+    
+    if (callUpdatedDate){
+        if (Object.values(considerCallEnded).includes(cStatusID)){
+            sec = callDuration > 0 ? callDuration : updatedDate - createdDate;                        
+            html+= '<span class="badge badge-primary timer" data-sec="'+ sec +'" data-control="pause" data-format="%M:%S" style="font-size: 10px">'+ formatTime(new Date(sec * 1000), true, false) +'</span>';           
+        } else {
+            sec = currentDate - createdDate;                          
+            html+='<span class="badge badge-warning timer" data-sec="'+ sec +'" data-control="start" data-format="%M:%S">'+ formatTime(new Date(sec * 1000), true, false) +'</span>';             
+        }
+    }    
+    
+    if(callSid){
+        html+='<small><i class="fa fa-play-circle-o"></i></small>'
+    }
+    
+    return html
+}
+
+function parentCallStatusDetails(cStatusID, callCreatedDate, callUpdatedDate, callDuration, callSid) {
+    let html = '';
+    let considerCallEnded = '$callIsEnded';
+    let sec = 0;
+    let currentDate = Math.floor(new Date().getTime() / 1000);
+    let createdDate = Math.floor(new Date(callCreatedDate).getTime() / 1000);
+    let updatedDate = Math.floor(new Date(callUpdatedDate).getTime() / 1000); 
+    
+    html+= showCurrentStatus(cStatusID);
+     
+    if (callUpdatedDate){       
+        if (Object.values(considerCallEnded).includes(cStatusID)){
+            sec = callDuration ? callDuration : updatedDate - createdDate;            
+        } else {
+            sec = currentDate - createdDate;            
+        }
+    }
+    
+    if (Object.values(considerCallEnded).includes(cStatusID)){
+        html+= '<span class="badge badge-default">'+ formatTime(new Date(sec * 1000), true, false) +'</span>' 
+        if(callSid){
+            html+='<small><i class="fa fa-play-circle-o"></i></small>'
+        }   
+    } else {
+        html+='<span class="badge badge-warning timer" data-sec="'+ sec +'" data-control="start" data-format="%M:%S">'+ formatTime(new Date(sec * 1000), true, false) +'</span>'              
+    }
+    
+    return html;
 }
 
 function showLeadCaseLinks(cLeadID, leadGid, cCaseID, caseGid) {
@@ -504,7 +574,7 @@ $('#btn-user-call-map-refresh').on('click', function () {
         url: '/call/realtime-user-map',
         type: 'POST',
         success: function(data) { 
-            //console.info('Request data on click Refresh Data');                 
+            //console.info('Request data on click Refresh Data');                             
         }
      });
 });

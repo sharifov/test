@@ -385,7 +385,8 @@ class CallSearch extends Call
 
         $query = Call::find()->alias('c');
         $query->select(['c.c_id', 'c.c_call_type_id', 'c.c_source_type_id', 'c.c_from', 'c.c_to', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_duration',
-            'c.c_lead_id', 'c.c_case_id', 'c.c_created_dt', 'c.c_updated_dt', 'c.c_created_user_id', 'name as project_name', 'ce.username', 'dep_name',
+            'c.c_lead_id', 'c.c_case_id', 'c.c_created_dt', 'c.c_updated_dt', 'c.c_created_user_id', 'c.c_call_duration',
+            'name as project_name', 'ce.username', 'dep_name', 'c.c_recording_sid',
             'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'l.gid', 'cs_gid',
             'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
         ]);
@@ -420,6 +421,9 @@ class CallSearch extends Call
         foreach ($data as $key => $row) {
             if ($row['c_created_dt']) {
                 $data[$key]['c_created_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_created_dt']), 'php: Y-m-d H:i:s');
+            }
+            if ($row['c_updated_dt']) {
+                $data[$key]['c_updated_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_updated_dt']), 'php: Y-m-d H:i:s');
             }
         }
 
@@ -810,7 +814,8 @@ class CallSearch extends Call
         $this->load($params);
         $query = Call::find()->alias('c')->limit(10);
         $query->select(['c.c_id', 'c.c_source_type_id', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_type_id', 'c.c_created_user_id', 'c.c_lead_id', 'c.c_case_id',
-            'c.c_created_dt', 'c.c_to', 'c.c_from', 'ce.username', 'name as project_name', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'dep_name', 'l.gid', 'cs_gid',
+            'c.c_created_dt', 'c.c_updated_dt', 'c.c_to', 'c.c_from', 'c.c_call_duration', 'c.c_recording_sid',
+            'ce.username', 'name as project_name', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'dep_name', 'l.gid', 'cs_gid',
             'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
         ]);
         $query->groupBy(['c.c_id']);
@@ -845,7 +850,8 @@ class CallSearch extends Call
         foreach ($data as $row){
             $queryChild = Call::find()->alias('ch');
             $queryChild->select(['ch.c_id', 'ch.c_parent_id', 'ch.c_call_type_id', 'ch.c_created_dt', 'ch.c_updated_dt', 'ch.c_source_type_id', 'ch.c_status_id', 'ch.c_to',
-                'ch.c_created_user_id', 'ce.username', 'dep_name', 'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
+                'ch.c_created_user_id', 'ch.c_call_duration', 'ch.c_recording_sid', 'ce.username', 'dep_name', 'group_concat(cau.username SEPARATOR "-") as cua_user_names',
+                'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
             ]);
             $queryChild->andWhere(['ch.c_parent_id' => $row['c_id']]);
             $queryChild->groupBy(['ch.c_id']);
@@ -862,6 +868,10 @@ class CallSearch extends Call
         foreach ($data as $key => $row) {
             if ($row['c_created_dt']) {
                 $data[$key]['c_created_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_created_dt']), 'php: Y-m-d H:i:s');
+            }
+
+            if ($row['c_updated_dt']) {
+                $data[$key]['c_updated_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_updated_dt']), 'php: Y-m-d H:i:s');
             }
         }
 
