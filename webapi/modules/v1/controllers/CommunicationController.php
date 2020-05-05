@@ -413,7 +413,11 @@ class CommunicationController extends ApiBaseController
                             return $this->createDirectCall($callModel, $user, $callFromInternalPhone);
                         }
 
-                        Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
+						if ($callFromInternalPhone) {
+							return $this->createExceptionCall($incoming_phone_number, 'Agent is offline');
+						}
+
+						Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
                             'info\API:Communication:Incoming:Offline');
                         $message = 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline";
                         if ($callModel->c_lead_id && $callModel->cLead) {
@@ -1254,16 +1258,17 @@ class CommunicationController extends ApiBaseController
         return $responseData;
     }
 
-    /**
-     * @param string $phoneNumber
-     * @return array
-     */
-    protected function createExceptionCall(string $phoneNumber): array
+	/**
+	 * @param string $phoneNumber
+	 * @param string $message
+	 * @return array
+	 */
+    protected function createExceptionCall(string $phoneNumber, string $message = 'Sorry, this number is temporarily not working.'): array
     {
         Yii::error('Number is temporarily not working ('.$phoneNumber.')', 'API:Communication:createExceptionCall');
 
         $responseTwml = new VoiceResponse();
-        $responseTwml->say('Sorry, this number is temporarily not working.', [
+        $responseTwml->say($message, [
                 'language' => 'en-US',
                 'voice' => 'alice'
             ]);
