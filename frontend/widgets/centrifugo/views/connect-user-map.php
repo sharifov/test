@@ -1,12 +1,14 @@
 <?php
 use yii\helpers\Html;
 use \common\models\Call;
+use common\models\CallUserAccess;
 
 /**
  * @var $centrifugoUrl
  * @var $token
  * @var $channels
  */
+$this->title = 'Real-time User Call Map';
 
 $cIn = Call::CALL_TYPE_IN;
 $cOut = Call::CALL_TYPE_OUT;
@@ -20,6 +22,10 @@ $callIsEnded = json_encode([
         Call::STATUS_CANCELED,
         Call::STATUS_FAILED,
 ]);
+
+$pending = CallUserAccess::STATUS_TYPE_PENDING;
+$accept = CallUserAccess::STATUS_TYPE_ACCEPT;
+$busy = CallUserAccess::STATUS_TYPE_BUSY;
 
 $passChannelsToJs ='["' . implode('", "', $channels) . '"]';
 
@@ -72,10 +78,9 @@ function channelConnector(chName)
             messageObj.realtimeCalls.forEach(function (parent, index) {
                 if(!parent.c_parent_id){
                     $("#card-live-calls").append(renderRealtimeCalls(parent));
-                    messageObj.realtimeCalls.forEach(function (childObj, childIndex) {
-                        if (parent.c_id == childObj.c_parent_id){
-                            //console.log(childObj.c_id)
-                            $('#parent-' + parent.c_id).append(renderChildCalls(childObj));
+                    messageObj.realtimeCalls.forEach(function (child, childIndex) {
+                        if (parent.c_id == child.c_parent_id){                            
+                            $('#parent-' + parent.c_id).append(renderChildCalls(child));
                         }
                     });
                 }                
@@ -86,10 +91,9 @@ function channelConnector(chName)
             messageObj.callsHistory.forEach(function (parent, index) {
                 if(!parent.c_parent_id){
                     $("#card-history-calls").append(renderRealtimeCalls(parent));
-                    messageObj.callsHistory.forEach(function (childObj, childIndex) {
-                        if (parent.c_id == childObj.c_parent_id){
-                            console.log(childObj.c_id)
-                            $('#parent-' + parent.c_id).append(renderChildCalls(childObj));
+                    messageObj.callsHistory.forEach(function (child, childIndex) {
+                        if (parent.c_id == child.c_parent_id){                            
+                            $('#parent-' + parent.c_id).append(renderChildCalls(child));
                         }
                     });
                 }                
@@ -135,18 +139,19 @@ function renderRealtimeCalls(parent)
                         showCurrentStatus(parent.c_status_id) +    
                     '</td>' + 
                     '<td class="text-center" style="width:160px">' + 
-                        callCreatedTime(parent.c_created_dt, parent.c_status_id) +
+                        callCreatedTime(parent.c_created_dt, parent.c_status_id, true) +
                     '</td>' +    
                     '<td class="text-left" style="width:160px">' + 
                         showAgentClientInfo(parent.c_call_type_id, parent.c_source_type_id, parent.c_to, parent.c_created_user_id, parent.username, parent.full_name) +
                     '</td>' +    
-                '</tr>' +
+                '</tr>' + 
+                    renderCallUserAccesses(parent.cua_status_ids, parent.cua_user_ids, parent.cua_user_names) +
             '</tbody>' +
         '</table>' +
     '</div>';
 }
 
-function renderChildCalls(childObj)
+function renderChildCalls(child)
 {
     return '<tr class="warning">' +
         '<td colspan="7">'+
@@ -155,14 +160,145 @@ function renderChildCalls(childObj)
                     '<tr>' +
                         '<td style="width:70px; border: none">' + 
                              '<u>'+
-                                  '<a href="/call/view?id='+ childObj.c_id +'" target="_blank">'+ childObj.c_id +'</a>' +
-                              '</u>' + isCallInOrOut(childObj.c_call_type_id, childObj.c_parent_id) +                
+                                  '<a href="/call/view?id='+ child.c_id +'" target="_blank">'+ child.c_id +'</a>' +
+                              '</u>' + isCallInOrOut(child.c_call_type_id, child.c_parent_id) +                
                         '</td>' +
-                    '</tr>' +    
+                        '<td style="width:50px">' +
+                             childCallSourceDep(child.c_source_type_id, child.dep_name) +
+                        '</td>' +
+                        '<td style="width: 120px">' +
+                            showCurrentStatus(child.c_status_id) +
+                        '</td>' +
+                        '<td style="width: 80px" class="text-left"> TIMER' +
+                        '</td>' +
+                        '<td class="text-left">' +
+                            renderChildCallUserAccesses(child.cua_status_ids, child.cua_user_ids, child.cua_user_names) +
+                        '</td>' +
+                        '<td class="text-center" style="width:90px">' +
+                            callCreatedTime(child.c_created_dt, false, false) +
+                        '</td>' +
+                        '<td class="text-center" style="width:180px">' +
+                            childCallRelativeTime(child.c_updated_dt, child.c_status_id) +
+                        '<td>' +
+                        '<td class="text-left" style="width:130px">' +
+                            childCallCreatedUser(child.c_call_type_id, child.c_created_user_id, child.username, child.c_to) +
+                        '</td>'
+                    '</tr>'   
                 '</tbody>' +    
             '</table>' +    
          '</td>'   
     '</tr>';
+}
+
+function renderChildCallUserAccesses(statusIDs, userIDs, userNames) {
+    let html = '';    
+    if(userIDs){
+        let userIDsArray = userIDs.split('-');
+        let statusIDsArray = statusIDs.split('-');
+        let userNamesArray = userNames.split('-');
+        
+        userIDsArray.forEach(function (user, index){
+            let label;
+            switch (statusIDsArray[index]) {
+                case '$pending':
+                    label = 'warning';
+                    break;
+                case '$accept':
+                    label = 'success';
+                    break;
+                case '$busy':
+                    label = 'danger';
+                    break;
+                default:
+                    label = 'default';
+            }
+            html+='<span class="label label-'+ label +'"><i class="fa fa-user"></i> '+ userNamesArray[index] +'</span>'+' ';   
+        });
+    }  
+  
+    return html
+}
+
+function renderCallUserAccesses(statusIDs, userIDs, userNames) {
+    let html = '';    
+    if(userIDs){
+        let userIDsArray = userIDs.split('-');
+        let statusIDsArray = statusIDs.split('-');
+        let userNamesArray = userNames.split('-');
+        
+        html+= '<tr class="warning">' +
+                    '<td class="text-center"><i class="fa fa-users"></i> </td>' +
+                    '<td colspan="6">';
+        
+        userIDsArray.forEach(function (user, index){
+            let label;
+            switch (statusIDsArray[index]) {
+                case '$pending':
+                    label = 'warning';
+                    break;
+                case '$accept':
+                    label = 'success';
+                    break;
+                case '$busy':
+                    label = 'danger';
+                    break;
+                default:
+                    label = 'default';
+            }
+            html+='<span class="label label-'+ label +'"><i class="fa fa-user"></i> '+ userNamesArray[index] +'</span>'+' ';   
+        });        
+        
+        html+= '</td></tr>';
+    }  
+  
+    return html
+}
+
+function childCallCreatedUser(callTypeId, callCreatedUserId, callCreatedUsername, callTo){
+    let html = '';
+    if (callTypeId == '$cIn'){
+        html+='<div>'
+        if (callCreatedUserId){
+            html+='<i class="fa fa-user fa-border"></i> ' + callCreatedUsername     
+        } else {
+            html+='<i class="fa fa-user fa-border"></i> ' + callTo
+        }
+        html+='</div>'
+    } else {
+        html+='<div>'
+        if (callCreatedUserId){
+            html+='<i class="fa fa-user fa-border"></i> ' + callCreatedUsername     
+        } else {
+            html+='<i class="fa fa-user fa-border"></i> ' + callTo
+        }
+        html+='</div>'     
+    }
+    return html;
+}
+
+function childCallRelativeTime(callUpdatedDate, cStatusID) {
+    let html = '';
+    let considerCallEnded = '$callIsEnded';
+    if (callUpdatedDate){
+        if (Object.values(considerCallEnded).includes(cStatusID)){
+            html+= '<small>'+ calculateRelativeTime(callUpdatedDate) + '</small>';
+        }
+    }
+    return html;
+}
+
+function childCallSourceDep(callSourceTypeId, depName){    
+    let html = '';
+    if (callSourceTypeId) {
+        html+= '<span class="label label-info">'+ showShortSource(callSourceTypeId) +'</span>';
+    }
+    //if (depName){
+        html+= '<span class="label label-warning">'+ depName +'</span>';
+    /*} else {
+        html+= '<span class="label label-warning"> - </span>';
+    }*/
+    
+    return html
 }
 
 function showAgentClientInfo(callTypeId, callSourceTypeId, callTo, callCreatedUserId, callCreatedUsername, fullName) {
@@ -198,12 +334,12 @@ function showAgentClientInfo(callTypeId, callSourceTypeId, callTo, callCreatedUs
     return html;
 }
 
-function callCreatedTime(callCreatedDate, cStatusID) {
+function callCreatedTime(callCreatedDate, cStatusID, enableSeconds) {
     let html = '';
     let date = new Date(callCreatedDate);
     let timeStamp = date.getTime();
-    let formattedTime = formatTime(new Date(timeStamp));
-    let considerCallEnded =  '$callIsEnded';    
+    let formattedTime = formatTime(new Date(timeStamp), enableSeconds);
+    let considerCallEnded = '$callIsEnded';    
     
     html+= '<i class="fa fa-clock-o"></i> '+ formattedTime +'<br>'
     
@@ -214,10 +350,14 @@ function callCreatedTime(callCreatedDate, cStatusID) {
     return html;
 }
 
-function formatTime(date) {
-  return (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' + 
-    (date.getMinutes() < 10 ? '0' : '') + date.getMinutes() + ':' +
-    (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
+function formatTime(date, includeSeconds) {
+    let time;
+    time = (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' + 
+            (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+    if (includeSeconds){
+        time+= ':' + (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
+    }
+    return  time;
 }
 
 function calculateRelativeTime(date) {
@@ -290,9 +430,9 @@ function showShortSource(callSourceTypeId) {
     }  
 }
 
-function isCallInOrOut(callTypeId, callparentID) {   
+function isCallInOrOut(callTypeId, callParentID) {   
     if(callTypeId == '$cOut'){        
-        if(callparentID){
+        if(callParentID){
             return '<br><span class="badge badge-danger">Out</span>'
         } else {
             return '<br><span class="badge badge-blue">Out</span>'
@@ -330,15 +470,7 @@ function showAgentClientDetails(fullName, callTypeId, callFrom, callCreatedUserI
         }
     }
     
-    return html
-    
-    /*if (fullName){
-        if(fullName.toString().trim() === 'ClientName'){
-            return '...';
-        }    
-        return fullName
-    }
-    return '...';*/
+    return html    
 }
 
 function renderUsersOnline(index, userID, username, userRoles, isCallStatusReady, isCallFree)

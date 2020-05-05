@@ -386,7 +386,8 @@ class CallSearch extends Call
         $query = Call::find()->alias('c');
         $query->select(['c.c_id', 'c.c_call_type_id', 'c.c_source_type_id', 'c.c_from', 'c.c_to', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_duration',
             'c.c_lead_id', 'c.c_case_id', 'c.c_created_dt', 'c.c_updated_dt', 'c.c_created_user_id', 'name as project_name', 'ce.username', 'dep_name',
-            'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'l.gid', 'cs_gid'
+            'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'l.gid', 'cs_gid',
+            'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
         ]);
         $query->groupBy(['c.c_id']);
         $query->orderBy(['c.c_id' => SORT_DESC]);
@@ -407,13 +408,11 @@ class CallSearch extends Call
 
         if ($this->ug_ids) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
-                //->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => 'ud_dep_id'])
                 ->where(['ugs_group_id' => $this->ug_ids]);
             $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
         }
 
-        //$query->joinWith(['cProject', 'cLead', 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
-        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cCreatedUser as ce', 'cDep', 'cClient as cls', 'callUserAccesses.cuaUser as cau', /*`'cuaUsers as t',*/ 'cugUgs', 'calls']);
+        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cCreatedUser as ce', 'cDep', 'cClient as cls', 'callUserAccesses.cuaUser as cau', 'cugUgs', 'calls']);
 
         $command = $query->createCommand();
         $data = $command->queryAll();
@@ -811,7 +810,8 @@ class CallSearch extends Call
         $this->load($params);
         $query = Call::find()->alias('c')->limit(10);
         $query->select(['c.c_id', 'c.c_source_type_id', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_type_id', 'c.c_created_user_id', 'c.c_lead_id', 'c.c_case_id',
-            'c.c_created_dt', 'c.c_to', 'c.c_from', 'ce.username', 'name as project_name', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'dep_name', 'l.gid', 'cs_gid'
+            'c.c_created_dt', 'c.c_to', 'c.c_from', 'ce.username', 'name as project_name', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'dep_name', 'l.gid', 'cs_gid',
+            'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
         ]);
         $query->groupBy(['c.c_id']);
         $query->orderBy(['c.c_id' => SORT_DESC]);
@@ -833,22 +833,24 @@ class CallSearch extends Call
 
         if ($this->ug_ids) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
-                //->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => 'ud_dep_id'])
                 ->where(['ugs_group_id' => $this->ug_ids]);
             $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
         }
 
-        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cClient as cls', 'cCreatedUser as ce', 'cDep', /*'callUserAccesses',*/ 'cuaUsers', 'cugUgs']);
+        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cClient as cls', 'cCreatedUser as ce', 'cDep', 'callUserAccesses.cuaUser as cau', 'cugUgs']);
 
         $command = $query->createCommand();
         $data = $command->queryAll();
 
         foreach ($data as $row){
             $queryChild = Call::find()->alias('ch');
-            $queryChild->select(['ch.c_id', 'ch.c_parent_id', 'ch.c_call_type_id', 'ch.c_created_dt']);
+            $queryChild->select(['ch.c_id', 'ch.c_parent_id', 'ch.c_call_type_id', 'ch.c_created_dt', 'ch.c_updated_dt', 'ch.c_source_type_id', 'ch.c_status_id', 'ch.c_to',
+                'ch.c_created_user_id', 'ce.username', 'dep_name', 'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
+            ]);
             $queryChild->andWhere(['ch.c_parent_id' => $row['c_id']]);
+            $queryChild->groupBy(['ch.c_id']);
 
-            $query->joinWith(['cCreatedUser as ce']);
+            $queryChild->joinWith(['cCreatedUser as ce', 'cDep', 'callUserAccesses.cuaUser as cau']);
 
             $command = $queryChild->createCommand();
             $childData = $command->queryAll();
