@@ -2038,6 +2038,27 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param int $user_id
+     * @param bool $onyEnabled
+     * @return array
+     */
+    public static function getEmailList(int $user_id, $onyEnabled = false) : array
+    {
+        $emailList = UserProjectParams::find()
+            ->select(['el_email', 'upp_email_list_id'])
+            ->byUserId($user_id)
+            ->innerJoinWith(['emailList' => static function(\sales\model\emailList\entity\Scopes $query) use ($onyEnabled) {
+                if ($onyEnabled) {
+                    $query->andOnCondition(['el_enabled' => true]);
+                }
+            }], false)
+            ->indexBy('el_email')
+            ->column();
+
+        return $emailList;
+    }
+
+    /**
      * @return bool
      */
     public function isOnline() : bool
