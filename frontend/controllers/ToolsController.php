@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use common\models\Quote;
+use sales\parcingDump\worldspanGds\Reservation;
+use sales\parcingDump\worldspanGds\WorldspanGds;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -97,13 +99,17 @@ class ToolsController extends FController
     {
         $data = [];
         $dump = Yii::$app->request->post('dump');
+        $type = Yii::$app->request->post('type', 'Reservation');
+
         if ($dump) {
-
-            $data = Quote::parseDump($dump, true);
-
-
+            $obj = WorldspanGds::initClass($type);
+            $data = $obj->parseDump($dump, true);
         }
 
-        return $this->render('check-flight-dump', ['dump' => $dump, 'data' => $data]);
+        return $this->render('check-flight-dump', [
+            'dump' => $dump,
+            'data' => $data,
+            'type' => $type,
+        ]);
     }
 }
