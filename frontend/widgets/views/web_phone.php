@@ -604,7 +604,7 @@ use yii\helpers\Html;
 
                 device.on('incoming', function (conn) {
                     connection = conn;
-                    $('#call-controls2').hide();
+                    // $('#call-controls2').hide();
                     if (document.visibilityState === 'visible') {
                         // conn.accept();
                     } else {
