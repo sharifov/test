@@ -606,7 +606,7 @@ use yii\helpers\Html;
                     connection = conn;
                     $('#call-controls2').hide();
                     if (document.visibilityState === 'visible') {
-                        conn.accept();
+                        // conn.accept();
                     } else {
                         $('#call-controls2').show();
                     }
