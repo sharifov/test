@@ -605,7 +605,7 @@ use yii\helpers\Html;
                 device.on('incoming', function (conn) {
                     connection = conn;
                     $('#call-controls2').hide();
-                    if ("autoAccept" in connection.message) {
+                    if ("autoAccept" in connection.message && !connection.message.autoAccept) {
                         $('#call-controls2').show();
                     } else {
                         if (document.visibilityState === 'visible') {
