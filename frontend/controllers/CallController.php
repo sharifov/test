@@ -15,6 +15,8 @@ use common\models\UserProjectParams;
 use frontend\widgets\CallBox;
 use frontend\widgets\IncomingCallWidget;
 use http\Exception\InvalidArgumentException;
+use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use sales\services\call\CallService;
 use Yii;
 use common\models\Call;

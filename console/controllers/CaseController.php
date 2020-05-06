@@ -55,7 +55,7 @@ class CaseController extends Controller
 					if (!$clientEmail->save()) {
 						throw new Exception($clientEmail->getErrorSummary(true)[0]);
 					}
-					$case = Cases::createExchangeByImport($client->getPrimaryKey(), $refund['projectid'], $refund['bookingid'], 25, 'Corona Virus form', CasesSourceType::OTHER);
+					$case = Cases::createExchangeByImport($client->getPrimaryKey(), $refund['projectid'], $refund['bookingid'], $refund['categoryid'], $refund['subject'], CasesSourceType::OTHER);
 					if (!$case->save()) {
 						throw new Exception($case->getErrorSummary(true)[0]);
 					}
@@ -70,10 +70,12 @@ class CaseController extends Controller
 					$transaction->commit();
 
 					echo '----------------' . PHP_EOL;
-					printf("\n Processed Data: \n ProjectId - %s \n BookingId - %s \n Email: %s \n",
+					printf("\n Processed Data: \n ProjectId - %s \n BookingId - %s \n Email: %s \n CategoryId: %s\n Subject: %s \n",
 						$this->ansiFormat($refund['projectid'], Console::FG_GREEN),
 						$this->ansiFormat($refund['bookingid'], Console::FG_GREEN),
-						$this->ansiFormat($refund['email'], Console::FG_GREEN)
+						$this->ansiFormat($refund['email'], Console::FG_GREEN),
+						$this->ansiFormat($refund['categoryid'], Console::FG_GREEN),
+						$this->ansiFormat($refund['subject'], Console::FG_GREEN)
 					);
 					printf("\n Total Rows: %s \n Current row: %s \n Remaining: %s \n",
 						$this->ansiFormat($totalRows, Console::FG_GREEN),

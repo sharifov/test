@@ -13,7 +13,7 @@ use yii\filters\VerbFilter;
 /**
  * UserStatusController implements the CRUD actions for UserStatus model.
  */
-class UserStatusController extends Controller
+class UserStatusController extends FController
 {
     /**
      * @return array

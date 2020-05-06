@@ -9,6 +9,7 @@ use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use yii\data\ActiveDataProvider;
 use sales\model\callLog\entity\callLog\CallLog;
+use yii\db\Query;
 
 /**
  * Class CallLogSearch
@@ -146,4 +147,31 @@ class CallLogSearch extends CallLog
 
         return $dataProvider;
     }
+
+	public function getCallHistory($params): ActiveDataProvider
+	{
+		$this->load($params);
+
+		$query = static::find();
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'pagination' => [
+				'pageSize' => 10,
+			]
+		]);
+
+		if (!$this->validate()) {
+			$query->where('0=1');
+			return $dataProvider;
+		}
+
+		$query->select(['call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration']);
+		$query->addSelect(['if (clients.first_name is not null, concat(clients.first_name, \' \', clients.last_name), null) as client_name']);
+		$query->leftJoin('clients', 'clients.id = cl_client_id');
+		$query->where(['cl_user_id' => $this->cl_user_id]);
+		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
+
+		return $dataProvider;
+	}
 }

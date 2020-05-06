@@ -2,6 +2,8 @@
 
 namespace frontend\widgets\notification;
 
+use common\components\purifier\Purifier;
+use common\components\purifier\PurifierFilter;
 use common\models\Email;
 use common\models\Notifications;
 use yii\bootstrap4\Html;
@@ -27,6 +29,7 @@ class NotificationMessage
      */
     public static function add(Notifications $ntf): array
     {
+        $message = Purifier::purify($ntf->n_message, PurifierFilter::shortCodeToId());
         return [
             'notification' => [
                 'command' => self::COMMAND_ADD,
@@ -34,11 +37,11 @@ class NotificationMessage
                 'id' => $ntf->n_id,
                 'title' => Html::encode($ntf->n_title),
                 'time' => strtotime($ntf->n_created_dt),
-                'message' => StringHelper::truncate(Email::strip_html_tags($ntf->n_message), 80, '...'),
+                'message' => StringHelper::truncate(Email::strip_html_tags($message), 80, '...'),
                 'type' => $ntf->getNotifyType(),
                 'popup' => (int)$ntf->n_popup,
-                'notifyMessage' => (int)$ntf->n_popup ? str_replace(["\r\n", "\n", '"'], ['', '', '\"'], $ntf->n_message) : '',
-                'notifyDesktopMessage' => (int)$ntf->n_popup ? str_replace('"', '\"', strip_tags($ntf->n_message)) : '',
+                'notifyMessage' => (int)$ntf->n_popup ? str_replace(["\r\n", "\n", '"'], ['', '', '\"'], $message) : '',
+                'notifyDesktopMessage' => (int)$ntf->n_popup ? str_replace('"', '\"', strip_tags($message)) : '',
             ]
         ];
     }

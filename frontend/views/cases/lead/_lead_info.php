@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\bootstrap4\Modal;
@@ -346,7 +347,7 @@ echo $this->render('_search_lead_form', [
 
                 $str = $clientName.'<br>';
 
-                if (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) && Yii::$app->user->id !== $model->employee_id) {
+                if (Auth::id() !== $model->employee_id && Auth::user()->isAgent()) {
                     $str .= '- // - // - // -';
                 } else {
                     $str .= $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';

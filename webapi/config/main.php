@@ -65,6 +65,10 @@ return [
             'enableSession' => false
         ],
 
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
+
         'i18n' => [
             'translations' => [
                 '*' => [

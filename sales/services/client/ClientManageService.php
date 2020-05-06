@@ -5,6 +5,7 @@ namespace sales\services\client;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\UserContactList;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
@@ -83,41 +84,47 @@ class ClientManageService
     /**
      * @param Client $client
      * @param PhoneCreateForm $phoneForm
+     * @return ClientPhone|null
      */
-    public function addPhone(Client $client, PhoneCreateForm $phoneForm): void
+    public function addPhone(Client $client, PhoneCreateForm $phoneForm): ?ClientPhone
     {
         if (!$phoneForm->phone) {
-            return;
+            return null;
         }
-
-        $this->internalPhoneGuard->guard($phoneForm->phone);
 
         if (!$this->clientPhoneRepository->exists($client->id, $phoneForm->phone)) {
             $phone = ClientPhone::create(
                 $phoneForm->phone,
                 $client->id,
 				$phoneForm->type ?? null,
-                $phoneForm->comments ?? null
+                $phoneForm->comments ?? null,
+                $phoneForm->cp_title ?? null
             );
             $this->clientPhoneRepository->save($phone);
+            return $phone;
         }
+        return null;
     }
 
-	/**
-	 * @param PhoneCreateForm $form
-	 */
-    public function updatePhone(PhoneCreateForm $form): void
-	{
+    /**
+     * @param PhoneCreateForm $form
+     * @return ClientPhone
+     */
+    public function updatePhone(PhoneCreateForm $form): ClientPhone
+    {
 		$phone = $this->clientPhoneRepository->find($form->id);
-//		$phone->edit($form->phone, $form->type);
+
 		if ($form->phone !== null) {
 			$phone->phone = $form->phone;
 		}
-
 		if ($form->type !== null) {
 			$phone->type = $form->type;
 		}
+		if ($form->cp_title !== null) {
+			$phone->cp_title = $form->cp_title;
+		}
 		$this->clientPhoneRepository->save($phone);
+		return $phone;
 	}
 
     /**
@@ -144,7 +151,8 @@ class ClientManageService
             $email = ClientEmail::create(
                 $emailForm->email,
                 $client->id,
-				$emailForm->type
+				$emailForm->type,
+				$emailForm->ce_title
             );
             $this->clientEmailRepository->save($email);
         }
@@ -160,9 +168,11 @@ class ClientManageService
 		if ($form->email !== null) {
 			$email->email = $form->email;
 		}
-
 		if ($form->type !== null) {
 			$email->type = $form->type;
+		}
+		if ($form->ce_title !== null) {
+			$email->ce_title = $form->ce_title;
 		}
 
 		$this->clientEmailRepository->save($email);
@@ -314,4 +324,20 @@ class ClientManageService
 
         return $emails;
     }
+
+    /**
+     * @param Client $client
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function removeContact(Client $client): void
+	{
+		$client = $this->finder->clientFind($client);
+		$client->cl_type_id = Client::TYPE_CLIENT;
+		$clientId = $this->clientRepository->save($client);
+
+        if ($userContactList = UserContactList::findOne(['ucl_client_id' => $clientId])) {
+            $userContactList->delete();
+        }
+	}
 }

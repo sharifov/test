@@ -164,7 +164,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $email->e_created_dt = $mail['ei_created_dt'];
 
                         $email->e_inbox_email_id = $mail['ei_id'];
-                        $email->e_inbox_created_dt = $mail['ei_created_dt'];
+                        $email->e_inbox_created_dt = $mail['ei_received_dt'] ?: $mail['ei_created_dt'];
                         $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
                         $email->e_message_id = $mail['ei_message_id'];
 
@@ -194,7 +194,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 						}
 
                         if (!$email->save()) {
-                            \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
+                            \Yii::error(VarDumper::dumpAsString([
+                                'communicationId' => $mail['ei_id'],
+                                'error' => $email->errors,
+                            ]), 'ReceiveEmailsJob:execute');
                         } else {
                             if ($lead_id === null && $case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
                                 try {

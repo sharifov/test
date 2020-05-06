@@ -56,6 +56,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
 
 
+        $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/failed-bookings'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Bonus <span id="badges-bonus" data-type="bonus" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/bonus'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
@@ -147,6 +148,12 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
 
         $menuItems[] = [
+            'label' => 'My Contacts <span id="call-inbox-queue" class="label-info label pull-right"></span>',
+            'url' => ['/contacts/index'],
+            'icon' => 'user'
+        ];
+
+        $menuItems[] = [
             'label' => 'Data Lists',
             'url' => 'javascript:',
             'icon' => 'th-list',
@@ -233,7 +240,6 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
-                ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
                 ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
             ]
@@ -247,6 +253,9 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
                 ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
                 ['label' => 'Clients emails', 'url' => ['/client-email/index'], 'icon' => 'envelope '],
+                ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
+                ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'list'],
+                ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'list'],
             ]
         ];
 

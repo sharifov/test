@@ -25,12 +25,13 @@ class MigrateCallsToCallLogsController extends Controller
     public $offset;
     public $dateFrom;
     public $dateTo;
+    public $callId;
 
     public function options($actionID)
     {
         if ($actionID === 'migrate-calls-to-call-log') {
             return array_merge(parent::options($actionID), [
-                'limit', 'offset', 'dateFrom', 'dateTo'
+                'limit', 'offset', 'dateFrom', 'dateTo', 'callId'
             ]);
         }
         return parent::options($actionID);
@@ -48,7 +49,7 @@ class MigrateCallsToCallLogsController extends Controller
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
     }
 
-    private function getQueryBefore($limit, $offset, $dateFrom, $dateTo)
+    private function getQueryBefore($limit, $offset, $dateFrom, $dateTo, $callId)
     {
         $query = Call::find()
             ->orderBy(['c_id' => SORT_ASC])
@@ -59,10 +60,13 @@ class MigrateCallsToCallLogsController extends Controller
             ->andWhere(['<', 'c_created_dt', self::DATE])
             ->andWhere(['c_call_status' => [Call::TW_STATUS_COMPLETED, Call::TW_STATUS_BUSY, Call::TW_STATUS_NO_ANSWER, Call::STATUS_FAILED, Call::TW_STATUS_CANCELED]])
             ->asArray();
+        if ($callId) {
+            $query->andWhere(['c_id' => $callId]);
+        }
         return $query;
     }
 
-    private function getQueryAfter($limit, $offset, $dateFrom, $dateTo)
+    private function getQueryAfter($limit, $offset, $dateFrom, $dateTo, $callId)
     {
         $query = Call::find()->alias('c')
             ->select('c.*')
@@ -112,7 +116,8 @@ class MigrateCallsToCallLogsController extends Controller
                          first_child.c_source_type_id as `first_child_c_source_type_id`,
                          first_child.c_recording_sid as `first_child_c_recording_sid`,
                          first_child.c_recording_duration as `first_child_c_recording_duration`,
-                         first_child.c_created_user_id as `first_child_c_created_user_id`'
+                         first_child.c_created_user_id as `first_child_c_created_user_id`,
+                         first_child.c_status_id as `first_child_c_status_id`'
             )
             ->addSelect(
                 'first_same_child.c_id as `first_same_child_c_id`,
@@ -159,10 +164,13 @@ class MigrateCallsToCallLogsController extends Controller
             ->andWhere(['<', 'c.c_created_dt', $dateTo])
             ->andWhere(['c.c_call_status' => [Call::TW_STATUS_COMPLETED, Call::TW_STATUS_BUSY, Call::TW_STATUS_NO_ANSWER, Call::TW_STATUS_FAILED, Call::TW_STATUS_CANCELED]])
             ->asArray();
+        if ($callId) {
+            $query->andWhere(['c.c_id' => $callId]);
+        }
         return $query;
     }
 
-    public function actionMigrateCallsToCallLog($limit, $offset, $dateFrom, $dateTo): void
+    public function actionMigrateCallsToCallLog($limit, $offset, $dateFrom, $dateTo, $callId = null): void
     {
         $limit = ($limit);
         $offset = ($offset);
@@ -188,9 +196,9 @@ class MigrateCallsToCallLogsController extends Controller
         $n = 0;
 
         if (strtotime($dateFrom) < strtotime(self::DATE)) {
-            $query = $this->getQueryBefore($limit, $offset, $dateFrom, $dateTo);
+            $query = $this->getQueryBefore($limit, $offset, $dateFrom, $dateTo, $callId);
         } else {
-            $query = $this->getQueryAfter($limit, $offset, $dateFrom, $dateTo);
+            $query = $this->getQueryAfter($limit, $offset, $dateFrom, $dateTo, $callId);
         }
 
         $total = (clone $query)->count();
@@ -202,7 +210,7 @@ class MigrateCallsToCallLogsController extends Controller
 
         foreach ($query->batch() as $calls) {
             foreach ($calls as $call) {
-                $this->processCall($call, $logs);
+                $this->processCall($call, $logs, $callId);
                 $n++;
                 Console::updateProgress($n, $total);
             }
@@ -227,8 +235,12 @@ class MigrateCallsToCallLogsController extends Controller
         printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
     }
 
-    private function processCall($call, &$log): void
+    private function processCall($call, &$log, $callId): void
     {
+        if ($callId) {
+            \Yii::info($call, 'info\Debug');
+        }
+
         if (CallLog::find()->andWhere(['cl_id' => $call['c_id']])->exists()) {
             $log[] = [
                 'Call Id' => $call['c_id'],
@@ -245,10 +257,11 @@ class MigrateCallsToCallLogsController extends Controller
         if (
             $call['c_call_type_id'] == Call::CALL_TYPE_OUT
             && $call['c_parent_id'] == null
-            && (
-                $call['first_child_c_id'] == null || $call['first_child_c_call_type_id'] == Call::CALL_TYPE_OUT
-            )
+            && $call['first_child_c_id'] != null
+            && $call['bottom_child_c_id'] == null
+            && $call['first_child_c_call_type_id'] == Call::CALL_TYPE_OUT
         ) {
+            $this->outParentCalls($call, $log);
             return;
         }
 
@@ -256,7 +269,7 @@ class MigrateCallsToCallLogsController extends Controller
             $call['c_call_type_id'] == Call::CALL_TYPE_OUT
             && $call['c_parent_id'] == null
             && $call['first_child_c_id'] != null
-            && $call['bottom_child_c_id'] != null
+            && ($call['bottom_child_c_id'] != null || $call['first_child_c_call_type_id'] == Call::CALL_TYPE_IN)
         ) {
             $this->outTransferParentCalls($call, $log);
             return;
@@ -265,10 +278,9 @@ class MigrateCallsToCallLogsController extends Controller
         if (
             $call['c_call_type_id'] == Call::CALL_TYPE_OUT
             && $call['c_parent_id'] != null
-            && $call['first_child_c_id'] == null
             && $call['parent_c_parent_id'] == null
         ) {
-            $this->outChildCalls($call, $log);
+            //$this->outChildCalls($call, $log);
             return;
         }
 
@@ -400,11 +412,34 @@ class MigrateCallsToCallLogsController extends Controller
 
     }
 
+    private function outParentCalls($call, array &$log): void
+    {
+        if ($call['first_child_c_id']) {
+            $callData['cl_status_id'] = $call['first_child_c_status_id'];
+        } else {
+            $callData['cl_status_id'] = $call['c_status_id'];
+        }
+
+        $callData['cl_group_id'] = $call['c_id'];
+
+        $callRecordData['clr_record_sid'] = $call['first_child_c_recording_sid'];
+        $callRecordData['clr_duration'] = $call['first_child_c_recording_duration'];
+
+        $this->createCallLogs(
+            $call,
+            $log,
+            $callData,
+            [],
+            $callRecordData
+        );
+    }
+
     private function outTransferSecondaryOutChildCall($call, array &$log): void
     {
         $call['c_created_user_id'] = null;
 
         $callData['cl_group_id'] = $call['parent_c_parent_id'];
+        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['top_parent_c_created_dt']) + $call['top_parent_c_call_duration']));
 
         $this->createCallLogs(
             $call,
@@ -491,7 +526,7 @@ class MigrateCallsToCallLogsController extends Controller
 
         $call['c_parent_id'] = $call['parent_c_parent_id'];
 
-        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - strtotime($call['parent_c_created_dt']));
+        $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['top_parent_c_created_dt']) + $call['top_parent_c_call_duration']));
 
         $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
         $callData['cl_is_transfer'] = (

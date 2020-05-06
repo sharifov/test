@@ -26,6 +26,7 @@ use common\components\CheckPhoneNumberJob;
  * @property string $updated
  * @property string $comments
  * @property string $type
+ * @property string $cp_title
  *
  * @property Client $client
  */
@@ -44,6 +45,13 @@ class ClientPhone extends \yii\db\ActiveRecord
     	self::PHONE_VALID => 'Valid',
 		self::PHONE_FAVORITE => 'Favorite',
 		self::PHONE_INVALID => 'Invalid',
+	];
+
+	public const PHONE_TYPE_ICO_CLASS = [
+		self::PHONE_VALID => 'fa fa-phone success',
+		self::PHONE_FAVORITE => 'fa fa-phone warning',
+		self::PHONE_INVALID => 'fa fa-phone danger',
+		self::PHONE_NOT_SET => 'fa fa-phone'
 	];
 
     public const PHONE_TYPE_ICONS = [
@@ -75,31 +83,35 @@ class ClientPhone extends \yii\db\ActiveRecord
         return 'client_phone';
     }
 
-	/**
-	 * @param string $phone
-	 * @param int $clientId
-	 * @param int|null $phoneType
-	 * @param string|null $comments
-	 * @return ClientPhone
-	 */
-    public static function create(string $phone, int $clientId, int $phoneType = null, string $comments = null): self
+    /**
+     * @param string $phone
+     * @param int $clientId
+     * @param int|null $phoneType
+     * @param string|null $comments
+     * @param string|null $cpTitle
+     * @return ClientPhone
+     */
+    public static function create(string $phone, int $clientId, int $phoneType = null, string $comments = null, string $cpTitle = null): self
     {
         $clientPhone = new static();
         $clientPhone->phone = $phone;
         $clientPhone->client_id = $clientId;
         $clientPhone->type = $phoneType;
         $clientPhone->comments = $comments;
+        $clientPhone->cp_title = $cpTitle;
         return $clientPhone;
     }
 
-	/**
-	 * @param string $phone
-	 * @param int|null $phoneType
-	 */
-    public function edit(string $phone, int $phoneType = null): void
+    /**
+     * @param string $phone
+     * @param int|null $phoneType
+     * @param string|null $cpTitle
+     */
+    public function edit(string $phone, int $phoneType = null, string $cpTitle = null): void
 	{
 		$this->phone = $phone;
 		$this->type = $phoneType;
+		$this->cp_title = $cpTitle;
 	}
 
     /**
@@ -118,7 +130,8 @@ class ClientPhone extends \yii\db\ActiveRecord
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['phone', 'client_id'], 'unique', 'targetAttribute' => ['phone', 'client_id']],
 
-            ['type', 'in', 'range' => array_keys(self::PHONE_TYPE)]
+            ['type', 'in', 'range' => array_keys(self::PHONE_TYPE)],
+            [['cp_title'], 'string', 'max' => 150],
         ];
     }
 
@@ -147,7 +160,8 @@ class ClientPhone extends \yii\db\ActiveRecord
             'validate_dt' => 'Validated at',
             'created' => 'Created',
             'updated' => 'Updated',
-			'type' => 'Phone Type'
+			'type' => 'Phone Type',
+			'cp_title' => 'Title'
         ];
     }
 

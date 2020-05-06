@@ -8,7 +8,7 @@ use common\models\UserProjectParams;
 /**
  * Class InternalPhoneGuard
  *
- * @property $internalPhones
+ * @property array $internalPhones
  */
 class InternalPhoneGuard
 {

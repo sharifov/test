@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="col-md-5">
             <pre><?php  echo $model->n_title; ?></pre>
-            <pre><?php  echo $model->n_message; ?></pre>
+            <pre><?php  echo Yii::$app->formatter->asNtextWithPurify($model->n_message); ?></pre>
         </div>
         <div class="col-md-7">
 

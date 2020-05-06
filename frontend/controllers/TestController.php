@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Client;
@@ -23,6 +24,7 @@ use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
+use common\models\search\ContactsSearch;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserConnection;
@@ -37,6 +39,8 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\widgets\lead\editTool\Form;
+use frontend\widgets\newWebPhone\sms\socket\Message;
+use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
@@ -61,6 +65,7 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
+use sales\access\CallAccess;
 use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
@@ -84,6 +89,8 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
 use sales\helpers\app\AppHelper;
+use sales\helpers\call\CallHelper;
+use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
@@ -135,6 +142,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -200,7 +208,13 @@ class TestController extends FController
 
     public function actionTest()
     {
-        return $this->render('blank');
+
+
+        $search = new ContactsSearch(295);
+        $search->searchByWidgetCallSection('373');
+
+
+//        return $this->render('blank');
     }
 
     public function actionTestNew()
@@ -1146,4 +1160,31 @@ class TestController extends FController
         return $this->render('websocket');
     }
 
+    public function actionTestCallHelper(): void
+	{
+		$callAccess = CallAccess::isUserCanDial(464, UserProfile::CALL_TYPE_WEB);
+
+		$test1 = CallHelper::callNumber('+123456789', false);
+		$test2 = CallHelper::callNumber('+123456789', $callAccess, 'call phone');
+		$test3 = CallHelper::callNumber('+123456789', $callAccess, 'call phone', [
+			'confirm' => 1,
+			'call' => 1,
+			'phone-from-id' => 34,
+			'icon-class' => 'fa fa-phone valid'
+		]);
+		$test4 = CallHelper::callNumber('+123456789', $callAccess,'call phone', [
+			'confirm' => 1,
+			'call' => 1,
+			'phone-from-id' => 34,
+			'icon-class' => 'fa fa-phone valid',
+		], 'a');
+
+		echo Html::encode($test1);
+		echo '<br>';
+		echo Html::encode($test2);
+		echo '<br>';
+		echo Html::encode($test3);
+		echo '<br>';
+		echo Html::encode($test4);
+	}
 }

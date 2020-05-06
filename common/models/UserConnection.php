@@ -187,7 +187,7 @@ class UserConnection extends \yii\db\ActiveRecord
     public static function getLastUserChannel(int $userId): ?string
     {
         $uc = self::getLastUserConnection($userId);
-        if ($uc & $uc->uc_id) {
+        if ($uc && $uc->uc_id) {
             return 'con-' . $uc->uc_id;
         }
         return null;

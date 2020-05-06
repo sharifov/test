@@ -104,6 +104,11 @@ $js = <<<JS
                             }
                         }
                         
+                        if(obj.cmd === 'userNotInit') {
+                            window.location.href = '/site/logout';
+                        }
+                        
+                        
                         if(obj.cmd === 'getNewNotification') {
                             //alert(obj.cmd);
                              if (typeof obj.notification !== 'undefined') {
@@ -187,6 +192,12 @@ $js = <<<JS
                             hiddenLink.attr("target", "_blank");
                             hiddenLink.attr("data-pjax", "0");
                             hiddenLink[0].click();*/
+                        }
+                        
+                        if(obj.cmd === 'phoneWidgetSmsSocketMessage') {
+                            if (typeof obj.data !== 'undefined') {
+                                PhoneWidgetSms.socket(obj.data);
+                             }
                         }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');

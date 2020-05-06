@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\search\QuotePriceSearch;
+use sales\auth\Auth;
 use Yii;
 use common\models\Quote;
 use common\models\search\QuoteSearch;
@@ -95,7 +96,7 @@ class QuotesController extends FController
         $model = $this->findModel($id);
         $lead = $model->lead;
 
-        if($lead->status === Lead::STATUS_TRASH && Yii::$app->user->identity->canRole('agent')) {
+        if($lead->status === Lead::STATUS_TRASH && Auth::user()->isAgent()) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 

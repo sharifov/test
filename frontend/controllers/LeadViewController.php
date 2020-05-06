@@ -800,7 +800,7 @@ class LeadViewController extends FController
 	 * @param array $errors
 	 * @return string
 	 */
-    private function getParsedErrors(array $errors): string
+    public function getParsedErrors(array $errors): string
 	{
 		return implode('<br>', array_map(static function ($errors) {
 			return implode('<br>', $errors);

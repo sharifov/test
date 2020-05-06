@@ -381,6 +381,7 @@ JS;
                     <?= $form->field($modelProfile, 'up_skill')->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---']) ?>
                     <?= $form->field($modelProfile, 'up_auto_redial')->checkbox() ?>
                     <?= $form->field($modelProfile, 'up_kpi_enable')->checkbox() ?>
+                    <?= $form->field($modelProfile, 'up_show_in_contact_list')->checkbox() ?>
                 </div>
                 <div class="col-md-3">
                     <?= $form->field($modelProfile, 'up_2fa_enable')->checkbox() ?>

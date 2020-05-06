@@ -4,6 +4,10 @@ namespace sales\model\client;
 
 use common\CodeExceptionsModule as Module;
 
+/**
+ * Class ClientCodeException
+ * @package sales\model\client
+ */
 class ClientCodeException
 {
     public const CLIENT_NOT_FOUND = Module::CLIENT . 100;
@@ -19,6 +23,7 @@ class ClientCodeException
     public const CLIENT_EMAIL_REMOVE = Module::CLIENT . 302;
 
     public const INTERNAL_PHONE = Module::CLIENT . 400;
+    public const INTERNAL_EMAIL = Module::CLIENT . 401;
 
     public const CLIENT_CREATE_NOT_ADD_PHONES = Module::CLIENT . 500;
     public const CLIENT_CREATE_NOT_ADD_EMAILS = Module::CLIENT . 501;

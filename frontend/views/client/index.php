@@ -33,7 +33,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'first_name',
             'middle_name',
             'last_name',
-
+            'company_name',
+            'is_company:boolean',
+            'is_public:boolean',
+            'disabled:boolean',
             [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
