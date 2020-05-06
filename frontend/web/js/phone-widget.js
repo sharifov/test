@@ -1,4 +1,5 @@
 $(document).ready(function() {
+
     $phoneTabAnchor = $('[data-toggle-tab]');
     var historySimpleBar;
 
@@ -308,6 +309,62 @@ $(document).ready(function() {
         $('.phone-widget-icon').removeClass('is-on-call');
         $('.phone-widget-icon').removeClass('is-pending');
         $('.call-pane__call-btns').removeClass('is-on-call');
-        $('.call-pane__call-btns').removeClass('is-pending')
+        $('.call-pane__call-btns').removeClass('is-pending');
+        $('.call-pane-calling').removeClass('is_active');
+        $('.call-pane').addClass('is_active');
     }
+
+    function toSelect(elem, cb) {
+        var $element = $(elem),
+            $toggle = $element.find('.dropdown-toggle'),
+            $option = $element.find('.dropdown-item'),
+            $selectedNumber = $element.find('.current-number__selected-nr'),
+            $selectedText = $element.find('.current-number__selected-project');
+
+        var selected = 'optionselected';
+
+        this.data = {
+            value: '',
+            company: ''
+        }
+
+        function setValue(option) {
+            this.data.value = $(option).val();
+            this.data.company = $(option).attr('data-info-project');
+        }
+
+        this.getData = function() {
+            return this.data;
+        }
+
+        $($toggle).on(selected, function(e) {
+            var elem = e.target;
+
+            $(elem).val(this.data.value);
+            $selectedNumber.text(this.data.value);
+            $selectedText.text(this.data.company)
+
+            if (typeof cb === 'function') {
+                 cb.call(this);
+            }
+            
+        }.bind(this)); 
+
+        $($option).on('click', function() {
+            setValue($(this));
+            $toggle.trigger(selected);
+        })
+
+        return {
+            getData: this.getData(),
+        }
+
+    }
+
+    var currentNumber = toSelect($('.current-number'), function() {
+        console.log('here goes a callback')
+        console.log(currentNumber.getData);
+    });
+    
+    
 });

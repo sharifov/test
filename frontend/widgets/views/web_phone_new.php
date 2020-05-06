@@ -74,7 +74,12 @@ $js = <<<JS
                 }, 'json');
                 
             } else {
-                alert('You have active call');
+
+								alert('You have active call');
+								$('.call-pane').removeClass('is_active');
+								$('.call-pane-calling').addClass('is_active');
+								$(".call-pane__call-btns").addClass("is-on-call");
+
                 return false;
             }
         }, 'json');

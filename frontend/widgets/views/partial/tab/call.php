@@ -4,9 +4,29 @@
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
-    <div class="call-pane">
+    <div class="call-pane is_active">
+        <div class="current-number">
+            <div class="dropdown">
+                <button value="+1-222-555-8888" class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <small class="current-number__phone current-number__selected-nr">+1-222-555-8888</small>
+                <span class="current-number__identifier current-number__selected-project">wowfare</span>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <button class="dropdown-item" type="button" value="+1-222-555-8888" data-info-project="wowfare"> 
+                        <small class="current-number__phone">+1-222-555-8888</small>
+                        <span class="current-number__identifier">wowfare</span>
+                    </button>
+                    <button class="dropdown-item" type="button" value="+1-222-555-4444" data-info-project="ovago">
+                    <small class="current-number__phone">+1-333-222-444</small>
+                        <span class="current-number__identifier">ovago</span>
+                    </button>
+                </div>
+            </div>
+            <i class="fa fa-chevron-down"></i>
+
+        </div>
         <div class="call-pane__number">
-            <div class="suggestion-placeholder">
+            <!-- <div class="suggestion-placeholder">
                 <svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1.97374 43.421C0.888156 43.421 0 44.3092 0 45.3946C0 46.4802 0.888156 47.3683 1.97374 47.3683C3.05933 47.3683 3.94749 46.4802 3.94749 45.3946C3.9473 44.3092 3.05914 43.421 1.97374 43.421Z" fill="white" fill-opacity="0.1"/>
                     <path d="M1.97374 27.6315C0.888156 27.6315 0 28.5196 0 29.6052C0 30.6908 0.888156 31.579 1.97374 31.579C3.05933 31.579 3.94749 30.6908 3.94749 29.6052C3.9473 28.5196 3.05914 27.6315 1.97374 27.6315Z" fill="white" fill-opacity="0.1"/>
@@ -38,8 +58,10 @@
                     <i class="far fa-user"></i>
 
                 </div>
-            </div>
+            </div> -->
             <ul class="phone-widget__list-item calls-history suggested-contacts"></ul>
+
+            
 
             <?php
 
@@ -87,6 +109,7 @@
                 <li class="dial__item"><button class="dial__btn" value="✱">✱</button></li>
                 <li class="dial__item"><button class="dial__btn" value="0">0</button></li>
                 <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
+                <li class="dial__item"><button class="dial__btn" value="+">+</button></li>
             </ul>
             <div class="call-pane__call-btns">
                 <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
@@ -126,6 +149,86 @@
 <!--                </svg>-->
 <!--            </button>-->
 <!--        </div>-->
+    </div>
+    <div class="call-pane-calling">
+        <div class="contact-info-card">
+
+            <div class="contact-info-card__details">
+            <div class="contact-info-card__line history-details">
+                <strong class="contact-info-card__name">Geordan Reyney</strong>
+            </div>
+
+            <div class="contact-info-card__line history-details">
+                <span class="contact-info-card__call-type">+1-222-555-8888</span>
+            </div>
+            </div>
+            </div>
+
+            <div class="call-pane__call-btns">
+            <button class="call-pane__mute">
+            <i class="fa fa-volume-mute"></i>
+            </button>
+            <button class="call-pane__start-call calling-state-block">
+            <div class="call-in-action">
+                <span class="call-in-action__text">on call</span>
+                <span class="call-in-action__time">01:54</span>
+            </div>
+            <!-- <i class="fas fa-phone"></i> -->
+            </button>
+            <button class="call-pane__end-call">
+            <i class="fa fa-phone-slash"></i>
+            </button>
+            <!-- <button class="call-pane__correction">
+            <i class="fa fa-backspace"></i>
+            </button> -->
+
+
+            </div>
+
+            <div class="sound-control-wrap">
+            <i class="fa fa-volume-down"></i>
+            <div class="sound-controls">
+            
+            <div class="progres-wrap">
+                <div class="sound-progress" ></div>
+                <div class="sound-ovf" style="right: -100%;"></div>
+            </div>
+            </div>
+            </div>
+
+            <div class="sound-control-wrap">
+            <i class="fa fa-microphone"></i>
+            <div class="sound-controls">
+            
+            <div class="progres-wrap">
+                <div class="sound-progress" ></div>
+                <div class="sound-ovf" style="right: -30%;"></div>
+            </div>
+            </div>
+            </div>
+
+            <div class="call-pane__note-block">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M4.5778 11.0407C4.5778 11.2514 4.74859 11.4222 4.95928 11.4222H7.49903C7.70138 11.4222 7.89544 11.3418 8.03853 11.1987L15.7766 3.46065C15.9196 3.31757 16 3.12355 16 2.92123C16 2.71892 15.9196 2.52489 15.7766 2.38182L13.6182 0.223386C13.4751 0.0803521 13.2811 0 13.0788 0C12.8765 0 12.6824 0.0803521 12.5393 0.223386L4.80126 7.96147C4.65818 8.10455 4.5778 8.29862 4.5778 8.50097V11.0407ZM14.1576 2.92123L7.18256 9.89627H6.10373V8.81744L13.0788 1.8424L14.1576 2.92123Z"
+                fill="#446D97"></path>
+            <path
+                d="M1.52593 14.474V2.26655H5.34076V0.740614H1.52593C0.683183 0.740614 0 1.4238 0 2.26655V14.474C0 15.3168 0.683184 15.9999 1.52593 15.9999H13.7334C14.5761 15.9999 15.2593 15.3168 15.2593 14.474V10.6592H13.7334V14.474H1.52593Z"
+                fill="#446D97"></path>
+            </svg>
+
+            <div class="form-group">
+            <input type="text" class="call-pane__note-msg form-control" placeholder="Add Note">
+            <div class="error-message"></div>
+            </div>
+            <button class="call-pane__add-note">
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M16.7072 1.70718L6.50008 11.9143L0.292969 5.70718L1.70718 4.29297L6.50008 9.08586L15.293 0.292969L16.7072 1.70718Z"
+                fill="white" />
+            </svg>
+            </button>
+        </div>
     </div>
 </div>
 

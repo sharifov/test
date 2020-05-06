@@ -307,6 +307,6 @@ JS;
     $this->registerJs($js);
     ?>
 
-    <div id="list-of-contacts"></div>
+    <div class="contacts-list" id="list-of-contacts"></div>
 
 </div>
