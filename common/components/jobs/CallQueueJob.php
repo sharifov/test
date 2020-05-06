@@ -77,10 +77,17 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->casesRepository = Yii::createObject(CasesRepository::class);
             $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
+            Yii::info(VarDumper::dumpAsString('Call from internal number: ' . $this->callFromInternalPhone));
+            Yii::info(VarDumper::dumpAsString('Site Settings: ' . Yii::$app->params['create_lead_on_incoming_call']));
+
             $createLeadOnIncoming = $this->callFromInternalPhone ? false : (bool)(Yii::$app->params['create_lead_on_incoming_call'] ?? true);
             $createCaseOnIncoming = $this->callFromInternalPhone ? false : (bool)(Yii::$app->params['create_case_on_incoming_call'] ?? true);
 
-            // Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
+			Yii::info(VarDumper::dumpAsString('Create lead: ' . $createLeadOnIncoming));
+			Yii::info(VarDumper::dumpAsString('Create lead: ' . $createCaseOnIncoming));
+
+
+			// Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
 
             if ($this->delay) {
                 sleep($this->delay);
