@@ -81,4 +81,9 @@ class Language extends \yii\db\ActiveRecord
     {
         return $this->hasMany(LanguageSource::class, ['id' => 'id'])->viaTable('language_translate', ['language' => 'language_id']);
     }
+
+    public static function getList(): array
+	{
+		return self::find()->select(['language_id'])->indexBy('language_id')->asArray()->column();
+	}
 }
