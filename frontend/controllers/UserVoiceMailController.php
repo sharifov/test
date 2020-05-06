@@ -2,11 +2,14 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use common\models\Language;
 use Yii;
 use sales\model\userVoiceMail\entity\UserVoiceMail;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -19,14 +22,15 @@ class UserVoiceMailController extends FController
     */
     public function behaviors(): array
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
+		$behaviors = [
+			'verbs' => [
+				'class' => VerbFilter::class,
+				'actions' => [
+					'delete' => ['POST'],
+				],
+			],
+		];
+		return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -110,6 +114,67 @@ class UserVoiceMailController extends FController
 
         return $this->redirect(['index']);
     }
+
+	/**s
+	 * @return string
+	 * @throws BadRequestHttpException
+	 */
+    public function actionAjaxCreate(): string
+	{
+		$userId = Yii::$app->request->get('uid');
+		if (!$user = Employee::findOne($userId)) {
+			throw new BadRequestHttpException('Invalid User Id: ' . $userId, 1);
+		}
+
+		$userVoiceMail = new UserVoiceMail();
+		$userVoiceMail->uvm_user_id = $userId;
+
+		if ($userVoiceMail->load(Yii::$app->request->post())) {
+			if($userVoiceMail->validate() && $userVoiceMail->save()) {
+				return 'Success <script>$("#modal-df").modal("hide")</script>';
+			}
+		}
+
+		return $this->renderAjax('create_ajax', [
+			'model' => $userVoiceMail,
+		]);
+	}
+
+	public function actionAjaxUpdate(): string
+	{
+		$id = Yii::$app->request->get('id');
+
+		$model = $this->findModel($id);
+
+		if ($model->load(Yii::$app->request->post())) {
+			if($model->validate() && $model->save()) {
+				return 'Success <script>$("#modal-df").modal("hide")</script>';
+			}
+		}
+		return $this->renderAjax('update_ajax', [
+			'model' => $model,
+		]);
+	}
+
+	/**
+	 * @return string
+	 * @throws BadRequestHttpException
+	 * @throws NotFoundHttpException
+	 * @throws StaleObjectException
+	 * @throws \Throwable
+	 */
+	public function actionAjaxDelete()
+	{
+		$id = Yii::$app->request->get('id');
+
+		$model = $this->findModel($id);
+
+		if ($model->delete()) {
+			return $this->asJson(['error' => false]);
+		}
+
+		return $this->asJson(['error' => true, 'message' => $model->getErrorSummary(false)[0]]);
+	}
 
     /**
      * @param integer $id

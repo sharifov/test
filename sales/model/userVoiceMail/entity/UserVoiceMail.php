@@ -3,6 +3,7 @@
 namespace sales\model\userVoiceMail\entity;
 
 use common\models\Employee;
+use common\models\Language;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -33,6 +34,8 @@ use yii\db\ActiveRecord;
  */
 class UserVoiceMail extends \yii\db\ActiveRecord
 {
+	private const MAX_COUNT_ROWS = 10;
+
 	/**
 	 * @return array
 	 */
@@ -72,6 +75,8 @@ class UserVoiceMail extends \yii\db\ActiveRecord
             ['uvm_record_enable', 'integer'],
 
             ['uvm_say_language', 'string', 'max' => 10],
+            ['uvm_say_language', 'required'],
+			['uvm_say_language', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['uvm_say_language' => 'language_id']],
 
             ['uvm_say_text_message', 'string'],
 
@@ -88,6 +93,8 @@ class UserVoiceMail extends \yii\db\ActiveRecord
             ['uvm_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uvm_user_id' => 'id']],
 
             ['uvm_voice_file_message', 'string', 'max' => 255],
+
+			['uvm_user_id', 'checkCountOfRows']
         ];
     }
 
@@ -109,21 +116,21 @@ class UserVoiceMail extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'uvm_id' => 'Uvm ID',
-            'uvm_user_id' => 'Uvm User ID',
-            'uvm_name' => 'Uvm Name',
-            'uvm_say_text_message' => 'Uvm Say Text Message',
-            'uvm_say_language' => 'Uvm Say Language',
-            'uvm_say_voice' => 'Uvm Say Voice',
-            'uvm_voice_file_message' => 'Uvm Voice File Message',
-            'uvm_record_enable' => 'Uvm Record Enable',
-            'uvm_max_recording_time' => 'Uvm Max Recording Time',
-            'uvm_transcribe_enable' => 'Uvm Transcribe Enable',
-            'uvm_enabled' => 'Uvm Enabled',
-            'uvm_created_dt' => 'Uvm Created Dt',
-            'uvm_updated_dt' => 'Uvm Updated Dt',
-            'uvm_created_user_id' => 'Uvm Created User ID',
-            'uvm_updated_user_id' => 'Uvm Updated User ID',
+            'uvm_id' => 'ID',
+            'uvm_user_id' => 'User ID',
+            'uvm_name' => 'Name',
+            'uvm_say_text_message' => 'Say Text Message',
+            'uvm_say_language' => 'Say Language',
+            'uvm_say_voice' => 'Say Voice',
+            'uvm_voice_file_message' => 'Voice File Message',
+            'uvm_record_enable' => 'Record Enable',
+            'uvm_max_recording_time' => 'Max Recording Time',
+            'uvm_transcribe_enable' => 'Transcribe Enable',
+            'uvm_enabled' => 'Enabled',
+            'uvm_created_dt' => 'Created Dt',
+            'uvm_updated_dt' => 'Updated Dt',
+            'uvm_created_user_id' => 'Created User ID',
+            'uvm_updated_user_id' => 'Updated User ID',
         ];
     }
 
@@ -136,4 +143,16 @@ class UserVoiceMail extends \yii\db\ActiveRecord
     {
         return 'user_voice_mail';
     }
+
+    public function checkCountOfRows($attribute, $params, $validator): void
+	{
+		if ($this->getIsNewRecord()) {
+			$count = self::find()->where(['uvm_user_id' => $this->uvm_user_id])->count();
+
+			$maxRows = Yii::$app->params['user_voice_mail'] ?? self::MAX_COUNT_ROWS;
+			if ($count+1 > $maxRows) {
+				$this->addError('uvm_user_id', 'Maximum number of entries exceeded: ' . $maxRows);
+			}
+		}
+	}
 }

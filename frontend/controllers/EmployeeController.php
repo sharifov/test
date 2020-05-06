@@ -16,6 +16,7 @@ use common\models\UserProductType;
 use common\models\UserProfile;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
+use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
@@ -692,6 +693,9 @@ class EmployeeController extends FController
             'dataProvider' => $dataProvider,
             'modelProfile' => $modelProfile,
         ];
+
+		$userVoiceMailSearch = new UserVoiceMailSearch();
+		$result['userVoiceMailProvider'] = $userVoiceMailSearch->search(['UserVoiceMailSearch' => ['uvm_user_id' => $model->id]]);
 
         if (Auth::can('user-product-type/list')) {
             $dataUserProductType = new ActiveDataProvider([
