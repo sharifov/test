@@ -77,14 +77,14 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->casesRepository = Yii::createObject(CasesRepository::class);
             $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
-            Yii::info(VarDumper::dumpAsString('Call from internal number: ' . $this->callFromInternalPhone));
-            Yii::info(VarDumper::dumpAsString('Site Settings: ' . Yii::$app->params['settings']['create_lead_on_incoming_call']));
+            Yii::error(VarDumper::dumpAsString('Call from internal number: ' . $this->callFromInternalPhone));
+            Yii::error(VarDumper::dumpAsString('Site Settings: ' . Yii::$app->params['settings']['create_lead_on_incoming_call']));
 
             $createLeadOnIncoming = $this->callFromInternalPhone ? false : (bool)(Yii::$app->params['settings']['create_lead_on_incoming_call'] ?? true);
             $createCaseOnIncoming = $this->callFromInternalPhone ? false : (bool)(Yii::$app->params['settings']['create_case_on_incoming_call'] ?? true);
 
-			Yii::info(VarDumper::dumpAsString('Create lead: ' . $createLeadOnIncoming));
-			Yii::info(VarDumper::dumpAsString('Create lead: ' . $createCaseOnIncoming));
+			Yii::error(VarDumper::dumpAsString('Create lead: ' . $createLeadOnIncoming));
+			Yii::error(VarDumper::dumpAsString('Create lead: ' . $createCaseOnIncoming));
 
 
 			// Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
@@ -111,7 +111,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                     $call->setStatusQueue();
                 }
 
-                if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES && $createLeadOnIncoming) {
+                if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
                     if ($call->c_from) {
 //                        $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
 //                        if (!$lead) {
@@ -138,7 +138,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                         try {
                             $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
-                            if (!$lead) {
+                            if (!$lead && $createLeadOnIncoming) {
                                 $lead = (Yii::createObject(LeadManageService::class))->createByIncomingCall($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
                             }
                             $call->c_lead_id = $lead->id;
