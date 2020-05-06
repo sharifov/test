@@ -184,7 +184,7 @@ class ContactsController extends FController
             try {
                 if ($client->load(Yii::$app->request->post(), (new ContactForm())->formName()) && $client->save()) {
 
-                    if ($userContactList = UserContactList::getUserContact(Auth::id(), $client->id)) {
+                    if ($userContactList = UserContactList::findOne(['ucl_client_id' => $client->id])) {
                         $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
                         if(!$userContactList->save()) {
                             Yii::error(VarDumper::dumpAsString($userContactList->errors),
@@ -220,7 +220,7 @@ class ContactsController extends FController
         $form->phones = $client->clientPhones;
 
         $favorite = false;
-        if ($contact = UserContactList::getUserContact(Auth::id(), $client->id)) {
+        if ($contact = UserContactList::findOne(['ucl_client_id' => $client->id])) {
             $favorite = $contact->ucl_favorite;
         }
 
