@@ -5,7 +5,9 @@
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
     <div class="call-pane is_active">
+        
         <div class="current-number">
+            <label class="call-pane-label" for="">Calling from</label>
             <div class="dropdown">
                 <button value="+1-222-555-8888" class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <small class="current-number__phone current-number__selected-nr">+1-222-555-8888</small>
@@ -21,8 +23,8 @@
                         <span class="current-number__identifier">ovago</span>
                     </button>
                 </div>
+                <i class="fa fa-chevron-down"></i>
             </div>
-            <i class="fa fa-chevron-down"></i>
 
         </div>
         <div class="call-pane__number">
@@ -62,29 +64,31 @@
             <ul class="phone-widget__list-item calls-history suggested-contacts"></ul>
 
             
+            <div class="phone-input-wrap">
+                <label class="call-pane-label" for="">Calling to</label>
+                <?php
 
-            <?php
+                use yii\bootstrap4\Html;
+                use yii\web\View;
+                use yii\widgets\ActiveForm;
 
-            use yii\bootstrap4\Html;
-            use yii\web\View;
-            use yii\widgets\ActiveForm;
+                $form = ActiveForm::begin([
+                    'id' => 'contact-list-calls-ajax',
+                    'action' => ['/contacts/list-calls-ajax'],
+                    'method' => 'get',
+                ]);
 
-            $form = ActiveForm::begin([
-                'id' => 'contact-list-calls-ajax',
-                'action' => ['/contacts/list-calls-ajax'],
-                'method' => 'get',
-            ]);
+                echo Html::input('text', 'q', null, [
+                    'id' => 'call-pane__dial-number',
+                    'class' => 'call-pane__dial-number',
+                    'placeholder' => 'Name, company, phone...',
+                    'autocomplete' => 'off',
+                ]);
 
-            echo Html::input('text', 'q', null, [
-                'id' => 'call-pane__dial-number',
-                'class' => 'call-pane__dial-number',
-                'placeholder' => 'Name, company, phone...',
-                'autocomplete' => 'off',
-            ]);
+                ActiveForm::end()
 
-            ActiveForm::end()
-
-            ?>
+                ?>
+            </div>
 
             <a href="#" class="call-pane__dial-clear-all is-shown">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">

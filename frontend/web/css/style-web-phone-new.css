@@ -20,6 +20,13 @@
     .phone-widget button:hover, .phone-widget button:focus, .phone-widget button:active {
       outline: none;
       box-shadow: none; }
+  .phone-widget .call-pane-label {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0; }
   .phone-widget .fa,
   .phone-widget .far,
   .phone-widget .fas {
@@ -34,10 +41,11 @@
       left: auto;
       top: auto;
       border-radius: 6px;
-      height: 608px; } }
+      height: 628px; } }
   .phone-widget .current-number {
     width: 100%;
-    position: relative; }
+    position: relative;
+    margin-bottom: 20px; }
     .phone-widget .current-number .fa {
       position: absolute;
       right: 10px;
@@ -46,17 +54,23 @@
       color: #fff; }
     .phone-widget .current-number__phone {
       font-size: 14px;
-      line-height: 18px; }
+      line-height: 18px;
+      width: calc(100% - 72px); }
     .phone-widget .current-number__identifier {
       font-weight: 500;
       font-size: 10px;
-      line-height: 12px;
+      line-height: 11px;
       color: #2a3f54;
-      background-color: #D6E3F0;
+      background-color: #d6e3f0;
       text-transform: uppercase;
       border-radius: 2px;
       margin-left: 8px;
-      padding: 2px 4px; }
+      padding: 3px 4px 2px 4px;
+      display: inline-block;
+      max-width: 72px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap; }
     .phone-widget .current-number .dropdown {
       width: 100%;
       height: 36px;
@@ -69,7 +83,7 @@
       font-size: 14px;
       line-height: 18px; }
       .phone-widget .current-number .dropdown .dropdown-menu {
-        background-color: #4b6581;
+        background-color: #6986a6;
         border: 0 none;
         width: 100%;
         margin: 0;
@@ -78,12 +92,14 @@
         background-color: transparent;
         width: 100%;
         border: 0 none;
-        padding: 0 10px;
+        padding: 0 30px 0 10px;
         height: 100%;
         text-align: left;
+        margin: 0;
         outline: none;
         display: flex;
-        align-items: center; }
+        align-items: center;
+        justify-content: space-between; }
         .phone-widget .current-number .dropdown .dropdown-toggle:focus, .phone-widget .current-number .dropdown .dropdown-toggle:active {
           outline: none;
           box-shadow: none; }
@@ -94,16 +110,20 @@
         color: #fff;
         padding: 10px;
         margin: 0;
-        position: relative; }
+        position: relative;
+        display: flex;
+        align-items: center; }
         .phone-widget .current-number .dropdown .dropdown-item:after {
-          content: '';
+          content: "";
           position: absolute;
-          width: 80%;
+          width: 100%;
           height: 1px;
-          background-color: rgba(255, 255, 255, 0.2);
+          background-color: rgba(255, 255, 255, 0.15);
           top: 0;
           left: 50%;
           transform: translateX(-50%); }
+        .phone-widget .current-number .dropdown .dropdown-item:first-child:after {
+          display: none; }
   .phone-widget .agent-text-avatar {
     height: 30px;
     width: 30px;
@@ -173,7 +193,7 @@
     position: relative; }
     @media (min-width: 768px) {
       .phone-widget__body {
-        min-height: 530px; } }
+        min-height: 552px; } }
   .phone-widget__tab {
     position: absolute;
     opacity: 0;
@@ -187,7 +207,7 @@
       padding: 0; }
     @media (min-width: 768px) {
       .phone-widget__tab {
-        height: 530px; } }
+        height: 552px; } }
     .phone-widget__tab.is_active {
       opacity: 1;
       z-index: 4;
@@ -454,7 +474,7 @@
       border-bottom: 1px solid transparent; }
   @media (min-width: 768px) {
     .phone-widget .contact-modal-info {
-      height: 530px; } }
+      height: 552px; } }
   .phone-widget .contact-modal-info .agent-text-avatar {
     width: 50px;
     height: 50px;
@@ -506,7 +526,7 @@
     height: calc(100vh - 80px); }
     @media (min-width: 768px) {
       .phone-widget .email-modal {
-        height: 530px;
+        height: 552px;
         overflow: hidden !important; } }
     .phone-widget .email-modal .simplebar-content-wrapper {
       overflow-y: scroll !important; }
@@ -588,7 +608,7 @@
     height: calc(100vh - 80px); }
     @media (min-width: 768px) {
       .phone-widget .messages-modal {
-        height: 530px;
+        height: 552px;
         overflow: hidden !important; } }
     .phone-widget .messages-modal__msg-list {
       list-style-type: none;
@@ -681,7 +701,7 @@
         word-break: break-all; }
   .phone-widget .call-pane {
     background: linear-gradient(180deg, #385778 0%, #273a4e 100%);
-    padding: 34px 32px 29px;
+    padding: 18px 32px 29px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -742,7 +762,7 @@
     .phone-widget .call-pane__number {
       margin-bottom: 28px;
       position: relative;
-      padding-top: 34px; }
+      padding-top: 0; }
       .phone-widget .call-pane__number .suggestion-placeholder {
         position: absolute;
         top: -18px;
@@ -772,7 +792,7 @@
         overflow-x: hidden;
         position: absolute;
         z-index: 33;
-        top: -70px;
+        top: -94px;
         width: calc(100% + 68px);
         left: -34px;
         height: 92px;
