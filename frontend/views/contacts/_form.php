@@ -48,7 +48,7 @@ $projectList = EmployeeProjectAccess::getProjects(Auth::id());
 
             <?php
                 $favorite = false;
-                if ($model->id !== null && $contact = UserContactList::getUserContact(Auth::id(), $model->id)) {
+                if ($model->id !== null && $contact = UserContactList::findOne(['ucl_client_id' => $model->id])) {
                     $favorite = $contact->ucl_favorite;
                 }
             ?>

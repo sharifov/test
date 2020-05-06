@@ -218,7 +218,7 @@ class ContactsController extends FController
         $form->phones = $client->clientPhones;
 
         $favorite = false;
-        if ($contact = UserContactList::getUserContact(Auth::id(), $client->id)) {
+        if ($contact = UserContactList::findOne(['ucl_client_id' => $client->id])) {
             $favorite = $contact->ucl_favorite;
         }
 
