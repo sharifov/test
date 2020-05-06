@@ -1165,15 +1165,15 @@ class CommunicationController extends ApiBaseController
 
             }
         } else if ($callFromInternalPhone) {
-			$dial = $responseTwml->dial('', [
-				'answerOnBridge' => true,
-				'recordingStatusCallbackMethod' => 'POST',
-				'record' => 'record-from-answer-dual',
-				'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
-			]);
-			$dial->client('seller'.$user->id);
-//			$response['agent_username'][] = 'seller'.$user->id;
-//			$responseTwml = null;
+//			$dial = $responseTwml->dial('', [
+//				'answerOnBridge' => true,
+//				'recordingStatusCallbackMethod' => 'POST',
+//				'record' => 'record-from-answer-dual',
+//				'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
+//			]);
+//			$dial->client('seller'.$user->id);
+			$response['agent_username'][] = 'seller'.$user->id;
+			$responseTwml = null;
 		}
 
         $callInfo['id'] = $callModel->c_id;
