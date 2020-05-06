@@ -397,7 +397,7 @@ class CommunicationController extends ApiBaseController
                         $call_dep_id = null;
                     }
 
-                    $callFromInternalPhone = PhoneList::find()->byPhone($client_phone_number)->exists();
+                    $callFromInternalPhone = PhoneList::find()->byPhone($client_phone_number)->enabled()->exists();
 
                     $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $upp->upp_project_id,
                         $call_dep_id, null, $callFromInternalPhone);
