@@ -40,7 +40,7 @@ class NotificationMessage
                 'message' => StringHelper::truncate(Email::strip_html_tags($message), 80, '...'),
                 'type' => $ntf->getNotifyType(),
                 'popup' => (int)$ntf->n_popup,
-                'notifyMessage' => (int)$ntf->n_popup ? str_replace(["\r\n", "\n", '"'], ['', '', '\"'], $message) : '',
+                'notifyMessage' => (int)$ntf->n_popup ? str_replace(["\r\n", "\n", '"'], ['', '', '\"'], strip_tags($message)) : '',
                 'notifyDesktopMessage' => (int)$ntf->n_popup ? str_replace('"', '\"', strip_tags($message)) : '',
             ]
         ];

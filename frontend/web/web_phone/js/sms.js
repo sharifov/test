@@ -65,7 +65,7 @@ let PhoneWidgetSms = function () {
 
     function loadSmses(contact, user) {
         let container = $(".widget-phone__messages-modal");
-        let data = {"contactId": contact.id, "contactPhone": contact.phone, "userPhone": user.phone};
+        let data = {"contactId": contact.id, "contactPhone": contact.phone, "contactType": contact.type, "userPhone": user.phone};
 
         $(".phone-widget__tab").addClass('ovf-hidden');
         container.html("").show();
@@ -114,7 +114,7 @@ let PhoneWidgetSms = function () {
     }
 
     function getSmsesContainerName(contact, user) {
-        return 'phone-widget-sms-messages-container-' + contact.id + '-' + processPhone(contact.phone) + '-' + processPhone(user.phone);
+        return 'phone-widget-sms-messages-container-' + contact.id + '-' + processPhone(contact.phone) + '-' + contact.type + '-' + processPhone(user.phone);
     }
 
     function processPhone(phone) {
@@ -191,6 +191,7 @@ let PhoneWidgetSms = function () {
                     '<form id="phone-widget-send-sms-form" action="' + sendUrl + '" method="post">' +
                         '<div class="messages-modal__input-group">' +
                                 '<input name="text" type="text" class="messages-modal__msg-input" placeholder="Your Message">' +
+                                '<input name="contactType" type="hidden" value="' + contact.type + '">' +
                                 '<input name="contactId" type="hidden" value="' + contact.id + '">' +
                                 '<input name="contactPhone" type="hidden" value="' + contact.phone + '">' +
                                 '<input name="userPhone" type="hidden" value="' + user.phone + '">' +
@@ -274,7 +275,7 @@ $(document).on('click', '.js-trigger-messages-modal', function () {
         new PNotify({title: "Get sms messages", type: "error", text: 'Not found user phones.', hide: true});
         return false;
     }
-    let contact = {"id": $(this).data('contact-id'), "phone": $(this).data('contact-phone')};
+    let contact = {"id": $(this).data('contact-id'), "phone": $(this).data('contact-phone'), "type": $(this).data('contact-type')};
     if (countPhones > 1) {
         PhoneWidgetSms.showModalSelectNumber(contact);
         return false;

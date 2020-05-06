@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\widgets\newWebPhone;
 
 use frontend\assets\WebPhoneAsset;

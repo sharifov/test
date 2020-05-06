@@ -2428,7 +2428,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function getAvatar(): string
     {
-        return strtoupper($this->username[0] ?? '');
+        return strtoupper($this->full_name[0] ?? '');
     }
 
     public function getProjectsToArray(): array
