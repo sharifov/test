@@ -605,10 +605,10 @@ use yii\helpers\Html;
                 device.on('incoming', function (conn) {
                     connection = conn;
                     // $('#call-controls2').hide();
+                    $('#call-controls2').show();
                     if (document.visibilityState === 'visible') {
                         // conn.accept();
                     } else {
-                        $('#call-controls2').show();
                     }
 
                     /*var access =  updateAgentStatus(connection, true, 0);
