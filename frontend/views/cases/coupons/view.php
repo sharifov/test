@@ -28,12 +28,12 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                 <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Request', '#', ['id' => 'btn-request-coupons', 'title' => 'Request coupons'])?>
             </li>
 			<li>
-				<a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
+				<a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
 			</li>
 		</ul>
 		<div class="clearfix"></div>
 	</div>
-	<div class="x_content" style="display: none; margin-top: -10px;">
+	<div class="x_content" style="margin-top: -10px;">
         <div class="row">
             <div class="col-md-12">
                 <?= \common\widgets\Alert::widget() ?>
