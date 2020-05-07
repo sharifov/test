@@ -274,7 +274,6 @@ class TwilioController extends ApiBaseNoAuthController
      */
     public function actionRedirectCall()
     {
-
         //$this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
@@ -374,6 +373,7 @@ class TwilioController extends ApiBaseNoAuthController
                 //$call->setStatusByTwilioStatus($call->c_call_status);
 
                 $call->setStatusQueue();
+
 
                 $callUserAccessAny = $call->callUserAccesses; //CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {

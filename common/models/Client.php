@@ -52,10 +52,12 @@ class Client extends ActiveRecord
 
     public const TYPE_CLIENT  = 1;
     public const TYPE_CONTACT = 2;
+    public const TYPE_INTERNAL = 3;
 
     public const TYPE_LIST = [
         self::TYPE_CLIENT  => 'Client',
         self::TYPE_CONTACT => 'Contact',
+        self::TYPE_INTERNAL => 'Internal',
     ];
 
     /**

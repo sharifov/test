@@ -6,9 +6,11 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
 use frontend\models\form\ContactForm;
+use frontend\widgets\newWebPhone\contacts\helper\ContactsHelper;
 use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
+use sales\helpers\app\AppHelper;
 use sales\services\client\ClientManageService;
 use Throwable;
 use Yii;
@@ -18,6 +20,7 @@ use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -181,7 +184,7 @@ class ContactsController extends FController
             try {
                 if ($client->load(Yii::$app->request->post(), (new ContactForm())->formName()) && $client->save()) {
 
-                    if ($userContactList = UserContactList::getUserContact(Auth::id(), $client->id)) {
+                    if ($userContactList = UserContactList::findOne(['ucl_client_id' => $client->id])) {
                         $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
                         if(!$userContactList->save()) {
                             Yii::error(VarDumper::dumpAsString($userContactList->errors),
@@ -217,7 +220,7 @@ class ContactsController extends FController
         $form->phones = $client->clientPhones;
 
         $favorite = false;
-        if ($contact = UserContactList::getUserContact(Auth::id(), $client->id)) {
+        if ($contact = UserContactList::findOne(['ucl_client_id' => $client->id])) {
             $favorite = $contact->ucl_favorite;
         }
 
@@ -248,7 +251,6 @@ class ContactsController extends FController
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 
-
     /**
      * @param int $id
      * @return Response
@@ -265,9 +267,74 @@ class ContactsController extends FController
 			throw new HttpException(403, 'Access Denied');
 		}
 
-        $client->delete();
+		$this->clientManageService->removeContact($client);
 
         return $this->redirect(['index']);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionSetFavoriteAjax(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['message' => '', 'status' => 0, 'favorite' => 0];
+
+        if (Yii::$app->request->isAjax) {
+            $clientId = (int) Yii::$app->request->post('client_id');
+            $isFavorite = (bool) Yii::$app->request->post('is_favorite');
+            $ucl_favorite = $isFavorite ? false : true;
+
+            if ($userContactList = UserContactList::findOne(['ucl_client_id' => $clientId])) {
+                $userContactList->ucl_favorite = $ucl_favorite;
+
+                if ($userContactList->save()) {
+                    $result['status'] = 1;
+                    $result['favorite'] = (int)$ucl_favorite;
+                }  else {
+                    $result['message'] = $userContactList->getErrorSummary(false)[0];
+                    Yii::error(VarDumper::dumpAsString($userContactList->errors),
+                        'ContactsController:actionSetFavoriteAjax:saveUserContactList');
+                }
+            } else {
+                $result['message'] = 'Client not found';
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public function actionSetDisabledAjax(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['message' => '', 'status' => 0, 'disabled' => 0];
+
+        if (Yii::$app->request->isAjax) {
+            try {
+                $clientId = (int) Yii::$app->request->post('client_id');
+                $isDisabled = (bool) Yii::$app->request->post('is_disabled');
+                $disabled = $isDisabled ? false : true;
+
+                if ($client = $this->findModel($clientId)) {
+                    $client->disabled = $disabled;
+
+                    if ($client->save()) {
+                        $result['status'] = 1;
+                        $result['disabled'] = (int)$disabled;
+                    }  else {
+                        throw new \DomainException($client->getErrorSummary(false)[0]);
+                    }
+                } else {
+                    throw new \DomainException('Client not found');
+                }
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'ContactsController:actionSetDisabledAjax:save');
+                $result['message'] = $throwable->getMessage();
+            }
+        }
+        return $result;
     }
 
     /**
@@ -286,9 +353,48 @@ class ContactsController extends FController
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-
-    public function actionListAjax(?string $q = null): Response
+    /**
+     * From Contacts section full list on Phone Widget
+     *
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionFullListAjax(): Response
     {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            throw new BadRequestHttpException();
+        }
+
+        $page = (int)Yii::$app->request->post('page', 0);
+
+        $provider = (new ContactsSearch(Auth::id()))->searchByWidgetContactsSection();
+        $provider->getPagination()->setPage($page);
+        $rows = $provider->getModels();
+
+        $out = [
+            'results' => ContactsHelper::processContactsList($rows),
+            'page' => $page + 1,
+            'rows' => empty($rows)
+        ];
+
+//        VarDumper::dump($out);die;
+
+        return $this->asJson($out);
+    }
+
+    /**
+     * From Contacts section with search on Phone Widget
+     *
+     * @param string|null $q
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionSearchListAjax(?string $q = null): Response
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException();
+        }
+
         $out = ['results' => []];
 
         if ($q !== null) {
@@ -297,47 +403,35 @@ class ContactsController extends FController
                 return $this->asJson($out);
             }
 
-            /** @var ContactsSearch[] $contacts */
-            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q)->getModels();
-//sleep(4);
-            $data = [];
-            if ($contacts) {
-                foreach ($contacts as $n => $contact) {
-                    $contactData = [];
-                    if ($contact->is_company) {
-                        $name = $contact->company_name ?: $contact->first_name . ' ' . $contact->last_name;
-                    } else {
-                        $name = $contact->first_name . ' ' . $contact->last_name;
-                    }
-                    $group = strtoupper($name[0] ?? 'A');
-                    $contactData['id'] = $contact->id;
-                    $contactData['name'] = $name;
-                    $contactData['description'] = $contact->description ?: '';
-                    $contactData['avatar'] = $group;
-                    $contactData['is_company'] = $contact->is_company;
-                    if ($contact->clientPhones) {
-                        foreach ($contact->clientPhones as $phone) {
-                            $contactData['phones'][] = $phone->phone;
-                        }
-                    }
-                    if ($contact->clientEmails) {
-                        foreach ($contact->clientEmails as $email) {
-                            $contactData['emails'][] = $email->email;
-                        }
-                    }
-                    //$data[$n]['selection'] = $item['text'];
-                    $data[$group][$n] = $contactData;
-                }
-            }
+            $provider = (new ContactsSearch(Auth::id()))->searchByWidgetContactsSection($q);
+            ($provider->getPagination())->setPageSize(null);
 
-            $out['results'] = $data;
+            $rows = $provider->getModels();
+
+            $out = [
+                'results' => ContactsHelper::processContactsList($rows),
+                'rows' => empty($rows)
+            ];
         }
+
+//        VarDumper::dump($out);die;
 
         return $this->asJson($out);
     }
 
+    /**
+     * From Call section on Phone Widget
+     *
+     * @param string|null $q
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionListCallsAjax(?string $q = null): Response
     {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            throw new BadRequestHttpException();
+        }
+
         $out = ['results' => []];
 
         if ($q !== null) {
@@ -346,29 +440,38 @@ class ContactsController extends FController
                 return $this->asJson($out);
             }
 
-            /** @var ContactsSearch[] $contacts */
-            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q, $limit = 3)->getModels();
-//sleep(4);
+            $contacts = (new ContactsSearch(Auth::id()))->searchByWidgetCallSection($q, $limit = 3);
+
+//            VarDumper::dump($contacts);die;
+
             $data = [];
             if ($contacts) {
                 foreach ($contacts as $n => $contact) {
-                    if ($contact->is_company) {
-                        $name = $contact->company_name ?: $contact->first_name . ' ' . $contact->last_name;
+                    if ($contact['is_company']) {
+                        $name = $contact['company_name'] ?: $contact['full_name'];
                     } else {
-                        $name = $contact->first_name . ' ' . $contact->last_name;
+                        $name = $contact['full_name'];
                     }
-                    if ($contact->clientPhones) {
-                        foreach ($contact->clientPhones as $phone) {
-                            $contactData = [];
-                            $contactData['id'] = $contact->id;
-                            $contactData['name'] = StringHelper::truncate($name, 18, '...') . ' ' . $phone->phone;
-                            $contactData['phone'] = $phone->phone;
-                            $data[] = $contactData;
-                            if (count($data) === 3) {
-                                break 2;
-                            }
+                    $contactData = [];
+                    $contactData['id'] = $contact['id'];
+                    $contactData['name'] = StringHelper::truncate($name, 18, '...') . ' ' . $contact['phone'];
+                    $contactData['phone'] = $contact['phone'];
+                    $contactData['type'] = (int)$contact['type'];
+
+                    if ($contactData['type'] === Client::TYPE_INTERNAL) {
+                        $isCallFree = (int)$contact['user_is_on_call'] ? false : true;
+                        $isCallStatusReady = (int)$contact['user_call_phone_status'] ? true : false;
+                        if ($isCallFree && $isCallStatusReady) {
+                            $class = 'text-success';
+                        } elseif ($isCallStatusReady) {
+                            $class = 'text-warning';
+                        } else {
+                            $class = 'text-danger';
                         }
+                        $contactData['user_status_class'] = $class;
                     }
+
+                    $data[] = $contactData;
                 }
             }
 

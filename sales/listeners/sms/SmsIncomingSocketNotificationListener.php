@@ -5,6 +5,7 @@ namespace sales\listeners\sms;
 use common\models\Employee;
 use common\models\Notifications;
 use frontend\widgets\newWebPhone\sms\socket\Message;
+use sales\model\sms\useCase\send\Contact;
 use sales\repositories\user\UserProjectParamsRepository;
 use sales\services\cases\CasesManageService;
 use sales\services\sms\incoming\SmsIncomingEvent;
@@ -35,7 +36,7 @@ class SmsIncomingSocketNotificationListener
         if ($usersId = $this->projectParamsRepository->findUsersIdByPhone($event->sms->s_phone_to)) {
             foreach ($usersId as $userId) {
                 if ($user = Employee::findOne($userId)) {
-                    Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $user->id], Message::add($sms, $user, $event->sms->client));
+                    Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $user->id], Message::add($sms, $user, new Contact($event->sms->client)));
                 }
             }
         }

@@ -2,9 +2,9 @@
 
 namespace frontend\widgets\newWebPhone\sms\dto;
 
-use common\models\Client;
 use common\models\Employee;
 use common\models\Sms;
+use sales\model\sms\useCase\send\Contact;
 use yii\helpers\Html;
 
 /**
@@ -41,11 +41,12 @@ class SmsDto
     private $group;
 
     /**
-     * @param Sms|array $sms
+     * SmsDto constructor.
+     * @param $sms
      * @param Employee $user
-     * @param Client $contact
+     * @param Contact $contact
      */
-    public function __construct($sms, Employee $user, Client $contact)
+    public function __construct($sms, Employee $user, Contact $contact)
     {
         $createdDt = Employee::convertTimeFromUtcToUserTime($user, strtotime($sms['s_created_dt']));
         $this->id = $sms['s_id'];
@@ -57,7 +58,7 @@ class SmsDto
         $this->date = $createdDt;
         $this->time = date('h:i A', strtotime($createdDt));
         $this->avatar = $this->isOut() ? $user->getAvatar() : $contact->getAvatar();
-        $this->name = $this->isOut() ? 'Me' : $contact->getNameByType();
+        $this->name = $this->isOut() ? 'Me' : $contact->getName();
         $this->group = date('d M Y', strtotime($createdDt));
     }
 

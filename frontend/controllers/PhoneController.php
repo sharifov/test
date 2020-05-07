@@ -626,6 +626,8 @@ class PhoneController extends FController
 
             $communication = \Yii::$app->communication;
 
+            $communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
+
             //$updateData = ['status' => 'completed'];
             /*$updateData = [
                 'method'    =>  'POST',

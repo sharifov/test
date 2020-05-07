@@ -9,6 +9,7 @@ use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\search\CallLogSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -92,7 +93,11 @@ class CallLogController extends FController
 	{
 		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
 
-			$userId = Yii::$app->request->post('uid');
+			$userId = (int)Yii::$app->request->post('uid');
+
+			if (Auth::id() !== $userId) {
+                throw new ForbiddenHttpException();
+            }
 
 			$callSearch = new CallLogSearch();
 			$page = Yii::$app->request->post('page', 0);

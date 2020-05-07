@@ -15,6 +15,7 @@ use sales\helpers\cases\CasesUrlHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\model\call\entity\call\events\CallEvents;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -196,6 +197,10 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_CONFERENCE_CALL  => 'Conference',
         self::SOURCE_REDIAL_CALL  => 'Redial',
     ];
+
+    public const TW_RECORDING_STATUS_PAUSED = 'paused';
+    public const TW_RECORDING_STATUS_IN_PROGRESS = 'in-progress';
+    public const TW_RECORDING_STATUS_STOPPED = 'stopped';
 
     //public $c_recording_url = '';
 
@@ -1161,6 +1166,8 @@ class Call extends \yii\db\ActiveRecord
                 /*if ($call->c_created_user_id) {
                     return false;
                 }*/
+
+//				$callFromInternalPhone = PhoneList::find()->byPhone($call->c_from)->exists();
 
                 if ($call->isStatusQueue()) {
 
