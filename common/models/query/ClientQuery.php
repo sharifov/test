@@ -17,6 +17,6 @@ class ClientQuery extends ActiveQuery
 
     public function byId(?int $id): self
     {
-        return $this->andWhere(['cl_id' => $id]);
+        return $this->andWhere(['id' => $id]);
     }
 }
