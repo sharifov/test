@@ -1169,15 +1169,15 @@ class TestController extends FController
 
     public function actionGetCoupons2()
     {
-        $coupons = Yii::$app->airsearch->generateCoupons(5, 'USD50');
+        $coupons = Yii::$app->airsearch->generateCoupons(1, 'USD50');
         $validate = Yii::$app->airsearch->validateCoupon('3KA4FO8B9IZasdasdasdasdasd');
 
         VarDumper::dump($coupons, 10, true);
-        VarDumper::dump($validate, 10, true);
+//        VarDumper::dump($validate, 10, true);
 
-
-        $coupons = SearchService::getCoupons(['nr' => 5, 'code' => 'USD50']);
-        VarDumper::dump($coupons, 10, true);;
+//
+//        $coupons = SearchService::getCoupons(['nr' => 1, 'code' => 'USD50']);
+//        VarDumper::dump($coupons, 10, true);;
 
     }
 

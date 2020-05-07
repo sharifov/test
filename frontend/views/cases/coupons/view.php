@@ -107,6 +107,7 @@ $js = <<<JS
                 });
             } 
         });  
+        return false;
     });
     
 JS;
