@@ -59,7 +59,7 @@ class CouponCase extends \yii\db\ActiveRecord
             'user' => [
                 'class' => BlameableBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => [$this->cc_created_user_id],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['cc_created_user_id'],
                 ],
             ],
         ];

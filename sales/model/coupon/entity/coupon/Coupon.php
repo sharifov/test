@@ -62,7 +62,7 @@ class Coupon extends \yii\db\ActiveRecord
 
             ['c_reusable_count', 'integer'],
 
-            ['c_start_date', 'format' => 'php:Y-m-d H:i:s'],
+            ['c_start_date', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['c_status_id', 'required'],
             ['c_status_id', 'integer'],

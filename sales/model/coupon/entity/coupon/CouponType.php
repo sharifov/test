@@ -6,17 +6,17 @@ use yii\bootstrap4\Html;
 
 class CouponType
 {
-    public const COUPON = 1;
-    public const VOUCHER = 2;
+    public const VOUCHER = 1;
+    public const COUPON = 2;
 
     private const LIST = [
-        self::COUPON => 'Coupon',
         self::VOUCHER => 'Voucher',
+        self::COUPON => 'Coupon',
     ];
 
     private const CLASS_LIST = [
-        self::COUPON => 'info',
         self::VOUCHER => 'success',
+        self::COUPON => 'info',
     ];
 
     public static function getList(): array

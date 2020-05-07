@@ -40,7 +40,7 @@ class RequestCouponService
 
         $coupon = new Coupon();
         $coupon->c_status_id = CouponStatus::NEW;
-        $coupon->c_type_id = CouponType::COUPON;
+        $coupon->c_type_id = CouponType::VOUCHER;
         $coupon->c_code = $couponForm->enc_coupon;
         $coupon->c_exp_date = $couponForm->exp_date;
         $coupon->c_amount = $couponForm->amount;
