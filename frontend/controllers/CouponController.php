@@ -155,7 +155,7 @@ class CouponController extends FController
                 } catch (\DomainException $e) {
                     return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
                 } catch (\Throwable $e) {
-                    Yii::error(AppHelper::throwableFormatter($e), 'CouponController:' . __FUNCTION__ );
+                    Yii::error($e, 'CouponController:' . __FUNCTION__ );
                     return $this->asJson(['success' => false, 'message' => 'Server error']);
                 }
             }

@@ -19,7 +19,7 @@ class RequestCouponService
 
     public function request(RequestForm $form): array
     {
-        if (!$coupons = SearchService::getCoupons($form->getParams())) {
+        if (!$coupons = \Yii::$app->airsearch->generateCoupons($form->count, $form->code)) {
             throw new \DomainException('Request error.');
         }
         foreach ($coupons as $item) {
