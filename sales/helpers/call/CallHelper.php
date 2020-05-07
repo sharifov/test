@@ -25,8 +25,9 @@ class CallHelper
 			'data-confirm' => isset($dataParams['confirm']) ? 1 : 0,
 			'data-call' => isset($dataParams['call']) ? 1 : 0,
 			'data-phone-from-id' => $dataParams['phone-from-id'] ?? '',
-			'class' => $access ? 'wg-call' : ''
+			'class' => $access ? 'wg-call badge badge-pill badge-light' : ''
 		];
+
 
         $disableIcon = $dataParams['disable-icon'] ?? false;
         if ($disableIcon) {
@@ -38,7 +39,7 @@ class CallHelper
 			'class' => $iconClass
 		]);
 
-		return $iconTag . ' ' . Html::tag($tag, $title, $options);
+		return Html::tag($tag, $iconTag . ' ' . $title, $options);
 	}
 
 	/**
