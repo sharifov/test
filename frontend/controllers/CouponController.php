@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Email;
+use common\models\EmailTemplateType;
 use frontend\models\CasePreviewEmailForm;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
@@ -197,6 +198,11 @@ class CouponController extends FController
 						Yii::error(VarDumper::dumpAsString($result), 'CouponController::actionSend::emailPreview');
 					} else {
 						$previewEmailForm = new CasePreviewEmailForm($result['data']);
+
+						$emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
+						if ($emailTemplateType) {
+							$previewEmailForm->e_email_tpl_id = $emailTemplateType->etp_id;
+						}
 
 						return $this->render('/cases/coupons/view', [
 							'previewEmailForm' => $previewEmailForm,

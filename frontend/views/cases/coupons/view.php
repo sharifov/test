@@ -82,9 +82,11 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                 </table>
 
                 <div class="row">
-                    <div class="col-md-5">
-                        <?= $form->field($sendCouponsForm, 'emailTemplateType')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, null), ['prompt' => '---', 'class' => 'form-control', 'id' => 'email_tpl_key']) ?>
-                    </div>
+<!--                    <div class="col-md-5">-->
+                    <?= $form->field($sendCouponsForm, 'emailTemplateType')->hiddenInput(['value' => 'cl_coupon'])->label(false) ?>
+<!--                        --><?php // $form->field($sendCouponsForm, 'emailTemplateType')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, null), ['prompt' => '---', 'class' => 'form-control', 'id' => 'email_tpl_key']) ?>
+
+<!--                    </div>-->
 
                     <div class="col-md-5">
                         <?= $form->field($sendCouponsForm, 'emailTo')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control']) ?>
