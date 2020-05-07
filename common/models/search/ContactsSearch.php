@@ -249,6 +249,7 @@ class ContactsSearch extends Client
             'c.description as description',
         ]);
 
+        $queryClient->andWhere(['c.cl_type_id' => Client::TYPE_CONTACT]);
         $queryClient->innerJoin(UserContactList::tableName(), 'ucl_client_id = c.id');
 
         if (!$this->isRoleAdmin()) {
@@ -331,6 +332,7 @@ class ContactsSearch extends Client
             'ce.email as email',
         ]);
 
+        $queryClient->andWhere(['c.cl_type_id' => Client::TYPE_CONTACT]);
         $queryClient->innerJoin(UserContactList::tableName(), 'ucl_client_id = c.id');
         $queryClient->innerJoin(ClientPhone::tableName() . ' as cp', 'cp.client_id = c.id');
         $queryClient->leftJoin(ClientEmail::tableName() . ' as ce', 'ce.client_id = c.id');
