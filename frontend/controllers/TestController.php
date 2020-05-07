@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
+use common\components\SearchService;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
@@ -95,6 +96,7 @@ use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\coupon\useCase\request\CouponForm;
 use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
