@@ -318,4 +318,43 @@ The connection in " . $countryName . " is not provided by the airlines. You will
         // The layover time is long enough for the transfer and it's protected by the " . $projectName . ' Guarantee in case of any delay.';
         return $str;
     }
+
+    /**
+     * @param int $count
+     * @param string $code
+     * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
+    public static function getCoupons(int $count = 0, string $code = '')
+    {
+        $result = null;
+
+        $params = [
+            'nr' => $count,
+            'code' => $code
+        ];
+
+        $fields = http_build_query($params);
+        $url = \Yii::$app->params['search']['host'].'/v1/discounts/coupons?' . $fields;
+
+        $authStr = base64_encode(\Yii::$app->params['search']['api_cid'] . ':' . \Yii::$app->params['search']['api_key']);
+
+        $client = new Client();
+        $client->setTransport(CurlTransport::class);
+        $request = $client->createRequest();
+        $request->setMethod('GET')->setUrl($url)->setOptions([CURLOPT_ENCODING => 'gzip']);
+        $request->addHeaders(['Authorization' => 'Basic ' . $authStr]);
+        $response = $request->send();
+
+        //VarDumper::dump($url); exit;
+        //Yii::info(urldecode($url), 'info\CURL:getOnlineQuotes:quickSearch');
+
+        if ($response->isOk) {
+            return $response->data;
+        }
+
+        \Yii::error('Params: ' . VarDumper::dumpAsString($params, 10) . ' Error: ' . VarDumper::dumpAsString($response->content, 10), 'SearchService::getCoupons');
+        return null;
+    }
 }

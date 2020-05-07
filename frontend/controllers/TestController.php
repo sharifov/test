@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\jobs\TelegramSendMessageJob;
+use common\components\SearchService;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
@@ -1153,5 +1154,11 @@ class TestController extends FController
 		$expMonth = $userProfile->getExperienceMonth();
 		var_dump($expMonth);
 	}
+
+	public function actionGetCoupons()
+    {
+        $coupons = SearchService::getCoupons(5, 'USD50');
+        VarDumper::dump($coupons, 10, true);;
+    }
 
 }
