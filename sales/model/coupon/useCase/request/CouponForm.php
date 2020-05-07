@@ -40,11 +40,12 @@ class CouponForm extends Model
             [['exp_date', 'create_date'], 'filter', 'filter' => static function($value) {
                 return date('Y-m-d H:i:s', strtotime($value));
             }, 'skipOnEmpty' => true],
-
             [['exp_date', 'create_date'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
+            ['amount', 'required'],
             ['amount', 'integer'],
 
+            ['currency', 'required'],
             ['currency', 'in', 'range' => array_keys(self::CURRENCY_LIST)],
 
             ['public', 'boolean'],

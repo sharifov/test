@@ -30,7 +30,7 @@ class RequestForm extends Model
         parent::__construct($config);
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
             ['count', 'required'],
@@ -41,14 +41,6 @@ class RequestForm extends Model
 
             ['caseId', 'required'],
             ['caseId', 'exist', 'targetAttribute' => 'cs_id', 'targetClass' => Cases::class],
-        ];
-    }
-
-    public function getParams(): array
-    {
-        return [
-            'nr' => $this->count,
-            'code' => $this->code,
         ];
     }
 }

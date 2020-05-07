@@ -42,12 +42,14 @@ class Coupon extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
+            ['c_amount', 'required'],
             ['c_amount', 'number'],
 
             ['c_code', 'required'],
             ['c_code', 'string', 'max' => 50],
             ['c_code', 'unique'],
 
+            ['c_currency_code', 'required'],
             ['c_currency_code', 'string', 'max' => 3],
 
             ['c_disabled', 'boolean'],
