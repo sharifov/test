@@ -2,6 +2,7 @@
 
 /** @var $previewEmailForm \frontend\models\CasePreviewEmailForm */
 /** @var $case \sales\entities\cases\Cases */
+/** @var $this \yii\web\View */
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -73,7 +74,7 @@ echo $form->errorSummary($previewEmailForm);
 </div>
 <div class="row" style="display: none" id="email-data-content-div">
     <pre>
-        <?= json_encode($previewEmailForm->e_content_data) ?>
+        <?php // json_encode($previewEmailForm->e_content_data) ?>
     </pre>
 </div>
 
@@ -89,7 +90,17 @@ echo $form->errorSummary($previewEmailForm);
 </div>
 
 <div class="btn-wrapper text-right">
-	<?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
-    <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
+	<?= Html::button('<i class="fa fa-envelope-o"></i> Cancel', ['class' => 'btn btn-lg btn-primary btn-coupon-cancel-preview']) ?>
+	<?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-success']) ?>
+    <?php // Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
 </div>
 <?php \yii\bootstrap\ActiveForm::end(); ?>
+
+<?php
+$js = <<<JS
+$(document).on('click', '.btn-coupon-cancel-preview', function (e) {
+    pjaxReload({container: '#pjax-case-coupons-table'});
+});
+JS;
+$this->registerJs($js);
+

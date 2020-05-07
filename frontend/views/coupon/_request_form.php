@@ -19,7 +19,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
             'Request coupons',
             true,
             'modal-sm',
-            'let cont = $("#pjax-case-coupons-table").length; if (cont) { $.pjax.reload({container: \'#pjax-case-coupons-table\'}) } else { $.pjax.reload({container: \'#pjax-case-coupons\'}) }',
+            'let cont = $("#pjax-case-coupons-table").length; if (cont) { pjaxReload({container: \'#pjax-case-coupons-table\'}) } else { pjaxReload({container: \'#pjax-case-coupons\'}) }',
             null,
             null
         ),
