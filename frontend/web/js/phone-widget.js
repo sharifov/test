@@ -314,18 +314,60 @@ $(document).ready(function() {
         $('.call-pane').addClass('is_active');
     }
 
-    function toSelect(elem, cb) {
+    function toSelect(elem, obj, cb) {
         var $element = $(elem),
             $toggle = $element.find('.dropdown-toggle'),
             $option = $element.find('.dropdown-item'),
-            $selectedNumber = $element.find('.current-number__selected-nr'),
-            $selectedText = $element.find('.current-number__selected-project');
+            optionClass = 'dropdown-item';
 
         var selected = 'optionselected';
 
         this.data = {
             value: '',
             company: ''
+        }
+
+        // nodes
+        function selectedNode(value, project, id) {
+            return (
+                '<button value="' + value + '" class="btn btn-secondary dropdown-toggle" type="button" id="' +id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
+                    '<small class="current-number__phone current-number__selected-nr">' + value + '</small>'+
+                    '<span class="current-number__identifier current-number__selected-project">' + project + '</span>'+
+                '</button>'
+            );
+        }
+
+        function optionNode(optionList) {
+            arr = []
+            optionList.forEach(function(el) {
+                arr.push('<button class="dropdown-item" type="button" value="' + el.value + '" data-info-project="' + el.project + '">'+
+                '<small class="current-number__phone">' + el.value + '</small>'+
+                '<span class="current-number__identifier">' + el.project + '</span>'+
+            '</button>')
+            })
+
+            return arr;
+        }
+
+        function containerNode(selected, optionList) {
+            var arr = optionNode(optionList).join('');
+
+            return (
+                '<div class="dropdown">'+
+                    selected +
+                    '<div class="dropdown-menu" aria-labelledby="' + $toggle.attr('id') + '">' +
+                        arr
+                    +
+                    '</div>'+
+                    '<i class="fa fa-chevron-down"></i>'+
+                '</div>'
+            )
+        }
+
+        function generateSelect(obj) {
+            $element.append(
+                containerNode(selectedNode(obj.selected.value, obj.selected.project, obj.selected.id), obj.options)
+            )
         }
 
         function setValue(option) {
@@ -337,12 +379,14 @@ $(document).ready(function() {
             return this.data;
         }
 
-        $($toggle).on(selected, function(e) {
-            var elem = e.target;
+        $($element).on(selected, $($toggle), function(e) {
+            var elem = e.target,
+                $selectedNumber = $element.find('.current-number__selected-nr'),
+                $selectedText = $element.find('.current-number__selected-project');
 
             $(elem).val(this.data.value);
             $selectedNumber.text(this.data.value);
-            $selectedText.text(this.data.company)
+            $selectedText.text(this.data.company);
 
             if (typeof cb === 'function') {
                  cb.call(this);
@@ -350,18 +394,47 @@ $(document).ready(function() {
             
         }.bind(this)); 
 
-        $($option).on('click', function() {
-            setValue($(this));
-            $toggle.trigger(selected);
-        })
+        $($element).on('click', $($option), function(e) {
+            var elem = $(e.target).hasClass(optionClass) ? $(e.target) : $(e.target.parentNode);
+        
+            setValue($(elem));
+            $($element).trigger(selected)
+        
+        }.bind(this))
+
+        generateSelect(obj)
 
         return {
             getData: this.getData(),
         }
 
     }
-
-    var currentNumber = toSelect($('.current-number'), function() {
+    var data = {
+        'selected': {
+            'value': '+1-222-555-2222',
+            'project': 'gtt',
+            'id': 'dd-select'
+        },
+        'options': [
+            {
+                'value': '+1-222-555-4444',
+                'project': 'flygtravel'
+            },
+            {
+                'value': '+1-222-555-3333',
+                'project': 'wowgateway'
+            },
+            {
+                'value': '+1-222-555-2222',
+                'project': 'gtt'
+            },
+            {
+                'value': '+1-222-555-1111',
+                'project': 'gtt2'
+            }
+        ]
+    }
+    var currentNumber = toSelect($('.current-number'), data, function() {
         console.log('here goes a callback')
         console.log(currentNumber.getData);
     });

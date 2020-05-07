@@ -8,24 +8,7 @@
         
         <div class="current-number">
             <label class="call-pane-label" for="">Calling from</label>
-            <div class="dropdown">
-                <button value="+1-222-555-8888" class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <small class="current-number__phone current-number__selected-nr">+1-222-555-8888</small>
-                <span class="current-number__identifier current-number__selected-project">wowfare</span>
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                    <button class="dropdown-item" type="button" value="+1-222-555-8888" data-info-project="wowfare"> 
-                        <small class="current-number__phone">+1-222-555-8888</small>
-                        <span class="current-number__identifier">wowfare</span>
-                    </button>
-                    <button class="dropdown-item" type="button" value="+1-222-555-4444" data-info-project="ovago">
-                    <small class="current-number__phone">+1-333-222-444</small>
-                        <span class="current-number__identifier">ovago</span>
-                    </button>
-                </div>
-                <i class="fa fa-chevron-down"></i>
-            </div>
-
+            <!-- Custom select is appended to this block. Please, search search JS function initialized with 'current-number' selector. -->
         </div>
         <div class="call-pane__number">
             <!-- <div class="suggestion-placeholder">
