@@ -13,17 +13,14 @@ class CouponSearch extends Coupon
     {
         return [
             ['c_amount', 'number'],
-
             ['c_code', 'safe'],
 
             ['c_created_user_id', 'integer'],
-
             ['c_currency_code', 'safe'],
 
             ['c_disabled', 'boolean'],
 
             ['c_id', 'integer'],
-
             ['c_percent', 'integer'],
 
             ['c_public', 'boolean'],
@@ -33,7 +30,6 @@ class CouponSearch extends Coupon
             ['c_reusable_count', 'integer'],
 
             ['c_status_id', 'integer'],
-
             ['c_type_id', 'integer'],
 
             ['c_updated_user_id', 'integer'],
@@ -48,7 +44,10 @@ class CouponSearch extends Coupon
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -90,10 +89,12 @@ class CouponSearch extends Coupon
             'c_type_id' => $this->c_type_id,
             'c_created_user_id' => $this->c_created_user_id,
             'c_updated_user_id' => $this->c_updated_user_id,
+            'c_currency_code' => $this->c_currency_code,
+            'c_code' => $this->c_code,
         ]);
 
-        $query->andFilterWhere(['like', 'c_code', $this->c_code])
-            ->andFilterWhere(['like', 'c_currency_code', $this->c_currency_code]);
+//        $query->andFilterWhere(['like', 'c_code', $this->c_code])
+//            ->andFilterWhere(['like', 'c_currency_code', $this->c_currency_code]);
 
         return $dataProvider;
     }

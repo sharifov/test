@@ -12,13 +12,9 @@ class CouponCaseSearch extends CouponCase
     {
         return [
             ['cc_case_id', 'integer'],
-
             ['cc_coupon_id', 'integer'],
-
             ['cc_created_dt', 'date', 'format' => 'php:Y-m-d'],
-
             ['cc_created_user_id', 'integer'],
-
             ['cc_sale_id', 'integer'],
         ];
     }
@@ -29,7 +25,10 @@ class CouponCaseSearch extends CouponCase
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['cc_created_dt' => SORT_DESC]]
+            'sort'=> ['defaultOrder' => ['cc_coupon_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
