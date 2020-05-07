@@ -1,5 +1,5 @@
 <?php
-
+/** @var $coupons \sales\model\coupon\entity\couponCase\CouponCase[] */
 ?>
 
 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-case-coupons', 'enablePushState' => false, 'timeout' => 10000]) ?>
@@ -17,6 +17,7 @@
 	</div>
 	<div class="x_content" style="display: none; margin-top: -10px;">
         <br>
+        <?php if ($coupons): ?>
         <?php \yii\widgets\Pjax::begin(['id' => 'pjax-case-coupons-table', 'enablePushState' => false, 'timeout' => 10000]) ?>
             <table class="table table-bordered table-hover table-condensed">
                 <thead>
@@ -30,16 +31,49 @@
                     <th class="text-center" style="width: 130px">Exp Date</th>
                     <th class="text-center" style="width: 130px">Start Date</th>
                     <th class="text-center" style="width: 130px">Status</th>
-                    <th class="text-center">Notes</th>
                 </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <th colspan="10" style="text-align: center">Not Found Data</th>
-                    </tr>
+
+                        <?php foreach($coupons as $key => $coupon): ?>
+                            <tr>
+                                <td><?= $key+1 ?></td>
+                                <td><?= \yii\helpers\Html::checkbox($coupon->formName() . '[cc_case_id]['.$key.']', false, ['value' => $coupon->cc_coupon_id]) ?></td>
+                                <td><?= $coupon->coupon->c_code ?></td>
+                                <td><?= $coupon->coupon->c_amount ?></td>
+                                <td><?= $coupon->coupon->c_currency_code ?></td>
+                                <td><?= $coupon->coupon->c_percent ?></td>
+                                <td><?= $coupon->coupon->c_exp_date ?></td>
+                                <td><?= $coupon->coupon->c_start_date ?></td>
+                                <td><?= $coupon->coupon->c_status_id ?></td>
+                            </tr>
+                        <?php endforeach; ?>
                 </tbody>
             </table>
+
+            <div class="row">
+                <div class="col-md-5">
+                    <?= \yii\helpers\Html::dropDownList('email_tpl_key', null, \common\models\EmailTemplateType::getKeyList(false, null), ['prompt' => '---', 'class' => 'form-control', 'id' => 'email_tpl_key']) ?>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-12">
+                    <?= \yii\helpers\Html::button('<i class="fa fa-envelope"></i> Send Coupons', ['id' => 'send-case-coupons', 'class' => 'btn btn-success']) ?>
+                </div>
+            </div>
 		<?php \yii\widgets\Pjax::end()?>
+        <?php else: ?>
+            <p>Not found coupons</p>
+        <?php endif; ?>
     </div>
 </div>
 <?php \yii\widgets\Pjax::end()?>
+
+<?php
+$js = <<<JS
+    $(document).on('click', '#send-case-coupons', function () {
+        
+    });
+JS;
+

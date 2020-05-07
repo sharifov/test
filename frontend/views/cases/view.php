@@ -29,6 +29,8 @@ use yii\bootstrap4\Modal;
  * @var $modelNote common\models\CaseNote
  * @var $dataProviderNotes yii\data\ArrayDataProvider
  *
+ * @var $coupons \sales\model\coupon\entity\couponCase\CouponCase[]
+ *
  *
  */
 
@@ -106,7 +108,7 @@ $user = Yii::$app->user->identity;
 
     <div class="row">
         <div class="col-md-6">
-            <?= $this->render('coupons/view', []) ?>
+            <?= $this->render('coupons/view', ['coupons' => $coupons]) ?>
         </div>
 
         <div class="col-md-6">

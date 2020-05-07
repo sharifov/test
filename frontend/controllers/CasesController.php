@@ -38,6 +38,7 @@ use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\guards\cases\CaseTakeGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
+use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -629,6 +630,8 @@ class CasesController extends FController
             ],
         ]);
 
+        $coupons = CouponCase::find()->getByCaseId($model->cs_id)->all();
+
         //VarDumper::dump($dataProvider->allModels); exit;
 
 
@@ -657,6 +660,8 @@ class CasesController extends FController
 
             'modelNote' => $modelNote,
             'dataProviderNotes' => $dataProviderNotes,
+
+			'coupons' => $coupons
         ]);
     }
 
