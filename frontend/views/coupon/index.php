@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\coupon\CouponStatusColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -37,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_reusable',
             //'c_reusable_count',
             //'c_public',
-            //'c_status_id',
+            ['class' => CouponStatusColumn::class, 'attribute' => 'c_status_id'],
             //'c_used_dt',
             //'c_disabled',
             //'c_type_id',

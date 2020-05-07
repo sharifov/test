@@ -4,6 +4,7 @@ namespace sales\model\coupon\entity\coupon;
 
 use common\models\Employee;
 use sales\entities\cases\Cases;
+use sales\model\coupon\entity\couponCase\CouponCase;
 use Yii;
 
 /**
@@ -29,7 +30,7 @@ use Yii;
  * @property int|null $c_updated_user_id
  *
  * @property Employee $createdUser
- * @property Employee $cUpdatedUser
+ * @property Employee $updatedUser
  * @property Cases[] $cases
  * @property CouponCase[] $couponCases
  */
@@ -43,11 +44,6 @@ class Coupon extends \yii\db\ActiveRecord
             ['c_code', 'required'],
             ['c_code', 'string', 'max' => 50],
             ['c_code', 'unique'],
-
-            ['c_created_dt', 'safe'],
-
-            ['c_created_user_id', 'integer'],
-            ['c_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
 
             ['c_currency_code', 'string', 'max' => 3],
 
@@ -63,16 +59,15 @@ class Coupon extends \yii\db\ActiveRecord
 
             ['c_reusable_count', 'integer'],
 
-            ['c_start_date', 'safe'],
+            ['c_start_date', 'datetime'],
 
+            ['c_status_id', 'required'],
             ['c_status_id', 'integer'],
+            ['c_status_id', 'in', 'range' => array_keys(CouponStatus::getList())],
 
+            ['c_type_id', 'required'],
             ['c_type_id', 'integer'],
-
-            ['c_updated_dt', 'safe'],
-
-            ['c_updated_user_id', 'integer'],
-            ['c_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_updated_user_id' => 'id']],
+            ['c_type_id', 'in', 'range' => array_keys(CouponType::getList())],
 
             ['c_used_dt', 'safe'],
         ];
@@ -95,30 +90,30 @@ class Coupon extends \yii\db\ActiveRecord
 
     public function getCouponCases(): \yii\db\ActiveQuery
     {
-        return $this->hasMany(CouponCase::className(), ['cc_coupon_id' => 'c_id']);
+        return $this->hasMany(CouponCase::class, ['cc_coupon_id' => 'c_id']);
     }
 
     public function attributeLabels(): array
     {
         return [
-            'c_id' => 'C ID',
-            'c_code' => 'C Code',
-            'c_amount' => 'C Amount',
-            'c_currency_code' => 'C Currency Code',
-            'c_percent' => 'C Percent',
-            'c_exp_date' => 'C Exp Date',
-            'c_start_date' => 'C Start Date',
-            'c_reusable' => 'C Reusable',
-            'c_reusable_count' => 'C Reusable Count',
-            'c_public' => 'C Public',
-            'c_status_id' => 'C Status ID',
-            'c_used_dt' => 'C Used Dt',
-            'c_disabled' => 'C Disabled',
-            'c_type_id' => 'C Type ID',
-            'c_created_dt' => 'C Created Dt',
-            'c_updated_dt' => 'C Updated Dt',
-            'c_created_user_id' => 'C Created User ID',
-            'c_updated_user_id' => 'C Updated User ID',
+            'c_id' => 'ID',
+            'c_code' => 'Code',
+            'c_amount' => 'Amount',
+            'c_currency_code' => 'Currency Code',
+            'c_percent' => 'Percent',
+            'c_exp_date' => 'Exp Date',
+            'c_start_date' => 'Start Date',
+            'c_reusable' => 'Reusable',
+            'c_reusable_count' => 'Reusable Count',
+            'c_public' => 'Public',
+            'c_status_id' => 'Status',
+            'c_used_dt' => 'Used Dt',
+            'c_disabled' => 'Disabled',
+            'c_type_id' => 'Type ID',
+            'c_created_dt' => 'Created Dt',
+            'c_updated_dt' => 'Updated Dt',
+            'c_created_user_id' => 'Created User',
+            'c_updated_user_id' => 'Updated User',
         ];
     }
 
