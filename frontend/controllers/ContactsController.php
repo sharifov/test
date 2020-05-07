@@ -428,9 +428,9 @@ class ContactsController extends FController
      */
     public function actionListCallsAjax(?string $q = null): Response
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            throw new BadRequestHttpException();
-        }
+//        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+//            throw new BadRequestHttpException();
+//        }
 
         $out = ['results' => []];
 

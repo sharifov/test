@@ -497,7 +497,7 @@ class SmsController extends FController
                     'phone' => $form->userPhone,
                 ];
 
-                if ($form->contactIsClient()) {
+                if ($form->contactIsContact()) {
                     $result = array_merge($result, $this->smsSender->sendToExternalNumber($form));
                 } elseif ($form->contactIsInternal()) {
                     $result = array_merge($result, $this->smsSender->sendToInternalNumber($form));

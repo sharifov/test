@@ -24,8 +24,8 @@ class Contact
 
     public function getType(): int
     {
-        if ($this->isClient()) {
-            return Client::TYPE_CLIENT;
+        if ($this->isContact()) {
+            return Client::TYPE_CONTACT;
         }
 
         if ($this->isInternal()) {
@@ -37,7 +37,7 @@ class Contact
 
     public function getId(): int
     {
-        if ($this->isClient()) {
+        if ($this->isContact()) {
             return $this->contact->id;
         }
 
@@ -50,7 +50,7 @@ class Contact
 
     public function getName(): ?string
     {
-        if ($this->isClient()) {
+        if ($this->isContact()) {
             return $this->contact->getNameByType();
         }
 
@@ -63,7 +63,7 @@ class Contact
 
     public function getAvatar(): ?string
     {
-        if ($this->isClient()) {
+        if ($this->isContact()) {
             return $this->contact->getAvatar();
         }
 
@@ -74,7 +74,7 @@ class Contact
         throw new \InvalidArgumentException('Undefined contact type');
     }
 
-    public function isClient(): bool
+    public function isContact(): bool
     {
         return $this->contact instanceof Client;
     }

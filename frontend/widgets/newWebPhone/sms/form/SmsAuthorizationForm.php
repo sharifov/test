@@ -22,6 +22,11 @@ use yii\base\Model;
  */
 class SmsAuthorizationForm extends Model
 {
+    public const CLIENT_TYPES = [
+        Client::TYPE_CONTACT,
+        Client::TYPE_INTERNAL
+    ];
+
     public $userPhone;
     public $contactId;
     public $contactPhone;
@@ -48,7 +53,7 @@ class SmsAuthorizationForm extends Model
             ['contactType', 'required'],
             ['contactType', 'integer'],
             ['contactType', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['contactType', 'in', 'range' => [Client::TYPE_CLIENT, Client::TYPE_INTERNAL]],
+            ['contactType', 'in', 'range' => self::CLIENT_TYPES],
 
             ['contactId', 'required'],
             ['contactId', 'integer'],
@@ -83,8 +88,8 @@ class SmsAuthorizationForm extends Model
             return;
         }
 
-        if ($this->contactType === Client::TYPE_CLIENT) {
-            if (!$this->contactEntity = Client::findOne($this->contactId)) {
+        if ($this->contactType === Client::TYPE_CONTACT) {
+            if (!$this->contactEntity = Client::find()->byId($this->contactId)->byContact()->limit(1)->one()) {
                 $this->addError('contactId', 'Contact not found.');
             }
             $this->contact = new Contact($this->contactEntity);
@@ -106,7 +111,7 @@ class SmsAuthorizationForm extends Model
             return;
         }
 
-        if ($this->contactType === Client::TYPE_CLIENT) {
+        if ($this->contactType === Client::TYPE_CONTACT) {
             foreach ($this->contactEntity->clientPhones as $phone) {
                 if ($phone->phone === $this->contactPhone) {
                     return;
@@ -152,9 +157,9 @@ class SmsAuthorizationForm extends Model
         return $this->contact;
     }
 
-    public function contactIsClient(): bool
+    public function contactIsContact(): bool
     {
-        return $this->contactType === Client::TYPE_CLIENT;
+        return $this->contactType === Client::TYPE_CONTACT;
     }
 
     public function contactIsInternal(): bool
