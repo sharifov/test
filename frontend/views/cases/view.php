@@ -110,17 +110,6 @@ $user = Yii::$app->user->identity;
         </div>
 
         <div class="col-md-6">
-
-            <?= $this->render('notes/agent_notes', [
-                'caseModel' => $model,
-                'dataProviderNotes'  => $dataProviderNotes,
-                'modelNote'  => $modelNote,
-            ]); ?>
-
-
-        </div>
-
-        <div class="col-md-6">
             <?php if ($enableCommunication) : ?>
                 <?= $this->render('communication/case_communication', [
                     'model'      => $model,
@@ -153,6 +142,19 @@ $user = Yii::$app->user->identity;
 			<?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
 			<?php endif;?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+
+			<?= $this->render('notes/agent_notes', [
+				'caseModel' => $model,
+				'dataProviderNotes'  => $dataProviderNotes,
+				'modelNote'  => $modelNote,
+			]); ?>
+
+
         </div>
     </div>
 
