@@ -106,6 +106,10 @@ $user = Yii::$app->user->identity;
 
     <div class="row">
         <div class="col-md-6">
+            <?= $this->render('coupons/view', []) ?>
+        </div>
+
+        <div class="col-md-6">
 
             <?= $this->render('notes/agent_notes', [
                 'caseModel' => $model,
