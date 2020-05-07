@@ -199,7 +199,7 @@ class CouponController extends FController
 						
 					} else {
 						$previewEmailForm = new CasePreviewEmailForm($result['data']);
-						$previewEmailForm->e_email_from_name = Auth::user()->full_name;
+						$previewEmailForm->e_email_from_name = Auth::user()->username;
 						$previewEmailForm->coupon_list = json_encode($form->couponIds);
 
 						$emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
