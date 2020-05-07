@@ -16,27 +16,30 @@
 		<div class="clearfix"></div>
 	</div>
 	<div class="x_content" style="display: none; margin-top: -10px;">
-        <table class="table table-bordered table-hover table-condensed">
-            <thead>
-            <tr>
-                <th style="width: 50px">#</th>
-                <th style="width: 30px"> </th>
-                <th class="text-center" style="width: 130px">Code</th>
-                <th class="text-center" style="width: 130px">Amount</th>
-                <th class="text-center" style="width: 130px">Currency Code</th>
-                <th class="text-center" style="width: 130px">Percent</th>
-                <th class="text-center" style="width: 130px">Exp Date</th>
-                <th class="text-center" style="width: 130px">Start Date</th>
-                <th class="text-center" style="width: 130px">Status</th>
-                <th class="text-center">Notes</th>
-            </tr>
-            </thead>
-            <tbody>
+        <br>
+        <?php \yii\widgets\Pjax::begin(['id' => 'pjax-case-coupons-table', 'enablePushState' => false, 'timeout' => 10000]) ?>
+            <table class="table table-bordered table-hover table-condensed">
+                <thead>
                 <tr>
-                    <th colspan="10" style="text-align: center">Not Found Data</th>
+                    <th style="width: 50px">#</th>
+                    <th style="width: 30px"> </th>
+                    <th class="text-center" style="width: 130px">Code</th>
+                    <th class="text-center" style="width: 130px">Amount</th>
+                    <th class="text-center" style="width: 130px">Currency Code</th>
+                    <th class="text-center" style="width: 130px">Percent</th>
+                    <th class="text-center" style="width: 130px">Exp Date</th>
+                    <th class="text-center" style="width: 130px">Start Date</th>
+                    <th class="text-center" style="width: 130px">Status</th>
+                    <th class="text-center">Notes</th>
                 </tr>
-            </tbody>
-        </table>
-	</div>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th colspan="10" style="text-align: center">Not Found Data</th>
+                    </tr>
+                </tbody>
+            </table>
+		<?php \yii\widgets\Pjax::end()?>
+    </div>
 </div>
 <?php \yii\widgets\Pjax::end()?>
