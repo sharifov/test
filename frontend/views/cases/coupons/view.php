@@ -25,7 +25,7 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
 		<h2><i class="fa fa-sticky-note-o"></i> Coupons </h2>
 		<ul class="nav navbar-right panel_toolbox">
             <li>
-                <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Request', '#', ['id' => 'btn-request-coupons', 'title' => 'Request coupons'])?>
+                <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Generate coupons', '#', ['id' => 'btn-request-coupons', 'title' => 'Request coupons'])?>
             </li>
 			<li>
 				<a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -59,9 +59,8 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                         <th class="text-center" style="width: 130px">Code</th>
                         <th class="text-center" style="width: 130px">Amount</th>
                         <th class="text-center" style="width: 130px">Currency Code</th>
-                        <th class="text-center" style="width: 130px">Percent</th>
                         <th class="text-center" style="width: 130px">Exp Date</th>
-                        <th class="text-center" style="width: 130px">Start Date</th>
+                        <th class="text-center" style="width: 130px">Created Date</th>
                         <th class="text-center" style="width: 130px">Status</th>
                     </tr>
                     </thead>
@@ -74,10 +73,9 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                                     <td><?= $coupon->coupon->c_code ?></td>
                                     <td><?= $coupon->coupon->c_amount ?></td>
                                     <td><?= $coupon->coupon->c_currency_code ?></td>
-                                    <td><?= $coupon->coupon->c_percent ?></td>
                                     <td><?= $coupon->coupon->c_exp_date ?></td>
-                                    <td><?= $coupon->coupon->c_start_date ?></td>
-                                    <td><?= $coupon->coupon->c_status_id ?></td>
+                                    <td><?= Yii::$app->formatter->asDatetime(strtotime($coupon->coupon->c_created_dt)) ?></td>
+                                    <td><?= \sales\model\coupon\entity\coupon\CouponStatus::asFormat($coupon->coupon->c_status_id) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                     </tbody>
