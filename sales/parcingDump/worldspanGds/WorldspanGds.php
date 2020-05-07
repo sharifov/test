@@ -9,8 +9,7 @@ class WorldspanGds
 {
     public CONST TYPE_MAP = [
         'Reservation' => 'Reservation',
-        'PricingPublished' => 'Pricing published',
-        'PricingPrivate' => 'Pricing private',
+        'Pricing' => 'Pricing',
         'Baggage' => 'Baggage',
     ];
 
