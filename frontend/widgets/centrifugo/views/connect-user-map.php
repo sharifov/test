@@ -7,6 +7,7 @@ use common\models\CallUserAccess;
  * @var $centrifugoUrl
  * @var $token
  * @var $channels
+ * @var $this yii\web\View
  */
 $this->title = 'Real-time User Call Map';
 $bundle = \frontend\assets\TimerAsset::register($this);
@@ -39,35 +40,61 @@ channels.forEach(channelConnector)
 function channelConnector(chName)
 {    
     centrifuge.subscribe(chName, function(message) {    
-        let messageObj = JSON.parse(message.data.message);        
-        //console.log(messageObj)
+        let messageObj = JSON.parse(message.data.message);
+        let depSalesIsEmpty = messageObj.onlineDepSales.length;
+        let depExchangeIsEmpty = messageObj.onlineDepExchange.length;
+        let depSupportIsEmpty = messageObj.onlineDepSupport.length;
+        let usersOnlineIsEmpty = messageObj.usersOnline.length;
         
         //console.log(messageObj.onlineDepSales)
-        $("#card-sales-header-count, #card-sales").text('');        
-        $("#card-sales-header-count").append(messageObj.onlineDepSales.length);
+        $("#card-sales-header-count, #card-sales").text('');
+            if (depSalesIsEmpty > 0){
+                $("#card-sales-header-count").append(depSalesIsEmpty);
+                $('#sales-department').removeClass('d-none')
+            } else {
+                $('#sales-department').addClass('d-none')
+            }
+            
             messageObj.onlineDepSales.forEach(function (obj, index) {
                 index++;
                 $("#card-sales").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
         //console.log(messageObj.onlineDepExchange)
-        $("#card-exchange-header-count, #card-exchange").text('');        
-         $("#card-exchange-header-count").append(messageObj.onlineDepExchange.length);
+        $("#card-exchange-header-count, #card-exchange").text('');
+            if (depExchangeIsEmpty > 0){
+                $("#card-exchange-header-count").append(depExchangeIsEmpty);
+                $('#exchange-department').removeClass('d-none')
+            } else {
+                $("#exchange-department").addClass('d-none')
+            }
+        
             messageObj.onlineDepExchange.forEach(function (obj, index) {
                 index++;
                 $("#card-exchange").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
         //console.log(messageObj.onlineDepSupport)
-        $("#card-support-header-count, #card-support").text('');        
-        $("#card-support-header-count").append(messageObj.onlineDepSupport.length);
+        $("#card-support-header-count, #card-support").text('');
+            if (depSupportIsEmpty > 0){
+                $("#card-support-header-count").append(depSupportIsEmpty);
+                $('#support-department').removeClass('d-none')
+            } else {
+                $("#support-department").addClass('d-none')
+            }
+        
             messageObj.onlineDepSupport.forEach(function (obj, index) {
                 index++;
                 $("#card-support").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
             });        
         
         //console.log(messageObj.usersOnline)
-        $("#card-other").text('');        
+        $("#card-other").text('');
+            if (usersOnlineIsEmpty > 0){
+                $('#non-department').removeClass('d-none')
+            } else {
+                $("#non-department").addClass('d-none')
+            }
             messageObj.usersOnline.forEach(function (obj, index) {
                 index++;
                 $("#card-other").append(renderUsersOnline(index, obj.uc_user_id, obj.username, obj.user_roles, obj.us_call_phone_status, obj.us_is_on_call));
@@ -77,7 +104,7 @@ function channelConnector(chName)
         $("#card-live-calls").text('');
             messageObj.realtimeCalls.forEach(function (parent, index) {
                 if(!parent.c_parent_id){
-                    $("#card-live-calls").append(renderRealtimeCalls(parent));
+                    $("#card-live-calls").append(renderParentCalls(parent));
                     messageObj.realtimeCalls.forEach(function (child, childIndex) {
                         if (parent.c_id == child.c_parent_id){                            
                             $('#parent-' + parent.c_id).append(renderChildCalls(child));
@@ -90,7 +117,7 @@ function channelConnector(chName)
         $("#card-history-calls").text('');
             messageObj.callsHistory.forEach(function (parent, index) {
                 if(!parent.c_parent_id){
-                    $("#card-history-calls").append(renderRealtimeCalls(parent));
+                    $("#card-history-calls").append(renderParentCalls(parent));
                     messageObj.callsHistory.forEach(function (child, childIndex) {
                         if (parent.c_id == child.c_parent_id){                            
                             $('#parent-' + parent.c_id).append(renderChildCalls(child));
@@ -104,17 +131,22 @@ centrifuge.connect();
 
 centrifuge.on('connect', function(context) {        
     //console.info('Client connected to Centrifugo and authorized')
+    contentUpdate()
+});
+
+function contentUpdate() {
     $.ajax({
         url: '/call/realtime-user-map',
         type: 'POST',
         success: function(data) { 
-            //console.info('Request data on connect'); 
+            //console.info('Request data on connect');            
+            $("#page-updated-time").text('').text(data.updatedTime); 
             startTimers();                
         }
-     });
-});
+    });
+}
 
-function renderRealtimeCalls(parent)
+function renderParentCalls(parent)
 {
     return '<div class="col-md-12" style="margin-bottom:2px">' +
         '<table class="table table-condensed">' +
@@ -128,10 +160,8 @@ function renderRealtimeCalls(parent)
                     '<td class="text-left" style="width:180px">' +                        
                         showAgentClientDetails(parent.full_name, parent.c_call_type_id, parent.c_from, parent.c_created_user_id, parent.username) + 
                     '</td>' + 
-                    '<td class="text-center" style="width:130px">' +
-                        '<span class="badge badge-info">'+ parent.project_name +'</span><br>' +
-                        '<span class="label label-warning">'+ parent.dep_name +'</span>' + 
-                        '<span class="label label-info">'+ showShortSource(parent.c_source_type_id) +'</span>' +            
+                    '<td class="text-center" style="width:130px">' +                        
+                        parentCallProjectDetails(parent.project_name, parent.dep_name, parent.c_source_type_id) +            
                     '</td>' + 
                     '<td class="text-left">' +
                         showLeadCaseLinks(parent.c_lead_id, parent.gid, parent.c_case_id, parent.cs_gid) +      
@@ -190,6 +220,17 @@ function renderChildCalls(child)
             '</table>' +    
          '</td>'   
     '</tr>';
+}
+
+function parentCallProjectDetails(projectName, depName, callSourceTypeId) {
+    let html = '';
+    
+    html+='<span class="badge badge-info">'+ projectName +'</span> <br>' +
+          '<span class="label label-warning">'+ depName +'</span> '
+        if(callSourceTypeId){
+            html+='<span class="label label-info">'+ showShortSource(callSourceTypeId) +'</span>'  
+        }          
+    return html;
 }
 
 function renderChildCallUserAccesses(statusIDs, userIDs, userNames) {
@@ -292,7 +333,7 @@ function childCallRelativeTime(callUpdatedDate, cStatusID) {
 function childCallSourceDep(callSourceTypeId, depName){    
     let html = '';
     if (callSourceTypeId) {
-        html+= '<span class="label label-info">'+ showShortSource(callSourceTypeId) +'</span>';
+        html+= '<span class="label label-info">'+ showShortSource(callSourceTypeId) +'</span> ';
     }
     //if (depName){
         html+= '<span class="label label-warning">'+ depName +'</span>';
@@ -534,9 +575,9 @@ function showAgentClientDetails(fullName, callTypeId, callFrom, callCreatedUserI
                '</div>';
     } else {
         if (callCreatedUserId) {
-            html+= '<i class="fa fa-user fa-2x fa-border"></i>' + callCreatedUsername
+            html+= '<i class="fa fa-user fa-2x fa-border"></i> ' + callCreatedUsername
         } else {
-            html+= '<i class="fa fa-phone fa-2x fa-border"></i>' + callFrom
+            html+= '<i class="fa fa-phone fa-2x fa-border"></i> ' + callFrom
         }
     }
     
@@ -570,13 +611,7 @@ function renderUsersOnline(index, userID, username, userRoles, isCallStatusReady
 }
 
 $('#btn-user-call-map-refresh').on('click', function () {
-        $.ajax({
-        url: '/call/realtime-user-map',
-        type: 'POST',
-        success: function(data) { 
-            //console.info('Request data on click Refresh Data');                             
-        }
-     });
+    contentUpdate();
 });
 
 JS;
@@ -589,28 +624,28 @@ $this->registerJs($js);
 <div id="call-map-page" class="col-md-12">
     <div class="row">
         <div class="col-md-2">
-            <div class="card card-default" style="margin-bottom: 20px;">
+            <div id="sales-department" class="card card-default d-none" style="margin-bottom: 20px;">
                 <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SALES (<span id="card-sales-header-count"></span>)</div>
                 <div id="card-sales" class="card-body">
                     <!-- User List: from SALES department -->
                 </div>
             </div>
 
-            <div class="card card-default" style="margin-bottom: 20px;">
+            <div id="exchange-department" class="card card-default d-none" style="margin-bottom: 20px;">
                 <div class="card-header"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<span id="card-exchange-header-count"></span>)</div>
                 <div id="card-exchange" class="card-body">
                    <!-- User List: from EXCHANGE department -->
                 </div>
             </div>
 
-            <div class="card card-default" style="margin-bottom: 20px;">
+            <div id="support-department" class="card card-default d-none" style="margin-bottom: 20px;">
                 <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<span id="card-support-header-count"></span>)</div>
                 <div id="card-support" class="card-body">
                     <!-- User List: from SUPPORT department -->
                 </div>
             </div>
 
-            <div class="card card-default" style="margin-bottom: 20px;">
+            <div id="non-department" class="card card-default d-none" style="margin-bottom: 20px;">
                 <!--<div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (1)</div>-->
                 <div id="card-other" class="card-body">
                     <!-- User List: from W/O department -->
@@ -620,7 +655,7 @@ $this->registerJs($js);
 
         <div class="col-md-5">
             <div class="card card-default">
-                <div class="card-header"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS (Updated: <i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>)</div>
+                <div class="card-header"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS (Updated: <i class="fa fa-clock-o"></i> <span id="page-updated-time"></span>)</div>
                 <div id="card-live-calls" class="card-body">
                    <!-- Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS -->
                 </div>
@@ -639,7 +674,7 @@ $this->registerJs($js);
     </div>
 
     <div class="text-center hidden">
-        <?=Html::button('Refresh Data', ['class' => 'btn btn-sm btn-success hidden', 'id' => 'btn-user-call-map-refresh'])?>
+        <?=Html::button('Refresh Data', ['class' => 'btn btn-sm btn-success d-none', 'id' => 'btn-user-call-map-refresh'])?>
     </div>
 </div>
 

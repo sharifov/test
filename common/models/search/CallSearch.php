@@ -413,7 +413,7 @@ class CallSearch extends Call
             $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
         }
 
-        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cCreatedUser as ce', 'cDep', 'cClient as cls', 'callUserAccesses.cuaUser as cau', 'cugUgs', 'calls']);
+        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cCreatedUser as ce', 'cDep', 'cClient as cls', 'callUserAccesses.cuaUser as cau', 'cugUgs']);
 
         $command = $query->createCommand();
         $data = $command->queryAll();

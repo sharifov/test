@@ -358,7 +358,7 @@ class CallController extends FController
             $user = Auth::user();
             $searchUserConnectionModel = new UserConnectionSearch();
             $searchUserCallModel = new CallSearch();
-            $params = Yii::$app->request->queryParams;
+            //$params = Yii::$app->request->queryParams;
 
             $accessDepartmentModels = $user->udDeps;
             if($accessDepartmentModels) {
@@ -414,10 +414,8 @@ class CallController extends FController
             $realtimeCalls = $searchUserCallModel->searchRealtimeUserCallMap($params);
 
             $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
-            //$params['CallSearch']['limit'] = 10;
-            $callsHistory = $searchUserCallModel->searchRealtimeUserCallMapHistory($params);
 
-            //var_dump($callsHistory); die();
+            $callsHistory = $searchUserCallModel->searchRealtimeUserCallMapHistory($params);
 
             CentrifugoService::sendMsg(json_encode([
                 'onlineDepSales' => $usersOnlineDepSales,
@@ -428,13 +426,7 @@ class CallController extends FController
                 'callsHistory' => $callsHistory
             ]), 'realtimeUserMapChannel#' . Auth::id());
 
-            /*CentrifugoService::sendMsg(json_encode($usersOnlineDepSales), 'realtimeUserMapChannel#' . Auth::id());
-            CentrifugoService::sendMsg(json_encode($usersOnlineDepExchange), 'realtimeUserMapChannel#' . Auth::id());
-            CentrifugoService::sendMsg(json_encode($usersOnlineDepSupport), 'realtimeUserMapChannel#' . Auth::id());
-            CentrifugoService::sendMsg(json_encode($usersOnline), 'realtimeUserMapChannel#' . Auth::id());
-            CentrifugoService::sendMsg(json_encode($realtimeCalls), 'realtimeUserMapChannel#' . Auth::id());*/
-
-            //var_dump($usersOnlineDepSales); die();
+            return $this->asJson(['updatedTime' => Yii::$app->formatter->asTime(time(), 'php:H:i:s')]);
         } else {
             $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
 
