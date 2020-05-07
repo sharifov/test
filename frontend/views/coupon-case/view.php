@@ -32,10 +32,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'cc_coupon_id',
-                'cc_case_id',
+                'case:case',
                 'cc_sale_id',
-                'cc_created_dt',
-                'cc_created_user_id',
+                'cc_created_dt:byUserDateTime',
+                'createdUser:userName',
             ],
         ]) ?>
 

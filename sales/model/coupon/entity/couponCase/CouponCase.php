@@ -37,11 +37,6 @@ class CouponCase extends \yii\db\ActiveRecord
             ['cc_coupon_id', 'integer'],
             ['cc_coupon_id', 'exist', 'skipOnError' => true, 'targetClass' => Coupon::class, 'targetAttribute' => ['cc_coupon_id' => 'c_id']],
 
-            ['cc_created_dt', 'safe'],
-
-            ['cc_created_user_id', 'integer'],
-            ['cc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cc_created_user_id' => 'id']],
-
             ['cc_sale_id', 'integer'],
         ];
     }

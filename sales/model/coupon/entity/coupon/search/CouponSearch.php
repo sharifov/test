@@ -2,6 +2,8 @@
 
 namespace sales\model\coupon\entity\coupon\search;
 
+use common\models\Employee;
+use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use sales\model\coupon\entity\coupon\Coupon;
 
@@ -14,46 +16,39 @@ class CouponSearch extends Coupon
 
             ['c_code', 'safe'],
 
-            ['c_created_dt', 'safe'],
-
             ['c_created_user_id', 'integer'],
 
             ['c_currency_code', 'safe'],
 
-            ['c_disabled', 'integer'],
-
-            ['c_exp_date', 'safe'],
+            ['c_disabled', 'boolean'],
 
             ['c_id', 'integer'],
 
             ['c_percent', 'integer'],
 
-            ['c_public', 'integer'],
+            ['c_public', 'boolean'],
 
-            ['c_reusable', 'integer'],
+            ['c_reusable', 'boolean'],
 
             ['c_reusable_count', 'integer'],
-
-            ['c_start_date', 'safe'],
 
             ['c_status_id', 'integer'],
 
             ['c_type_id', 'integer'],
 
-            ['c_updated_dt', 'safe'],
-
             ['c_updated_user_id', 'integer'],
 
-            ['c_used_dt', 'safe'],
+            [['c_created_dt', 'c_exp_date', 'c_start_date', 'c_updated_dt', 'c_used_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
-    public function search($params): ActiveDataProvider
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['c_id' => SORT_DESC]],
         ]);
 
         $this->load($params);
@@ -63,21 +58,36 @@ class CouponSearch extends Coupon
             return $dataProvider;
         }
 
+        if ($this->c_created_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_created_dt', $this->c_created_dt, $user->timezone);
+        }
+
+        if ($this->c_exp_date) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_exp_date', $this->c_exp_date, $user->timezone);
+        }
+
+        if ($this->c_start_date) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_start_date', $this->c_start_date, $user->timezone);
+        }
+
+        if ($this->c_updated_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_updated_dt', $this->c_updated_dt, $user->timezone);
+        }
+
+        if ($this->c_used_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_used_dt', $this->c_used_dt, $user->timezone);
+        }
+
         $query->andFilterWhere([
             'c_id' => $this->c_id,
             'c_amount' => $this->c_amount,
             'c_percent' => $this->c_percent,
-            'c_exp_date' => $this->c_exp_date,
-            'c_start_date' => $this->c_start_date,
             'c_reusable' => $this->c_reusable,
             'c_reusable_count' => $this->c_reusable_count,
             'c_public' => $this->c_public,
             'c_status_id' => $this->c_status_id,
-            'c_used_dt' => $this->c_used_dt,
             'c_disabled' => $this->c_disabled,
             'c_type_id' => $this->c_type_id,
-            'c_created_dt' => $this->c_created_dt,
-            'c_updated_dt' => $this->c_updated_dt,
             'c_created_user_id' => $this->c_created_user_id,
             'c_updated_user_id' => $this->c_updated_user_id,
         ]);

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\model\coupon\useCase\request\RequestCouponService;
 use sales\model\coupon\useCase\request\RequestForm;
@@ -52,7 +53,7 @@ class CouponController extends FController
     public function actionIndex(): string
     {
         $searchModel = new CouponSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,

@@ -7,8 +7,9 @@ use yii\grid\DataColumn;
 
 class CouponStatusColumn extends DataColumn
 {
+    public $attribute = 'c_status_id';
     public $filter;
-    public $format = 'raw';
+    public $format = 'couponStatus';
 
     public function init(): void
     {
@@ -17,10 +18,5 @@ class CouponStatusColumn extends DataColumn
         if ($this->filter === null) {
             $this->filter = CouponStatus::getList();
         }
-    }
-
-    public function getDataCellValue($model, $key, $index)
-    {
-        return CouponStatus::asFormat($model->{$this->attribute});
     }
 }

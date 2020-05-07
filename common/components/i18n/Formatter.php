@@ -43,6 +43,7 @@ use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\coupon\entity\coupon\CouponStatus;
+use sales\model\coupon\entity\coupon\CouponType;
 use sales\model\emailList\entity\EmailList;
 use sales\model\emailList\helpers\formatters\EmailListFormatter;
 use sales\model\phoneList\entity\PhoneList;
@@ -602,5 +603,14 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return CouponStatus::asFormat($value);
+    }
+
+    public function asCouponType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return CouponType::asFormat($value);
     }
 }

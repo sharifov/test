@@ -2,11 +2,11 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\entity\couponCase\search\CouponCaseSearch;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -36,7 +36,7 @@ class CouponCaseController extends FController
     public function actionIndex(): string
     {
         $searchModel = new CouponCaseSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,

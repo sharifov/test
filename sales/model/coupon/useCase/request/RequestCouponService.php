@@ -2,7 +2,6 @@
 
 namespace sales\model\coupon\useCase\request;
 
-use common\components\SearchService;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\CouponStatus;
 use sales\model\coupon\entity\coupon\CouponType;

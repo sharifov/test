@@ -1,6 +1,8 @@
 <?php
 
 use sales\model\coupon\entity\coupon\CouponStatus;
+use sales\model\coupon\entity\coupon\CouponType;
+use sales\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -23,9 +25,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'c_percent')->textInput() ?>
 
-        <?= $form->field($model, 'c_exp_date')->textInput() ?>
+        <?= $form->field($model, 'c_exp_date')->widget(DateTimePicker::class) ?>
 
-        <?= $form->field($model, 'c_start_date')->textInput() ?>
+        <?= $form->field($model, 'c_start_date')->widget(DateTimePicker::class) ?>
 
         <?= $form->field($model, 'c_reusable')->checkbox() ?>
 
@@ -35,11 +37,11 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'c_status_id')->dropDownList(CouponStatus::getList(), ['prompt' => 'Select status']) ?>
 
-        <?= $form->field($model, 'c_used_dt')->textInput() ?>
+        <?= $form->field($model, 'c_used_dt')->widget(DateTimePicker::class) ?>
 
         <?= $form->field($model, 'c_disabled')->checkbox() ?>
 
-        <?= $form->field($model, 'c_type_id')->textInput() ?>
+        <?= $form->field($model, 'c_type_id')->dropDownList(CouponType::getList()) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

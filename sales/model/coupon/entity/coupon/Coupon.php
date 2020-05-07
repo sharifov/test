@@ -131,7 +131,7 @@ class Coupon extends \yii\db\ActiveRecord
             'c_status_id' => 'Status',
             'c_used_dt' => 'Used Dt',
             'c_disabled' => 'Disabled',
-            'c_type_id' => 'Type ID',
+            'c_type_id' => 'Type',
             'c_created_dt' => 'Created Dt',
             'c_updated_dt' => 'Updated Dt',
             'c_created_user_id' => 'Created User',

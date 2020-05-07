@@ -200,10 +200,8 @@ class TestController extends FController
 
     public function actionTest()
     {
-//        $d = new DateTime('2020-05-07T15:54:33');
-        $form = new CouponForm(['exp_date' => '2020-05-07 15:54:33']);
-        $form->validate();
-        VarDumper::dump($form->errors);
+
+        echo date('Y-m-d H:i:s', strtotime('2020-05-07T15:54:33'));
         die;
         echo $d->format('Y-m-d H:i:s');die;
 

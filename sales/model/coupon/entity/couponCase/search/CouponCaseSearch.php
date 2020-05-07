@@ -2,6 +2,7 @@
 
 namespace sales\model\coupon\entity\couponCase\search;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use sales\model\coupon\entity\couponCase\CouponCase;
 
@@ -14,7 +15,7 @@ class CouponCaseSearch extends CouponCase
 
             ['cc_coupon_id', 'integer'],
 
-            ['cc_created_dt', 'safe'],
+            ['cc_created_dt', 'date', 'format' => 'php:Y-m-d'],
 
             ['cc_created_user_id', 'integer'],
 
@@ -22,12 +23,13 @@ class CouponCaseSearch extends CouponCase
         ];
     }
 
-    public function search($params): ActiveDataProvider
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['cc_created_dt' => SORT_DESC]]
         ]);
 
         $this->load($params);
@@ -37,11 +39,14 @@ class CouponCaseSearch extends CouponCase
             return $dataProvider;
         }
 
+        if ($this->cc_created_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cc_created_dt', $this->cc_created_dt, $user->timezone);
+        }
+
         $query->andFilterWhere([
             'cc_coupon_id' => $this->cc_coupon_id,
             'cc_case_id' => $this->cc_case_id,
             'cc_sale_id' => $this->cc_sale_id,
-            'cc_created_dt' => $this->cc_created_dt,
             'cc_created_user_id' => $this->cc_created_user_id,
         ]);
 
