@@ -117,6 +117,11 @@ class Coupon extends \yii\db\ActiveRecord
         return $this->hasMany(CouponCase::class, ['cc_coupon_id' => 'c_id']);
     }
 
+    public function isSend(): bool
+	{
+		return $this->c_status_id === CouponStatus::SEND;
+	}
+
     public function attributeLabels(): array
     {
         return [

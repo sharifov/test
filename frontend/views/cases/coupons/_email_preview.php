@@ -43,6 +43,7 @@ echo $form->errorSummary($previewEmailForm);
 		<?= $form->field($previewEmailForm, 'e_language_id')->hiddenInput()->label(false); ?>
 		<?= $form->field($previewEmailForm, 'e_email_tpl_id')->hiddenInput()->label(false); ?>
 		<?= $form->field($previewEmailForm, 'e_quote_list')->hiddenInput()->label(false); ?>
+		<?= $form->field($previewEmailForm, 'coupon_list')->hiddenInput()->label(false); ?>
 	</div>
 	<div class="col-sm-4 form-group">
 		<?= $form->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
@@ -90,7 +91,7 @@ echo $form->errorSummary($previewEmailForm);
 </div>
 
 <div class="btn-wrapper text-right">
-	<?= Html::button('<i class="fa fa-envelope-o"></i> Cancel', ['class' => 'btn btn-lg btn-primary btn-coupon-cancel-preview']) ?>
+	<?= Html::button('<i class="fa fa-close"></i> Cancel', ['class' => 'btn btn-lg btn-danger btn-coupon-cancel-preview']) ?>
 	<?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-success']) ?>
     <?php // Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
 </div>

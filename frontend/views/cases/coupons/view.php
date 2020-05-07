@@ -36,7 +36,6 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
 	<div class="x_content" style="margin-top: -10px;">
         <div class="row">
             <div class="col-md-12">
-                <?= \common\widgets\Alert::widget() ?>
             </div>
         </div>
         <br>
@@ -69,7 +68,11 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                             <?php foreach($coupons as $key => $coupon): ?>
                                 <tr>
                                     <td><?= $key+1 ?></td>
-                                    <td><?= Html::checkbox($sendCouponsForm->formName() . '[couponIds]['.$key.']', false, ['value' => $coupon->cc_coupon_id]) ?></td>
+                                    <td>
+                                        <?php if (!$coupon->coupon->isSend()): ?>
+                                            <?= Html::checkbox($sendCouponsForm->formName() . '[couponIds]['.$key.']', false, ['value' => $coupon->cc_coupon_id]) ?>
+                                        <?php  endif; ?>
+                                    </td>
                                     <td><?= $coupon->coupon->c_code ?></td>
                                     <td><?= $coupon->coupon->c_amount ?></td>
                                     <td><?= $coupon->coupon->c_currency_code ?></td>
