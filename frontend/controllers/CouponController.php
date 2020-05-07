@@ -195,7 +195,7 @@ class CouponController extends FController
 					$result = $this->sendCouponsService->preview($form, $case, Auth::user());
 
 					if ($result['error']) {
-						Yii::error(VarDumper::dumpAsString($result), 'CouponController::actionSend::emailPreview');
+						
 					} else {
 						$previewEmailForm = new CasePreviewEmailForm($result['data']);
 
@@ -275,7 +275,7 @@ class CouponController extends FController
 
 						$mailResponse = $mail->sendMail();
 
-						Yii::error(VarDumper::dumpAsString($mailResponse), 'test');
+						Yii::error(VarDumper::dumpAsString($mailResponse), 'CouponController::actionSend::Debug');
 
 						if (isset($mailResponse['error']) && $mailResponse['error']) {
 							$previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);

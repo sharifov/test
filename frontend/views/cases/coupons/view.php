@@ -109,12 +109,6 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
 
 <?php
 $js = <<<JS
-    // $(document).on('click', '#send-case-coupons', function (e) {
-    //     e.preventDefault();
-    //    
-    //    
-    // });
-
     $('body').on('click', '#btn-request-coupons', function(e) {
         e.preventDefault();
         $('#preloader').removeClass('d-none');
