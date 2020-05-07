@@ -13,11 +13,94 @@ class Baggage /* implements ParseDump*/
      */
     public function parseDump(string $string): array
     {
-        $result['baggage'] = $this->parseBaggage($string);
+        $result['baggage'] = $this->parseBaggageAllowance($string);
+        $result['carry_on_allowance'] = $this->parseCarryOnAllowance($string);
 
-        \yii\helpers\VarDumper::dump([$result, $string], 10, true); exit();
-            /* FOR DEBUG:: must by remove */
+        return $result;
+    }
 
+    public function parseBaggageAllowance(string $string): ?array
+    {
+        $result = null;
+        $baggagePattern = '/BAGGAGE ALLOWANCE(.*?)CARRY ON ALLOWANCE/s';
+        preg_match($baggagePattern, $string, $baggageMatches);
+
+        if (isset($baggageMatches[1])) {
+            $rowDelimPatten = '[A-Z]{2}\s[A-Z]{6}\s{2}\d{1}PC';
+            preg_match_all('(' . $rowDelimPatten . ')', $baggageMatches[1], $codeMatches);
+
+            $items = preg_split('/' . $rowDelimPatten . '/', $baggageMatches[1]);
+            array_shift($items);
+
+            if ($codeMatches[0]) {
+                foreach ($codeMatches[0] as $key => $value) {
+                    preg_match("/([A-Z]{2})\s([A-Z]{6})\s{2}(\d{1})PC/", $value, $rowInfoMatches);
+
+                    $result[$key]['iata'] = $rowInfoMatches[1] ?? null;
+                    $result[$key]['code'] = $rowInfoMatches[2] ?? null;
+                    $result[$key]['allow_pieces'] = $rowInfoMatches[3] ?? null;
+
+                    $itemRow = trim($items[$key]);
+                    $itemRows = explode("\n", $itemRow);
+
+                    foreach ($itemRows as $keyBag => $valueBag) {
+                        if (strlen($valueBag) < 10) {
+                            continue;
+                        }
+                        // example: BAG 1 -  75.00 USD    UPTO50LB/23KG AND UPTO62LI/158LCM
+                        preg_match("/BAG\s(\d{1})\s-\s{2}([0-9]*\.[0-9]*)\s([A-Z]{2,3})\s{4}(.*?)\sAND\s(.*?)$/s", $valueBag, $bagMatches);
+
+                        if (!empty($bagMatches)) {
+                            $result[$key]['bag'][$keyBag]['price'] = isset($bagMatches[2]) ? trim($bagMatches[2]) : null;
+                            $result[$key]['bag'][$keyBag]['currency'] = isset($bagMatches[3]) ? trim($bagMatches[3]) : null;
+                            $result[$key]['bag'][$keyBag]['allow_max_weight'] = isset($bagMatches[4]) ? trim($bagMatches[4]) : null;
+                            $result[$key]['bag'][$keyBag]['allow_max_size'] = isset($bagMatches[5]) ? trim($bagMatches[5]) : null;
+                        }
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+
+    public function parseCarryOnAllowance(string $string): ?array
+    {
+        $result = null;
+        $carryPattern = '/CARRY ON ALLOWANCE(.*?)EMBARGO/s';
+        preg_match($carryPattern, $string, $carryMatches);
+
+        if (isset($carryMatches[1])) {
+            $rowDelimPatten = '[A-Z]{2}\s[A-Z]{6}\s{2}\d{1}PC';
+            $itemPattern = '/' . $rowDelimPatten . '(.*?)' . $rowDelimPatten . '/s';
+            preg_match_all($itemPattern, $carryMatches[1], $itemMatches);
+
+            preg_match_all('(' . $rowDelimPatten . ')', $carryMatches[1], $codeMatches);
+            $items = preg_split('/' . $rowDelimPatten . '/', $carryMatches[1]);
+            array_shift($items);
+
+            if ($codeMatches[0]) {
+                foreach ($codeMatches[0] as $key => $value) {
+                    preg_match("/([A-Z]{2})\s([A-Z]{6})\s{2}(\d{1})PC/", $value, $rowInfoMatches);
+
+                    $result[$key]['iata'] = $rowInfoMatches[1] ?? null;
+                    $result[$key]['code'] = $rowInfoMatches[2] ?? null;
+                    $result[$key]['allow_pieces'] = $rowInfoMatches[3] ?? null;
+
+
+                    $itemRow = trim($items[$key]);
+                    $itemRows = explode("\n", $itemRow);
+
+                    foreach ($itemRows as $keyBag => $valueBag) {
+                        preg_match("/BAG\s(\d{1})\s-\s{2}(.*?)\s{7}(.*?)\s{3}/s", $valueBag, $bagMatches);
+
+                        if (isset($bagMatches[3])) {
+                            $result[$key]['bag'][$keyBag]['price'] = isset($bagMatches[2]) ? trim($bagMatches[2]) : null;
+                            $result[$key]['bag'][$keyBag]['info'] = isset($bagMatches[3]) ? trim($bagMatches[3]) : null;
+                        }
+                    }
+                }
+            }
+        }
         return $result;
     }
 
@@ -25,16 +108,15 @@ class Baggage /* implements ParseDump*/
      * @param string $string
      * @return array|null
      */
-    public function parseBaggage(string $string): ?array
+    public function parseBaggageAllowanceOld(string $string): ?array
     {
         $result = null;
         $baggagePattern = '/BAGGAGE ALLOWANCE(.*?)VIEWTRIP.TRAVELPORT.COM/s';
         preg_match($baggagePattern, $string, $baggageMatches);
-
+        /* TODO::  ADT */
         if (isset($baggageMatches[1])) {
-            $bagPattern = '/BAG \d{1} - (.*?)CM/';
-            preg_match_all($bagPattern, trim($baggageMatches[1]), $bagMatches);
-
+            $bagPattern = "/BAG \d{1} - (.*?)\n/i";
+            preg_match_all($bagPattern, $baggageMatches[1], $bagMatches);
             if (isset($bagMatches[1])) {
                 foreach ($bagMatches[1] as $key => $value){
                     if ($bags = $this->prepareRow($value)) {
@@ -42,8 +124,8 @@ class Baggage /* implements ParseDump*/
                         $result[$key]['currency'] = $bags[1];
 
                         $bagsInfo = array_slice($bags, 2);
-                        $bagsInfo = implode(' ', $bagsInfo);
-                        $result[$key]['info'] = $bagsInfo . 'CM';
+                        $result[$key]['allow_max_weight'] = $bagsInfo[0] ?? null;
+                        $result[$key]['allow_max_size'] = $bagsInfo[2] ?? null;
                     }
                 }
             }
