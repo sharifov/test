@@ -5,20 +5,21 @@ namespace frontend\controllers;
 use Yii;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\search\CouponSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class CouponController extends Controller
+class CouponController extends FController
 {
     /**
-    * @return array
-    */
+     * @return array
+     */
     public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -26,6 +27,7 @@ class CouponController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

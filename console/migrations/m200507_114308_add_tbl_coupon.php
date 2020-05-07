@@ -19,7 +19,7 @@ class m200507_114308_add_tbl_coupon extends Migration
 
         $this->createTable('{{%coupon}}', [
             'c_id' => $this->primaryKey(),
-            'c_code' => $this->string(50)->notNull(),
+            'c_code' => $this->string(20)->notNull(),
             'c_amount' => $this->decimal(8,2),
             'c_currency_code' => $this->string(3),
             'c_percent' => $this->smallInteger(),
