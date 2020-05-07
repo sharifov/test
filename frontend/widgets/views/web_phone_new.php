@@ -8,6 +8,7 @@ use yii\web\View;
 /* @var $projectId int */
 /* @var $this View */
 /** @var array $userPhones */
+/** @var array $userEmails */
 
 NewWebPhoneAsset::register($this);
 ?>
@@ -15,6 +16,7 @@ NewWebPhoneAsset::register($this);
 <?= $this->render('partial/_phone_widget', [
 	'phoneFrom' => $phoneFrom,
 	'userPhones' => $userPhones,
+	'userEmails' => $userEmails,
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 

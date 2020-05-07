@@ -1,11 +1,10 @@
 <?php
 
-namespace sales\model\sms\service;
+namespace sales\model\sms\useCase\send;
 
 use common\models\Notifications;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
-use sales\model\sms\useCase\send\Contact;
 use Yii;
 use common\models\Sms;
 use frontend\widgets\newWebPhone\sms\dto\SmsDto;

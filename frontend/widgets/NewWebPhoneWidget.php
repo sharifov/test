@@ -39,11 +39,17 @@ class NewWebPhoneWidget extends Widget
 			'phoneFrom' => $phoneFrom,
 			'projectId' => $userProjectId,
             'userPhones' => array_keys($this->getUserPhones()),
+            'userEmails' => array_keys($this->getUserEmails()),
 		]);
 	}
 
 	private function getUserPhones(): array
     {
         return Employee::getPhoneList($this->userId);
+    }
+
+	private function getUserEmails(): array
+    {
+        return Employee::getEmailList($this->userId);
     }
 }

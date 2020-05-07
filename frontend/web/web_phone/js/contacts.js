@@ -95,7 +95,7 @@ let PhoneWidgetContacts = function () {
         }
         if (contact['emails']) {
             contact['emails'].forEach(function(email, index) {
-                content += getEmailItem(email, index)
+                content += getEmailItem(email, index, contact);
             })
         }
         content += '</ul>' +
@@ -165,7 +165,7 @@ let PhoneWidgetContacts = function () {
         }
         if (contact['emails']) {
             contact['emails'].forEach(function(email, index) {
-                content += getEmailItem(email, index)
+                content += getEmailItem(email, index, contact)
             })
         }
 
@@ -176,17 +176,17 @@ let PhoneWidgetContacts = function () {
         return content;
     }
 
-    function getEmailItem(email, index) {
+    function getEmailItem(email, index, contact) {
         return '<li>' +
             '<div class="form-group">' +
             '<label for="">Email ' + (index + 1) + '</label>' +
             '<input readonly type="email" class="form-control" value="' + email + '" autocomplete="off">' +
             '</div>' +
-            // '<ul class="actions-list">' +
-            //     '<li class="actions-list__option js-trigger-email-modal">' +
-            //         '<i class="fa fa-envelope"></i>' +
-            //     '</li>' +
-            // '</ul>' +
+                '<ul class="actions-list">' +
+                    '<li class="actions-list__option js-trigger-email-modal" data-contact="' + encode(contact) + '" data-contact-email="' + email + '">' +
+                        '<i class="fa fa-envelope"></i>' +
+                    '</li>' +
+                '</ul>' +
             '</li>';
     }
 
