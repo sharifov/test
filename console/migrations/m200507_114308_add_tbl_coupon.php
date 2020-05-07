@@ -21,7 +21,7 @@ class m200507_114308_add_tbl_coupon extends Migration
             'c_id' => $this->primaryKey(),
             'c_code' => $this->string(50)->notNull(),
             'c_amount' => $this->decimal(8,2),
-            'с_currency_code' => $this->string(3),
+            'c_currency_code' => $this->string(3),
             'c_percent' => $this->smallInteger(),
             'c_exp_date' => $this->dateTime(),
             'c_start_date' => $this->dateTime(),
@@ -40,6 +40,7 @@ class m200507_114308_add_tbl_coupon extends Migration
 
         $this->createIndex('IND-coupon-c_code', '{{%coupon}}', ['c_code'], true);
 
+        //$this->addForeignKey('FK-coupon-c_currency_code', '{{%coupon}}', ['c_currency_code'], '{{%currency}}', ['cur_code'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-coupon-c_created_user_id', '{{%coupon}}', ['c_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-coupon-c_updated_user_id', '{{%coupon}}', ['c_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
