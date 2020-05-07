@@ -7,11 +7,12 @@ namespace sales\parcingDump\worldspanGds;
  */
 interface ParseDump
 {
-
-    /* TODO::  */
     /**
      * @param string $string
+     * @param bool $validation
+     * @param array $itinerary
+     * @param bool $onView
      * @return array
      */
-    public function parseDump(string $string): array;
+    public function parseDump(string $string, $validation = true, &$itinerary = [], $onView = false): array;
 }

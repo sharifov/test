@@ -7,48 +7,24 @@ use common\models\Airline;
 /**
  * Class Pricing
  */
-class Pricing /* implements ParseDump*/
+class Pricing implements ParseDump
 {
     /**
      * @param string $string
+     * @param bool $validation
+     * @param array $itinerary
+     * @param bool $onView
      * @return array
      */
-    public function parseDump(string $string): array
+    public function parseDump(string $string, $validation = true, &$itinerary = [], $onView = false): array
     {
+        $baggage = new Baggage();
+
         $result['iata'] = $this->parseIata($string);
-        $result['airline'] = $this->getAirline($result['iata']);
+        //$result['airline'] = $this->getAirline($result['iata']);
         $result['price'] = $this->parsePrice($string);
-        $result['baggage'] = $this->parseBaggage($string);
-        return $result;
-    }
-
-    /**
-     * @param string $string
-     * @return array|null
-     */
-    public function parseBaggage(string $string): ?array
-    {
-        $result = null;
-        $baggagePattern = '/BAGGAGE ALLOWANCE(.*?)VIEWTRIP.TRAVELPORT.COM/s';
-        preg_match($baggagePattern, $string, $baggageMatches);
-
-        if (isset($baggageMatches[1])) {
-            $bagPattern = '/BAG \d{1} - (.*?)CM/';
-            preg_match_all($bagPattern, trim($baggageMatches[1]), $bagMatches);
-
-            if (isset($bagMatches[1])) {
-                foreach ($bagMatches[1] as $key => $value){
-                    if ($bags = $this->prepareRow($value)) {
-                        $result[$key]['price'] = $bags[0];
-                        $result[$key]['currency'] = $bags[1];
-
-                        $bagsInfo = array_slice($bags, 2);
-                        $bagsInfo = implode(' ', $bagsInfo);
-                        $result[$key]['info'] = $bagsInfo . 'CM';
-                    }
-                }
-            }
-        }
+        $result['baggage'] = $baggage->parseBaggageAllowance($string);
+        $result['carry_on_allowance'] = $baggage->parseCarryOnAllowance($string);
         return $result;
     }
 

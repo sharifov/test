@@ -10,7 +10,7 @@ use yii\base\ErrorException;
 /**
  * Class Reservation
  */
-class Reservation
+class Reservation implements ParseDump
 {
     private CONST ARRIVAL_OFFSET_MAP = [
         '' => 'arrival on the same day',
