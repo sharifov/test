@@ -18,7 +18,7 @@ $urlRequestCoupons = Url::to(['/coupon/request', 'caseId' => $model->cs_id])
 		<h2><i class="fa fa-sticky-note-o"></i> Coupons </h2>
 		<ul class="nav navbar-right panel_toolbox">
             <li>
-                <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Request', '#', ['id' => 'btn-request-coupons', 'title' => 'Update Case'])?>
+                <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Request', '#', ['id' => 'btn-request-coupons', 'title' => 'Request coupons'])?>
             </li>
 			<li>
 				<a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
