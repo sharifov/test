@@ -8,6 +8,7 @@ use frontend\models\CasePreviewEmailForm;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\coupon\entity\coupon\CouponStatus;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\request\RequestCouponService;
 use sales\model\coupon\useCase\request\RequestForm;
@@ -198,6 +199,8 @@ class CouponController extends FController
 						
 					} else {
 						$previewEmailForm = new CasePreviewEmailForm($result['data']);
+						$previewEmailForm->e_email_from_name = Auth::user()->full_name;
+						$previewEmailForm->coupon_list = json_encode($form->couponIds);
 
 						$emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
 						if ($emailTemplateType) {
@@ -274,6 +277,16 @@ class CouponController extends FController
 						$previewEmailForm->is_send = true;
 
 						$mailResponse = $mail->sendMail();
+
+						$selectedCoupons = json_decode($previewEmailForm->coupon_list, true);
+
+						foreach ($selectedCoupons as $couponId) {
+							$coupon = Coupon::findOne((int)$couponId);
+							if ($coupon) {
+								$coupon->c_status_id = CouponStatus::SEND;
+								$coupon->save();
+							}
+						}
 
 						Yii::error(VarDumper::dumpAsString($mailResponse), 'CouponController::actionSend::Debug');
 
