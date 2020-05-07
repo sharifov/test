@@ -75,14 +75,16 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'is_company',
+                'label' => 'Type',
                 'value' => static function(Client $model) {
-                    return $model->is_company ? 'yes' : '-';
+                    return $model->is_company ? '<i class="fa fa-building-o" title="Company"></i>' : '<i class="fa fa-user" title="Personal"></i>';
                 },
                 'format' => 'raw',
-                'filter' => [1 => 'Yes', 0 => 'No'],
+                'filter' => [1 => 'Company', 0 => 'Personal'],
                 'options' => [
-                    'style' => 'width:100px'
+                    'style' => 'width:80px',
                 ],
+                'contentOptions' => ['class' => 'text-center'],
             ],
             [
                 'attribute' => 'ucl_favorite',
@@ -101,7 +103,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $out;
                 },
                 'format' => 'raw',
-                'filter' => [1 => 'Yes', 0 => 'No']
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'options' => [
+                    'style' => 'width:80px',
+                ],
+                'contentOptions' => ['class' => 'text-center'],
             ],
             [
                 'header' => 'Name',
@@ -172,15 +178,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-left'],
             ],
             [
+                'label' => 'Public',
                 'attribute' => 'is_public',
                 'value' => static function(Client $model) {
-                    return $model->is_public ? '<i class="fa fa-share-alt" title="public"></i>' : '-';
+                    return $model->is_public ? '<i class="fa fa-globe" title="public"></i>' : '<i class="fa fa-book" title="private"></i>';
                 },
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No'],
                 'options' => [
-                    'style' => 'width:100px'
+                    'style' => 'width:80px',
                 ],
+                'contentOptions' => ['class' => 'text-center'],
             ],
             [
                 'attribute' => 'disabled',
