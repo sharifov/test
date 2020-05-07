@@ -156,14 +156,18 @@ class CasesCreateService
         return $case;
     }
 
-    public function getOrCreateByCall(array $clientPhones, int $callId, int $projectId, int $depId): Cases
+    public function getOrCreateByCall(array $clientPhones, int $callId, int $projectId, int $depId, bool $createCaseOnIncoming = true): ?Cases
     {
 
-        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId) {
+        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId, $createCaseOnIncoming) {
 
-            $client = $this->clientManageService->getOrCreateByPhones($clientPhones);
+        	if ($createCaseOnIncoming) {
+				$client = $this->clientManageService->getOrCreateByPhones($clientPhones);
+			} else {
+        		$client = $this->clientManageService->getExistingOrCreateEmptyObj($clientPhones);
+			}
 
-            if (!$case = Cases::find()->findLastActiveCaseByClient($client->id, $projectId)->byDepartment($depId)->one()) {
+            if ((!$case = Cases::find()->findLastActiveCaseByClient($client->id, $projectId)->byDepartment($depId)->one()) && $createCaseOnIncoming) {
                 //\Yii::info('Not found case:  ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
                 $case = Cases::createByCall(
                     $client->id,

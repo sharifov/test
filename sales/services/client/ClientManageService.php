@@ -219,6 +219,29 @@ class ClientManageService
         return $client;
     }
 
+	/**
+	 * @param array $phones
+	 * @param bool $setClientIdNull
+	 * @return Client
+	 */
+    public function getExistingOrCreateEmptyObj(array $phones): Client
+	{
+		$client = null;
+		/** @var PhoneCreateForm[] $phones */
+		foreach ($phones as $phone) {
+			if (($clientPhone = $this->clientPhoneRepository->getByPhone($phone->phone))) {
+				$client = $clientPhone->client;
+			}
+		}
+
+		if (!$client) {
+			$client = Client::create('', '', '');
+			$client->id = 0;
+		}
+
+		return $client;
+	}
+
     /**
      * Find or create Client
      *
