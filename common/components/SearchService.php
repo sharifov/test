@@ -320,20 +320,14 @@ The connection in " . $countryName . " is not provided by the airlines. You will
     }
 
     /**
-     * @param int $count
-     * @param string $code
-     * @return mixed
+     * @param array $params
+     * @return mixed|null
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public static function getCoupons(int $count = 0, string $code = '')
+    public static function getCoupons(array $params)
     {
         $result = null;
-
-        $params = [
-            'nr' => $count,
-            'code' => $code
-        ];
 
         $fields = http_build_query($params);
         $url = \Yii::$app->params['search']['host'].'/v1/discounts/coupons?' . $fields;

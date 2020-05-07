@@ -1,5 +1,15 @@
 <?php
+
+use sales\entities\cases\Cases;
+use yii\helpers\Url;
+use yii\web\View;
+
 /** @var $coupons \sales\model\coupon\entity\couponCase\CouponCase[] */
+/** @var View $this */
+/** @var Cases $model */
+
+$urlRequestCoupons = Url::to(['/coupon/request', 'caseId' => $model->cs_id])
+
 ?>
 
 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-case-coupons', 'enablePushState' => false, 'timeout' => 10000]) ?>
@@ -7,8 +17,9 @@
 	<div class="x_title" >
 		<h2><i class="fa fa-sticky-note-o"></i> Coupons </h2>
 		<ul class="nav navbar-right panel_toolbox">
-			<li>
-			</li>
+            <li>
+                <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Request', '#', ['id' => 'btn-request-coupons', 'title' => 'Update Case'])?>
+            </li>
 			<li>
 				<a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
 			</li>
@@ -75,5 +86,30 @@ $js = <<<JS
     $(document).on('click', '#send-case-coupons', function () {
         
     });
+
+    $('body').on('click', '#btn-request-coupons', function(e) {
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-sm');
+        $('#modal-sm-label').html('Request coupons');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load('{$urlRequestCoupons}' , function(response, status, xhr ) {
+                    
+            $('#preloader').addClass('d-none');
+                        
+            if (status == 'error') {                
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            } 
+        });  
+    });
+    
 JS;
+
+$this->registerJs($js);
 

@@ -108,7 +108,7 @@ $user = Yii::$app->user->identity;
 
     <div class="row">
         <div class="col-md-6">
-            <?= $this->render('coupons/view', ['coupons' => $coupons]) ?>
+            <?= $this->render('coupons/view', ['model' => $model, 'coupons' => $coupons]) ?>
         </div>
 
         <div class="col-md-6">

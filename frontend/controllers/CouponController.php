@@ -2,18 +2,33 @@
 
 namespace frontend\controllers;
 
+use sales\helpers\app\AppHelper;
+use sales\model\coupon\useCase\request\RequestCouponService;
+use sales\model\coupon\useCase\request\RequestForm;
 use Yii;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\search\CouponSearch;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
+/**
+ * Class CouponController
+ *
+ * @property RequestCouponService $requestCoupon
+ */
 class CouponController extends FController
 {
+    private $requestCoupon;
+
+    public function __construct($id, $module, RequestCouponService $requestCoupon, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->requestCoupon = $requestCoupon;
+    }
+
     /**
      * @return array
      */
@@ -116,5 +131,34 @@ class CouponController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @return string|Response
+     */
+    public function actionRequest()
+    {
+        $caseId = Yii::$app->request->get('caseId', '0');
+
+        $form = new RequestForm($caseId);
+
+        if ($form->load(Yii::$app->request->post())) {
+            if ($form->validate()) {
+                try {
+                    $result = $this->requestCoupon->request($form);
+                    return $this->asJson(['success' => true]);
+                } catch (\DomainException $e) {
+                    return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+                } catch (\Throwable $e) {
+                    Yii::error(AppHelper::throwableFormatter($e), 'CouponController:' . __FUNCTION__ );
+                    return $this->asJson(['success' => false, 'message' => 'Server error']);
+                }
+            }
+            return $this->asJson(\common\components\bootstrap4\activeForm\ActiveForm::formatError($form));
+        }
+
+        return $this->renderAjax('_request_form', [
+            'model' => $form,
+        ]);
     }
 }
