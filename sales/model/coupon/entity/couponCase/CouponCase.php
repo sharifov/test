@@ -5,7 +5,9 @@ namespace sales\model\coupon\entity\couponCase;
 use common\models\Employee;
 use sales\entities\cases\Cases;
 use sales\model\coupon\entity\coupon\Coupon;
-use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "{{%coupon_case}}".
@@ -44,6 +46,25 @@ class CouponCase extends \yii\db\ActiveRecord
         ];
     }
 
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['cc_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => [$this->cc_created_user_id],
+                ],
+            ],
+        ];
+    }
+
     public function getCase(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'cc_case_id']);
@@ -62,11 +83,11 @@ class CouponCase extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'cc_coupon_id' => 'Cc Coupon ID',
-            'cc_case_id' => 'Cc Case ID',
-            'cc_sale_id' => 'Cc Sale ID',
-            'cc_created_dt' => 'Cc Created Dt',
-            'cc_created_user_id' => 'Cc Created User ID',
+            'cc_coupon_id' => 'Coupon ID',
+            'cc_case_id' => 'Case ID',
+            'cc_sale_id' => 'Sale ID',
+            'cc_created_dt' => 'Created Dt',
+            'cc_created_user_id' => 'Created User',
         ];
     }
 

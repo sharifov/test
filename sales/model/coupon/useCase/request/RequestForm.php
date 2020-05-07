@@ -5,6 +5,13 @@ namespace sales\model\coupon\useCase\request;
 use sales\entities\cases\Cases;
 use yii\base\Model;
 
+/**
+ * Class RequestForm
+ *
+ * @property int $caseId
+ * @property int $count
+ * @property string $code
+ */
 class RequestForm extends Model
 {
     public const CODE_USD50 = 'USD50';

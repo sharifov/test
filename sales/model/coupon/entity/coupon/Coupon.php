@@ -6,6 +6,9 @@ use common\models\Employee;
 use sales\entities\cases\Cases;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "{{%coupon}}".
@@ -47,19 +50,19 @@ class Coupon extends \yii\db\ActiveRecord
 
             ['c_currency_code', 'string', 'max' => 3],
 
-            ['c_disabled', 'integer'],
+            ['c_disabled', 'boolean'],
 
-            ['c_exp_date', 'safe'],
+            ['c_exp_date', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['c_percent', 'integer'],
 
-            ['c_public', 'integer'],
+            ['c_public', 'boolean'],
 
-            ['c_reusable', 'integer'],
+            ['c_reusable', 'boolean'],
 
             ['c_reusable_count', 'integer'],
 
-            ['c_start_date', 'datetime'],
+            ['c_start_date', 'format' => 'php:Y-m-d H:i:s'],
 
             ['c_status_id', 'required'],
             ['c_status_id', 'integer'],
@@ -69,7 +72,26 @@ class Coupon extends \yii\db\ActiveRecord
             ['c_type_id', 'integer'],
             ['c_type_id', 'in', 'range' => array_keys(CouponType::getList())],
 
-            ['c_used_dt', 'safe'],
+            ['c_used_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+        ];
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['c_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['c_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'c_created_user_id',
+                'updatedByAttribute' => 'c_updated_user_id',
+            ],
         ];
     }
 

@@ -87,6 +87,7 @@ use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\coupon\useCase\request\CouponForm;
 use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
@@ -199,6 +200,12 @@ class TestController extends FController
 
     public function actionTest()
     {
+//        $d = new DateTime('2020-05-07T15:54:33');
+        $form = new CouponForm(['exp_date' => '2020-05-07 15:54:33']);
+        $form->validate();
+        VarDumper::dump($form->errors);
+        die;
+        echo $d->format('Y-m-d H:i:s');die;
 
         return $this->render('blank');
     }
@@ -1157,6 +1164,7 @@ class TestController extends FController
 
 	public function actionGetCoupons()
     {
+
         $coupons = SearchService::getCoupons(5, 'USD50');
         VarDumper::dump($coupons, 10, true);
     }
@@ -1168,6 +1176,10 @@ class TestController extends FController
 
         VarDumper::dump($coupons, 10, true);
         VarDumper::dump($validate, 10, true);
+
+
+        $coupons = SearchService::getCoupons(['nr' => 5, 'code' => 'USD50']);
+        VarDumper::dump($coupons, 10, true);;
 
     }
 

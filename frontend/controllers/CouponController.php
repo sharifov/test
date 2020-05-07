@@ -9,6 +9,7 @@ use Yii;
 use sales\model\coupon\entity\coupon\Coupon;
 use sales\model\coupon\entity\coupon\search\CouponSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -145,7 +146,11 @@ class CouponController extends FController
         if ($form->load(Yii::$app->request->post())) {
             if ($form->validate()) {
                 try {
-                    $result = $this->requestCoupon->request($form);
+                    $errors = $this->requestCoupon->request($form);
+                    if ($errors) {
+                        Yii::error(VarDumper::dumpAsString($errors), 'CouponController:actionRequest');
+                        return $this->asJson(['success' => true, 'message' => 'Was some errors. Please contact to administrator.']);
+                    }
                     return $this->asJson(['success' => true]);
                 } catch (\DomainException $e) {
                     return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
