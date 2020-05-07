@@ -7,6 +7,7 @@ use common\models\ClientPhone;
 use common\models\ClientProject;
 use common\models\Employee;
 use common\models\UserContactList;
+use common\models\UserOnline;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\model\emailList\entity\EmailList;
@@ -330,6 +331,7 @@ class ContactsSearch extends Client
             'user_call_phone_status' => new Expression('null'),
             'user_is_on_call' => new Expression('null'),
             'ce.email as email',
+            'user_is_online' => new Expression('null'),
         ]);
 
         $queryClient->andWhere(['c.cl_type_id' => Client::TYPE_CONTACT]);
@@ -356,6 +358,7 @@ class ContactsSearch extends Client
             'us_call_phone_status as user_call_phone_status',
             'us_is_on_call as user_is_on_call',
             'el_email as email',
+            'uo_user_id as user_is_online'
         ]);
 
         $queryUser->innerJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
@@ -363,13 +366,14 @@ class ContactsSearch extends Client
         $queryUser->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');
         $queryUser->leftJoin(EmailList::tableName(), 'el_id = upp_email_list_id');
         $queryUser->leftJoin(UserStatus::tableName(), 'us_user_id = u.id');
+        $queryUser->leftJoin(UserOnline::tableName(), 'uo_user_id = u.id');
 
         $queryUser->andWhere(['<>', 'u.id', $this->userId]);
 
         $union = $queryClient->union($queryUser);
 
         $query = (new Query())
-            ->select(['id', 'full_name', 'company_name', 'phone', 'type', 'is_company', 'user_call_phone_status', 'user_is_on_call'])
+            ->select(['id', 'full_name', 'company_name', 'phone', 'type', 'is_company', 'user_call_phone_status', 'user_is_on_call', 'user_is_online'])
             ->from($union)
             ->andWhere([
                 'OR',
@@ -379,7 +383,7 @@ class ContactsSearch extends Client
                 ['like', 'email', $q],
             ])
             ->orderBy(['full_name' => SORT_ASC, 'company_name' => SORT_ASC])
-            ->groupBy(['id', 'full_name', 'company_name', 'phone', 'type', 'is_company', 'user_call_phone_status', 'user_is_on_call']);
+            ->groupBy(['id', 'full_name', 'company_name', 'phone', 'type', 'is_company', 'user_call_phone_status', 'user_is_on_call', 'user_is_online']);
 
         if ($limit) {
             $query->limit($limit);

@@ -459,11 +459,12 @@ class ContactsController extends FController
                     $contactData['type'] = (int)$contact['type'];
 
                     if ($contactData['type'] === Client::TYPE_INTERNAL) {
+                        $isOnline = (int)$contact['user_is_online'] ? true : false;
                         $isCallFree = (int)$contact['user_is_on_call'] ? false : true;
                         $isCallStatusReady = (int)$contact['user_call_phone_status'] ? true : false;
-                        if ($isCallFree && $isCallStatusReady) {
+                        if ($isOnline && $isCallFree && $isCallStatusReady) {
                             $class = 'text-success';
-                        } elseif ($isCallStatusReady) {
+                        } elseif ($isOnline && $isCallStatusReady) {
                             $class = 'text-warning';
                         } else {
                             $class = 'text-danger';
