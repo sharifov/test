@@ -316,21 +316,23 @@ $(document).ready(function() {
 
     function toSelect(elem, obj, cb) {
         var $element = $(elem),
-            $toggle = $element.find('.dropdown-toggle'),
-            $option = $element.find('.dropdown-item'),
+            $toggle = '.dropdown-toggle',
+            $option = '.dropdown-item',
+            selectedNumber = '.current-number__selected-nr',
+            selectedText = '.current-number__selected-project';
             optionClass = 'dropdown-item';
 
         var selected = 'optionselected';
 
         this.data = {
-            value: '',
-            company: ''
+            value: obj.selected.value,
+            company: obj.selected.project
         }
 
         // nodes
         function selectedNode(value, project, id) {
             return (
-                '<button value="' + value + '" class="btn btn-secondary dropdown-toggle" type="button" id="' +id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
+                '<button value="' + value + '" data-info-project="' + project + '" class="btn btn-secondary dropdown-toggle" type="button" id="' +id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
                     '<small class="current-number__phone current-number__selected-nr">' + value + '</small>'+
                     '<span class="current-number__identifier current-number__selected-project">' + project + '</span>'+
                 '</button>'
@@ -355,7 +357,7 @@ $(document).ready(function() {
             return (
                 '<div class="dropdown">'+
                     selected +
-                    '<div class="dropdown-menu" aria-labelledby="' + $toggle.attr('id') + '">' +
+                    '<div class="dropdown-menu" >' +
                         arr
                     +
                     '</div>'+
@@ -371,20 +373,23 @@ $(document).ready(function() {
         }
 
         function setValue(option) {
-            this.data.value = $(option).val();
-            this.data.company = $(option).attr('data-info-project');
+            this.data.value = option.val();
+            this.data.company = option.attr('data-info-project');
+            $($element).trigger(selected);
         }
 
         this.getData = function() {
             return this.data;
         }
 
+        generateSelect(obj)
+
         $($element).on(selected, $($toggle), function(e) {
             var elem = e.target,
-                $selectedNumber = $element.find('.current-number__selected-nr'),
-                $selectedText = $element.find('.current-number__selected-project');
+                $selectedNumber = $element.find(selectedNumber),
+                $selectedText = $element.find(selectedText);
 
-            $(elem).val(this.data.value);
+            $(elem).find($toggle).val(this.data.value);
             $selectedNumber.text(this.data.value);
             $selectedText.text(this.data.company);
 
@@ -394,15 +399,9 @@ $(document).ready(function() {
             
         }.bind(this)); 
 
-        $($element).on('click', $($option), function(e) {
-            var elem = $(e.target).hasClass(optionClass) ? $(e.target) : $(e.target.parentNode);
-        
-            setValue($(elem));
-            $($element).trigger(selected)
-        
-        }.bind(this))
-
-        generateSelect(obj)
+        $($element).on('click', $option, function() {
+            setValue($(this))
+        });
 
         return {
             getData: this.getData(),
@@ -434,7 +433,7 @@ $(document).ready(function() {
             }
         ]
     }
-    var currentNumber = toSelect($('.current-number'), data, function() {
+    var currentNumber = toSelect($('.custom-phone-select'), data, function() {
         console.log('here goes a callback')
         console.log(currentNumber.getData);
     });

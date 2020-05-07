@@ -8,6 +8,7 @@
         
         <div class="current-number">
             <label class="call-pane-label" for="">Calling from</label>
+            <div class="custom-phone-select"></div>
             <!-- Custom select is appended to this block. Please, search search JS function initialized with 'current-number' selector. -->
         </div>
         <div class="call-pane__number">

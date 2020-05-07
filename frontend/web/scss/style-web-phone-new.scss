@@ -74,6 +74,7 @@ $red: #e15258;
 			top: 50%;
 			transform: translateY(-50%);
 			color: #fff;
+			pointer-events: none;
 		}
 
 		&__phone {
