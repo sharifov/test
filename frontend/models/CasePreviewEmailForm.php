@@ -47,6 +47,22 @@ class CasePreviewEmailForm extends Model
     public $is_send;
 
 
+    public function __construct(array $data = [], $config = [])
+	{
+		parent::__construct($config);
+
+		if ($data) {
+			$this->e_case_id = $data['email_data']['case']['id'] ?? null;
+			$this->e_email_from = $data['email_from'] ?? null;
+			$this->e_email_to = $data['email_to'] ?? null;
+			$this->e_email_from_name = $data['email_from_name'] ?? null;
+			$this->e_email_to_name = $data['email_to_name'] ?? null;
+			$this->e_email_subject = $data['email_subject'] ?? null;
+			$this->e_email_message = $data['email_body_html'] ?? null;
+		}
+
+	}
+
     /**
      * @return array
      */

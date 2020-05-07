@@ -30,6 +30,7 @@ use yii\bootstrap4\Modal;
  * @var $dataProviderNotes yii\data\ArrayDataProvider
  *
  * @var $coupons \sales\model\coupon\entity\couponCase\CouponCase[]
+ * @var $sendCouponsForm \sales\model\coupon\useCase\send\SendCouponsForm
  *
  *
  */
@@ -108,7 +109,7 @@ $user = Yii::$app->user->identity;
 
     <div class="row">
         <div class="col-md-6">
-            <?= $this->render('coupons/view', ['model' => $model, 'coupons' => $coupons]) ?>
+            <?= $this->render('coupons/view', ['model' => $model, 'coupons' => $coupons, 'sendCouponsForm' => $sendCouponsForm]) ?>
         </div>
 
         <div class="col-md-6">
