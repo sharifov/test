@@ -152,7 +152,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Name',
                 'attribute' => 'full_name',
                 'value' => static function($model) {
-                    return  ($model['type'] === Client::TYPE_CONTACT  && !$model['is_company'] ? '<i class="fa fa-user"></i> ' : '') . '<b>' . Html::encode($model['full_name']) .'</b>';
+                    return  ($model['type'] === Client::TYPE_INTERNAL ? '<i class="fa fa-user"></i> ' : '') . '<b>' . Html::encode($model['full_name']) .'</b>';
                 },
                 'format' => 'raw',
                 'filter' => false,
